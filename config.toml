@@ -1,0 +1,6 @@
+baseurl = "/"
+languageCode = "ja"
+title = "My snippets"
+
+[params]
+  description = "何かをかく"
