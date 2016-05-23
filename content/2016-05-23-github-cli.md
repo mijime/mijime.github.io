@@ -1,6 +1,6 @@
 +++
 date = "2016-05-23T22:48:11+09:00"
-draft = true
+draft = false
 title = "introduce a github cli"
 +++
 
