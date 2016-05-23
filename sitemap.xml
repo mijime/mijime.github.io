@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  
+  <url>
+    <loc>/</loc>
+    <lastmod>2016-05-23T22:39:17+09:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/2016-05-23-hugo-deploy/</loc>
+    <lastmod>2016-05-23T22:39:17+09:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/2016-05-23-first-blogged/</loc>
+    <lastmod>2016-05-23T21:56:24+09:00</lastmod>
+  </url>
+  
+</urlset>

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>My snippets</title>
+    <link>/</link>
+    <description>Recent content on My snippets</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>ja</language>
+    <lastBuildDate>Mon, 23 May 2016 22:39:17 +0900</lastBuildDate>
+    <atom:link href="/index.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>hugo deploy to github pages</title>
+      <link>/2016-05-23-hugo-deploy/</link>
+      <pubDate>Mon, 23 May 2016 22:39:17 +0900</pubDate>
+      
+      <guid>/2016-05-23-hugo-deploy/</guid>
+      <description>&lt;p&gt;master branch のみ適用されるらしいので,
+生成元は content branch, public 配下は master branch みたいな
+本来の使い方ではない使い方で運用する&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>first blogged</title>
+      <link>/2016-05-23-first-blogged/</link>
+      <pubDate>Mon, 23 May 2016 21:56:24 +0900</pubDate>
+      
+      <guid>/2016-05-23-first-blogged/</guid>
+      <description>&lt;p&gt;何を書いてく.&lt;/p&gt;
+
+&lt;p&gt;やったネタ や Qiita の下書き, 外部マウンティング的な何かを行う.&lt;/p&gt;
+</description>
+    </item>
+    
+  </channel>
+</rss>
