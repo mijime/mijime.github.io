@@ -4,3 +4,7 @@ title = "My snippets"
 
 [params]
   description = "何かをかく"
+  layoutReverse = true
+
+[params.googleAnalytics]
+  UA = "UA-46554348-4"

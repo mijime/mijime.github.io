@@ -6,10 +6,13 @@ help: ### Print tasks
 		| sort \
 		| awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
-deploy: ### Deploy to master
-	[[ -d public ]] \
-		|| git clone $(REPO) public
+public:
+	git clone $(REPO) public
+
+build: public ### Build to
 	hugo --theme $(THEME)
+
+deploy: build ### Deploy to master
 	cd public; \
 		git add -A; \
 		git commit -m ':memo: Update $(shell date "+%F %H:%M:%S")'; \
