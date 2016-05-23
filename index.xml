@@ -6,8 +6,24 @@
     <description>Recent content on My snippets</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>ja</language>
-    <lastBuildDate>Mon, 23 May 2016 22:39:17 +0900</lastBuildDate>
+    <lastBuildDate>Mon, 23 May 2016 22:48:11 +0900</lastBuildDate>
     <atom:link href="/index.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>introduce a github cli</title>
+      <link>/2016-05-23-github-cli/</link>
+      <pubDate>Mon, 23 May 2016 22:48:11 +0900</pubDate>
+      
+      <guid>/2016-05-23-github-cli/</guid>
+      <description>&lt;p&gt;リポジトリをWebから作るのがめんどくさいので導入する.&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&#34;https://github.com/github/hub&#34;&gt;https://github.com/github/hub&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;hub create mijime.github.io&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;ユーザ名とパスワードを入れるのはなんか嫌.&lt;/p&gt;
+</description>
+    </item>
     
     <item>
       <title>hugo deploy to github pages</title>
