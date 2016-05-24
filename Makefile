@@ -15,6 +15,7 @@ build: public ### Build to
 deploy: build ### Deploy to master
 	cd public; \
 		git add -A; \
+		git ls-files | xargs chmod 0644; \
 		git commit -m ':memo: Update $(shell date "+%F %H:%M:%S")'; \
 		git push --set-upstream origin master; \
 		cd -
