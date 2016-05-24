@@ -1,9 +1,9 @@
 {{ partial "head.html" . }}
 {{ partial "sidebar.html" . }}
 
-<div class="content container">
+<main class="content container">
   <div class="posts">
-    {{ range .Data.Pages }}
+    {{- range (.Paginator 10).Pages }}
     <div class="post">
       <h1 class="post-title">
         <a href="{{ .Permalink }}">
@@ -15,8 +15,22 @@
 
       {{ .Content }}
     </div>
-    {{ end }}
+    {{- end }}
   </div>
-</div>
+
+  {{- if or (.Paginator.HasPrev) (.Paginator.HasNext) }}
+  <div>
+    <nav role="pagination">
+      {{- if .Paginator.HasPrev }}
+      <a href="{{ .Paginator.Prev.URL }}">Prev</a>
+      {{- end }}
+      <span class="">Page {{ .Paginator.PageNumber }} of {{ .Paginator.TotalPages }}</span>
+      {{- if .Paginator.HasNext }}
+      <a href="{{ .Paginator.Next.URL }}">Next</a>
+      {{- end }}
+    </nav>
+  </div>
+  {{- end }}
+</main>
 
 {{ partial "foot.html" . }}
