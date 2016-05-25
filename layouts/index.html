@@ -10,27 +10,26 @@
           {{ .Title }}
         </a>
       </h1>
-
       <span class="post-date">{{ .Date.Format "Mon, Jan 2, 2006" }}</span>
 
       {{ .Content }}
+
+      {{ partial "tags.html" . }}
     </div>
     {{- end }}
   </div>
-
-  {{- if or (.Paginator.HasPrev) (.Paginator.HasNext) }}
-  <div>
-    <nav role="pagination">
-      {{- if .Paginator.HasPrev }}
-      <a href="{{ .Paginator.Prev.URL }}">Prev</a>
-      {{- end }}
-      <span class="">Page {{ .Paginator.PageNumber }} of {{ .Paginator.TotalPages }}</span>
-      {{- if .Paginator.HasNext }}
-      <a href="{{ .Paginator.Next.URL }}">Next</a>
-      {{- end }}
-    </nav>
-  </div>
-  {{- end }}
 </main>
+
+{{- if or (.Paginator.HasPrev) (.Paginator.HasNext) }}
+<nav class="container" role="pagination">
+  {{- if .Paginator.HasPrev }}
+  <a href="{{ .Paginator.Prev.URL }}">Prev</a>
+  {{- end }}
+  <span class="">Page {{ .Paginator.PageNumber }} of {{ .Paginator.TotalPages }}</span>
+  {{- if .Paginator.HasNext }}
+  <a href="{{ .Paginator.Next.URL }}">Next</a>
+  {{- end }}
+</nav>
+{{- end }}
 
 {{ partial "foot.html" . }}

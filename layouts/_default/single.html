@@ -1,7 +1,7 @@
 {{ partial "head.html" . }}
 {{ partial "sidebar.html" . }}
 
-<div class="content container">
+<main class="content container">
   <div class="post">
     <h1>{{ .Title }}</h1>
     <span class="post-date">{{ .Date.Format "Mon, Jan 2, 2006" }}</span>
@@ -12,6 +12,12 @@
   <h2>Comments</h2>
   {{ partial "disqus" . }}
   {{- end }}
-</div>
+</main>
+
+{{- if or (.Params.categories) (.Params.tags) }}
+<nav class="content container">
+  {{ partial "tags.html" . }}
+</nav>
+{{- end }}
 
 {{ partial "foot.html" . }}
