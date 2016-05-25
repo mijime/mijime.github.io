@@ -63,9 +63,14 @@
       <pubDate>Mon, 23 May 2016 22:39:17 +0900</pubDate>
       
       <guid>/2016-05-23-hugo-deploy/</guid>
-      <description>&lt;p&gt;master branch のみ適用されるらしいので,
-生成元は content branch, public 配下は master branch みたいな
-本来の使い方ではない使い方で運用する&lt;/p&gt;
+      <description>&lt;p&gt;master branch のみ適用されるらしいので,&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;生成元は content branch&lt;/li&gt;
+&lt;li&gt;public 配下は master branch&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;みたいな 本来の使い方ではない使い方で運用する&lt;/p&gt;
 </description>
     </item>
     
