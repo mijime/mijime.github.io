@@ -6,5 +6,8 @@ tags = ["hugo"]
 +++
 
 master branch のみ適用されるらしいので,
-生成元は content branch, public 配下は master branch みたいな
-本来の使い方ではない使い方で運用する
+
+- 生成元は content branch
+- public 配下は master branch
+
+みたいな 本来の使い方ではない使い方で運用する
