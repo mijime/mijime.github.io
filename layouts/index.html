@@ -3,7 +3,7 @@
 
 <main class="content container">
   <div class="posts">
-    {{- range (.Paginator 10).Pages }}
+    {{ range (.Paginator 10).Pages }}
     <div class="post">
       <h1 class="post-title">
         <a href="{{ .Permalink }}">
@@ -11,27 +11,27 @@
         </a>
       </h1>
       <span class="post-date">
-        {{- .Date.Format "Mon, Jan 2, 2006" }}
+        {{ .Date.Format "Mon, Jan 2, 2006" }}
       </span>
 
       {{ .Content }}
 
-      {{- partial "tags.html" . }}
+      {{ partial "tags.html" . }}
     </div>
-    {{- end }}
+    {{ end }}
   </div>
 </main>
 
-{{- if or (.Paginator.HasPrev) (.Paginator.HasNext) }}
+{{ if or (.Paginator.HasPrev) (.Paginator.HasNext) }}
 <nav class="container" role="pagination">
-  {{- if .Paginator.HasPrev }}
+  {{ if .Paginator.HasPrev }}
   <a href="{{ .Paginator.Prev.URL }}">Prev</a>
-  {{- end }}
+  {{ end }}
   <span class="">Page {{ .Paginator.PageNumber }} of {{ .Paginator.TotalPages }}</span>
-  {{- if .Paginator.HasNext }}
+  {{ if .Paginator.HasNext }}
   <a href="{{ .Paginator.Next.URL }}">Next</a>
-  {{- end }}
+  {{ end }}
 </nav>
-{{- end }}
+{{ end }}
 
 {{ partial "foot.html" . }}
