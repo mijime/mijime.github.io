@@ -1,6 +1,6 @@
 +++
 date = "2016-05-25T14:05:50+09:00"
-draft = true
+draft = false
 title = "hugo pagination"
 tags = ["hugo"]
 +++
