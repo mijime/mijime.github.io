@@ -6,8 +6,40 @@
     <description>Recent content in Hugo on My snippets</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>ja</language>
-    <lastBuildDate>Mon, 23 May 2016 22:39:17 +0900</lastBuildDate>
+    <lastBuildDate>Wed, 25 May 2016 14:05:50 +0900</lastBuildDate>
     <atom:link href="/tags/hugo/index.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>hugo pagination</title>
+      <link>/2016-05-25-hugo-pagination/</link>
+      <pubDate>Wed, 25 May 2016 14:05:50 +0900</pubDate>
+      
+      <guid>/2016-05-25-hugo-pagination/</guid>
+      <description>&lt;p&gt;.Paginator を使えば自動でやってくれるみたい&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-html&#34;&gt;{{- range (.Paginator 10).Pages }}
+&amp;lt;div&amp;gt;
+  {{ .Content }}
+&amp;lt;/div&amp;gt;
+{{- end }}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;次頁, 前頁 へのリンクも .Paginator を使う&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-html&#34;&gt;{{- if or (.Paginator.HasPrev) (.Paginator.HasNext) }}
+&amp;lt;nav role=&amp;quot;pagination&amp;quot;&amp;gt;
+  {{- if .Paginator.HasPrev }}
+    &amp;lt;a href=&amp;quot;{{ .Paginator.Prev.URL }}&amp;quot;&amp;gt;Prev&amp;lt;/a&amp;gt;
+  {{- end }}
+    &amp;lt;span class=&amp;quot;&amp;quot;&amp;gt;Page {{ .Paginator.PageNumber }} of {{ .Paginator.TotalPages }}&amp;lt;/span&amp;gt;
+  {{- if .Paginator.HasNext }}
+    &amp;lt;a href=&amp;quot;{{ .Paginator.Next.URL }}&amp;quot;&amp;gt;Next&amp;lt;/a&amp;gt;
+  {{- end }}
+&amp;lt;/nav&amp;gt;
+{{end}}
+&lt;/code&gt;&lt;/pre&gt;
+</description>
+    </item>
     
     <item>
       <title>hugo deploy to github pages</title>
