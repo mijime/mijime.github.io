@@ -1,24 +1,25 @@
 REPO = git@github.com:mijime/mijime.github.io.git
 THEME = hyde
+BRANCH = master
+PUBLIC = public
 
 help: ### Print tasks
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' Makefile \
 		| sort \
 		| awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
-public:
-	git clone $(REPO) public
-
-build: public ### Build to
+build: $(PUBLIC) ### Build to
 	hugo --theme $(THEME)
 
-deploy: build ### Deploy to master
+deploy: build ### Deploy to
 	cd public; \
 		git add -A; \
-		git ls-files | xargs chmod 0644; \
 		git commit -m ':memo: Update $(shell date "+%F %H:%M:%S")'; \
-		git push --set-upstream origin master; \
+		git push --set-upstream origin $(BRANCH); \
 		cd -
 
 watch: ### Watch for
 	hugo server --theme $(THEME) --watch
+
+$(PUBLIC):
+	git clone --branch $(BRANCH) $(REPO) $@

@@ -1,0 +1,19 @@
+checkout:
+  post:
+    - git submodule sync
+    - git submodule update --init --recursive
+
+machine:
+  timezone: Asia/Tokyo
+
+dependencies:
+  pre:
+    - git config --global user.name "CircleCI"
+    - git config --global user.email "circleci@circleci.com"
+
+deployment:
+  release:
+    branch: content
+    commands:
+      - go get -v github.com/spf13/hugo
+      - make deploy
