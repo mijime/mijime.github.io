@@ -16,7 +16,7 @@
 
 {{- if or (.Params.categories) (.Params.tags) }}
 <nav class="content container">
-  {{ partial "tags.html" . }}
+  {{- partial "tags.html" . }}
 </nav>
 {{- end }}
 

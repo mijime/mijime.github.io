@@ -1,10 +1,14 @@
 {{- with .Params.categories }}
 <span>
-  Categories:{{- range . }} <a href="/categories/{{ . }}/">{{ . }}</a>{{- end }}
+  {{- range . }}
+  <a href="/categories/{{ . }}/">{{ . }}</a>
+  {{- end }}
 </span>
 {{- end }}
 {{- with .Params.tags }}
 <span>
-  {{- range . }} <a href="/tags/{{ . }}/">#{{ . }}</a>{{- end }}
+  {{- range . }}
+  <a href="/tags/{{ . }}/">#{{ . }}</a>
+  {{- end }}
 </span>
 {{- end }}

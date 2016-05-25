@@ -10,11 +10,13 @@
           {{ .Title }}
         </a>
       </h1>
-      <span class="post-date">{{ .Date.Format "Mon, Jan 2, 2006" }}</span>
+      <span class="post-date">
+        {{- .Date.Format "Mon, Jan 2, 2006" }}
+      </span>
 
       {{ .Content }}
 
-      {{ partial "tags.html" . }}
+      {{- partial "tags.html" . }}
     </div>
     {{- end }}
   </div>
