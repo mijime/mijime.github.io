@@ -3,7 +3,7 @@
 
 <main class="content container">
   <ul class="posts">
-    {{ range .Data.Pages }}
+    {{ range (.Paginate .Data.Pages).Pages }}
     <li>
       <span>
         <a href="{{ .Permalink }}">{{ .Title }}</a>
@@ -14,4 +14,5 @@
   </ul>
 </main>
 
+{{ partial "paginator.html" . }}
 {{ partial "foot.html" . }}
