@@ -15,8 +15,8 @@
       </span>
 
       <div class="post-content">
-        {{ .Content }}
         {{ partial "tags.html" . }}
+        {{ .Content }}
       </div>
     </div>
     {{ end }}
