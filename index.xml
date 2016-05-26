@@ -6,8 +6,56 @@
     <description>Recent content on My snippets</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>ja</language>
-    <lastBuildDate>Wed, 25 May 2016 14:05:50 +0900</lastBuildDate>
+    <lastBuildDate>Thu, 26 May 2016 21:13:19 +0900</lastBuildDate>
     <atom:link href="/index.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>背面派、前面派</title>
+      <link>/posts/2016-05-26/border-implement/</link>
+      <pubDate>Thu, 26 May 2016 21:13:19 +0900</pubDate>
+      
+      <guid>/posts/2016-05-26/border-implement/</guid>
+      <description>&lt;p&gt;アプリ側で実装する際に、サーバ側で対応するかクライアント側で対応するか、という話。&lt;/p&gt;
+
+&lt;p&gt;場合によりけりなのは分かっているけど、思わずクライアント側で対応しがちだよね、的な。&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>CI を始めるのが辛い</title>
+      <link>/posts/2016-05-26/ci-is-difficult/</link>
+      <pubDate>Thu, 26 May 2016 21:10:04 +0900</pubDate>
+      
+      <guid>/posts/2016-05-26/ci-is-difficult/</guid>
+      <description>&lt;ul&gt;
+&lt;li&gt;環境が違う&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;サービスによっては一つ前のバージョンを使っていたりする。
+開発環境は最新めなことが多いので、ハマる&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;入れまくり&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;ツールやパッケージやらインストールするのにダウンロードしまくる。
+その時のリソースの潤沢な使い方に残念さを感じる&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;回しすぎ&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;初期環境を構築するのに、上二つも相まって過剰にリソースを消費する。
+他人のサーバだからといって甘えすぎ&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;回せない&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;headlessな環境じゃ動かなかったり、expect前提だったり、特殊な環境前提だったり、
+リソースが気軽にダウンロードできなかったりすると、回せない&lt;/p&gt;
+</description>
+    </item>
     
     <item>
       <title>hugo pagination</title>
