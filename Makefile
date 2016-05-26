@@ -2,6 +2,10 @@ REPO = git@github.com:mijime/mijime.github.io.git
 THEME = hyde
 BRANCH = master
 PUBLIC = public
+FAVICONS = static/favicon.png \
+					 static/apple-touch-icon-144-precomposed.png
+FAVICON_BASE = favicon.png
+
 
 help: ### Print tasks
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' Makefile \
@@ -24,3 +28,17 @@ watch: ### Watch for
 
 $(PUBLIC):
 	git clone --branch $(BRANCH) $(REPO) $@
+
+favicon: $(FAVICONS) ### Create favicon use imagemagick
+
+static/favicon.png: $(FAVICON_BASE)
+	convert $< \
+		-thumbnail 32x32^ -gravity center -extent 32x32 \
+		\( -size 32x32 xc:none -fill white -draw 'circle 15,15 15,0' \) \
+		-compose CopyOpacity -composite $@
+
+static/apple-touch-icon-144-precomposed.png: $(FAVICON_BASE) ### Create favicon use imagemagick
+	convert $< \
+		-thumbnail 144x144^ -gravity center -extent 144x144 \
+		\( -size 144x144 xc:none -fill white -draw 'circle 71,71 71,0' \) \
+		-compose CopyOpacity -composite $@
