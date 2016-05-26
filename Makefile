@@ -34,11 +34,13 @@ favicon: $(FAVICONS) ### Create favicon use imagemagick
 static/favicon.png: $(FAVICON_BASE)
 	convert $< \
 		-thumbnail 32x32^ -gravity center -extent 32x32 \
+		-type GrayScale \
 		\( -size 32x32 xc:none -fill white -draw 'circle 15,15 15,0' \) \
 		-compose CopyOpacity -composite $@
 
-static/apple-touch-icon-144-precomposed.png: $(FAVICON_BASE) ### Create favicon use imagemagick
+static/apple-touch-icon-144-precomposed.png: $(FAVICON_BASE)
 	convert $< \
 		-thumbnail 144x144^ -gravity center -extent 144x144 \
+		-type GrayScale \
 		\( -size 144x144 xc:none -fill white -draw 'circle 71,71 71,0' \) \
 		-compose CopyOpacity -composite $@
