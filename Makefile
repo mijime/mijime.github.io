@@ -6,7 +6,7 @@ PUBLIC = public
 help: ### Print tasks
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' Makefile \
 		| sort \
-		| awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
+		| awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-12s\033[0m %s\n", $$1, $$2}'
 
 build: $(PUBLIC) ### Build to
 	hugo --theme $(THEME)
