@@ -1,3 +1,8 @@
+---
+test:
+  override:
+    - exit 0
+
 checkout:
   post:
     - git submodule sync
@@ -10,10 +15,11 @@ dependencies:
   pre:
     - git config --global user.name "CircleCI"
     - git config --global user.email "circleci@circleci.com"
+  override:
+    - which hugo || go get -v github.com/spf13/hugo
 
 deployment:
   release:
     branch: content
     commands:
-      - go get -v github.com/spf13/hugo
       - make deploy
