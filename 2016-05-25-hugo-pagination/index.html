@@ -16,6 +16,7 @@
     <link rel="stylesheet" href="/css/poole.css">
     <link rel="stylesheet" href="/css/syntax.css">
     <link rel="stylesheet" href="/css/hyde.css">
+    <link rel="stylesheet" href="/css/style.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=PT+Sans:400,400italic,700|Abril+Fatface">
 
     
@@ -51,7 +52,8 @@
   <div class="post">
     <h1>hugo pagination</h1>
     <span class="post-date">Wed, May 25, 2016</span>
-    <p>.Paginator を使えば自動でやってくれるみたい</p>
+    <div class="post-content">
+      <p>.Paginator を使えば自動でやってくれるみたい</p>
 
 <pre><code class="language-html">{{- range (.Paginator 10).Pages }}
 &lt;div&gt;
@@ -76,7 +78,7 @@
 </code></pre>
 
 
-    
+      
 
 <span>
   
@@ -85,9 +87,8 @@
 </span>
 
 
+    </div>
   </div>
-
-  
 </main>
 
     <footer>
