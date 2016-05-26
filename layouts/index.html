@@ -14,9 +14,10 @@
         {{ .Date.Format "Mon, Jan 2, 2006" }}
       </span>
 
-      {{ .Content }}
-
-      {{ partial "tags.html" . }}
+      <div class="post-content">
+        {{ .Content }}
+        {{ partial "tags.html" . }}
+      </div>
     </div>
     {{ end }}
   </div>
