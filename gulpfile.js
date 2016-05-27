@@ -23,3 +23,8 @@ gulp.task('css', function() {
     .pipe(cssnext())
     .pipe(gulp.dest('static'));
 });
+
+gulp.task('watch', ['default'], function() {
+  gulp.watch('source/**/*.css', ['css']);
+  gulp.watch('content/**/*.md', ['textlint']);
+});

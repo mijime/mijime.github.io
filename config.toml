@@ -5,6 +5,11 @@ title = "My snippets"
 [params]
   description = "何かをかく"
   layoutReverse = true
+  themeColor = ""
 
 [params.googleAnalytics]
   UA = "UA-46554348-4"
+
+[[menu.main]]
+  name = "Posts"
+  url = "/posts"
