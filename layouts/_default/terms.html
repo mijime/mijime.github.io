@@ -1,0 +1,31 @@
+{{ partial "head.html" . }}
+{{ partial "sidebar.html" . }}
+
+<main class="content container">
+  <div class="posts">
+    {{ $data := .Data }}
+    {{ range $key, $value := .Data.Terms.ByCount }}
+    <div class="post">
+      <h1 class="post-title">
+        <a href="/{{ $data.Plural }}/{{ $value.Name | urlize }}">
+          {{ $value.Name }} ({{ $value.Count }})
+        </a>
+      </h1>
+      <ul class="post-content">
+        {{ range first 3 $value.Pages.ByDate }}
+        <li>
+          <span>
+            <a href="{{ .Permalink }}">{{ .Title }}</a>
+            <time class="pull-right post-list">
+              {{ .Date.Format "Mon, Jan 2, 2006" }}
+            </time>
+          </span>
+        </li>
+        {{ end }}
+      </ul>
+    </div>
+    {{ end }}
+  </div>
+</main>
+
+{{ partial "foot.html" . }}
