@@ -5,10 +5,10 @@ title = "introduce a github cli"
 +++
 
 
-リポジトリをWebから作るのがめんどくさいので導入する.
+リポジトリをWebから作るのがめんどくさいので導入する。
 
 https://github.com/github/hub
 
 `hub create mijime.github.io`
 
-ユーザ名とパスワードを入れるのはなんか嫌.
+ユーザ名とパスワードを入れるのはなんか嫌。

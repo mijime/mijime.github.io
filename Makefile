@@ -26,6 +26,9 @@ deploy: build ### Deploy to
 watch: ### Watch for
 	hugo server --theme $(THEME) --watch
 
+test: ### Test
+	npm run test
+
 $(PUBLIC):
 	git clone --branch $(BRANCH) $(REPO) $@
 

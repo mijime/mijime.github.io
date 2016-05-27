@@ -5,9 +5,9 @@ title = "hugo deploy to github pages"
 tags = ["hugo"]
 +++
 
-master branch のみ適用されるらしいので,
+master branchのみ適用されるらしいので、
 
-- 生成元は content branch
-- public 配下は master branch
+- 生成元はcontent branch
+- public配下はmaster branch
 
-みたいな 本来の使い方ではない使い方で運用する
+みたいな本来の使い方ではない使い方で運用する

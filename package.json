@@ -1,0 +1,24 @@
+{
+  "name": "mijime.github.io",
+  "version": "1.0.0",
+  "description": "mijime.github.io ===",
+  "main": "index.js",
+  "scripts": {
+    "test": "textlint content"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mijime/mijime.github.io.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/mijime/mijime.github.io/issues"
+  },
+  "homepage": "https://github.com/mijime/mijime.github.io#readme",
+  "devDependencies": {
+    "textlint": "^6.8.0",
+    "textlint-rule-preset-jtf-style": "^2.2.0"
+  }
+}

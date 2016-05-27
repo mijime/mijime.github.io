@@ -5,7 +5,7 @@ title = "hugo pagination"
 tags = ["hugo"]
 +++
 
-.Paginator を使えば自動でやってくれるみたい
+.Paginatorを使えば自動でやってくれるみたい
 
 
 ``` html
@@ -16,7 +16,7 @@ tags = ["hugo"]
 {{- end }}
 ```
 
-次頁, 前頁 へのリンクも .Paginator を使う
+次頁、前頁へのリンクも .Paginatorを使う
 
 ``` html
 {{- if or (.Paginator.HasPrev) (.Paginator.HasNext) }}
