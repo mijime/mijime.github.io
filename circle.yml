@@ -1,7 +1,7 @@
 ---
 test:
   override:
-    - exit 0
+    - make test
 
 checkout:
   post:
@@ -15,8 +15,7 @@ dependencies:
   pre:
     - git config --global user.name "CircleCI"
     - git config --global user.email "circleci@circleci.com"
-  override:
-    - which hugo || go get -v github.com/spf13/hugo
+    - go get -v github.com/spf13/hugo
 
 deployment:
   release:
