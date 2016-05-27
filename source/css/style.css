@@ -1,0 +1,31 @@
+:root {
+  --gray-color: #9a9a9a;
+  --link-color: #268bd2;
+}
+
+a:hover,
+a:focus {
+  text-decoration: none;
+}
+
+a {
+  display: inline-block;
+}
+
+a::after {
+  display: block;
+  content: "";
+  height: 1px;
+  width: 0%;
+  background-color: var(--gray-color);
+  transition: width 0.5s ease;
+}
+
+a:hover::after,
+a:focus::after {
+  width: 100%;
+}
+
+.post-content a::after {
+  background-color: var(--link-color);
+}
