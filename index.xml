@@ -6,8 +6,45 @@
     <description>Recent content on My snippets</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>ja</language>
-    <lastBuildDate>Thu, 26 May 2016 21:13:19 +0900</lastBuildDate>
+    <lastBuildDate>Fri, 27 May 2016 14:20:56 +0900</lastBuildDate>
     <atom:link href="/index.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>my first slide</title>
+      <link>/slides/2016-05-27/my-first-slide/</link>
+      <pubDate>Fri, 27 May 2016 14:20:56 +0900</pubDate>
+      
+      <guid>/slides/2016-05-27/my-first-slide/</guid>
+      <description>&lt;section&gt; 
+&lt;section&gt; &lt;h1 id=&#34;hugoでreveal-jsを始める&#34;&gt;HugoでReveal JSを始める&lt;/h1&gt;
+ &lt;/section&gt;
+
+&lt;section&gt; &lt;ul&gt;
+&lt;li&gt;始める&lt;/li&gt;
+&lt;/ul&gt;
+ &lt;/section&gt;
+
+ &lt;/section&gt;
+
+
+&lt;p&gt;&lt;section&gt; 
+&lt;section&gt; &lt;pre&gt;&lt;code&gt;// 1 Page
+{{ &amp;lt; section &amp;gt; }}
+
+// 1 - 1 Page
+{{ % section % }} ### ここに Markdown を書く {{ % /section % }}
+
+// 1 - 2 Page
+{{ % section % }} ### ここに Markdown を書く {{ % /section % }}
+
+{{ &amp;lt; /section &amp;gt; }}
+&lt;/code&gt;&lt;/pre&gt;
+ &lt;/section&gt;
+
+ &lt;/section&gt;
+&lt;/p&gt;
+</description>
+    </item>
     
     <item>
       <title>背面派、前面派</title>
@@ -130,7 +167,7 @@
       <guid>/posts/2016-05-23/first-blogged/</guid>
       <description>&lt;p&gt;何を書いてく。&lt;/p&gt;
 
-&lt;p&gt;やったネタやQiitaの下書き、 外部マウンティング的な何かを行う。&lt;/p&gt;
+&lt;p&gt;やったネタやQiitaの下書き、外部マウンティング的な何かを行う。&lt;/p&gt;
 </description>
     </item>
     

@@ -9,7 +9,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
 
     
-    <title> Hugo | My snippets </title>
+    <title> my first slide | My snippets </title>
     
 
     
@@ -24,59 +24,66 @@
     <link rel="shortcut icon" href="/favicon.png">
 
     
-    <link href="/tags/hugo/index.xml" rel="alternate" type="application/rss+xml" title="My snippets" />
+    <link href="" rel="alternate" type="application/rss+xml" title="My snippets" />
   </head>
 
   <body class=" layout-reverse">
 
-<nav class="sidebar">
-  <div class="container sidebar-sticky">
-    <div class="sidebar-about">
-      <h1>
-        <a href="/">My snippets</a>
-      </h1>
-      
-      <p class="lead"> 何かをかく </p>
-      
-    </div>
 
-    <ul class="sidebar-nav">
-      <li><a href="/">Home</a></li>
-      
-      <li><a href="/posts">Posts</a></li>
-      
-      <li><a href="/slides">Slides</a></li>
-      
-      <li><a href="/tags">Tags</a></li>
-      
-    </ul>
+<header>
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/reveal.js/3.3.0/css/reveal.min.css">
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/reveal.js/3.3.0/css/theme/moon.min.css">
+  <script src="//cdnjs.cloudflare.com/ajax/libs/reveal.js/3.3.0/lib/js/head.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/reveal.js/3.3.0/js/reveal.min.js"></script>
+</header>
 
-    <p>&copy; 2016. All rights reserved. </p>
+<main class="reveal">
+  <div class="slides">
+    <section> 
+<section> <h1 id="hugoでreveal-jsを始める">HugoでReveal JSを始める</h1>
+ </section>
+
+<section> <ul>
+<li>始める</li>
+</ul>
+ </section>
+
+ </section>
+
+
+<p><section> 
+<section> <pre><code>// 1 Page
+{{ &lt; section &gt; }}
+
+// 1 - 1 Page
+{{ % section % }} ### ここに Markdown を書く {{ % /section % }}
+
+// 1 - 2 Page
+{{ % section % }} ### ここに Markdown を書く {{ % /section % }}
+
+{{ &lt; /section &gt; }}
+</code></pre>
+ </section>
+
+ </section>
+</p>
+
   </div>
-</nav>
-
-
-<main class="content container">
-  <ul class="posts">
-    
-    <li>
-      <span>
-        <a href="/posts/2016-05-25/hugo-pagination/">hugo pagination</a>
-        <time class="pull-right post-list">Wed, May 25, 2016</time>
-      </span>
-    </li>
-    
-    <li>
-      <span>
-        <a href="/posts/2016-05-23/hugo-deploy/">hugo deploy to github pages</a>
-        <time class="pull-right post-list">Mon, May 23, 2016</time>
-      </span>
-    </li>
-    
-  </ul>
 </main>
 
-
+<footer>
+  <script defer>
+Reveal.initialize({
+  controls: true,
+  progress: true,
+  history: true,
+  center: true,
+  theme: Reveal.getQueryHash().theme,
+  transition: Reveal.getQueryHash().transition || 'default',
+  dependencies: []
+});
+  </script>
+</footer>
 
     <footer>
 
