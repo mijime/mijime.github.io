@@ -7,20 +7,21 @@ a {
   display: inline-block;
 }
 
-a:after {
+a::after {
   display: block;
   content: "";
   height: 1px;
   width: 0%;
   background-color: #9a9a9a;
-  transition: width 0.5s ease;
+  -webkit-transition: width 0.5s ease;
+          transition: width 0.5s ease;
 }
 
-a:hover:after,
-a:focus:after {
+a:hover::after,
+a:focus::after {
   width: 100%;
 }
 
-.post-content a:after {
+.post-content a::after {
   background-color: #268bd2;
 }

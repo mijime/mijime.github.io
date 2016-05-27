@@ -22,7 +22,7 @@
     </item>
     
     <item>
-      <title>CI を始めるのが辛い</title>
+      <title>CIを始めるのが辛い</title>
       <link>/posts/2016-05-26/ci-is-difficult/</link>
       <pubDate>Thu, 26 May 2016 21:10:04 +0900</pubDate>
       
@@ -31,7 +31,7 @@
 &lt;li&gt;環境が違う&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;p&gt;サービスによっては一つ前のバージョンを使っていたりする。
+&lt;p&gt;サービスによっては1つ前のバージョンを使っていたりする。
 開発環境は最新めなことが多いので、ハマる&lt;/p&gt;
 
 &lt;ul&gt;
@@ -45,7 +45,7 @@
 &lt;li&gt;回しすぎ&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;p&gt;初期環境を構築するのに、上二つも相まって過剰にリソースを消費する。
+&lt;p&gt;初期環境を構築するのに、上2つも相まって過剰にリソースを消費する。
 他人のサーバだからといって甘えすぎ&lt;/p&gt;
 
 &lt;ul&gt;
@@ -63,7 +63,7 @@
       <pubDate>Wed, 25 May 2016 14:05:50 +0900</pubDate>
       
       <guid>/posts/2016-05-25/hugo-pagination/</guid>
-      <description>&lt;p&gt;.Paginator を使えば自動でやってくれるみたい&lt;/p&gt;
+      <description>&lt;p&gt;.Paginatorを使えば自動でやってくれるみたい&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&#34;language-html&#34;&gt;{{- range (.Paginator 10).Pages }}
 &amp;lt;div&amp;gt;
@@ -72,7 +72,7 @@
 {{- end }}
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;次頁, 前頁 へのリンクも .Paginator を使う&lt;/p&gt;
+&lt;p&gt;次頁、前頁へのリンクも .Paginatorを使う&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&#34;language-html&#34;&gt;{{- if or (.Paginator.HasPrev) (.Paginator.HasNext) }}
 &amp;lt;nav role=&amp;quot;pagination&amp;quot;&amp;gt;
@@ -95,13 +95,13 @@
       <pubDate>Mon, 23 May 2016 22:48:11 +0900</pubDate>
       
       <guid>/posts/2016-05-23/github-cli/</guid>
-      <description>&lt;p&gt;リポジトリをWebから作るのがめんどくさいので導入する.&lt;/p&gt;
+      <description>&lt;p&gt;リポジトリをWebから作るのがめんどくさいので導入する。&lt;/p&gt;
 
 &lt;p&gt;&lt;a href=&#34;https://github.com/github/hub&#34;&gt;https://github.com/github/hub&lt;/a&gt;&lt;/p&gt;
 
 &lt;p&gt;&lt;code&gt;hub create mijime.github.io&lt;/code&gt;&lt;/p&gt;
 
-&lt;p&gt;ユーザ名とパスワードを入れるのはなんか嫌.&lt;/p&gt;
+&lt;p&gt;ユーザ名とパスワードを入れるのはなんか嫌。&lt;/p&gt;
 </description>
     </item>
     
@@ -111,14 +111,14 @@
       <pubDate>Mon, 23 May 2016 22:39:17 +0900</pubDate>
       
       <guid>/posts/2016-05-23/hugo-deploy/</guid>
-      <description>&lt;p&gt;master branch のみ適用されるらしいので,&lt;/p&gt;
+      <description>&lt;p&gt;master branchのみ適用されるらしいので、&lt;/p&gt;
 
 &lt;ul&gt;
-&lt;li&gt;生成元は content branch&lt;/li&gt;
-&lt;li&gt;public 配下は master branch&lt;/li&gt;
+&lt;li&gt;生成元はcontent branch&lt;/li&gt;
+&lt;li&gt;public配下はmaster branch&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;p&gt;みたいな 本来の使い方ではない使い方で運用する&lt;/p&gt;
+&lt;p&gt;みたいな本来の使い方ではない使い方で運用する&lt;/p&gt;
 </description>
     </item>
     
@@ -128,9 +128,9 @@
       <pubDate>Mon, 23 May 2016 21:56:24 +0900</pubDate>
       
       <guid>/posts/2016-05-23/first-blogged/</guid>
-      <description>&lt;p&gt;何を書いてく.&lt;/p&gt;
+      <description>&lt;p&gt;何を書いてく。&lt;/p&gt;
 
-&lt;p&gt;やったネタ や Qiita の下書き, 外部マウンティング的な何かを行う.&lt;/p&gt;
+&lt;p&gt;やったネタやQiitaの下書き、 外部マウンティング的な何かを行う。&lt;/p&gt;
 </description>
     </item>
     
