@@ -1,27 +1,39 @@
-a:hover,
-a:focus {
+.sidebar a {
+  text-decoration: none;
+  -webkit-transition: color 0.4s ease;
+          transition: color 0.4s ease;
+}
+
+.sidebar a:hover,
+.sidebar a:focus {
+  color: #268bd2;
+}
+
+.content a,
+.paginator a {
+  display: inline-block;
   text-decoration: none;
 }
 
-a {
-  display: inline-block;
-}
-
-a::after {
+.content a::after,
+.paginator a::after {
   display: block;
   content: "";
-  height: 1px;
+  height: 0.1em;
   width: 0%;
-  background-color: #9a9a9a;
-  -webkit-transition: width 0.5s ease;
-          transition: width 0.5s ease;
-}
-
-a:hover::after,
-a:focus::after {
-  width: 100%;
-}
-
-.post-content a::after {
   background-color: #268bd2;
+  -webkit-transition: width 0.4s ease;
+          transition: width 0.4s ease;
+}
+
+.content .post-title a::after,
+.paginator .post-title a::after {
+  background-color: #202020;
+}
+
+.content a:hover::after,
+.content a:focus::after,
+.paginator a:hover::after,
+.paginator a:focus::after {
+  width: 100%;
 }
