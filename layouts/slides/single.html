@@ -1,0 +1,30 @@
+{{ partial "head.html" . }}
+
+<header>
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/reveal.js/3.3.0/css/reveal.min.css">
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/reveal.js/3.3.0/css/theme/moon.min.css">
+  <script src="//cdnjs.cloudflare.com/ajax/libs/reveal.js/3.3.0/lib/js/head.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/reveal.js/3.3.0/js/reveal.min.js"></script>
+</header>
+
+<main class="reveal">
+  <div class="slides">
+    {{ .Content }}
+  </div>
+</main>
+
+<footer>
+  <script defer>
+Reveal.initialize({
+  controls: true,
+  progress: true,
+  history: true,
+  center: true,
+  theme: Reveal.getQueryHash().theme,
+  transition: Reveal.getQueryHash().transition || 'default',
+  dependencies: []
+});
+  </script>
+</footer>
+
+{{ partial "foot.html" . }}

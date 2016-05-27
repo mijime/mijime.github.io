@@ -13,3 +13,11 @@ title = "My snippets"
 [[menu.main]]
   name = "Posts"
   url = "/posts"
+
+[[menu.main]]
+  name = "Slides"
+  url = "/slides"
+
+[[menu.main]]
+  name = "Tags"
+  url = "/tags"
