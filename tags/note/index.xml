@@ -79,37 +79,36 @@
       
       <guid>/posts/2016-05-26/ci-is-difficult/</guid>
       <description>&lt;ul&gt;
-&lt;li&gt;環境が違う&lt;/li&gt;
-&lt;/ul&gt;
+&lt;li&gt;&lt;p&gt;環境が違う&lt;/p&gt;
 
 &lt;p&gt;サービスによっては1つ前のバージョンを使っていたりする。
-開発環境は最新めなことが多いので、ハマる&lt;/p&gt;
+開発環境は最新めなことが多いので、ハマる&lt;/p&gt;&lt;/li&gt;
 
-&lt;ul&gt;
-&lt;li&gt;入れまくり&lt;/li&gt;
-&lt;/ul&gt;
+&lt;li&gt;&lt;p&gt;入れまくり&lt;/p&gt;
 
 &lt;p&gt;ツールやパッケージやらインストールするのにダウンロードしまくる。
-その時のリソースの潤沢な使い方に残念さを感じる&lt;/p&gt;
+その時のリソースの潤沢な使い方に残念さを感じる&lt;/p&gt;&lt;/li&gt;
 
-&lt;ul&gt;
-&lt;li&gt;回しすぎ&lt;/li&gt;
-&lt;/ul&gt;
+&lt;li&gt;&lt;p&gt;回しすぎ&lt;/p&gt;
 
 &lt;p&gt;初期環境を構築するのに、上2つも相まって過剰にリソースを消費する。
-他人のサーバだからといって甘えすぎ&lt;/p&gt;
+他人のサーバだからといって甘えすぎ&lt;/p&gt;&lt;/li&gt;
 
-&lt;ul&gt;
-&lt;li&gt;回せない&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;回せない&lt;/p&gt;
+
+&lt;p&gt;headlessな環境じゃ動かなかったり。&lt;/p&gt;
+
+&lt;p&gt;expect前提だったり。&lt;/p&gt;
+
+&lt;p&gt;特殊な環境前提だったり。&lt;/p&gt;
+
+&lt;p&gt;リソースが気軽にダウンロードできなかったり&lt;/p&gt;&lt;/li&gt;
 &lt;/ul&gt;
-
-&lt;p&gt;headlessな環境じゃ動かなかったり、expect前提だったり、特殊な環境前提だったり、
-リソースが気軽にダウンロードできなかったりすると、回せない&lt;/p&gt;
 </description>
     </item>
     
     <item>
-      <title>introduce a github cli</title>
+      <title>introduce a GitHub cli</title>
       <link>/posts/2016-05-23/github-cli/</link>
       <pubDate>Mon, 23 May 2016 22:48:11 +0900</pubDate>
       

@@ -42,7 +42,7 @@
     </item>
     
     <item>
-      <title>hugo deploy to github pages</title>
+      <title>hugo deploy to GitHub pages</title>
       <link>/posts/hugo/hugo-deploy/</link>
       <pubDate>Mon, 23 May 2016 22:39:17 +0900</pubDate>
       
@@ -54,7 +54,7 @@
 &lt;li&gt;public配下はmaster branch&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;p&gt;みたいな本来の使い方ではない使い方で運用する&lt;/p&gt;
+&lt;p&gt;みたいな本来の使い方ではない使い方で運用する。&lt;/p&gt;
 </description>
     </item>
     
