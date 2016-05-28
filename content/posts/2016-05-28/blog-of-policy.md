@@ -1,6 +1,6 @@
 +++
 date = "2016-05-28T13:48:27+09:00"
-draft = true
+draft = false
 title = "ブログの方針"
 +++
 
