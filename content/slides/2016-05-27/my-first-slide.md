@@ -4,34 +4,20 @@ draft = false
 title = "my first slide"
 +++
 
-{{< section >}}
-{{% section %}}
-
 # HugoでReveal JSを始める
 
-{{% /section %}}
-{{% section %}}
+>>>
 
 - 始める
 
-{{% /section %}}
-{{< /section >}}
+---
 
-{{< section >}}
-{{% section %}}
+# 始めた
 
+---
+
+``` html
+<div>
+  hello world
+</div>
 ```
-// 1 Page
-{{ < section > }}
-
-// 1 - 1 Page
-{{ % section % }} ### ここに Markdown を書く {{ % /section % }}
-
-// 1 - 2 Page
-{{ % section % }} ### ここに Markdown を書く {{ % /section % }}
-
-{{ < /section > }}
-```
-
-{{% /section %}}
-{{< /section >}}
