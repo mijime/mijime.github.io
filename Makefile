@@ -25,7 +25,7 @@ deploy: build ### Deploy to
 		cd -
 
 watch: ### Watch for
-	hugo server --theme $(THEME) --watch
+	hugo server --theme $(THEME) --buildDrafts --watch
 
 test: ### Test
 	npm run test
