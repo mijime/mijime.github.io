@@ -3,28 +3,31 @@
 
 <main class="content container">
   <div class="posts">
-    {{ $data := .Data }}
-    {{ range $key, $value := .Data.Terms.ByCount }}
     <div class="post">
-      <h1 class="post-title">
-        <a href="/{{ $data.Plural }}/{{ $value.Name | urlize }}">
-          {{ $value.Name }} ({{ $value.Count }})
-        </a>
-      </h1>
+      <h3 class="post-title">
+        {{ .Title }}
+      </h3>
       <ul class="post-content">
-        {{ range first 3 $value.Pages.ByDate }}
+        {{ $data := .Data }}
+        {{ range $key, $value := .Data.Terms.ByCount }}
         <li>
-          <span>
-            <a href="{{ .Permalink }}">{{ .Title }}</a>
-            <time class="pull-right post-list">
-              {{ .Date.Format "Mon, Jan 2, 2006" }}
-            </time>
-          </span>
+          <a href="/{{ $data.Plural }}/{{ $value.Name | urlize }}">
+            {{ $value.Name }} ({{ $value.Count }})
+          </a>
+          <ol>
+            {{ range first 3 $value.Pages.ByPublishDate }}
+            <li>
+              <a href="{{ .Permalink }}">{{ .Title }}</a>
+              <time class="pull-right post-list">
+                {{ .Date.Format "Mon, Jan 2, 2006" }}
+              </time>
+            </li>
+            {{ end }}
+          </ol>
         </li>
         {{ end }}
       </ul>
     </div>
-    {{ end }}
   </div>
 </main>
 

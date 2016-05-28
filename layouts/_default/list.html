@@ -2,16 +2,23 @@
 {{ partial "sidebar.html" . }}
 
 <main class="content container">
-  <ul class="posts">
-    {{ range (.Paginate .Data.Pages).Pages }}
-    <li>
-      <span>
-        <a href="{{ .Permalink }}">{{ .Title }}</a>
-        <time class="pull-right post-list">{{ .Date.Format "Mon, Jan 2, 2006" }}</time>
-      </span>
-    </li>
-    {{ end }}
-  </ul>
+  <div class="posts">
+    <div class="post">
+      <h3 class="post-title">
+        {{ .Title }}
+      </h3>
+      <ul class="post-content">
+        {{ range (.Paginate .Data.Pages).Pages }}
+        <li>
+          <span>
+            <a href="{{ .Permalink }}">{{ .Title }}</a>
+            <time class="pull-right post-list">{{ .Date.Format "Mon, Jan 2, 2006" }}</time>
+          </span>
+        </li>
+        {{ end }}
+      </ul>
+    </div>
+  </div>
 </main>
 
 {{ partial "paginator.html" . }}
