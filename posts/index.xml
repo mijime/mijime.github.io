@@ -6,8 +6,50 @@
     <description>Recent content in Posts on My snippets</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>ja</language>
-    <lastBuildDate>Thu, 26 May 2016 21:13:19 +0900</lastBuildDate>
+    <lastBuildDate>Sat, 28 May 2016 13:48:27 +0900</lastBuildDate>
     <atom:link href="/posts/index.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>ブログの方針</title>
+      <link>/posts/2016-05-28/blog-of-policy/</link>
+      <pubDate>Sat, 28 May 2016 13:48:27 +0900</pubDate>
+      
+      <guid>/posts/2016-05-28/blog-of-policy/</guid>
+      <description>
+
+&lt;h3 id=&#34;記事の種別&#34;&gt;記事の種別&lt;/h3&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;tech系&lt;/p&gt;
+
+&lt;p&gt;種類毎のタグで管理。 &amp;ldquo;セクション/メインのタグ&amp;rdquo; の下に書く。&lt;/p&gt;
+
+&lt;p&gt;ある程度まとまってきたらタグごとのlayoutを使う。&lt;/p&gt;&lt;/li&gt;
+
+&lt;li&gt;&lt;p&gt;ドウデモイイ系&lt;/p&gt;
+
+&lt;p&gt;タグは基本的にはつけない。 &amp;ldquo;セクション/日付&amp;rdquo; の下に書く。&lt;/p&gt;
+
+&lt;p&gt;適当に思いついたことを残す。あとからtech系に移しても良い。&lt;/p&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&#34;デプロイ方針&#34;&gt;デプロイ方針&lt;/h3&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;記事更新以外はissue + branchで対応&lt;/p&gt;
+
+&lt;p&gt;真面目にやろう&lt;/p&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&#34;スライド&#34;&gt;スライド&lt;/h3&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;sectionタイプとmarkdownタイプ両方かけるようにしておこう&lt;/p&gt;&lt;/li&gt;
+
+&lt;li&gt;&lt;p&gt;&amp;ldquo;勉強会/日付&amp;rdquo; で作っていく&lt;/p&gt;&lt;/li&gt;
+&lt;/ul&gt;
+</description>
+    </item>
     
     <item>
       <title>背面派、前面派</title>
