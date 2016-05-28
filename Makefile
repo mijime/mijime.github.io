@@ -13,7 +13,7 @@ help: ### Print tasks
 		| awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-12s\033[0m %s\n", $$1, $$2}'
 
 build: $(PUBLIC) ### Build to
-	gulp
+	npm run build
 	rm -r public/*
 	hugo --theme $(THEME)
 
