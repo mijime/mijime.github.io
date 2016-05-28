@@ -13,11 +13,13 @@
     
 
     
-    <link rel="stylesheet" href="/css/poole.css">
-    <link rel="stylesheet" href="/css/syntax.css">
-    <link rel="stylesheet" href="/css/hyde.css">
-    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/reveal.js/3.3.0/css/reveal.min.css">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/reveal.js/3.3.0/css/theme/moon.min.css" id="theme">
     <link rel="stylesheet" href="//fonts.googleapis.com/css?family=PT+Sans:400,400italic,700|Abril+Fatface">
+
+    
+    <script src="//cdnjs.cloudflare.com/ajax/libs/reveal.js/3.3.0/lib/js/head.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/reveal.js/3.3.0/js/reveal.min.js"></script>
 
     
     <link rel="apple-touch-icon-precomposed" sizes="144x144" href="/apple-touch-icon-144-precomposed.png">
@@ -29,58 +31,40 @@
 
   <body class=" layout-reverse">
 
-
-<header>
-  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/reveal.js/3.3.0/css/reveal.min.css">
-  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/reveal.js/3.3.0/css/theme/moon.min.css">
-  <script src="//cdnjs.cloudflare.com/ajax/libs/reveal.js/3.3.0/lib/js/head.min.js"></script>
-  <script src="//cdnjs.cloudflare.com/ajax/libs/reveal.js/3.3.0/js/reveal.min.js"></script>
-</header>
-
 <main class="reveal">
   <div class="slides">
-    <section> 
-<section> <h1 id="hugoでreveal-jsを始める">HugoでReveal JSを始める</h1>
- </section>
-
-<section> <ul>
-<li>始める</li>
-</ul>
- </section>
-
- </section>
-
-
-<p><section> 
-<section> <pre><code>// 1 Page
-{{ &lt; section &gt; }}
-
-// 1 - 1 Page
-{{ % section % }} ### ここに Markdown を書く {{ % /section % }}
-
-// 1 - 2 Page
-{{ % section % }} ### ここに Markdown を書く {{ % /section % }}
-
-{{ &lt; /section &gt; }}
-</code></pre>
- </section>
-
- </section>
-</p>
-
+    <section
+       data-markdown
+       data-separator="^\n---$"
+       data-separator-vertical="^\n>>>$">
+      <script type="text/template"></script>
+    </section>
   </div>
 </main>
 
 <footer>
   <script defer>
+var markdownTemplate = document.querySelector("[data-markdown] script[type='text/template']");
+markdownTemplate.textContent = "# HugoでReveal JSを始める\n\n\u003e\u003e\u003e\n\n- 始める\n\n---\n\n# 始めた\n\n---\n\n``` html\n\u003cdiv\u003e\n  hello world\n\u003c/div\u003e\n```\n";
+
 Reveal.initialize({
   controls: true,
   progress: true,
   history: true,
   center: true,
   theme: Reveal.getQueryHash().theme,
-  transition: Reveal.getQueryHash().transition || 'default',
-  dependencies: []
+  transition: Reveal.getQueryHash().transition || "default",
+  dependencies: [{
+    src: "//cdnjs.cloudflare.com/ajax/libs/reveal.js/3.3.0/plugin/markdown/marked.min.js",
+    condition: function() {
+      return !!markdownTemplate;
+    }
+  }, {
+    src: "//cdnjs.cloudflare.com/ajax/libs/reveal.js/3.3.0/plugin/markdown/markdown.min.js",
+    condition: function() {
+      return !!markdownTemplate;
+    }
+  }]
 });
   </script>
 </footer>

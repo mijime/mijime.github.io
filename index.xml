@@ -57,34 +57,31 @@
       <pubDate>Fri, 27 May 2016 14:20:56 +0900</pubDate>
       
       <guid>/slides/2016-05-27/my-first-slide/</guid>
-      <description>&lt;section&gt; 
-&lt;section&gt; &lt;h1 id=&#34;hugoでreveal-jsを始める&#34;&gt;HugoでReveal JSを始める&lt;/h1&gt;
- &lt;/section&gt;
+      <description>
 
-&lt;section&gt; &lt;ul&gt;
+&lt;h1 id=&#34;hugoでreveal-jsを始める&#34;&gt;HugoでReveal JSを始める&lt;/h1&gt;
+
+&lt;blockquote&gt;
+&lt;blockquote&gt;
+&lt;blockquote&gt;
+&lt;/blockquote&gt;
+&lt;/blockquote&gt;
+&lt;/blockquote&gt;
+
+&lt;ul&gt;
 &lt;li&gt;始める&lt;/li&gt;
 &lt;/ul&gt;
- &lt;/section&gt;
 
- &lt;/section&gt;
+&lt;hr /&gt;
 
+&lt;h1 id=&#34;始めた&#34;&gt;始めた&lt;/h1&gt;
 
-&lt;p&gt;&lt;section&gt; 
-&lt;section&gt; &lt;pre&gt;&lt;code&gt;// 1 Page
-{{ &amp;lt; section &amp;gt; }}
+&lt;hr /&gt;
 
-// 1 - 1 Page
-{{ % section % }} ### ここに Markdown を書く {{ % /section % }}
-
-// 1 - 2 Page
-{{ % section % }} ### ここに Markdown を書く {{ % /section % }}
-
-{{ &amp;lt; /section &amp;gt; }}
+&lt;pre&gt;&lt;code class=&#34;language-html&#34;&gt;&amp;lt;div&amp;gt;
+  hello world
+&amp;lt;/div&amp;gt;
 &lt;/code&gt;&lt;/pre&gt;
- &lt;/section&gt;
-
- &lt;/section&gt;
-&lt;/p&gt;
 </description>
     </item>
     
