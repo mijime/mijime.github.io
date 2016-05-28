@@ -37,3 +37,11 @@
 .paginator a:focus::after {
   width: 100%;
 }
+
+@media (max-width: 48em) {
+  .sidebar-nav li {
+    display: inline;
+    margin-left: 0.5em;
+    margin-right: 0.5em;
+  }
+}
