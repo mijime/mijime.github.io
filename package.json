@@ -4,12 +4,10 @@
   "description": "mijime.github.io ===",
   "main": "index.js",
   "scripts": {
-    "gulp:build": "gulp",
-    "build": "npm run gulp:build",
-    "gulp:watch": "gulp watch",
-    "watch": "npm run gulp:watch",
-    "gulp:test": "gulp test",
-    "test": "npm run gulp:test"
+    "fix": "textlint --fix content",
+    "build": "gulp",
+    "watch": "gulp watch",
+    "test": "gulp test"
   },
   "repository": {
     "type": "git",
