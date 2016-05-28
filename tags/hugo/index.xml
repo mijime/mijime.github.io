@@ -11,10 +11,10 @@
     
     <item>
       <title>hugo pagination</title>
-      <link>/posts/2016-05-25/hugo-pagination/</link>
+      <link>/posts/hugo/hugo-pagination/</link>
       <pubDate>Wed, 25 May 2016 14:05:50 +0900</pubDate>
       
-      <guid>/posts/2016-05-25/hugo-pagination/</guid>
+      <guid>/posts/hugo/hugo-pagination/</guid>
       <description>&lt;p&gt;.Paginatorを使えば自動でやってくれるみたい&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&#34;language-html&#34;&gt;{{- range (.Paginator 10).Pages }}
@@ -43,10 +43,10 @@
     
     <item>
       <title>hugo deploy to github pages</title>
-      <link>/posts/2016-05-23/hugo-deploy/</link>
+      <link>/posts/hugo/hugo-deploy/</link>
       <pubDate>Mon, 23 May 2016 22:39:17 +0900</pubDate>
       
-      <guid>/posts/2016-05-23/hugo-deploy/</guid>
+      <guid>/posts/hugo/hugo-deploy/</guid>
       <description>&lt;p&gt;master branchのみ適用されるらしいので、&lt;/p&gt;
 
 &lt;ul&gt;

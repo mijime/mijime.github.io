@@ -9,7 +9,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
 
     
-    <title> ブログの方針 | My snippets </title>
+    <title> hugo pagination | My snippets </title>
     
 
     
@@ -59,48 +59,44 @@
 <main class="content container">
   <div class="post">
     <h1 class="post-title">
-      <a href="/posts/2016-05-28/blog-of-policy/">
-        ブログの方針
+      <a href="/posts/hugo/hugo-pagination/">
+        hugo pagination
       </a>
     </h1>
-    <span class="post-date">Sat, May 28, 2016</span>
+    <span class="post-date">Wed, May 25, 2016</span>
     <div class="post-content">
       
 
+<span>
+  
+  <a href="/tags/hugo/">#hugo</a>
+  
+</span>
 
-      
 
-<h3 id="記事の種別">記事の種別</h3>
+      <p>.Paginatorを使えば自動でやってくれるみたい</p>
 
-<ul>
-<li><p>tech系</p>
+<pre><code class="language-html">{{- range (.Paginator 10).Pages }}
+&lt;div&gt;
+  {{ .Content }}
+&lt;/div&gt;
+{{- end }}
+</code></pre>
 
-<p>種類毎のタグで管理。 &ldquo;セクション/メインのタグ&rdquo; の下に書く。</p>
+<p>次頁、前頁へのリンクも .Paginatorを使う</p>
 
-<p>ある程度まとまってきたらタグごとのlayoutを使う。</p></li>
-
-<li><p>ドウデモイイ系</p>
-
-<p>タグは基本的にはつけない。 &ldquo;セクション/日付&rdquo; の下に書く。</p>
-
-<p>適当に思いついたことを残す。あとからtech系に移しても良い。</p></li>
-</ul>
-
-<h3 id="デプロイ方針">デプロイ方針</h3>
-
-<ul>
-<li><p>記事更新以外はissue + branchで対応</p>
-
-<p>真面目にやろう</p></li>
-</ul>
-
-<h3 id="スライド">スライド</h3>
-
-<ul>
-<li><p>sectionタイプとmarkdownタイプ両方かけるようにしておこう</p></li>
-
-<li><p>&ldquo;勉強会/日付&rdquo; で作っていく</p></li>
-</ul>
+<pre><code class="language-html">{{- if or (.Paginator.HasPrev) (.Paginator.HasNext) }}
+&lt;nav role=&quot;pagination&quot;&gt;
+  {{- if .Paginator.HasPrev }}
+    &lt;a href=&quot;{{ .Paginator.Prev.URL }}&quot;&gt;Prev&lt;/a&gt;
+  {{- end }}
+    &lt;span class=&quot;&quot;&gt;Page {{ .Paginator.PageNumber }} of {{ .Paginator.TotalPages }}&lt;/span&gt;
+  {{- if .Paginator.HasNext }}
+    &lt;a href=&quot;{{ .Paginator.Next.URL }}&quot;&gt;Next&lt;/a&gt;
+  {{- end }}
+&lt;/nav&gt;
+{{end}}
+</code></pre>
 
     </div>
   </div>

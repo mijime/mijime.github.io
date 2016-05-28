@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Ci on My snippets</title>
+    <link>/tags/ci/</link>
+    <description>Recent content in Ci on My snippets</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>ja</language>
+    <lastBuildDate>Thu, 26 May 2016 21:10:04 +0900</lastBuildDate>
+    <atom:link href="/tags/ci/index.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>CIを始めるのが辛い</title>
+      <link>/posts/2016-05-26/ci-is-difficult/</link>
+      <pubDate>Thu, 26 May 2016 21:10:04 +0900</pubDate>
+      
+      <guid>/posts/2016-05-26/ci-is-difficult/</guid>
+      <description>&lt;ul&gt;
+&lt;li&gt;環境が違う&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;サービスによっては1つ前のバージョンを使っていたりする。
+開発環境は最新めなことが多いので、ハマる&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;入れまくり&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;ツールやパッケージやらインストールするのにダウンロードしまくる。
+その時のリソースの潤沢な使い方に残念さを感じる&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;回しすぎ&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;初期環境を構築するのに、上2つも相まって過剰にリソースを消費する。
+他人のサーバだからといって甘えすぎ&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;回せない&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;headlessな環境じゃ動かなかったり、expect前提だったり、特殊な環境前提だったり、
+リソースが気軽にダウンロードできなかったりすると、回せない&lt;/p&gt;
+</description>
+    </item>
+    
+  </channel>
+</rss>
