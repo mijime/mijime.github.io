@@ -1,8 +1,11 @@
 +++
 date = "2016-05-23T22:48:11+09:00"
+
 draft = false
-title = "introduce a github cli"
-tags = ["note", "github"]
+
+title = "introduce a GitHub cli"
+
+tags = ["note", "GitHub"]
 +++
 
 
