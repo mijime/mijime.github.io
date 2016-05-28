@@ -2,6 +2,7 @@
 date = "2016-05-26T21:10:04+09:00"
 draft = false
 title = "CIを始めるのが辛い"
+tags = ["note", "ci"]
 +++
 
 - 環境が違う
