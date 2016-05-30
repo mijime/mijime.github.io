@@ -36,15 +36,23 @@
 
 &lt;p&gt;分解した単語と出現回数を記録する。&lt;/p&gt;
 
-&lt;script src=&#34;http://gist-it.appspot.com/github.com/mijime/mijime.github.io/blob/content/source/js/similarity/index.js?slice=50:75&#34;&gt;&lt;/script&gt;
+&lt;script src=&#39;//gist-it.appspot.com/github.com/mijime/mijime.github.io/blob/content/source/js/similarity/index.js?slice=54:71&#39;&gt;
+&lt;/script&gt;
+
 
 &lt;p&gt;出現回数を数えるのは名詞で3文字以上の単語のみ。&lt;/p&gt;
 
-&lt;script src=&#34;http://gist-it.appspot.com/github.com/mijime/mijime.github.io/blob/content/source/js/similarity/index.js?slice=30:40&#34;&gt;&lt;/script&gt;
+&lt;script src=&#39;//gist-it.appspot.com/github.com/mijime/mijime.github.io/blob/content/source/js/similarity/index.js?slice=32:39&#39;&gt;
+&lt;/script&gt;
+
 
 &lt;p&gt;あとは計算しておしまい。&lt;/p&gt;
 
-&lt;script src=&#34;http://gist-it.appspot.com/github.com/mijime/mijime.github.io/blob/content/source/js/similarity/index.js?slice=70:100&#34;&gt;&lt;/script&gt;
+&lt;script src=&#39;//gist-it.appspot.com/github.com/mijime/mijime.github.io/blob/content/source/js/similarity/index.js?slice=71:96&#39;&gt;
+&lt;/script&gt;
+
+
+&lt;h3 id=&#34;実行結果&#34;&gt;実行結果&lt;/h3&gt;
 
 &lt;p&gt;うーん、全然関係ない単語でしか一致しない、、、その通りではあるんだけど&lt;/p&gt;
 
