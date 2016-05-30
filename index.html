@@ -61,6 +61,77 @@
     
     <div class="post">
       <h1 class="post-title">
+        <a href="/posts/js/cosine-similarity/">
+          関連記事を探す
+        </a>
+      </h1>
+      <span class="post-date">
+        Sat, May 28, 2016
+      </span>
+
+      <div class="post-content">
+        
+
+<span>
+  
+  <a href="/tags/tech/">#tech</a>
+  
+  <a href="/tags/js/">#js</a>
+  
+</span>
+
+
+        
+
+<p>他のブログを参考にすると関連記事というのを最後に表示しているらしい。</p>
+
+<p>まだ記事の数は少ないけど、ある程度近い記事を探すことができるようにする。</p>
+
+<h3 id="類似度の取得">類似度の取得</h3>
+
+<p>&ldquo;MeCab&rdquo; + &ldquo;類似&rdquo; でググったら、コサイン類似度なるものがあるとのこと。</p>
+
+<ul>
+<li><a href="http://www.cse.kyoto-su.ac.jp/~g0846020/keywords/cosinSimilarity.html">コサイン類似度</a></li>
+<li><a href="http://qiita.com/nmbakfm/items/6bb91b89571dd68fcea6">TF-IDF Cos類似度推定法</a></li>
+</ul>
+
+<p>このブログはjs + hugoで書いているので、
+<a href="https://www.npmjs.com/package/kuromoji">kuromoji</a> のラッパー
+<a href="https://www.npmjs.com/package/kuromojin">kuromojin</a> を使って形態素解析する。</p>
+
+<p>分解した単語と出現回数を記録する。</p>
+
+<script src="http://gist-it.appspot.com/github.com/mijime/mijime.github.io/blob/content/source/js/similarity/index.js?slice=50:75"></script>
+
+<p>出現回数を数えるのは名詞で3文字以上の単語のみ。</p>
+
+<script src="http://gist-it.appspot.com/github.com/mijime/mijime.github.io/blob/content/source/js/similarity/index.js?slice=30:40"></script>
+
+<p>あとは計算しておしまい。</p>
+
+<script src="http://gist-it.appspot.com/github.com/mijime/mijime.github.io/blob/content/source/js/similarity/index.js?slice=70:100"></script>
+
+<p>うーん、全然関係ない単語でしか一致しない、、、その通りではあるんだけど</p>
+
+<pre><code>&gt; babel-node source/js/similarity &quot;content/posts/js/cosine-similarity.md&quot; &quot;content&quot;
+&gt;
+&gt; 0       content/posts/2016-05-26/border-implement.md
+&gt; 0.42074115723005184     content/posts/2016-05-23/github-cli.md  com, https, github, mijime
+&gt; 0       content/posts/2016-05-26/ci-is-difficult.md
+&gt; 0       content/posts/blog/blog-of-policy.md
+&gt; 0       content/posts/blog/first-blogged.md
+&gt; 0.007841750524290146    content/posts/hugo/hugo-pagination.md   html
+&gt; 0.036063527762575875    content/posts/hugo/hugo-deploy.md       content
+&gt; 1       content/posts/js/cosine-similarity.md   100, 89571, MeCab, コサイン, http
+&gt; 0.017920111019015677    content/slides/2016-05-27/my-first-slide.md     html
+</code></pre>
+
+      </div>
+    </div>
+    
+    <div class="post">
+      <h1 class="post-title">
         <a href="/posts/blog/blog-of-policy/">
           ブログの方針
         </a>
@@ -249,39 +320,6 @@
 &lt;/nav&gt;
 {{end}}
 </code></pre>
-
-      </div>
-    </div>
-    
-    <div class="post">
-      <h1 class="post-title">
-        <a href="/posts/2016-05-23/github-cli/">
-          introduce a GitHub cli
-        </a>
-      </h1>
-      <span class="post-date">
-        Mon, May 23, 2016
-      </span>
-
-      <div class="post-content">
-        
-
-<span>
-  
-  <a href="/tags/note/">#note</a>
-  
-  <a href="/tags/GitHub/">#GitHub</a>
-  
-</span>
-
-
-        <p>リポジトリをWebから作るのがめんどくさいので導入する。</p>
-
-<p><a href="https://github.com/github/hub">https://github.com/github/hub</a></p>
-
-<p><code>hub create mijime.github.io</code></p>
-
-<p>ユーザ名とパスワードを入れるのはなんか嫌。</p>
 
       </div>
     </div>
