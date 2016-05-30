@@ -13,9 +13,9 @@
     
 
     
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/reveal.js/3.3.0/lib/css/zenburn.min.css">
     <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/reveal.js/3.3.0/css/reveal.min.css">
-    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/reveal.js/3.3.0/css/print/pdf.min.css" media="print">
-    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/reveal.js/3.3.0/css/theme/moon.min.css" id="theme">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/reveal.js/3.3.0/css/theme/solarized.min.css" id="theme">
     <link rel="stylesheet" href="//fonts.googleapis.com/css?family=PT+Sans:400,400italic,700|Abril+Fatface">
 
     
@@ -45,6 +45,14 @@
 
 <footer>
   <script defer>
+var printLink = document.createElement("link");
+printLink.rel = "stylesheet";
+printLink.type = "text/css";
+printLink.href = window.location.search.match(/print-pdf/)
+  ? "//cdnjs.cloudflare.com/ajax/libs/reveal.js/3.3.0/css/print/pdf.min.css"
+  : "//cdnjs.cloudflare.com/ajax/libs/reveal.js/3.3.0/css/print/paper.min.css";
+document.querySelector("head").appendChild(printLink);
+
 var markdownTemplate = document.querySelector("[data-markdown] script[type='text/template']");
 markdownTemplate.textContent = "# HugoでReveal JSを始める\n\n\u003e\u003e\u003e\n\n- 始める\n\n---\n\n# 始めた\n\n---\n\n``` html\n\u003cdiv\u003e\n  hello world\n\u003c/div\u003e\n```\n";
 
@@ -56,15 +64,24 @@ Reveal.initialize({
   theme: Reveal.getQueryHash().theme,
   transition: Reveal.getQueryHash().transition || "default",
   dependencies: [{
+    src: "//cdnjs.cloudflare.com/ajax/libs/reveal.js/3.3.0/lib/js/classList.min.js",
+    condition: function() { return !document.body.classList; }
+  }, {
     src: "//cdnjs.cloudflare.com/ajax/libs/reveal.js/3.3.0/plugin/markdown/marked.min.js",
-    condition: function() {
-      return !!markdownTemplate;
-    }
+    condition: function() { return !!markdownTemplate; }
   }, {
     src: "//cdnjs.cloudflare.com/ajax/libs/reveal.js/3.3.0/plugin/markdown/markdown.min.js",
-    condition: function() {
-      return !!markdownTemplate;
-    }
+    condition: function() { return !!markdownTemplate; }
+  }, {
+    src: "//cdnjs.cloudflare.com/ajax/libs/reveal.js/3.3.0/plugin/highlight/highlight.min.js",
+    async: true,
+    callback: function() { return hljs.initHighlightingOnLoad(); }
+  }, {
+    src: "//cdnjs.cloudflare.com/ajax/libs/reveal.js/3.3.0/plugin/zoom-js/zoom.min.js",
+    async: true
+  }, {
+    src: "//cdnjs.cloudflare.com/ajax/libs/reveal.js/3.3.0/plugin/notes/notes.min.js",
+    async: true
   }]
 });
   </script>
