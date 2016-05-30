@@ -25,18 +25,19 @@ tags = ["tech", "js"]
 
 分解した単語と出現回数を記録する。
 
-<script src="http://gist-it.appspot.com/github.com/mijime/mijime.github.io/blob/content/source/js/similarity/index.js?slice=50:75"></script>
+{{<gist-it repo="mijime/mijime.github.io" branch="content" path="source/js/similarity/index.js?slice=54:71">}}
 
 出現回数を数えるのは名詞で3文字以上の単語のみ。
 
-<script src="http://gist-it.appspot.com/github.com/mijime/mijime.github.io/blob/content/source/js/similarity/index.js?slice=30:40"></script>
+{{<gist-it repo="mijime/mijime.github.io" branch="content" path="source/js/similarity/index.js?slice=32:39">}}
 
 あとは計算しておしまい。
 
-<script src="http://gist-it.appspot.com/github.com/mijime/mijime.github.io/blob/content/source/js/similarity/index.js?slice=70:100"></script>
+{{<gist-it repo="mijime/mijime.github.io" branch="content" path="source/js/similarity/index.js?slice=71:96">}}
+
+### 実行結果
 
 うーん、全然関係ない単語でしか一致しない、、、その通りではあるんだけど
-
 
 ```
 > babel-node source/js/similarity "content/posts/js/cosine-similarity.md" "content"
