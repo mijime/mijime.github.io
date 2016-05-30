@@ -36,7 +36,7 @@ async function recursiveDir (p) {
   }
 
   const files = await fsp.node('readdir')(p);
-  return await Promise.all(files.map(async (f) => await recursiveDir(path.join(p, f))));
+  return Promise.all(files.map(async (f) => await recursiveDir(path.join(p, f))));
 }
 
 async function parseVector (p) {
@@ -92,14 +92,18 @@ async function main (content, contentDir) {
   const nestedFiles = await recursiveDir(contentDir);
   const files = flatten(nestedFiles);
 
-  return await Promise.all(files.map(async (file) => {
+  return Promise.all(files.map(async (file) => {
     const vector = await parseVector(file);
     const score = cosineSimilarity(baseVector, vector);
+    return {file, score};
+  }).map(async res => {
+    const {file, score} = await res;
+    console.log(score, file);
     return {file, score};
   }));
 }
 
 console.log('main start');
 main(process.argv[2], process.argv[3])
-  .then(res => console.log('main end', res))
+  .then(res => console.log('main end'))
   .catch(err => console.log(err));
