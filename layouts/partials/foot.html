@@ -13,20 +13,7 @@
 
       <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/mermaid/6.0.0/mermaid.min.css" />
       <script src="//cdnjs.cloudflare.com/ajax/libs/mermaid/6.0.0/mermaid.min.js"></script>
-      <script defer>
-var mermaids = Array.prototype.map.call(
-    document.querySelectorAll("pre code.language-mermaid"),
-    function(code) {
-      var div = document.createElement("div");
-      div.setAttribute("class", "mermaid");
-      div.textContent = code.textContent;
-      code.textContent = "";
-      code.appendChild(div);
-      return code;
-    });
-
-mermaid.initialize({startOnLoad: true});
-      </script>
+      <script defer src="/js/bundle.js"></script>
     </footer>
   </body>
 </html>
