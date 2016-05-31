@@ -15,7 +15,7 @@
     {{ end }}
 
     <!-- CSS -->
-    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/reveal.js/3.3.0/lib/css/zenburn.min.css">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.4.0/styles/default.min.css">
     <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/reveal.js/3.3.0/css/reveal.min.css">
     <link rel="stylesheet" href="/css/slide.css" id="theme">
     <link rel="stylesheet" href="//fonts.googleapis.com/css?family=PT+Sans:400,400italic,700|Abril+Fatface">
@@ -67,13 +67,24 @@ Reveal.initialize({
   transition: Reveal.getQueryHash().transition || "default",
   dependencies: [{
     src: "//cdnjs.cloudflare.com/ajax/libs/reveal.js/3.3.0/lib/js/classList.min.js",
-    condition: function() { return !document.body.classList; }
+    condition: function() { return !document.body.classList; },
   }, {
     src: "//cdnjs.cloudflare.com/ajax/libs/reveal.js/3.3.0/plugin/markdown/marked.min.js",
-    condition: function() { return !!markdownTemplate; }
+    condition: function() { return !!markdownTemplate; },
+    callback: function() {
+      var renderer = new marked.Renderer();
+      var defaultRendererCode = renderer.code;
+      renderer.code = function (code, language) {
+        if (language == "mermaid") {
+          return "<div class=mermaid>" +  code + "</div>";
+        }
+        return defaultRendererCode.apply(this, arguments);
+      };
+      marked.setOptions({renderer: renderer});
+    }
   }, {
     src: "//cdnjs.cloudflare.com/ajax/libs/reveal.js/3.3.0/plugin/markdown/markdown.min.js",
-    condition: function() { return !!markdownTemplate; }
+    condition: function() { return !!markdownTemplate; },
   }, {
     src: "//cdnjs.cloudflare.com/ajax/libs/reveal.js/3.3.0/plugin/highlight/highlight.min.js",
     async: true,
