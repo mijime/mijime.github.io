@@ -61,6 +61,70 @@
     
     <div class="post">
       <h1 class="post-title">
+        <a href="/posts/hugo/code-mermaid/">
+          mermaidに対応した
+        </a>
+      </h1>
+      <span class="post-date">
+        Tue, May 31, 2016
+      </span>
+
+      <div class="post-content">
+        
+
+<span>
+  
+  <a href="/tags/tech/">#tech</a>
+  
+  <a href="/tags/mermaid/">#mermaid</a>
+  
+</span>
+
+
+        <p>code.language-mermaidを変換するスクリプトを噛ませただけだけど。</p>
+
+<pre><code class="language-mermaid">  graph TD;
+    A--&gt;B;
+    A--&gt;C;
+    B--&gt;D;
+    C--&gt;D;
+</code></pre>
+
+<pre><code class="language-mermaid">  gantt
+    dateFormat  YYYY-MM-DD
+    title Adding GANTT diagram functionality to mermaid
+    section A section
+    Completed task: done,   des1,       2014-01-06, 2014-01-08
+    Active task:    active, des2,       2014-01-09, 3d
+    Future task:    des3,   after des2, 5d
+    Future task2:   des4,   after des3, 5d
+    section Critical tasks
+    Completed task in the critical line :crit, done, 2014-01-06, 24h
+    Implement parser and jison          :crit, done, after des1, 2d
+    Create tests for parser             :crit, active, 3d
+    Future task in critical line        :crit, 5d
+    Create tests for renderer           :2d
+    Add to mermaid                      :1d
+</code></pre>
+
+<pre><code class="language-mermaid">  sequenceDiagram
+    participant Alice
+    participant Bob
+    Alice-&gt;John: Hello John, how are you?
+    loop Healthcheck
+    John-&gt;John: Fight against hypochondria
+    end
+    Note right of John: Rational thoughts prevail...
+    John--&gt;Alice: Great!
+    John-&gt;Bob: How about you?
+    Bob--&gt;John: Jolly good!
+</code></pre>
+
+      </div>
+    </div>
+    
+    <div class="post">
+      <h1 class="post-title">
         <a href="/posts/js/cosine-similarity/">
           関連記事を探す
         </a>
@@ -285,53 +349,6 @@
       </div>
     </div>
     
-    <div class="post">
-      <h1 class="post-title">
-        <a href="/posts/hugo/hugo-pagination/">
-          hugo pagination
-        </a>
-      </h1>
-      <span class="post-date">
-        Wed, May 25, 2016
-      </span>
-
-      <div class="post-content">
-        
-
-<span>
-  
-  <a href="/tags/hugo/">#hugo</a>
-  
-</span>
-
-
-        <p>.Paginatorを使えば自動でやってくれるみたい</p>
-
-<pre><code class="language-html">{{- range (.Paginator 10).Pages }}
-&lt;div&gt;
-  {{ .Content }}
-&lt;/div&gt;
-{{- end }}
-</code></pre>
-
-<p>次頁、前頁へのリンクも .Paginatorを使う</p>
-
-<pre><code class="language-html">{{- if or (.Paginator.HasPrev) (.Paginator.HasNext) }}
-&lt;nav role=&quot;pagination&quot;&gt;
-  {{- if .Paginator.HasPrev }}
-    &lt;a href=&quot;{{ .Paginator.Prev.URL }}&quot;&gt;Prev&lt;/a&gt;
-  {{- end }}
-    &lt;span class=&quot;&quot;&gt;Page {{ .Paginator.PageNumber }} of {{ .Paginator.TotalPages }}&lt;/span&gt;
-  {{- if .Paginator.HasNext }}
-    &lt;a href=&quot;{{ .Paginator.Next.URL }}&quot;&gt;Next&lt;/a&gt;
-  {{- end }}
-&lt;/nav&gt;
-{{end}}
-</code></pre>
-
-      </div>
-    </div>
-    
   </div>
 </main>
 
@@ -354,15 +371,32 @@
     <footer>
 
       <script>
-    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (function(i,s,o,g,r,a,m){i["GoogleAnalyticsObject"]=r;i[r]=i[r]||function(){
       (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
     m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+    })(window,document,"script","//www.google-analytics.com/analytics.js","ga");
 
-    ga('create', 'UA-46554348-4', 'auto');
-    ga('send', 'pageview');
-    </script>
+    ga("create", "UA-46554348-4", "auto");
+    ga("send", "pageview");
+      </script>
 
+
+      <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/mermaid/6.0.0/mermaid.min.css" />
+      <script src="//cdnjs.cloudflare.com/ajax/libs/mermaid/6.0.0/mermaid.min.js"></script>
+      <script defer>
+var mermaids = Array.prototype.map.call(
+    document.querySelectorAll("pre code.language-mermaid"),
+    function(code) {
+      var div = document.createElement("div");
+      div.setAttribute("class", "mermaid");
+      div.textContent = code.textContent;
+      code.textContent = "";
+      code.appendChild(div);
+      return code;
+    });
+
+mermaid.initialize({startOnLoad: true});
+      </script>
     </footer>
   </body>
 </html>

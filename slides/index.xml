@@ -40,6 +40,13 @@
   hello world
 &amp;lt;/div&amp;gt;
 &lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-mermaid&#34;&gt;  graph TD;
+    A--&amp;gt;B;
+    A--&amp;gt;C;
+    B--&amp;gt;D;
+    C--&amp;gt;D;
+&lt;/code&gt;&lt;/pre&gt;
 </description>
     </item>
     

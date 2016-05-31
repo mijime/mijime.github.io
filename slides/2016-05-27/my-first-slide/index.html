@@ -13,7 +13,7 @@
     
 
     
-    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/reveal.js/3.3.0/lib/css/zenburn.min.css">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.4.0/styles/default.min.css">
     <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/reveal.js/3.3.0/css/reveal.min.css">
     <link rel="stylesheet" href="/css/slide.css" id="theme">
     <link rel="stylesheet" href="//fonts.googleapis.com/css?family=PT+Sans:400,400italic,700|Abril+Fatface">
@@ -54,7 +54,7 @@ printLink.href = window.location.search.match(/print-pdf/)
 document.querySelector("head").appendChild(printLink);
 
 var markdownTemplate = document.querySelector("[data-markdown] script[type='text/template']");
-markdownTemplate.textContent = "# HugoでReveal JSを始める\n\n\u003e\u003e\u003e\n\n- 始める\n\n---\n\n# 始めた\n\n---\n\n``` html\n\u003cdiv\u003e\n  hello world\n\u003c/div\u003e\n```\n";
+markdownTemplate.textContent = "# HugoでReveal JSを始める\n\n\u003e\u003e\u003e\n\n- 始める\n\n---\n\n# 始めた\n\n---\n\n``` html\n\u003cdiv\u003e\n  hello world\n\u003c/div\u003e\n```\n\n``` mermaid\n  graph TD;\n    A--\u003eB;\n    A--\u003eC;\n    B--\u003eD;\n    C--\u003eD;\n```\n";
 
 Reveal.initialize({
   controls: true,
@@ -65,13 +65,24 @@ Reveal.initialize({
   transition: Reveal.getQueryHash().transition || "default",
   dependencies: [{
     src: "//cdnjs.cloudflare.com/ajax/libs/reveal.js/3.3.0/lib/js/classList.min.js",
-    condition: function() { return !document.body.classList; }
+    condition: function() { return !document.body.classList; },
   }, {
     src: "//cdnjs.cloudflare.com/ajax/libs/reveal.js/3.3.0/plugin/markdown/marked.min.js",
-    condition: function() { return !!markdownTemplate; }
+    condition: function() { return !!markdownTemplate; },
+    callback: function() {
+      var renderer = new marked.Renderer();
+      var defaultRendererCode = renderer.code;
+      renderer.code = function (code, language) {
+        if (language == "mermaid") {
+          return "<div class=mermaid>" +  code + "</div>";
+        }
+        return defaultRendererCode.apply(this, arguments);
+      };
+      marked.setOptions({renderer: renderer});
+    }
   }, {
     src: "//cdnjs.cloudflare.com/ajax/libs/reveal.js/3.3.0/plugin/markdown/markdown.min.js",
-    condition: function() { return !!markdownTemplate; }
+    condition: function() { return !!markdownTemplate; },
   }, {
     src: "//cdnjs.cloudflare.com/ajax/libs/reveal.js/3.3.0/plugin/highlight/highlight.min.js",
     async: true,
@@ -90,15 +101,32 @@ Reveal.initialize({
     <footer>
 
       <script>
-    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (function(i,s,o,g,r,a,m){i["GoogleAnalyticsObject"]=r;i[r]=i[r]||function(){
       (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
     m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+    })(window,document,"script","//www.google-analytics.com/analytics.js","ga");
 
-    ga('create', 'UA-46554348-4', 'auto');
-    ga('send', 'pageview');
-    </script>
+    ga("create", "UA-46554348-4", "auto");
+    ga("send", "pageview");
+      </script>
 
+
+      <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/mermaid/6.0.0/mermaid.min.css" />
+      <script src="//cdnjs.cloudflare.com/ajax/libs/mermaid/6.0.0/mermaid.min.js"></script>
+      <script defer>
+var mermaids = Array.prototype.map.call(
+    document.querySelectorAll("pre code.language-mermaid"),
+    function(code) {
+      var div = document.createElement("div");
+      div.setAttribute("class", "mermaid");
+      div.textContent = code.textContent;
+      code.textContent = "";
+      code.appendChild(div);
+      return code;
+    });
+
+mermaid.initialize({startOnLoad: true});
+      </script>
     </footer>
   </body>
 </html>
