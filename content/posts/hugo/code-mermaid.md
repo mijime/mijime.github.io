@@ -3,12 +3,12 @@ date = "2016-05-31T22:41:30+09:00"
 
 draft = false
 
-title = "mermaid に対応した"
+title = "mermaidに対応した"
 
 tags = ["tech", "mermaid"]
 +++
 
-code.language-mermaid を変換するスクリプトを噛ませただけだけど...
+code.language-mermaidを変換するスクリプトを噛ませただけだけど。
 
 ``` mermaid
   graph TD;
