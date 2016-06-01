@@ -3,7 +3,7 @@ var textlint = require('gulp-textlint');
 var cssnext = require('gulp-cssnext');
 var stylelint = require('gulp-stylelint');
 var eslint = require('gulp-eslint');
-var webpack = require('gulp-webpack');
+var webpack = require('webpack-stream');
 
 var stylelintrc = {
   'config':    {'extends': 'stylelint-config-standard'},
