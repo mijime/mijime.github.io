@@ -5,7 +5,7 @@
         <a href="{{ .Site.BaseURL }}">{{ .Site.Title }}</a>
       </h1>
       {{ with .Site.Params.description }}
-      <p class="lead"> {{.}} </p>
+      <p class="lead"> {{ . }} </p>
       {{ end }}
     </div>
 
@@ -13,9 +13,9 @@
       <li><a href="{{ .Site.BaseURL }}">Home</a></li>
       {{ range .Site.Menus.main }}
       <li><a href="{{ .URL }}">{{ .Name }}</a></li>
-      {{end}}
+      {{ end }}
     </ul>
 
-    <p>{{ with .Site.Params.copyright }}{{.}}{{ else }}&copy; {{.Now.Format "2006"}}. All rights reserved. {{end}}</p>
+    <p>{{ with .Site.Params.copyright }}{{ . }}{{ else }}&copy; {{ .Now.Format "2006" }}. All rights reserved. {{ end }}</p>
   </div>
 </nav>
