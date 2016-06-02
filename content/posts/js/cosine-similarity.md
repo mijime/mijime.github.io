@@ -40,16 +40,16 @@ tags = ["tech", "js"]
 うーん、全然関係ない単語でしか一致しない、、、その通りではあるんだけど
 
 ```
-> babel-node source/js/similarity "content/posts/js/cosine-similarity.md" "content"
->
-> 0       content/posts/2016-05-26/border-implement.md
-> 0.42074115723005184     content/posts/2016-05-23/github-cli.md  com, https, github, mijime
-> 0       content/posts/2016-05-26/ci-is-difficult.md
-> 0       content/posts/blog/blog-of-policy.md
-> 0       content/posts/blog/first-blogged.md
-> 0.007841750524290146    content/posts/hugo/hugo-pagination.md   html
-> 0.036063527762575875    content/posts/hugo/hugo-deploy.md       content
-> 1       content/posts/js/cosine-similarity.md   100, 89571, MeCab, コサイン, http
-> 0.017920111019015677    content/slides/2016-05-27/my-first-slide.md     html
-```
+babel-node source/js/similarity "content/posts/js/cosine-similarity.md" "content"
 
+25.26%  content\posts\2016-05-23\github-cli.md  com, https, mijime, github
+0%      content\posts\2016-05-26\border-implement.md
+0%      content\posts\2016-05-26\ci-is-difficult.md
+0%      content\posts\blog\first-blogged.md
+0%      content\posts\hugo\code-mermaid.md
+20.9%   content\posts\hugo\hugo-deploy.md       branch, content
+100%    content\posts\js\cosine-similarity.md   100, 2016, 89571, MeCab, コサイン
+9.93%   content\posts\blog\blog-of-policy.md    branch, posts, slides
+1.98%   content\posts\hugo\hugo-pagination.md   html, pagination
+3.52%   content\slides\2016-05-27\my-first-slide.md     html
+```

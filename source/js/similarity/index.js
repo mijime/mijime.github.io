@@ -113,7 +113,7 @@ async function main(content, contentDirs) {
   }).map(async res => {
     const {file, score, words} = await res;
     process.stdout.write([
-      score,
+      `${Math.floor(score * 10000) / 100}%`,
       file,
       words.slice(0, 5).join(', '),
       '\n'].join('\t'));
