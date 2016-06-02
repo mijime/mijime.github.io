@@ -81,39 +81,84 @@
 &lt;a href=&#34;https://www.npmjs.com/package/kuromoji&#34;&gt;kuromoji&lt;/a&gt; のラッパー
 &lt;a href=&#34;https://www.npmjs.com/package/kuromojin&#34;&gt;kuromojin&lt;/a&gt; を使って形態素解析する。&lt;/p&gt;
 
-&lt;p&gt;分解した単語と出現回数を記録する。&lt;/p&gt;
+&lt;h3 id=&#34;コード解説&#34;&gt;コード解説&lt;/h3&gt;
 
-&lt;script src=&#39;//gist-it.appspot.com/github.com/mijime/mijime.github.io/blob/content/source/js/similarity/index.js?slice=54:71&#39;&gt;
-&lt;/script&gt;
+&lt;p&gt;&lt;a href=&#34;https://github.com/mijime/mijime.github.io/blob/content/source/js/similarity/index.js&#34;&gt;コード全体&lt;/a&gt;&lt;/p&gt;
 
+&lt;p&gt;テキストを分解して、 単語と出現回数を記録する。&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-javascript&#34;&gt;async function parseVector(text) {
+  const tokens = await tokenize(text);
+  return tokens.reduce((acc, next) =&amp;gt; {
+    if (!isTargetToken(next)) {
+      return acc;
+    }
+
+    if (acc[next.surface_form]) {
+      acc[next.surface_form] ++;
+    } else {
+      acc[next.surface_form] = 1;
+    }
+
+    return acc;
+  }, {});
+}
+&lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;出現回数を数えるのは名詞で3文字以上の単語のみ。&lt;/p&gt;
 
-&lt;script src=&#39;//gist-it.appspot.com/github.com/mijime/mijime.github.io/blob/content/source/js/similarity/index.js?slice=32:39&#39;&gt;
-&lt;/script&gt;
-
+&lt;pre&gt;&lt;code class=&#34;language-javascript&#34;&gt;function isTargetToken(token) {
+  return token.pos === &#39;名詞&#39;
+    &amp;amp;&amp;amp; token.surface_form.length &amp;gt;= 3
+    &amp;amp;&amp;amp; (token.basic_form !== &#39;*&#39;
+        || token.surface_form.match(/^[\wA-Z]+$/));
+}
+&lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;あとは計算しておしまい。&lt;/p&gt;
 
-&lt;script src=&#39;//gist-it.appspot.com/github.com/mijime/mijime.github.io/blob/content/source/js/similarity/index.js?slice=71:96&#39;&gt;
-&lt;/script&gt;
+&lt;pre&gt;&lt;code class=&#34;language-javascript&#34;&gt;function cosineSimilarity(curr, next) {
+  const currKeys = Object.keys(curr);
+  const nextKeys = Object.keys(next);
+  const keys = currKeys.concat(nextKeys)
+    .filter((v, i, self) =&amp;gt; self.indexOf(v) === i);
 
+  const baseScore = keys
+    .map(k =&amp;gt; (curr[k] || 0) * (next[k] || 0))
+    .reduce((acc, c) =&amp;gt; acc + c, 0);
+
+  const currScore = keys
+    .map(k =&amp;gt; curr[k] ? Math.pow(curr[k], 2) : 0)
+    .reduce((acc, c) =&amp;gt; acc + c, 0);
+
+  const nextScore = keys
+    .map(k =&amp;gt; next[k] ? Math.pow(next[k], 2) : 0)
+    .reduce((acc, c) =&amp;gt; acc + c, 0);
+
+  const score = baseScore
+    ? baseScore / (Math.sqrt(currScore) * Math.sqrt(nextScore))
+    : 0;
+  const words = keys.filter(k =&amp;gt; curr[k] &amp;amp;&amp;amp; next[k]);
+  return {score, words};
+}
+&lt;/code&gt;&lt;/pre&gt;
 
 &lt;h3 id=&#34;実行結果&#34;&gt;実行結果&lt;/h3&gt;
 
 &lt;p&gt;うーん、全然関係ない単語でしか一致しない、、、その通りではあるんだけど&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;&amp;gt; babel-node source/js/similarity &amp;quot;content/posts/js/cosine-similarity.md&amp;quot; &amp;quot;content&amp;quot;
-&amp;gt;
-&amp;gt; 0       content/posts/2016-05-26/border-implement.md
-&amp;gt; 0.42074115723005184     content/posts/2016-05-23/github-cli.md  com, https, github, mijime
-&amp;gt; 0       content/posts/2016-05-26/ci-is-difficult.md
-&amp;gt; 0       content/posts/blog/blog-of-policy.md
-&amp;gt; 0       content/posts/blog/first-blogged.md
-&amp;gt; 0.007841750524290146    content/posts/hugo/hugo-pagination.md   html
-&amp;gt; 0.036063527762575875    content/posts/hugo/hugo-deploy.md       content
-&amp;gt; 1       content/posts/js/cosine-similarity.md   100, 89571, MeCab, コサイン, http
-&amp;gt; 0.017920111019015677    content/slides/2016-05-27/my-first-slide.md     html
+&lt;pre&gt;&lt;code&gt;babel-node source/js/similarity &amp;quot;content/posts/js/cosine-similarity.md&amp;quot; &amp;quot;content&amp;quot;
+
+25.26%  content\posts\2016-05-23\github-cli.md  com, https, mijime, github
+0%      content\posts\2016-05-26\border-implement.md
+0%      content\posts\2016-05-26\ci-is-difficult.md
+0%      content\posts\blog\first-blogged.md
+0%      content\posts\hugo\code-mermaid.md
+20.9%   content\posts\hugo\hugo-deploy.md       branch, content
+100%    content\posts\js\cosine-similarity.md   100, 2016, 89571, MeCab, コサイン
+9.93%   content\posts\blog\blog-of-policy.md    branch, posts, slides
+1.98%   content\posts\hugo\hugo-pagination.md   html, pagination
+3.52%   content\slides\2016-05-27\my-first-slide.md     html
 &lt;/code&gt;&lt;/pre&gt;
 </description>
     </item>
