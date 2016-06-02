@@ -1,16 +1,16 @@
-var gulp = require('gulp');
-var textlint = require('gulp-textlint');
-var cssnext = require('gulp-cssnext');
-var stylelint = require('gulp-stylelint');
-var eslint = require('gulp-eslint');
-var webpack = require('webpack-stream');
+import gulp from 'gulp';
+import textlint from 'gulp-textlint';
+import cssnext from 'gulp-cssnext';
+import stylelint from 'gulp-stylelint';
+import eslint from 'gulp-eslint';
+import webpack from 'webpack-stream';
 
-var stylelintrc = {
+const stylelintrc = {
   'config':    {'extends': 'stylelint-config-standard'},
   'reporters': [{'formatter': 'string', 'console': true}]
 };
 
-var webpackConfig = {
+const webpackConfig = {
   'entry': {
     'index': './source/js/browser',
   },
@@ -28,32 +28,39 @@ var webpackConfig = {
     'mermaid':      true,
     'highlight.js': 'hljs',
   },
+  'plugins': [
+    new webpack.webpack.optimize.UglifyJsPlugin({
+      'minimize':  true,
+      'sourceMap': true,
+    }),
+  ],
+  'devtool': 'source-map',
 };
 
 gulp.task('default', ['test', 'css', 'js']);
 
 gulp.task('test', ['textlint', 'eslint']);
 
-gulp.task('textlint', function() {
+gulp.task('textlint', () => {
   return gulp.src('content/**/*.md')
     .pipe(textlint());
 });
 
-gulp.task('eslint', function() {
+gulp.task('eslint', () => {
   return gulp.src('source/js/**/*.js')
     .pipe(eslint({'useEslintrc': true}))
     .pipe(eslint.format())
     .pipe(eslint.failAfterError());
 });
 
-gulp.task('css', function() {
+gulp.task('css', () => {
   return gulp.src('source/**/*.css')
     .pipe(stylelint(stylelintrc))
     .pipe(cssnext())
     .pipe(gulp.dest('static'));
 });
 
-gulp.task('js', function() {
+gulp.task('js', () => {
   return gulp.src('source/js/browser/*.js')
     .pipe(eslint({'useEslintrc': true}))
     .pipe(eslint.format())
@@ -62,7 +69,7 @@ gulp.task('js', function() {
     .pipe(gulp.dest('static/js'));
 });
 
-gulp.task('watch', ['default'], function() {
+gulp.task('watch', ['default'], () => {
   gulp.watch('source/**/*.css', ['css']);
   gulp.watch('content/**/*.md', ['textlint']);
 });
