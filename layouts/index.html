@@ -15,7 +15,7 @@
       </span>
 
       <div class="post-content">
-        {{ partial "tags.html" . }}
+        {{ template "_internals/tags.html" . }}
         {{ .Content }}
       </div>
     </div>
@@ -23,5 +23,5 @@
   </div>
 </main>
 
-{{ partial "paginator.html" . }}
+{{ template "_internals/paginator.html" . }}
 {{ partial "foot.html" . }}

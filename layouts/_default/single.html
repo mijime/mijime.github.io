@@ -10,7 +10,7 @@
     </h1>
     <span class="post-date">{{ .Date.Format "Mon, Jan 2, 2006" }}</span>
     <div class="post-content">
-      {{ partial "tags.html" . }}
+      {{ template "_internals/tags.html" . }}
       {{ .Content }}
     </div>
   </div>
