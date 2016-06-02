@@ -23,17 +23,71 @@ tags = ["tech", "js"]
 [kuromoji](https://www.npmjs.com/package/kuromoji) のラッパー
 [kuromojin](https://www.npmjs.com/package/kuromojin) を使って形態素解析する。
 
-分解した単語と出現回数を記録する。
+### コード解説
 
-{{<gist-it repo="mijime/mijime.github.io" branch="content" path="source/js/similarity/index.js?slice=54:71">}}
+[コード全体](https://github.com/mijime/mijime.github.io/blob/content/source/js/similarity/index.js)
+
+テキストを分解して、 単語と出現回数を記録する。
+
+``` javascript
+async function parseVector(text) {
+  const tokens = await tokenize(text);
+  return tokens.reduce((acc, next) => {
+    if (!isTargetToken(next)) {
+      return acc;
+    }
+
+    if (acc[next.surface_form]) {
+      acc[next.surface_form] ++;
+    } else {
+      acc[next.surface_form] = 1;
+    }
+
+    return acc;
+  }, {});
+}
+```
 
 出現回数を数えるのは名詞で3文字以上の単語のみ。
 
-{{<gist-it repo="mijime/mijime.github.io" branch="content" path="source/js/similarity/index.js?slice=32:39">}}
+``` javascript
+function isTargetToken(token) {
+  return token.pos === '名詞'
+    && token.surface_form.length >= 3
+    && (token.basic_form !== '*'
+        || token.surface_form.match(/^[\wA-Z]+$/));
+}
+```
+
 
 あとは計算しておしまい。
 
-{{<gist-it repo="mijime/mijime.github.io" branch="content" path="source/js/similarity/index.js?slice=71:96">}}
+``` javascript
+function cosineSimilarity(curr, next) {
+  const currKeys = Object.keys(curr);
+  const nextKeys = Object.keys(next);
+  const keys = currKeys.concat(nextKeys)
+    .filter((v, i, self) => self.indexOf(v) === i);
+
+  const baseScore = keys
+    .map(k => (curr[k] || 0) * (next[k] || 0))
+    .reduce((acc, c) => acc + c, 0);
+
+  const currScore = keys
+    .map(k => curr[k] ? Math.pow(curr[k], 2) : 0)
+    .reduce((acc, c) => acc + c, 0);
+
+  const nextScore = keys
+    .map(k => next[k] ? Math.pow(next[k], 2) : 0)
+    .reduce((acc, c) => acc + c, 0);
+
+  const score = baseScore
+    ? baseScore / (Math.sqrt(currScore) * Math.sqrt(nextScore))
+    : 0;
+  const words = keys.filter(k => curr[k] && next[k]);
+  return {score, words};
+}
+```
 
 ### 実行結果
 
