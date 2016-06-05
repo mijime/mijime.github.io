@@ -1,19 +1,10 @@
-{{ partial "head.html" . }}
-{{ partial "sidebar.html" . }}
-
-<main class="content container">
-  <div class="post">
-    <h1 class="post-title">
-      <a href="{{ .Permalink }}">
-        {{ .Title }}
-      </a>
-    </h1>
-    <span class="post-date">{{ .Date.Format "Mon, Jan 2, 2006" }}</span>
-    <div class="post-content">
-      {{ template "_internals/tags.html" . }}
-      {{ .Content }}
-    </div>
-  </div>
-</main>
-
-{{ partial "foot.html" . }}
+<!DOCTYPE html>
+<html lang="{{ .Site.LanguageCode }}">
+  <head>
+    {{ partial "head.html" . }}
+    {{ .Render "include-head" }}
+  </head>
+  <body class="{{ .Site.Params.css }}">
+    {{ .Render "include-single" }}
+  </body>
+</html>

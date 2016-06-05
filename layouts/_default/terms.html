@@ -1,34 +1,31 @@
-{{ partial "head.html" . }}
-{{ partial "sidebar.html" . }}
+<!DOCTYPE html>
+<html lang="{{ .Site.LanguageCode }}">
+  <head>
+    {{ partial "head.html" . }}
+    {{ template "_default/include-head.html" . }}
+  </head>
+  <body class="{{ .Site.Params.css }}">
+    {{ partial "sidebar.html" . }}
 
-<main class="content container">
-  <div class="posts">
-    <div class="post">
-      <h3 class="post-title">
-        {{ .Title }}
-      </h3>
-      <ul class="post-content">
-        {{ $data := .Data }}
-        {{ range $key, $value := .Data.Terms.ByCount }}
-        <li>
-          <a href="/{{ $data.Plural }}/{{ $value.Name | urlize }}">
-            {{ $value.Name }} ({{ $value.Count }})
-          </a>
-          <ol>
-            {{ range first 3 $value.Pages.ByPublishDate }}
+    <main class="content container">
+      <div class="posts">
+        <div class="post">
+          <h3 class="post-title">
+            {{ .Title }}
+          </h3>
+          <ul class="post-content">
+            {{ $data := .Data }}
+            {{ $baseURL := .Site.BaseURL }}
+            {{ range $key, $value := .Data.Terms.ByCount }}
             <li>
-              <a href="{{ .Permalink }}">{{ .Title }}</a>
-              <time class="pull-right post-list">
-                {{ .Date.Format "Mon, Jan 2, 2006" }}
-              </time>
+              <a href="{{ $baseURL }}{{ $data.Plural }}/{{ $value.Name | urlize }}">
+                {{ $value.Name }} ({{ $value.Count }})
+              </a>
             </li>
             {{ end }}
-          </ol>
-        </li>
-        {{ end }}
-      </ul>
-    </div>
-  </div>
-</main>
-
-{{ partial "foot.html" . }}
+          </ul>
+        </div>
+      </div>
+    </main>
+  </body>
+</html>

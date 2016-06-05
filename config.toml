@@ -1,11 +1,11 @@
 baseurl = "/"
 languageCode = "ja"
 title = "My snippets"
+HasCJKLanguage = true
 
 [params]
   description = "何かをかく"
-  layoutReverse = true
-  themeColor = ""
+  css = "layout-reverse"
 
 [params.googleAnalytics]
   UA = "UA-46554348-4"

@@ -1,32 +1,19 @@
-<!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml"{{ with .Site.LanguageCode }} xml:lang="{{ . }}" lang="{{ . }}"{{ end }}>
-  <head>
-    <link href="http://gmpg.org/xfn/11" rel="profile">
-    <meta http-equiv="content-type" content="text/html; charset=utf-8">
-    {{ .Hugo.Generator }}
+<link href="http://gmpg.org/xfn/11" rel="profile">
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+{{ .Hugo.Generator }}
 
-    <!-- Enable responsiveness on mobile devices-->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<!-- Enable responsiveness on mobile devices-->
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
 
-    {{ if eq .Title .Site.Title }}
-    <title> {{ .Site.Title }} </title>
-    {{ else }}
-    <title> {{ .Title }} | {{ .Site.Title }} </title>
-    {{ end }}
+{{ if .IsPage }}
+<title>{{ .Title }} | {{ .Site.Title }}</title>
+{{ else }}
+<title>{{ .Site.Title }}</title>
+{{ end }}
 
-    <!-- CSS -->
-    <link rel="stylesheet" href="{{ .Site.BaseURL }}css/poole.css">
-    <link rel="stylesheet" href="{{ .Site.BaseURL }}css/syntax.css">
-    <link rel="stylesheet" href="{{ .Site.BaseURL }}css/hyde.css">
-    <link rel="stylesheet" href="{{ .Site.BaseURL }}css/style.css">
-    <link rel="stylesheet" href="//fonts.googleapis.com/css?family=PT+Sans:400,400italic,700|Abril+Fatface">
+<!-- Icons -->
+<link rel="apple-touch-icon-precomposed" sizes="144x144" href="{{ .Site.BaseURL }}apple-touch-icon-144-precomposed.png">
+<link rel="shortcut icon" href="{{ .Site.BaseURL }}favicon.png">
 
-    <!-- Icons -->
-    <link rel="apple-touch-icon-precomposed" sizes="144x144" href="{{ .Site.BaseURL }}apple-touch-icon-144-precomposed.png">
-    <link rel="shortcut icon" href="{{ .Site.BaseURL }}favicon.png">
-
-    <!-- RSS -->
-    <link href="{{ .RSSlink }}" rel="alternate" type="application/rss+xml" title="{{ .Site.Title }}" />
-  </head>
-
-  <body class="{{ .Site.Params.themeColor }} {{ if .Site.Params.layoutReverse }}layout-reverse{{ end }}">
+<!-- RSS -->
+<link href="{{ .RSSlink }}" rel="alternate" type="application/rss+xml" title="{{ .Site.Title }}" />

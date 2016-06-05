@@ -1,14 +1,15 @@
+{{ $baseURL := .Site.BaseURL }}
 {{ with .Params.categories }}
 <span>
   {{ range . }}
-  <a href="/categories/{{ . | urlize }}/">{{ . }}</a>
+  <a href="{{ $baseURL }}categories/{{ . | urlize }}/">#{{ . }}</a>
   {{ end }}
 </span>
 {{ end }}
 {{ with .Params.tags }}
 <span>
   {{ range . }}
-  <a href="/tags/{{ . | urlize }}/">#{{ . }}</a>
+  <a href="{{ $baseURL }}tags/{{ . | urlize }}/">#{{ . }}</a>
   {{ end }}
 </span>
 {{ end }}

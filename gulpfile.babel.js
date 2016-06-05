@@ -13,6 +13,7 @@ const stylelintrc = {
 const webpackConfig = {
   'entry': {
     'index': './source/js/browser',
+    'slide': './source/js/browser/slide',
   },
   'output': {
     'filename':      '[name].bundle.js',

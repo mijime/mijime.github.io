@@ -1,0 +1,12 @@
+<main class="reveal">
+  <div class="slides">
+    <section
+       data-markdown
+       data-separator="^\n---$"
+       data-separator-vertical="^\n>>>$">
+       <script type="text/template">
+{{ .RawContent | safeJS }}
+       </script>
+    </section>
+  </div>
+</main>

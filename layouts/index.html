@@ -1,27 +1,35 @@
-{{ partial "head.html" . }}
-{{ partial "sidebar.html" . }}
+<!DOCTYPE html>
+<html lang="{{ .Site.LanguageCode }}">
+  <head>
+    {{ partial "head.html" . }}
+    {{ template "_default/include-head.html" . }}
+  </head>
 
-<main class="content container">
-  <div class="posts">
-    {{ range (.Paginate (where .Data.Pages "Section" "posts") 5).Pages }}
-    <div class="post">
-      <h1 class="post-title">
-        <a href="{{ .Permalink }}">
-          {{ .Title }}
-        </a>
-      </h1>
-      <span class="post-date">
-        {{ .Date.Format "Mon, Jan 2, 2006" }}
-      </span>
+  <body class="{{ .Site.Params.css }}">
+    {{ partial "sidebar.html" . }}
 
-      <div class="post-content">
-        {{ template "_internals/tags.html" . }}
-        {{ .Content }}
+    <main class="content container">
+    <div class="posts">
+      {{ range (.Paginate (where .Data.Pages "Section" "posts") 5).Pages }}
+      <div class="post">
+        <h1 class="post-title">
+          <a href="{{ .Permalink }}">
+            {{ .Title }}
+          </a>
+        </h1>
+        <span class="post-date">
+          {{ .Date.Format "Mon, Jan 2, 2006" }}
+        </span>
+
+        <div class="post-content">
+          {{ template "_internals/tags.html" . }}
+          {{ .Content }}
+        </div>
       </div>
+      {{ end }}
     </div>
-    {{ end }}
-  </div>
-</main>
+    </main>
 
-{{ template "_internals/paginator.html" . }}
-{{ partial "foot.html" . }}
+    {{ template "_internals/paginator.html" . }}
+  </body>
+</html>
