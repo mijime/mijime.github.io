@@ -4,6 +4,7 @@ title = "My snippets"
 HasCJKLanguage = true
 
 [params]
+  keywords = [ "mijime" ]
   description = "何かをかく"
   css = "layout-reverse"
 

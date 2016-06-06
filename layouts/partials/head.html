@@ -7,8 +7,16 @@
 
 {{ if .IsPage }}
 <title>{{ .Title }} | {{ .Site.Title }}</title>
+<meta name="description" content="{{ .Summary }}">
+{{ with .Params.tags }}
+<meta name="keywords" content="{{ delimit . "," }}">
+{{ end }}
 {{ else }}
 <title>{{ .Site.Title }}</title>
+<meta name="description" content="{{ .Site.Params.description }}">
+{{ with .Site.Params.tags }}
+<meta name="keywords" content="{{ delimit . "," }}">
+{{ end }}
 {{ end }}
 
 <!-- Icons -->
