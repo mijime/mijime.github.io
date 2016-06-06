@@ -10,6 +10,7 @@ tags = ["hugo"]
 
 .Paginatorを使えば自動でやってくれるみたい
 
+<!--more-->
 
 ``` html
 {{- range (.Paginator 10).Pages }}

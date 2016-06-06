@@ -23,7 +23,9 @@
 
         <div class="post-content">
           {{ template "_internals/tags.html" . }}
-          {{ .Content }}
+
+          <p>{{ .Summary }}</p>
+          {{ if .Truncated }}<a href="{{ .RelPermalink }}">More...</a>{{ end }}
         </div>
       </div>
       {{ end }}
