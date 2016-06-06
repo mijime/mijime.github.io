@@ -92,45 +92,10 @@
 </span>
 
 
-          <p>code.language-mermaidを変換するスクリプトを噛ませただけだけど。</p>
 
-<pre><code class="language-mermaid">  graph TD;
-    A--&gt;B;
-    A--&gt;C;
-    B--&gt;D;
-    C--&gt;D;
-</code></pre>
-
-<pre><code class="language-mermaid">  gantt
-    dateFormat  YYYY-MM-DD
-    title Adding GANTT diagram functionality to mermaid
-    section A section
-    Completed task: done,   des1,       2014-01-06, 2014-01-08
-    Active task:    active, des2,       2014-01-09, 3d
-    Future task:    des3,   after des2, 5d
-    Future task2:   des4,   after des3, 5d
-    section Critical tasks
-    Completed task in the critical line :crit, done, 2014-01-06, 24h
-    Implement parser and jison          :crit, done, after des1, 2d
-    Create tests for parser             :crit, active, 3d
-    Future task in critical line        :crit, 5d
-    Create tests for renderer           :2d
-    Add to mermaid                      :1d
-</code></pre>
-
-<pre><code class="language-mermaid">  sequenceDiagram
-    participant Alice
-    participant Bob
-    Alice-&gt;John: Hello John, how are you?
-    loop Healthcheck
-    John-&gt;John: Fight against hypochondria
-    end
-    Note right of John: Rational thoughts prevail...
-    John--&gt;Alice: Great!
-    John-&gt;Bob: How about you?
-    Bob--&gt;John: Jolly good!
-</code></pre>
-
+          <p><p>code.language-mermaidを変換するスクリプトを噛ませただけだけど。</p>
+</p>
+          <a href="/posts/hugo/code-mermaid/">More...</a>
         </div>
       </div>
       
@@ -157,105 +122,9 @@
 </span>
 
 
-          
 
-<p>他のブログを参考にすると関連記事というのを最後に表示しているらしい。</p>
-
-<p>まだ記事の数は少ないけど、ある程度近い記事を探すことができるようにする。</p>
-
-<h3 id="類似度の取得">類似度の取得</h3>
-
-<p>&ldquo;MeCab&rdquo; + &ldquo;類似&rdquo; でググったら、コサイン類似度なるものがあるとのこと。</p>
-
-<ul>
-<li><a href="http://www.cse.kyoto-su.ac.jp/~g0846020/keywords/cosinSimilarity.html">コサイン類似度</a></li>
-<li><a href="http://qiita.com/nmbakfm/items/6bb91b89571dd68fcea6">TF-IDF Cos類似度推定法</a></li>
-</ul>
-
-<p>このブログはjs + hugoで書いているので、
-<a href="https://www.npmjs.com/package/kuromoji">kuromoji</a> のラッパー
-<a href="https://www.npmjs.com/package/kuromojin">kuromojin</a> を使って形態素解析する。</p>
-
-<h3 id="コード解説">コード解説</h3>
-
-<p><a href="https://github.com/mijime/mijime.github.io/blob/content/source/js/similarity/index.js">コード全体</a></p>
-
-<p>テキストを分解して、 単語と出現回数を記録する。</p>
-
-<pre><code class="language-javascript">async function parseVector(text) {
-  const tokens = await tokenize(text);
-  return tokens.reduce((acc, next) =&gt; {
-    if (!isTargetToken(next)) {
-      return acc;
-    }
-
-    if (acc[next.surface_form]) {
-      acc[next.surface_form] ++;
-    } else {
-      acc[next.surface_form] = 1;
-    }
-
-    return acc;
-  }, {});
-}
-</code></pre>
-
-<p>出現回数を数えるのは名詞で3文字以上の単語のみ。</p>
-
-<pre><code class="language-javascript">function isTargetToken(token) {
-  return token.pos === '名詞'
-    &amp;&amp; token.surface_form.length &gt;= 3
-    &amp;&amp; (token.basic_form !== '*'
-        || token.surface_form.match(/^[\wA-Z]+$/));
-}
-</code></pre>
-
-<p>あとは計算しておしまい。</p>
-
-<pre><code class="language-javascript">function cosineSimilarity(curr, next) {
-  const currKeys = Object.keys(curr);
-  const nextKeys = Object.keys(next);
-  const keys = currKeys.concat(nextKeys)
-    .filter((v, i, self) =&gt; self.indexOf(v) === i);
-
-  const baseScore = keys
-    .map(k =&gt; (curr[k] || 0) * (next[k] || 0))
-    .reduce((acc, c) =&gt; acc + c, 0);
-
-  const currScore = keys
-    .map(k =&gt; curr[k] ? Math.pow(curr[k], 2) : 0)
-    .reduce((acc, c) =&gt; acc + c, 0);
-
-  const nextScore = keys
-    .map(k =&gt; next[k] ? Math.pow(next[k], 2) : 0)
-    .reduce((acc, c) =&gt; acc + c, 0);
-
-  const score = baseScore
-    ? baseScore / (Math.sqrt(currScore) * Math.sqrt(nextScore))
-    : 0;
-  const words = keys.filter(k =&gt; curr[k] &amp;&amp; next[k]);
-  return {score, words};
-}
-</code></pre>
-
-<h3 id="実行結果">実行結果</h3>
-
-<p>うーん、全然関係ない単語でしか一致しない、、、その通りではあるんだけど</p>
-
-<pre><code>babel-node source/js/similarity &quot;content/posts/js/cosine-similarity.md&quot; &quot;content&quot;
-
-25.26%  content\posts\2016-05-23\github-cli.md  com, https, mijime, github
-0%      content\posts\2016-05-26\border-implement.md
-0%      content\posts\2016-05-26\ci-is-difficult.md
-0%      content\posts\blog\first-blogged.md
-0%      content\posts\hugo\code-mermaid.md
-20.9%   content\posts\hugo\hugo-deploy.md       branch, content
-100%    content\posts\js\cosine-similarity.md   100, 2016, 89571, MeCab, コサイン
-9.93%   content\posts\blog\blog-of-policy.md    branch, posts, slides
-1.98%   content\posts\hugo\hugo-pagination.md   html, pagination
-3.52%   content\slides\2016-05-27\my-first-slide.md     html
-</code></pre>
-
+          <p>他のブログを参考にすると関連記事というのを最後に表示しているらしい。 まだ記事の数は少ないけど、ある程度近い記事を探すことができるようにする。</p>
+          <a href="/posts/js/cosine-similarity/">More...</a>
         </div>
       </div>
       
@@ -282,49 +151,9 @@
 </span>
 
 
-          
 
-<h3 id="コンテンツ">コンテンツ</h3>
-
-<ul>
-<li><p>種別</p>
-
-<ul>
-<li>posts技術ログ、 雑記</li>
-<li>slides RevealJSで操作するスライド</li>
-</ul></li>
-
-<li><p>タグ</p>
-
-<ul>
-<li>note雑記</li>
-<li>tech技術ログ</li>
-<li>meetup勉強会ログ</li>
-<li>[技術タグ]</li>
-<li>[勉強会タグ]</li>
-</ul></li>
-
-<li><p>ディレクトリ構造</p>
-
-<ul>
-<li><p>note, meetup</p>
-
-<p><code>/[種別]/[日付]/[記事タイトル]</code></p></li>
-
-<li><p>tech</p>
-
-<p><code>/[種別]/[メインのタグ]/[記事タイトル]</code></p></li>
-</ul></li>
-</ul>
-
-<h3 id="デプロイ方針">デプロイ方針</h3>
-
-<ul>
-<li><p>記事更新以外はissue + branchで対応</p>
-
-<p>真面目にやろう</p></li>
-</ul>
-
+          <p>コンテンツ 種別 posts技術ログ、 雑記 slides RevealJSで操作するスライド タグ note雑記 tech技術ログ meetup勉強会ログ [技術タグ]</p>
+          <a href="/posts/blog/blog-of-policy/">More...</a>
         </div>
       </div>
       
@@ -349,10 +178,9 @@
 </span>
 
 
-          <p>アプリ側で実装する際に、サーバ側で対応するかクライアント側で対応するか、という話。</p>
 
-<p>場合によりけりなのは分かっているけど、思わずクライアント側で対応しがちだよね、的な。</p>
-
+          <p>アプリ側で実装する際に、サーバ側で対応するかクライアント側で対応するか、という話。 場合によりけりなのは分かっているけど、思わずクライアント側</p>
+          <a href="/posts/2016-05-26/border-implement/">More...</a>
         </div>
       </div>
       
@@ -379,33 +207,9 @@
 </span>
 
 
-          <ul>
-<li><p>環境が違う</p>
 
-<p>サービスによっては1つ前のバージョンを使っていたりする。
-開発環境は最新めなことが多いので、ハマる</p></li>
-
-<li><p>入れまくり</p>
-
-<p>ツールやパッケージやらインストールするのにダウンロードしまくる。
-その時のリソースの潤沢な使い方に残念さを感じる</p></li>
-
-<li><p>回しすぎ</p>
-
-<p>初期環境を構築するのに、上2つも相まって過剰にリソースを消費する。
-他人のサーバだからといって甘えすぎ</p></li>
-
-<li><p>回せない</p>
-
-<p>headlessな環境じゃ動かなかったり。</p>
-
-<p>expect前提だったり。</p>
-
-<p>特殊な環境前提だったり。</p>
-
-<p>リソースが気軽にダウンロードできなかったり</p></li>
-</ul>
-
+          <p>環境が違う サービスによっては1つ前のバージョンを使っていたりする。 開発環境は最新めなことが多いので、ハマる 入れまくり ツールやパッケージやらイ</p>
+          <a href="/posts/2016-05-26/ci-is-difficult/">More...</a>
         </div>
       </div>
       

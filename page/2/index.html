@@ -90,30 +90,10 @@
 </span>
 
 
-          <p>.Paginatorを使えば自動でやってくれるみたい</p>
 
-<pre><code class="language-html">{{- range (.Paginator 10).Pages }}
-&lt;div&gt;
-  {{ .Content }}
-&lt;/div&gt;
-{{- end }}
-</code></pre>
-
-<p>次頁、前頁へのリンクも .Paginatorを使う</p>
-
-<pre><code class="language-html">{{- if or (.Paginator.HasPrev) (.Paginator.HasNext) }}
-&lt;nav role=&quot;pagination&quot;&gt;
-  {{- if .Paginator.HasPrev }}
-    &lt;a href=&quot;{{ .Paginator.Prev.URL }}&quot;&gt;Prev&lt;/a&gt;
-  {{- end }}
-    &lt;span class=&quot;&quot;&gt;Page {{ .Paginator.PageNumber }} of {{ .Paginator.TotalPages }}&lt;/span&gt;
-  {{- if .Paginator.HasNext }}
-    &lt;a href=&quot;{{ .Paginator.Next.URL }}&quot;&gt;Next&lt;/a&gt;
-  {{- end }}
-&lt;/nav&gt;
-{{end}}
-</code></pre>
-
+          <p><p>.Paginatorを使えば自動でやってくれるみたい</p>
+</p>
+          <a href="/posts/hugo/hugo-pagination/">More...</a>
         </div>
       </div>
       
@@ -140,14 +120,9 @@
 </span>
 
 
-          <p>リポジトリをWebから作るのがめんどくさいので導入する。</p>
 
-<p><a href="https://github.com/github/hub">https://github.com/github/hub</a></p>
-
-<p><code>hub create mijime.github.io</code></p>
-
-<p>ユーザ名とパスワードを入れるのはなんか嫌。</p>
-
+          <p>リポジトリをWebから作るのがめんどくさいので導入する。 https://github.com/github/hub hub create mijime.github.io ユーザ名とパスワードを入れるのはなんか嫌。</p>
+          
         </div>
       </div>
       
@@ -172,15 +147,9 @@
 </span>
 
 
-          <p>master branchのみ適用されるらしいので、</p>
 
-<ul>
-<li>生成元はcontent branch</li>
-<li>public配下はmaster branch</li>
-</ul>
-
-<p>みたいな本来の使い方ではない使い方で運用する。</p>
-
+          <p>master branchのみ適用されるらしいので、 生成元はcontent branch public配下はmaster branch みたいな本来の使い方ではない使い方で運用する</p>
+          <a href="/posts/hugo/hugo-deploy/">More...</a>
         </div>
       </div>
       
@@ -207,10 +176,9 @@
 </span>
 
 
-          <p>何を書いてく。</p>
 
-<p>やったネタやQiitaの下書き、外部マウンティング的な何かを行う。</p>
-
+          <p>何を書いてく。 やったネタやQiitaの下書き、外部マウンティング的な何かを行う。</p>
+          
         </div>
       </div>
       
