@@ -10,6 +10,8 @@ tags = ["tech", "mermaid"]
 
 code.language-mermaidを変換するスクリプトを噛ませただけだけど。
 
+<!--more-->
+
 ``` mermaid
   graph TD;
     A-->B;
