@@ -1,4 +1,4 @@
-baseurl = "/"
+baseurl = "https://mijime.github.io/"
 languageCode = "ja"
 title = "My snippets"
 HasCJKLanguage = true
