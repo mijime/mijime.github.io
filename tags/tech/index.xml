@@ -2,19 +2,19 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Tech on My snippets</title>
-    <link>/tags/tech/</link>
+    <link>https://mijime.github.io/tags/tech/</link>
     <description>Recent content in Tech on My snippets</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>ja</language>
     <lastBuildDate>Tue, 31 May 2016 22:41:30 +0900</lastBuildDate>
-    <atom:link href="/tags/tech/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="https://mijime.github.io/tags/tech/index.xml" rel="self" type="application/rss+xml" />
     
     <item>
       <title>mermaidに対応した</title>
-      <link>/posts/hugo/code-mermaid/</link>
+      <link>https://mijime.github.io/posts/hugo/code-mermaid/</link>
       <pubDate>Tue, 31 May 2016 22:41:30 +0900</pubDate>
       
-      <guid>/posts/hugo/code-mermaid/</guid>
+      <guid>https://mijime.github.io/posts/hugo/code-mermaid/</guid>
       <description>&lt;p&gt;code.language-mermaidを変換するスクリプトを噛ませただけだけど。&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&#34;language-mermaid&#34;&gt;  graph TD;
@@ -58,10 +58,10 @@
     
     <item>
       <title>関連記事を探す</title>
-      <link>/posts/js/cosine-similarity/</link>
+      <link>https://mijime.github.io/posts/js/cosine-similarity/</link>
       <pubDate>Sat, 28 May 2016 21:12:36 +0900</pubDate>
       
-      <guid>/posts/js/cosine-similarity/</guid>
+      <guid>https://mijime.github.io/posts/js/cosine-similarity/</guid>
       <description>
 
 &lt;p&gt;他のブログを参考にすると関連記事というのを最後に表示しているらしい。&lt;/p&gt;

@@ -2,19 +2,19 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Slides on My snippets</title>
-    <link>/slides/</link>
+    <link>https://mijime.github.io/slides/</link>
     <description>Recent content in Slides on My snippets</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>ja</language>
     <lastBuildDate>Fri, 27 May 2016 14:20:56 +0900</lastBuildDate>
-    <atom:link href="/slides/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="https://mijime.github.io/slides/index.xml" rel="self" type="application/rss+xml" />
     
     <item>
       <title>my first slide</title>
-      <link>/slides/2016-05-27/my-first-slide/</link>
+      <link>https://mijime.github.io/slides/2016-05-27/my-first-slide/</link>
       <pubDate>Fri, 27 May 2016 14:20:56 +0900</pubDate>
       
-      <guid>/slides/2016-05-27/my-first-slide/</guid>
+      <guid>https://mijime.github.io/slides/2016-05-27/my-first-slide/</guid>
       <description>
 
 &lt;h1 id=&#34;hugoでreveal-jsを始める&#34;&gt;HugoでReveal JSを始める&lt;/h1&gt;
