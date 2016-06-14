@@ -1,4 +1,5 @@
 baseurl = "https://mijime.github.io/"
+theme = "hyde"
 languageCode = "ja"
 title = "My snippets"
 HasCJKLanguage = true

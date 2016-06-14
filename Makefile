@@ -1,5 +1,4 @@
 REPO = git@github.com:mijime/mijime.github.io.git
-THEME = hyde
 BRANCH = master
 PUBLIC = public
 FAVICONS = static/favicon.png \
@@ -15,7 +14,7 @@ help: ### Print tasks
 build: $(PUBLIC) ### Build to
 	npm run build
 	rm -r public/*
-	hugo --theme $(THEME)
+	hugo
 
 deploy: build ### Deploy to
 	cd public; \
@@ -25,7 +24,7 @@ deploy: build ### Deploy to
 		cd -
 
 watch: ### Watch for
-	hugo server --theme $(THEME) --buildDrafts --watch
+	hugo server --buildDrafts --watch
 
 test: ### Test
 	npm run test
