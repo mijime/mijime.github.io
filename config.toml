@@ -10,6 +10,7 @@ HasCJKLanguage = true
 
 [params.googleAnalytics]
   UA = "UA-46554348-4"
+  SiteVerification = "7gVj5rzyozu0vYcQMLhIGr4g-WWyJn4R22RgeYqQdS0"
 
 [[menu.main]]
   name = "Posts"
