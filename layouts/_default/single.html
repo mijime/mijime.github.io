@@ -6,5 +6,6 @@
   </head>
   <body class="{{ .Site.Params.css }}">
     {{ .Render "include-single" }}
+    {{ template "_internals/analytics.html" . }}
   </body>
 </html>

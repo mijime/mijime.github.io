@@ -16,10 +16,10 @@
           <ul class="post-content">
             {{ $data := .Data }}
             {{ $baseURL := .Site.BaseURL }}
-            {{ range $key, $value := .Data.Terms.ByCount }}
+            {{ range .Data.Terms.ByCount }}
             <li>
-              <a href="{{ $baseURL }}{{ $data.Plural }}/{{ $value.Name | urlize }}">
-                {{ $value.Name }} ({{ $value.Count }})
+              <a href="{{ $baseURL }}{{ $data.Plural }}/{{ .Name | urlize }}">
+                {{ .Name }} ({{ .Count }})
               </a>
             </li>
             {{ end }}
@@ -27,5 +27,6 @@
         </div>
       </div>
     </main>
+    {{ template "_internals/analytics.html" . }}
   </body>
 </html>
