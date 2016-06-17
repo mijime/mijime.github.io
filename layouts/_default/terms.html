@@ -7,18 +7,16 @@
   <body class="{{ .Site.Params.css }}">
     {{ partial "sidebar.html" . }}
 
-    <main class="content container">
+    <div class="content container">
       <div class="posts">
         <div class="post">
           <h3 class="post-title">
             {{ .Title }}
           </h3>
           <ul class="post-content">
-            {{ $data := .Data }}
-            {{ $baseURL := .Site.BaseURL }}
             {{ range .Data.Terms.ByCount }}
             <li>
-              <a href="{{ $baseURL }}{{ $data.Plural }}/{{ .Name | urlize }}">
+              <a href="{{ $.Site.BaseURL }}{{ $.Data.Plural }}/{{ .Name | urlize }}">
                 {{ .Name }} ({{ .Count }})
               </a>
             </li>
@@ -26,7 +24,7 @@
           </ul>
         </div>
       </div>
-    </main>
+    </div>
     {{ template "_internals/analytics.html" . }}
   </body>
 </html>

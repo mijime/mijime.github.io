@@ -7,7 +7,7 @@
   <body class="{{ .Site.Params.css }}">
     {{ partial "sidebar.html" . }}
 
-    <main class="content container">
+    <div class="content container">
       <div class="posts">
         <div class="post">
           <h3 class="post-title">
@@ -25,7 +25,7 @@
           </ul>
         </div>
       </div>
-    </main>
+    </div>
     {{ template "_internals/paginator.html" . }}
     {{ template "_internals/analytics.html" . }}
   </body>
