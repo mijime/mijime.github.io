@@ -1,0 +1,246 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Development on My snippets</title>
+    <link>https://mijime.github.io/tags/development/</link>
+    <description>Recent content in Development on My snippets</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>ja</language>
+    <lastBuildDate>Sat, 18 Jun 2016 13:23:05 +0900</lastBuildDate>
+    <atom:link href="https://mijime.github.io/tags/development/index.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title> kanazawa.rb meetup 45に参加した</title>
+      <link>https://mijime.github.io/posts/study/kanazawa.rb/2016-06-18/</link>
+      <pubDate>Sat, 18 Jun 2016 13:23:05 +0900</pubDate>
+      
+      <guid>https://mijime.github.io/posts/study/kanazawa.rb/2016-06-18/</guid>
+      <description>
+
+&lt;h2 id=&#34;aws-lambdaを管理するツールlammaやってみた&#34;&gt;AWS Lambdaを管理するツールLammaやってみた&lt;/h2&gt;
+
+&lt;p&gt;Rubyで書かれたlammbaというリポジトリが上がったので
+ruby勉強会に参加がてら触ってみた&lt;/p&gt;
+
+&lt;h3 id=&#34;lamma-https-github-com-ayemos-lamma&#34;&gt;&lt;a href=&#34;https://github.com/ayemos/Lamma&#34;&gt;lamma&lt;/a&gt;&lt;/h3&gt;
+
+&lt;h3 id=&#34;作業リポジトリ&#34;&gt;作業リポジトリ&lt;/h3&gt;
+
+&lt;p&gt;&lt;a href=&#34;https://github.com/mijime/mijime.github.io//tree/master/source/study/kanazawa.rb/2016-06-18/&#34;&gt;source&lt;/a&gt;&lt;/p&gt;
+
+&lt;h3 id=&#34;作業雑感&#34;&gt;作業雑感&lt;/h3&gt;
+
+&lt;h4 id=&#34;pros&#34;&gt;Pros&lt;/h4&gt;
+
+&lt;ul&gt;
+&lt;li&gt;1 dir,  1 funcなのでわかりやすいね&lt;/li&gt;
+&lt;li&gt;勝手にzipしてくれるね&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h4 id=&#34;cons&#34;&gt;Cons&lt;/h4&gt;
+
+&lt;ul&gt;
+&lt;li&gt;後発の割にnodejs, python2.7のみ&lt;/li&gt;
+&lt;li&gt;API GatewayやRoleとかと連携してもらえると助かるんだけど。.&lt;/li&gt;
+&lt;li&gt;消したりするのめんどくさそう &amp;hellip; まぁ関数だけだからいいんだけども &amp;hellip;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&#34;作業ログ&#34;&gt;作業ログ&lt;/h3&gt;
+
+&lt;p&gt;まずは環境作成&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-ruby&#34;&gt;source &amp;quot;https://rubygems.org&amp;quot;
+
+gem &amp;quot;lamma&amp;quot;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;FROM ruby
+
+COPY Gemfile /var/app/Gemfile
+WORKDIR /var/app
+RUN bundle install
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;---
+version: &#39;2&#39;
+services:
+  app:
+    build: .
+    command: sleep 3600
+    environment:
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+    volumes:
+      - ./scripts:/var/app/scripts
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;とりあえずインストールして実行してみる&lt;/p&gt;
+
+&lt;p&gt;AWS関連の情報を渡して &amp;hellip;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;eval $(cat ~/.aws/credentials | awk -v FS=&amp;quot; = &amp;quot; &#39;$1~/^aws/{print &amp;quot;export&amp;quot;,toupper($1)&amp;quot;=&amp;quot;$2}&#39;)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;関数を作成してみる&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;lamma create scripts/my-function-1 --runtime python2.7
+
+Creating function at directory ./scripts/my-function-1.
+bundler: failed to load command: lamma (/usr/local/bundle/bin/lamma)
+NoMethodError: undefined method `match&#39; for nil:NilClass
+Did you mean?  catch
+/usr/local/bundle/gems/aws-sdk-core-2.3.14/lib/aws-sdk-core/endpoint_provider.rb:67:in `block in partition_matching_region&#39;
+/usr/local/bundle/gems/aws-sdk-core-2.3.14/lib/aws-sdk-core/endpoint_provider.rb:66:in `each&#39;
+/usr/local/bundle/gems/aws-sdk-core-2.3.14/lib/aws-sdk-core/endpoint_provider.rb:66:in `find&#39;
+/usr/local/bundle/gems/aws-sdk-core-2.3.14/lib/aws-sdk-core/endpoint_provider.rb:66:in `partition_matching_region&#39;
+...
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;うーん &amp;hellip;  なぜにnil &amp;hellip;&lt;/p&gt;
+
+&lt;p&gt;AWS_REGIONを渡す&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-diff&#34;&gt;diff --git a/source/study/kanazawa.rb/2016-06-18/docker-compose.yml b/source/study/kanazawa.rb/2016-06-18/docker-compose.yml
+index e03b010..2784d3c 100644
+--- a/source/study/kanazawa.rb/2016-06-18/docker-compose.yml
++++ b/source/study/kanazawa.rb/2016-06-18/docker-compose.yml
+@@ -7,5 +7,6 @@ services:
+     environment:
+       AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+       AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
++      AWS_REGION: ap-northeast-1
+     volumes:
+       - ./scripts:/var/app/scripts
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;$ lamma create my-function --runtime python2.7
+
+Creating function at directory ./my-function.
+Done.
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;$ tree .
+
+my-function
+  ├── lambda_function.py
+  └── lamma.conf
+
+1 directory, 2 files
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;まだこの時点で関数は作られていないみたい &amp;hellip;  なんでAWS認証求められたんだ&lt;/p&gt;
+
+&lt;p&gt;deployしてみる。&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;$ lamma deploy test
+
+Loading configuration.
+Done.
+bundler: failed to load command: lamma (/usr/local/bundle/bin/lamma)
+Aws::Lambda::Errors::BadRequest:
+/usr/local/bundle/gems/aws-sdk-core-2.3.14/lib/seahorse/client/plugins/raise_response_errors.rb:15:in `call&#39;
+/usr/local/bundle/gems/aws-sdk-core-2.3.14/lib/aws-sdk-core/plugins/param_converter.rb:20:in `call&#39;
+/usr/local/bundle/gems/aws-sdk-core-2.3.14/lib/seahorse/client/plugins/response_target.rb:21:in `call&#39;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;うーん &amp;hellip;  ?&lt;/p&gt;
+
+&lt;p&gt;よくわからないのでJSで作り直す&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;$ lamma create my-function-js --runtime nodejs
+
+Creating function at directory ./my-function-js.
+Done.
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;$ lamma deploy test
+
+Loading configuration.
+Done.
+Function &#39;my-function-js&#39; doesn&#39;t seem to be exists.
+Do you want to create new function &#39;my-function-js&#39; ? (y/n) y
+Creating function &#39;my-function-js&#39; ...
+bundler: failed to load command: lamma (/usr/local/bundle/bin/lamma)
+Errno::ENOENT: No such file or directory @ rb_sysopen - /tmp/d20160618-92-1fppw7/lambda.zip
+  /usr/local/bundle/gems/lamma-0.1.1/lib/lamma/function.rb:57:in `initialize&#39;
+...
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;zip &amp;hellip;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-diff&#34;&gt;diff --git a/source/study/kanazawa.rb/2016-06-18/Dockerfile b/source/study/kanazawa.rb/2016-06-18/Dockerfile
+index f9e4aff..0595f36 100644
+--- a/source/study/kanazawa.rb/2016-06-18/Dockerfile
++++ b/source/study/kanazawa.rb/2016-06-18/Dockerfile
+@@ -3,3 +3,4 @@ FROM ruby
+COPY Gemfile /var/app/Gemfile
+WORKDIR /var/app
+RUN bundle install
++RUN apt-get update &amp;amp;&amp;amp; apt-get install -y zip
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;$ lamma deploy test
+
+Loading configuration.
+Done.
+Function &#39;my-function-js&#39; doesn&#39;t seem to be exists.
+Do you want to create new function &#39;my-function-js&#39; ? (y/n) y
+Creating function &#39;my-function-js&#39; ...
+adding: lamma.conf (deflated 17%)
+adding: index.js (deflated 45%)
+ArgumentError occured. You might need to specify role arn you want to pass to your function via &#39;lamma.conf&#39; file or ENV[&#39;AWS_LAMBDA_IAM_ROLE&#39;].
+Done.
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;ほむほむ &amp;hellip; あんましロールを書きたくないのでenvで&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;export AWS_LAMBDA_IAM_ROLE=arn:aws:iam::000000000000:role/lambda_basic_execution
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;$ lamma deploy test
+
+Loading configuration.
+Done.
+Function &#39;my-function-js&#39; doesn&#39;t seem to be exists.
+Do you want to create new function &#39;my-function-js&#39; ? (y/n) y
+Creating function &#39;my-function-js&#39; ...
+adding: lamma.conf (deflated 17%)
+adding: index.js (deflated 45%)
+Done.
+Setting aliases.
+Done.
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;$ lamma list-functions
+
+my-function-js
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;できた。&lt;/p&gt;
+
+&lt;h2 id=&#34;lt感想&#34;&gt;LT感想&lt;/h2&gt;
+
+&lt;h3 id=&#34;シェルチェックを使おう&#34;&gt;シェルチェックを使おう&lt;/h3&gt;
+
+&lt;ul&gt;
+&lt;li&gt;文法がバラバラなので統一する&lt;/li&gt;
+&lt;li&gt;各環境でパッケージとして提供されている&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;確かにシェルは動かすの簡単だけど、 他の環境で動かないことが多い &amp;hellip;&lt;/p&gt;
+
+&lt;h3 id=&#34;shunit2を使おう&#34;&gt;shUnit2を使おう&lt;/h3&gt;
+
+&lt;ul&gt;
+&lt;li&gt;対応シェルも幅広い&lt;/li&gt;
+&lt;li&gt;ダウンロードするだけで使える！&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;bats派だけど、 msysでも早いなら乗り換えたいかも&lt;/p&gt;
+
+&lt;h3 id=&#34;dokku&#34;&gt;Dokku&lt;/h3&gt;
+</description>
+    </item>
+    
+  </channel>
+</rss>
