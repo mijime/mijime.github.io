@@ -239,6 +239,29 @@ my-function-js
 &lt;p&gt;bats派だけど、 msysでも早いなら乗り換えたいかも&lt;/p&gt;
 
 &lt;h3 id=&#34;dokku&#34;&gt;Dokku&lt;/h3&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Heroku like&lt;/li&gt;
+&lt;li&gt;前面にnginxがあって、 コンテナにルーティング&lt;/li&gt;
+&lt;li&gt;herokuのbuild packsも利用できるので良い！&lt;/li&gt;
+&lt;li&gt;運用メンテナンスが気になるところ&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;スケーリングしないとかで敬遠してたけども、 開発環境で利用するなら楽だよなぁ&lt;/p&gt;
+
+&lt;p&gt;だいぶバージョンアップされているとのことなので、触ってみたい&lt;/p&gt;
+
+&lt;p&gt;もっと利用されるという話なので、その話を聞いてからかな？&lt;/p&gt;
+
+&lt;p&gt;dokku-altとの違いもあとで調べておこう &amp;hellip;&lt;/p&gt;
+
+&lt;h3 id=&#34;awssummit&#34;&gt;AWSSummit&lt;/h3&gt;
+
+&lt;h3 id=&#34;iot&#34;&gt;Iot&lt;/h3&gt;
+
+&lt;p&gt;書き込むのに結構ツールが必要なんですね &amp;hellip;&lt;/p&gt;
+
+&lt;p&gt;IOT超絶敷居高い。&lt;/p&gt;
 </description>
     </item>
     
