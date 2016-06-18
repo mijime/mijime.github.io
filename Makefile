@@ -47,3 +47,12 @@ static/apple-touch-icon-144-precomposed.png: $(FAVICON_BASE)
 		-type GrayScale \
 		\( -size 144x144 xc:none -fill white -draw 'circle 71,71 71,0' \) \
 		-compose CopyOpacity -composite $@
+
+htmllint: /tmp/dist/vnu.jar
+	java -jar $^ `find public -name '*.html'`
+
+/tmp/dist/vnu.jar: /tmp/vnu.jar_16.3.3.zip
+	unzip $^ -d /tmp
+
+/tmp/vnu.jar_16.3.3.zip:
+	curl -o $@ -L https://github.com/validator/validator/releases/download/16.3.3/vnu.jar_16.3.3.zip
