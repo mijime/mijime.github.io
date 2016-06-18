@@ -30,19 +30,22 @@ ruby勉強会に参加がてら触ってみた&lt;/p&gt;
 
 &lt;h3 id=&#34;作業雑感&#34;&gt;作業雑感&lt;/h3&gt;
 
+&lt;p&gt;シンプルなLambda管理ツール&lt;/p&gt;
+
 &lt;h4 id=&#34;pros&#34;&gt;Pros&lt;/h4&gt;
 
 &lt;ul&gt;
 &lt;li&gt;1 dir,  1 funcなのでわかりやすいね&lt;/li&gt;
 &lt;li&gt;勝手にzipしてくれるね&lt;/li&gt;
+&lt;li&gt;Rubyなので今後拡張しやすい、のかな？&lt;/li&gt;
 &lt;/ul&gt;
 
 &lt;h4 id=&#34;cons&#34;&gt;Cons&lt;/h4&gt;
 
 &lt;ul&gt;
-&lt;li&gt;後発の割にnodejs, python2.7のみ&lt;/li&gt;
-&lt;li&gt;API GatewayやRoleとかと連携してもらえると助かるんだけど。.&lt;/li&gt;
+&lt;li&gt;nodejs, python2.7のみ対応&lt;/li&gt;
 &lt;li&gt;消したりするのめんどくさそう &amp;hellip; まぁ関数だけだからいいんだけども &amp;hellip;&lt;/li&gt;
+&lt;li&gt;node_modules入ってない？&lt;/li&gt;
 &lt;/ul&gt;
 
 &lt;h3 id=&#34;作業ログ&#34;&gt;作業ログ&lt;/h3&gt;
@@ -256,6 +259,10 @@ my-function-js
 &lt;p&gt;dokku-altとの違いもあとで調べておこう &amp;hellip;&lt;/p&gt;
 
 &lt;h3 id=&#34;awssummit&#34;&gt;AWSSummit&lt;/h3&gt;
+
+&lt;p&gt;SIerが完全に淘汰されちゃう感じ&lt;/p&gt;
+
+&lt;p&gt;PaaS, SaaSの流行には全然触れてなかったので、 今回の話を機会に調べてみよう &amp;hellip;&lt;/p&gt;
 
 &lt;h3 id=&#34;iot&#34;&gt;Iot&lt;/h3&gt;
 
