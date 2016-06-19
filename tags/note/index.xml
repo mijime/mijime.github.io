@@ -11,10 +11,10 @@
     
     <item>
       <title>ブログの方針</title>
-      <link>https://mijime.github.io/posts/blog/blog-of-policy/</link>
+      <link>https://mijime.github.io/post/blog/blog-of-policy/</link>
       <pubDate>Sat, 28 May 2016 13:48:27 +0900</pubDate>
       
-      <guid>https://mijime.github.io/posts/blog/blog-of-policy/</guid>
+      <guid>https://mijime.github.io/post/blog/blog-of-policy/</guid>
       <description>
 
 &lt;h3 id=&#34;コンテンツ&#34;&gt;コンテンツ&lt;/h3&gt;
@@ -62,10 +62,10 @@
     
     <item>
       <title>背面派、前面派</title>
-      <link>https://mijime.github.io/posts/2016-05-26/border-implement/</link>
+      <link>https://mijime.github.io/post/2016-05-26/border-implement/</link>
       <pubDate>Thu, 26 May 2016 21:13:19 +0900</pubDate>
       
-      <guid>https://mijime.github.io/posts/2016-05-26/border-implement/</guid>
+      <guid>https://mijime.github.io/post/2016-05-26/border-implement/</guid>
       <description>&lt;p&gt;アプリ側で実装する際に、サーバ側で対応するかクライアント側で対応するか、という話。&lt;/p&gt;
 
 &lt;p&gt;場合によりけりなのは分かっているけど、思わずクライアント側で対応しがちだよね、的な。&lt;/p&gt;
@@ -74,10 +74,10 @@
     
     <item>
       <title>CIを始めるのが辛い</title>
-      <link>https://mijime.github.io/posts/2016-05-26/ci-is-difficult/</link>
+      <link>https://mijime.github.io/post/2016-05-26/ci-is-difficult/</link>
       <pubDate>Thu, 26 May 2016 21:10:04 +0900</pubDate>
       
-      <guid>https://mijime.github.io/posts/2016-05-26/ci-is-difficult/</guid>
+      <guid>https://mijime.github.io/post/2016-05-26/ci-is-difficult/</guid>
       <description>&lt;ul&gt;
 &lt;li&gt;&lt;p&gt;環境が違う&lt;/p&gt;
 
@@ -109,10 +109,10 @@
     
     <item>
       <title>introduce a GitHub cli</title>
-      <link>https://mijime.github.io/posts/2016-05-23/github-cli/</link>
+      <link>https://mijime.github.io/post/2016-05-23/github-cli/</link>
       <pubDate>Mon, 23 May 2016 22:48:11 +0900</pubDate>
       
-      <guid>https://mijime.github.io/posts/2016-05-23/github-cli/</guid>
+      <guid>https://mijime.github.io/post/2016-05-23/github-cli/</guid>
       <description>&lt;p&gt;リポジトリをWebから作るのがめんどくさいので導入する。&lt;/p&gt;
 
 &lt;p&gt;&lt;a href=&#34;https://github.com/github/hub&#34;&gt;https://github.com/github/hub&lt;/a&gt;&lt;/p&gt;
@@ -125,10 +125,10 @@
     
     <item>
       <title>first blogged</title>
-      <link>https://mijime.github.io/posts/blog/first-blogged/</link>
+      <link>https://mijime.github.io/post/blog/first-blogged/</link>
       <pubDate>Mon, 23 May 2016 21:56:24 +0900</pubDate>
       
-      <guid>https://mijime.github.io/posts/blog/first-blogged/</guid>
+      <guid>https://mijime.github.io/post/blog/first-blogged/</guid>
       <description>&lt;p&gt;何を書いてく。&lt;/p&gt;
 
 &lt;p&gt;やったネタやQiitaの下書き、外部マウンティング的な何かを行う。&lt;/p&gt;

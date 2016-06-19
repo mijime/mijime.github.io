@@ -11,10 +11,10 @@
     
     <item>
       <title>mermaidに対応した</title>
-      <link>https://mijime.github.io/posts/hugo/code-mermaid/</link>
+      <link>https://mijime.github.io/post/hugo/code-mermaid/</link>
       <pubDate>Tue, 31 May 2016 22:41:30 +0900</pubDate>
       
-      <guid>https://mijime.github.io/posts/hugo/code-mermaid/</guid>
+      <guid>https://mijime.github.io/post/hugo/code-mermaid/</guid>
       <description>&lt;p&gt;code.language-mermaidを変換するスクリプトを噛ませただけだけど。&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&#34;language-mermaid&#34;&gt;  graph TD;
@@ -58,10 +58,10 @@
     
     <item>
       <title>関連記事を探す</title>
-      <link>https://mijime.github.io/posts/js/cosine-similarity/</link>
+      <link>https://mijime.github.io/post/js/cosine-similarity/</link>
       <pubDate>Sat, 28 May 2016 21:12:36 +0900</pubDate>
       
-      <guid>https://mijime.github.io/posts/js/cosine-similarity/</guid>
+      <guid>https://mijime.github.io/post/js/cosine-similarity/</guid>
       <description>
 
 &lt;p&gt;他のブログを参考にすると関連記事というのを最後に表示しているらしい。&lt;/p&gt;

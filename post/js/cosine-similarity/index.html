@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <link href="http://gmpg.org/xfn/11" rel="profile">
+<meta name="google-site-verification" content="7gVj5rzyozu0vYcQMLhIGr4g-WWyJn4R22RgeYqQdS0" />
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+<meta name="generator" content="Hugo 0.17-DEV" />
+
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+
+<title>関連記事を探す | My snippets</title>
+<meta name="description" content="他のブログを参考にすると関連記事というのを最後に表示しているらしい。 まだ記事の数は少ないけど、ある程度近い記事を探すことができるようにする。">
+
+<meta name="keywords" content="tech,js">
+
+
+
+
+<link rel="apple-touch-icon-precomposed" sizes="144x144" href="https://mijime.github.io/apple-touch-icon-144-precomposed.png">
+<link rel="shortcut icon" href="https://mijime.github.io/favicon.png">
+
+
+
+    
+<link rel="stylesheet" href="https://mijime.github.io/css/poole.css" />
+<link rel="stylesheet" href="https://mijime.github.io/css/syntax.css" />
+<link rel="stylesheet" href="https://mijime.github.io/css/hyde.css" />
+<link rel="stylesheet" href="https://mijime.github.io/css/style.css" />
+<link rel="stylesheet" href="//fonts.googleapis.com/earlyaccess/notosansjapanese.css" />
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/mermaid/6.0.0/mermaid.min.css" />
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.4.0/styles/zenburn.min.css" />
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/mermaid/6.0.0/mermaid.min.js" defer></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.4.0/highlight.min.js" defer></script>
+<script src="https://mijime.github.io/js/index.bundle.js" defer></script>
+
+    
+<script>
+(function(i,s,o,g,r,a,m){i["GoogleAnalyticsObject"]=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,"script","//www.google-analytics.com/analytics.js","ga");
+
+ga("create", "UA-46554348-4", "auto");
+ga("send", "pageview");
+</script>
+
+
+  </head>
+  <body class="layout-reverse">
+    <header class="sidebar">
+  <div class="container sidebar-sticky">
+    <div class="sidebar-about">
+      <h1>
+        <a href="https://mijime.github.io/">My snippets</a>
+      </h1>
+      
+      <p class="lead"> 何かをかく </p>
+      
+    </div>
+
+    <ul class="sidebar-nav">
+      <li><a href="https://mijime.github.io/">Home</a></li>
+      
+      <li><a href="/post">Posts</a></li>
+      
+      <li><a href="/slide">Slides</a></li>
+      
+      <li><a href="/tags">Tags</a></li>
+      
+    </ul>
+
+    <p>&copy; 2016. All rights reserved. </p>
+  </div>
+</header>
+
+
+<div class="content container">
+  <div class="post">
+    <h1 class="post-title">
+      <a href="https://mijime.github.io/post/js/cosine-similarity/">
+        関連記事を探す
+      </a>
+    </h1>
+    <span class="post-date">Sat, May 28, 2016</span>
+    <div class="post-content">
+      
+
+<span>
+  
+  <a href="https://mijime.github.io/tags/tech/">#tech</a>
+  
+  <a href="https://mijime.github.io/tags/js/">#js</a>
+  
+</span>
+
+
+      
+
+<p>他のブログを参考にすると関連記事というのを最後に表示しているらしい。</p>
+
+<p>まだ記事の数は少ないけど、ある程度近い記事を探すことができるようにする。</p>
+
+<h3 id="類似度の取得">類似度の取得</h3>
+
+<p>&ldquo;MeCab&rdquo; + &ldquo;類似&rdquo; でググったら、コサイン類似度なるものがあるとのこと。</p>
+
+<ul>
+<li><a href="http://www.cse.kyoto-su.ac.jp/~g0846020/keywords/cosinSimilarity.html">コサイン類似度</a></li>
+<li><a href="http://qiita.com/nmbakfm/items/6bb91b89571dd68fcea6">TF-IDF Cos類似度推定法</a></li>
+</ul>
+
+<p>このブログはjs + hugoで書いているので、
+<a href="https://www.npmjs.com/package/kuromoji">kuromoji</a> のラッパー
+<a href="https://www.npmjs.com/package/kuromojin">kuromojin</a> を使って形態素解析する。</p>
+
+<h3 id="コード解説">コード解説</h3>
+
+<p><a href="https://github.com/mijime/mijime.github.io/blob/content/source/js/similarity/index.js">コード全体</a></p>
+
+<p>テキストを分解して、 単語と出現回数を記録する。</p>
+
+<pre><code class="language-javascript">async function parseVector(text) {
+  const tokens = await tokenize(text);
+  return tokens.reduce((acc, next) =&gt; {
+    if (!isTargetToken(next)) {
+      return acc;
+    }
+
+    if (acc[next.surface_form]) {
+      acc[next.surface_form] ++;
+    } else {
+      acc[next.surface_form] = 1;
+    }
+
+    return acc;
+  }, {});
+}
+</code></pre>
+
+<p>出現回数を数えるのは名詞で3文字以上の単語のみ。</p>
+
+<pre><code class="language-javascript">function isTargetToken(token) {
+  return token.pos === '名詞'
+    &amp;&amp; token.surface_form.length &gt;= 3
+    &amp;&amp; (token.basic_form !== '*'
+        || token.surface_form.match(/^[\wA-Z]+$/));
+}
+</code></pre>
+
+<p>あとは計算しておしまい。</p>
+
+<pre><code class="language-javascript">function cosineSimilarity(curr, next) {
+  const currKeys = Object.keys(curr);
+  const nextKeys = Object.keys(next);
+  const keys = currKeys.concat(nextKeys)
+    .filter((v, i, self) =&gt; self.indexOf(v) === i);
+
+  const baseScore = keys
+    .map(k =&gt; (curr[k] || 0) * (next[k] || 0))
+    .reduce((acc, c) =&gt; acc + c, 0);
+
+  const currScore = keys
+    .map(k =&gt; curr[k] ? Math.pow(curr[k], 2) : 0)
+    .reduce((acc, c) =&gt; acc + c, 0);
+
+  const nextScore = keys
+    .map(k =&gt; next[k] ? Math.pow(next[k], 2) : 0)
+    .reduce((acc, c) =&gt; acc + c, 0);
+
+  const score = baseScore
+    ? baseScore / (Math.sqrt(currScore) * Math.sqrt(nextScore))
+    : 0;
+  const words = keys.filter(k =&gt; curr[k] &amp;&amp; next[k]);
+  return {score, words};
+}
+</code></pre>
+
+<h3 id="実行結果">実行結果</h3>
+
+<p>うーん、全然関係ない単語でしか一致しない、、、その通りではあるんだけど</p>
+
+<pre><code>babel-node source/js/similarity &quot;content/posts/js/cosine-similarity.md&quot; &quot;content&quot;
+
+25.26%  content\posts\2016-05-23\github-cli.md  com, https, mijime, github
+0%      content\posts\2016-05-26\border-implement.md
+0%      content\posts\2016-05-26\ci-is-difficult.md
+0%      content\posts\blog\first-blogged.md
+0%      content\posts\hugo\code-mermaid.md
+20.9%   content\posts\hugo\hugo-deploy.md       branch, content
+100%    content\posts\js\cosine-similarity.md   100, 2016, 89571, MeCab, コサイン
+9.93%   content\posts\blog\blog-of-policy.md    branch, posts, slides
+1.98%   content\posts\hugo\hugo-pagination.md   html, pagination
+3.52%   content\slides\2016-05-27\my-first-slide.md     html
+</code></pre>
+
+    </div>
+  </div>
+</div>
+
+  </body>
+</html>
