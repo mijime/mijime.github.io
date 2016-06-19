@@ -3,6 +3,7 @@
   <head>
     {{ partial "head.html" . }}
     {{ template "_default/include-head.html" . }}
+    {{ template "_internals/analytics.html" . }}
   </head>
 
   <body class="{{ .Site.Params.css }}">
@@ -12,14 +13,14 @@
       <div class="posts">
         {{ range (.Paginate (where .Data.Pages "Section" "posts") 5).Pages }}
         <div class="post">
-          <h1 class="post-title">
+          <h2 class="post-title">
             <a href="{{ .Permalink }}">
               {{ .Title }}
             </a>
-          </h1>
-          <span class="post-date">
+          </h2>
+          <time class="post-date" datetime="{{ .Date.Format "2006-01-02T03:04" }}">
             {{ .Date.Format "Mon, Jan 2, 2006" }}
-          </span>
+          </time>
 
           <div class="post-content">
             {{ template "_internals/tags.html" . }}
@@ -33,6 +34,5 @@
     </div>
 
     {{ template "_internals/paginator.html" . }}
-    {{ template "_internals/analytics.html" . }}
   </body>
 </html>

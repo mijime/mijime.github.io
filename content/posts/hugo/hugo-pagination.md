@@ -8,9 +8,9 @@ title = "hugo pagination"
 tags = ["hugo"]
 +++
 
-.Paginatorを使えば自動でやってくれるみたい
-
 <!--more-->
+
+.Paginatorを使えば自動でやってくれるみたい
 
 ``` html
 {{- range (.Paginator 10).Pages }}

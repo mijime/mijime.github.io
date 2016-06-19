@@ -1,5 +1,6 @@
 import gulp from 'gulp';
 import textlint from 'gulp-textlint';
+import htmllint from 'gulp-htmllint';
 import cssnext from 'gulp-cssnext';
 import stylelint from 'gulp-stylelint';
 import eslint from 'gulp-eslint';
@@ -40,11 +41,16 @@ const webpackConfig = {
 
 gulp.task('default', ['test', 'css', 'js']);
 
-gulp.task('test', ['textlint', 'eslint']);
+gulp.task('test', ['textlint', 'eslint', 'htmllint']);
 
 gulp.task('textlint', () => {
   return gulp.src('content/**/*.md')
     .pipe(textlint());
+});
+
+gulp.task('htmllint', () => {
+  return gulp.src('layout/**/*.html')
+    .pipe(htmllint());
 });
 
 gulp.task('eslint', () => {

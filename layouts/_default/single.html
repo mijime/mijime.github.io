@@ -3,9 +3,9 @@
   <head>
     {{ partial "head.html" . }}
     {{ .Render "include-head" }}
+    {{ template "_internals/analytics.html" . }}
   </head>
   <body class="{{ .Site.Params.css }}">
     {{ .Render "include-single" }}
-    {{ template "_internals/analytics.html" . }}
   </body>
 </html>

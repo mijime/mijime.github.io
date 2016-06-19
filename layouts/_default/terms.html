@@ -3,6 +3,7 @@
   <head>
     {{ partial "head.html" . }}
     {{ template "_default/include-head.html" . }}
+    {{ template "_internals/analytics.html" . }}
   </head>
   <body class="{{ .Site.Params.css }}">
     {{ partial "sidebar.html" . }}
@@ -25,6 +26,5 @@
         </div>
       </div>
     </div>
-    {{ template "_internals/analytics.html" . }}
   </body>
 </html>

@@ -3,6 +3,7 @@
   <head>
     {{ partial "head.html" . }}
     {{ template "_default/include-head.html" . }}
+    {{ template "_internals/analytics.html" . }}
   </head>
   <body class="{{ .Site.Params.css }}">
     {{ partial "sidebar.html" . }}
@@ -18,7 +19,9 @@
             <li>
               <span>
                 <a href="{{ .Permalink }}">{{ .Title }}</a>
-                <time class="pull-right post-list">{{ .Date.Format "Mon, Jan 2, 2006" }}</time>
+                <time class="pull-right post-list" datetime="{{ .Date.Format "2006-01-02T03:04" }}">
+                  {{ .Date.Format "Mon, Jan 2, 2006" }}
+                </time>
               </span>
             </li>
             {{ end }}
@@ -27,6 +30,5 @@
       </div>
     </div>
     {{ template "_internals/paginator.html" . }}
-    {{ template "_internals/analytics.html" . }}
   </body>
 </html>

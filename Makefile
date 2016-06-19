@@ -3,8 +3,11 @@ BRANCH = master
 PUBLIC = public
 FAVICONS = static/favicon.png \
 					 static/apple-touch-icon-144-precomposed.png
-FAVICON_BASE = favicon.png
+FAVICON_BASE = assets/favicon.png
 
+HTML = $(shell find $(PUBLIC) -name "*.html")
+CONTENT = $(shell find content -name "*.md")
+LAYOUT = $(shell find layouts -name "*.html")
 
 help: ### Print tasks
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' Makefile \
@@ -13,10 +16,15 @@ help: ### Print tasks
 
 build: $(PUBLIC) ### Build to
 	npm run build
-	rm -r public/*
-	hugo
+	make hugo
 
-deploy: build ### Deploy to
+clean:
+	rm -rf $(PUBLIC)
+
+deploy: ### Deploy to
+	make clean
+	make build
+	make htmllint
 	cd public; \
 		git add -A; \
 		git commit -m ':memo: Update $(shell date "+%F %H:%M:%S")'; \
@@ -48,11 +56,16 @@ static/apple-touch-icon-144-precomposed.png: $(FAVICON_BASE)
 		\( -size 144x144 xc:none -fill white -draw 'circle 71,71 71,0' \) \
 		-compose CopyOpacity -composite $@
 
-htmllint: /tmp/dist/vnu.jar
-	java -jar $^ `find public -name '*.html'`
+hugo: $(CONTENT) $(LAYOUT)
+	hugo
 
-/tmp/dist/vnu.jar: /tmp/vnu.jar_16.3.3.zip
-	unzip $^ -d /tmp
+htmllint: assets/vnu.jar hugo
+	java -jar $< $(HTML)
 
-/tmp/vnu.jar_16.3.3.zip:
-	curl -o $@ -L https://github.com/validator/validator/releases/download/16.3.3/vnu.jar_16.3.3.zip
+assets/vnu.jar: assets/vnu.jar_16.6.18.zip
+	unzip -p $< dist/vnu.jar > $@
+
+assets/vnu.jar_16.6.18.zip:
+	mkdir -p assets
+	curl -L https://github.com/validator/validator/releases/download/16.6.18/vnu.jar_16.6.18.zip \
+		-o $@
