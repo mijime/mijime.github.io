@@ -11,7 +11,7 @@
 
     <div class="content container">
       <div class="posts">
-        {{ range (.Paginate (where .Data.Pages "Section" "posts") 5).Pages }}
+        {{ range (.Paginate (where .Data.Pages "Section" "post") 5).Pages }}
         <div class="post">
           <h2 class="post-title">
             <a href="{{ .Permalink }}">

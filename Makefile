@@ -5,7 +5,6 @@ FAVICONS = static/favicon.png \
 					 static/apple-touch-icon-144-precomposed.png
 FAVICON_BASE = assets/favicon.png
 
-HTML = $(shell find $(PUBLIC) -name "*.html")
 CONTENT = $(shell find content -name "*.md")
 LAYOUT = $(shell find layouts -name "*.html")
 
@@ -56,11 +55,15 @@ static/apple-touch-icon-144-precomposed.png: $(FAVICON_BASE)
 		\( -size 144x144 xc:none -fill white -draw 'circle 71,71 71,0' \) \
 		-compose CopyOpacity -composite $@
 
-hugo: $(CONTENT) $(LAYOUT)
+
+hugo: assets/.hugo
+
+assets/.hugo: $(CONTENT) $(LAYOUT)
 	hugo
+	touch assets/.hugo
 
 htmllint: assets/vnu.jar hugo
-	java -jar $< $(HTML)
+	java -jar $< `find $(PUBLIC) -name "*.html"`
 
 assets/vnu.jar: assets/vnu.jar_16.6.18.zip
 	unzip -p $< dist/vnu.jar > $@

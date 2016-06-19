@@ -15,11 +15,11 @@ HasCJKLanguage = true
 
 [[menu.main]]
   name = "Posts"
-  url = "/posts"
+  url = "/post"
 
 [[menu.main]]
   name = "Slides"
-  url = "/slides"
+  url = "/slide"
 
 [[menu.main]]
   name = "Tags"
