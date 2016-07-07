@@ -1,20 +1,9 @@
 :root {
-  --background-color: #fdf6e3;
-  --font-color: #657b83;
-  --font-family: "PT Sans", Helvetica, Arial, sans-serif;
-  --header-color: #586e75;
-  --header-font-family: "Abril Fatface", serif;
-  --section-background-color: #d33682;
-  --section-font-color: #fff;
-  --roll-color: #1a6091;
-  --link-color: #268bd2;
-  --link-hover-color: #78b9e6;
-
   --background-color: #fff;
   --font-color: #515151;
-  --font-family: "PT Sans", Helvetica, Arial, sans-serif;
+  --font-family: "PT Sans", "Helvetica Neue", Helvetica, "Arial", "游ゴシック", YuGothic, "ヒラギノ角ゴ ProN W3", "Hiragino Kaku Gothic ProN", "Noto Sans Japanese", "メイリオ", Meiryo, sans-serif;
   --header-color: #303030;
-  --header-font-family: "Abril Fatface", serif;
+  --header-font-family: "Abril Fatface", "Helvetica Neue", Helvetica, "Arial", "游ゴシック", YuGothic, "ヒラギノ角ゴ ProN W3", "Hiragino Kaku Gothic ProN", "Noto Sans Japanese", "メイリオ", Meiryo, sans-serif;
   --section-background-color: #f9f9f9;
   --section-font-color: #515151;
   --roll-color: #1a6091;
