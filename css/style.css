@@ -1,3 +1,7 @@
+body {
+  font-family: "PT Sans", "Helvetica Neue", Helvetica, "Arial", "游ゴシック", YuGothic, "ヒラギノ角ゴ ProN W3", "Hiragino Kaku Gothic ProN", "Noto Sans Japanese", "メイリオ", Meiryo, sans-serif;
+}
+
 .sidebar a {
   text-decoration: none;
   -webkit-transition: color 0.4s ease;

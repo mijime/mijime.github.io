@@ -9,7 +9,7 @@ body {
 }
 
 .reveal {
-  font-family: "PT Sans", Helvetica, Arial, sans-serif;
+  font-family: "PT Sans", "Helvetica Neue", Helvetica, "Arial", "游ゴシック", YuGothic, "ヒラギノ角ゴ ProN W3", "Hiragino Kaku Gothic ProN", "Noto Sans Japanese", "メイリオ", Meiryo, sans-serif;
   font-size: 36px;
   font-weight: normal;
   color: #515151;
@@ -41,7 +41,7 @@ body {
 .reveal h6 {
   margin: 0 0 20px;
   color: #303030;
-  font-family: "Abril Fatface", serif;
+  font-family: "Abril Fatface", "Helvetica Neue", Helvetica, "Arial", "游ゴシック", YuGothic, "ヒラギノ角ゴ ProN W3", "Hiragino Kaku Gothic ProN", "Noto Sans Japanese", "メイリオ", Meiryo, sans-serif;
   font-weight: normal;
   line-height: 1.2;
   letter-spacing: normal;
