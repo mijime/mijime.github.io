@@ -5,6 +5,10 @@
        data-separator="^\n---$"
        data-separator-vertical="^\n>>>$">
        <script type="text/template">
+# {{ .Title | safeJS }}
+
+---
+
 {{ .RawContent | safeJS }}
        </script>
     </div>
