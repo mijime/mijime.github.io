@@ -2,6 +2,7 @@ import gulp from 'gulp';
 import textlint from 'gulp-textlint';
 import htmllint from 'gulp-htmllint';
 import cssnext from 'gulp-cssnext';
+import cssmin from 'gulp-cssmin';
 import stylelint from 'gulp-stylelint';
 import eslint from 'gulp-eslint';
 import webpack from 'webpack-stream';
@@ -64,6 +65,7 @@ gulp.task('css', () => {
   return gulp.src('source/**/*.css')
     .pipe(stylelint(stylelintrc))
     .pipe(cssnext())
+    .pipe(cssmin())
     .pipe(gulp.dest('static'));
 });
 
