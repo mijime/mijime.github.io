@@ -21,7 +21,6 @@ dependencies:
     - git config --global user.name "CircleCI"
     - git config --global user.email "circleci@circleci.com"
     - go get -u -v github.com/spf13/hugo
-    - make assets/vnu.jar
   override:
     - yarn
 

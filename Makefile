@@ -1,4 +1,4 @@
-REPO = git@github.com:mijime/mijime.github.io.git
+REPO = $(shell git remote get-url origin)
 BRANCH = master
 PUBLIC = public
 FAVICONS = static/favicon.png \
@@ -61,14 +61,3 @@ hugo: assets/.hugo
 assets/.hugo: $(CONTENT) $(LAYOUT)
 	hugo
 	touch assets/.hugo
-
-htmllint: assets/vnu.jar hugo
-	java -jar $< `find $(PUBLIC) -name "*.html"`
-
-assets/vnu.jar: assets/vnu.jar_16.6.18.zip
-	unzip -p $< dist/vnu.jar > $@
-
-assets/vnu.jar_16.6.18.zip:
-	mkdir -p assets
-	curl -L https://github.com/validator/validator/releases/download/16.6.18/vnu.jar_16.6.18.zip \
-		-o $@
