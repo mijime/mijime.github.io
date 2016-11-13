@@ -2,7 +2,7 @@
 machine:
   timezone: Asia/Tokyo
   post:
-    - curl -oL https://yarnpkg.com/install.sh | bash
+    - curl -o- -L https://yarnpkg.com/install.sh | bash
 
 test:
   override:
