@@ -14,7 +14,7 @@ help: ### Print tasks
 		| awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-12s\033[0m %s\n", $$1, $$2}'
 
 build: $(PUBLIC) ### Build to
-	npm run build
+	yarn run build
 	make hugo
 
 clean:
@@ -34,7 +34,7 @@ watch: ### Watch for
 	hugo server --buildDrafts --watch
 
 test: ### Test
-	npm run test
+	yarn test
 
 $(PUBLIC):
 	git clone --branch $(BRANCH) $(REPO) $@

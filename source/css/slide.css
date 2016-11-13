@@ -13,7 +13,6 @@
 
 html * {
   color-profile: sRGB;
-  rendering-intent: auto;
 }
 
 body {
