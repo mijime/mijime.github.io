@@ -1,4 +1,9 @@
 ---
+machine:
+  timezone: Asia/Tokyo
+  post:
+    - curl -oL https://yarnpkg.com/install.sh | bash
+
 test:
   override:
     - make test
@@ -8,17 +13,17 @@ checkout:
     - git submodule sync
     - git submodule update --init --recursive
 
-machine:
-  timezone: Asia/Tokyo
-
 dependencies:
   cache_directories:
     - assets
+    - ~/.yarn-cache
   pre:
     - git config --global user.name "CircleCI"
     - git config --global user.email "circleci@circleci.com"
     - go get -u -v github.com/spf13/hugo
     - make assets/vnu.jar
+  override:
+    - yarn
 
 deployment:
   release:
