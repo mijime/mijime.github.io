@@ -23,7 +23,6 @@ clean:
 deploy: ### Deploy to
 	make clean
 	make build
-	make htmllint
 	cd public; \
 		git add -A; \
 		git commit -m ':memo: Update $(shell date "+%F %H:%M:%S")'; \
