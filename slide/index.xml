@@ -2,7 +2,7 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Slides on My snippets</title>
-    <link>https://mijime.github.io/slide/</link>
+    <link>https://mijime.github.io/slide/index.xml</link>
     <description>Recent content in Slides on My snippets</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>ja</language>

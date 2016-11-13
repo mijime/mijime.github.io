@@ -2,7 +2,7 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Posts on My snippets</title>
-    <link>https://mijime.github.io/post/</link>
+    <link>https://mijime.github.io/post/index.xml</link>
     <description>Recent content in Posts on My snippets</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>ja</language>
@@ -530,7 +530,9 @@ my-function-js
       <pubDate>Wed, 25 May 2016 14:05:50 +0900</pubDate>
       
       <guid>https://mijime.github.io/post/hugo/hugo-pagination/</guid>
-      <description>&lt;p&gt;.Paginatorを使えば自動でやってくれるみたい&lt;/p&gt;
+      <description>&lt;p&gt;&lt;/p&gt;
+
+&lt;p&gt;.Paginatorを使えば自動でやってくれるみたい&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&#34;language-html&#34;&gt;{{- range (.Paginator 10).Pages }}
 &amp;lt;div&amp;gt;
@@ -552,8 +554,7 @@ my-function-js
   {{- end }}
 &amp;lt;/nav&amp;gt;
 {{end}}
-&lt;/code&gt;&lt;/pre&gt;
-</description>
+&lt;/code&gt;&lt;/pre&gt;</description>
     </item>
     
     <item>

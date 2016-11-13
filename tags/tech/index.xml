@@ -2,11 +2,10 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Tech on My snippets</title>
-    <link>https://mijime.github.io/tags/tech/</link>
+    <link>https://mijime.github.io/tags/tech/index.xml</link>
     <description>Recent content in Tech on My snippets</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>ja</language>
-    <lastBuildDate>Tue, 31 May 2016 22:41:30 +0900</lastBuildDate>
     <atom:link href="https://mijime.github.io/tags/tech/index.xml" rel="self" type="application/rss+xml" />
     
     <item>
