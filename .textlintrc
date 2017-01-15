@@ -1,3 +1,5 @@
+---
 rules:
   preset-japanese: true
   preset-jtf-style: true
+...
