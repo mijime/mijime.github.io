@@ -54,9 +54,11 @@ static/apple-touch-icon-144-precomposed.png: $(FAVICON_BASE)
 		\( -size 144x144 xc:none -fill white -draw 'circle 71,71 71,0' \) \
 		-compose CopyOpacity -composite $@
 
+assets/:
+	mkdir -p $@
 
 hugo: assets/.hugo
 
-assets/.hugo: $(CONTENT) $(LAYOUT)
+assets/.hugo: assets/ $(CONTENT) $(LAYOUT)
 	hugo
 	touch assets/.hugo
