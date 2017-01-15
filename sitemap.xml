@@ -2,11 +2,6 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
-    <loc>https://mijime.github.io/</loc>
-    <lastmod>2016-06-18T13:23:05+09:00</lastmod>
-  </url>
-  
-  <url>
     <loc>https://mijime.github.io/post/study/kanazawa.rb/2016-06-18/</loc>
     <lastmod>2016-06-18T13:23:05+09:00</lastmod>
   </url>
@@ -59,6 +54,95 @@
   <url>
     <loc>https://mijime.github.io/post/blog/first-blogged/</loc>
     <lastmod>2016-05-23T21:56:24+09:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://mijime.github.io/tags/blog/</loc>
+    <lastmod>2016-05-28T13:48:27+09:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://mijime.github.io/tags/ci/</loc>
+    <lastmod>2016-05-26T21:10:04+09:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://mijime.github.io/tags/development/</loc>
+    <lastmod>2016-06-18T13:23:05+09:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://mijime.github.io/tags/github/</loc>
+    <lastmod>2016-05-23T22:48:11+09:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://mijime.github.io/tags/hugo/</loc>
+    <lastmod>2016-05-25T14:05:50+09:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://mijime.github.io/tags/js/</loc>
+    <lastmod>2016-05-28T21:12:36+09:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://mijime.github.io/tags/kzrb/</loc>
+    <lastmod>2016-06-18T13:23:05+09:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://mijime.github.io/tags/lambda/</loc>
+    <lastmod>2016-06-18T13:23:05+09:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://mijime.github.io/tags/mermaid/</loc>
+    <lastmod>2016-05-31T22:41:30+09:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://mijime.github.io/</loc>
+    <lastmod>2016-06-18T13:23:05+09:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://mijime.github.io/tags/note/</loc>
+    <lastmod>2016-05-28T13:48:27+09:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://mijime.github.io/post/</loc>
+    <lastmod>2016-06-18T13:23:05+09:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://mijime.github.io/slide/</loc>
+    <lastmod>2016-05-27T14:20:56+09:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://mijime.github.io/tags/</loc>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://mijime.github.io/tags/tech/</loc>
+    <lastmod>2016-05-31T22:41:30+09:00</lastmod>
+    <priority>0</priority>
   </url>
   
 </urlset>
