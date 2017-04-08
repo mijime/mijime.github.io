@@ -1,7 +1,7 @@
 import gulp from 'gulp';
 import textlint from 'gulp-textlint';
 import htmllint from 'gulp-htmllint';
-import cssnext from 'gulp-cssnext';
+import postcss from 'gulp-postcss';
 import cssmin from 'gulp-cssmin';
 import stylelint from 'gulp-stylelint';
 import eslint from 'gulp-eslint';
@@ -22,9 +22,9 @@ const webpackConfig = {
     'chunkFilename': '[id].bundle.js',
   },
   'module': {
-    'loaders': [{
+    'rules': [{
       'test':   /\.js$/,
-      'loader': 'babel'
+      'use': ['babel-loader']
     }],
   },
   'externals': {
@@ -64,7 +64,7 @@ gulp.task('eslint', () => {
 gulp.task('css', () => {
   return gulp.src('source/**/*.css')
     .pipe(stylelint(stylelintrc))
-    .pipe(cssnext())
+    .pipe(postcss())
     .pipe(cssmin())
     .pipe(gulp.dest('static'));
 });
