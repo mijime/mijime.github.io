@@ -1,3 +1,4 @@
+import path from 'path';
 import gulp from 'gulp';
 import textlint from 'gulp-textlint';
 import htmllint from 'gulp-htmllint';
@@ -5,7 +6,7 @@ import postcss from 'gulp-postcss';
 import cssmin from 'gulp-cssmin';
 import stylelint from 'gulp-stylelint';
 import eslint from 'gulp-eslint';
-import webpack from 'webpack-stream';
+import webpack from 'webpack';
 
 const stylelintrc = {
   'config':    {'extends': 'stylelint-config-standard'},
@@ -14,10 +15,11 @@ const stylelintrc = {
 
 const webpackConfig = {
   'entry': {
-    'index': './source/js/browser',
-    'slide': './source/js/browser/slide',
+    'index': path.resolve(__dirname, 'source/js/browser'),
+    'slide': path.resolve(__dirname, 'source/js/browser/slide'),
   },
   'output': {
+    'path':          path.resolve(__dirname, 'static/js'),
     'filename':      '[name].bundle.js',
     'chunkFilename': '[id].bundle.js',
   },
@@ -32,7 +34,8 @@ const webpackConfig = {
     'highlight.js': 'hljs',
   },
   'plugins': [
-    new webpack.webpack.optimize.UglifyJsPlugin({
+    new webpack.optimize.DedupePlugin(),
+    new webpack.optimize.UglifyJsPlugin({
       'minimize':  true,
       'sourceMap': true,
     }),
@@ -69,13 +72,8 @@ gulp.task('css', () => {
     .pipe(gulp.dest('static'));
 });
 
-gulp.task('js', () => {
-  return gulp.src('source/js/browser/*.js')
-    .pipe(eslint({'useEslintrc': true}))
-    .pipe(eslint.format())
-    .pipe(eslint.failAfterError())
-    .pipe(webpack(webpackConfig))
-    .pipe(gulp.dest('static/js'));
+gulp.task('js', done => {
+  return webpack(webpackConfig).run(done);
 });
 
 gulp.task('watch', ['default'], () => {
