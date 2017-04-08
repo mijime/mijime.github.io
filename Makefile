@@ -1,4 +1,4 @@
-REPO = $(shell git remote get-url origin)
+REPO = $(shell git config remote.origin.url)
 BRANCH = master
 PUBLIC = public
 FAVICONS = static/favicon.png \
@@ -23,6 +23,7 @@ clean:
 deploy: ### Deploy to
 	make clean
 	make build
+	cp -rv circle.yml public/circle.yml
 	cd public; \
 		git add -A; \
 		git commit -m ':memo: Update $(shell date "+%F %H:%M:%S")'; \
