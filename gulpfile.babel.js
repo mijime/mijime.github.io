@@ -25,8 +25,8 @@ const webpackConfig = {
   },
   'module': {
     'rules': [{
-      'test':   /\.js$/,
-      'use': ['babel-loader']
+      'test': /\.js$/,
+      'use':  ['babel-loader']
     }],
   },
   'externals': {
