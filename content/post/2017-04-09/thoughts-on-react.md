@@ -45,7 +45,7 @@ markdown -> html -> reactの流れのほうが拡張しやすく感じた。
 
 - http://prismjs.com/
 
-highlight.jsがMinifyすると中身が飛び出る問題が辛いときに使ったやつ。
+highlight.jsをMinifyすると中身が飛びでて辛いときに使ったやつ。
 
 プロセッサも分かれてるのでそのままrehypeに流せた。
 
@@ -59,7 +59,7 @@ Reactがでかすぎたので使って見た。 webpack-bundle-size-anlyzerで�
 ReactDOM + Reactが500+kbなのに対し、 Preact + Preact-compatが35kb前後？　良い。
 
 React-Reduxは普通に使えたので、 問題はなかった。  React-helmetとかReact-router周りはまだ試していない。
-ただ、Preact-helmetとかPreact-routerとかあるし、なんだかんだでまた使えそう。
+ただ、Preact-helmetやPreact-routerとかあるし、なんだかんだでまた使えそう。
 
 dio.jsとかも同様も簡単に乗り換えれるか試したけど、 Preact-compatはだいぶ頑張っているのが分かっただけだった。
 
@@ -69,8 +69,7 @@ JestやStyleGuidistなんかがReactを強要するので、 Webpackでビルド
 
 - https://milligram.github.io/
 
-マークダウンプレビューとしては簡単に綺麗に出るので良い。
-
+マークダウンプレビューとしては綺麗に表示できるので、
 みんなGithub.cssから乗り換えるべきだと思う。軽量ですし。
 
 ただ、シンプルなコンポーネントしかないので
