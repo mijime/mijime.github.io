@@ -36,6 +36,18 @@ watch: ### Watch for
 test: ### Test
 	yarn test
 
+post-diary: post-diary/index ### Add dairy (/{title})
+post-diary/%:
+	hugo new post/$(shell date +%F)/$*.md
+
+post-memo: post-diary/index ### Add memo (/{tag}/{title})
+post-memo/%:
+	hugo new post/$*.md
+
+post-slide: post-slide/index ### Add slide (/{title})
+post-slide/%:
+	hugo new slide/$(shell date +%F)/$*.md
+
 $(PUBLIC):
 	git clone --branch $(BRANCH) $(REPO) $@
 
