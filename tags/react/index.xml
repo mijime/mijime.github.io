@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>React on My snippets</title>
+    <link>https://mijime.github.io/tags/react/index.xml</link>
+    <description>Recent content in React on My snippets</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>ja</language>
+    <atom:link href="https://mijime.github.io/tags/react/index.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>React周りのライブラリのかんそう</title>
+      <link>https://mijime.github.io/post/2017-04-09/thoughts-on-react/</link>
+      <pubDate>Sun, 09 Apr 2017 22:40:10 +0900</pubDate>
+      
+      <guid>https://mijime.github.io/post/2017-04-09/thoughts-on-react/</guid>
+      <description>
+
+&lt;h2 id=&#34;作ったもの&#34;&gt;作ったもの&lt;/h2&gt;
+
+&lt;p&gt;&lt;a href=&#34;https://github.com/mijime/markdown-editor&#34;&gt;https://github.com/mijime/markdown-editor&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;ダウンロードすればオフラインでも使えるマークダウンエディタを作りたかった&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;h2 id=&#34;使ってよかったもの&#34;&gt;使ってよかったもの&lt;/h2&gt;
+
+&lt;h2 id=&#34;rehype-remark&#34;&gt;Rehype, Remark&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/wooorm/rehype&#34;&gt;https://github.com/wooorm/rehype&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/wooorm/remark&#34;&gt;https://github.com/wooorm/remark&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;HTMLやMarkdownをASTに変換してくれる。&lt;/p&gt;
+
+&lt;p&gt;MarkedがStringを既にがっちゃんこ状態で投げてくるので
+dangerouslySetInnerHTMLを使わざるえない影響が出てくる。&lt;/p&gt;
+
+&lt;p&gt;そういうときは上のRehype, RemarkでASTに変換してからReactコンポーネントにするアプローチが良さげ。&lt;/p&gt;
+
+&lt;p&gt;react-markdownていうのもあったけどcommonmarkに準拠してるらしく、テーブルの変換ができなかったので諦めた。
+あとcommonmarkが割と容量食ってたのもある。&lt;/p&gt;
+
+&lt;p&gt;remark-reactを使わなかったのはhighlight系のライブラリをかます必要があったのと
+markdown -&amp;gt; html -&amp;gt; reactの流れのほうが拡張しやすく感じた。
+絵文字対応もさくっといけたし。&lt;/p&gt;
+
+&lt;p&gt;なんかやるとき、もしくはデンジャラスなコードを強要されたときはまた使ってみたい。&lt;/p&gt;
+
+&lt;p&gt;ただ、 markedの方が軽量ではあったので、1回きりの表示ならmarkedのほうが断然良さそう。&lt;/p&gt;
+
+&lt;h2 id=&#34;prism-js&#34;&gt;Prism.js&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;http://prismjs.com/&#34;&gt;http://prismjs.com/&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;highlight.jsをMinifyすると中身が飛びでて辛いときに使ったやつ。&lt;/p&gt;
+
+&lt;p&gt;プロセッサも分かれてるのでそのままrehypeに流せた。&lt;/p&gt;
+
+&lt;p&gt;プラッガブルでなかなかに軽量なので、おすすめしていきたい。&lt;/p&gt;
+
+&lt;h2 id=&#34;preact&#34;&gt;Preact&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://preactjs.com/&#34;&gt;https://preactjs.com/&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Reactがでかすぎたので使って見た。 webpack-bundle-size-anlyzerで見る限りだと
+ReactDOM + Reactが500+kbなのに対し、 Preact + Preact-compatが35kb前後？　良い。&lt;/p&gt;
+
+&lt;p&gt;React-Reduxは普通に使えたので、 問題はなかった。  React-helmetとかReact-router周りはまだ試していない。
+ただ、Preact-helmetやPreact-routerとかあるし、なんだかんだでまた使えそう。&lt;/p&gt;
+
+&lt;p&gt;dio.jsとかも同様も簡単に乗り換えれるか試したけど、 Preact-compatはだいぶ頑張っているのが分かっただけだった。&lt;/p&gt;
+
+&lt;p&gt;JestやStyleGuidistなんかがReactを強要するので、 Webpackでビルド時のみ差し替える運用にした。&lt;/p&gt;
+
+&lt;h2 id=&#34;milligram&#34;&gt;milligram&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://milligram.github.io/&#34;&gt;https://milligram.github.io/&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;マークダウンプレビューとしては綺麗に表示できるので、
+みんなGithub.cssから乗り換えるべきだと思う。軽量ですし。&lt;/p&gt;
+
+&lt;p&gt;ただ、シンプルなコンポーネントしかないので
+UIが複雑になってきたならMaterialなんちゃら系の方が良さそう、とは思う&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;h2 id=&#34;見送ったもの&#34;&gt;見送ったもの&lt;/h2&gt;
+
+&lt;h2 id=&#34;highlight-js&#34;&gt;highlight.js&lt;/h2&gt;
+
+&lt;p&gt;みんな言語絞って使ってるくさい。最初、何度圧縮してもクソでかくて不思議だった。
+言語によっては圧縮時に飛び出る。 と思ったけどbrowserify使った時は問題なさそう。. だった？&lt;/p&gt;
+
+&lt;p&gt;使うのやめた。&lt;/p&gt;
+
+&lt;h2 id=&#34;codemirror&#34;&gt;CodeMirror&lt;/h2&gt;
+
+&lt;p&gt;重量がなかなかあったので、採用を見送った。 vim mode試したかった。&lt;/p&gt;
+
+&lt;p&gt;もっと軽量なエディタがあれば選択肢に入れたかったので、あとで探す。&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;h2 id=&#34;react-setstate&#34;&gt;React.setState&lt;/h2&gt;
+
+&lt;p&gt;ReactのsetStateは使わずにpure componentだけで構成したかったけど、
+非同期に描画してコンポーネント内だけで完結するなら、 stateを使って書いた方が切り出しやすかった。&lt;/p&gt;
+
+&lt;h2 id=&#34;flow&#34;&gt;Flow&lt;/h2&gt;
+
+&lt;p&gt;今回は頑張ってFlowtypeに立ち向かってみた。 Flow-jsdocでJSDocと同期をとりつつ、みたいなことを実現したかったが、
+type周りが対応してなかったので結局flow-commentをちりばめながら書くはめになった。&lt;/p&gt;
+
+&lt;p&gt;あと、flowさんってcommonjsスタイル読み取ってくれないのが一番のショックだった。
+他のライブラリの *.flowにビンビン反応していくのもちょいちょい辛い。&lt;/p&gt;
+</description>
+    </item>
+    
+  </channel>
+</rss>
