@@ -11,7 +11,8 @@ jobs:
     steps:
       - run: |
           curl -sSL https://github.com/spf13/hugo/releases/download/v0.19/hugo_0.19_Linux-64bit.tar.gz \
-          | tar xz -C /usr/local/bin
+          | tar -xzC /usr/local/bin \
+          && ln -sfb /usr/local/bin/hugo_0.19_linux_amd64/hugo_0.19_linux_amd64 /usr/local/bin/hugo
       - checkout
       - run: git submodule sync
       - run: git submodule update --init --recursive
