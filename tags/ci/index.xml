@@ -2,11 +2,14 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Ci on My snippets</title>
-    <link>https://mijime.github.io/tags/ci/index.xml</link>
+    <link>https://mijime.github.io/tags/ci/</link>
     <description>Recent content in Ci on My snippets</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>ja</language>
-    <atom:link href="https://mijime.github.io/tags/ci/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Thu, 26 May 2016 21:10:04 +0900</lastBuildDate>
+    
+	<atom:link href="https://mijime.github.io/tags/ci/index.xml" rel="self" type="application/rss+xml" />
+    
     
     <item>
       <title>CIを始めるのが辛い</title>
@@ -14,33 +17,7 @@
       <pubDate>Thu, 26 May 2016 21:10:04 +0900</pubDate>
       
       <guid>https://mijime.github.io/post/2016-05-26/ci-is-difficult/</guid>
-      <description>&lt;ul&gt;
-&lt;li&gt;&lt;p&gt;環境が違う&lt;/p&gt;
-
-&lt;p&gt;サービスによっては1つ前のバージョンを使っていたりする。
-開発環境は最新めなことが多いので、ハマる&lt;/p&gt;&lt;/li&gt;
-
-&lt;li&gt;&lt;p&gt;入れまくり&lt;/p&gt;
-
-&lt;p&gt;ツールやパッケージやらインストールするのにダウンロードしまくる。
-その時のリソースの潤沢な使い方に残念さを感じる&lt;/p&gt;&lt;/li&gt;
-
-&lt;li&gt;&lt;p&gt;回しすぎ&lt;/p&gt;
-
-&lt;p&gt;初期環境を構築するのに、上2つも相まって過剰にリソースを消費する。
-他人のサーバだからといって甘えすぎ&lt;/p&gt;&lt;/li&gt;
-
-&lt;li&gt;&lt;p&gt;回せない&lt;/p&gt;
-
-&lt;p&gt;headlessな環境じゃ動かなかったり。&lt;/p&gt;
-
-&lt;p&gt;expect前提だったり。&lt;/p&gt;
-
-&lt;p&gt;特殊な環境前提だったり。&lt;/p&gt;
-
-&lt;p&gt;リソースが気軽にダウンロードできなかったり&lt;/p&gt;&lt;/li&gt;
-&lt;/ul&gt;
-</description>
+      <description>環境が違う サービスによっては1つ前のバージョンを使っていたりする。 開発環境は最新めなことが多いので、ハマる 入れまくり ツールやパッケージやらイ</description>
     </item>
     
   </channel>

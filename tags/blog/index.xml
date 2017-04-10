@@ -2,11 +2,14 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Blog on My snippets</title>
-    <link>https://mijime.github.io/tags/blog/index.xml</link>
+    <link>https://mijime.github.io/tags/blog/</link>
     <description>Recent content in Blog on My snippets</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>ja</language>
-    <atom:link href="https://mijime.github.io/tags/blog/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Sat, 28 May 2016 13:48:27 +0900</lastBuildDate>
+    
+	<atom:link href="https://mijime.github.io/tags/blog/index.xml" rel="self" type="application/rss+xml" />
+    
     
     <item>
       <title>ブログの方針</title>
@@ -14,49 +17,7 @@
       <pubDate>Sat, 28 May 2016 13:48:27 +0900</pubDate>
       
       <guid>https://mijime.github.io/post/blog/blog-of-policy/</guid>
-      <description>
-
-&lt;h3 id=&#34;コンテンツ&#34;&gt;コンテンツ&lt;/h3&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;p&gt;種別&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;posts技術ログ、 雑記&lt;/li&gt;
-&lt;li&gt;slides RevealJSで操作するスライド&lt;/li&gt;
-&lt;/ul&gt;&lt;/li&gt;
-
-&lt;li&gt;&lt;p&gt;タグ&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;note雑記&lt;/li&gt;
-&lt;li&gt;tech技術ログ&lt;/li&gt;
-&lt;li&gt;meetup勉強会ログ&lt;/li&gt;
-&lt;li&gt;[技術タグ]&lt;/li&gt;
-&lt;li&gt;[勉強会タグ]&lt;/li&gt;
-&lt;/ul&gt;&lt;/li&gt;
-
-&lt;li&gt;&lt;p&gt;ディレクトリ構造&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;p&gt;note, meetup&lt;/p&gt;
-
-&lt;p&gt;&lt;code&gt;/[種別]/[日付]/[記事タイトル]&lt;/code&gt;&lt;/p&gt;&lt;/li&gt;
-
-&lt;li&gt;&lt;p&gt;tech&lt;/p&gt;
-
-&lt;p&gt;&lt;code&gt;/[種別]/[メインのタグ]/[記事タイトル]&lt;/code&gt;&lt;/p&gt;&lt;/li&gt;
-&lt;/ul&gt;&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h3 id=&#34;デプロイ方針&#34;&gt;デプロイ方針&lt;/h3&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;p&gt;記事更新以外はissue + branchで対応&lt;/p&gt;
-
-&lt;p&gt;真面目にやろう&lt;/p&gt;&lt;/li&gt;
-&lt;/ul&gt;
-</description>
+      <description>コンテンツ 種別 posts技術ログ、 雑記 slides RevealJSで操作するスライド タグ note雑記 tech技術ログ meetup勉強会ログ [技術タグ]</description>
     </item>
     
     <item>
@@ -65,10 +26,7 @@
       <pubDate>Mon, 23 May 2016 21:56:24 +0900</pubDate>
       
       <guid>https://mijime.github.io/post/blog/first-blogged/</guid>
-      <description>&lt;p&gt;何を書いてく。&lt;/p&gt;
-
-&lt;p&gt;やったネタやQiitaの下書き、外部マウンティング的な何かを行う。&lt;/p&gt;
-</description>
+      <description>何を書いてく。 やったネタやQiitaの下書き、外部マウンティング的な何かを行う。</description>
     </item>
     
   </channel>

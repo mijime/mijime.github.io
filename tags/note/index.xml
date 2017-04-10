@@ -2,11 +2,14 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Note on My snippets</title>
-    <link>https://mijime.github.io/tags/note/index.xml</link>
+    <link>https://mijime.github.io/tags/note/</link>
     <description>Recent content in Note on My snippets</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>ja</language>
-    <atom:link href="https://mijime.github.io/tags/note/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Sat, 28 May 2016 13:48:27 +0900</lastBuildDate>
+    
+	<atom:link href="https://mijime.github.io/tags/note/index.xml" rel="self" type="application/rss+xml" />
+    
     
     <item>
       <title>ブログの方針</title>
@@ -14,49 +17,7 @@
       <pubDate>Sat, 28 May 2016 13:48:27 +0900</pubDate>
       
       <guid>https://mijime.github.io/post/blog/blog-of-policy/</guid>
-      <description>
-
-&lt;h3 id=&#34;コンテンツ&#34;&gt;コンテンツ&lt;/h3&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;p&gt;種別&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;posts技術ログ、 雑記&lt;/li&gt;
-&lt;li&gt;slides RevealJSで操作するスライド&lt;/li&gt;
-&lt;/ul&gt;&lt;/li&gt;
-
-&lt;li&gt;&lt;p&gt;タグ&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;note雑記&lt;/li&gt;
-&lt;li&gt;tech技術ログ&lt;/li&gt;
-&lt;li&gt;meetup勉強会ログ&lt;/li&gt;
-&lt;li&gt;[技術タグ]&lt;/li&gt;
-&lt;li&gt;[勉強会タグ]&lt;/li&gt;
-&lt;/ul&gt;&lt;/li&gt;
-
-&lt;li&gt;&lt;p&gt;ディレクトリ構造&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;p&gt;note, meetup&lt;/p&gt;
-
-&lt;p&gt;&lt;code&gt;/[種別]/[日付]/[記事タイトル]&lt;/code&gt;&lt;/p&gt;&lt;/li&gt;
-
-&lt;li&gt;&lt;p&gt;tech&lt;/p&gt;
-
-&lt;p&gt;&lt;code&gt;/[種別]/[メインのタグ]/[記事タイトル]&lt;/code&gt;&lt;/p&gt;&lt;/li&gt;
-&lt;/ul&gt;&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h3 id=&#34;デプロイ方針&#34;&gt;デプロイ方針&lt;/h3&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;p&gt;記事更新以外はissue + branchで対応&lt;/p&gt;
-
-&lt;p&gt;真面目にやろう&lt;/p&gt;&lt;/li&gt;
-&lt;/ul&gt;
-</description>
+      <description>コンテンツ 種別 posts技術ログ、 雑記 slides RevealJSで操作するスライド タグ note雑記 tech技術ログ meetup勉強会ログ [技術タグ]</description>
     </item>
     
     <item>
@@ -65,10 +26,7 @@
       <pubDate>Thu, 26 May 2016 21:13:19 +0900</pubDate>
       
       <guid>https://mijime.github.io/post/2016-05-26/border-implement/</guid>
-      <description>&lt;p&gt;アプリ側で実装する際に、サーバ側で対応するかクライアント側で対応するか、という話。&lt;/p&gt;
-
-&lt;p&gt;場合によりけりなのは分かっているけど、思わずクライアント側で対応しがちだよね、的な。&lt;/p&gt;
-</description>
+      <description>アプリ側で実装する際に、サーバ側で対応するかクライアント側で対応するか、という話。 場合によりけりなのは分かっているけど、思わずクライアント側</description>
     </item>
     
     <item>
@@ -77,33 +35,7 @@
       <pubDate>Thu, 26 May 2016 21:10:04 +0900</pubDate>
       
       <guid>https://mijime.github.io/post/2016-05-26/ci-is-difficult/</guid>
-      <description>&lt;ul&gt;
-&lt;li&gt;&lt;p&gt;環境が違う&lt;/p&gt;
-
-&lt;p&gt;サービスによっては1つ前のバージョンを使っていたりする。
-開発環境は最新めなことが多いので、ハマる&lt;/p&gt;&lt;/li&gt;
-
-&lt;li&gt;&lt;p&gt;入れまくり&lt;/p&gt;
-
-&lt;p&gt;ツールやパッケージやらインストールするのにダウンロードしまくる。
-その時のリソースの潤沢な使い方に残念さを感じる&lt;/p&gt;&lt;/li&gt;
-
-&lt;li&gt;&lt;p&gt;回しすぎ&lt;/p&gt;
-
-&lt;p&gt;初期環境を構築するのに、上2つも相まって過剰にリソースを消費する。
-他人のサーバだからといって甘えすぎ&lt;/p&gt;&lt;/li&gt;
-
-&lt;li&gt;&lt;p&gt;回せない&lt;/p&gt;
-
-&lt;p&gt;headlessな環境じゃ動かなかったり。&lt;/p&gt;
-
-&lt;p&gt;expect前提だったり。&lt;/p&gt;
-
-&lt;p&gt;特殊な環境前提だったり。&lt;/p&gt;
-
-&lt;p&gt;リソースが気軽にダウンロードできなかったり&lt;/p&gt;&lt;/li&gt;
-&lt;/ul&gt;
-</description>
+      <description>環境が違う サービスによっては1つ前のバージョンを使っていたりする。 開発環境は最新めなことが多いので、ハマる 入れまくり ツールやパッケージやらイ</description>
     </item>
     
     <item>
@@ -112,14 +44,7 @@
       <pubDate>Mon, 23 May 2016 22:48:11 +0900</pubDate>
       
       <guid>https://mijime.github.io/post/2016-05-23/github-cli/</guid>
-      <description>&lt;p&gt;リポジトリをWebから作るのがめんどくさいので導入する。&lt;/p&gt;
-
-&lt;p&gt;&lt;a href=&#34;https://github.com/github/hub&#34;&gt;https://github.com/github/hub&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;&lt;code&gt;hub create mijime.github.io&lt;/code&gt;&lt;/p&gt;
-
-&lt;p&gt;ユーザ名とパスワードを入れるのはなんか嫌。&lt;/p&gt;
-</description>
+      <description>リポジトリをWebから作るのがめんどくさいので導入する。 https://github.com/github/hub hub create mijime.github.io ユーザ名とパスワードを入れるのはなんか嫌。</description>
     </item>
     
     <item>
@@ -128,10 +53,7 @@
       <pubDate>Mon, 23 May 2016 21:56:24 +0900</pubDate>
       
       <guid>https://mijime.github.io/post/blog/first-blogged/</guid>
-      <description>&lt;p&gt;何を書いてく。&lt;/p&gt;
-
-&lt;p&gt;やったネタやQiitaの下書き、外部マウンティング的な何かを行う。&lt;/p&gt;
-</description>
+      <description>何を書いてく。 やったネタやQiitaの下書き、外部マウンティング的な何かを行う。</description>
     </item>
     
   </channel>

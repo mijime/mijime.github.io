@@ -2,12 +2,14 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>My snippets</title>
-    <link>https://mijime.github.io/index.xml</link>
+    <link>https://mijime.github.io/</link>
     <description>Recent content on My snippets</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>ja</language>
     <lastBuildDate>Sun, 09 Apr 2017 22:40:10 +0900</lastBuildDate>
-    <atom:link href="https://mijime.github.io/index.xml" rel="self" type="application/rss+xml" />
+    
+	<atom:link href="https://mijime.github.io/index.xml" rel="self" type="application/rss+xml" />
+    
     
     <item>
       <title>React周りのライブラリのかんそう</title>
@@ -15,115 +17,7 @@
       <pubDate>Sun, 09 Apr 2017 22:40:10 +0900</pubDate>
       
       <guid>https://mijime.github.io/post/2017-04-09/thoughts-on-react/</guid>
-      <description>
-
-&lt;h2 id=&#34;作ったもの&#34;&gt;作ったもの&lt;/h2&gt;
-
-&lt;p&gt;&lt;a href=&#34;https://github.com/mijime/markdown-editor&#34;&gt;https://github.com/mijime/markdown-editor&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;ダウンロードすればオフラインでも使えるマークダウンエディタを作りたかった&lt;/p&gt;
-
-&lt;hr /&gt;
-
-&lt;h2 id=&#34;使ってよかったもの&#34;&gt;使ってよかったもの&lt;/h2&gt;
-
-&lt;h2 id=&#34;rehype-remark&#34;&gt;Rehype, Remark&lt;/h2&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;https://github.com/wooorm/rehype&#34;&gt;https://github.com/wooorm/rehype&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;https://github.com/wooorm/remark&#34;&gt;https://github.com/wooorm/remark&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;HTMLやMarkdownをASTに変換してくれる。&lt;/p&gt;
-
-&lt;p&gt;MarkedがStringを既にがっちゃんこ状態で投げてくるので
-dangerouslySetInnerHTMLを使わざるえない影響が出てくる。&lt;/p&gt;
-
-&lt;p&gt;そういうときは上のRehype, RemarkでASTに変換してからReactコンポーネントにするアプローチが良さげ。&lt;/p&gt;
-
-&lt;p&gt;react-markdownていうのもあったけどcommonmarkに準拠してるらしく、テーブルの変換ができなかったので諦めた。
-あとcommonmarkが割と容量食ってたのもある。&lt;/p&gt;
-
-&lt;p&gt;remark-reactを使わなかったのはhighlight系のライブラリをかます必要があったのと
-markdown -&amp;gt; html -&amp;gt; reactの流れのほうが拡張しやすく感じた。
-絵文字対応もさくっといけたし。&lt;/p&gt;
-
-&lt;p&gt;なんかやるとき、もしくはデンジャラスなコードを強要されたときはまた使ってみたい。&lt;/p&gt;
-
-&lt;p&gt;ただ、 markedの方が軽量ではあったので、1回きりの表示ならmarkedのほうが断然良さそう。&lt;/p&gt;
-
-&lt;h2 id=&#34;prism-js&#34;&gt;Prism.js&lt;/h2&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;http://prismjs.com/&#34;&gt;http://prismjs.com/&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;highlight.jsをMinifyすると中身が飛びでて辛いときに使ったやつ。&lt;/p&gt;
-
-&lt;p&gt;プロセッサも分かれてるのでそのままrehypeに流せた。&lt;/p&gt;
-
-&lt;p&gt;プラッガブルでなかなかに軽量なので、おすすめしていきたい。&lt;/p&gt;
-
-&lt;h2 id=&#34;preact&#34;&gt;Preact&lt;/h2&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;https://preactjs.com/&#34;&gt;https://preactjs.com/&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;Reactがでかすぎたので使って見た。 webpack-bundle-size-anlyzerで見る限りだと
-ReactDOM + Reactが500+kbなのに対し、 Preact + Preact-compatが35kb前後？　良い。&lt;/p&gt;
-
-&lt;p&gt;React-Reduxは普通に使えたので、 問題はなかった。  React-helmetとかReact-router周りはまだ試していない。
-ただ、Preact-helmetやPreact-routerとかあるし、なんだかんだでまた使えそう。&lt;/p&gt;
-
-&lt;p&gt;dio.jsとかも同様も簡単に乗り換えれるか試したけど、 Preact-compatはだいぶ頑張っているのが分かっただけだった。&lt;/p&gt;
-
-&lt;p&gt;JestやStyleGuidistなんかがReactを強要するので、 Webpackでビルド時のみ差し替える運用にした。&lt;/p&gt;
-
-&lt;h2 id=&#34;milligram&#34;&gt;milligram&lt;/h2&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;https://milligram.github.io/&#34;&gt;https://milligram.github.io/&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;マークダウンプレビューとしては綺麗に表示できるので、
-みんなGithub.cssから乗り換えるべきだと思う。軽量ですし。&lt;/p&gt;
-
-&lt;p&gt;ただ、シンプルなコンポーネントしかないので
-UIが複雑になってきたならMaterialなんちゃら系の方が良さそう、とは思う&lt;/p&gt;
-
-&lt;hr /&gt;
-
-&lt;h2 id=&#34;見送ったもの&#34;&gt;見送ったもの&lt;/h2&gt;
-
-&lt;h2 id=&#34;highlight-js&#34;&gt;highlight.js&lt;/h2&gt;
-
-&lt;p&gt;みんな言語絞って使ってるくさい。最初、何度圧縮してもクソでかくて不思議だった。
-言語によっては圧縮時に飛び出る。 と思ったけどbrowserify使った時は問題なさそう。. だった？&lt;/p&gt;
-
-&lt;p&gt;使うのやめた。&lt;/p&gt;
-
-&lt;h2 id=&#34;codemirror&#34;&gt;CodeMirror&lt;/h2&gt;
-
-&lt;p&gt;重量がなかなかあったので、採用を見送った。 vim mode試したかった。&lt;/p&gt;
-
-&lt;p&gt;もっと軽量なエディタがあれば選択肢に入れたかったので、あとで探す。&lt;/p&gt;
-
-&lt;hr /&gt;
-
-&lt;h2 id=&#34;react-setstate&#34;&gt;React.setState&lt;/h2&gt;
-
-&lt;p&gt;ReactのsetStateは使わずにpure componentだけで構成したかったけど、
-非同期に描画してコンポーネント内だけで完結するなら、 stateを使って書いた方が切り出しやすかった。&lt;/p&gt;
-
-&lt;h2 id=&#34;flow&#34;&gt;Flow&lt;/h2&gt;
-
-&lt;p&gt;今回は頑張ってFlowtypeに立ち向かってみた。 Flow-jsdocでJSDocと同期をとりつつ、みたいなことを実現したかったが、
-type周りが対応してなかったので結局flow-commentをちりばめながら書くはめになった。&lt;/p&gt;
-
-&lt;p&gt;あと、flowさんってcommonjsスタイル読み取ってくれないのが一番のショックだった。
-他のライブラリの *.flowにビンビン反応していくのもちょいちょい辛い。&lt;/p&gt;
-</description>
+      <description>作ったもの https://github.com/mijime/markdown-editor ダウンロードすればオフラインでも使えるマークダウンエディタを作りたかった 使ってよかったもの Rehype, Remark https://github.com/wooorm/rehype https://github.com/wooorm/remark HTMLやMarkdownをA</description>
     </item>
     
     <item>
@@ -132,261 +26,7 @@ type周りが対応してなかったので結局flow-commentをちりばめな�
       <pubDate>Sat, 18 Jun 2016 13:23:05 +0900</pubDate>
       
       <guid>https://mijime.github.io/post/study/kanazawa.rb/2016-06-18/</guid>
-      <description>
-
-&lt;h2 id=&#34;aws-lambdaを管理するツールlammaやってみた&#34;&gt;AWS Lambdaを管理するツールLammaやってみた&lt;/h2&gt;
-
-&lt;p&gt;Rubyで書かれたlammbaというリポジトリが上がったので
-ruby勉強会に参加がてら触ってみた&lt;/p&gt;
-
-&lt;h3 id=&#34;lamma-https-github-com-ayemos-lamma&#34;&gt;&lt;a href=&#34;https://github.com/ayemos/Lamma&#34;&gt;lamma&lt;/a&gt;&lt;/h3&gt;
-
-&lt;h3 id=&#34;作業リポジトリ&#34;&gt;作業リポジトリ&lt;/h3&gt;
-
-&lt;p&gt;&lt;a href=&#34;https://github.com/mijime/mijime.github.io/tree/content/source/study/kanazawa.rb/2016-06-18&#34;&gt;source&lt;/a&gt;&lt;/p&gt;
-
-&lt;h3 id=&#34;作業雑感&#34;&gt;作業雑感&lt;/h3&gt;
-
-&lt;p&gt;シンプルなLambda管理ツール&lt;/p&gt;
-
-&lt;h4 id=&#34;pros&#34;&gt;Pros&lt;/h4&gt;
-
-&lt;ul&gt;
-&lt;li&gt;1 dir,  1 funcなのでわかりやすいね&lt;/li&gt;
-&lt;li&gt;勝手にzipしてくれるね&lt;/li&gt;
-&lt;li&gt;Rubyなので今後拡張しやすい、のかな？&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h4 id=&#34;cons&#34;&gt;Cons&lt;/h4&gt;
-
-&lt;ul&gt;
-&lt;li&gt;nodejs, python2.7のみ対応&lt;/li&gt;
-&lt;li&gt;消したりするのめんどくさそう &amp;hellip; まぁ関数だけだからいいんだけども &amp;hellip;&lt;/li&gt;
-&lt;li&gt;node_modules入ってない？&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h3 id=&#34;作業ログ&#34;&gt;作業ログ&lt;/h3&gt;
-
-&lt;p&gt;まずは環境作成&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-ruby&#34;&gt;source &amp;quot;https://rubygems.org&amp;quot;
-
-gem &amp;quot;lamma&amp;quot;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;pre&gt;&lt;code&gt;FROM ruby
-
-COPY Gemfile /var/app/Gemfile
-WORKDIR /var/app
-RUN bundle install
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;pre&gt;&lt;code&gt;---
-version: &#39;2&#39;
-services:
-  app:
-    build: .
-    command: sleep 3600
-    environment:
-      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
-      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
-    volumes:
-      - ./scripts:/var/app/scripts
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;とりあえずインストールして実行してみる&lt;/p&gt;
-
-&lt;p&gt;AWS関連の情報を渡して &amp;hellip;&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;eval $(cat ~/.aws/credentials | awk -v FS=&amp;quot; = &amp;quot; &#39;$1~/^aws/{print &amp;quot;export&amp;quot;,toupper($1)&amp;quot;=&amp;quot;$2}&#39;)
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;関数を作成してみる&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;lamma create scripts/my-function-1 --runtime python2.7
-
-Creating function at directory ./scripts/my-function-1.
-bundler: failed to load command: lamma (/usr/local/bundle/bin/lamma)
-NoMethodError: undefined method `match&#39; for nil:NilClass
-Did you mean?  catch
-/usr/local/bundle/gems/aws-sdk-core-2.3.14/lib/aws-sdk-core/endpoint_provider.rb:67:in `block in partition_matching_region&#39;
-/usr/local/bundle/gems/aws-sdk-core-2.3.14/lib/aws-sdk-core/endpoint_provider.rb:66:in `each&#39;
-/usr/local/bundle/gems/aws-sdk-core-2.3.14/lib/aws-sdk-core/endpoint_provider.rb:66:in `find&#39;
-/usr/local/bundle/gems/aws-sdk-core-2.3.14/lib/aws-sdk-core/endpoint_provider.rb:66:in `partition_matching_region&#39;
-...
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;うーん &amp;hellip;  なぜにnil &amp;hellip;&lt;/p&gt;
-
-&lt;p&gt;AWS_REGIONを渡す&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-diff&#34;&gt;diff --git a/source/study/kanazawa.rb/2016-06-18/docker-compose.yml b/source/study/kanazawa.rb/2016-06-18/docker-compose.yml
-index e03b010..2784d3c 100644
---- a/source/study/kanazawa.rb/2016-06-18/docker-compose.yml
-+++ b/source/study/kanazawa.rb/2016-06-18/docker-compose.yml
-@@ -7,5 +7,6 @@ services:
-     environment:
-       AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
-       AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
-+      AWS_REGION: ap-northeast-1
-     volumes:
-       - ./scripts:/var/app/scripts
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;pre&gt;&lt;code&gt;$ lamma create my-function --runtime python2.7
-
-Creating function at directory ./my-function.
-Done.
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;pre&gt;&lt;code&gt;$ tree .
-
-my-function
-  ├── lambda_function.py
-  └── lamma.conf
-
-1 directory, 2 files
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;まだこの時点で関数は作られていないみたい &amp;hellip;  なんでAWS認証求められたんだ&lt;/p&gt;
-
-&lt;p&gt;deployしてみる。&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;$ lamma deploy test
-
-Loading configuration.
-Done.
-bundler: failed to load command: lamma (/usr/local/bundle/bin/lamma)
-Aws::Lambda::Errors::BadRequest:
-/usr/local/bundle/gems/aws-sdk-core-2.3.14/lib/seahorse/client/plugins/raise_response_errors.rb:15:in `call&#39;
-/usr/local/bundle/gems/aws-sdk-core-2.3.14/lib/aws-sdk-core/plugins/param_converter.rb:20:in `call&#39;
-/usr/local/bundle/gems/aws-sdk-core-2.3.14/lib/seahorse/client/plugins/response_target.rb:21:in `call&#39;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;うーん &amp;hellip;  ?&lt;/p&gt;
-
-&lt;p&gt;よくわからないのでJSで作り直す&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;$ lamma create my-function-js --runtime nodejs
-
-Creating function at directory ./my-function-js.
-Done.
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;pre&gt;&lt;code&gt;$ lamma deploy test
-
-Loading configuration.
-Done.
-Function &#39;my-function-js&#39; doesn&#39;t seem to be exists.
-Do you want to create new function &#39;my-function-js&#39; ? (y/n) y
-Creating function &#39;my-function-js&#39; ...
-bundler: failed to load command: lamma (/usr/local/bundle/bin/lamma)
-Errno::ENOENT: No such file or directory @ rb_sysopen - /tmp/d20160618-92-1fppw7/lambda.zip
-  /usr/local/bundle/gems/lamma-0.1.1/lib/lamma/function.rb:57:in `initialize&#39;
-...
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;zip &amp;hellip;&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-diff&#34;&gt;diff --git a/source/study/kanazawa.rb/2016-06-18/Dockerfile b/source/study/kanazawa.rb/2016-06-18/Dockerfile
-index f9e4aff..0595f36 100644
---- a/source/study/kanazawa.rb/2016-06-18/Dockerfile
-+++ b/source/study/kanazawa.rb/2016-06-18/Dockerfile
-@@ -3,3 +3,4 @@ FROM ruby
-COPY Gemfile /var/app/Gemfile
-WORKDIR /var/app
-RUN bundle install
-+RUN apt-get update &amp;amp;&amp;amp; apt-get install -y zip
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;pre&gt;&lt;code&gt;$ lamma deploy test
-
-Loading configuration.
-Done.
-Function &#39;my-function-js&#39; doesn&#39;t seem to be exists.
-Do you want to create new function &#39;my-function-js&#39; ? (y/n) y
-Creating function &#39;my-function-js&#39; ...
-adding: lamma.conf (deflated 17%)
-adding: index.js (deflated 45%)
-ArgumentError occured. You might need to specify role arn you want to pass to your function via &#39;lamma.conf&#39; file or ENV[&#39;AWS_LAMBDA_IAM_ROLE&#39;].
-Done.
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;ほむほむ &amp;hellip; あんましロールを書きたくないのでenvで&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;export AWS_LAMBDA_IAM_ROLE=arn:aws:iam::000000000000:role/lambda_basic_execution
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;pre&gt;&lt;code&gt;$ lamma deploy test
-
-Loading configuration.
-Done.
-Function &#39;my-function-js&#39; doesn&#39;t seem to be exists.
-Do you want to create new function &#39;my-function-js&#39; ? (y/n) y
-Creating function &#39;my-function-js&#39; ...
-adding: lamma.conf (deflated 17%)
-adding: index.js (deflated 45%)
-Done.
-Setting aliases.
-Done.
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;pre&gt;&lt;code&gt;$ lamma list-functions
-
-my-function-js
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;できた。&lt;/p&gt;
-
-&lt;h2 id=&#34;lt感想&#34;&gt;LT感想&lt;/h2&gt;
-
-&lt;h3 id=&#34;シェルチェックを使おう&#34;&gt;シェルチェックを使おう&lt;/h3&gt;
-
-&lt;ul&gt;
-&lt;li&gt;文法がバラバラなので統一する&lt;/li&gt;
-&lt;li&gt;各環境でパッケージとして提供されている&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;確かにシェルは動かすの簡単だけど、 他の環境で動かないことが多い &amp;hellip;&lt;/p&gt;
-
-&lt;h3 id=&#34;shunit2を使おう&#34;&gt;shUnit2を使おう&lt;/h3&gt;
-
-&lt;ul&gt;
-&lt;li&gt;対応シェルも幅広い&lt;/li&gt;
-&lt;li&gt;ダウンロードするだけで使える！&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;bats派だけど、 msysでも早いなら乗り換えたいかも&lt;/p&gt;
-
-&lt;h3 id=&#34;dokku&#34;&gt;Dokku&lt;/h3&gt;
-
-&lt;ul&gt;
-&lt;li&gt;Heroku like&lt;/li&gt;
-&lt;li&gt;前面にnginxがあって、 コンテナにルーティング&lt;/li&gt;
-&lt;li&gt;herokuのbuild packsも利用できるので良い！&lt;/li&gt;
-&lt;li&gt;運用メンテナンスが気になるところ&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;スケーリングしないとかで敬遠してたけども、 開発環境で利用するなら楽だよなぁ&lt;/p&gt;
-
-&lt;p&gt;だいぶバージョンアップされているとのことなので、触ってみたい&lt;/p&gt;
-
-&lt;p&gt;もっと利用されるという話なので、その話を聞いてからかな？&lt;/p&gt;
-
-&lt;p&gt;dokku-altとの違いもあとで調べておこう &amp;hellip;&lt;/p&gt;
-
-&lt;h3 id=&#34;awssummit&#34;&gt;AWSSummit&lt;/h3&gt;
-
-&lt;p&gt;SIerが完全に淘汰されちゃう感じ&lt;/p&gt;
-
-&lt;p&gt;PaaS, SaaSの流行には全然触れてなかったので、 今回の話を機会に調べてみよう &amp;hellip;&lt;/p&gt;
-
-&lt;h3 id=&#34;iot&#34;&gt;Iot&lt;/h3&gt;
-
-&lt;p&gt;書き込むのに結構ツールが必要なんですね &amp;hellip;&lt;/p&gt;
-
-&lt;p&gt;IOT超絶敷居高い。&lt;/p&gt;
-</description>
+      <description>AWS Lambdaを管理するツールLammaやってみた Rubyで書かれたlammbaというリポジトリが上がったので ruby勉強会に参加がてら触っ</description>
     </item>
     
     <item>
@@ -395,45 +35,7 @@ my-function-js
       <pubDate>Tue, 31 May 2016 22:41:30 +0900</pubDate>
       
       <guid>https://mijime.github.io/post/hugo/code-mermaid/</guid>
-      <description>&lt;p&gt;code.language-mermaidを変換するスクリプトを噛ませただけだけど。&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-mermaid&#34;&gt;  graph TD;
-    A--&amp;gt;B;
-    A--&amp;gt;C;
-    B--&amp;gt;D;
-    C--&amp;gt;D;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-mermaid&#34;&gt;  gantt
-    dateFormat  YYYY-MM-DD
-    title Adding GANTT diagram functionality to mermaid
-    section A section
-    Completed task: done,   des1,       2014-01-06, 2014-01-08
-    Active task:    active, des2,       2014-01-09, 3d
-    Future task:    des3,   after des2, 5d
-    Future task2:   des4,   after des3, 5d
-    section Critical tasks
-    Completed task in the critical line :crit, done, 2014-01-06, 24h
-    Implement parser and jison          :crit, done, after des1, 2d
-    Create tests for parser             :crit, active, 3d
-    Future task in critical line        :crit, 5d
-    Create tests for renderer           :2d
-    Add to mermaid                      :1d
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-mermaid&#34;&gt;  sequenceDiagram
-    participant Alice
-    participant Bob
-    Alice-&amp;gt;John: Hello John, how are you?
-    loop Healthcheck
-    John-&amp;gt;John: Fight against hypochondria
-    end
-    Note right of John: Rational thoughts prevail...
-    John--&amp;gt;Alice: Great!
-    John-&amp;gt;Bob: How about you?
-    Bob--&amp;gt;John: Jolly good!
-&lt;/code&gt;&lt;/pre&gt;
-</description>
+      <description>code.language-mermaidを変換するスクリプトを噛ませただけだけど。 graph TD; A--&amp;gt;B; A--&amp;gt;C; B--&amp;gt;D; C--&amp;gt;D; gantt dateFormat YYYY-MM-DD title Adding GANTT diagram functionality to mermaid section A section Completed task: done, des1, 2014-01-06, 2014-01-08 Active task: active,</description>
     </item>
     
     <item>
@@ -442,105 +44,7 @@ my-function-js
       <pubDate>Sat, 28 May 2016 21:12:36 +0900</pubDate>
       
       <guid>https://mijime.github.io/post/js/cosine-similarity/</guid>
-      <description>
-
-&lt;p&gt;他のブログを参考にすると関連記事というのを最後に表示しているらしい。&lt;/p&gt;
-
-&lt;p&gt;まだ記事の数は少ないけど、ある程度近い記事を探すことができるようにする。&lt;/p&gt;
-
-&lt;h3 id=&#34;類似度の取得&#34;&gt;類似度の取得&lt;/h3&gt;
-
-&lt;p&gt;&amp;ldquo;MeCab&amp;rdquo; + &amp;ldquo;類似&amp;rdquo; でググったら、コサイン類似度なるものがあるとのこと。&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;http://www.cse.kyoto-su.ac.jp/~g0846020/keywords/cosinSimilarity.html&#34;&gt;コサイン類似度&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;http://qiita.com/nmbakfm/items/6bb91b89571dd68fcea6&#34;&gt;TF-IDF Cos類似度推定法&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;このブログはjs + hugoで書いているので、
-&lt;a href=&#34;https://www.npmjs.com/package/kuromoji&#34;&gt;kuromoji&lt;/a&gt; のラッパー
-&lt;a href=&#34;https://www.npmjs.com/package/kuromojin&#34;&gt;kuromojin&lt;/a&gt; を使って形態素解析する。&lt;/p&gt;
-
-&lt;h3 id=&#34;コード解説&#34;&gt;コード解説&lt;/h3&gt;
-
-&lt;p&gt;&lt;a href=&#34;https://github.com/mijime/mijime.github.io/blob/content/source/js/similarity/index.js&#34;&gt;コード全体&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;テキストを分解して、 単語と出現回数を記録する。&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-javascript&#34;&gt;async function parseVector(text) {
-  const tokens = await tokenize(text);
-  return tokens.reduce((acc, next) =&amp;gt; {
-    if (!isTargetToken(next)) {
-      return acc;
-    }
-
-    if (acc[next.surface_form]) {
-      acc[next.surface_form] ++;
-    } else {
-      acc[next.surface_form] = 1;
-    }
-
-    return acc;
-  }, {});
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;出現回数を数えるのは名詞で3文字以上の単語のみ。&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-javascript&#34;&gt;function isTargetToken(token) {
-  return token.pos === &#39;名詞&#39;
-    &amp;amp;&amp;amp; token.surface_form.length &amp;gt;= 3
-    &amp;amp;&amp;amp; (token.basic_form !== &#39;*&#39;
-        || token.surface_form.match(/^[\wA-Z]+$/));
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;あとは計算しておしまい。&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-javascript&#34;&gt;function cosineSimilarity(curr, next) {
-  const currKeys = Object.keys(curr);
-  const nextKeys = Object.keys(next);
-  const keys = currKeys.concat(nextKeys)
-    .filter((v, i, self) =&amp;gt; self.indexOf(v) === i);
-
-  const baseScore = keys
-    .map(k =&amp;gt; (curr[k] || 0) * (next[k] || 0))
-    .reduce((acc, c) =&amp;gt; acc + c, 0);
-
-  const currScore = keys
-    .map(k =&amp;gt; curr[k] ? Math.pow(curr[k], 2) : 0)
-    .reduce((acc, c) =&amp;gt; acc + c, 0);
-
-  const nextScore = keys
-    .map(k =&amp;gt; next[k] ? Math.pow(next[k], 2) : 0)
-    .reduce((acc, c) =&amp;gt; acc + c, 0);
-
-  const score = baseScore
-    ? baseScore / (Math.sqrt(currScore) * Math.sqrt(nextScore))
-    : 0;
-  const words = keys.filter(k =&amp;gt; curr[k] &amp;amp;&amp;amp; next[k]);
-  return {score, words};
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h3 id=&#34;実行結果&#34;&gt;実行結果&lt;/h3&gt;
-
-&lt;p&gt;うーん、全然関係ない単語でしか一致しない、、、その通りではあるんだけど&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;babel-node source/js/similarity &amp;quot;content/posts/js/cosine-similarity.md&amp;quot; &amp;quot;content&amp;quot;
-
-25.26%  content\posts\2016-05-23\github-cli.md  com, https, mijime, github
-0%      content\posts\2016-05-26\border-implement.md
-0%      content\posts\2016-05-26\ci-is-difficult.md
-0%      content\posts\blog\first-blogged.md
-0%      content\posts\hugo\code-mermaid.md
-20.9%   content\posts\hugo\hugo-deploy.md       branch, content
-100%    content\posts\js\cosine-similarity.md   100, 2016, 89571, MeCab, コサイン
-9.93%   content\posts\blog\blog-of-policy.md    branch, posts, slides
-1.98%   content\posts\hugo\hugo-pagination.md   html, pagination
-3.52%   content\slides\2016-05-27\my-first-slide.md     html
-&lt;/code&gt;&lt;/pre&gt;
-</description>
+      <description>他のブログを参考にすると関連記事というのを最後に表示しているらしい。 まだ記事の数は少ないけど、ある程度近い記事を探すことができるようにする。</description>
     </item>
     
     <item>
@@ -549,49 +53,7 @@ my-function-js
       <pubDate>Sat, 28 May 2016 13:48:27 +0900</pubDate>
       
       <guid>https://mijime.github.io/post/blog/blog-of-policy/</guid>
-      <description>
-
-&lt;h3 id=&#34;コンテンツ&#34;&gt;コンテンツ&lt;/h3&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;p&gt;種別&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;posts技術ログ、 雑記&lt;/li&gt;
-&lt;li&gt;slides RevealJSで操作するスライド&lt;/li&gt;
-&lt;/ul&gt;&lt;/li&gt;
-
-&lt;li&gt;&lt;p&gt;タグ&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;note雑記&lt;/li&gt;
-&lt;li&gt;tech技術ログ&lt;/li&gt;
-&lt;li&gt;meetup勉強会ログ&lt;/li&gt;
-&lt;li&gt;[技術タグ]&lt;/li&gt;
-&lt;li&gt;[勉強会タグ]&lt;/li&gt;
-&lt;/ul&gt;&lt;/li&gt;
-
-&lt;li&gt;&lt;p&gt;ディレクトリ構造&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;p&gt;note, meetup&lt;/p&gt;
-
-&lt;p&gt;&lt;code&gt;/[種別]/[日付]/[記事タイトル]&lt;/code&gt;&lt;/p&gt;&lt;/li&gt;
-
-&lt;li&gt;&lt;p&gt;tech&lt;/p&gt;
-
-&lt;p&gt;&lt;code&gt;/[種別]/[メインのタグ]/[記事タイトル]&lt;/code&gt;&lt;/p&gt;&lt;/li&gt;
-&lt;/ul&gt;&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h3 id=&#34;デプロイ方針&#34;&gt;デプロイ方針&lt;/h3&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;p&gt;記事更新以外はissue + branchで対応&lt;/p&gt;
-
-&lt;p&gt;真面目にやろう&lt;/p&gt;&lt;/li&gt;
-&lt;/ul&gt;
-</description>
+      <description>コンテンツ 種別 posts技術ログ、 雑記 slides RevealJSで操作するスライド タグ note雑記 tech技術ログ meetup勉強会ログ [技術タグ]</description>
     </item>
     
     <item>
@@ -600,39 +62,7 @@ my-function-js
       <pubDate>Fri, 27 May 2016 14:20:56 +0900</pubDate>
       
       <guid>https://mijime.github.io/slide/2016-05-27/my-first-slide/</guid>
-      <description>
-
-&lt;h1 id=&#34;hugoでreveal-jsを始める&#34;&gt;HugoでReveal JSを始める&lt;/h1&gt;
-
-&lt;blockquote&gt;
-&lt;blockquote&gt;
-&lt;blockquote&gt;
-&lt;/blockquote&gt;
-&lt;/blockquote&gt;
-&lt;/blockquote&gt;
-
-&lt;ul&gt;
-&lt;li&gt;始める&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;hr /&gt;
-
-&lt;h1 id=&#34;始めた&#34;&gt;始めた&lt;/h1&gt;
-
-&lt;hr /&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-html&#34;&gt;&amp;lt;div&amp;gt;
-  hello world
-&amp;lt;/div&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-mermaid&#34;&gt;  graph TD;
-    A--&amp;gt;B;
-    A--&amp;gt;C;
-    B--&amp;gt;D;
-    C--&amp;gt;D;
-&lt;/code&gt;&lt;/pre&gt;
-</description>
+      <description>HugoでReveal JSを始める 始める 始めた &amp;lt;div&amp;gt; hello world &amp;lt;/div&amp;gt; graph TD; A--&amp;gt;B; A--&amp;gt;C; B--&amp;gt;D; C--&amp;gt;D;</description>
     </item>
     
     <item>
@@ -641,10 +71,7 @@ my-function-js
       <pubDate>Thu, 26 May 2016 21:13:19 +0900</pubDate>
       
       <guid>https://mijime.github.io/post/2016-05-26/border-implement/</guid>
-      <description>&lt;p&gt;アプリ側で実装する際に、サーバ側で対応するかクライアント側で対応するか、という話。&lt;/p&gt;
-
-&lt;p&gt;場合によりけりなのは分かっているけど、思わずクライアント側で対応しがちだよね、的な。&lt;/p&gt;
-</description>
+      <description>アプリ側で実装する際に、サーバ側で対応するかクライアント側で対応するか、という話。 場合によりけりなのは分かっているけど、思わずクライアント側</description>
     </item>
     
     <item>
@@ -653,33 +80,7 @@ my-function-js
       <pubDate>Thu, 26 May 2016 21:10:04 +0900</pubDate>
       
       <guid>https://mijime.github.io/post/2016-05-26/ci-is-difficult/</guid>
-      <description>&lt;ul&gt;
-&lt;li&gt;&lt;p&gt;環境が違う&lt;/p&gt;
-
-&lt;p&gt;サービスによっては1つ前のバージョンを使っていたりする。
-開発環境は最新めなことが多いので、ハマる&lt;/p&gt;&lt;/li&gt;
-
-&lt;li&gt;&lt;p&gt;入れまくり&lt;/p&gt;
-
-&lt;p&gt;ツールやパッケージやらインストールするのにダウンロードしまくる。
-その時のリソースの潤沢な使い方に残念さを感じる&lt;/p&gt;&lt;/li&gt;
-
-&lt;li&gt;&lt;p&gt;回しすぎ&lt;/p&gt;
-
-&lt;p&gt;初期環境を構築するのに、上2つも相まって過剰にリソースを消費する。
-他人のサーバだからといって甘えすぎ&lt;/p&gt;&lt;/li&gt;
-
-&lt;li&gt;&lt;p&gt;回せない&lt;/p&gt;
-
-&lt;p&gt;headlessな環境じゃ動かなかったり。&lt;/p&gt;
-
-&lt;p&gt;expect前提だったり。&lt;/p&gt;
-
-&lt;p&gt;特殊な環境前提だったり。&lt;/p&gt;
-
-&lt;p&gt;リソースが気軽にダウンロードできなかったり&lt;/p&gt;&lt;/li&gt;
-&lt;/ul&gt;
-</description>
+      <description>環境が違う サービスによっては1つ前のバージョンを使っていたりする。 開発環境は最新めなことが多いので、ハマる 入れまくり ツールやパッケージやらイ</description>
     </item>
     
     <item>
@@ -688,31 +89,7 @@ my-function-js
       <pubDate>Wed, 25 May 2016 14:05:50 +0900</pubDate>
       
       <guid>https://mijime.github.io/post/hugo/hugo-pagination/</guid>
-      <description>&lt;p&gt;&lt;/p&gt;
-
-&lt;p&gt;.Paginatorを使えば自動でやってくれるみたい&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-html&#34;&gt;{{- range (.Paginator 10).Pages }}
-&amp;lt;div&amp;gt;
-  {{ .Content }}
-&amp;lt;/div&amp;gt;
-{{- end }}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;次頁、前頁へのリンクも .Paginatorを使う&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-html&#34;&gt;{{- if or (.Paginator.HasPrev) (.Paginator.HasNext) }}
-&amp;lt;nav role=&amp;quot;pagination&amp;quot;&amp;gt;
-  {{- if .Paginator.HasPrev }}
-    &amp;lt;a href=&amp;quot;{{ .Paginator.Prev.URL }}&amp;quot;&amp;gt;Prev&amp;lt;/a&amp;gt;
-  {{- end }}
-    &amp;lt;span class=&amp;quot;&amp;quot;&amp;gt;Page {{ .Paginator.PageNumber }} of {{ .Paginator.TotalPages }}&amp;lt;/span&amp;gt;
-  {{- if .Paginator.HasNext }}
-    &amp;lt;a href=&amp;quot;{{ .Paginator.Next.URL }}&amp;quot;&amp;gt;Next&amp;lt;/a&amp;gt;
-  {{- end }}
-&amp;lt;/nav&amp;gt;
-{{end}}
-&lt;/code&gt;&lt;/pre&gt;</description>
+      <description>&lt;p&gt;&lt;/p&gt;</description>
     </item>
     
     <item>
@@ -721,14 +98,7 @@ my-function-js
       <pubDate>Mon, 23 May 2016 22:48:11 +0900</pubDate>
       
       <guid>https://mijime.github.io/post/2016-05-23/github-cli/</guid>
-      <description>&lt;p&gt;リポジトリをWebから作るのがめんどくさいので導入する。&lt;/p&gt;
-
-&lt;p&gt;&lt;a href=&#34;https://github.com/github/hub&#34;&gt;https://github.com/github/hub&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;&lt;code&gt;hub create mijime.github.io&lt;/code&gt;&lt;/p&gt;
-
-&lt;p&gt;ユーザ名とパスワードを入れるのはなんか嫌。&lt;/p&gt;
-</description>
+      <description>リポジトリをWebから作るのがめんどくさいので導入する。 https://github.com/github/hub hub create mijime.github.io ユーザ名とパスワードを入れるのはなんか嫌。</description>
     </item>
     
     <item>
@@ -737,15 +107,7 @@ my-function-js
       <pubDate>Mon, 23 May 2016 22:39:17 +0900</pubDate>
       
       <guid>https://mijime.github.io/post/hugo/hugo-deploy/</guid>
-      <description>&lt;p&gt;master branchのみ適用されるらしいので、&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;生成元はcontent branch&lt;/li&gt;
-&lt;li&gt;public配下はmaster branch&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;みたいな本来の使い方ではない使い方で運用する。&lt;/p&gt;
-</description>
+      <description>master branchのみ適用されるらしいので、 生成元はcontent branch public配下はmaster branch みたいな本来の使い方ではない使い方で運用する</description>
     </item>
     
     <item>
@@ -754,10 +116,7 @@ my-function-js
       <pubDate>Mon, 23 May 2016 21:56:24 +0900</pubDate>
       
       <guid>https://mijime.github.io/post/blog/first-blogged/</guid>
-      <description>&lt;p&gt;何を書いてく。&lt;/p&gt;
-
-&lt;p&gt;やったネタやQiitaの下書き、外部マウンティング的な何かを行う。&lt;/p&gt;
-</description>
+      <description>何を書いてく。 やったネタやQiitaの下書き、外部マウンティング的な何かを行う。</description>
     </item>
     
   </channel>

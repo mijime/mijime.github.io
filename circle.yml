@@ -10,9 +10,9 @@ jobs:
       - image: node:latest
     steps:
       - run: |
-          curl -sSL https://github.com/spf13/hugo/releases/download/v0.19/hugo_0.19_Linux-64bit.tar.gz \
+          curl -sSL https://github.com/spf13/hugo/releases/download/v0.20/hugo_0.20_Linux-64bit.tar.gz \
           | tar -xzC /usr/local/bin \
-          && ln -sfb /usr/local/bin/hugo_0.19_linux_amd64/hugo_0.19_linux_amd64 /usr/local/bin/hugo
+          && ln -sfb /usr/local/bin/hugo_0.20_linux_amd64/hugo_0.20_linux_amd64 /usr/local/bin/hugo
       - checkout
       - run: git submodule sync
       - run: git submodule update --init --recursive

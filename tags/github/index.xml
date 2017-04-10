@@ -2,11 +2,14 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Github on My snippets</title>
-    <link>https://mijime.github.io/tags/github/index.xml</link>
+    <link>https://mijime.github.io/tags/github/</link>
     <description>Recent content in Github on My snippets</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>ja</language>
-    <atom:link href="https://mijime.github.io/tags/github/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Mon, 23 May 2016 22:48:11 +0900</lastBuildDate>
+    
+	<atom:link href="https://mijime.github.io/tags/github/index.xml" rel="self" type="application/rss+xml" />
+    
     
     <item>
       <title>introduce a GitHub cli</title>
@@ -14,14 +17,7 @@
       <pubDate>Mon, 23 May 2016 22:48:11 +0900</pubDate>
       
       <guid>https://mijime.github.io/post/2016-05-23/github-cli/</guid>
-      <description>&lt;p&gt;リポジトリをWebから作るのがめんどくさいので導入する。&lt;/p&gt;
-
-&lt;p&gt;&lt;a href=&#34;https://github.com/github/hub&#34;&gt;https://github.com/github/hub&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;&lt;code&gt;hub create mijime.github.io&lt;/code&gt;&lt;/p&gt;
-
-&lt;p&gt;ユーザ名とパスワードを入れるのはなんか嫌。&lt;/p&gt;
-</description>
+      <description>リポジトリをWebから作るのがめんどくさいので導入する。 https://github.com/github/hub hub create mijime.github.io ユーザ名とパスワードを入れるのはなんか嫌。</description>
     </item>
     
   </channel>
