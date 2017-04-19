@@ -32,7 +32,7 @@
     <item>
       <title>Development</title>
       <link>https://mijime.github.io/tags/development/</link>
-      <pubDate>Sun, 09 Apr 2017 22:40:10 +0900</pubDate>
+      <pubDate>Thu, 20 Apr 2017 07:48:28 +0900</pubDate>
       
       <guid>https://mijime.github.io/tags/development/</guid>
       <description></description>
@@ -48,11 +48,29 @@
     </item>
     
     <item>
+      <title>Golang</title>
+      <link>https://mijime.github.io/tags/golang/</link>
+      <pubDate>Tue, 11 Apr 2017 10:25:47 +0900</pubDate>
+      
+      <guid>https://mijime.github.io/tags/golang/</guid>
+      <description></description>
+    </item>
+    
+    <item>
       <title>Hugo</title>
       <link>https://mijime.github.io/tags/hugo/</link>
       <pubDate>Wed, 25 May 2016 14:05:50 +0900</pubDate>
       
       <guid>https://mijime.github.io/tags/hugo/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Javascript</title>
+      <link>https://mijime.github.io/tags/javascript/</link>
+      <pubDate>Thu, 20 Apr 2017 07:48:28 +0900</pubDate>
+      
+      <guid>https://mijime.github.io/tags/javascript/</guid>
       <description></description>
     </item>
     

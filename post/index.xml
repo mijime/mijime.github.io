@@ -6,10 +6,28 @@
     <description>Recent content in Posts on My snippets</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>ja</language>
-    <lastBuildDate>Sun, 09 Apr 2017 22:40:10 +0900</lastBuildDate>
+    <lastBuildDate>Thu, 20 Apr 2017 07:48:28 +0900</lastBuildDate>
     
 	<atom:link href="https://mijime.github.io/post/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>regexp recursive</title>
+      <link>https://mijime.github.io/post/2017-04-20/regexp-recursive/</link>
+      <pubDate>Thu, 20 Apr 2017 07:48:28 +0900</pubDate>
+      
+      <guid>https://mijime.github.io/post/2017-04-20/regexp-recursive/</guid>
+      <description>JSの正規表現の再帰にはまったのでメモる 再帰的に正規表現で抜き出して詰めたい場合があるとする。 function regexpr(re, text, acc=[]) { const res = re.exec(text); return res ? regexpr( re, text.substr(res.index + res[0].length, text.length), acc.concat(res)) : acc; } こ</description>
+    </item>
+    
+    <item>
+      <title>docker compose 3</title>
+      <link>https://mijime.github.io/post/2017-04-11/docker-compose-3/</link>
+      <pubDate>Tue, 11 Apr 2017 10:25:47 +0900</pubDate>
+      
+      <guid>https://mijime.github.io/post/2017-04-11/docker-compose-3/</guid>
+      <description>いつバージョン3になったんだ、、あとで差分チェックする</description>
+    </item>
     
     <item>
       <title>React周りのライブラリのかんそう</title>

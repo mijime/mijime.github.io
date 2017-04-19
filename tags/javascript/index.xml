@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Javascript on My snippets</title>
+    <link>https://mijime.github.io/tags/javascript/</link>
+    <description>Recent content in Javascript on My snippets</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>ja</language>
+    <lastBuildDate>Thu, 20 Apr 2017 07:48:28 +0900</lastBuildDate>
+    
+	<atom:link href="https://mijime.github.io/tags/javascript/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>regexp recursive</title>
+      <link>https://mijime.github.io/post/2017-04-20/regexp-recursive/</link>
+      <pubDate>Thu, 20 Apr 2017 07:48:28 +0900</pubDate>
+      
+      <guid>https://mijime.github.io/post/2017-04-20/regexp-recursive/</guid>
+      <description>JSの正規表現の再帰にはまったのでメモる 再帰的に正規表現で抜き出して詰めたい場合があるとする。 function regexpr(re, text, acc=[]) { const res = re.exec(text); return res ? regexpr( re, text.substr(res.index + res[0].length, text.length), acc.concat(res)) : acc; } こ</description>
+    </item>
+    
+  </channel>
+</rss>
