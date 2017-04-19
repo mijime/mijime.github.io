@@ -29,6 +29,8 @@ function regexpr(re, text, acc=[]) {
 ```js
 regexpr(/hello|world/,  "hello world"); // => ["hello", "world"]
 regexpr(/hello|world/g, "hello world"); // => ["hello"]
+regexpr(/hello|world/ , "hello world hello world"); // => ["hello", "world", "hello", "world"]
+regexpr(/hello|world/g, "hello world hello world"); // => ["hello", "hello"]
 ```
 
 indexや結果は変わらないのに、なんでだろう
