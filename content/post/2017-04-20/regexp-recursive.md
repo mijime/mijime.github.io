@@ -5,12 +5,12 @@ Tags = ["Development","JavaScript"]
 
 date = "2017-04-20T07:48:28+09:00"
 
-title = "regexp recursive"
+title = "JSの正規表現の再帰にはまった"
 
 draft = false
 +++
 
-JSの正規表現の再帰にはまったのでメモる
+のでメモる
 
 再帰的に正規表現で抜き出して詰めたい場合があるとする。
 
