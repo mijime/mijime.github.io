@@ -90,7 +90,7 @@ ga("send", "pageview");
         <div class="post">
           <h2 class="post-title">
             <a href="https://mijime.github.io/post/2017-04-20/regexp-recursive/">
-              regexp recursive
+              JSの正規表現の再帰にはまった
             </a>
           </h2>
           <time class="post-date" datetime="2017-04-20T07:48">
@@ -110,7 +110,7 @@ ga("send", "pageview");
 
 
 
-            <p>JSの正規表現の再帰にはまったのでメモる 再帰的に正規表現で抜き出して詰めたい場合があるとする。 function regexpr(re, text, acc=[]) { const res = re.exec(text); return res ? regexpr( re, text.substr(res.index + res[0].length, text.length), acc.concat(res)) : acc; } こ</p>
+            <p>のでメモる 再帰的に正規表現で抜き出して詰めたい場合があるとする。 function regexpr(re, text, acc=[]) { const res = re.exec(text); return res ? regexpr( re, text.substr(res.index + res[0].length, text.length), acc.concat(res)) : acc; } このときchromeさんだと、 g</p>
             <a href="/post/2017-04-20/regexp-recursive/">More...</a>
           </div>
         </div>

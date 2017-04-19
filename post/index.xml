@@ -12,12 +12,12 @@
     
     
     <item>
-      <title>regexp recursive</title>
+      <title>JSの正規表現の再帰にはまった</title>
       <link>https://mijime.github.io/post/2017-04-20/regexp-recursive/</link>
       <pubDate>Thu, 20 Apr 2017 07:48:28 +0900</pubDate>
       
       <guid>https://mijime.github.io/post/2017-04-20/regexp-recursive/</guid>
-      <description>JSの正規表現の再帰にはまったのでメモる 再帰的に正規表現で抜き出して詰めたい場合があるとする。 function regexpr(re, text, acc=[]) { const res = re.exec(text); return res ? regexpr( re, text.substr(res.index + res[0].length, text.length), acc.concat(res)) : acc; } こ</description>
+      <description>のでメモる 再帰的に正規表現で抜き出して詰めたい場合があるとする。 function regexpr(re, text, acc=[]) { const res = re.exec(text); return res ? regexpr( re, text.substr(res.index + res[0].length, text.length), acc.concat(res)) : acc; } このときchromeさんだと、 g</description>
     </item>
     
     <item>
