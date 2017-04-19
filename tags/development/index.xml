@@ -47,5 +47,23 @@
       <description>AWS Lambdaを管理するツールLammaやってみた Rubyで書かれたlammbaというリポジトリが上がったので ruby勉強会に参加がてら触っ</description>
     </item>
     
+    <item>
+      <title>mermaidに対応した</title>
+      <link>https://mijime.github.io/post/hugo/code-mermaid/</link>
+      <pubDate>Tue, 31 May 2016 22:41:30 +0900</pubDate>
+      
+      <guid>https://mijime.github.io/post/hugo/code-mermaid/</guid>
+      <description>code.language-mermaidを変換するスクリプトを噛ませただけだけど。 graph TD; A--&amp;gt;B; A--&amp;gt;C; B--&amp;gt;D; C--&amp;gt;D; gantt dateFormat YYYY-MM-DD title Adding GANTT diagram functionality to mermaid section A section Completed task: done, des1, 2014-01-06, 2014-01-08 Active task: active,</description>
+    </item>
+    
+    <item>
+      <title>関連記事を探す</title>
+      <link>https://mijime.github.io/post/js/cosine-similarity/</link>
+      <pubDate>Sat, 28 May 2016 21:12:36 +0900</pubDate>
+      
+      <guid>https://mijime.github.io/post/js/cosine-similarity/</guid>
+      <description>他のブログを参考にすると関連記事というのを最後に表示しているらしい。 まだ記事の数は少ないけど、ある程度近い記事を探すことができるようにする。</description>
+    </item>
+    
   </channel>
 </rss>

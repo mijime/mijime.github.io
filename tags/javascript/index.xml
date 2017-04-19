@@ -20,5 +20,14 @@
       <description>のでメモる 再帰的に正規表現で抜き出して詰めたい場合があるとする。 function regexpr(re, text, acc=[]) { const res = re.exec(text); return res ? regexpr( re, text.substr(res.index + res[0].length, text.length), acc.concat(res)) : acc; } このときchromeさんだと、 g</description>
     </item>
     
+    <item>
+      <title>関連記事を探す</title>
+      <link>https://mijime.github.io/post/js/cosine-similarity/</link>
+      <pubDate>Sat, 28 May 2016 21:12:36 +0900</pubDate>
+      
+      <guid>https://mijime.github.io/post/js/cosine-similarity/</guid>
+      <description>他のブログを参考にすると関連記事というのを最後に表示しているらしい。 まだ記事の数は少ないけど、ある程度近い記事を探すことができるようにする。</description>
+    </item>
+    
   </channel>
 </rss>
