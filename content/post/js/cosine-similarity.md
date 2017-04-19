@@ -5,7 +5,7 @@ draft = false
 
 title = "関連記事を探す"
 
-tags = ["tech", "js"]
+tags = ["Development", "JavaScript"]
 +++
 
 他のブログを参考にすると関連記事というのを最後に表示しているらしい。

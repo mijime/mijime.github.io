@@ -5,7 +5,7 @@ draft = false
 
 title = "mermaidに対応した"
 
-tags = ["tech", "mermaid"]
+tags = ["Development", "mermaid"]
 +++
 
 code.language-mermaidを変換するスクリプトを噛ませただけだけど。
