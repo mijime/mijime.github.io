@@ -1,4 +1,4 @@
-Lambda から git のコミットログをハンドリングする
+Python で git のコミットログをハンドリングする
 ===
 
 Git がインストールされていない環境でログを取得し、ハンドリングする
@@ -23,8 +23,6 @@ def get_first_commit_time(repo):
     for entry in repo.get_walker():
         return entry.commit.commit_time
 ```
-
-Java でやる場合は JGit が主流な模様
 
 ## Reference
 
