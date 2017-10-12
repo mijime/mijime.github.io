@@ -1,5 +1,5 @@
-!scripts/index.py
-scripts/*
+!app/index.py
+app/*
 *.zip
 *.compiled
 

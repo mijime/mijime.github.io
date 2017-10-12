@@ -9,7 +9,7 @@ Resources:
   Lambda:
     Type: AWS::Lambda::Function
     Properties:
-      Code: ./scripts
+      Code: ./app
       Handler: index.lambda_handler
       MemorySize: 128
       Runtime: python3.6
