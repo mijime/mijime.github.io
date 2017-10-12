@@ -38,7 +38,7 @@ def fetch_trend_repolist(tag="", since="daily"):
         desc = repo.select(".py-1 p")[0].getText().strip()
         yield TRENDS_FORMAT.format(title=title, url=url, desc=desc)
 
-def get_first_commit_time(repo):
+def get_latest_commit_time(repo):
     for entry in itertools.islice(repo.get_walker(), 1):
         return entry.commit.commit_time
 
@@ -53,7 +53,7 @@ def fetch_repo(repo=None, url=None):
 def lambda_handler(event, context):
     url = os.getenv("GIT_REPO")
     repo = fetch_repo(repo=MemoryRepo(), url=url)
-    elapsed_sec = datetime.now().timestamp() - get_first_commit_time(repo)
+    elapsed_sec = datetime.now().timestamp() - get_latest_commit_time(repo)
     elapsed_day = math.floor(elapsed_sec/UNIT_DAYS_TO_SEC)
 
     print("elapsed_sec: {elapsed_sec:f} s".format(elapsed_sec=elapsed_sec))
