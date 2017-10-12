@@ -56,7 +56,7 @@ def lambda_handler(event, context):
     elapsed_sec = datetime.now().timestamp() - get_first_commit_time(repo)
     elapsed_day = math.floor(elapsed_sec/UNIT_DAYS_TO_SEC)
 
-    print("elapsed_sec: {elapsed_sec:d}".format(elapsed_sec=elapsed_sec))
+    print("elapsed_sec: {elapsed_sec:f} s".format(elapsed_sec=elapsed_sec))
 
     if elapsed_sec > LIMIT_DAYS_TO_SEC:
         subject = SUBJECT_FORMAT.format(url=url, elapsed_day=elapsed_day)
