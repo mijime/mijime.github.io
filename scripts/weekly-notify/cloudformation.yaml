@@ -32,6 +32,15 @@ Resources:
               Service: lambda.amazonaws.com
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: !Sub publish-sns-${AWS::StackName}
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Action: sns:Publish
+                Effect: Allow
+                Resource:
+                  - !Ref Topic
 
   WeeklyEvents:
     Type: AWS::Events::Rule
