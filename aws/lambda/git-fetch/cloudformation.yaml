@@ -1,0 +1,58 @@
+---
+Parameters:
+  GitRepository:
+    Type: String
+  NotificationAddress:
+    Type: String
+
+Resources:
+  Lambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      Code: ./scripts
+      Handler: index.lambda_handler
+      MemorySize: 128
+      Runtime: python3.6
+      Timeout: 30
+      Role: !GetAtt Role.Arn
+      Environment:
+        Variables:
+          GIT_REPO: !Ref GitRepository
+          SNS_TOPIC_ARN: !Ref Topic
+
+  Role:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Action: sts:AssumeRole
+            Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+
+  WeeklyEvents:
+    Type: AWS::Events::Rule
+    Properties:
+      ScheduleExpression: rate(3 days)
+      State: ENABLED
+      Targets:
+        - Arn: !GetAtt Lambda.Arn
+          Id: !Sub WeeklyEvents-${AWS::StackName}
+
+  EventsPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref Lambda
+      Action: lambda:InvokeFunction
+      Principal: events.amazonaws.com
+      SourceArn: !GetAtt WeeklyEvents.Arn
+
+  Topic:
+    Type: AWS::SNS::Topic
+    Properties:
+      Subscription:
+        - Protocol: email
+          Endpoint: !Ref NotificationAddress

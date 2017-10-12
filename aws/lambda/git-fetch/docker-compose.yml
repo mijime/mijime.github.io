@@ -1,0 +1,16 @@
+version: '3.0'
+services:
+  builder:
+    image: python:3.6
+    command: pip install paramiko dulwich boto3 beautifulsoup4 -t .
+    working_dir: /var/app
+    volumes:
+      - ./scripts:/var/app
+  runner:
+    image: python:3.6
+    command: python handler.py
+    working_dir: /var/app
+    volumes:
+      - ./scripts:/var/app
+    environment:
+      GIT_REPO: https://github.com/mijime/til.git
