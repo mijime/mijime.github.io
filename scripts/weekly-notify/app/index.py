@@ -11,9 +11,9 @@ import os
 
 UNIT_DAYS_TO_SEC = 24 * 60 * 60 # 1 day
 LIMIT_DAYS_TO_SEC = 3 * UNIT_DAYS_TO_SEC
-SUBJECT_FORMAT = "[{url}] 前回のコミットから {diff:d} 日経過しています"
+SUBJECT_FORMAT = "[{url}] 前回のコミットから {elapsed_day:d} 日経過しています"
 MESSAGE_FORMAT = """
-{url} では前回のコミットから {diff:d} 日経過しています
+{url} では前回のコミットから {elapsed_day:d} 日経過しています
 
 学んだことを記録しませんか
 
@@ -21,8 +21,8 @@ MESSAGE_FORMAT = """
 """
 TRENDS_FORMAT = "* [{title}]({url})\n {desc}"
 
-def build_message(url=None, diff=0):
-    return MESSAGE_FORMAT.format(url=url, diff=diff).strip() + \
+def build_message(url=None, elapsed_day=0):
+    return MESSAGE_FORMAT.format(url=url, elapsed_day=elapsed_day).strip() + \
             "\n\n" + \
             "\n\n".join(itertools.islice(fetch_trend_repolist(), 10))
 
@@ -53,15 +53,15 @@ def fetch_repo(repo=None, url=None):
 def lambda_handler(event, context):
     url = os.getenv("GIT_REPO")
     repo = fetch_repo(repo=MemoryRepo(), url=url)
-    diff = datetime.now().timestamp() - get_first_commit_time(repo)
-    diff_days = math.floor(diff/UNIT_DAYS_TO_SEC)
+    elapsed_sec = datetime.now().timestamp() - get_first_commit_time(repo)
+    elapsed_day = math.floor(elapsed_sec/UNIT_DAYS_TO_SEC)
 
-    print("diff_days: {diff_days:d}".format(diff_days=diff_days))
+    print("elapsed_sec: {elapsed_sec:d}".format(elapsed_sec=elapsed_sec))
 
-    if diff > LIMIT_DAYS_TO_SEC:
-        subject = SUBJECT_FORMAT.format(url=url, diff=diff_days)
+    if elapsed_sec > LIMIT_DAYS_TO_SEC:
+        subject = SUBJECT_FORMAT.format(url=url, elapsed_day=elapsed_day)
         print("Subject: ", subject)
-        message = build_message(url=url, diff=diff_days)
+        message = build_message(url=url, elapsed_day=elapsed_day)
         print("Message: ", message)
         sns = boto3.client("sns")
         sns.publish(TopicArn=os.getenv("SNS_TOPIC_ARN"), Subject=subject, Message=message)
