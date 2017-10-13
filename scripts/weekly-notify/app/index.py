@@ -14,7 +14,7 @@ UNIT_MONTH_TO_SEC = 30 * 24 * 60 * 60
 UNIT_DAY_TO_SEC = 24 * 60 * 60
 UNIT_HOUR_TO_SEC = 60 * 60
 UNIT_MINUTE_TO_SEC = 60
-LIMIT_DAYS_TO_SEC = 3 * UNIT_DAY_TO_SEC
+ALERT_PERIOD_TO_SEC = 3 * UNIT_DAY_TO_SEC
 SUBJECT_FORMAT = "[{url}] 前回のコミットから {elapsed_time} 経過しています"
 MESSAGE_FORMAT = """
 {url} では前回のコミットから {elapsed_time} 経過しています
@@ -80,7 +80,7 @@ def lambda_handler(event, context):
 
     print("Last updated: {elapsed_time}".format(elapsed_time=elapsed_time))
 
-    if elapsed_sec > LIMIT_DAYS_TO_SEC:
+    if elapsed_sec > ALERT_PERIOD_TO_SEC:
         subject = SUBJECT_FORMAT.format(url=url, elapsed_time=elapsed_time)
         print("Subject: ", subject)
         message = build_message(url=url, elapsed_time=elapsed_time)
