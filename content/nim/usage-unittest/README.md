@@ -2,12 +2,14 @@
 
 ## ファイルの場所
 
-tests フォルダに *.nim を配置することで始める
+tests フォルダに .nim を配置することで始める
+
 Warning が発生するので SkipDirs に @["tests"] を追加する
 
 ## 始め方
 
 `import unittest` を使ってテストする.
+
 `nimble test` でテストを実行.
 
 直列にテストを実行する
