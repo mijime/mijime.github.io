@@ -9,11 +9,15 @@ import itertools
 import math
 import os
 
-UNIT_DAYS_TO_SEC = 24 * 60 * 60 # 1 day
+UNIT_YEAR_TO_SEC = 365 * 24 * 60 * 60
+UNIT_MONTH_TO_SEC = 30 * 24 * 60 * 60
+UNIT_DAYS_TO_SEC = 24 * 60 * 60
+UNIT_HOUR_TO_SEC = 60 * 60
+UNIT_MINUTE_TO_SEC = 60
 LIMIT_DAYS_TO_SEC = 3 * UNIT_DAYS_TO_SEC
-SUBJECT_FORMAT = "[{url}] 前回のコミットから {elapsed_day:d} 日経過しています"
+SUBJECT_FORMAT = "[{url}] 前回のコミットから {elapsed_time} 経過しています"
 MESSAGE_FORMAT = """
-{url} では前回のコミットから {elapsed_day:d} 日経過しています
+{url} では前回のコミットから {elapsed_time} 経過しています
 
 学んだことを記録しませんか
 
@@ -21,10 +25,28 @@ MESSAGE_FORMAT = """
 """
 TRENDS_FORMAT = "* [{title}]({url})\n {desc}"
 
-def build_message(url=None, elapsed_day=0):
-    return MESSAGE_FORMAT.format(url=url, elapsed_day=elapsed_day).strip() + \
+def build_message(url=None, elapsed_time=0):
+    return MESSAGE_FORMAT.format(url=url, elapsed_time=elapsed_time).strip() + \
             "\n\n" + \
             "\n\n".join(itertools.islice(fetch_trend_repolist(), 10))
+
+def humanize_datetime(elapsed_sec=0):
+    if elapsed_sec > UNIT_YEAR_TO_SEC:
+        return "{0:d} 年".format(math.floor(elapsed_sec/UNIT_YEAR_TO_SEC))
+
+    if elapsed_sec > UNIT_MONTH_TO_SEC:
+        return "{0:d} ヶ月".format(math.floor(elapsed_sec/UNIT_MONTH_TO_SEC))
+
+    if elapsed_sec > UNIT_DAYS_TO_SEC:
+        return "{0:d} 日".format(math.floor(elapsed_sec/UNIT_DAYS_TO_SEC))
+
+    if elapsed_sec > UNIT_HOUR_TO_SEC:
+        return "{0:d} 時間".format(math.floor(elapsed_sec/UNIT_HOUR_TO_SEC))
+
+    if elapsed_sec > UNIT_MINUTE_TO_SEC:
+        return "{0:d} 分".format(math.floor(elapsed_sec/UNIT_MINUTE_TO_SEC))
+
+    return "{0:d} 秒".format(math.floor(elapsed_sec))
 
 def fetch_trend_repolist(tag="", since="daily"):
     html = request.urlopen("https://github.com/trending/{tag}?since={since}"
@@ -54,14 +76,14 @@ def lambda_handler(event, context):
     url = os.getenv("GIT_REPO")
     repo = fetch_repo(repo=MemoryRepo(), url=url)
     elapsed_sec = datetime.now().timestamp() - get_latest_commit_time(repo)
-    elapsed_day = math.floor(elapsed_sec/UNIT_DAYS_TO_SEC)
+    elapsed_time = humanize_datetime(elapsed_sec)
 
-    print("elapsed_sec: {elapsed_sec:f} s".format(elapsed_sec=elapsed_sec))
+    print("Last updated: {elapsed_time}".format(elapsed_time=elapsed_time))
 
     if elapsed_sec > LIMIT_DAYS_TO_SEC:
-        subject = SUBJECT_FORMAT.format(url=url, elapsed_day=elapsed_day)
+        subject = SUBJECT_FORMAT.format(url=url, elapsed_time=elapsed_time)
         print("Subject: ", subject)
-        message = build_message(url=url, elapsed_day=elapsed_day)
+        message = build_message(url=url, elapsed_time=elapsed_time)
         print("Message: ", message)
         sns = boto3.client("sns")
         sns.publish(TopicArn=os.getenv("SNS_TOPIC_ARN"), Subject=subject, Message=message)
