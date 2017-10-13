@@ -11,10 +11,10 @@ import os
 
 UNIT_YEAR_TO_SEC = 365 * 24 * 60 * 60
 UNIT_MONTH_TO_SEC = 30 * 24 * 60 * 60
-UNIT_DAYS_TO_SEC = 24 * 60 * 60
+UNIT_DAY_TO_SEC = 24 * 60 * 60
 UNIT_HOUR_TO_SEC = 60 * 60
 UNIT_MINUTE_TO_SEC = 60
-LIMIT_DAYS_TO_SEC = 3 * UNIT_DAYS_TO_SEC
+LIMIT_DAYS_TO_SEC = 3 * UNIT_DAY_TO_SEC
 SUBJECT_FORMAT = "[{url}] 前回のコミットから {elapsed_time} 経過しています"
 MESSAGE_FORMAT = """
 {url} では前回のコミットから {elapsed_time} 経過しています
@@ -37,8 +37,8 @@ def humanize_datetime(elapsed_sec=0):
     if elapsed_sec > UNIT_MONTH_TO_SEC:
         return "{0:d} ヶ月".format(math.floor(elapsed_sec/UNIT_MONTH_TO_SEC))
 
-    if elapsed_sec > UNIT_DAYS_TO_SEC:
-        return "{0:d} 日".format(math.floor(elapsed_sec/UNIT_DAYS_TO_SEC))
+    if elapsed_sec > UNIT_DAY_TO_SEC:
+        return "{0:d} 日".format(math.floor(elapsed_sec/UNIT_DAY_TO_SEC))
 
     if elapsed_sec > UNIT_HOUR_TO_SEC:
         return "{0:d} 時間".format(math.floor(elapsed_sec/UNIT_HOUR_TO_SEC))
