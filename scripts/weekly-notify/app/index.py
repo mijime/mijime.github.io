@@ -78,7 +78,7 @@ def lambda_handler(event, context):
     elapsed_sec = datetime.now().timestamp() - get_latest_commit_time(repo)
     elapsed_time = humanize_datetime(elapsed_sec)
 
-    print("Last updated: {elapsed_time} before".format(elapsed_time=elapsed_time))
+    print("Last updated: {elapsed_time} ago".format(elapsed_time=elapsed_time))
 
     if elapsed_sec > ALERT_PERIOD_TO_SEC:
         subject = SUBJECT_FORMAT.format(url=url, elapsed_time=elapsed_time)
