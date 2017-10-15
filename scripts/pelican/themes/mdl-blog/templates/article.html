@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block title %}
+<title>{{ article.title }} | {{ SITENAME }}</title>
+<meta property="og:title" content="{{ article.title }} | {{ SITENAME }}" />
+{% endblock %}
+
+{% block metadata %}
+{% if article.description %}
+<meta name="description" content="{{ article.description }}">
+<meta property="og:description" content="{{ article.description }}">
+{% else %}
+<meta name="description" content="{{ BIO }}">
+<meta property="og:description" content="{{ BIO }}">
+{% endif %}
+<meta property="og:type" content="article" />
+<meta property="og:url" content="{{ SITEURL }}/{{ article.url }}" />
+{% endblock %}
+
+{% block content %}
+<div class="mdl-grid">
+  <div class="mdl-card mdl-shadow--2dp mdl-cell mdl-cell--12-col">
+    <div class="mdl-card__title">
+      <h1 class="mdl-card__title-text">
+        <a href="{{ SITEURL }}/{{ article.url }}#{{ article.slug }}">{{ article.title }}</a>
+      </h1>
+    </div>
+    <div class="mdl-card__supporting-text">
+      {{ article.content }}
+    </div>
+  </div>
+</div>
+{% endblock %}
