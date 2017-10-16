@@ -25,6 +25,7 @@
   {% for translation in page.translations %}
   <url>
     <loc>{{ SITEURL }}/{{ translation.url }}</loc>
+    <lastmod>{{ page.locale_modified }}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
