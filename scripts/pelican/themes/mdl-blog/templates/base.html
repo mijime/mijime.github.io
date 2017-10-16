@@ -33,11 +33,11 @@
     {% endblock %}
 
     <!-- CSS - mdl -->
-    <link rel="dns-prefetch" href="//fonts.googleapis.com/">
-    <link rel="stylesheet" href="//fonts.googleapis.com/icon?family=Material+Icons">
     <link rel="dns-prefetch" href="//codes.getmdl.io/">
     <link rel="stylesheet" href="//code.getmdl.io/1.3.0/material.brown-orange.min.css">
     <script defer src="//code.getmdl.io/1.3.0/material.min.js"></script>
+    <link rel="dns-prefetch" href="//fonts.googleapis.com/">
+    <link rel="stylesheet" href="//fonts.googleapis.com/icon?family=Material+Icons">
 
     <!-- RSS -->
     {% if FEED_ALL_ATOM %}
@@ -45,16 +45,27 @@
     {% endif %}
 
     {% include "partials/google_analytics.html" %}
+  <style>
+.nav {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+.nav > .nav__button {
+  text-decoration: none;
+}
+  </style>
   </head>
 
   <body>
-    <div class="mdl-layout mdl-js-layout">
+    <div class="mdl-layout mdl-layout--fixed-header mdl-js-layout">
       {% include "partials/header.html" %}
       {% include "partials/sidebar.html" %}
       <main class="mdl-layout__content">
       {% block content %}
       {% endblock %}
       </main>
+      {% include "partials/footer.html" %}
     </div>
   </body>
 </html>

@@ -27,5 +27,8 @@ TRANSLATION_FEED_ATOM = "feeds/translation-%s.atom.xml"
 AUTHOR_FEED_ATOM = None
 AUTHOR_FEED_RSS = None
 
+DIRECT_TEMPLATES = ("index", "tags", "categories", "archives", "sitemap")
+SITEMAP_SAVE_AS = "sitemap.xml"
+
 # Uncomment following line if you want document-relative URLs when developing
 RELATIVE_URLS = True

@@ -2,58 +2,6 @@
 
 {% block content %}
 <div class="mdl-grid">
-  {% for article in articles_page.object_list %}
-  <div class="mdl-card mdl-shadow--2dp mdl-cell mdl-cell--12-col">
-    <div class="mdl-card__title mdl-card--border">
-      <h2 class="mdl-card__title-text">
-        <a href="{{ SITEURL }}/{{ article.url }}#{{ article.slug }}">{{ article.title }}</a>
-      </h2>
-    </div>
-    {% if article.description %}
-    <div class="mdl-card__supporting-text">
-      {{ article.description }}
-    </div>
-    {% endif %}
-  </div>
-  {% endfor %}
-  <style>
-.nav {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-}
-.nav > .nav__button {
-  text-decoration: none;
-}
-  </style>
-  {% if articles_page.has_previous() or articles_page.has_next() %}
-  <nav class="nav mdl-cell mdl-cell--12-col">
-    {% if articles_page.has_previous() %}
-    {% set prev_pg_num = articles_page.previous_page_number() %}
-    <a class="nav__button" href="{{ SITEURL }}/{{ page_name }}{{ prev_pg_num if prev_pg_num > 1 else '' }}.html">
-      <button class="mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--icon" role="presentation">
-        <i class="material-icons">arrow_back</i>
-        <span class="mdl-button__ripple-container">
-          <span class="mdl-ripple"></span>
-        </span>
-      </button>
-      Newer
-    </a>
-    {% endif %}
-    <div class="section-spacer"></div>
-    {% if articles_page.has_next() %}
-    {% set next_pg_num = articles_page.next_page_number() %}
-    <a class="nav__button" href="{{ SITEURL }}/{{ page_name }}{{ next_pg_num }}.html">
-      Older
-      <button class="mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--icon" role="presentation">
-        <i class="material-icons">arrow_forward</i>
-        <span class="mdl-button__ripple-container">
-          <span class="mdl-ripple"></span>
-        </span>
-      </button>
-    </a>
-    {% endif %}
-  </nav>
-  {% endif %}
+  {% include "partials/articles.html" %}
 </div>
 {% endblock %}

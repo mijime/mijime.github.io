@@ -19,12 +19,8 @@
 
 {% block content %}
 <div class="mdl-grid">
-  <div class="mdl-card mdl-shadow--2dp mdl-cell mdl-cell--12-col">
-    <div class="mdl-card__title">
-      <h1 class="mdl-card__title-text">
-        <a href="{{ SITEURL }}/{{ article.url }}#{{ article.slug }}">{{ article.title }}</a>
-      </h1>
-    </div>
+  <div class="mdl-cell--2-col"></div>
+  <div class="mdl-card mdl-shadow--2dp mdl-cell mdl-cell--8-col">
     <div class="mdl-card__supporting-text">
       {{ article.content }}
     </div>
