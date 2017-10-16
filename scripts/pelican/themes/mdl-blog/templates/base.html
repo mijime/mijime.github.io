@@ -7,16 +7,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
 
     <link rel="canonical" href="{{ SITEURL }}">
-    <link rel="shortcut icon" href="{{ SITEURL }}/{{ IMAGE_DIR }}/favicon.png">
+    <link rel="shortcut icon" href="{{ SITEURL }}/theme/images/favicon.png">
 
     <meta name="mobile-web-app-capable" content="yes">
-    <link rel="icon" sizes="192x192" href="{{ SITEURL }}/{{ IMAGE_DIR }}/android-desktop.png">
-    <link rel="apple-touch-icon-precomposed" href="{{ SITEURL }}/{{ IMAGE_DIR }}/ios-desktop.png">
+    <link rel="icon" sizes="192x192" href="{{ SITEURL }}/theme/images/android-desktop.png">
+    <link rel="apple-touch-icon-precomposed" href="{{ SITEURL }}/theme/images/ios-desktop.png">
     <meta name="apple-mobile-web-app-title" content="{{ SITENAME }}">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
     <meta name="msapplication-TileColor" content="#3372DF">
-    <meta name="msapplication-TileImage" content="{{ SITEURL }}/{{ IMAGE_DIR }}/touch/ms-touch-icon-144x144-precomposed.png">
+    <meta name="msapplication-TileImage" content="{{ SITEURL }}/theme/images/ms-touch-icon-144x144-precomposed.png">
 
     {% block title %}
     <title>{{ SITENAME }}</title>
@@ -29,7 +29,7 @@
     <meta property="og:description" content="{{ BIO }}" />
     <meta property="og:url" content="{{ SITEURL }}" />
     <meta property="og:type" content="website" />
-    <meta property="og:image" content="{{ SITEURL }}/{{ IMAGE_DIR }}/{{ PROFILE_IMAGE }}" />
+    <meta property="og:image" content="{{ SITEURL }}/theme/images/logo.png" />
     {% endblock %}
 
     <!-- CSS - mdl -->
@@ -39,22 +39,14 @@
     <link rel="dns-prefetch" href="//fonts.googleapis.com/">
     <link rel="stylesheet" href="//fonts.googleapis.com/icon?family=Material+Icons">
 
+    <link rel="stylesheet" href="{{ SITEURL }}/theme/css/style.css">
+
     <!-- RSS -->
     {% if FEED_ALL_ATOM %}
     <link rel="alternate" type="application/rss+xml" title="RSS" href="{{ FEED_ALL_ATOM }}">
     {% endif %}
 
     {% include "partials/google_analytics.html" %}
-  <style>
-.nav {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-}
-.nav > .nav__button {
-  text-decoration: none;
-}
-  </style>
   </head>
 
   <body>
