@@ -31,4 +31,4 @@ DIRECT_TEMPLATES = ("index", "tags", "categories", "archives", "sitemap")
 SITEMAP_SAVE_AS = "sitemap.xml"
 
 # Uncomment following line if you want document-relative URLs when developing
-# RELATIVE_URLS = True
+RELATIVE_URLS = True
