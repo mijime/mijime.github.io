@@ -8,6 +8,7 @@ import boto3
 import itertools
 import math
 import os
+import functools
 
 UNIT_YEAR_TO_SEC = 365 * 24 * 60 * 60
 UNIT_MONTH_TO_SEC = 30 * 24 * 60 * 60
@@ -58,11 +59,9 @@ def fetch_trend_repolist(tag="", since="daily"):
         title = title_anchor.getText().strip()
         url = "https://github.com" + title_anchor.get("href").strip()
         descHtml = repo.select(".py-1 p")
-        if 0 < len(descHtml):
-            desc = descHtml[0].getText().strip()
-            yield TRENDS_FORMAT.format(title=title, url=url, desc=desc)
-        else:
-            yield TRENDS_FORMAT.format(title=title, url=url, desc="")
+        desc = functools.reduce(lambda x, y: x + y, \
+                map(lambda x: x.getText().strip(), descHtml), "")
+        yield TRENDS_FORMAT.format(title=title, url=url, desc=desc)
 
 def get_latest_commit_time(repo):
     for entry in itertools.islice(repo.get_walker(), 1):
