@@ -57,8 +57,12 @@ def fetch_trend_repolist(tag="", since="daily"):
         title_anchor = repo.select("h3 a")[0]
         title = title_anchor.getText().strip()
         url = "https://github.com" + title_anchor.get("href").strip()
-        desc = repo.select(".py-1 p")[0].getText().strip()
-        yield TRENDS_FORMAT.format(title=title, url=url, desc=desc)
+        descHtml = repo.select(".py-1 p")
+        if 0 < len(descHtml):
+            desc = descHtml[0].getText().strip()
+            yield TRENDS_FORMAT.format(title=title, url=url, desc=desc)
+        else:
+            yield TRENDS_FORMAT.format(title=title, url=url, desc="")
 
 def get_latest_commit_time(repo):
     for entry in itertools.islice(repo.get_walker(), 1):
