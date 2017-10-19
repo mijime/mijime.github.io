@@ -30,5 +30,15 @@ AUTHOR_FEED_RSS = None
 DIRECT_TEMPLATES = ("index", "tags", "categories", "archives", "sitemap")
 SITEMAP_SAVE_AS = "sitemap.xml"
 
+MARKDOWN = {
+        "extension_configs": {
+            "markdown.extensions.codehilite": {"css_class": "highlight"},
+            "markdown.extensions.extra": {},
+            "markdown.extensions.meta": {},
+            "markdown.extensions.toc": {},
+        },
+        "output_format": "html5",
+    }
+
 # Uncomment following line if you want document-relative URLs when developing
 RELATIVE_URLS = True
