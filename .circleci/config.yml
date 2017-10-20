@@ -5,7 +5,7 @@ jobs:
     branches:
       only:
         - master
-        - /add-content\/.*/
+        - /drafts\/.*/
     docker:
       - image: python:3
     working_directory: /var/app
