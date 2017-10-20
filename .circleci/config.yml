@@ -18,5 +18,6 @@ jobs:
           key: pip-{{ .Branch }}-{{ checksum "scripts/pelican/requirements.txt" }}
           paths:
             - ~/.cache/pip
+      - run: git config user.name ${CIRCLE_USERNAME}
       - run: cd scripts/pelican && make github
 ...
