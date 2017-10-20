@@ -1,0 +1,16 @@
+---
+version: 2
+jobs:
+  build:
+    docker:
+      - image: python:3
+    working_directory: /var/app
+    dependencies:
+      cache_directories:
+        - ~/.cache/pip
+    steps:
+      - checkout
+      - run: cd scripts/pelican && pip install -r requirements.txt
+      - run: mkdir -p ~/.ssh && ssh-keyscan -H github.com | tee -a ~/.ssh/known_hosts
+      - run: cd scripts/pelican && make github
+...
