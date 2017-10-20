@@ -2,6 +2,10 @@
 version: 2
 jobs:
   build:
+    branches:
+      only:
+        - master
+        - /add-content\/.*/
     docker:
       - image: python:3
     working_directory: /var/app
