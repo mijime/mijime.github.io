@@ -2,15 +2,21 @@
 version: 2
 jobs:
   build:
+    branches:
+      only:
+        - master
+        - /drafts\/.*/
     docker:
       - image: python:3
     working_directory: /var/app
-    dependencies:
-      cache_directories:
-        - ~/.cache/pip
     steps:
       - checkout
+      - restore_cache:
+          key: pip-{{ .Branch }}-{{ checksum "scripts/pelican/requirements.txt" }}
       - run: cd scripts/pelican && pip install -r requirements.txt
-      - run: mkdir -p ~/.ssh && ssh-keyscan -H github.com | tee -a ~/.ssh/known_hosts
+      - save_cache:
+          key: pip-{{ .Branch }}-{{ checksum "scripts/pelican/requirements.txt" }}
+          paths:
+            - ~/.cache/pip
       - run: cd scripts/pelican && make github
 ...
