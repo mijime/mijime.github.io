@@ -27,6 +27,8 @@ TRANSLATION_FEED_ATOM = "feeds/translation-%s.atom.xml"
 AUTHOR_FEED_ATOM = None
 AUTHOR_FEED_RSS = None
 
+SLUGIFY_SOURCE = "basename"
+
 DIRECT_TEMPLATES = ("index", "tags", "categories", "archives", "sitemap")
 SITEMAP_SAVE_AS = "sitemap.xml"
 
