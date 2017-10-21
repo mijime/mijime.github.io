@@ -1,24 +1,11 @@
 {% for article in articles_page.object_list %}
 <div class="mdl-cell mdl-cell--2-col"></div>
-<div class="mdl-card mdl-shadow--2dp mdl-cell mdl-cell--8-col">
-  <header class="mdl-card__title mdl-color--accent mdl-color-text--accent-contrast">
-    <h2 class="mdl-card__title-text">
-      {{ article.title }}
-    </h2>
-  </header>
-  <div class="mdl-layout-spacer"></div>
-  <section class="mdl-card__supporting-text">
-    <p class="mdl-card__subtitle--text mdl-typography--text-right">
-    <time>{{ article.date }}</time>
-    </p>
-    <div class="markdown-body">
-      {{ article.summary }}
-    </div>
-  </section>
-  <div class="mdl-layout-spacer"></div>
+<div class="mdl-cell mdl-cell--8-col mdl-card mdl-shadow--8dp">
+  {% set article_content = article.summary %}
+  {% include "partials/article_base.html" %}
   <section class="mdl-card__actions mdl-card--border">
     <div class="mdl-typography--text-right">
-      <a class="mdl-button mdl-button--colored mdl-js-button mdl-color-text--accent"
+      <a class="mdl-button mdl-js-button mdl-color-text--accent"
          href="{{ SITEURL }}/{{ article.url }}#{{ article.slug }}">
         <i class="material-icons">event</i>
         Read more
@@ -28,4 +15,3 @@
 </div>
 <div class="mdl-cell mdl-cell--2-col"></div>
 {% endfor %}
-

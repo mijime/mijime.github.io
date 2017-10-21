@@ -48,5 +48,5 @@ RELATIVE_URLS = True
 
 # Custom variables
 
-BIO = "today i learning"
-MDL_COLOR = "deep_purple-pink"
+BIO = "Today I Learning"
+MDL_COLOR = "brown-orange"
