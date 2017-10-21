@@ -7,11 +7,13 @@
     </h2>
   </header>
   <div class="mdl-layout-spacer"></div>
-  <section class="mdl-card__supporting-text markdown-body">
+  <section class="mdl-card__supporting-text">
     <p class="mdl-card__subtitle--text mdl-typography--text-right">
     <time>{{ article.date }}</time>
     </p>
-    {{ article.summary }}
+    <div class="markdown-body">
+      {{ article.summary }}
+    </div>
   </section>
   <div class="mdl-layout-spacer"></div>
   <section class="mdl-card__actions mdl-card--border">
