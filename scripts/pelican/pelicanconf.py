@@ -13,6 +13,7 @@ TIMEZONE = "Asia/Tokyo"
 DEFAULT_LANG = "ja"
 
 THEME = "themes/mdl-blog"
+SUMMARY_MAX_LENGTH = 15
 
 USE_FOLDER_AS_CATEGORY = True
 DEFAULT_CATEGORY = "misc"
@@ -27,11 +28,14 @@ TRANSLATION_FEED_ATOM = "feeds/translation-%s.atom.xml"
 AUTHOR_FEED_ATOM = None
 AUTHOR_FEED_RSS = None
 
+SLUGIFY_SOURCE = "basename"
+
 DIRECT_TEMPLATES = ("index", "tags", "categories", "archives", "sitemap")
 SITEMAP_SAVE_AS = "sitemap.xml"
 
 MARKDOWN = {
         "extension_configs": {
+            "markdown.extensions.nl2br": {},
             "markdown.extensions.codehilite": {"css_class": "highlight"},
             "markdown.extensions.extra": {},
             "markdown.extensions.meta": {},

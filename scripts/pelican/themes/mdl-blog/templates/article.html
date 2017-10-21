@@ -20,10 +20,16 @@
 {% block content %}
 <div class="mdl-grid">
   <div class="mdl-cell--2-col"></div>
-  <div class="mdl-card mdl-shadow--2dp mdl-cell mdl-cell--8-col">
-    <div class="mdl-card__supporting-text markdown-body">
+  <div class="mdl-card mdl-card__supporting-text mdl-shadow--2dp mdl-cell mdl-cell--8-col">
+    <header class="mdl-card__title">
+      <h1 class="mdl-card__title-text"> {{ article.title }} </h1>
+    </header>
+    <section class="mdl-typography--text-right">
+      <time>{{ article.date }}</time>
+    </section>
+    <section class="markdown-body">
       {{ article.content }}
-    </div>
+    </section>
   </div>
   <div class="mdl-cell--2-col"></div>
 </div>

@@ -1,4 +1,7 @@
-# web-ext を使って WebExtension を始める
+---
+Title: web-ext を使って WebExtension を始める
+Date: 2017-10-14 01:38:45 +0900
+---
 
 web extension 用のビルドツール `web-ext` があるらしい
 
@@ -29,9 +32,6 @@ web-ext run --firefox=${FIREFOX_BIN}
 web-ext build
 web-ext sign --api-key ${API_KEY} --api-secret ${API_SECRET}
 ```
-
-
-
 
 ## Reference
 
