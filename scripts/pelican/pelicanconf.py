@@ -3,7 +3,7 @@
 from __future__ import unicode_literals
 
 SITEURL = "https://mijime.github.io/til"
-SITENAME = "mijime's til"
+SITENAME = "Today I Learned"
 AUTHOR = "mijime"
 
 PATH = "content"
@@ -17,6 +17,7 @@ SUMMARY_MAX_LENGTH = 15
 USE_FOLDER_AS_CATEGORY = True
 DEFAULT_CATEGORY = "misc"
 DEFAULT_PAGINATION = 3
+DEFAULT_DATE_FORMAT = "%Y-%m-%d %H:%M"
 
 ARTICLE_URL = "posts/{date:%Y}/{date:%b}/{date:%d}/{slug}/"
 ARTICLE_SAVE_AS = "posts/{date:%Y}/{date:%b}/{date:%d}/{slug}/index.html"
