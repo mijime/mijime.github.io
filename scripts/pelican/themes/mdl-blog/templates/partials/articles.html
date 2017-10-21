@@ -1,31 +1,27 @@
 {% for article in articles_page.object_list %}
 <div class="mdl-cell mdl-cell--2-col"></div>
-<div class="mdl-card mdl-card__supporting-text mdl-shadow--2dp mdl-cell mdl-cell--8-col">
+<div class="mdl-card mdl-shadow--2dp mdl-cell mdl-cell--8-col">
   <header class="mdl-card__title">
     <h2 class="mdl-card__title-text">
       {{ article.title }}
     </h2>
   </header>
-  <section class="mdl-typography--text-right">
-    <time>{{ article.date }}</time>
-  </section>
   <div class="mdl-layout-spacer"></div>
-  {% if article.description %}
-  <section>
-    {{ article.description }}
-  </section>
-  {% else %}
-  <section class="markdown-body">
+  <section class="mdl-card__supporting-text markdown-body">
+    <p class="mdl-card__subtitle--text mdl-typography--text-right">
+    <time>{{ article.date }}</time>
+    </p>
     {{ article.summary }}
   </section>
-  {% endif %}
   <div class="mdl-layout-spacer"></div>
-  <section class="mdl-card__actions mdl-card--border mdl-typography--text-right">
-    <a class="mdl-button mdl-button--colored mdl-js-button"
-       href="{{ SITEURL }}/{{ article.url }}#{{ article.slug }}">
-      <i class="material-icons">event</i>
-      Read more
-    </a>
+  <section class="mdl-card__actions mdl-card--border">
+    <div class="mdl-typography--text-right">
+      <a class="mdl-button mdl-button--colored mdl-js-button"
+         href="{{ SITEURL }}/{{ article.url }}#{{ article.slug }}">
+        <i class="material-icons">event</i>
+        Read more
+      </a>
+    </div>
   </section>
 </div>
 <div class="mdl-cell mdl-cell--2-col"></div>
