@@ -48,6 +48,6 @@ RELATIVE_URLS = True
 
 # Custom variables
 
-BIO = "Today I Learning"
+BIO = "Today I Learned"
 MDL_COLOR = "brown-orange"
 GOOGLE_TAG_MANAGER = "GTM-NXFWK5L"
