@@ -5,7 +5,6 @@ from __future__ import unicode_literals
 SITEURL = "https://mijime.github.io/til"
 SITENAME = "mijime's til"
 AUTHOR = "mijime"
-BIO = "today i learning"
 
 PATH = "content"
 
@@ -46,3 +45,8 @@ MARKDOWN = {
 
 # Uncomment following line if you want document-relative URLs when developing
 RELATIVE_URLS = True
+
+# Custom variables
+
+BIO = "today i learning"
+MDL_COLOR = "deep_purple-pink"
