@@ -3,8 +3,6 @@ Title: web-ext を使って WebExtension を始める
 Date: 2017-10-14 01:38:45 +0900
 ---
 
-# web-ext を使って WebExtension を始める
-
 web extension 用のビルドツール `web-ext` があるらしい
 
 [web-ext](https://github.com/mozilla/web-ext)
