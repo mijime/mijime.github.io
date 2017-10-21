@@ -1,7 +1,7 @@
 ---
 version: 2
 jobs:
-  build:
+  deploy:
     branches:
       only:
         - master
@@ -11,6 +11,8 @@ jobs:
     working_directory: /var/app
     steps:
       - checkout
+      - run: git submodule sync
+      - run: git submodule update --init
       - restore_cache:
           key: pip-{{ .Branch }}-{{ checksum "scripts/pelican/requirements.txt" }}
       - run: cd scripts/pelican && pip install -r requirements.txt

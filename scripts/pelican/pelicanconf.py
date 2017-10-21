@@ -29,8 +29,9 @@ AUTHOR_FEED_RSS = None
 
 SLUGIFY_SOURCE = "basename"
 
-DIRECT_TEMPLATES = ("index", "tags", "categories", "archives", "sitemap")
-SITEMAP_SAVE_AS = "sitemap.xml"
+PLUGIN_PATHS = ["plugins"]
+PLUGINS = ["sitemap"]
+SITEMAP = {"format": "xml"}
 
 MARKDOWN = {
         "extension_configs": {
