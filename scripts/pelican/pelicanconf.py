@@ -17,7 +17,7 @@ SUMMARY_MAX_LENGTH = 15
 
 USE_FOLDER_AS_CATEGORY = True
 DEFAULT_CATEGORY = "misc"
-DEFAULT_PAGINATION = 10
+DEFAULT_PAGINATION = 3
 
 ARTICLE_URL = "posts/{date:%Y}/{date:%b}/{date:%d}/{slug}/"
 ARTICLE_SAVE_AS = "posts/{date:%Y}/{date:%b}/{date:%d}/{slug}/index.html"
