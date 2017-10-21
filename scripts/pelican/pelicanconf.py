@@ -13,6 +13,7 @@ TIMEZONE = "Asia/Tokyo"
 DEFAULT_LANG = "ja"
 
 THEME = "themes/mdl-blog"
+SUMMARY_MAX_LENGTH = 15
 
 USE_FOLDER_AS_CATEGORY = True
 DEFAULT_CATEGORY = "misc"
