@@ -19,8 +19,10 @@
     {{ article.summary }}
   </section>
   {% endif %}
+  <div class="mdl-layout-spacer"></div>
   <section class="mdl-card__actions mdl-card--border mdl-typography--text-right">
-    <a class="mdl-button mdl-button--colored mdl-js-button" href="{{ SITEURL }}/{{ article.url }}#{{ article.slug }}">
+    <a class="mdl-button mdl-button--colored mdl-js-button"
+       href="{{ SITEURL }}/{{ article.url }}#{{ article.slug }}">
       <i class="material-icons">event</i>
       Read more
     </a>

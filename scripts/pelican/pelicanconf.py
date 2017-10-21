@@ -35,6 +35,7 @@ SITEMAP_SAVE_AS = "sitemap.xml"
 
 MARKDOWN = {
         "extension_configs": {
+            "markdown.extensions.nl2br": {},
             "markdown.extensions.codehilite": {"css_class": "highlight"},
             "markdown.extensions.extra": {},
             "markdown.extensions.meta": {},
