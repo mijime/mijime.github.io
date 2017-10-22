@@ -22,3 +22,4 @@ http://docs.getpelican.com/en/3.7.1/plugins.html#list-of-signals
 
 `_content` や `_summary` を書き換える場合は以降のステージで行えば良いとのこと
 
+だが、一度も上手くいっていない
