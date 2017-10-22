@@ -30,7 +30,7 @@ AUTHOR_FEED_RSS = None
 
 SLUGIFY_SOURCE = "basename"
 
-PLUGIN_PATHS = ["plugins"]
+PLUGIN_PATHS = ["pelican-plugins"]
 PLUGINS = ["sitemap"]
 SITEMAP = {"format": "xml"}
 
