@@ -10,7 +10,7 @@ def makeExtension(**kwargs):
 class EmojifyExtension(Extension):
     def extendMarkdown(self, md, md_globals):
         md.registerExtension(self)
-        md.preprocessors.add("mdx_emojify", EmojifyPreprocessor(md), "_end")
+        md.preprocessors.add("emojify", EmojifyPreprocessor(md), "_end")
 
 class EmojifyPreprocessor(Preprocessor):
     def run(self, lines):
