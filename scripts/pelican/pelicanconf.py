@@ -42,6 +42,7 @@ MARKDOWN = {
             "linkify": {},
             "del_ins": {},
             "emojify": {},
+            "autometa": {},
             "markdown.extensions.nl2br": {},
             "markdown.extensions.codehilite": {"css_class": "highlight"},
             "markdown.extensions.extra": {},
