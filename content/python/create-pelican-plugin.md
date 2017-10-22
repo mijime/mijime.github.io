@@ -1,6 +1,6 @@
 ---
 Tags: pelican
-...
+---
 
 # Pelican の Plugin の作り方
 
