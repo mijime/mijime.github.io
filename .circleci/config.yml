@@ -22,5 +22,5 @@ jobs:
             - ~/.cache/pip
       - run: git config user.name ${CIRCLE_USERNAME}
       - run: git config user.email ${CIRCLE_USERNAME}@users.noreply.github.com
-      - run: cd scripts/pelican && make github DEBUG=1
+      - run: cd scripts/pelican && make github
 ...
