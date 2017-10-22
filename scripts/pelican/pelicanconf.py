@@ -20,7 +20,7 @@ SUMMARY_MAX_LENGTH = 15
 USE_FOLDER_AS_CATEGORY = True
 DEFAULT_CATEGORY = "misc"
 DEFAULT_PAGINATION = 3
-DEFAULT_DATE_FORMAT = "%Y-%m-%d %H:%M"
+DEFAULT_DATE_FORMAT = "%Y-%m-%d %H:%M %z"
 
 ARTICLE_URL = "posts/{date:%Y}/{date:%b}/{date:%d}/{slug}/"
 ARTICLE_SAVE_AS = "posts/{date:%Y}/{date:%b}/{date:%d}/{slug}/index.html"
@@ -45,6 +45,7 @@ MARKDOWN = {
             "markdown.extensions.nl2br": {},
             "markdown.extensions.codehilite": {"css_class": "highlight"},
             "markdown.extensions.extra": {},
+            "markdown.extensions.meta": {},
             "markdown.extensions.toc": {},
         },
         "output_format": "html5",
