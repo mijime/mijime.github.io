@@ -3,7 +3,7 @@
 from __future__ import unicode_literals
 import os
 import sys
-sys.path.append("mdx-plugins")
+sys.path.append("plugins")
 
 SITEURL = "https://mijime.github.io/til"
 SITENAME = "Today I Learned"
