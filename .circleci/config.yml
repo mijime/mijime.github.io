@@ -8,6 +8,8 @@ jobs:
         - /drafts\/.*/
     docker:
       - image: python:3
+        environment:
+          TZ: "/usr/share/zoneinfo/Asia/Tokyo"
     working_directory: /var/app
     steps:
       - checkout
