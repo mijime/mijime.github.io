@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*- #
 from __future__ import unicode_literals
+import os
+import sys
+sys.path.append("mdx-plugins")
 
 SITEURL = "https://mijime.github.io/til"
 SITENAME = "Today I Learned"
@@ -36,6 +39,9 @@ SITEMAP = {"format": "xml"}
 
 MARKDOWN = {
         "extension_configs": {
+            "linkify": {},
+            "del_ins": {},
+            "emojify": {},
             "markdown.extensions.nl2br": {},
             "markdown.extensions.codehilite": {"css_class": "highlight"},
             "markdown.extensions.extra": {},
