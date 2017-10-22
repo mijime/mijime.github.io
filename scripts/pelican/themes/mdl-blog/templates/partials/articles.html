@@ -1,6 +1,9 @@
 {% for article in articles_page.object_list %}
 <div class="mdl-cell mdl-cell--2-col"></div>
 <div class="mdl-cell mdl-cell--8-col mdl-card mdl-shadow--8dp">
+  <header class="mdl-card__title mdl-color-text--grey-600">
+    <h3 class="mdl-card__title-text"> {{ article.title }} </h3>
+  </header>
   {% set article_content = article.summary %}
   {% include "partials/article_base.html" %}
   <section class="mdl-card__actions mdl-card--border">
