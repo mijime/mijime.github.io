@@ -30,13 +30,12 @@ def setup_title_metadata(content):
         title = soup.h1.string
         content.title = title
         content.metadata["title"] = title
-        content.metadata["__title_replace__"] = True
         DEV_LOGGER.debug("content_object_init: %s: title = %s" % (content, title))
 
 def setup_date_metadata(content):
     repo_path = find_repo_path(content.source_path)
     if repo_path == None:
-        return False
+        return
 
     repo = Repo(repo_path)
     source_path = path.relpath(content.source_path, repo_path)
