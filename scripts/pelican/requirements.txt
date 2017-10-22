@@ -4,3 +4,5 @@ Markdown==2.6.9
 mdx-del-ins==1.0
 mdx-linkify==1.0
 pelican==3.7.1
+beautifulsoup4
+dulwich

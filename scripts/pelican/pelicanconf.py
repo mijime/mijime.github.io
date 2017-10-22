@@ -33,8 +33,8 @@ AUTHOR_FEED_RSS = None
 
 SLUGIFY_SOURCE = "basename"
 
-PLUGIN_PATHS = ["pelican-plugins"]
-PLUGINS = ["sitemap"]
+PLUGIN_PATHS = ["pelican-plugins", "plugins"]
+PLUGINS = ["sitemap", "pelican_autometa"]
 SITEMAP = {"format": "xml"}
 
 MARKDOWN = {
@@ -45,7 +45,6 @@ MARKDOWN = {
             "markdown.extensions.nl2br": {},
             "markdown.extensions.codehilite": {"css_class": "highlight"},
             "markdown.extensions.extra": {},
-            "markdown.extensions.meta": {},
             "markdown.extensions.toc": {},
         },
         "output_format": "html5",
