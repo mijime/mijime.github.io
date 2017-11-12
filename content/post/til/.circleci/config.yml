@@ -1,0 +1,28 @@
+---
+version: 2
+jobs:
+  build:
+    branches:
+      only:
+        - master
+        - /drafts\/.*/
+    docker:
+      - image: python:3
+        environment:
+          TZ: "/usr/share/zoneinfo/Asia/Tokyo"
+    working_directory: /var/app
+    steps:
+      - checkout
+      - run: git submodule sync
+      - run: git submodule update --init
+      - restore_cache:
+          key: pip-{{ .Branch }}-{{ checksum "scripts/pelican/requirements.txt" }}
+      - run: cd scripts/pelican && pip install -r requirements.txt
+      - save_cache:
+          key: pip-{{ .Branch }}-{{ checksum "scripts/pelican/requirements.txt" }}
+          paths:
+            - ~/.cache/pip
+      - run: git config user.name ${CIRCLE_USERNAME}
+      - run: git config user.email ${CIRCLE_USERNAME}@users.noreply.github.com
+      - run: cd scripts/pelican && make github
+...

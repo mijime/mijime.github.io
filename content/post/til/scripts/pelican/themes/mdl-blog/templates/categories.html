@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block title %}
+<title>categories | {{ SITENAME }}</title>
+<meta property="og:title" content="categories | {{ SITENAME }}" />
+{% endblock %}
+
+{% block content %}
+<div class="mdl-grid">
+  <div class="mdl-cell mdl-cell--2-col"></div>
+  <div class="mdl-cell mdl-cell--8-col mdl-color-text--grey-600">
+    <h3> <i class="material-icons">description</i> categories </h3>
+  </div>
+  <div class="mdl-cell mdl-cell--2-col"></div>
+
+  <div class="mdl-cell mdl-cell--2-col"></div>
+  <div class="mdl-cell mdl-cell--8-col">
+    <ul class="mdl-list">
+      {% for category, articles in categories %}
+      <li class="mdl-list__item">
+        <a class="mdl-list__item-primary-content" href="{{ SITEURL }}/{{ category.url }}">
+          <i class="mdl-list__item-icon material-icons mdl-badge mdl-badge--overlap" data-badge="{{ articles | count }}">
+            description
+          </i>
+          <span class="mdl-list__item-text-body">{{ category }}</span>
+        </a>
+      </li>
+      {% endfor %}
+    </ul>
+  </div>
+  <div class="mdl-cell mdl-cell--2-col"></div>
+</div>
+{% endblock %}
