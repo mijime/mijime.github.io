@@ -24,16 +24,16 @@ date: "2017-09-17T07:48:28+09:00"
 
 - https://developers.google.com/protocol-buffers/docs/javatutorial
 
-  - ProtoBuf 2.x 系だったのでちょっと古め
+  - ProtoBuf 2.x系だったのでちょっと古め
 
 - https://grpc.io/docs/quickstart/java.html
 - https://grpc.io/docs/tutorials/basic/java.html
 
-  - Grpc のチュートリアル
+  - Grpcのチュートリアル
 
 - https://github.com/grpc/grpc-java/tree/master/examples
 
-  - Grpc のチュートリアルのレポジトリ
+  - Grpcのチュートリアルのリポジトリ
 
 ## 依存関係
 
@@ -64,12 +64,12 @@ date: "2017-09-17T07:48:28+09:00"
 
 # その他メモ
 
-## Clojure で JavaClass の継承
+## ClojureでJavaClassの継承
 
-- Clojure で Java クラスの継承 などしてみる
+- ClojureでJavaクラスの継承などしてみる
   http://qiita.com/FScoward/items/ede5b4c0c98111c219bf
 
-## InnterClass の参照方法
+## InnterClassの参照方法
 
-- A$B で指定する必要あり。。
+- A$Bで指定する必要あり
 - `:extends` に指定する場合はパッケージ名じゃないと難しそう

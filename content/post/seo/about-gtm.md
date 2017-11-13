@@ -3,21 +3,21 @@ Title: Google tag manager の概要
 Date: 2017-10-22 03:07:56+0900
 ---
 
-Google tag manager は HTMLタグ を動的に挿入するサービス.
+Google tag managerはHTMLタグを動的に挿入するサービス。
 
 - 既存のHTMLに手を加えなくても管理画面から追加できる
-- 挿入する HTMLタグ を一元に管理できる
+- 挿入するHTMLタグを一元に管理できる
 
-のが強み.
+のが強み。
 
-挿入できる HTMLタグ のテンプレートが用意されており
+挿入できるHTMLタグのテンプレートが用意されており
 
 - google analytics
 - doubleclick
 
-などはすぐに開始できる.
+などはすぐに開始できる。
 
-カスタムのHTML を挿入することも可能.
+カスタムのHTMLを挿入することも可能。
 
 ### Reference
 

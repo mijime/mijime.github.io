@@ -3,16 +3,16 @@ Title: web-ext を使って WebExtension を始める
 Date: 2017-10-14 01:38:45 +0900
 ---
 
-web extension 用のビルドツール `web-ext` があるらしい
+web extension用のビルドツール `web-ext` があるらしい
 
 [web-ext](https://github.com/mozilla/web-ext)
 
-Signed, Debug がメインのツール.
+Signed, Debugがメインのツール。
 ビルドは主要ファイルをzipに入れるだけだった
 
 ## Install
 
-Yarn だと上手くいかない...? ので `npm` でインストールする
+Yarnだと上手くいかない。..? ので `npm` でインストールする
 
 ```bash
 npm install --global web-ext

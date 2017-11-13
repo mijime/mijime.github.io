@@ -5,9 +5,9 @@ Date: 2017-10-13 13:24:00 +0900
 
 ## ファイルの場所
 
-tests フォルダに .nim を配置することで始める
+testsフォルダに .nimを配置することで始める
 
-Warning が発生するので SkipDirs に @["tests"] を追加する
+Warningが発生するのでSkipDirsに @["tests"] を追加する
 
 `usage-unittest.nimble`
 
@@ -28,9 +28,9 @@ skipDirs = @["tests"]
 
 ## 始め方
 
-`import unittest` を使ってテストする.
+`import unittest` を使ってテストする。
 
-`nimble test` でテストを実行.
+`nimble test` でテストを実行。
 
 直列にテストを実行する
 

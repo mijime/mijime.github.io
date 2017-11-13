@@ -2,9 +2,9 @@
 Tags: git
 ---
 
-# Git がインストールされていない環境でログを取得し、ハンドリングする
+# Gitがインストールされていない環境でログを取得し、ハンドリングする
 
-python の dulwich を使う例が多い
+Pythonのdulwichを使う例が多い
 
 ```python
 from dulwich.client import HttpGitClient
