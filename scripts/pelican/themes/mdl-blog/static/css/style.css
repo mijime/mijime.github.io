@@ -1,8 +1,0 @@
-.nav {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-}
-.nav > .nav__button {
-  text-decoration: none;
-}
