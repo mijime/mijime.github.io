@@ -1,8 +1,9 @@
 ---
-Tags: pelican
+Date: "2017-10-22T21:32:19Z+09:00"
+Draft: false
+Title: "PelicanのPluginの作り方"
+Tags: ["pelican"]
 ---
-
-# PelicanのPluginの作り方
 
 register関数を用意して、 各イベントのsignalsに `connect` する
 

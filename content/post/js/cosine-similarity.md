@@ -1,12 +1,9 @@
-+++
-date = "2016-05-28T21:12:36+09:00"
-
-draft = false
-
-title = "関連記事を探す"
-
-tags = ["Development", "JavaScript"]
-+++
+---
+Date: "2016-05-28T21:12:36+09:00"
+Draft: false
+Title: "関連記事を探す"
+Tags: ["Development", "JavaScript"]
+---
 
 他のブログを参考にすると関連記事というのを最後に表示しているらしい。
 

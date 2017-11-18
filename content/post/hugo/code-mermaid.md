@@ -1,12 +1,9 @@
-+++
-date = "2016-05-31T22:41:30+09:00"
-
-draft = false
-
-title = "mermaidに対応した"
-
-tags = ["Development", "mermaid"]
-+++
+---
+Date: "2016-05-31T22:41:30+09:00"
+Draft: false
+Title: "mermaidに対応した"
+Tags: ["Development", "mermaid"]
+---
 
 code.language-mermaidを変換するスクリプトを噛ませただけだけど。
 

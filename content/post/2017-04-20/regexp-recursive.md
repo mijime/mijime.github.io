@@ -1,14 +1,10 @@
-+++
-Description = ""
-
-Tags = ["Development","JavaScript"]
-
-date = "2017-04-20T07:48:28+09:00"
-
-title = "JSの正規表現の再帰にはまった"
-
-draft = false
-+++
+---
+Description: ""
+Tags: ["Development","JavaScript"]
+Date: "2017-04-20T07:48:28+09:00"
+Title: "JSの正規表現の再帰にはまった"
+Draft: false
+---
 
 のでメモる
 
