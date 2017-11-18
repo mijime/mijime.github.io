@@ -23,7 +23,7 @@ clean:
 deploy: ### Deploy to
 	make clean
 	make build
-	cp -rv circle.yml public/circle.yml
+	cp -rv .circleci public/
 	cd public; \
 		git add -A; \
 		git commit -m ':memo: Update $(shell date "+%F %H:%M:%S")'; \
