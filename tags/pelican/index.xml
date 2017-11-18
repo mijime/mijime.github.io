@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Pelican on My snippets</title>
+    <link>https://mijime.github.io/tags/pelican/</link>
+    <description>Recent content in Pelican on My snippets</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>ja</language>
+    <lastBuildDate>Sun, 22 Oct 2017 21:32:19 +0900</lastBuildDate>
+    
+	<atom:link href="https://mijime.github.io/tags/pelican/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>PelicanのPluginの作り方</title>
+      <link>https://mijime.github.io/post/python/create-pelican-plugin/</link>
+      <pubDate>Sun, 22 Oct 2017 21:32:19 +0900</pubDate>
+      
+      <guid>https://mijime.github.io/post/python/create-pelican-plugin/</guid>
+      <description>register関数を用意して、 各イベントのsignalsに connect する from pelican import signals def register(): signals.content_object_init.connect(content_object_init_handler) def content_object_init_handler(content): pass signalsは下記を参照 http://docs.getpelican.com/en/3.7.1/plugins.html#list-of-signals _content や _summary を書き換える場合は以</description>
+    </item>
+    
+  </channel>
+</rss>

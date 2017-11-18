@@ -2,6 +2,36 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>https://mijime.github.io/post/python/create-pelican-plugin/</loc>
+    <lastmod>2017-10-22T21:32:19+09:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://mijime.github.io/post/python/git-fetch/</loc>
+    <lastmod>2017-10-22T21:25:19+09:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://mijime.github.io/post/seo/about-gtm/</loc>
+    <lastmod>2017-10-22T03:07:56+09:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://mijime.github.io/post/js/getting-started-web-ext/</loc>
+    <lastmod>2017-10-14T01:38:45+09:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://mijime.github.io/post/nim/usage-unittest/</loc>
+    <lastmod>2017-10-13T13:24:00+09:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://mijime.github.io/post/nim/main-args/</loc>
+    <lastmod>2017-10-12T13:53:00+09:00</lastmod>
+  </url>
+  
+  <url>
     <loc>https://mijime.github.io/post/2017-09-16/index/</loc>
     <lastmod>2017-09-16T07:48:28+09:00</lastmod>
   </url>
@@ -106,6 +136,12 @@
   </url>
   
   <url>
+    <loc>https://mijime.github.io/tags/git/</loc>
+    <lastmod>2017-10-22T21:25:19+09:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
     <loc>https://mijime.github.io/tags/github/</loc>
     <lastmod>2016-05-23T22:48:11+09:00</lastmod>
     <priority>0</priority>
@@ -149,7 +185,7 @@
   
   <url>
     <loc>https://mijime.github.io/</loc>
-    <lastmod>2017-09-16T07:48:28+09:00</lastmod>
+    <lastmod>2017-10-22T21:32:19+09:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -160,8 +196,14 @@
   </url>
   
   <url>
+    <loc>https://mijime.github.io/tags/pelican/</loc>
+    <lastmod>2017-10-22T21:32:19+09:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
     <loc>https://mijime.github.io/post/</loc>
-    <lastmod>2017-09-16T07:48:28+09:00</lastmod>
+    <lastmod>2017-10-22T21:32:19+09:00</lastmod>
     <priority>0</priority>
   </url>
   

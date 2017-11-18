@@ -6,10 +6,64 @@
     <description>Recent content in Posts on My snippets</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>ja</language>
-    <lastBuildDate>Sat, 16 Sep 2017 07:48:28 +0900</lastBuildDate>
+    <lastBuildDate>Sun, 22 Oct 2017 21:32:19 +0900</lastBuildDate>
     
 	<atom:link href="https://mijime.github.io/post/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>PelicanのPluginの作り方</title>
+      <link>https://mijime.github.io/post/python/create-pelican-plugin/</link>
+      <pubDate>Sun, 22 Oct 2017 21:32:19 +0900</pubDate>
+      
+      <guid>https://mijime.github.io/post/python/create-pelican-plugin/</guid>
+      <description>register関数を用意して、 各イベントのsignalsに connect する from pelican import signals def register(): signals.content_object_init.connect(content_object_init_handler) def content_object_init_handler(content): pass signalsは下記を参照 http://docs.getpelican.com/en/3.7.1/plugins.html#list-of-signals _content や _summary を書き換える場合は以</description>
+    </item>
+    
+    <item>
+      <title>Gitがインストールされていない環境でログを取得し、ハンドリングする</title>
+      <link>https://mijime.github.io/post/python/git-fetch/</link>
+      <pubDate>Sun, 22 Oct 2017 21:25:19 +0900</pubDate>
+      
+      <guid>https://mijime.github.io/post/python/git-fetch/</guid>
+      <description>Pythonのdulwichを使う例が多い from dulwich.client import HttpGitClient from dulwich.repo import MemoryRepo from urllib.parse import urlparse import itertools def fetch_repo(repo=None, url=None): url_object = urlparse(url) client = HttpGitClient(&amp;quot;://&amp;quot;.join([url_object.scheme, url_object.netloc])) remote_refs = client.fetch(url_object.path, repo) for ref, sha1 in remote_refs.items(): repo.refs[ref] = sha1 return repo def get_first_commit_time(repo): for entry in repo.get_walker(): return entry.commit.commit_time Reference https://github.com/jelmer/dulwich http://ijin.github.io/blog/2016/02/18/ssh-and-git-on-aws-lambda/</description>
+    </item>
+    
+    <item>
+      <title>Google tag manager の概要</title>
+      <link>https://mijime.github.io/post/seo/about-gtm/</link>
+      <pubDate>Sun, 22 Oct 2017 03:07:56 +0900</pubDate>
+      
+      <guid>https://mijime.github.io/post/seo/about-gtm/</guid>
+      <description>Google tag managerはHTMLタグを動的に挿入するサービス。 既存のHTMLに手を加えなくても管理画面から追加できる 挿入するHTMLタグを一元に</description>
+    </item>
+    
+    <item>
+      <title>web-ext を使って WebExtension を始める</title>
+      <link>https://mijime.github.io/post/js/getting-started-web-ext/</link>
+      <pubDate>Sat, 14 Oct 2017 01:38:45 +0900</pubDate>
+      
+      <guid>https://mijime.github.io/post/js/getting-started-web-ext/</guid>
+      <description>web extension用のビルドツール web-ext があるらしい web-ext Signed, Debugがメインのツール。 ビルドは主要ファイルをzipに入れるだけだった Install Yarnだ</description>
+    </item>
+    
+    <item>
+      <title>Nimble でユニットテストする</title>
+      <link>https://mijime.github.io/post/nim/usage-unittest/</link>
+      <pubDate>Fri, 13 Oct 2017 13:24:00 +0900</pubDate>
+      
+      <guid>https://mijime.github.io/post/nim/usage-unittest/</guid>
+      <description>ファイルの場所 testsフォルダに .nimを配置することで始める Warningが発生するのでSkipDirsに @[&amp;ldquo;tests&amp;rdquo;] を追加する usage-unittest.nimble # Package version = &amp;quot;0.1.0&amp;quot; author = &amp;quot;Anonymous&amp;quot;</description>
+    </item>
+    
+    <item>
+      <title>Nim の main 関数の処理方法について</title>
+      <link>https://mijime.github.io/post/nim/main-args/</link>
+      <pubDate>Thu, 12 Oct 2017 13:53:00 +0900</pubDate>
+      
+      <guid>https://mijime.github.io/post/nim/main-args/</guid>
+      <description>各パラメータ概要 用途 名 型 module メイン関数として呼ばれているか isMainModule bool system メイン関数の戻り値 programResult int system 引数の数 paramCount() int os 引数の値 commandLineParams() seq[TaintedString] os Reference https://nim-lang.org/docs/system.html https://nim-lang.org/docs/os.html https://qiita.com/6in/items/c735cb2ffbe79f3f9d94</description>
+    </item>
     
     <item>
       <title>Azure Resource Managerを通じてAzureを学ぶ</title>

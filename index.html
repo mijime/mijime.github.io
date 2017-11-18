@@ -89,12 +89,12 @@ ga("send", "pageview");
         
         <div class="post">
           <h2 class="post-title">
-            <a href="https://mijime.github.io/post/2017-09-16/index/">
-              Azure Resource Managerを通じてAzureを学ぶ
+            <a href="https://mijime.github.io/post/python/create-pelican-plugin/">
+              PelicanのPluginの作り方
             </a>
           </h2>
-          <time class="post-date" datetime="2017-09-16T07:48">
-            Sat, Sep 16, 2017
+          <time class="post-date" datetime="2017-10-22T09:32">
+            Sun, Oct 22, 2017
           </time>
 
           <div class="post-content">
@@ -102,27 +102,25 @@ ga("send", "pageview");
 
 <span>
   
-  <a href="https://mijime.github.io/tags/development/">#Development</a>
-  
-  <a href="https://mijime.github.io/tags/azure/">#Azure</a>
+  <a href="https://mijime.github.io/tags/pelican/">#pelican</a>
   
 </span>
 
 
 
-            <p>Azureにおけるテンプレートの立ち位置 Azureizmでは Azure Resource Manager と呼ぶらしい。 https://docs.microsoft.com/ja-jp/azure/azure-resource-manager/ ソース Azure Quickstart Templates https://github.com/Azure/azure-quickstart-templates 進め方 下のURLをなぞって勉強することにする</p>
-            <a href="/post/2017-09-16/index/">More...</a>
+            <p>register関数を用意して、 各イベントのsignalsに connect する from pelican import signals def register(): signals.content_object_init.connect(content_object_init_handler) def content_object_init_handler(content): pass signalsは下記を参照 http://docs.getpelican.com/en/3.7.1/plugins.html#list-of-signals _content や _summary を書き換える場合は以</p>
+            <a href="/post/python/create-pelican-plugin/">More...</a>
           </div>
         </div>
         
         <div class="post">
           <h2 class="post-title">
-            <a href="https://mijime.github.io/post/2017-04-20/regexp-recursive/">
-              JSの正規表現の再帰にはまった
+            <a href="https://mijime.github.io/post/python/git-fetch/">
+              Gitがインストールされていない環境でログを取得し、ハンドリングする
             </a>
           </h2>
-          <time class="post-date" datetime="2017-04-20T07:48">
-            Thu, Apr 20, 2017
+          <time class="post-date" datetime="2017-10-22T09:25">
+            Sun, Oct 22, 2017
           </time>
 
           <div class="post-content">
@@ -130,102 +128,74 @@ ga("send", "pageview");
 
 <span>
   
-  <a href="https://mijime.github.io/tags/development/">#Development</a>
-  
-  <a href="https://mijime.github.io/tags/javascript/">#JavaScript</a>
+  <a href="https://mijime.github.io/tags/git/">#Git</a>
   
 </span>
 
 
 
-            <p>のでメモる 再帰的に正規表現で抜き出して詰めたい場合があるとする。 function regexpr(re, text, acc=[]) { const res = re.exec(text); return res ? regexpr( re, text.substr(res.index + res[0].length, text.length), acc.concat(res)) : acc; } このときchromeさんだと、 g</p>
-            <a href="/post/2017-04-20/regexp-recursive/">More...</a>
+            <p>Pythonのdulwichを使う例が多い from dulwich.client import HttpGitClient from dulwich.repo import MemoryRepo from urllib.parse import urlparse import itertools def fetch_repo(repo=None, url=None): url_object = urlparse(url) client = HttpGitClient(&quot;://&quot;.join([url_object.scheme, url_object.netloc])) remote_refs = client.fetch(url_object.path, repo) for ref, sha1 in remote_refs.items(): repo.refs[ref] = sha1 return repo def get_first_commit_time(repo): for entry in repo.get_walker(): return entry.commit.commit_time Reference https://github.com/jelmer/dulwich http://ijin.github.io/blog/2016/02/18/ssh-and-git-on-aws-lambda/</p>
+            <a href="/post/python/git-fetch/">More...</a>
           </div>
         </div>
         
         <div class="post">
           <h2 class="post-title">
-            <a href="https://mijime.github.io/post/2017-04-11/docker-compose-3/">
-              docker compose 3
+            <a href="https://mijime.github.io/post/seo/about-gtm/">
+              Google tag manager の概要
             </a>
           </h2>
-          <time class="post-date" datetime="2017-04-11T10:25">
-            Tue, Apr 11, 2017
+          <time class="post-date" datetime="2017-10-22T03:07">
+            Sun, Oct 22, 2017
           </time>
 
           <div class="post-content">
             
 
-<span>
-  
-  <a href="https://mijime.github.io/tags/development/">#Development</a>
-  
-  <a href="https://mijime.github.io/tags/golang/">#golang</a>
-  
-</span>
 
 
-
-            <p>いつバージョン3になったんだ、、あとで差分チェックする</p>
-            
+            <p>Google tag managerはHTMLタグを動的に挿入するサービス。 既存のHTMLに手を加えなくても管理画面から追加できる 挿入するHTMLタグを一元に</p>
+            <a href="/post/seo/about-gtm/">More...</a>
           </div>
         </div>
         
         <div class="post">
           <h2 class="post-title">
-            <a href="https://mijime.github.io/post/2017-04-09/thoughts-on-react/">
-              ReactでMarkdownEditorを作ったかんそう
+            <a href="https://mijime.github.io/post/js/getting-started-web-ext/">
+              web-ext を使って WebExtension を始める
             </a>
           </h2>
-          <time class="post-date" datetime="2017-04-09T10:40">
-            Sun, Apr 9, 2017
+          <time class="post-date" datetime="2017-10-14T01:38">
+            Sat, Oct 14, 2017
           </time>
 
           <div class="post-content">
             
 
-<span>
-  
-  <a href="https://mijime.github.io/tags/development/">#Development</a>
-  
-  <a href="https://mijime.github.io/tags/react/">#React</a>
-  
-</span>
 
 
-
-            <p>作ったもの https://github.com/mijime/markdown-editor ダウンロードすればオフラインでも使えるマークダウンエディタを作りたかった 使ってよかったもの Rehype, Remark https://github.com/wooorm/rehype https://github.com/wooorm/remark HTMLやMarkdownをA</p>
-            <a href="/post/2017-04-09/thoughts-on-react/">More...</a>
+            <p>web extension用のビルドツール web-ext があるらしい web-ext Signed, Debugがメインのツール。 ビルドは主要ファイルをzipに入れるだけだった Install Yarnだ</p>
+            <a href="/post/js/getting-started-web-ext/">More...</a>
           </div>
         </div>
         
         <div class="post">
           <h2 class="post-title">
-            <a href="https://mijime.github.io/post/study/kanazawa.rb/2016-06-18/">
-               kanazawa.rb meetup 46に参加した
+            <a href="https://mijime.github.io/post/nim/usage-unittest/">
+              Nimble でユニットテストする
             </a>
           </h2>
-          <time class="post-date" datetime="2016-06-18T01:23">
-            Sat, Jun 18, 2016
+          <time class="post-date" datetime="2017-10-13T01:24">
+            Fri, Oct 13, 2017
           </time>
 
           <div class="post-content">
             
 
-<span>
-  
-  <a href="https://mijime.github.io/tags/development/">#Development</a>
-  
-  <a href="https://mijime.github.io/tags/lambda/">#lambda</a>
-  
-  <a href="https://mijime.github.io/tags/kzrb/">#kzrb</a>
-  
-</span>
 
 
-
-            <p>AWS Lambdaを管理するツールLammaやってみた Rubyで書かれたlammbaというリポジトリが上がったので ruby勉強会に参加がてら触っ</p>
-            <a href="/post/study/kanazawa.rb/2016-06-18/">More...</a>
+            <p>ファイルの場所 testsフォルダに .nimを配置することで始める Warningが発生するのでSkipDirsに @[&ldquo;tests&rdquo;] を追加する usage-unittest.nimble # Package version = &quot;0.1.0&quot; author = &quot;Anonymous&quot;</p>
+            <a href="/post/nim/usage-unittest/">More...</a>
           </div>
         </div>
         
@@ -237,7 +207,7 @@ ga("send", "pageview");
   <div class="container">
     
     <span>
-      Page 1 of 3
+      Page 1 of 5
     </span>
     
     <span>

@@ -1,23 +1,5 @@
 ---
-version: 2
-jobs:
-  build:
-    branches:
-      only:
-        - content
-    working_directory: /var/app
-    docker:
-      - image: node:latest
-    steps:
-      - run: |
-          curl -sSL https://github.com/spf13/hugo/releases/download/v0.20/hugo_0.20_Linux-64bit.tar.gz \
-          | tar -xzC /usr/local/bin \
-          && ln -sfb /usr/local/bin/hugo_0.20_linux_amd64/hugo_0.20_linux_amd64 /usr/local/bin/hugo
-      - checkout
-      - run: git submodule sync
-      - run: git submodule update --init --recursive
-      - run: yarn install --force
-      - run: git config --global user.name "circleci"
-      - run: git config --global user.email "circleci@circleci.com"
-      - run: make deploy
-...
+general:
+  branches:
+    ignore:
+      - master
