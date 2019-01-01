@@ -17,7 +17,7 @@
       <pubDate>Sun, 22 Oct 2017 21:25:19 +0900</pubDate>
       
       <guid>https://mijime.github.io/post/python/git-fetch/</guid>
-      <description>Pythonのdulwichを使う例が多い from dulwich.client import HttpGitClient from dulwich.repo import MemoryRepo from urllib.parse import urlparse import itertools def fetch_repo(repo=None, url=None): url_object = urlparse(url) client = HttpGitClient(&amp;quot;://&amp;quot;.join([url_object.scheme, url_object.netloc])) remote_refs = client.fetch(url_object.path, repo) for ref, sha1 in remote_refs.items(): repo.refs[ref] = sha1 return repo def get_first_commit_time(repo): for entry in repo.get_walker(): return entry.commit.commit_time Reference https://github.com/jelmer/dulwich http://ijin.github.io/blog/2016/02/18/ssh-and-git-on-aws-lambda/</description>
+      <description>&lt;p&gt;Pythonのdulwichを使う例が多い&lt;/p&gt;</description>
     </item>
     
   </channel>

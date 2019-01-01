@@ -17,7 +17,7 @@
       <pubDate>Sun, 22 Oct 2017 21:32:19 +0900</pubDate>
       
       <guid>https://mijime.github.io/post/python/create-pelican-plugin/</guid>
-      <description>register関数を用意して、 各イベントのsignalsに connect する from pelican import signals def register(): signals.content_object_init.connect(content_object_init_handler) def content_object_init_handler(content): pass signalsは下記を参照 http://docs.getpelican.com/en/3.7.1/plugins.html#list-of-signals _content や _summary を書き換える場合は以</description>
+      <description>&lt;p&gt;register関数を用意して、 各イベントのsignalsに &lt;code&gt;connect&lt;/code&gt; する&lt;/p&gt;</description>
     </item>
     
   </channel>

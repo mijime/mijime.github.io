@@ -4,14 +4,14 @@
     <link href="http://gmpg.org/xfn/11" rel="profile">
 <meta name="google-site-verification" content="7gVj5rzyozu0vYcQMLhIGr4g-WWyJn4R22RgeYqQdS0" />
 <meta http-equiv="content-type" content="text/html; charset=utf-8">
-<meta name="generator" content="Hugo 0.20" />
+<meta name="generator" content="Hugo 0.53" />
 
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
 
 
 <title>Gitがインストールされていない環境でログを取得し、ハンドリングする | My snippets</title>
-<meta name="description" content="Pythonのdulwichを使う例が多い from dulwich.client import HttpGitClient from dulwich.repo import MemoryRepo from urllib.parse import urlparse import itertools def fetch_repo(repo=None, url=None): url_object = urlparse(url) client = HttpGitClient(&quot;://&quot;.join([url_object.scheme, url_object.netloc])) remote_refs = client.fetch(url_object.path, repo) for ref, sha1 in remote_refs.items(): repo.refs[ref] = sha1 return repo def get_first_commit_time(repo): for entry in repo.get_walker(): return entry.commit.commit_time Reference https://github.com/jelmer/dulwich http://ijin.github.io/blog/2016/02/18/ssh-and-git-on-aws-lambda/">
+<meta name="description" content="Pythonのdulwichを使う例が多い">
 
 <meta name="keywords" content="Git">
 
@@ -98,9 +98,7 @@ ga("send", "pageview");
 </span>
 
 
-      
-
-<p>Pythonのdulwichを使う例が多い</p>
+      <p>Pythonのdulwichを使う例が多い</p>
 
 <pre><code class="language-python">from dulwich.client import HttpGitClient
 from dulwich.repo import MemoryRepo
@@ -127,7 +125,6 @@ def get_first_commit_time(repo):
 <li><a href="http://ijin.github.io/blog/2016/02/18/ssh-and-git-on-aws-lambda/">http://ijin.github.io/blog/2016/02/18/ssh-and-git-on-aws-lambda/</a></li>
 <li><a href="https://qiita.com/shibataka000/items/910754486ba2585209b2">https://qiita.com/shibataka000/items/910754486ba2585209b2</a></li>
 </ul>
-
     </div>
   </div>
 </div>

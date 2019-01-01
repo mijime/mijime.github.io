@@ -13,10 +13,10 @@
     
     <item>
       <title>Azure Resource Managerを通じてAzureを学ぶ</title>
-      <link>https://mijime.github.io/post/2017-09-16/index/</link>
+      <link>https://mijime.github.io/post/2017-09-16/</link>
       <pubDate>Sat, 16 Sep 2017 07:48:28 +0900</pubDate>
       
-      <guid>https://mijime.github.io/post/2017-09-16/index/</guid>
+      <guid>https://mijime.github.io/post/2017-09-16/</guid>
       <description>Azureにおけるテンプレートの立ち位置 Azureizmでは Azure Resource Manager と呼ぶらしい。 https://docs.microsoft.com/ja-jp/azure/azure-resource-manager/ ソース Azure Quickstart Templates https://github.com/Azure/azure-quickstart-templates 進め方 下のURLをなぞって勉強することにする</description>
     </item>
     

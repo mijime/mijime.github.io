@@ -4,14 +4,16 @@
     <link href="http://gmpg.org/xfn/11" rel="profile">
 <meta name="google-site-verification" content="7gVj5rzyozu0vYcQMLhIGr4g-WWyJn4R22RgeYqQdS0" />
 <meta http-equiv="content-type" content="text/html; charset=utf-8">
-<meta name="generator" content="Hugo 0.20" />
+<meta name="generator" content="Hugo 0.53" />
 
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
 
 
 <title>JSの正規表現の再帰にはまった | My snippets</title>
-<meta name="description" content="のでメモる 再帰的に正規表現で抜き出して詰めたい場合があるとする。 function regexpr(re, text, acc=[]) { const res = re.exec(text); return res ? regexpr( re, text.substr(res.index &#43; res[0].length, text.length), acc.concat(res)) : acc; } このときchromeさんだと、 g">
+<meta name="description" content="のでメモる
+
+再帰的に正規表現で抜き出して詰めたい場合があるとする。">
 
 <meta name="keywords" content="Development,JavaScript">
 
@@ -122,7 +124,6 @@ regexpr(/hello|world/g, &quot;hello world hello world&quot;); // =&gt; [&quot;he
 </code></pre>
 
 <p>indexや結果は変わらないのに、なんでだろう</p>
-
     </div>
   </div>
 </div>

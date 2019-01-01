@@ -17,7 +17,7 @@
       <pubDate>Sun, 22 Oct 2017 21:32:19 +0900</pubDate>
       
       <guid>https://mijime.github.io/post/python/create-pelican-plugin/</guid>
-      <description>register関数を用意して、 各イベントのsignalsに connect する from pelican import signals def register(): signals.content_object_init.connect(content_object_init_handler) def content_object_init_handler(content): pass signalsは下記を参照 http://docs.getpelican.com/en/3.7.1/plugins.html#list-of-signals _content や _summary を書き換える場合は以</description>
+      <description>&lt;p&gt;register関数を用意して、 各イベントのsignalsに &lt;code&gt;connect&lt;/code&gt; する&lt;/p&gt;</description>
     </item>
     
     <item>
@@ -26,7 +26,7 @@
       <pubDate>Sun, 22 Oct 2017 21:25:19 +0900</pubDate>
       
       <guid>https://mijime.github.io/post/python/git-fetch/</guid>
-      <description>Pythonのdulwichを使う例が多い from dulwich.client import HttpGitClient from dulwich.repo import MemoryRepo from urllib.parse import urlparse import itertools def fetch_repo(repo=None, url=None): url_object = urlparse(url) client = HttpGitClient(&amp;quot;://&amp;quot;.join([url_object.scheme, url_object.netloc])) remote_refs = client.fetch(url_object.path, repo) for ref, sha1 in remote_refs.items(): repo.refs[ref] = sha1 return repo def get_first_commit_time(repo): for entry in repo.get_walker(): return entry.commit.commit_time Reference https://github.com/jelmer/dulwich http://ijin.github.io/blog/2016/02/18/ssh-and-git-on-aws-lambda/</description>
+      <description>&lt;p&gt;Pythonのdulwichを使う例が多い&lt;/p&gt;</description>
     </item>
     
     <item>
@@ -67,10 +67,10 @@
     
     <item>
       <title>Azure Resource Managerを通じてAzureを学ぶ</title>
-      <link>https://mijime.github.io/post/2017-09-16/index/</link>
+      <link>https://mijime.github.io/post/2017-09-16/</link>
       <pubDate>Sat, 16 Sep 2017 07:48:28 +0900</pubDate>
       
-      <guid>https://mijime.github.io/post/2017-09-16/index/</guid>
+      <guid>https://mijime.github.io/post/2017-09-16/</guid>
       <description>Azureにおけるテンプレートの立ち位置 Azureizmでは Azure Resource Manager と呼ぶらしい。 https://docs.microsoft.com/ja-jp/azure/azure-resource-manager/ ソース Azure Quickstart Templates https://github.com/Azure/azure-quickstart-templates 進め方 下のURLをなぞって勉強することにする</description>
     </item>
     
@@ -80,7 +80,9 @@
       <pubDate>Thu, 20 Apr 2017 07:48:28 +0900</pubDate>
       
       <guid>https://mijime.github.io/post/2017-04-20/regexp-recursive/</guid>
-      <description>のでメモる 再帰的に正規表現で抜き出して詰めたい場合があるとする。 function regexpr(re, text, acc=[]) { const res = re.exec(text); return res ? regexpr( re, text.substr(res.index + res[0].length, text.length), acc.concat(res)) : acc; } このときchromeさんだと、 g</description>
+      <description>&lt;p&gt;のでメモる&lt;/p&gt;
+
+&lt;p&gt;再帰的に正規表現で抜き出して詰めたい場合があるとする。&lt;/p&gt;</description>
     </item>
     
     <item>
@@ -170,7 +172,7 @@
       <pubDate>Wed, 25 May 2016 14:05:50 +0900</pubDate>
       
       <guid>https://mijime.github.io/post/hugo/hugo-pagination/</guid>
-      <description>&lt;p&gt;&lt;/p&gt;</description>
+      <description>.Paginatorを使えば自動でやってくれるみたい {{- range (.Paginator 10).Pages }} &amp;lt;div&amp;gt; {{ .Content }} &amp;lt;/div&amp;gt; {{- end }} 次頁、前頁へのリンクも .Paginatorを使う {{- if or (.Paginator.HasPrev) (.Paginator.HasNext) }} &amp;lt;nav</description>
     </item>
     
     <item>

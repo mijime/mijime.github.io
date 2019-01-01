@@ -4,7 +4,7 @@
     <link href="http://gmpg.org/xfn/11" rel="profile">
 <meta name="google-site-verification" content="7gVj5rzyozu0vYcQMLhIGr4g-WWyJn4R22RgeYqQdS0" />
 <meta http-equiv="content-type" content="text/html; charset=utf-8">
-<meta name="generator" content="Hugo 0.20" />
+<meta name="generator" content="Hugo 0.53" />
 
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
@@ -162,7 +162,7 @@ ga("send", "pageview");
 
 
 
-            <p><p></p></p>
+            <p>.Paginatorを使えば自動でやってくれるみたい {{- range (.Paginator 10).Pages }} &lt;div&gt; {{ .Content }} &lt;/div&gt; {{- end }} 次頁、前頁へのリンクも .Paginatorを使う {{- if or (.Paginator.HasPrev) (.Paginator.HasNext) }} &lt;nav</p>
             <a href="/post/hugo/hugo-pagination/">More...</a>
           </div>
         </div>

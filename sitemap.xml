@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+  xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
     <loc>https://mijime.github.io/post/python/create-pelican-plugin/</loc>
@@ -32,7 +33,7 @@
   </url>
   
   <url>
-    <loc>https://mijime.github.io/post/2017-09-16/index/</loc>
+    <loc>https://mijime.github.io/post/2017-09-16/</loc>
     <lastmod>2017-09-16T07:48:28+09:00</lastmod>
   </url>
   
