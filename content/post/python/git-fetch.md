@@ -7,6 +7,8 @@ Tags: ["Git"]
 
 Pythonのdulwichを使う例が多い
 
+<!--more-->
+
 ```python
 from dulwich.client import HttpGitClient
 from dulwich.repo import MemoryRepo

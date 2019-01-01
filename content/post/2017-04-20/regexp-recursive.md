@@ -10,6 +10,8 @@ Draft: false
 
 再帰的に正規表現で抜き出して詰めたい場合があるとする。
 
+<!--more-->
+
 ```js
 function regexpr(re, text, acc=[]) {
   const res = re.exec(text);

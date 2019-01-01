@@ -7,6 +7,8 @@ Tags: ["pelican"]
 
 register関数を用意して、 各イベントのsignalsに `connect` する
 
+<!--more-->
+
 ```python
 from pelican import signals
 
