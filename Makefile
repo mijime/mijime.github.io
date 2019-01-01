@@ -1,3 +1,5 @@
+HUGO_VERSION = 0.53
+HUGO_OS = Linux
 REPO = $(shell git config remote.origin.url)
 BRANCH = master
 PUBLIC = public
@@ -5,6 +7,7 @@ FAVICONS = static/favicon.png \
 					 static/apple-touch-icon-144-precomposed.png
 FAVICON_BASE = assets/favicon.png
 
+HUGO = assets/hugo
 CONTENT = $(shell find content -name "*.md")
 LAYOUT = $(shell find layouts -name "*.html")
 
@@ -31,22 +34,22 @@ deploy: ### Deploy to
 		cd -
 
 watch: ### Watch for
-	hugo server --buildDrafts --watch
+	$(HUGO) server --buildDrafts --watch
 
 test: ### Test
 	yarn test
 
 post-diary: post-diary/index ### Add dairy (/{title})
 post-diary/%:
-	hugo new post/$(shell date +%F)/$*.md
+	$(HUGO) new post/$(shell date +%F)/$*.md
 
 post-memo: post-diary/index ### Add memo (/{tag}/{title})
 post-memo/%:
-	hugo new post/$*.md
+	$(HUGO) new post/$*.md
 
 post-slide: post-slide/index ### Add slide (/{title})
 post-slide/%:
-	hugo new slide/$(shell date +%F)/$*.md
+	$(HUGO) new slide/$(shell date +%F)/$*.md
 
 $(PUBLIC):
 	git clone --branch $(BRANCH) $(REPO) $@
@@ -67,11 +70,13 @@ static/apple-touch-icon-144-precomposed.png: $(FAVICON_BASE)
 		\( -size 144x144 xc:none -fill white -draw 'circle 71,71 71,0' \) \
 		-compose CopyOpacity -composite $@
 
-assets/:
-	mkdir -p $@
+assets/hugo:
+	mkdir -p $(shell dirname $@)
+	curl -L https://github.com/gohugoio/hugo/releases/download/v$(HUGO_VERSION)/hugo_$(HUGO_VERSION)_$(HUGO_OS)-64bit.tar.gz \
+		| tar xvfz - -C $(shell dirname $@)
 
 hugo: assets/.hugo
 
 assets/.hugo: assets/ $(CONTENT) $(LAYOUT)
-	hugo
+	$(HUGO)
 	touch assets/.hugo
