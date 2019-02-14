@@ -1,0 +1,15 @@
+---
+version: '3'
+services:
+  jsbuilder:
+    image: node:10
+    command: make install build
+    working_dir: /var/app
+    volumes:
+      - .:/var/app
+      - tmp_assets:/var/app/assets
+      - tmp_modules:/var/app/node_modules
+volumes:
+  tmp_assets: {}
+  tmp_modules: {}
+...

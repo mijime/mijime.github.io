@@ -16,6 +16,9 @@ help: ### Print tasks
 		| sort \
 		| awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-12s\033[0m %s\n", $$1, $$2}'
 
+install:
+	yarn
+
 build: $(PUBLIC) ### Build to
 	yarn run build
 	make hugo
@@ -77,6 +80,6 @@ assets/hugo:
 
 hugo: assets/.hugo
 
-assets/.hugo: assets/ $(CONTENT) $(LAYOUT)
+assets/.hugo: assets/hugo $(CONTENT) $(LAYOUT)
 	$(HUGO)
 	touch assets/.hugo
