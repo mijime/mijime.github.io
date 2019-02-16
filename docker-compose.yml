@@ -1,7 +1,7 @@
 ---
 version: '3'
 services:
-  jsbuilder:
+  builder:
     image: node:10
     command: make install build
     working_dir: /var/app

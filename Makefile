@@ -83,3 +83,9 @@ hugo: assets/.hugo
 assets/.hugo: assets/hugo $(CONTENT) $(LAYOUT)
 	$(HUGO)
 	touch assets/.hugo
+
+docker-build:
+	docker-compose run --rm builder make install build
+
+docker-watch:
+	docker-compose run --rm builder make install watch
