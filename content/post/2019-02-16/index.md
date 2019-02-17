@@ -52,3 +52,14 @@ icon=$(echo -ne $((127744 + 16#$(whoami|md5sum|cut -c-8)%512))|awk '{printf("%3c
 ```
 
 これを適当にPS1に入れておけば、間違えにくくなる
+
+## セキュアなデータをGoogleDriveにいれてGitで管理する
+
+だいぶBad Practiceな気がするが、パスワードとかssh-keyとかは全部Gitのリポジトリにして管理している。
+
+それを一旦GoogleDriveとかにぶち込んで別端末に持ってきた。
+
+さすがに内容が内容なので、`git encrypt` コマンドを作って暗号化してみた
+
+https://github.com/kojimat/git-encrypt
+
