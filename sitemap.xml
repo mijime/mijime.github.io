@@ -3,6 +3,11 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
+    <loc>https://mijime.github.io/post/2019-02-16/</loc>
+    <lastmod>2019-02-16T14:56:38+09:00</lastmod>
+  </url>
+  
+  <url>
     <loc>https://mijime.github.io/post/python/create-pelican-plugin/</loc>
     <lastmod>2017-10-22T21:32:19+09:00</lastmod>
   </url>
@@ -137,6 +142,12 @@
   </url>
   
   <url>
+    <loc>https://mijime.github.io/categories/development/</loc>
+    <lastmod>2019-02-16T14:56:38+09:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
     <loc>https://mijime.github.io/tags/git/</loc>
     <lastmod>2017-10-22T21:25:19+09:00</lastmod>
     <priority>0</priority>
@@ -186,7 +197,7 @@
   
   <url>
     <loc>https://mijime.github.io/</loc>
-    <lastmod>2017-10-22T21:32:19+09:00</lastmod>
+    <lastmod>2019-02-16T14:56:38+09:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -204,7 +215,7 @@
   
   <url>
     <loc>https://mijime.github.io/post/</loc>
-    <lastmod>2017-10-22T21:32:19+09:00</lastmod>
+    <lastmod>2019-02-16T14:56:38+09:00</lastmod>
     <priority>0</priority>
   </url>
   
