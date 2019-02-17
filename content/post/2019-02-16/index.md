@@ -1,7 +1,7 @@
 ---
 Title: リモートワーク用の環境を構築するときはアカウントを分けるとよさそう
 Draft: false
-Categories: ["development"]
+Tags: ["development"]
 Date: "2019-02-16T14:56:38+09:00"
 ---
 
