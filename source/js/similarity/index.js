@@ -60,7 +60,7 @@ async function parseVector(text) {
     }
 
     if (acc[next.surface_form]) {
-      acc[next.surface_form] ++;
+      acc[next.surface_form]++;
     } else {
       acc[next.surface_form] = 1;
     }
@@ -99,7 +99,7 @@ async function main(content, contentDirs) {
   const baseVector = await parseVector(removeHeader(text));
 
   const nestedFiles = await Promise.all(
-      contentDirs.map(dir => recursiveDir(dir)));
+    contentDirs.map(dir => recursiveDir(dir)));
   const files = flatten(nestedFiles);
 
   return Promise.all(files.map(async file => {

@@ -8,6 +8,12 @@ body {
   font-family: var(--font-family);
 }
 
+.content a,
+.paginator a {
+  display: inline-block;
+  text-decoration: none;
+}
+
 .sidebar a {
   text-decoration: none;
   transition: color 0.4s ease;
@@ -16,12 +22,6 @@ body {
 .sidebar a:hover,
 .sidebar a:focus {
   color: var(--link-color);
-}
-
-.content a,
-.paginator a {
-  display: inline-block;
-  text-decoration: none;
 }
 
 .content a::after,

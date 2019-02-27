@@ -58,7 +58,7 @@ ReactDOM + Reactが500+kbなのに対し、 Preact + Preact-compatが35kb前後�
 React-Reduxは普通に使えたので、 問題はなかった。  React-helmetとかReact-router周りはまだ試していない。
 ただ、Preact-helmetやPreact-routerとかあるし、なんだかんだでまた使えそう。
 
-dio.jsとかも同様も簡単に乗り換えれるか試したけど、 Preact-compatはだいぶ頑張っているのが分かっただけだった。
+dio.jsとかも同様も簡単に乗り換えられるか試したけど、 Preact-compatはだいぶ頑張っているのが分かっただけだった。
 
 JestやStyleGuidistなんかがReactを強要するので、 Webpackでビルド時のみ差し替える運用にした。
 

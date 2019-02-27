@@ -33,50 +33,40 @@ const webpackConfig = {
     'mermaid':      true,
     'highlight.js': 'hljs',
   },
-  'plugins': [
-    new webpack.optimize.DedupePlugin(),
-    new webpack.optimize.UglifyJsPlugin({
-      'minimize':  true,
-      'sourceMap': true,
-    }),
-  ],
   'devtool': 'source-map',
 };
 
-gulp.task('default', ['test', 'css', 'js']);
 
-gulp.task('test', ['textlint', 'eslint', 'htmllint']);
-
-gulp.task('textlint', () => {
+function textlintTask() {
   return gulp.src('content/**/*.md')
     .pipe(textlint());
-});
+}
 
-gulp.task('htmllint', () => {
+function htmllintTask() {
   return gulp.src('layout/**/*.html')
     .pipe(htmllint());
-});
+}
 
-gulp.task('eslint', () => {
+function eslintTask() {
   return gulp.src('source/js/**/*.js')
     .pipe(eslint({'useEslintrc': true}))
     .pipe(eslint.format())
     .pipe(eslint.failAfterError());
-});
+}
 
-gulp.task('css', () => {
+function cssTask() {
   return gulp.src('source/**/*.css')
     .pipe(stylelint(stylelintrc))
     .pipe(postcss())
     .pipe(cssmin())
     .pipe(gulp.dest('static'));
-});
+}
 
-gulp.task('js', done => {
+function jsTask(done) {
   return webpack(webpackConfig).run(done);
-});
+}
 
-gulp.task('watch', ['default'], () => {
-  gulp.watch('source/**/*.css', ['css']);
-  gulp.watch('content/**/*.md', ['textlint']);
-});
+const testTask = gulp.parallel(textlintTask, eslintTask, htmllintTask);
+const buildTask = gulp.parallel(testTask, cssTask, jsTask);
+
+export default buildTask;

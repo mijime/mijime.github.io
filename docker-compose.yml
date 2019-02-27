@@ -2,7 +2,7 @@
 version: '3'
 services:
   builder:
-    image: node:10
+    image: node:latest
     command: make install build
     working_dir: /var/app
     volumes:
