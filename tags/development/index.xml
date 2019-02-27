@@ -6,10 +6,20 @@
     <description>Recent content in Development on My snippets</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>ja</language>
-    <lastBuildDate>Sat, 16 Feb 2019 14:56:38 +0900</lastBuildDate>
+    <lastBuildDate>Thu, 28 Feb 2019 01:49:54 +0900</lastBuildDate>
     
 	<atom:link href="https://mijime.github.io/tags/development/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>vim-lspはじめました</title>
+      <link>https://mijime.github.io/post/2019-02-28/</link>
+      <pubDate>Thu, 28 Feb 2019 01:49:54 +0900</pubDate>
+      
+      <guid>https://mijime.github.io/post/2019-02-28/</guid>
+      <description>&lt;p&gt;今まで &lt;code&gt;faith/vim-go&lt;/code&gt; をありがたく使わせてもらっていたけど
+&lt;code&gt;GO111MODULE=on&lt;/code&gt; のときの挙動が気になったので &lt;code&gt;prabirshrestha/vim-lsp&lt;/code&gt; に移行した&lt;/p&gt;</description>
+    </item>
     
     <item>
       <title>リモートワーク用の環境を構築するときはアカウントを分けるとよさそう</title>

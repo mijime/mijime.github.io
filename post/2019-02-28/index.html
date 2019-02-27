@@ -10,10 +10,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
 
 
-<title>My snippets</title>
-<meta name="description" content="何かをかく">
+<title>vim-lspはじめました | My snippets</title>
+<meta name="description" content="今まで faith/vim-go をありがたく使わせてもらっていたけど
+GO111MODULE=on のときの挙動が気になったので prabirshrestha/vim-lsp に移行した">
 
-<meta name="keywords" content="mijime">
+<meta name="keywords" content="development">
 
 
 
@@ -21,9 +22,6 @@
 <link rel="apple-touch-icon-precomposed" sizes="144x144" href="https://mijime.github.io/apple-touch-icon-144-precomposed.png">
 <link rel="shortcut icon" href="https://mijime.github.io/favicon.png">
 
-
-
-<link href="https://mijime.github.io/post/index.xml" rel="alternate" type="application/rss+xml" title="My snippets" />
 
 
     
@@ -78,56 +76,62 @@ ga("send", "pageview");
       
     </ul>
 
-    <p>&copy; 2016. All rights reserved. </p>
+    <p>&copy; 2019. All rights reserved. </p>
   </div>
 </header>
 
 
-    <div class="content container">
-      <div class="posts">
-        <div class="post">
-          <h3 class="post-title">
-            Posts
-          </h3>
-          <ul class="post-content">
-            
-            <li>
-              <span>
-                <a href="https://mijime.github.io/post/hugo/hugo-deploy/">hugo deploy to GitHub pages</a>
-                <time class="pull-right post-list" datetime="2016-05-23T10:39">
-                  Mon, May 23, 2016
-                </time>
-              </span>
-            </li>
-            
-            <li>
-              <span>
-                <a href="https://mijime.github.io/post/blog/first-blogged/">first blogged</a>
-                <time class="pull-right post-list" datetime="2016-05-23T09:56">
-                  Mon, May 23, 2016
-                </time>
-              </span>
-            </li>
-            
-          </ul>
-        </div>
-      </div>
-    </div>
-    
-<footer class="paginator">
-  <div class="container">
-    
-    <span>
-      <a href="/post/page/2/">Prev</a>
-    </span>
-    
-    <span>
-      Page 3 of 3
-    </span>
-    
-  </div>
-</footer>
+<div class="content container">
+  <div class="post">
+    <h1 class="post-title">
+      <a href="https://mijime.github.io/post/2019-02-28/">
+        vim-lspはじめました
+      </a>
+    </h1>
+    <span class="post-date">Thu, Feb 28, 2019</span>
+    <div class="post-content">
+      
 
+<span>
+  
+  <a href="https://mijime.github.io/tags/development/">#development</a>
+  
+</span>
+
+
+      <p>今まで <code>faith/vim-go</code> をありがたく使わせてもらっていたけど
+<code>GO111MODULE=on</code> のときの挙動が気になったので <code>prabirshrestha/vim-lsp</code> に移行した</p>
+
+<ol>
+<li><p>Wikiに全部書いてあるのでそれをコピる</p></li>
+
+<li><p><code>go get -u github.com/saibing/bingo</code> でbingoをインストールしておく</p></li>
+
+<li><p><code>&lt;C-]&gt;</code> などのkey mappingを設定する</p></li>
+</ol>
+
+<pre><code class="language-vimrc">&quot; ...
+Plug 'prabirshrestha/async.vim'
+Plug 'prabirshrestha/vim-lsp'
+if executable('bingo')
+    augroup LspGo
+        au!
+        autocmd User lsp_setup call lsp#register_server({
+            \ 'name': 'go-lang',
+            \ 'cmd': {server_info-&gt;['bingo', '-mode', 'stdio']},
+                      \ 'whitelist': ['go'],
+                                  \ })
+        autocmd FileType go setlocal omnifunc=lsp#complete
+        autocmd FileType go nmap &lt;C-]&gt; :LspDefinition&lt;CR&gt;
+        autocmd FileType go nmap K :LspHover&lt;CR&gt;
+        autocmd FileType go nmap ]] :LspDocumentSymbol&lt;CR&gt;
+    augroup END
+endif
+&quot; ...
+</code></pre>
+    </div>
+  </div>
+</div>
 
   </body>
 </html>
