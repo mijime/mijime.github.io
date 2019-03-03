@@ -121,10 +121,12 @@ if executable('bingo')
             \ 'cmd': {server_info-&gt;['bingo', '-mode', 'stdio']},
                       \ 'whitelist': ['go'],
                                   \ })
+        autocmd FileType go setlocal noexpandtab
         autocmd FileType go setlocal omnifunc=lsp#complete
         autocmd FileType go nmap &lt;C-]&gt; :LspDefinition&lt;CR&gt;
         autocmd FileType go nmap K :LspHover&lt;CR&gt;
         autocmd FileType go nmap ]] :LspDocumentSymbol&lt;CR&gt;
+        autocmd BufWritePre *.go LspDocumentFormatSync
     augroup END
 endif
 &quot; ...
