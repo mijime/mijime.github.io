@@ -1,4 +1,4 @@
-HUGO_VERSION = 0.54
+HUGO_VERSION = 0.54.0
 HUGO_OS = Linux
 REPO = $(shell git config remote.origin.url)
 BRANCH = master
