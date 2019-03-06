@@ -10,8 +10,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
 
 
-<title>web-ext を使って WebExtension を始める | My snippets</title>
-<meta name="description" content="web extension用のビルドツール web-ext があるらしい web-ext Signed, Debugがメインのツール。 ビルドは主要ファイルをzipに入れるだけだった Install Yarnだ">
+<title>circleci local で死ぬパターン | My snippets</title>
+<meta name="description" content="circleciは通るけど、circleci local で死ぬパターンがある。">
+
+<meta name="keywords" content="development">
 
 
 
@@ -73,7 +75,7 @@ ga("send", "pageview");
       
     </ul>
 
-    <p>&copy; 2017. All rights reserved. </p>
+    <p>&copy; 2019. All rights reserved. </p>
   </div>
 </header>
 
@@ -81,51 +83,37 @@ ga("send", "pageview");
 <div class="content container">
   <div class="post">
     <h1 class="post-title">
-      <a href="https://mijime.github.io/post/js/getting-started-web-ext/">
-        web-ext を使って WebExtension を始める
+      <a href="https://mijime.github.io/post/2019-03-07/">
+        circleci local で死ぬパターン
       </a>
     </h1>
-    <span class="post-date">Sat, Oct 14, 2017</span>
+    <span class="post-date">Thu, Mar 7, 2019</span>
     <div class="post-content">
       
 
+<span>
+  
+  <a href="https://mijime.github.io/tags/development/">#development</a>
+  
+</span>
 
-      
 
-<p>web extension用のビルドツール <code>web-ext</code> があるらしい</p>
-
-<p><a href="https://github.com/mozilla/web-ext">web-ext</a></p>
-
-<p>Signed, Debugがメインのツール。
-ビルドは主要ファイルをzipに入れるだけだった</p>
-
-<h2 id="install">Install</h2>
-
-<p>Yarnだと上手くいかない。..? ので <code>npm</code> でインストールする</p>
-
-<pre><code class="language-bash">npm install --global web-ext
-</code></pre>
-
-<h2 id="usage">Usage</h2>
-
-<p>デバッグで確認する</p>
-
-<pre><code class="language-bash">web-ext run --firefox=${FIREFOX_BIN}
-</code></pre>
-
-<p>ビルドする</p>
-
-<pre><code class="language-bash">web-ext build
-web-ext sign --api-key ${API_KEY} --api-secret ${API_SECRET}
-</code></pre>
-
-<h2 id="reference">Reference</h2>
+      <p>circleciは通るけど、<code>circleci local</code> で死ぬパターンがある。</p>
 
 <ul>
-<li><a href="https://github.com/mozilla/web-ext">https://github.com/mozilla/web-ext</a></li>
-<li><a href="https://developer.mozilla.org/en-US/Add-ons/WebExtensions/Getting_started_with_web-ext">https://developer.mozilla.org/en-US/Add-ons/WebExtensions/Getting_started_with_web-ext</a></li>
+<li><p>ファイル数が <code>xargs</code> の上限を超える</p>
+
+<p>ローカルのファイルを <code>git ls-files | xargs tar cfz - | tar xfz -C</code>
+みたいな感じで所定のリポジトリに移動している。
+なので <code>xargs</code> の引数を超過すると死ぬ</p></li>
+
+<li><p>Gitコマンドを使用する</p>
+
+<p><code>git ls-files</code> でファイルだけを持っているので、ビルドタスクで
+<code>git submodule</code> や <code>git commit &amp;&amp; git push</code> があると死ぬ</p></li>
 </ul>
 
+<p>素直にdockerとかで別途テストできる環境を用意しておくのが吉。</p>
     </div>
   </div>
 </div>
