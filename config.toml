@@ -1,4 +1,4 @@
-baseurl = "https://mijime.github.io/"
+baseurl = "https://blog.m-iji.me/"
 theme = "hyde"
 languageCode = "ja"
 title = "My snippets"
