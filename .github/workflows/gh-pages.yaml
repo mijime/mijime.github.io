@@ -1,0 +1,21 @@
+---
+name: Github page CI
+
+on:
+  push:
+    branches:
+    - content
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+    - uses: actions/setup-node@v1
+      with:
+        node-version: 12.x
+    - run: npm ci
+    - run: git submodule sync
+    - run: git submodule update --init --recursive
+    - run: make assets/hugo
+    - run: make deploy
+...

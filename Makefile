@@ -17,19 +17,17 @@ help: ### Print tasks
 		| awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-12s\033[0m %s\n", $$1, $$2}'
 
 install:
-	yarn
+	npm install
 
 build: $(PUBLIC) ### Build to
-	yarn run build
-	make hugo
+	npm run build
+	PATH=$(PATH):assets hugo
 
 clean:
 	rm -rf $(PUBLIC)
 
-deploy: ### Deploy to
-	make clean
-	make build
-	cp -rv .circleci public/
+deploy: build ### Deploy to
+	cp -rv .github public/
 	cd public; \
 		git add -A; \
 		git commit -m ':memo: Update $(shell date "+%F %H:%M:%S")'; \
@@ -77,12 +75,6 @@ assets/hugo:
 	mkdir -p $(shell dirname $@)
 	curl -L https://github.com/gohugoio/hugo/releases/download/v$(HUGO_VERSION)/hugo_$(HUGO_VERSION)_$(HUGO_OS)-64bit.tar.gz \
 		| tar xvfz - -C $(shell dirname $@)
-
-hugo: assets/.hugo
-
-assets/.hugo: assets/hugo $(CONTENT) $(LAYOUT)
-	$(HUGO)
-	touch assets/.hugo
 
 docker-build:
 	docker-compose run --rm builder make install build
