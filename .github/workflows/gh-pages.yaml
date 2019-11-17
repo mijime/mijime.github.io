@@ -26,7 +26,6 @@ jobs:
     - run: git submodule sync
     - run: git submodule update --init --recursive
     - run: make assets/hugo
-    - run: mkdir -p public
     - run: make build
     - uses: peaceiris/actions-gh-pages@v2.5.1
       env:
