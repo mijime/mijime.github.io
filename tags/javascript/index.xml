@@ -1,22 +1,22 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Javascript on My snippets</title>
-    <link>https://mijime.github.io/tags/javascript/</link>
-    <description>Recent content in Javascript on My snippets</description>
+    <title>JavaScript on My snippets</title>
+    <link>https://blog.m-iji.me/tags/javascript/</link>
+    <description>Recent content in JavaScript on My snippets</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>ja</language>
     <lastBuildDate>Thu, 20 Apr 2017 07:48:28 +0900</lastBuildDate>
     
-	<atom:link href="https://mijime.github.io/tags/javascript/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="https://blog.m-iji.me/tags/javascript/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>JSの正規表現の再帰にはまった</title>
-      <link>https://mijime.github.io/post/2017-04-20/regexp-recursive/</link>
+      <link>https://blog.m-iji.me/post/2017-04-20/regexp-recursive/</link>
       <pubDate>Thu, 20 Apr 2017 07:48:28 +0900</pubDate>
       
-      <guid>https://mijime.github.io/post/2017-04-20/regexp-recursive/</guid>
+      <guid>https://blog.m-iji.me/post/2017-04-20/regexp-recursive/</guid>
       <description>&lt;p&gt;のでメモる&lt;/p&gt;
 
 &lt;p&gt;再帰的に正規表現で抜き出して詰めたい場合があるとする。&lt;/p&gt;</description>
@@ -24,10 +24,10 @@
     
     <item>
       <title>関連記事を探す</title>
-      <link>https://mijime.github.io/post/js/cosine-similarity/</link>
+      <link>https://blog.m-iji.me/post/js/cosine-similarity/</link>
       <pubDate>Sat, 28 May 2016 21:12:36 +0900</pubDate>
       
-      <guid>https://mijime.github.io/post/js/cosine-similarity/</guid>
+      <guid>https://blog.m-iji.me/post/js/cosine-similarity/</guid>
       <description>他のブログを参考にすると関連記事というのを最後に表示しているらしい。 まだ記事の数は少ないけど、ある程度近い記事を探すことができるようにする。</description>
     </item>
     

@@ -1,41 +1,41 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Development on My snippets</title>
-    <link>https://mijime.github.io/tags/development/</link>
+    <link>https://blog.m-iji.me/tags/development/</link>
     <description>Recent content in Development on My snippets</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>ja</language>
     <lastBuildDate>Thu, 07 Mar 2019 00:38:33 +0900</lastBuildDate>
     
-	<atom:link href="https://mijime.github.io/tags/development/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="https://blog.m-iji.me/tags/development/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>circleci local で死ぬパターン</title>
-      <link>https://mijime.github.io/post/2019-03-07/</link>
+      <link>https://blog.m-iji.me/post/2019-03-07/</link>
       <pubDate>Thu, 07 Mar 2019 00:38:33 +0900</pubDate>
       
-      <guid>https://mijime.github.io/post/2019-03-07/</guid>
+      <guid>https://blog.m-iji.me/post/2019-03-07/</guid>
       <description>&lt;p&gt;circleciは通るけど、&lt;code&gt;circleci local&lt;/code&gt; で死ぬパターンがある。&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>vim-lspはじめました</title>
-      <link>https://mijime.github.io/post/2019-02-28/</link>
+      <link>https://blog.m-iji.me/post/2019-02-28/</link>
       <pubDate>Thu, 28 Feb 2019 01:49:54 +0900</pubDate>
       
-      <guid>https://mijime.github.io/post/2019-02-28/</guid>
+      <guid>https://blog.m-iji.me/post/2019-02-28/</guid>
       <description>&lt;p&gt;今まで &lt;code&gt;faith/vim-go&lt;/code&gt; をありがたく使わせてもらっていたけど
 &lt;code&gt;GO111MODULE=on&lt;/code&gt; のときの挙動が気になったので &lt;code&gt;prabirshrestha/vim-lsp&lt;/code&gt; に移行した&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>リモートワーク用の環境を構築するときはアカウントを分けるとよさそう</title>
-      <link>https://mijime.github.io/post/2019-02-16/</link>
+      <link>https://blog.m-iji.me/post/2019-02-16/</link>
       <pubDate>Sat, 16 Feb 2019 14:56:38 +0900</pubDate>
       
-      <guid>https://mijime.github.io/post/2019-02-16/</guid>
+      <guid>https://blog.m-iji.me/post/2019-02-16/</guid>
       <description>&lt;p&gt;最近リモート用の環境を私物のPCに構築した。&lt;/p&gt;
 
 &lt;p&gt;その時にアカウントを分けて、ブックマークとか作業環境を混ざらないようにしたが
@@ -44,19 +44,19 @@
     
     <item>
       <title>Azure Resource Managerを通じてAzureを学ぶ</title>
-      <link>https://mijime.github.io/post/2017-09-16/</link>
+      <link>https://blog.m-iji.me/post/2017-09-16/</link>
       <pubDate>Sat, 16 Sep 2017 07:48:28 +0900</pubDate>
       
-      <guid>https://mijime.github.io/post/2017-09-16/</guid>
+      <guid>https://blog.m-iji.me/post/2017-09-16/</guid>
       <description>Azureにおけるテンプレートの立ち位置 Azureizmでは Azure Resource Manager と呼ぶらしい。 https://docs.microsoft.com/ja-jp/azure/azure-resource-manager/ ソース Azure Quickstart Templates https://github.com/Azure/azure-quickstart-templates 進め方 下のURLをなぞって勉強することにする</description>
     </item>
     
     <item>
       <title>JSの正規表現の再帰にはまった</title>
-      <link>https://mijime.github.io/post/2017-04-20/regexp-recursive/</link>
+      <link>https://blog.m-iji.me/post/2017-04-20/regexp-recursive/</link>
       <pubDate>Thu, 20 Apr 2017 07:48:28 +0900</pubDate>
       
-      <guid>https://mijime.github.io/post/2017-04-20/regexp-recursive/</guid>
+      <guid>https://blog.m-iji.me/post/2017-04-20/regexp-recursive/</guid>
       <description>&lt;p&gt;のでメモる&lt;/p&gt;
 
 &lt;p&gt;再帰的に正規表現で抜き出して詰めたい場合があるとする。&lt;/p&gt;</description>
@@ -64,46 +64,46 @@
     
     <item>
       <title>docker compose 3</title>
-      <link>https://mijime.github.io/post/2017-04-11/docker-compose-3/</link>
+      <link>https://blog.m-iji.me/post/2017-04-11/docker-compose-3/</link>
       <pubDate>Tue, 11 Apr 2017 10:25:47 +0900</pubDate>
       
-      <guid>https://mijime.github.io/post/2017-04-11/docker-compose-3/</guid>
+      <guid>https://blog.m-iji.me/post/2017-04-11/docker-compose-3/</guid>
       <description>いつバージョン3になったんだ、、あとで差分チェックする</description>
     </item>
     
     <item>
       <title>ReactでMarkdownEditorを作ったかんそう</title>
-      <link>https://mijime.github.io/post/2017-04-09/thoughts-on-react/</link>
+      <link>https://blog.m-iji.me/post/2017-04-09/thoughts-on-react/</link>
       <pubDate>Sun, 09 Apr 2017 22:40:10 +0900</pubDate>
       
-      <guid>https://mijime.github.io/post/2017-04-09/thoughts-on-react/</guid>
+      <guid>https://blog.m-iji.me/post/2017-04-09/thoughts-on-react/</guid>
       <description>作ったもの https://github.com/mijime/markdown-editor ダウンロードすればオフラインでも使えるマークダウンエディタを作りたかった 使ってよかったもの Rehype, Remark https://github.com/wooorm/rehype https://github.com/wooorm/remark HTMLやMarkdownをA</description>
     </item>
     
     <item>
       <title> kanazawa.rb meetup 46に参加した</title>
-      <link>https://mijime.github.io/post/study/kanazawa.rb/2016-06-18/</link>
+      <link>https://blog.m-iji.me/post/study/kanazawa.rb/2016-06-18/</link>
       <pubDate>Sat, 18 Jun 2016 13:23:05 +0900</pubDate>
       
-      <guid>https://mijime.github.io/post/study/kanazawa.rb/2016-06-18/</guid>
+      <guid>https://blog.m-iji.me/post/study/kanazawa.rb/2016-06-18/</guid>
       <description>AWS Lambdaを管理するツールLammaやってみた Rubyで書かれたlammbaというリポジトリが上がったので ruby勉強会に参加がてら触っ</description>
     </item>
     
     <item>
       <title>mermaidに対応した</title>
-      <link>https://mijime.github.io/post/hugo/code-mermaid/</link>
+      <link>https://blog.m-iji.me/post/hugo/code-mermaid/</link>
       <pubDate>Tue, 31 May 2016 22:41:30 +0900</pubDate>
       
-      <guid>https://mijime.github.io/post/hugo/code-mermaid/</guid>
+      <guid>https://blog.m-iji.me/post/hugo/code-mermaid/</guid>
       <description>code.language-mermaidを変換するスクリプトを噛ませただけだけど。 graph TD; A--&amp;gt;B; A--&amp;gt;C; B--&amp;gt;D; C--&amp;gt;D; gantt dateFormat YYYY-MM-DD title Adding GANTT diagram functionality to mermaid section A section Completed task: done, des1, 2014-01-06, 2014-01-08 Active task: active,</description>
     </item>
     
     <item>
       <title>関連記事を探す</title>
-      <link>https://mijime.github.io/post/js/cosine-similarity/</link>
+      <link>https://blog.m-iji.me/post/js/cosine-similarity/</link>
       <pubDate>Sat, 28 May 2016 21:12:36 +0900</pubDate>
       
-      <guid>https://mijime.github.io/post/js/cosine-similarity/</guid>
+      <guid>https://blog.m-iji.me/post/js/cosine-similarity/</guid>
       <description>他のブログを参考にすると関連記事というのを最後に表示しているらしい。 まだ記事の数は少ないけど、ある程度近い記事を探すことができるようにする。</description>
     </item>
     

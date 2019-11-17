@@ -1,22 +1,22 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Mermaid on My snippets</title>
-    <link>https://mijime.github.io/tags/mermaid/</link>
-    <description>Recent content in Mermaid on My snippets</description>
+    <title>mermaid on My snippets</title>
+    <link>https://blog.m-iji.me/tags/mermaid/</link>
+    <description>Recent content in mermaid on My snippets</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>ja</language>
     <lastBuildDate>Tue, 31 May 2016 22:41:30 +0900</lastBuildDate>
     
-	<atom:link href="https://mijime.github.io/tags/mermaid/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="https://blog.m-iji.me/tags/mermaid/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>mermaidに対応した</title>
-      <link>https://mijime.github.io/post/hugo/code-mermaid/</link>
+      <link>https://blog.m-iji.me/post/hugo/code-mermaid/</link>
       <pubDate>Tue, 31 May 2016 22:41:30 +0900</pubDate>
       
-      <guid>https://mijime.github.io/post/hugo/code-mermaid/</guid>
+      <guid>https://blog.m-iji.me/post/hugo/code-mermaid/</guid>
       <description>code.language-mermaidを変換するスクリプトを噛ませただけだけど。 graph TD; A--&amp;gt;B; A--&amp;gt;C; B--&amp;gt;D; C--&amp;gt;D; gantt dateFormat YYYY-MM-DD title Adding GANTT diagram functionality to mermaid section A section Completed task: done, des1, 2014-01-06, 2014-01-08 Active task: active,</description>
     </item>
     

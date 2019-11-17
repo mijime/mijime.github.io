@@ -1,22 +1,22 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Lambda on My snippets</title>
-    <link>https://mijime.github.io/tags/lambda/</link>
-    <description>Recent content in Lambda on My snippets</description>
+    <title>lambda on My snippets</title>
+    <link>https://blog.m-iji.me/tags/lambda/</link>
+    <description>Recent content in lambda on My snippets</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>ja</language>
     <lastBuildDate>Sat, 18 Jun 2016 13:23:05 +0900</lastBuildDate>
     
-	<atom:link href="https://mijime.github.io/tags/lambda/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="https://blog.m-iji.me/tags/lambda/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title> kanazawa.rb meetup 46に参加した</title>
-      <link>https://mijime.github.io/post/study/kanazawa.rb/2016-06-18/</link>
+      <link>https://blog.m-iji.me/post/study/kanazawa.rb/2016-06-18/</link>
       <pubDate>Sat, 18 Jun 2016 13:23:05 +0900</pubDate>
       
-      <guid>https://mijime.github.io/post/study/kanazawa.rb/2016-06-18/</guid>
+      <guid>https://blog.m-iji.me/post/study/kanazawa.rb/2016-06-18/</guid>
       <description>AWS Lambdaを管理するツールLammaやってみた Rubyで書かれたlammbaというリポジトリが上がったので ruby勉強会に参加がてら触っ</description>
     </item>
     

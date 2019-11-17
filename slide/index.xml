@@ -1,22 +1,22 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Slides on My snippets</title>
-    <link>https://mijime.github.io/slide/</link>
+    <link>https://blog.m-iji.me/slide/</link>
     <description>Recent content in Slides on My snippets</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>ja</language>
     <lastBuildDate>Fri, 27 May 2016 14:20:56 +0900</lastBuildDate>
     
-	<atom:link href="https://mijime.github.io/slide/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="https://blog.m-iji.me/slide/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>スライドテスト</title>
-      <link>https://mijime.github.io/slide/2016-05-27/my-first-slide/</link>
+      <link>https://blog.m-iji.me/slide/2016-05-27/my-first-slide/</link>
       <pubDate>Fri, 27 May 2016 14:20:56 +0900</pubDate>
       
-      <guid>https://mijime.github.io/slide/2016-05-27/my-first-slide/</guid>
+      <guid>https://blog.m-iji.me/slide/2016-05-27/my-first-slide/</guid>
       <description>HugoでReveal JSを始める 始める 始めた &amp;lt;div&amp;gt; hello world &amp;lt;/div&amp;gt; graph TD; A--&amp;gt;B; A--&amp;gt;C; B--&amp;gt;D; C--&amp;gt;D;</description>
     </item>
     

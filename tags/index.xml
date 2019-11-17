@@ -1,148 +1,148 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Tags on My snippets</title>
-    <link>https://mijime.github.io/tags/</link>
+    <link>https://blog.m-iji.me/tags/</link>
     <description>Recent content in Tags on My snippets</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>ja</language>
-    <lastBuildDate>Sat, 16 Sep 2017 07:48:28 +0900</lastBuildDate>
+    <lastBuildDate>Thu, 07 Mar 2019 00:38:33 +0900</lastBuildDate>
     
-	<atom:link href="https://mijime.github.io/tags/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="https://blog.m-iji.me/tags/index.xml" rel="self" type="application/rss+xml" />
     
-    
-    <item>
-      <title>Azure</title>
-      <link>https://mijime.github.io/tags/azure/</link>
-      <pubDate>Sat, 16 Sep 2017 07:48:28 +0900</pubDate>
-      
-      <guid>https://mijime.github.io/tags/azure/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>Blog</title>
-      <link>https://mijime.github.io/tags/blog/</link>
-      <pubDate>Sat, 28 May 2016 13:48:27 +0900</pubDate>
-      
-      <guid>https://mijime.github.io/tags/blog/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>Ci</title>
-      <link>https://mijime.github.io/tags/ci/</link>
-      <pubDate>Thu, 26 May 2016 21:10:04 +0900</pubDate>
-      
-      <guid>https://mijime.github.io/tags/ci/</guid>
-      <description></description>
-    </item>
     
     <item>
       <title>Development</title>
-      <link>https://mijime.github.io/tags/development/</link>
+      <link>https://blog.m-iji.me/tags/development/</link>
       <pubDate>Thu, 07 Mar 2019 00:38:33 +0900</pubDate>
       
-      <guid>https://mijime.github.io/tags/development/</guid>
+      <guid>https://blog.m-iji.me/tags/development/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>pelican</title>
+      <link>https://blog.m-iji.me/tags/pelican/</link>
+      <pubDate>Sun, 22 Oct 2017 21:32:19 +0900</pubDate>
+      
+      <guid>https://blog.m-iji.me/tags/pelican/</guid>
       <description></description>
     </item>
     
     <item>
       <title>Git</title>
-      <link>https://mijime.github.io/tags/git/</link>
+      <link>https://blog.m-iji.me/tags/git/</link>
       <pubDate>Sun, 22 Oct 2017 21:25:19 +0900</pubDate>
       
-      <guid>https://mijime.github.io/tags/git/</guid>
+      <guid>https://blog.m-iji.me/tags/git/</guid>
       <description></description>
     </item>
     
     <item>
-      <title>Github</title>
-      <link>https://mijime.github.io/tags/github/</link>
-      <pubDate>Mon, 23 May 2016 22:48:11 +0900</pubDate>
+      <title>Azure</title>
+      <link>https://blog.m-iji.me/tags/azure/</link>
+      <pubDate>Sat, 16 Sep 2017 07:48:28 +0900</pubDate>
       
-      <guid>https://mijime.github.io/tags/github/</guid>
+      <guid>https://blog.m-iji.me/tags/azure/</guid>
       <description></description>
     </item>
     
     <item>
-      <title>Golang</title>
-      <link>https://mijime.github.io/tags/golang/</link>
-      <pubDate>Tue, 11 Apr 2017 10:25:47 +0900</pubDate>
-      
-      <guid>https://mijime.github.io/tags/golang/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>Hugo</title>
-      <link>https://mijime.github.io/tags/hugo/</link>
-      <pubDate>Wed, 25 May 2016 14:05:50 +0900</pubDate>
-      
-      <guid>https://mijime.github.io/tags/hugo/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>Javascript</title>
-      <link>https://mijime.github.io/tags/javascript/</link>
+      <title>JavaScript</title>
+      <link>https://blog.m-iji.me/tags/javascript/</link>
       <pubDate>Thu, 20 Apr 2017 07:48:28 +0900</pubDate>
       
-      <guid>https://mijime.github.io/tags/javascript/</guid>
+      <guid>https://blog.m-iji.me/tags/javascript/</guid>
       <description></description>
     </item>
     
     <item>
-      <title>Kzrb</title>
-      <link>https://mijime.github.io/tags/kzrb/</link>
-      <pubDate>Sat, 18 Jun 2016 13:23:05 +0900</pubDate>
+      <title>golang</title>
+      <link>https://blog.m-iji.me/tags/golang/</link>
+      <pubDate>Tue, 11 Apr 2017 10:25:47 +0900</pubDate>
       
-      <guid>https://mijime.github.io/tags/kzrb/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>Lambda</title>
-      <link>https://mijime.github.io/tags/lambda/</link>
-      <pubDate>Sat, 18 Jun 2016 13:23:05 +0900</pubDate>
-      
-      <guid>https://mijime.github.io/tags/lambda/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>Mermaid</title>
-      <link>https://mijime.github.io/tags/mermaid/</link>
-      <pubDate>Tue, 31 May 2016 22:41:30 +0900</pubDate>
-      
-      <guid>https://mijime.github.io/tags/mermaid/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>Note</title>
-      <link>https://mijime.github.io/tags/note/</link>
-      <pubDate>Sat, 28 May 2016 13:48:27 +0900</pubDate>
-      
-      <guid>https://mijime.github.io/tags/note/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>Pelican</title>
-      <link>https://mijime.github.io/tags/pelican/</link>
-      <pubDate>Sun, 22 Oct 2017 21:32:19 +0900</pubDate>
-      
-      <guid>https://mijime.github.io/tags/pelican/</guid>
+      <guid>https://blog.m-iji.me/tags/golang/</guid>
       <description></description>
     </item>
     
     <item>
       <title>React</title>
-      <link>https://mijime.github.io/tags/react/</link>
+      <link>https://blog.m-iji.me/tags/react/</link>
       <pubDate>Sun, 09 Apr 2017 22:40:10 +0900</pubDate>
       
-      <guid>https://mijime.github.io/tags/react/</guid>
+      <guid>https://blog.m-iji.me/tags/react/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>kzrb</title>
+      <link>https://blog.m-iji.me/tags/kzrb/</link>
+      <pubDate>Sat, 18 Jun 2016 13:23:05 +0900</pubDate>
+      
+      <guid>https://blog.m-iji.me/tags/kzrb/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>lambda</title>
+      <link>https://blog.m-iji.me/tags/lambda/</link>
+      <pubDate>Sat, 18 Jun 2016 13:23:05 +0900</pubDate>
+      
+      <guid>https://blog.m-iji.me/tags/lambda/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>mermaid</title>
+      <link>https://blog.m-iji.me/tags/mermaid/</link>
+      <pubDate>Tue, 31 May 2016 22:41:30 +0900</pubDate>
+      
+      <guid>https://blog.m-iji.me/tags/mermaid/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>blog</title>
+      <link>https://blog.m-iji.me/tags/blog/</link>
+      <pubDate>Sat, 28 May 2016 13:48:27 +0900</pubDate>
+      
+      <guid>https://blog.m-iji.me/tags/blog/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>note</title>
+      <link>https://blog.m-iji.me/tags/note/</link>
+      <pubDate>Sat, 28 May 2016 13:48:27 +0900</pubDate>
+      
+      <guid>https://blog.m-iji.me/tags/note/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>ci</title>
+      <link>https://blog.m-iji.me/tags/ci/</link>
+      <pubDate>Thu, 26 May 2016 21:10:04 +0900</pubDate>
+      
+      <guid>https://blog.m-iji.me/tags/ci/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>hugo</title>
+      <link>https://blog.m-iji.me/tags/hugo/</link>
+      <pubDate>Wed, 25 May 2016 14:05:50 +0900</pubDate>
+      
+      <guid>https://blog.m-iji.me/tags/hugo/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>GitHub</title>
+      <link>https://blog.m-iji.me/tags/github/</link>
+      <pubDate>Mon, 23 May 2016 22:48:11 +0900</pubDate>
+      
+      <guid>https://blog.m-iji.me/tags/github/</guid>
       <description></description>
     </item>
     
