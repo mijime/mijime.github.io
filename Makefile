@@ -27,8 +27,8 @@ clean:
 	rm -rf $(PUBLIC)
 
 deploy: build ### Deploy to
-	cp -rv .github public/
-	cd public; \
+	cp -rv .github $(PUBLIC)/
+	cd $(PUBLIC); \
 		git add -A; \
 		git commit -m ':memo: Update $(shell date "+%F %H:%M:%S")'; \
 		git push --set-upstream origin $(BRANCH); \
