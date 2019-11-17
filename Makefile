@@ -38,7 +38,7 @@ watch: ### Watch for
 	$(HUGO) server --buildDrafts --watch
 
 test: ### Test
-	yarn test
+	npm test
 
 post-diary: post-diary/index ### Add dairy (/{title})
 post-diary/%:
@@ -81,3 +81,6 @@ docker-build:
 
 docker-watch:
 	docker-compose run --rm builder make install watch
+
+npm_upgrade:
+	cat package.json | jq '.devDependencies|keys|@csv' -r|sed -e 's/,/ /g' | xargs npm install -D
