@@ -11,7 +11,7 @@
 
     <div class="content container">
       <div class="posts">
-        {{ range (.Paginate .Data.Pages 5).Pages }}
+        {{ range (.Paginate .Site.RegularPages 5).Pages }}
         <div class="post">
           <h2 class="post-title">
             <a href="{{ .Permalink }}">
