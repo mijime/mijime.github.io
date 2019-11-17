@@ -1,6 +1,6 @@
 HUGO_VERSION = 0.59.1
 HUGO_OS = Linux
-REPO = $(shell git config remote.origin.url)
+REPO = git@github.com:mijime/mijime.github.io
 BRANCH = master
 PUBLIC = public
 FAVICONS = static/favicon.png \
@@ -27,8 +27,8 @@ clean:
 	rm -rf $(PUBLIC)
 
 deploy: build ### Deploy to
-	cp -rv .github public/
-	cd public; \
+	cp -rv .github $(PUBLIC)/
+	cd $(PUBLIC); \
 		git add -A; \
 		git commit -m ':memo: Update $(shell date "+%F %H:%M:%S")'; \
 		git push --set-upstream origin $(BRANCH); \
@@ -38,7 +38,7 @@ watch: ### Watch for
 	$(HUGO) server --buildDrafts --watch
 
 test: ### Test
-	yarn test
+	npm test
 
 post-diary: post-diary/index ### Add dairy (/{title})
 post-diary/%:
@@ -81,3 +81,6 @@ docker-build:
 
 docker-watch:
 	docker-compose run --rm builder make install watch
+
+npm_upgrade:
+	cat package.json | jq '.devDependencies|keys|@csv' -r|sed -e 's/,/ /g' | xargs npm install -D
