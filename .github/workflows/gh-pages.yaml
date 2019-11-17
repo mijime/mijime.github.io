@@ -14,6 +14,7 @@ jobs:
       with:
         node-version: 12.x
     - run: npm ci
+    - run: scripts/setup-deploy-key.sh
     - run: git submodule sync
     - run: git submodule update --init --recursive
     - run: make assets/hugo
