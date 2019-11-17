@@ -15,6 +15,8 @@ jobs:
         node-version: 12.x
     - run: npm ci
     - run: scripts/setup-deploy-key.sh
+      env:
+        ACTIONS_DEPLOY_KEY: ${{ secrets.ACTIONS_DEPLOY_KEY }}
     - run: git submodule sync
     - run: git submodule update --init --recursive
     - run: make assets/hugo
