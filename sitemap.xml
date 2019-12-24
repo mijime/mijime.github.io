@@ -3,27 +3,37 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
+    <loc>https://blog.m-iji.me/tags/memo/</loc>
+    <lastmod>2019-12-24T10:15:44+09:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://blog.m-iji.me/</loc>
+    <lastmod>2019-12-24T10:15:44+09:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://blog.m-iji.me/post/2019-12-24/</loc>
+    <lastmod>2019-12-24T10:15:44+09:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://blog.m-iji.me/post/</loc>
+    <lastmod>2019-12-24T10:15:44+09:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://blog.m-iji.me/tags/</loc>
+    <lastmod>2019-12-24T10:15:44+09:00</lastmod>
+  </url>
+  
+  <url>
     <loc>https://blog.m-iji.me/post/2019-03-07/</loc>
     <lastmod>2019-03-07T00:38:33+09:00</lastmod>
   </url>
   
   <url>
     <loc>https://blog.m-iji.me/tags/development/</loc>
-    <lastmod>2019-03-07T00:38:33+09:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>https://blog.m-iji.me/</loc>
-    <lastmod>2019-03-07T00:38:33+09:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>https://blog.m-iji.me/post/</loc>
-    <lastmod>2019-03-07T00:38:33+09:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>https://blog.m-iji.me/tags/</loc>
     <lastmod>2019-03-07T00:38:33+09:00</lastmod>
   </url>
   
