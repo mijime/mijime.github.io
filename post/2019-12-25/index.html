@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <link href="http://gmpg.org/xfn/11" rel="profile">
+<meta name="google-site-verification" content="7gVj5rzyozu0vYcQMLhIGr4g-WWyJn4R22RgeYqQdS0" />
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+<meta name="generator" content="Hugo 0.59.1" />
+
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+
+<title>macOSからChromeOSに移行したけど、いろいろ辛かった | My snippets</title>
+<meta name="description" content="初めてのChromeOSだったのでいろいろハマった">
+
+<meta name="keywords" content="development">
+
+
+
+
+<link rel="apple-touch-icon-precomposed" sizes="144x144" href="https://blog.m-iji.me/apple-touch-icon-144-precomposed.png">
+<link rel="shortcut icon" href="https://blog.m-iji.me/favicon.png">
+
+
+
+    
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.4.0/styles/zenburn.min.css" />
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.4.0/highlight.min.js" defer></script>
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/mermaid/7.0.0/mermaid.min.css" />
+<script src="//cdnjs.cloudflare.com/ajax/libs/mermaid/7.0.0/mermaid.min.js" defer></script>
+
+
+<link rel="stylesheet" href="https://blog.m-iji.me/css/poole.css" />
+<link rel="stylesheet" href="https://blog.m-iji.me/css/syntax.css" />
+<link rel="stylesheet" href="https://blog.m-iji.me/css/hyde.css" />
+<link rel="stylesheet" href="https://blog.m-iji.me/css/style.css" />
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Abril+Fatface%7COpen+Sans%7CPT+Sans" />
+<link rel="stylesheet" href="//fonts.googleapis.com/earlyaccess/notosansjapanese.css" />
+
+<script src="https://blog.m-iji.me/js/index.bundle.js" defer></script>
+
+    
+<script>
+(function(i,s,o,g,r,a,m){i["GoogleAnalyticsObject"]=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,"script","//www.google-analytics.com/analytics.js","ga");
+
+ga("create", "UA-46554348-4", "auto");
+ga("send", "pageview");
+</script>
+
+
+  </head>
+  <body class="layout-reverse">
+    <header class="sidebar">
+  <div class="container sidebar-sticky">
+    <div class="sidebar-about">
+      <h1>
+        <a href="https://blog.m-iji.me/">My snippets</a>
+      </h1>
+      
+      <p class="lead"> 何かをかく </p>
+      
+    </div>
+
+    <ul class="sidebar-nav">
+      <li><a href="https://blog.m-iji.me/">Home</a></li>
+      
+      <li><a href="/post">Posts</a></li>
+      
+      <li><a href="/slide">Slides</a></li>
+      
+      <li><a href="/tags">Tags</a></li>
+      
+    </ul>
+
+    <p>&copy; 2019. All rights reserved. </p>
+  </div>
+</header>
+
+
+<div class="content container">
+  <div class="post">
+    <h1 class="post-title">
+      <a href="https://blog.m-iji.me/post/2019-12-25/">
+        macOSからChromeOSに移行したけど、いろいろ辛かった
+      </a>
+    </h1>
+    <span class="post-date">Wed, Dec 25, 2019</span>
+    <div class="post-content">
+      
+
+<span>
+  
+  <a href="https://blog.m-iji.me/tags/development/">#development</a>
+  
+</span>
+
+
+      <p>初めてのChromeOSだったのでいろいろハマった</p>
+
+<h2 id="標準ターミナルで日本語打つとぶっ壊れる">標準ターミナルで日本語打つとぶっ壊れる</h2>
+
+<p>そもそも標準ターミナルで日本語の切り替え方がわからずにハマった。</p>
+
+<ul>
+<li><a href="https://chromium.googlesource.com/apps/libapps/+/master/hterm/doc/KeyboardBindings.md">https://chromium.googlesource.com/apps/libapps/+/master/hterm/doc/KeyboardBindings.md</a></li>
+</ul>
+
+<p>Secure Shell appのほうのkeybidingsで<code>Ctrl-Space</code>を送信できれば解決できた。
+fcitxで解決、みたいな記事をよくみかけたけど、自分は解決できなかった。</p>
+
+<p>下記の設定をkeybindingsにいれた。</p>
+
+<pre><code>{
+    &quot;keybindings&quot;: {
+        &quot;Ctrl-Space&quot;: &quot;DEFAULT&quot;
+    }
+}
+</code></pre>
+
+<p>ただ、実際に日本語で送信してみると、補完入力とターミナルのバッファが
+ごっちゃになっているように見える。
+補完の内容がバッファに残ったままだったり、tmuxのwindow-sizeがおかしくなったりと辛い。</p>
+
+<p>vim内であればCtrl-Lでリセットできる。日本語入力中は辛いが。</p>
+
+<h2 id="alacrittyで絵文字表示されない">Alacrittyで絵文字表示されない</h2>
+
+<p>上の問題があって、TerminalをAlacritty + fcitxを採用したけど、ここでも問題があった。</p>
+
+<p>デフォルトだとWAYLAND?の設定が良くないらしく、fcitxが立ち上がらなかったり、
+全画面起動ができなかった。</p>
+
+<p>WAYLANDを空白で起動すれば解決した。
+毎回ターミナルからalacrittyを立ち上げるのは嫌なのでalacritty.desktopを用意した。</p>
+
+<pre><code>[Desktop Entry]
+Type=Application
+TryExec=alacritty
+Exec=env WAYLAND_DISPLAY= alacritty
+Icon=Alacritty
+Terminal=false
+Categories=System;TerminalEmulator;
+
+Name=Alacritty
+GenericName=Terminal
+Comment=A cross-platform, GPU enhanced terminal emulator
+StartupWMClass=Alacritty
+Actions=New;
+
+[Desktop Action New]
+Name=New Terminal
+Exec=env WAYLAND_DISPLAY= alacritty
+</code></pre>
+
+<p>fcitx自体は立ち上がるようになったけど、今度は絵文字がうまく表示されず。</p>
+
+<p>Alacritty自体に同様のIssueが結構上がっていて、MacOSの絵文字はうまくいくんだけど。。みたいな内容で終わっていたように見える。</p>
+
+<p>カラフルな絵文字は諦めたが、さすがに空白だと辛いので <code>twemoji-color-font</code> を入れて
+starshipに設定していた絵文字は全部表示できるようにした。</p>
+
+<h2 id="音楽が再生できない">音楽が再生できない</h2>
+
+<p>mpvを入れたけど、今度はターミナルから音楽がならない。
+コンテナを<code>--enable-audio-capture</code>して起動しないといけないらしい。</p>
+
+<ul>
+<li><a href="https://chromium.googlesource.com/chromiumos/docs/+/master/containers_and_vms.md#is-audio-capture-e_g_microphone_supported">https://chromium.googlesource.com/chromiumos/docs/+/master/containers_and_vms.md#is-audio-capture-e_g_microphone_supported</a></li>
+</ul>
+
+<p>crosh上で</p>
+
+<pre><code>vmc stop termina
+vmc start termina --enable-audio-capture
+</code></pre>
+
+<p>すれば解決した。</p>
+
+<p>その後、Alacrittyが透過できない+画面最大化できない、という症状になったけど
+これはLogout-&gt;Loginで治った。</p>
+
+<p>思ったより、音楽を鳴らすのにCPUを使っているけど。。pluseなんぞや。。</p>
+    </div>
+  </div>
+</div>
+
+  </body>
+</html>
