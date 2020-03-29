@@ -30,6 +30,15 @@
     </item>
     
     <item>
+      <title>webフォントを読み込んでいる間にシステムフォントを表示する</title>
+      <link>https://blog.m-iji.me/post/2020/03/29/preload-systemfont/</link>
+      <pubDate>Sun, 29 Mar 2020 07:55:11 +0000</pubDate>
+      
+      <guid>https://blog.m-iji.me/post/2020/03/29/preload-systemfont/</guid>
+      <description></description>
+    </item>
+    
+    <item>
       <title>Create page from github</title>
       <link>https://blog.m-iji.me/post/2020/03/28/</link>
       <pubDate>Sun, 29 Mar 2020 01:23:33 +0900</pubDate>
