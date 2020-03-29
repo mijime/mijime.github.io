@@ -1,14 +1,14 @@
 ---
 Title: Nimble でユニットテストする
-Date: "2017-10-13T13:24:00+09:00"
+Date: '2017-10-13T13:24:00+09:00'
 Draft: false
 ---
 
 ## ファイルの場所
 
-testsフォルダに .nimを配置することで始める
+tests フォルダに .nim を配置することで始める
 
-Warningが発生するのでSkipDirsに @["tests"] を追加する
+Warning が発生するので SkipDirs に @["tests"] を追加する
 
 `usage-unittest.nimble`
 
@@ -35,11 +35,11 @@ skipDirs = @["tests"]
 
 直列にテストを実行する
 
-| Name | Desc |
-| :-- | :-- |
-| suite | テスト大項目 |
-| test | テスト小項目 |
-| setup | 各テスト前に実行すること |
+| Name     | Desc                     |
+| :------- | :----------------------- |
+| suite    | テスト大項目             |
+| test     | テスト小項目             |
+| setup    | 各テスト前に実行すること |
 | teardown | 各テスト後に実行すること |
 
 `tests/test.nim`

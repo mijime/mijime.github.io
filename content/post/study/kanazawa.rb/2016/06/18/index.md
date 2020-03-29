@@ -1,42 +1,42 @@
 ---
-Description: ""
-Tags: ["Development", "lambda", "kzrb"]
-date: "2016-06-18T13:23:05+09:00"
-title: " kanazawa.rb meetup 46に参加した"
+Description: ''
+Tags: ['Development', 'lambda', 'kzrb']
+date: '2016-06-18T13:23:05+09:00'
+title: ' kanazawa.rb meetup 46に参加した'
 ---
 
-## AWS Lambdaを管理するツールLammaやってみた
+## AWS Lambda を管理するツール Lamma やってみた
 
-Rubyで書かれたlammbaというリポジトリが上がったので
-ruby勉強会に参加がてら触ってみた
+Ruby で書かれた lammba というリポジトリが上がったので
+ruby 勉強会に参加がてら触ってみた
 
 ### [lamma](https://github.com/ayemos/Lamma)
 
 ### 作業リポジトリ
 
-  [source](https://github.com/mijime/mijime.github.io/tree/content/source/study/kanazawa.rb/2016-06-18)
+[source](https://github.com/mijime/mijime.github.io/tree/content/source/study/kanazawa.rb/2016-06-18)
 
 ### 作業雑感
 
-シンプルなLambda管理ツール
+シンプルな Lambda 管理ツール
 
 #### Pros
 
-  - 1 dir,  1 funcなのでわかりやすいね
-  - 勝手にzipしてくれるね
-  - Rubyなので今後拡張しやすい、のかな？
+- 1 dir, 1 func なのでわかりやすいね
+- 勝手に zip してくれるね
+- Ruby なので今後拡張しやすい、のかな？
 
 #### Cons
 
-  - nodejs, python2.7のみ対応
-  - 消したりするのめんどくさそう ... まぁ関数だけだからいいんだけども ...
-  - node_modules入ってない？
+- nodejs, python2.7 のみ対応
+- 消したりするのめんどくさそう ... まぁ関数だけだからいいんだけども ...
+- node_modules 入ってない？
 
 ### 作業ログ
 
 まずは環境作成
 
-``` ruby
+```ruby
 source "https://rubygems.org"
 
 gem "lamma"
@@ -66,8 +66,7 @@ services:
 
 とりあえずインストールして実行してみる
 
-
-AWS関連の情報を渡して ...
+AWS 関連の情報を渡して ...
 
 ```
 eval $(cat ~/.aws/credentials | awk -v FS=" = " '$1~/^aws/{print "export",toupper($1)"="$2}')
@@ -89,11 +88,11 @@ Did you mean?  catch
 ...
 ```
 
-うーん ...  なぜにnil ...
+うーん ... なぜに nil ...
 
-AWS_REGIONを渡す
+AWS_REGION を渡す
 
-``` diff
+```diff
 diff --git a/source/study/kanazawa.rb/2016-06-18/docker-compose.yml b/source/study/kanazawa.rb/2016-06-18/docker-compose.yml
 index e03b010..2784d3c 100644
 --- a/source/study/kanazawa.rb/2016-06-18/docker-compose.yml
@@ -124,10 +123,9 @@ my-function
 1 directory, 2 files
 ```
 
-まだこの時点で関数は作られていないみたい ...  なんでAWS認証求められたんだ
+まだこの時点で関数は作られていないみたい ... なんで AWS 認証求められたんだ
 
-
-deployしてみる。
+deploy してみる。
 
 ```
 $ lamma deploy test
@@ -141,9 +139,9 @@ Aws::Lambda::Errors::BadRequest:
 /usr/local/bundle/gems/aws-sdk-core-2.3.14/lib/seahorse/client/plugins/response_target.rb:21:in `call'
 ```
 
-うーん ...  ?
+うーん ... ?
 
-よくわからないのでJSで作り直す
+よくわからないので JS で作り直す
 
 ```
 $ lamma create my-function-js --runtime nodejs
@@ -168,7 +166,7 @@ Errno::ENOENT: No such file or directory @ rb_sysopen - /tmp/d20160618-92-1fppw7
 
 zip ...
 
-``` diff
+```diff
 diff --git a/source/study/kanazawa.rb/2016-06-18/Dockerfile b/source/study/kanazawa.rb/2016-06-18/Dockerfile
 index f9e4aff..0595f36 100644
 --- a/source/study/kanazawa.rb/2016-06-18/Dockerfile
@@ -194,7 +192,7 @@ ArgumentError occured. You might need to specify role arn you want to pass to yo
 Done.
 ```
 
-ほむほむ ... あんましロールを書きたくないのでenvで
+ほむほむ ... あんましロールを書きたくないので env で
 
 ```
 export AWS_LAMBDA_IAM_ROLE=arn:aws:iam::000000000000:role/lambda_basic_execution
@@ -223,7 +221,7 @@ my-function-js
 
 できた。
 
-## LT感想
+## LT 感想
 
 ### シェルチェックを使おう
 
@@ -232,18 +230,18 @@ my-function-js
 
 確かにシェルは動かすの簡単だけど、 他の環境で動かないことが多い ...
 
-### shUnit2を使おう
+### shUnit2 を使おう
 
 - 対応シェルも幅広い
 - ダウンロードするだけで使える！
 
-bats派だけど、 msysでも早いなら乗り換えたいかも
+bats 派だけど、 msys でも早いなら乗り換えたいかも
 
 ### Dokku
 
 - Heroku like
-- 前面にnginxがあって、 コンテナにルーティング
-- herokuのbuild packsも利用できるので良い！
+- 前面に nginx があって、 コンテナにルーティング
+- heroku の build packs も利用できるので良い！
 - 運用メンテナンスが気になるところ
 
 スケーリングしないとかで敬遠してたけども、 開発環境で利用するなら楽だよなぁ
@@ -252,17 +250,16 @@ bats派だけど、 msysでも早いなら乗り換えたいかも
 
 もっと利用されるという話なので、その話を聞いてからかな？
 
-dokku-altとの違いもあとで調べておこう ...
+dokku-alt との違いもあとで調べておこう ...
 
 ### AWSSummit
 
-SIerが完全に淘汰されちゃう感じ
+SIer が完全に淘汰されちゃう感じ
 
-PaaS, SaaSの流行には全然触れてなかったので、 今回の話を機会に調べてみよう ...
+PaaS, SaaS の流行には全然触れてなかったので、 今回の話を機会に調べてみよう ...
 
 ### Iot
 
 書き込むのに結構ツールが必要なんですね ...
 
-IOT超絶敷居高い。
-
+IOT 超絶敷居高い。

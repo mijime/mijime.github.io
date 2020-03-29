@@ -1,9 +1,9 @@
 ---
-Title: "vim-lspはじめました"
+Title: 'vim-lspはじめました'
 Draft: false
-Description: ""
-Tags: ["development"]
-Date: "2019-02-28T01:49:54+09:00"
+Description: ''
+Tags: ['development']
+Date: '2019-02-28T01:49:54+09:00'
 ---
 
 今まで `faith/vim-go` をありがたく使わせてもらっていたけど
@@ -11,11 +11,11 @@ Date: "2019-02-28T01:49:54+09:00"
 
 <!--more-->
 
-1. Wikiに全部書いてあるのでそれをコピる
+1. Wiki に全部書いてあるのでそれをコピる
 
-2. `go get -u github.com/saibing/bingo` でbingoをインストールしておく
+2. `go get -u github.com/saibing/bingo` で bingo をインストールしておく
 
-3. `<C-]>` などのkey mappingを設定する
+3. `<C-]>` などの key mapping を設定する
 
 ```vimrc
 " ...

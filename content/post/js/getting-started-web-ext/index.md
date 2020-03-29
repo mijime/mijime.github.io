@@ -1,19 +1,19 @@
 ---
 Title: web-ext を使って WebExtension を始める
-Date: "2017-10-14T01:38:45+09:00"
+Date: '2017-10-14T01:38:45+09:00'
 Draft: False
 ---
 
-web extension用のビルドツール `web-ext` があるらしい
+web extension 用のビルドツール `web-ext` があるらしい
 
 [web-ext](https://github.com/mozilla/web-ext)
 
-Signed, Debugがメインのツール。
-ビルドは主要ファイルをzipに入れるだけだった
+Signed, Debug がメインのツール。
+ビルドは主要ファイルを zip に入れるだけだった
 
 ## Install
 
-Yarnだと上手くいかない。..? ので `npm` でインストールする
+Yarn だと上手くいかない。..? ので `npm` でインストールする
 
 ```bash
 npm install --global web-ext
