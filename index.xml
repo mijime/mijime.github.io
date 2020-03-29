@@ -6,10 +6,19 @@
     <description>Recent content on My snippets</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>ja</language>
-    <lastBuildDate>Sun, 29 Mar 2020 01:23:33 +0900</lastBuildDate>
+    <lastBuildDate>Sun, 29 Mar 2020 07:58:48 +0000</lastBuildDate>
     
 	<atom:link href="https://blog.m-iji.me/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>codeをbookmarkletに変換する</title>
+      <link>https://blog.m-iji.me/post/2020/03/29/code-to-bookmarklet/</link>
+      <pubDate>Sun, 29 Mar 2020 07:58:48 +0000</pubDate>
+      
+      <guid>https://blog.m-iji.me/post/2020/03/29/code-to-bookmarklet/</guid>
+      <description>&lt;p&gt;コードをurlencodeして、そのhrefをブックマークすればよさそう&lt;/p&gt;</description>
+    </item>
     
     <item>
       <title>Create page from github</title>
