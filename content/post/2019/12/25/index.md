@@ -6,7 +6,7 @@ Tags: ['development']
 Date: '2019-12-25T01:23:33+09:00'
 ---
 
-初めてのChromeOSだったのでいろいろハマった
+初めての ChromeOS だったのでいろいろハマった
 
 <!--more-->
 
@@ -16,10 +16,11 @@ Date: '2019-12-25T01:23:33+09:00'
 
 - https://chromium.googlesource.com/apps/libapps/+/master/hterm/doc/KeyboardBindings.md
 
-Secure Shell appのほうのkeybidingsで`Ctrl-Space`を送信できれば解決できた。
-fcitxで解決、みたいな記事をよくみかけたけど、自分は解決できなかった。
+Secure Shell app のほうの keybidings で`Ctrl-Space`を送信できれば解決できた。
 
-下記の設定をkeybindingsにいれた。
+fcitx で解決、みたいな記事をよくみかけたけど、自分は解決できなかった。
+
+下記の設定を keybindings にいれた。
 
 ```
 {
@@ -31,19 +32,19 @@ fcitxで解決、みたいな記事をよくみかけたけど、自分は解決
 
 ただ、実際に日本語で送信してみると、補完入力とターミナルのバッファが
 ごっちゃになっているように見える。
-補完の内容がバッファに残ったままだったり、tmuxのwindow-sizeがおかしくなったりと辛い。
+補完の内容がバッファに残ったままだったり、tmux の window-size がおかしくなったりと辛い。
 
-vim内であればCtrl-Lでリセットできる。日本語入力中は辛いが。
+vim 内であれば Ctrl-L でリセットできる。日本語入力中は辛いが。
 
-## Alacrittyで絵文字表示されない
+## Alacritty で絵文字表示されない
 
-上の問題があって、TerminalをAlacritty + fcitxを採用したけど、ここでも問題があった。
+上の問題があって、Terminal を Alacritty + fcitx を採用したけど、ここでも問題があった。
 
-デフォルトだとWAYLAND?の設定が良くないらしく、fcitxが立ち上がらなかったり、
+デフォルトだと WAYLAND?の設定が良くないらしく、fcitx が立ち上がらなかったり、
 全画面起動ができなかった。
 
-WAYLANDを空白で起動すれば解決した。
-毎回ターミナルからalacrittyを立ち上げるのは嫌なのでalacritty.desktopを用意した。
+WAYLAND を空白で起動すれば解決した。
+毎回ターミナルから alacritty を立ち上げるのは嫌なので alacritty.desktop を用意した。
 
 ```
 [Desktop Entry]
@@ -65,21 +66,21 @@ Name=New Terminal
 Exec=env WAYLAND_DISPLAY= alacritty
 ```
 
-fcitx自体は立ち上がるようになったけど、今度は絵文字がうまく表示されず。
+fcitx 自体は立ち上がるようになったけど、今度は絵文字がうまく表示されず。
 
-Alacritty自体に同様のIssueが結構上がっていて、MacOSの絵文字はうまくいくんだけど。。みたいな内容で終わっていたように見える。
+Alacritty 自体に同様の Issue が結構上がっていて、MacOS の絵文字はうまくいくんだけど。。みたいな内容で終わっていたように見える。
 
 カラフルな絵文字は諦めたが、さすがに空白だと辛いので `twemoji-color-font` を入れて
-starshipに設定していた絵文字は全部表示できるようにした。
+starship に設定していた絵文字は全部表示できるようにした。
 
 ## 音楽が再生できない
 
-mpvを入れたけど、今度はターミナルから音楽がならない。
+mpv を入れたけど、今度はターミナルから音楽がならない。
 コンテナを`--enable-audio-capture`して起動しないといけないらしい。
 
 - https://chromium.googlesource.com/chromiumos/docs/+/master/containers_and_vms.md#is-audio-capture-e_g_microphone_supported
 
-crosh上で
+crosh 上で
 
 ```
 vmc stop termina
@@ -88,7 +89,7 @@ vmc start termina --enable-audio-capture
 
 すれば解決した。
 
-その後、Alacrittyが透過できない+画面最大化できない、という症状になったけど
-これはLogout->Loginで治った。
+その後、Alacritty が透過できない+画面最大化できない、という症状になったけど
+これは Logout->Login で治った。
 
-思ったより、音楽を鳴らすのにCPUを使っているけど。。pluseなんぞや。。
+思ったより、音楽を鳴らすのに CPU を使っているけど。。pluse なんぞや。。

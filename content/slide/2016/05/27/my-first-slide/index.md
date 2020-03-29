@@ -4,9 +4,9 @@ draft = false
 title = "スライドテスト"
 +++
 
-# HugoでReveal JSを始める
+# Hugo で Reveal JS を始める
 
->>>
+> > >
 
 - 始める
 
@@ -16,13 +16,13 @@ title = "スライドテスト"
 
 ---
 
-``` html
+```html
 <div>
   hello world
 </div>
 ```
 
-``` mermaid
+```mermaid
   graph TD;
     A-->B;
     A-->C;

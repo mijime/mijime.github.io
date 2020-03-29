@@ -1,7 +1,10 @@
+/* stylelint-disable value-list-comma-newline-after, declaration-colon-newline-after */
 :root {
   --base-color: #202020;
   --link-color: #268bd2;
-  --font-family: "PT Sans", "Helvetica Neue", Helvetica, "Arial", "游ゴシック", YuGothic, "ヒラギノ角ゴ ProN W3", "Hiragino Kaku Gothic ProN", "Noto Sans Japanese", "メイリオ", Meiryo, sans-serif;
+  --font-family: 'PT Sans', 'Helvetica Neue', 'Helvetica', 'Arial', '游ゴシック',
+    'YuGothic', 'ヒラギノ角ゴ ProN W3', 'Hiragino Kaku Gothic ProN',
+    'Noto Sans Japanese', 'メイリオ', 'Meiryo', sans-serif;
 }
 
 body {
@@ -27,7 +30,7 @@ body {
 .content a::after,
 .paginator a::after {
   display: block;
-  content: "";
+  content: '';
   height: 0.1em;
   width: 0%;
   background-color: var(--link-color);

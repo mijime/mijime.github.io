@@ -1,13 +1,13 @@
 ---
-Date: "2016-05-31T22:41:30+09:00"
+Date: '2016-05-31T22:41:30+09:00'
 Draft: false
-Title: "mermaidに対応した"
-Tags: ["Development", "mermaid"]
+Title: 'mermaidに対応した'
+Tags: ['Development', 'mermaid']
 ---
 
-code.language-mermaidを変換するスクリプトを噛ませただけだけど。
+code.language-mermaid を変換するスクリプトを噛ませただけだけど。
 
-``` mermaid
+```mermaid
   graph TD;
     A-->B;
     A-->C;
@@ -15,7 +15,7 @@ code.language-mermaidを変換するスクリプトを噛ませただけだけ�
     C-->D;
 ```
 
-``` mermaid
+```mermaid
   gantt
     dateFormat  YYYY-MM-DD
     title Adding GANTT diagram functionality to mermaid
@@ -33,7 +33,7 @@ code.language-mermaidを変換するスクリプトを噛ませただけだけ�
     Add to mermaid                      :1d
 ```
 
-``` mermaid
+```mermaid
   sequenceDiagram
     participant Alice
     participant Bob

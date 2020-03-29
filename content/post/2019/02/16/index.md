@@ -1,18 +1,18 @@
 ---
 Title: リモートワーク用の環境を構築するときはアカウントを分けるとよさそう
 Draft: false
-Tags: ["development"]
-Date: "2019-02-16T14:56:38+09:00"
+Tags: ['development']
+Date: '2019-02-16T14:56:38+09:00'
 ---
 
-最近リモート用の環境を私物のPCに構築した。
+最近リモート用の環境を私物の PC に構築した。
 
 その時にアカウントを分けて、ブックマークとか作業環境を混ざらないようにしたが
 色々やることがあったのでメモっておく
 
 <!--more-->
 
-## brewの設定を分ける
+## brew の設定を分ける
 
 デフォルトだと `/usr/local` に全て入ってアカウント共有になってしまう。
 
@@ -27,9 +27,9 @@ curl -L https://github.com/Homebrew/brew/archive/master.tar.gz \
 export PATH=${HOME}/.brew/bin:${PATH}
 ```
 
-## dotfilesを共有する
+## dotfiles を共有する
 
-会社用のGithubアカウントを新規で作成したが、さすがにdotfilesは常々更新するので、
+会社用の Github アカウントを新規で作成したが、さすがに dotfiles は常々更新するので、
 同じものを使いたい。
 
 `git config core.sshCommand`で個別に鍵を指定した。
@@ -40,7 +40,7 @@ ssh-keygen -t ed25519 -N "" -C "" -f ~/.ssh/projects/github.com/${USER}_id_ed255
 git config core.sshCommand "ssh -i ~/.ssh/projects/github.com/${USER}_id_ed25519"
 ```
 
-## PS1にiconを設定する
+## PS1 に icon を設定する
 
 `su` で雑にアカウントを往復することがあるんだけども、名前は違えど色味がほぼほぼ同じなので
 'あれ、どっちで作業しているんだっけ…'的なことが時々起こる
@@ -51,15 +51,14 @@ git config core.sshCommand "ssh -i ~/.ssh/projects/github.com/${USER}_id_ed25519
 icon=$(echo -ne $((127744 + 16#$(whoami|md5sum|cut -c-8)%512))|awk '{printf("%3c",$1)}')
 ```
 
-これを適当にPS1に入れておけば、間違えにくくなる
+これを適当に PS1 に入れておけば、間違えにくくなる
 
-## セキュアなデータをGoogleDriveにいれてGitで管理する
+## セキュアなデータを GoogleDrive にいれて Git で管理する
 
-だいぶBad Practiceな気がするが、パスワードとかssh-keyとかは全部Gitのリポジトリにして管理している。
+だいぶ Bad Practice な気がするが、パスワードとか ssh-key とかは全部 Git のリポジトリにして管理している。
 
-それを一旦GoogleDriveとかにぶち込んで別端末に持ってきた。
+それを一旦 GoogleDrive とかにぶち込んで別端末に持ってきた。
 
 さすがに内容が内容なので、`git encrypt` コマンドを作って暗号化してみた
 
 https://github.com/kojimat/git-encrypt
-
