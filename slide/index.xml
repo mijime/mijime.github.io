@@ -13,10 +13,10 @@
     
     <item>
       <title>スライドテスト</title>
-      <link>https://blog.m-iji.me/slide/2016-05-27/my-first-slide/</link>
+      <link>https://blog.m-iji.me/slide/2016/05/27/my-first-slide/</link>
       <pubDate>Fri, 27 May 2016 14:20:56 +0900</pubDate>
       
-      <guid>https://blog.m-iji.me/slide/2016-05-27/my-first-slide/</guid>
+      <guid>https://blog.m-iji.me/slide/2016/05/27/my-first-slide/</guid>
       <description>HugoでReveal JSを始める 始める 始めた &amp;lt;div&amp;gt; hello world &amp;lt;/div&amp;gt; graph TD; A--&amp;gt;B; A--&amp;gt;C; B--&amp;gt;D; C--&amp;gt;D;</description>
     </item>
     
