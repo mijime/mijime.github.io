@@ -8,6 +8,8 @@ Date: '2020-03-29T07:58:48.611Z'
 
 <!--more-->
 
+実行後にcodeをクリックすればリンクを生成する
+
 ```javascript
 Array.from(document.querySelectorAll('code')).map(
   c =>
