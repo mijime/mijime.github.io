@@ -23,7 +23,7 @@ fy=d.getFullYear();
 fm=d.getMonth()+1+"";
 fd=d.getDate()+"";
 ff=(s)=>("00" +s).substr(s.length,2);
-ud=`${fy}-${ff(fm)}-${ff(fd)}`;
+ud=`${fy}/${ff(fm)}/${ff(fd)}`;
 ur="mijime/mijime.github.io";
 ub="content";
 document.location.href=`https://github.com/${ur}/new/${ub}?filename=content/post/${ud}/index.md&value=${v}`;
