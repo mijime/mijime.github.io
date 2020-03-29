@@ -1,9 +1,15 @@
+/* stylelint-disable value-list-comma-newline-after, declaration-colon-newline-after */
 :root {
   --background-color: #fff;
   --font-color: #515151;
-  --font-family: "PT Sans", "Helvetica Neue", Helvetica, "Arial", "游ゴシック", YuGothic, "ヒラギノ角ゴ ProN W3", "Hiragino Kaku Gothic ProN", "Noto Sans Japanese", "メイリオ", Meiryo, sans-serif;
+  --font-family: 'PT Sans', 'Helvetica Neue', 'Helvetica', 'Arial', '游ゴシック',
+    'YuGothic', 'ヒラギノ角ゴ ProN W3', 'Hiragino Kaku Gothic ProN',
+    'Noto Sans Japanese', 'メイリオ', 'Meiryo', sans-serif;
   --header-color: #303030;
-  --header-font-family: "Abril Fatface", "Helvetica Neue", Helvetica, "Arial", "游ゴシック", YuGothic, "ヒラギノ角ゴ ProN W3", "Hiragino Kaku Gothic ProN", "Noto Sans Japanese", "メイリオ", Meiryo, sans-serif;
+  --header-font-family: 'Abril Fatface', 'Helvetica Neue', 'Helvetica', 'Arial',
+    '游ゴシック', 'YuGothic', 'ヒラギノ角ゴ ProN W3',
+    'Hiragino Kaku Gothic ProN', 'Noto Sans Japanese', 'メイリオ', 'Meiryo',
+    sans-serif;
   --section-background-color: #f9f9f9;
   --section-font-color: #515151;
   --roll-color: #1a6091;
@@ -201,13 +207,13 @@ body {
   border-bottom: 1px solid;
 }
 
-.reveal table th[align="center"],
-.reveal table td[align="center"] {
+.reveal table th[align='center'],
+.reveal table td[align='center'] {
   text-align: center;
 }
 
-.reveal table th[align="right"],
-.reveal table td[align="right"] {
+.reveal table th[align='right'],
+.reveal table td[align='right'] {
   text-align: right;
 }
 

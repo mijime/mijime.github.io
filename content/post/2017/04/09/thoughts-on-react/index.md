@@ -1,8 +1,8 @@
 ---
-Tags: ["Development","React"]
-Date: "2017-04-09T22:40:10+09:00"
+Tags: ['Development', 'React']
+Date: '2017-04-09T22:40:10+09:00'
 Draft: false
-Title: "ReactでMarkdownEditorを作ったかんそう"
+Title: 'ReactでMarkdownEditorを作ったかんそう'
 ---
 
 ## 作ったもの
@@ -20,31 +20,31 @@ https://github.com/mijime/markdown-editor
 - https://github.com/wooorm/rehype
 - https://github.com/wooorm/remark
 
-HTMLやMarkdownをASTに変換してくれる。
+HTML や Markdown を AST に変換してくれる。
 
-MarkedがStringを既にがっちゃんこ状態で投げてくるので
-dangerouslySetInnerHTMLを使わざるえない影響が出てくる。
+Marked が String を既にがっちゃんこ状態で投げてくるので
+dangerouslySetInnerHTML を使わざるえない影響が出てくる。
 
-そういうときは上のRehype, RemarkでASTに変換してからReactコンポーネントにするアプローチが良さげ。
+そういうときは上の Rehype, Remark で AST に変換してから React コンポーネントにするアプローチが良さげ。
 
-react-markdownていうのもあったけどcommonmarkに準拠してるらしく、テーブルの変換ができなかったので諦めた。
-あとcommonmarkが割と容量食ってたのもある。
+react-markdown ていうのもあったけど commonmark に準拠してるらしく、テーブルの変換ができなかったので諦めた。
+あと commonmark が割と容量食ってたのもある。
 
-remark-reactを使わなかったのはhighlight系のライブラリをかます必要があったのと
-markdown -> html -> reactの流れのほうが拡張しやすく感じた。
+remark-react を使わなかったのは highlight 系のライブラリをかます必要があったのと
+markdown -> html -> react の流れのほうが拡張しやすく感じた。
 絵文字対応もさくっといけたし。
 
 なんかやるとき、もしくはデンジャラスなコードを強要されたときはまた使ってみたい。
 
-ただ、 markedの方が軽量ではあったので、1回きりの表示ならmarkedのほうが断然良さそう。
+ただ、 marked の方が軽量ではあったので、1 回きりの表示なら marked のほうが断然良さそう。
 
 ## Prism.js
 
 - http://prismjs.com/
 
-highlight.jsをMinifyすると中身が飛びでて辛いときに使ったやつ。
+highlight.js を Minify すると中身が飛びでて辛いときに使ったやつ。
 
-プロセッサも分かれてるのでそのままrehypeに流せた。
+プロセッサも分かれてるのでそのまま rehype に流せた。
 
 プラッガブルでなかなかに軽量なので、おすすめしていきたい。
 
@@ -52,25 +52,28 @@ highlight.jsをMinifyすると中身が飛びでて辛いときに使ったや�
 
 - https://preactjs.com/
 
-Reactがでかすぎたので使って見た。 webpack-bundle-size-anlyzerで見る限りだと
-ReactDOM + Reactが500+kbなのに対し、 Preact + Preact-compatが35kb前後？　良い。
+React がでかすぎたので使って見た。
 
-React-Reduxは普通に使えたので、 問題はなかった。  React-helmetとかReact-router周りはまだ試していない。
-ただ、Preact-helmetやPreact-routerとかあるし、なんだかんだでまた使えそう。
+webpack-bundle-size-anlyzer をつかってサイズを比較した。
 
-dio.jsとかも同様も簡単に乗り換えられるか試したけど、 Preact-compatはだいぶ頑張っているのが分かっただけだった。
+ReactDOM + React が 500+kb なのに対し、 Preact + Preact-compat が 35kb 前後？良い。
 
-JestやStyleGuidistなんかがReactを強要するので、 Webpackでビルド時のみ差し替える運用にした。
+React-Redux は普通に使えたので、 問題はなかった。 React-helmet とか React-router 周りはまだ試していない。
+ただ、Preact-helmet や Preact-router とかあるし、なんだかんだでまた使えそう。
+
+dio.js とかも同様も簡単に乗り換えられるか試したけど、 Preact-compat はだいぶ頑張っているのが分かっただけだった。
+
+Jest や StyleGuidist なんかが React を強要するので、 Webpack でビルド時のみ差し替える運用にした。
 
 ## milligram
 
 - https://milligram.github.io/
 
 マークダウンプレビューとしては綺麗に表示できるので、
-みんなGithub.cssから乗り換えるべきだと思う。軽量ですし。
+みんな Github.css から乗り換えるべきだと思う。軽量ですし。
 
 ただ、シンプルなコンポーネントしかないので
-UIが複雑になってきたならMaterialなんちゃら系の方が良さそう、とは思う
+UI が複雑になってきたなら Material なんちゃら系の方が良さそう、とは思う
 
 ---
 
@@ -79,13 +82,13 @@ UIが複雑になってきたならMaterialなんちゃら系の方が良さそ�
 ## highlight.js
 
 みんな言語絞って使ってるくさい。最初、何度圧縮してもクソでかくて不思議だった。
-言語によっては圧縮時に飛び出る。 と思ったけどbrowserify使った時は問題なさそう。. だった？
+言語によっては圧縮時に飛び出る。 と思ったけど browserify 使った時は問題なさそう。. だった？
 
 使うのやめた。
 
 ## CodeMirror
 
-重量がなかなかあったので、採用を見送った。 vim mode試したかった。
+重量がなかなかあったので、採用を見送った。 vim mode 試したかった。
 
 もっと軽量なエディタがあれば選択肢に入れたかったので、あとで探す。
 
@@ -93,13 +96,14 @@ UIが複雑になってきたならMaterialなんちゃら系の方が良さそ�
 
 ## React.setState
 
-ReactのsetStateは使わずにpure componentだけで構成したかったけど、
-非同期に描画してコンポーネント内だけで完結するなら、 stateを使って書いた方が切り出しやすかった。
+React の setState は使わずに pure component だけで構成したかったので。
+
+非同期に描画してコンポーネント内だけで完結するなら、 state を使って書いた方が切り出しやすかった。
 
 ## Flow
 
-今回は頑張ってFlowtypeに立ち向かってみた。 Flow-jsdocでJSDocと同期をとりつつ、みたいなことを実現したかったが、
-type周りが対応してなかったので結局flow-commentをちりばめながら書くはめになった。
+今回は頑張って Flowtype に立ち向かってみた。 Flow-jsdoc で JSDoc と同期をとりつつ、みたいなことを実現したかったが、
+type 周りが対応してなかったので結局 flow-comment をちりばめながら書くはめになった。
 
-あと、flowさんってcommonjsスタイル読み取ってくれないのが一番のショックだった。
-他のライブラリの *.flowにビンビン反応していくのもちょいちょい辛い。
+あと、flow さんって commonjs スタイル読み取ってくれないのが一番のショックだった。
+その他にも、他のライブラリの \*.flow にビンビン反応していくのもちょいちょい辛い。
