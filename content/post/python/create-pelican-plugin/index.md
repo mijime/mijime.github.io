@@ -1,11 +1,11 @@
 ---
-Date: "2017-10-22T21:32:19+09:00"
+Date: '2017-10-22T21:32:19+09:00'
 Draft: false
-Title: "PelicanのPluginの作り方"
-Tags: ["pelican"]
+Title: 'PelicanのPluginの作り方'
+Tags: ['pelican']
 ---
 
-register関数を用意して、 各イベントのsignalsに `connect` する
+register 関数を用意して、 各イベントの signals に `connect` する
 
 <!--more-->
 
@@ -19,7 +19,7 @@ def content_object_init_handler(content):
   pass
 ```
 
-signalsは下記を参照
+signals は下記を参照
 
 http://docs.getpelican.com/en/3.7.1/plugins.html#list-of-signals
 

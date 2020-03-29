@@ -1,11 +1,11 @@
 ---
-Date: "2017-10-22T21:25:19+09:00"
+Date: '2017-10-22T21:25:19+09:00'
 Draft: false
-Title: "Gitがインストールされていない環境でログを取得し、ハンドリングする"
-Tags: ["Git"]
+Title: 'Gitがインストールされていない環境でログを取得し、ハンドリングする'
+Tags: ['Git']
 ---
 
-Pythonのdulwichを使う例が多い
+Python の dulwich を使う例が多い
 
 <!--more-->
 

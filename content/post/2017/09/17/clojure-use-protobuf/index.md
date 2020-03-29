@@ -1,9 +1,9 @@
 ---
 Title: Clojure から GRPC とか ProtoBuf を触ってみる
-Tags: ["Development", "clojure"]
+Tags: ['Development', 'clojure']
 Draft: true
-Description: ""
-Date: "2017-09-17T07:48:28+09:00"
+Description: ''
+Date: '2017-09-17T07:48:28+09:00'
 ---
 
 # Grpc ?
@@ -16,24 +16,24 @@ Date: "2017-09-17T07:48:28+09:00"
 
 ## 触るモチベーション
 
-- HTTP2っていうのが早いらしい
+- HTTP2 っていうのが早いらしい
 - 分散するらしい
-- RPC系を一度は触っておきたい
+- RPC 系を一度は触っておきたい
 
 # Tutorial
 
 - https://developers.google.com/protocol-buffers/docs/javatutorial
 
-  - ProtoBuf 2.x系だったのでちょっと古め
+  - ProtoBuf 2.x 系だったのでちょっと古め
 
 - https://grpc.io/docs/quickstart/java.html
 - https://grpc.io/docs/tutorials/basic/java.html
 
-  - Grpcのチュートリアル
+  - Grpc のチュートリアル
 
 - https://github.com/grpc/grpc-java/tree/master/examples
 
-  - Grpcのチュートリアルのリポジトリ
+  - Grpc のチュートリアルのリポジトリ
 
 ## 依存関係
 
@@ -61,15 +61,14 @@ Date: "2017-09-17T07:48:28+09:00"
   )
 ```
 
-
 # その他メモ
 
-## ClojureでJavaClassの継承
+## Clojure で JavaClass の継承
 
-- ClojureでJavaクラスの継承などしてみる
+- Clojure で Java クラスの継承などしてみる
   http://qiita.com/FScoward/items/ede5b4c0c98111c219bf
 
-## InnterClassの参照方法
+## InnterClass の参照方法
 
-- A$Bで指定する必要あり
+- A\$B で指定する必要あり
 - `:extends` に指定する場合はパッケージ名じゃないと難しそう

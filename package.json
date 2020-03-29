@@ -1,14 +1,18 @@
 {
   "name": "mijime.github.io",
   "version": "1.0.0",
-  "description": "mijime.github.io ===",
+  "description": "mijime.github.io",
   "main": "index.js",
   "scripts": {
+    "build": "npm run build:js && npm run build:css",
+    "test": "npm run lint:js && npm run lint:css && npm run lint:md",
     "similarity": "babel-node source/js/similarity",
-    "fix": "textlint --fix content && eslint --fix source/js gulpfile.babel.js",
-    "build": "gulp",
-    "watch": "gulp watch",
-    "test": "gulp test"
+    "build:js": "webpack",
+    "build:css": "postcss source/css --dir static/css",
+    "lint:js": "eslint source/js",
+    "lint:css": "stylelint source/css",
+    "lint:md": "textlint content",
+    "format": "prettier --write *.js source/**/*.{js,css} content/**/*.md"
   },
   "repository": {
     "type": "git",
@@ -26,22 +30,29 @@
     "@babel/core": "^7.9.0",
     "@babel/preset-env": "^7.9.0",
     "@babel/register": "^7.9.0",
+    "autoprefixer": "^9.7.5",
     "babel-eslint": "^10.1.0",
     "babel-loader": "^8.1.0",
-    "eslint": "^5.16.0",
-    "gulp": "^4.0.2",
-    "gulp-cssmin": "^0.2.0",
-    "gulp-eslint": "^5.0.0",
-    "gulp-htmllint": "0.0.16",
-    "gulp-postcss": "^8.0.0",
-    "gulp-stylelint": "^13.0.0",
-    "gulp-textlint": "^5.1.16",
-    "kuromojin": "^1.5.1",
-    "stylelint": "^9.10.1",
-    "stylelint-config-standard": "^18.3.0",
+    "cssnano": "^4.1.10",
+    "eslint": "^6.8.0",
+    "eslint-config-standard": "^14.1.1",
+    "eslint-plugin-import": "^2.20.2",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-promise": "^4.2.1",
+    "eslint-plugin-standard": "^4.0.1",
+    "kuromojin": "^2.0.0",
+    "postcss-cli": "^7.1.0",
+    "postcss-preset-env": "^6.7.0",
+    "prettier": "^2.0.2",
+    "stylelint": "^13.2.1",
+    "stylelint-config-standard": "^20.0.0",
     "textlint": "^11.6.3",
     "textlint-rule-preset-japanese": "^4.0.4",
     "textlint-rule-preset-jtf-style": "^2.3.4",
-    "webpack": "^4.42.1"
-  }
+    "webpack": "^4.42.1",
+    "webpack-cli": "^3.3.11"
+  },
+  "browserslist": [
+    "last 2 versions"
+  ]
 }

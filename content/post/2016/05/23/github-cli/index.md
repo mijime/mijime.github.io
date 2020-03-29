@@ -1,12 +1,11 @@
 ---
-Date: "2016-05-23T22:48:11+09:00"
+Date: '2016-05-23T22:48:11+09:00'
 Draft: false
-Title: "introduce a GitHub cli"
-Tags: ["note", "GitHub"]
+Title: 'introduce a GitHub cli'
+Tags: ['note', 'GitHub']
 ---
 
-
-リポジトリをWebから作るのがめんどくさいので導入する。
+リポジトリを Web から作るのがめんどくさいので導入する。
 
 https://github.com/github/hub
 
