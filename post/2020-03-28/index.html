@@ -11,7 +11,7 @@
 
 
 <title>Create from github | My snippets</title>
-<meta name="description" content="githubから日記を書けるようにする d=new Date(); v=encodeURIComponent(`--- Title: &#39;&#39; Draft: false Date: &#39;${d.toISOString()}&#39; ---`); fy=d.getFullYear(); fm=d.getMonth()&#43;1&#43;&quot;&quot;; fd=d.getDate()&#43;&quot;&quot;; ff=(s)=&gt;(&quot;00&quot; &#43;s).substr(s.length,2); ud=`${fy}-${ff(fm)}-${ff(fd)}`; ur=&quot;mijime/mijime.github.io&quot;; ub=&quot;content&quot;; document.location.href=`https://github.com/${ur}/new/${ub}?filename=content/post/${ud}/index.md&amp;value=${v}`;">
+<meta name="description" content="githubから日記を書けるようにする">
 
 
 
@@ -92,12 +92,16 @@ ga("send", "pageview");
 
       <p>githubから日記を書けるようにする</p>
 
+<p>filename,valueを直接渡せばテンプレート化できそう。</p>
+
 <pre><code class="language-javascript">d=new Date();
 v=encodeURIComponent(`---
-Title: ''
+Title: &quot;&quot;
 Draft: false
-Date: '${d.toISOString()}'
----`);
+Date: &quot;${d.toISOString()}&quot;
+---
+
+&lt;!--more--&gt;`);
 fy=d.getFullYear();
 fm=d.getMonth()+1+&quot;&quot;;
 fd=d.getDate()+&quot;&quot;;
@@ -107,7 +111,6 @@ ur=&quot;mijime/mijime.github.io&quot;;
 ub=&quot;content&quot;;
 document.location.href=`https://github.com/${ur}/new/${ub}?filename=content/post/${ud}/index.md&amp;value=${v}`;
 </code></pre>
-
     </div>
   </div>
 </div>
