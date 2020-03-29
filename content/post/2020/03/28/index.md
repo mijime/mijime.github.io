@@ -19,9 +19,10 @@ ff = s => ('00' + s).substr(s.length, 2)
 b = 'mijime/mijime.github.io/new/content'
 f = `content/post/${fy}/${ff(fm)}/${ff(fd)}/index.md`
 v = encodeURIComponent(`---
-Title: ""
-Draft: false
-Date: "${d.toISOString()}"
+Title: ''
+Draft: true
+Tags: []
+Date: '${d.toISOString()}'
 ---
 
 <!--more-->`)
