@@ -10,8 +10,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
 
 
-<title> | My snippets</title>
-<meta name="description" content="Create from github">
+<title>Create from github | My snippets</title>
+<meta name="description" content="githubから日記を書けるようにする d=new Date(); v=encodeURIComponent(`--- Title: &#39;&#39; Draft: false Date: &#39;${d.toISOString()}&#39; ---`); fy=d.getFullYear(); fm=d.getMonth()&#43;1&#43;&quot;&quot;; fd=d.getDate()&#43;&quot;&quot;; ff=(s)=&gt;(&quot;00&quot; &#43;s).substr(s.length,2); ud=`${fy}-${ff(fm)}-${ff(fd)}`; ur=&quot;mijime/mijime.github.io&quot;; ub=&quot;content&quot;; document.location.href=`https://github.com/${ur}/new/${ub}?filename=content/post/${ud}/index.md&amp;value=${v}`;">
 
 
 
@@ -73,7 +73,7 @@ ga("send", "pageview");
       
     </ul>
 
-    <p>&copy; 0001. All rights reserved. </p>
+    <p>&copy; 2020. All rights reserved. </p>
   </div>
 </header>
 
@@ -82,15 +82,31 @@ ga("send", "pageview");
   <div class="post">
     <h1 class="post-title">
       <a href="https://blog.m-iji.me/post/2020-03-28/">
-        
+        Create from github
       </a>
     </h1>
-    <span class="post-date">Mon, Jan 1, 0001</span>
+    <span class="post-date">Sun, Mar 29, 2020</span>
     <div class="post-content">
       
 
 
-      <p>Create from github</p>
+      <p>githubから日記を書けるようにする</p>
+
+<pre><code class="language-javascript">d=new Date();
+v=encodeURIComponent(`---
+Title: ''
+Draft: false
+Date: '${d.toISOString()}'
+---`);
+fy=d.getFullYear();
+fm=d.getMonth()+1+&quot;&quot;;
+fd=d.getDate()+&quot;&quot;;
+ff=(s)=&gt;(&quot;00&quot; +s).substr(s.length,2);
+ud=`${fy}-${ff(fm)}-${ff(fd)}`;
+ur=&quot;mijime/mijime.github.io&quot;;
+ub=&quot;content&quot;;
+document.location.href=`https://github.com/${ur}/new/${ub}?filename=content/post/${ud}/index.md&amp;value=${v}`;
+</code></pre>
 
     </div>
   </div>

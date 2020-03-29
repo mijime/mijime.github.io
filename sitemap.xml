@@ -3,22 +3,27 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
+    <loc>https://blog.m-iji.me/post/2020-03-28/</loc>
+    <lastmod>2020-03-29T01:23:33+09:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://blog.m-iji.me/</loc>
+    <lastmod>2020-03-29T01:23:33+09:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://blog.m-iji.me/post/</loc>
+    <lastmod>2020-03-29T01:23:33+09:00</lastmod>
+  </url>
+  
+  <url>
     <loc>https://blog.m-iji.me/tags/development/</loc>
     <lastmod>2019-12-25T01:23:33+09:00</lastmod>
   </url>
   
   <url>
     <loc>https://blog.m-iji.me/post/2019-12-25/</loc>
-    <lastmod>2019-12-25T01:23:33+09:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>https://blog.m-iji.me/</loc>
-    <lastmod>2019-12-25T01:23:33+09:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>https://blog.m-iji.me/post/</loc>
     <lastmod>2019-12-25T01:23:33+09:00</lastmod>
   </url>
   
@@ -230,11 +235,6 @@
   <url>
     <loc>https://blog.m-iji.me/post/blog/first-blogged/</loc>
     <lastmod>2016-05-23T21:56:24+09:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>https://blog.m-iji.me/post/2020-03-28/</loc>
-    <priority>0</priority>
   </url>
   
   <url>

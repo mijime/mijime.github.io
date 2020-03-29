@@ -6,10 +6,19 @@
     <description>Recent content on My snippets</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>ja</language>
-    <lastBuildDate>Wed, 25 Dec 2019 01:23:33 +0900</lastBuildDate>
+    <lastBuildDate>Sun, 29 Mar 2020 01:23:33 +0900</lastBuildDate>
     
 	<atom:link href="https://blog.m-iji.me/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Create from github</title>
+      <link>https://blog.m-iji.me/post/2020-03-28/</link>
+      <pubDate>Sun, 29 Mar 2020 01:23:33 +0900</pubDate>
+      
+      <guid>https://blog.m-iji.me/post/2020-03-28/</guid>
+      <description>githubから日記を書けるようにする d=new Date(); v=encodeURIComponent(`--- Title: &#39;&#39; Draft: false Date: &#39;${d.toISOString()}&#39; ---`); fy=d.getFullYear(); fm=d.getMonth()+1+&amp;quot;&amp;quot;; fd=d.getDate()+&amp;quot;&amp;quot;; ff=(s)=&amp;gt;(&amp;quot;00&amp;quot; +s).substr(s.length,2); ud=`${fy}-${ff(fm)}-${ff(fd)}`; ur=&amp;quot;mijime/mijime.github.io&amp;quot;; ub=&amp;quot;content&amp;quot;; document.location.href=`https://github.com/${ur}/new/${ub}?filename=content/post/${ud}/index.md&amp;amp;value=${v}`;</description>
+    </item>
     
     <item>
       <title>macOSからChromeOSに移行したけど、いろいろ辛かった</title>
@@ -253,15 +262,6 @@
       
       <guid>https://blog.m-iji.me/post/blog/first-blogged/</guid>
       <description>何を書いてく。 やったネタやQiitaの下書き、外部マウンティング的な何かを行う。</description>
-    </item>
-    
-    <item>
-      <title></title>
-      <link>https://blog.m-iji.me/post/2020-03-28/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>https://blog.m-iji.me/post/2020-03-28/</guid>
-      <description>Create from github</description>
     </item>
     
   </channel>
