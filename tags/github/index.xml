@@ -13,10 +13,10 @@
     
     <item>
       <title>introduce a GitHub cli</title>
-      <link>https://blog.m-iji.me/post/2016-05-23/github-cli/</link>
+      <link>https://blog.m-iji.me/post/2016/05/23/github-cli/</link>
       <pubDate>Mon, 23 May 2016 22:48:11 +0900</pubDate>
       
-      <guid>https://blog.m-iji.me/post/2016-05-23/github-cli/</guid>
+      <guid>https://blog.m-iji.me/post/2016/05/23/github-cli/</guid>
       <description>リポジトリをWebから作るのがめんどくさいので導入する。 https://github.com/github/hub hub create mijime.github.io ユーザ名とパスワードを入れるのはなんか嫌。</description>
     </item>
     

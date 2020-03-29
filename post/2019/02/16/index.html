@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <link href="http://gmpg.org/xfn/11" rel="profile">
+<meta name="google-site-verification" content="7gVj5rzyozu0vYcQMLhIGr4g-WWyJn4R22RgeYqQdS0" />
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+<meta name="generator" content="Hugo 0.59.1" />
+
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+
+<title>リモートワーク用の環境を構築するときはアカウントを分けるとよさそう | My snippets</title>
+<meta name="description" content="最近リモート用の環境を私物のPCに構築した。
+
+その時にアカウントを分けて、ブックマークとか作業環境を混ざらないようにしたが
+色々やることがあったのでメモっておく">
+
+<meta name="keywords" content="development">
+
+
+
+
+<link rel="apple-touch-icon-precomposed" sizes="144x144" href="https://blog.m-iji.me/apple-touch-icon-144-precomposed.png">
+<link rel="shortcut icon" href="https://blog.m-iji.me/favicon.png">
+
+
+
+    
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.4.0/styles/zenburn.min.css" />
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.4.0/highlight.min.js" defer></script>
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/mermaid/7.0.0/mermaid.min.css" />
+<script src="//cdnjs.cloudflare.com/ajax/libs/mermaid/7.0.0/mermaid.min.js" defer></script>
+
+
+<link rel="stylesheet" href="https://blog.m-iji.me/css/poole.css" />
+<link rel="stylesheet" href="https://blog.m-iji.me/css/syntax.css" />
+<link rel="stylesheet" href="https://blog.m-iji.me/css/hyde.css" />
+<link rel="stylesheet" href="https://blog.m-iji.me/css/style.css" />
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Abril+Fatface%7COpen+Sans%7CPT+Sans" />
+<link rel="stylesheet" href="//fonts.googleapis.com/earlyaccess/notosansjapanese.css" />
+
+<script src="https://blog.m-iji.me/js/index.bundle.js" defer></script>
+
+    
+<script>
+(function(i,s,o,g,r,a,m){i["GoogleAnalyticsObject"]=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,"script","//www.google-analytics.com/analytics.js","ga");
+
+ga("create", "UA-46554348-4", "auto");
+ga("send", "pageview");
+</script>
+
+
+  </head>
+  <body class="layout-reverse">
+    <header class="sidebar">
+  <div class="container sidebar-sticky">
+    <div class="sidebar-about">
+      <h1>
+        <a href="https://blog.m-iji.me/">My snippets</a>
+      </h1>
+      
+      <p class="lead"> 何かをかく </p>
+      
+    </div>
+
+    <ul class="sidebar-nav">
+      <li><a href="https://blog.m-iji.me/">Home</a></li>
+      
+      <li><a href="/post">Posts</a></li>
+      
+      <li><a href="/slide">Slides</a></li>
+      
+      <li><a href="/tags">Tags</a></li>
+      
+    </ul>
+
+    <p>&copy; 2019. All rights reserved. </p>
+  </div>
+</header>
+
+
+<div class="content container">
+  <div class="post">
+    <h1 class="post-title">
+      <a href="https://blog.m-iji.me/post/2019/02/16/">
+        リモートワーク用の環境を構築するときはアカウントを分けるとよさそう
+      </a>
+    </h1>
+    <span class="post-date">Sat, Feb 16, 2019</span>
+    <div class="post-content">
+      
+
+<span>
+  
+  <a href="https://blog.m-iji.me/tags/development/">#development</a>
+  
+</span>
+
+
+      <p>最近リモート用の環境を私物のPCに構築した。</p>
+
+<p>その時にアカウントを分けて、ブックマークとか作業環境を混ざらないようにしたが
+色々やることがあったのでメモっておく</p>
+
+<h2 id="brewの設定を分ける">brewの設定を分ける</h2>
+
+<p>デフォルトだと <code>/usr/local</code> に全て入ってアカウント共有になってしまう。</p>
+
+<p>そうすると更新するたびに<code>sudo</code>権限を求められてしまうため、アカウント毎に <code>brew</code> を設定した。</p>
+
+<p><code>brew</code> を別ディレクトリに置けば、勝手に<code>BREW_HOME</code>を親ディレクトリに設定してくれる。</p>
+
+<pre><code class="language-bash">mkdir -p &quot;${HOME}/.brew&quot;
+curl -L https://github.com/Homebrew/brew/archive/master.tar.gz \
+         | tar xz --strip-components=1 -C &quot;${HOME}/.brew&quot;
+export PATH=${HOME}/.brew/bin:${PATH}
+</code></pre>
+
+<h2 id="dotfilesを共有する">dotfilesを共有する</h2>
+
+<p>会社用のGithubアカウントを新規で作成したが、さすがにdotfilesは常々更新するので、
+同じものを使いたい。</p>
+
+<p><code>git config core.sshCommand</code>で個別に鍵を指定した。</p>
+
+<pre><code class="language-bash">mkdir -p ~/.ssh/projects/github.com/
+ssh-keygen -t ed25519 -N &quot;&quot; -C &quot;&quot; -f ~/.ssh/projects/github.com/${USER}_id_ed25519
+git config core.sshCommand &quot;ssh -i ~/.ssh/projects/github.com/${USER}_id_ed25519&quot;
+</code></pre>
+
+<h2 id="ps1にiconを設定する">PS1にiconを設定する</h2>
+
+<p><code>su</code> で雑にアカウントを往復することがあるんだけども、名前は違えど色味がほぼほぼ同じなので
+&lsquo;あれ、どっちで作業しているんだっけ…&rsquo;的なことが時々起こる</p>
+
+<p>名前からランダムに絵文字を設定してみた。</p>
+
+<pre><code class="language-bash">icon=$(echo -ne $((127744 + 16#$(whoami|md5sum|cut -c-8)%512))|awk '{printf(&quot;%3c&quot;,$1)}')
+</code></pre>
+
+<p>これを適当にPS1に入れておけば、間違えにくくなる</p>
+
+<h2 id="セキュアなデータをgoogledriveにいれてgitで管理する">セキュアなデータをGoogleDriveにいれてGitで管理する</h2>
+
+<p>だいぶBad Practiceな気がするが、パスワードとかssh-keyとかは全部Gitのリポジトリにして管理している。</p>
+
+<p>それを一旦GoogleDriveとかにぶち込んで別端末に持ってきた。</p>
+
+<p>さすがに内容が内容なので、<code>git encrypt</code> コマンドを作って暗号化してみた</p>
+
+<p><a href="https://github.com/kojimat/git-encrypt">https://github.com/kojimat/git-encrypt</a></p>
+    </div>
+  </div>
+</div>
+
+  </body>
+</html>

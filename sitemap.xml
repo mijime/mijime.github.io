@@ -3,7 +3,7 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
-    <loc>https://blog.m-iji.me/post/2020-03-28/</loc>
+    <loc>https://blog.m-iji.me/post/2020/03/28/</loc>
     <lastmod>2020-03-29T01:23:33+09:00</lastmod>
   </url>
   
@@ -23,7 +23,7 @@
   </url>
   
   <url>
-    <loc>https://blog.m-iji.me/post/2019-12-25/</loc>
+    <loc>https://blog.m-iji.me/post/2019/12/25/</loc>
     <lastmod>2019-12-25T01:23:33+09:00</lastmod>
   </url>
   
@@ -38,22 +38,22 @@
   </url>
   
   <url>
-    <loc>https://blog.m-iji.me/post/2019-12-24/</loc>
+    <loc>https://blog.m-iji.me/post/2019/12/24/</loc>
     <lastmod>2019-12-24T10:15:44+09:00</lastmod>
   </url>
   
   <url>
-    <loc>https://blog.m-iji.me/post/2019-03-07/</loc>
+    <loc>https://blog.m-iji.me/post/2019/03/07/</loc>
     <lastmod>2019-03-07T00:38:33+09:00</lastmod>
   </url>
   
   <url>
-    <loc>https://blog.m-iji.me/post/2019-02-28/</loc>
+    <loc>https://blog.m-iji.me/post/2019/02/28/</loc>
     <lastmod>2019-02-28T01:49:54+09:00</lastmod>
   </url>
   
   <url>
-    <loc>https://blog.m-iji.me/post/2019-02-16/</loc>
+    <loc>https://blog.m-iji.me/post/2019/02/16/</loc>
     <lastmod>2019-02-16T14:56:38+09:00</lastmod>
   </url>
   
@@ -103,7 +103,7 @@
   </url>
   
   <url>
-    <loc>https://blog.m-iji.me/post/2017-09-16/</loc>
+    <loc>https://blog.m-iji.me/post/2017/09/16/</loc>
     <lastmod>2017-09-16T07:48:28+09:00</lastmod>
   </url>
   
@@ -113,12 +113,12 @@
   </url>
   
   <url>
-    <loc>https://blog.m-iji.me/post/2017-04-20/regexp-recursive/</loc>
+    <loc>https://blog.m-iji.me/post/2017/04/20/regexp-recursive/</loc>
     <lastmod>2017-04-20T07:48:28+09:00</lastmod>
   </url>
   
   <url>
-    <loc>https://blog.m-iji.me/post/2017-04-11/docker-compose-3/</loc>
+    <loc>https://blog.m-iji.me/post/2017/04/11/docker-compose-3/</loc>
     <lastmod>2017-04-11T10:25:47+09:00</lastmod>
   </url>
   
@@ -133,7 +133,7 @@
   </url>
   
   <url>
-    <loc>https://blog.m-iji.me/post/2017-04-09/thoughts-on-react/</loc>
+    <loc>https://blog.m-iji.me/post/2017/04/09/thoughts-on-react/</loc>
     <lastmod>2017-04-09T22:40:10+09:00</lastmod>
   </url>
   
@@ -193,7 +193,7 @@
   </url>
   
   <url>
-    <loc>https://blog.m-iji.me/post/2016-05-26/border-implement/</loc>
+    <loc>https://blog.m-iji.me/post/2016/05/26/border-implement/</loc>
     <lastmod>2016-05-26T21:13:19+09:00</lastmod>
   </url>
   
@@ -203,7 +203,7 @@
   </url>
   
   <url>
-    <loc>https://blog.m-iji.me/post/2016-05-26/ci-is-difficult/</loc>
+    <loc>https://blog.m-iji.me/post/2016/05/26/ci-is-difficult/</loc>
     <lastmod>2016-05-26T21:10:04+09:00</lastmod>
   </url>
   
@@ -223,7 +223,7 @@
   </url>
   
   <url>
-    <loc>https://blog.m-iji.me/post/2016-05-23/github-cli/</loc>
+    <loc>https://blog.m-iji.me/post/2016/05/23/github-cli/</loc>
     <lastmod>2016-05-23T22:48:11+09:00</lastmod>
   </url>
   

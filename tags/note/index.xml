@@ -22,28 +22,28 @@
     
     <item>
       <title>背面派、前面派</title>
-      <link>https://blog.m-iji.me/post/2016-05-26/border-implement/</link>
+      <link>https://blog.m-iji.me/post/2016/05/26/border-implement/</link>
       <pubDate>Thu, 26 May 2016 21:13:19 +0900</pubDate>
       
-      <guid>https://blog.m-iji.me/post/2016-05-26/border-implement/</guid>
+      <guid>https://blog.m-iji.me/post/2016/05/26/border-implement/</guid>
       <description>アプリ側で実装する際に、サーバ側で対応するかクライアント側で対応するか、という話。 場合によりけりなのは分かっているけど、思わずクライアント側</description>
     </item>
     
     <item>
       <title>CIを始めるのが辛い</title>
-      <link>https://blog.m-iji.me/post/2016-05-26/ci-is-difficult/</link>
+      <link>https://blog.m-iji.me/post/2016/05/26/ci-is-difficult/</link>
       <pubDate>Thu, 26 May 2016 21:10:04 +0900</pubDate>
       
-      <guid>https://blog.m-iji.me/post/2016-05-26/ci-is-difficult/</guid>
+      <guid>https://blog.m-iji.me/post/2016/05/26/ci-is-difficult/</guid>
       <description>環境が違う サービスによっては1つ前のバージョンを使っていたりする。 開発環境は最新めなことが多いので、ハマる 入れまくり ツールやパッケージやらイ</description>
     </item>
     
     <item>
       <title>introduce a GitHub cli</title>
-      <link>https://blog.m-iji.me/post/2016-05-23/github-cli/</link>
+      <link>https://blog.m-iji.me/post/2016/05/23/github-cli/</link>
       <pubDate>Mon, 23 May 2016 22:48:11 +0900</pubDate>
       
-      <guid>https://blog.m-iji.me/post/2016-05-23/github-cli/</guid>
+      <guid>https://blog.m-iji.me/post/2016/05/23/github-cli/</guid>
       <description>リポジトリをWebから作るのがめんどくさいので導入する。 https://github.com/github/hub hub create mijime.github.io ユーザ名とパスワードを入れるのはなんか嫌。</description>
     </item>
     
