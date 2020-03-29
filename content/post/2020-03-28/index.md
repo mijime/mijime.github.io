@@ -1,10 +1,10 @@
 ---
-Title: 'Create from github'
+Title: "Create from github"
 Draft: false
-Date: '2020-03-29T01:23:33+09:00'
+Date: "2020-03-29T01:23:33+09:00"
 ---
 
-github から日記を書けるようにする
+githubから日記を書けるようにする
 
 ```javascript
 d=new Date();
