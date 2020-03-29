@@ -10,7 +10,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
 
 
-<title>Create from github | My snippets</title>
+<title>Create page from github | My snippets</title>
 <meta name="description" content="githubから日記を書けるようにする">
 
 
@@ -82,7 +82,7 @@ ga("send", "pageview");
   <div class="post">
     <h1 class="post-title">
       <a href="https://blog.m-iji.me/post/2020/03/28/">
-        Create from github
+        Create page from github
       </a>
     </h1>
     <span class="post-date">Sun, Mar 29, 2020</span>
@@ -95,6 +95,12 @@ ga("send", "pageview");
 <p>filename,valueを直接渡せばテンプレート化できそう。</p>
 
 <pre><code class="language-javascript">d=new Date();
+fy=d.getFullYear();
+fm=d.getMonth()+1+&quot;&quot;;
+fd=d.getDate()+&quot;&quot;;
+ff=(s)=&gt;(&quot;00&quot; +s).substr(s.length,2);
+b=&quot;mijime/mijime.github.io/new/content&quot;;
+f=`content/post/${fy}/${ff(fm)}/${ff(fd)}/index.md`;
 v=encodeURIComponent(`---
 Title: &quot;&quot;
 Draft: false
@@ -102,14 +108,7 @@ Date: &quot;${d.toISOString()}&quot;
 ---
 
 &lt;!--more--&gt;`);
-fy=d.getFullYear();
-fm=d.getMonth()+1+&quot;&quot;;
-fd=d.getDate()+&quot;&quot;;
-ff=(s)=&gt;(&quot;00&quot; +s).substr(s.length,2);
-ud=`${fy}/${ff(fm)}/${ff(fd)}`;
-ur=&quot;mijime/mijime.github.io&quot;;
-ub=&quot;content&quot;;
-document.location.href=`https://github.com/${ur}/new/${ub}?filename=content/post/${ud}/index.md&amp;value=${v}`;
+document.location.href=`https://github.com/${b}?filename=${f}&amp;value=${v}`;
 </code></pre>
     </div>
   </div>
