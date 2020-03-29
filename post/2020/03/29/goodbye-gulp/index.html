@@ -10,11 +10,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
 
 
-<title>vim-lspはじめました | My snippets</title>
-<meta name="description" content="今まで faith/vim-go をありがたく使わせてもらっていたけど
-GO111MODULE=on のときの挙動が気になったので prabirshrestha/vim-lsp に移行した">
-
-<meta name="keywords" content="development">
+<title>Gulpをやめた | My snippets</title>
+<meta name="description" content="gulp をやめた">
 
 
 
@@ -76,7 +73,7 @@ ga("send", "pageview");
       
     </ul>
 
-    <p>&copy; 2019. All rights reserved. </p>
+    <p>&copy; 2020. All rights reserved. </p>
   </div>
 </header>
 
@@ -84,53 +81,27 @@ ga("send", "pageview");
 <div class="content container">
   <div class="post">
     <h1 class="post-title">
-      <a href="https://blog.m-iji.me/post/2019/02/28/">
-        vim-lspはじめました
+      <a href="https://blog.m-iji.me/post/2020/03/29/goodbye-gulp/">
+        Gulpをやめた
       </a>
     </h1>
-    <span class="post-date">Thu, Feb 28, 2019</span>
+    <span class="post-date">Sun, Mar 29, 2020</span>
     <div class="post-content">
       
 
-<span>
-  
-  <a href="https://blog.m-iji.me/tags/development/">#development</a>
-  
-</span>
 
+      <p>gulp をやめた</p>
 
-      <p>今まで <code>faith/vim-go</code> をありがたく使わせてもらっていたけど
-<code>GO111MODULE=on</code> のときの挙動が気になったので <code>prabirshrestha/vim-lsp</code> に移行した</p>
+<h1 id="やめた理由">やめた理由</h1>
 
-<ol>
-<li><p>Wiki に全部書いてあるのでそれをコピる</p></li>
+<ul>
+<li>gulp 周辺のツールがメンテされていない</li>
+<li>結局個別にタスクをキックすることが多い</li>
+</ul>
 
-<li><p><code>go get -u github.com/saibing/bingo</code> で bingo をインストールしておく</p></li>
+<p>gulp 自体は好き。stream 志向のタスクランナーってだけでかっこいい</p>
 
-<li><p><code>&lt;C-]&gt;</code> などの key mapping を設定する</p>
-
-<pre><code class="language-vimrc">&quot; ...
-Plug 'prabirshrestha/async.vim'
-Plug 'prabirshrestha/vim-lsp'
-if executable('bingo')
-augroup LspGo
-    au!
-    autocmd User lsp_setup call lsp#register_server({
-        \ 'name': 'go-lang',
-        \ 'cmd': {server_info-&gt;['bingo', '-mode', 'stdio']},
-                  \ 'whitelist': ['go'],
-                              \ })
-    autocmd FileType go setlocal noexpandtab
-    autocmd FileType go setlocal omnifunc=lsp#complete
-    autocmd FileType go nmap &lt;C-]&gt; :LspDefinition&lt;CR&gt;
-    autocmd FileType go nmap K :LspHover&lt;CR&gt;
-    autocmd FileType go nmap ]] :LspDocumentSymbol&lt;CR&gt;
-    autocmd BufWritePre *.go LspDocumentFormatSync
-augroup END
-endif
-&quot; ...
-</code></pre></li>
-</ol>
+<p>JS である必要はなかったかも。</p>
     </div>
   </div>
 </div>

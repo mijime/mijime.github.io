@@ -26,7 +26,7 @@
       <pubDate>Mon, 23 May 2016 22:39:17 +0900</pubDate>
       
       <guid>https://blog.m-iji.me/post/hugo/hugo-deploy/</guid>
-      <description>master branchのみ適用されるらしいので、 生成元はcontent branch public配下はmaster branch みたいな本来の使い方ではない使い方で運用する</description>
+      <description>master branch のみ適用されるらしいので、 生成元は content branch public 配下は master branch みたいな本来の使い方ではない使い方で運用する。</description>
     </item>
     
   </channel>

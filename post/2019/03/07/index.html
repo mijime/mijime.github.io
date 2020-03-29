@@ -11,7 +11,7 @@
 
 
 <title>circleci local で死ぬパターン | My snippets</title>
-<meta name="description" content="circleciは通るけど、circleci local で死ぬパターンがある。">
+<meta name="description" content="circleci は通るけど、circleci local で死ぬパターンがある。">
 
 <meta name="keywords" content="development">
 
@@ -98,22 +98,24 @@ ga("send", "pageview");
 </span>
 
 
-      <p>circleciは通るけど、<code>circleci local</code> で死ぬパターンがある。</p>
+      <p>circleci は通るけど、<code>circleci local</code> で死ぬパターンがある。</p>
 
 <ul>
-<li><p>ファイル数が <code>xargs</code> の上限を超える</p>
-
-<p>ローカルのファイルを <code>git ls-files | xargs tar cfz - | tar xfz -C</code>
-みたいな感じで所定のリポジトリに移動している。
-なので <code>xargs</code> の引数を超過すると死ぬ</p></li>
-
-<li><p>Gitコマンドを使用する</p>
-
-<p><code>git ls-files</code> でファイルだけを持っているので、ビルドタスクで
-<code>git submodule</code> や <code>git commit &amp;&amp; git push</code> があると死ぬ</p></li>
+<li>ファイル数が <code>xargs</code> の上限を超える</li>
 </ul>
 
-<p>素直にdockerとかで別途テストできる環境を用意しておくのが吉。</p>
+<p>ローカルのファイルを <code>git ls-files | xargs tar cfz - | tar xfz -C</code>
+  みたいな感じで所定のリポジトリに移動している。
+  なので <code>xargs</code> の引数を超過すると死ぬ</p>
+
+<ul>
+<li>Git コマンドを使用する</li>
+</ul>
+
+<p><code>git ls-files</code> でファイルだけを持っているので、ビルドタスクで
+  <code>git submodule</code> や <code>git commit &amp;&amp; git push</code> があると死ぬ</p>
+
+<p>素直に docker とかで別途テストできる環境を用意しておくのが吉。</p>
     </div>
   </div>
 </div>

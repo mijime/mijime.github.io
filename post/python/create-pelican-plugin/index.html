@@ -11,7 +11,7 @@
 
 
 <title>PelicanのPluginの作り方 | My snippets</title>
-<meta name="description" content="register関数を用意して、 各イベントのsignalsに connect する">
+<meta name="description" content="register 関数を用意して、 各イベントの signals に connect する">
 
 <meta name="keywords" content="pelican">
 
@@ -98,7 +98,7 @@ ga("send", "pageview");
 </span>
 
 
-      <p>register関数を用意して、 各イベントのsignalsに <code>connect</code> する</p>
+      <p>register 関数を用意して、 各イベントの signals に <code>connect</code> する</p>
 
 <pre><code class="language-python">from pelican import signals
 
@@ -109,7 +109,7 @@ def content_object_init_handler(content):
   pass
 </code></pre>
 
-<p>signalsは下記を参照</p>
+<p>signals は下記を参照</p>
 
 <p><a href="http://docs.getpelican.com/en/3.7.1/plugins.html#list-of-signals">http://docs.getpelican.com/en/3.7.1/plugins.html#list-of-signals</a></p>
 

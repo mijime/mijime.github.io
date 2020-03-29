@@ -106,24 +106,27 @@ ga("send", "pageview");
 
 <p>再帰的に正規表現で抜き出して詰めたい場合があるとする。</p>
 
-<pre><code class="language-js">function regexpr(re, text, acc=[]) {
-  const res = re.exec(text);
-  return res ? regexpr(
-    re,
-    text.substr(res.index + res[0].length, text.length),
-    acc.concat(res)) : acc;
+<pre><code class="language-js">function regexpr(re, text, acc = []) {
+  const res = re.exec(text)
+  return res
+    ? regexpr(
+        re,
+        text.substr(res.index + res[0].length, text.length),
+        acc.concat(res)
+      )
+    : acc
 }
 </code></pre>
 
-<p>このときchromeさんだと、 gオプションつけた時で結果が異なる。</p>
+<p>このとき chrome さんだと、 g オプションつけた時で結果が異なる。</p>
 
-<pre><code class="language-js">regexpr(/hello|world/,  &quot;hello world&quot;); // =&gt; [&quot;hello&quot;, &quot;world&quot;]
-regexpr(/hello|world/g, &quot;hello world&quot;); // =&gt; [&quot;hello&quot;]
-regexpr(/hello|world/ , &quot;hello world hello world&quot;); // =&gt; [&quot;hello&quot;, &quot;world&quot;, &quot;hello&quot;, &quot;world&quot;]
-regexpr(/hello|world/g, &quot;hello world hello world&quot;); // =&gt; [&quot;hello&quot;, &quot;hello&quot;]
+<pre><code class="language-js">regexpr(/hello|world/, 'hello world') // =&gt; [&quot;hello&quot;, &quot;world&quot;]
+regexpr(/hello|world/g, 'hello world') // =&gt; [&quot;hello&quot;]
+regexpr(/hello|world/, 'hello world hello world') // =&gt; [&quot;hello&quot;, &quot;world&quot;, &quot;hello&quot;, &quot;world&quot;]
+regexpr(/hello|world/g, 'hello world hello world') // =&gt; [&quot;hello&quot;, &quot;hello&quot;]
 </code></pre>
 
-<p>indexや結果は変わらないのに、なんでだろう</p>
+<p>index や結果は変わらないのに、なんでだろう</p>
     </div>
   </div>
 </div>

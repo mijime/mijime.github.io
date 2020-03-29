@@ -17,7 +17,7 @@
       <pubDate>Tue, 31 May 2016 22:41:30 +0900</pubDate>
       
       <guid>https://blog.m-iji.me/post/hugo/code-mermaid/</guid>
-      <description>code.language-mermaidを変換するスクリプトを噛ませただけだけど。 graph TD; A--&amp;gt;B; A--&amp;gt;C; B--&amp;gt;D; C--&amp;gt;D; gantt dateFormat YYYY-MM-DD title Adding GANTT diagram functionality to mermaid section A section Completed task: done, des1, 2014-01-06, 2014-01-08 Active task: active,</description>
+      <description>code.language-mermaid を変換するスクリプトを噛ませただけだけど。 graph TD; A--&amp;gt;B; A--&amp;gt;C; B--&amp;gt;D; C--&amp;gt;D; gantt dateFormat YYYY-MM-DD title Adding GANTT diagram functionality to mermaid section A section Completed task: done, des1, 2014-01-06, 2014-01-08 Active task: active, des2, 2014-01-09, 3d Future task: des3, after des2, 5d Future task2: des4, after des3, 5d section Critical tasks Completed task</description>
     </item>
     
   </channel>

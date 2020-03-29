@@ -11,7 +11,7 @@
 
 
 <title>リモートワーク用の環境を構築するときはアカウントを分けるとよさそう | My snippets</title>
-<meta name="description" content="最近リモート用の環境を私物のPCに構築した。
+<meta name="description" content="最近リモート用の環境を私物の PC に構築した。
 
 その時にアカウントを分けて、ブックマークとか作業環境を混ざらないようにしたが
 色々やることがあったのでメモっておく">
@@ -101,12 +101,12 @@ ga("send", "pageview");
 </span>
 
 
-      <p>最近リモート用の環境を私物のPCに構築した。</p>
+      <p>最近リモート用の環境を私物の PC に構築した。</p>
 
 <p>その時にアカウントを分けて、ブックマークとか作業環境を混ざらないようにしたが
 色々やることがあったのでメモっておく</p>
 
-<h2 id="brewの設定を分ける">brewの設定を分ける</h2>
+<h2 id="brew-の設定を分ける">brew の設定を分ける</h2>
 
 <p>デフォルトだと <code>/usr/local</code> に全て入ってアカウント共有になってしまう。</p>
 
@@ -120,9 +120,9 @@ curl -L https://github.com/Homebrew/brew/archive/master.tar.gz \
 export PATH=${HOME}/.brew/bin:${PATH}
 </code></pre>
 
-<h2 id="dotfilesを共有する">dotfilesを共有する</h2>
+<h2 id="dotfiles-を共有する">dotfiles を共有する</h2>
 
-<p>会社用のGithubアカウントを新規で作成したが、さすがにdotfilesは常々更新するので、
+<p>会社用の Github アカウントを新規で作成したが、さすがに dotfiles は常々更新するので、
 同じものを使いたい。</p>
 
 <p><code>git config core.sshCommand</code>で個別に鍵を指定した。</p>
@@ -132,7 +132,7 @@ ssh-keygen -t ed25519 -N &quot;&quot; -C &quot;&quot; -f ~/.ssh/projects/github.
 git config core.sshCommand &quot;ssh -i ~/.ssh/projects/github.com/${USER}_id_ed25519&quot;
 </code></pre>
 
-<h2 id="ps1にiconを設定する">PS1にiconを設定する</h2>
+<h2 id="ps1-に-icon-を設定する">PS1 に icon を設定する</h2>
 
 <p><code>su</code> で雑にアカウントを往復することがあるんだけども、名前は違えど色味がほぼほぼ同じなので
 &lsquo;あれ、どっちで作業しているんだっけ…&rsquo;的なことが時々起こる</p>
@@ -142,13 +142,13 @@ git config core.sshCommand &quot;ssh -i ~/.ssh/projects/github.com/${USER}_id_ed
 <pre><code class="language-bash">icon=$(echo -ne $((127744 + 16#$(whoami|md5sum|cut -c-8)%512))|awk '{printf(&quot;%3c&quot;,$1)}')
 </code></pre>
 
-<p>これを適当にPS1に入れておけば、間違えにくくなる</p>
+<p>これを適当に PS1 に入れておけば、間違えにくくなる</p>
 
-<h2 id="セキュアなデータをgoogledriveにいれてgitで管理する">セキュアなデータをGoogleDriveにいれてGitで管理する</h2>
+<h2 id="セキュアなデータを-googledrive-にいれて-git-で管理する">セキュアなデータを GoogleDrive にいれて Git で管理する</h2>
 
-<p>だいぶBad Practiceな気がするが、パスワードとかssh-keyとかは全部Gitのリポジトリにして管理している。</p>
+<p>だいぶ Bad Practice な気がするが、パスワードとか ssh-key とかは全部 Git のリポジトリにして管理している。</p>
 
-<p>それを一旦GoogleDriveとかにぶち込んで別端末に持ってきた。</p>
+<p>それを一旦 GoogleDrive とかにぶち込んで別端末に持ってきた。</p>
 
 <p>さすがに内容が内容なので、<code>git encrypt</code> コマンドを作って暗号化してみた</p>
 

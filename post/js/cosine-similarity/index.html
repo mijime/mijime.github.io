@@ -112,10 +112,10 @@ ga("send", "pageview");
 
 <ul>
 <li><a href="http://www.cse.kyoto-su.ac.jp/~g0846020/keywords/cosinSimilarity.html">コサイン類似度</a></li>
-<li><a href="http://qiita.com/nmbakfm/items/6bb91b89571dd68fcea6">TF-IDF Cos類似度推定法</a></li>
+<li><a href="http://qiita.com/nmbakfm/items/6bb91b89571dd68fcea6">TF-IDF Cos 類似度推定法</a></li>
 </ul>
 
-<p>このブログはjs + hugoで書いているので、
+<p>このブログは js + hugo で書いているので、
 <a href="https://www.npmjs.com/package/kuromoji">kuromoji</a> のラッパー
 <a href="https://www.npmjs.com/package/kuromojin">kuromojin</a> を使って形態素解析する。</p>
 
@@ -126,58 +126,60 @@ ga("send", "pageview");
 <p>テキストを分解して、 単語と出現回数を記録する。</p>
 
 <pre><code class="language-javascript">async function parseVector(text) {
-  const tokens = await tokenize(text);
+  const tokens = await tokenize(text)
   return tokens.reduce((acc, next) =&gt; {
     if (!isTargetToken(next)) {
-      return acc;
+      return acc
     }
 
     if (acc[next.surface_form]) {
-      acc[next.surface_form] ++;
+      acc[next.surface_form]++
     } else {
-      acc[next.surface_form] = 1;
+      acc[next.surface_form] = 1
     }
 
-    return acc;
-  }, {});
+    return acc
+  }, {})
 }
 </code></pre>
 
-<p>出現回数を数えるのは名詞で3文字以上の単語のみ。</p>
+<p>出現回数を数えるのは名詞で 3 文字以上の単語のみ。</p>
 
 <pre><code class="language-javascript">function isTargetToken(token) {
-  return token.pos === '名詞'
-    &amp;&amp; token.surface_form.length &gt;= 3
-    &amp;&amp; (token.basic_form !== '*'
-        || token.surface_form.match(/^[\wA-Z]+$/));
+  return (
+    token.pos === '名詞' &amp;&amp;
+    token.surface_form.length &gt;= 3 &amp;&amp;
+    (token.basic_form !== '*' || token.surface_form.match(/^[\wA-Z]+$/))
+  )
 }
 </code></pre>
 
 <p>あとは計算しておしまい。</p>
 
 <pre><code class="language-javascript">function cosineSimilarity(curr, next) {
-  const currKeys = Object.keys(curr);
-  const nextKeys = Object.keys(next);
-  const keys = currKeys.concat(nextKeys)
-    .filter((v, i, self) =&gt; self.indexOf(v) === i);
+  const currKeys = Object.keys(curr)
+  const nextKeys = Object.keys(next)
+  const keys = currKeys
+    .concat(nextKeys)
+    .filter((v, i, self) =&gt; self.indexOf(v) === i)
 
   const baseScore = keys
     .map(k =&gt; (curr[k] || 0) * (next[k] || 0))
-    .reduce((acc, c) =&gt; acc + c, 0);
+    .reduce((acc, c) =&gt; acc + c, 0)
 
   const currScore = keys
-    .map(k =&gt; curr[k] ? Math.pow(curr[k], 2) : 0)
-    .reduce((acc, c) =&gt; acc + c, 0);
+    .map(k =&gt; (curr[k] ? Math.pow(curr[k], 2) : 0))
+    .reduce((acc, c) =&gt; acc + c, 0)
 
   const nextScore = keys
-    .map(k =&gt; next[k] ? Math.pow(next[k], 2) : 0)
-    .reduce((acc, c) =&gt; acc + c, 0);
+    .map(k =&gt; (next[k] ? Math.pow(next[k], 2) : 0))
+    .reduce((acc, c) =&gt; acc + c, 0)
 
   const score = baseScore
     ? baseScore / (Math.sqrt(currScore) * Math.sqrt(nextScore))
-    : 0;
-  const words = keys.filter(k =&gt; curr[k] &amp;&amp; next[k]);
-  return {score, words};
+    : 0
+  const words = keys.filter(k =&gt; curr[k] &amp;&amp; next[k])
+  return { score, words }
 }
 </code></pre>
 

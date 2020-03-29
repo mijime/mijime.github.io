@@ -11,7 +11,7 @@
 
 
 <title>macOSからChromeOSに移行したけど、いろいろ辛かった | My snippets</title>
-<meta name="description" content="初めてのChromeOSだったのでいろいろハマった">
+<meta name="description" content="初めての ChromeOS だったのでいろいろハマった">
 
 <meta name="keywords" content="development">
 
@@ -98,7 +98,7 @@ ga("send", "pageview");
 </span>
 
 
-      <p>初めてのChromeOSだったのでいろいろハマった</p>
+      <p>初めての ChromeOS だったのでいろいろハマった</p>
 
 <h2 id="標準ターミナルで日本語打つとぶっ壊れる">標準ターミナルで日本語打つとぶっ壊れる</h2>
 
@@ -108,10 +108,11 @@ ga("send", "pageview");
 <li><a href="https://chromium.googlesource.com/apps/libapps/+/master/hterm/doc/KeyboardBindings.md">https://chromium.googlesource.com/apps/libapps/+/master/hterm/doc/KeyboardBindings.md</a></li>
 </ul>
 
-<p>Secure Shell appのほうのkeybidingsで<code>Ctrl-Space</code>を送信できれば解決できた。
-fcitxで解決、みたいな記事をよくみかけたけど、自分は解決できなかった。</p>
+<p>Secure Shell app のほうの keybidings で<code>Ctrl-Space</code>を送信できれば解決できた。</p>
 
-<p>下記の設定をkeybindingsにいれた。</p>
+<p>fcitx で解決、みたいな記事をよくみかけたけど、自分は解決できなかった。</p>
+
+<p>下記の設定を keybindings にいれた。</p>
 
 <pre><code>{
     &quot;keybindings&quot;: {
@@ -122,19 +123,19 @@ fcitxで解決、みたいな記事をよくみかけたけど、自分は解決
 
 <p>ただ、実際に日本語で送信してみると、補完入力とターミナルのバッファが
 ごっちゃになっているように見える。
-補完の内容がバッファに残ったままだったり、tmuxのwindow-sizeがおかしくなったりと辛い。</p>
+補完の内容がバッファに残ったままだったり、tmux の window-size がおかしくなったりと辛い。</p>
 
-<p>vim内であればCtrl-Lでリセットできる。日本語入力中は辛いが。</p>
+<p>vim 内であれば Ctrl-L でリセットできる。日本語入力中は辛いが。</p>
 
-<h2 id="alacrittyで絵文字表示されない">Alacrittyで絵文字表示されない</h2>
+<h2 id="alacritty-で絵文字表示されない">Alacritty で絵文字表示されない</h2>
 
-<p>上の問題があって、TerminalをAlacritty + fcitxを採用したけど、ここでも問題があった。</p>
+<p>上の問題があって、Terminal を Alacritty + fcitx を採用したけど、ここでも問題があった。</p>
 
-<p>デフォルトだとWAYLAND?の設定が良くないらしく、fcitxが立ち上がらなかったり、
+<p>デフォルトだと WAYLAND?の設定が良くないらしく、fcitx が立ち上がらなかったり、
 全画面起動ができなかった。</p>
 
-<p>WAYLANDを空白で起動すれば解決した。
-毎回ターミナルからalacrittyを立ち上げるのは嫌なのでalacritty.desktopを用意した。</p>
+<p>WAYLAND を空白で起動すれば解決した。
+毎回ターミナルから alacritty を立ち上げるのは嫌なので alacritty.desktop を用意した。</p>
 
 <pre><code>[Desktop Entry]
 Type=Application
@@ -155,23 +156,23 @@ Name=New Terminal
 Exec=env WAYLAND_DISPLAY= alacritty
 </code></pre>
 
-<p>fcitx自体は立ち上がるようになったけど、今度は絵文字がうまく表示されず。</p>
+<p>fcitx 自体は立ち上がるようになったけど、今度は絵文字がうまく表示されず。</p>
 
-<p>Alacritty自体に同様のIssueが結構上がっていて、MacOSの絵文字はうまくいくんだけど。。みたいな内容で終わっていたように見える。</p>
+<p>Alacritty 自体に同様の Issue が結構上がっていて、MacOS の絵文字はうまくいくんだけど。。みたいな内容で終わっていたように見える。</p>
 
 <p>カラフルな絵文字は諦めたが、さすがに空白だと辛いので <code>twemoji-color-font</code> を入れて
-starshipに設定していた絵文字は全部表示できるようにした。</p>
+starship に設定していた絵文字は全部表示できるようにした。</p>
 
 <h2 id="音楽が再生できない">音楽が再生できない</h2>
 
-<p>mpvを入れたけど、今度はターミナルから音楽がならない。
+<p>mpv を入れたけど、今度はターミナルから音楽がならない。
 コンテナを<code>--enable-audio-capture</code>して起動しないといけないらしい。</p>
 
 <ul>
 <li><a href="https://chromium.googlesource.com/chromiumos/docs/+/master/containers_and_vms.md#is-audio-capture-e_g_microphone_supported">https://chromium.googlesource.com/chromiumos/docs/+/master/containers_and_vms.md#is-audio-capture-e_g_microphone_supported</a></li>
 </ul>
 
-<p>crosh上で</p>
+<p>crosh 上で</p>
 
 <pre><code>vmc stop termina
 vmc start termina --enable-audio-capture
@@ -179,10 +180,10 @@ vmc start termina --enable-audio-capture
 
 <p>すれば解決した。</p>
 
-<p>その後、Alacrittyが透過できない+画面最大化できない、という症状になったけど
-これはLogout-&gt;Loginで治った。</p>
+<p>その後、Alacritty が透過できない+画面最大化できない、という症状になったけど
+これは Logout-&gt;Login で治った。</p>
 
-<p>思ったより、音楽を鳴らすのにCPUを使っているけど。。pluseなんぞや。。</p>
+<p>思ったより、音楽を鳴らすのに CPU を使っているけど。。pluse なんぞや。。</p>
     </div>
   </div>
 </div>

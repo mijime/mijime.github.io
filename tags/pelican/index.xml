@@ -17,7 +17,7 @@
       <pubDate>Sun, 22 Oct 2017 21:32:19 +0900</pubDate>
       
       <guid>https://blog.m-iji.me/post/python/create-pelican-plugin/</guid>
-      <description>&lt;p&gt;register関数を用意して、 各イベントのsignalsに &lt;code&gt;connect&lt;/code&gt; する&lt;/p&gt;</description>
+      <description>&lt;p&gt;register 関数を用意して、 各イベントの signals に &lt;code&gt;connect&lt;/code&gt; する&lt;/p&gt;</description>
     </item>
     
   </channel>

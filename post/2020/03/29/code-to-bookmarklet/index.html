@@ -11,7 +11,7 @@
 
 
 <title>codeをbookmarkletに変換する | My snippets</title>
-<meta name="description" content="コードをurlencodeして、そのhrefをブックマークすればよさそう">
+<meta name="description" content="コードを urlencode して、その href をブックマークすればよさそう">
 
 
 
@@ -90,15 +90,17 @@ ga("send", "pageview");
       
 
 
-      <p>コードをurlencodeして、そのhrefをブックマークすればよさそう</p>
+      <p>コードを urlencode して、その href をブックマークすればよさそう</p>
 
-<pre><code class="language-javascript">Array.from(document.querySelectorAll('code'))
-.map(c=&gt;c.onclick=()=&gt;{
-a=document.createElement('a');
-a.innerText=new Date();
-a.href=&quot;javascript:&quot;+encodeURIComponent(c.innerText);
-c.parentElement.appendChild(a);
-});
+<pre><code class="language-javascript">Array.from(document.querySelectorAll('code')).map(
+  c =&gt;
+    (c.onclick = () =&gt; {
+      a = document.createElement('a')
+      a.innerText = new Date()
+      a.href = 'javascript:' + encodeURIComponent(c.innerText)
+      c.parentElement.appendChild(a)
+    })
+)
 </code></pre>
     </div>
   </div>

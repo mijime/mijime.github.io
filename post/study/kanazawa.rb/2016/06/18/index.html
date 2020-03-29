@@ -11,7 +11,7 @@
 
 
 <title> kanazawa.rb meetup 46に参加した | My snippets</title>
-<meta name="description" content="AWS Lambdaを管理するツールLammaやってみた Rubyで書かれたlammbaというリポジトリが上がったので ruby勉強会に参加がてら触っ">
+<meta name="description" content="AWS Lambda を管理するツール Lamma やってみた Ruby で書かれた lammba というリポジトリが上がったので ruby 勉強会に参加がてら触ってみた lamma 作業リポジトリ source 作業雑感 シンプル">
 
 <meta name="keywords" content="Development,lambda,kzrb">
 
@@ -104,10 +104,10 @@ ga("send", "pageview");
 
       
 
-<h2 id="aws-lambdaを管理するツールlammaやってみた">AWS Lambdaを管理するツールLammaやってみた</h2>
+<h2 id="aws-lambda-を管理するツール-lamma-やってみた">AWS Lambda を管理するツール Lamma やってみた</h2>
 
-<p>Rubyで書かれたlammbaというリポジトリが上がったので
-ruby勉強会に参加がてら触ってみた</p>
+<p>Ruby で書かれた lammba というリポジトリが上がったので
+ruby 勉強会に参加がてら触ってみた</p>
 
 <h3 id="lamma-https-github-com-ayemos-lamma"><a href="https://github.com/ayemos/Lamma">lamma</a></h3>
 
@@ -117,22 +117,22 @@ ruby勉強会に参加がてら触ってみた</p>
 
 <h3 id="作業雑感">作業雑感</h3>
 
-<p>シンプルなLambda管理ツール</p>
+<p>シンプルな Lambda 管理ツール</p>
 
 <h4 id="pros">Pros</h4>
 
 <ul>
-<li>1 dir,  1 funcなのでわかりやすいね</li>
-<li>勝手にzipしてくれるね</li>
-<li>Rubyなので今後拡張しやすい、のかな？</li>
+<li>1 dir, 1 func なのでわかりやすいね</li>
+<li>勝手に zip してくれるね</li>
+<li>Ruby なので今後拡張しやすい、のかな？</li>
 </ul>
 
 <h4 id="cons">Cons</h4>
 
 <ul>
-<li>nodejs, python2.7のみ対応</li>
+<li>nodejs, python2.7 のみ対応</li>
 <li>消したりするのめんどくさそう &hellip; まぁ関数だけだからいいんだけども &hellip;</li>
-<li>node_modules入ってない？</li>
+<li>node_modules 入ってない？</li>
 </ul>
 
 <h3 id="作業ログ">作業ログ</h3>
@@ -166,7 +166,7 @@ services:
 
 <p>とりあえずインストールして実行してみる</p>
 
-<p>AWS関連の情報を渡して &hellip;</p>
+<p>AWS 関連の情報を渡して &hellip;</p>
 
 <pre><code>eval $(cat ~/.aws/credentials | awk -v FS=&quot; = &quot; '$1~/^aws/{print &quot;export&quot;,toupper($1)&quot;=&quot;$2}')
 </code></pre>
@@ -186,9 +186,9 @@ Did you mean?  catch
 ...
 </code></pre>
 
-<p>うーん &hellip;  なぜにnil &hellip;</p>
+<p>うーん &hellip; なぜに nil &hellip;</p>
 
-<p>AWS_REGIONを渡す</p>
+<p>AWS_REGION を渡す</p>
 
 <pre><code class="language-diff">diff --git a/source/study/kanazawa.rb/2016-06-18/docker-compose.yml b/source/study/kanazawa.rb/2016-06-18/docker-compose.yml
 index e03b010..2784d3c 100644
@@ -218,9 +218,9 @@ my-function
 1 directory, 2 files
 </code></pre>
 
-<p>まだこの時点で関数は作られていないみたい &hellip;  なんでAWS認証求められたんだ</p>
+<p>まだこの時点で関数は作られていないみたい &hellip; なんで AWS 認証求められたんだ</p>
 
-<p>deployしてみる。</p>
+<p>deploy してみる。</p>
 
 <pre><code>$ lamma deploy test
 
@@ -233,9 +233,9 @@ Aws::Lambda::Errors::BadRequest:
 /usr/local/bundle/gems/aws-sdk-core-2.3.14/lib/seahorse/client/plugins/response_target.rb:21:in `call'
 </code></pre>
 
-<p>うーん &hellip;  ?</p>
+<p>うーん &hellip; ?</p>
 
-<p>よくわからないのでJSで作り直す</p>
+<p>よくわからないので JS で作り直す</p>
 
 <pre><code>$ lamma create my-function-js --runtime nodejs
 
@@ -282,7 +282,7 @@ ArgumentError occured. You might need to specify role arn you want to pass to yo
 Done.
 </code></pre>
 
-<p>ほむほむ &hellip; あんましロールを書きたくないのでenvで</p>
+<p>ほむほむ &hellip; あんましロールを書きたくないので env で</p>
 
 <pre><code>export AWS_LAMBDA_IAM_ROLE=arn:aws:iam::000000000000:role/lambda_basic_execution
 </code></pre>
@@ -308,7 +308,7 @@ my-function-js
 
 <p>できた。</p>
 
-<h2 id="lt感想">LT感想</h2>
+<h2 id="lt-感想">LT 感想</h2>
 
 <h3 id="シェルチェックを使おう">シェルチェックを使おう</h3>
 
@@ -319,21 +319,21 @@ my-function-js
 
 <p>確かにシェルは動かすの簡単だけど、 他の環境で動かないことが多い &hellip;</p>
 
-<h3 id="shunit2を使おう">shUnit2を使おう</h3>
+<h3 id="shunit2-を使おう">shUnit2 を使おう</h3>
 
 <ul>
 <li>対応シェルも幅広い</li>
 <li>ダウンロードするだけで使える！</li>
 </ul>
 
-<p>bats派だけど、 msysでも早いなら乗り換えたいかも</p>
+<p>bats 派だけど、 msys でも早いなら乗り換えたいかも</p>
 
 <h3 id="dokku">Dokku</h3>
 
 <ul>
 <li>Heroku like</li>
-<li>前面にnginxがあって、 コンテナにルーティング</li>
-<li>herokuのbuild packsも利用できるので良い！</li>
+<li>前面に nginx があって、 コンテナにルーティング</li>
+<li>heroku の build packs も利用できるので良い！</li>
 <li>運用メンテナンスが気になるところ</li>
 </ul>
 
@@ -343,19 +343,19 @@ my-function-js
 
 <p>もっと利用されるという話なので、その話を聞いてからかな？</p>
 
-<p>dokku-altとの違いもあとで調べておこう &hellip;</p>
+<p>dokku-alt との違いもあとで調べておこう &hellip;</p>
 
 <h3 id="awssummit">AWSSummit</h3>
 
-<p>SIerが完全に淘汰されちゃう感じ</p>
+<p>SIer が完全に淘汰されちゃう感じ</p>
 
-<p>PaaS, SaaSの流行には全然触れてなかったので、 今回の話を機会に調べてみよう &hellip;</p>
+<p>PaaS, SaaS の流行には全然触れてなかったので、 今回の話を機会に調べてみよう &hellip;</p>
 
 <h3 id="iot">Iot</h3>
 
 <p>書き込むのに結構ツールが必要なんですね &hellip;</p>
 
-<p>IOT超絶敷居高い。</p>
+<p>IOT 超絶敷居高い。</p>
 
     </div>
   </div>

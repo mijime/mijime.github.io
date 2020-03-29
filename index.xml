@@ -6,10 +6,19 @@
     <description>Recent content on My snippets</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>ja</language>
-    <lastBuildDate>Sun, 29 Mar 2020 07:58:48 +0000</lastBuildDate>
+    <lastBuildDate>Sun, 29 Mar 2020 08:37:25 +0000</lastBuildDate>
     
 	<atom:link href="https://blog.m-iji.me/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Gulpをやめた</title>
+      <link>https://blog.m-iji.me/post/2020/03/29/goodbye-gulp/</link>
+      <pubDate>Sun, 29 Mar 2020 08:37:25 +0000</pubDate>
+      
+      <guid>https://blog.m-iji.me/post/2020/03/29/goodbye-gulp/</guid>
+      <description>&lt;p&gt;gulp をやめた&lt;/p&gt;</description>
+    </item>
     
     <item>
       <title>codeをbookmarkletに変換する</title>
@@ -17,7 +26,7 @@
       <pubDate>Sun, 29 Mar 2020 07:58:48 +0000</pubDate>
       
       <guid>https://blog.m-iji.me/post/2020/03/29/code-to-bookmarklet/</guid>
-      <description>&lt;p&gt;コードをurlencodeして、そのhrefをブックマークすればよさそう&lt;/p&gt;</description>
+      <description>&lt;p&gt;コードを urlencode して、その href をブックマークすればよさそう&lt;/p&gt;</description>
     </item>
     
     <item>
@@ -26,7 +35,7 @@
       <pubDate>Sun, 29 Mar 2020 01:23:33 +0900</pubDate>
       
       <guid>https://blog.m-iji.me/post/2020/03/28/</guid>
-      <description>&lt;p&gt;githubから日記を書けるようにする&lt;/p&gt;</description>
+      <description>&lt;p&gt;github から日記を書けるようにする&lt;/p&gt;</description>
     </item>
     
     <item>
@@ -35,7 +44,7 @@
       <pubDate>Wed, 25 Dec 2019 01:23:33 +0900</pubDate>
       
       <guid>https://blog.m-iji.me/post/2019/12/25/</guid>
-      <description>&lt;p&gt;初めてのChromeOSだったのでいろいろハマった&lt;/p&gt;</description>
+      <description>&lt;p&gt;初めての ChromeOS だったのでいろいろハマった&lt;/p&gt;</description>
     </item>
     
     <item>
@@ -44,9 +53,9 @@
       <pubDate>Tue, 24 Dec 2019 10:15:44 +0900</pubDate>
       
       <guid>https://blog.m-iji.me/post/2019/12/24/</guid>
-      <description>&lt;p&gt;今のメインPCがだいぶ古くなってきたので買い換えることにした&lt;/p&gt;
+      <description>&lt;p&gt;今のメイン PC がだいぶ古くなってきたので買い換えることにした&lt;/p&gt;
 
-&lt;p&gt;そのタイミングでpixelbook goが発売したので買ってみた&lt;/p&gt;
+&lt;p&gt;そのタイミングで pixelbook go が発売したので買ってみた&lt;/p&gt;
 
 &lt;p&gt;そのときのメモを吐き出す&lt;/p&gt;</description>
     </item>
@@ -57,7 +66,7 @@
       <pubDate>Thu, 07 Mar 2019 00:38:33 +0900</pubDate>
       
       <guid>https://blog.m-iji.me/post/2019/03/07/</guid>
-      <description>&lt;p&gt;circleciは通るけど、&lt;code&gt;circleci local&lt;/code&gt; で死ぬパターンがある。&lt;/p&gt;</description>
+      <description>&lt;p&gt;circleci は通るけど、&lt;code&gt;circleci local&lt;/code&gt; で死ぬパターンがある。&lt;/p&gt;</description>
     </item>
     
     <item>
@@ -76,7 +85,7 @@
       <pubDate>Sat, 16 Feb 2019 14:56:38 +0900</pubDate>
       
       <guid>https://blog.m-iji.me/post/2019/02/16/</guid>
-      <description>&lt;p&gt;最近リモート用の環境を私物のPCに構築した。&lt;/p&gt;
+      <description>&lt;p&gt;最近リモート用の環境を私物の PC に構築した。&lt;/p&gt;
 
 &lt;p&gt;その時にアカウントを分けて、ブックマークとか作業環境を混ざらないようにしたが
 色々やることがあったのでメモっておく&lt;/p&gt;</description>
@@ -88,7 +97,7 @@
       <pubDate>Sun, 22 Oct 2017 21:32:19 +0900</pubDate>
       
       <guid>https://blog.m-iji.me/post/python/create-pelican-plugin/</guid>
-      <description>&lt;p&gt;register関数を用意して、 各イベントのsignalsに &lt;code&gt;connect&lt;/code&gt; する&lt;/p&gt;</description>
+      <description>&lt;p&gt;register 関数を用意して、 各イベントの signals に &lt;code&gt;connect&lt;/code&gt; する&lt;/p&gt;</description>
     </item>
     
     <item>
@@ -97,7 +106,7 @@
       <pubDate>Sun, 22 Oct 2017 21:25:19 +0900</pubDate>
       
       <guid>https://blog.m-iji.me/post/python/git-fetch/</guid>
-      <description>&lt;p&gt;Pythonのdulwichを使う例が多い&lt;/p&gt;</description>
+      <description>&lt;p&gt;Python の dulwich を使う例が多い&lt;/p&gt;</description>
     </item>
     
     <item>
@@ -106,7 +115,7 @@
       <pubDate>Sun, 22 Oct 2017 03:07:56 +0900</pubDate>
       
       <guid>https://blog.m-iji.me/post/seo/about-gtm/</guid>
-      <description>Google tag managerはHTMLタグを動的に挿入するサービス。 既存のHTMLに手を加えなくても管理画面から追加できる 挿入するHTMLタグを一元に</description>
+      <description>Google tag manager は HTML タグを動的に挿入するサービス。 既存の HTML に手を加えなくても管理画面から追加できる 挿入する HTML タグを一元に管理できる のが強み。 挿入できる</description>
     </item>
     
     <item>
@@ -115,7 +124,7 @@
       <pubDate>Sat, 14 Oct 2017 01:38:45 +0900</pubDate>
       
       <guid>https://blog.m-iji.me/post/js/getting-started-web-ext/</guid>
-      <description>web extension用のビルドツール web-ext があるらしい web-ext Signed, Debugがメインのツール。 ビルドは主要ファイルをzipに入れるだけだった Install Yarnだ</description>
+      <description>web extension 用のビルドツール web-ext があるらしい web-ext Signed, Debug がメインのツール。 ビルドは主要ファイルを zip に入れるだけだった Install Yarn だと上手くいかない。..? ので npm でイ</description>
     </item>
     
     <item>
@@ -124,7 +133,7 @@
       <pubDate>Fri, 13 Oct 2017 13:24:00 +0900</pubDate>
       
       <guid>https://blog.m-iji.me/post/nim/usage-unittest/</guid>
-      <description>ファイルの場所 testsフォルダに .nimを配置することで始める Warningが発生するのでSkipDirsに @[&amp;ldquo;tests&amp;rdquo;] を追加する usage-unittest.nimble # Package version = &amp;quot;0.1.0&amp;quot; author = &amp;quot;Anonymous&amp;quot;</description>
+      <description>ファイルの場所 tests フォルダに .nim を配置することで始める Warning が発生するので SkipDirs に @[&amp;ldquo;tests&amp;rdquo;] を追加する usage-unittest.nimble # Package version = &amp;quot;0.1.0&amp;quot; author = &amp;quot;Anonymous&amp;quot; description = &amp;quot;usage unit test&amp;quot; license = &amp;quot;MIT&amp;quot; # Dependencies requires &amp;quot;nim &amp;gt;= 0.17.2&amp;quot; skipDirs = @[&amp;quot;tests&amp;quot;] 始め方</description>
     </item>
     
     <item>
@@ -142,7 +151,7 @@
       <pubDate>Sat, 16 Sep 2017 07:48:28 +0900</pubDate>
       
       <guid>https://blog.m-iji.me/post/2017/09/16/</guid>
-      <description>Azureにおけるテンプレートの立ち位置 Azureizmでは Azure Resource Manager と呼ぶらしい。 https://docs.microsoft.com/ja-jp/azure/azure-resource-manager/ ソース Azure Quickstart Templates https://github.com/Azure/azure-quickstart-templates 進め方 下のURLをなぞって勉強することにする</description>
+      <description>Azure におけるテンプレートの立ち位置 Azureizm では Azure Resource Manager と呼ぶらしい。 https://docs.microsoft.com/ja-jp/azure/azure-resource-manager/ ソース Azure Quickstart Templates https://github.com/Azure/azure-quickstart-templates 進め方 下の URL をなぞって勉強することにする Resource Manager テンプレートと Azure CLI を使</description>
     </item>
     
     <item>
@@ -162,7 +171,7 @@
       <pubDate>Tue, 11 Apr 2017 10:25:47 +0900</pubDate>
       
       <guid>https://blog.m-iji.me/post/2017/04/11/docker-compose-3/</guid>
-      <description>いつバージョン3になったんだ、、あとで差分チェックする</description>
+      <description>いつバージョン 3 になったんだ、、あとで差分チェックする</description>
     </item>
     
     <item>
@@ -171,7 +180,7 @@
       <pubDate>Sun, 09 Apr 2017 22:40:10 +0900</pubDate>
       
       <guid>https://blog.m-iji.me/post/2017/04/09/thoughts-on-react/</guid>
-      <description>作ったもの https://github.com/mijime/markdown-editor ダウンロードすればオフラインでも使えるマークダウンエディタを作りたかった 使ってよかったもの Rehype, Remark https://github.com/wooorm/rehype https://github.com/wooorm/remark HTMLやMarkdownをA</description>
+      <description>作ったもの https://github.com/mijime/markdown-editor ダウンロードすればオフラインでも使えるマークダウンエディタを作りたかった 使ってよかったもの Rehype, Remark https://github.com/wooorm/rehype https://github.com/wooorm/remark HTML や Markdown を AST に変換してくれる。 Marked</description>
     </item>
     
     <item>
@@ -180,7 +189,7 @@
       <pubDate>Sat, 18 Jun 2016 13:23:05 +0900</pubDate>
       
       <guid>https://blog.m-iji.me/post/study/kanazawa.rb/2016/06/18/</guid>
-      <description>AWS Lambdaを管理するツールLammaやってみた Rubyで書かれたlammbaというリポジトリが上がったので ruby勉強会に参加がてら触っ</description>
+      <description>AWS Lambda を管理するツール Lamma やってみた Ruby で書かれた lammba というリポジトリが上がったので ruby 勉強会に参加がてら触ってみた lamma 作業リポジトリ source 作業雑感 シンプル</description>
     </item>
     
     <item>
@@ -189,7 +198,7 @@
       <pubDate>Tue, 31 May 2016 22:41:30 +0900</pubDate>
       
       <guid>https://blog.m-iji.me/post/hugo/code-mermaid/</guid>
-      <description>code.language-mermaidを変換するスクリプトを噛ませただけだけど。 graph TD; A--&amp;gt;B; A--&amp;gt;C; B--&amp;gt;D; C--&amp;gt;D; gantt dateFormat YYYY-MM-DD title Adding GANTT diagram functionality to mermaid section A section Completed task: done, des1, 2014-01-06, 2014-01-08 Active task: active,</description>
+      <description>code.language-mermaid を変換するスクリプトを噛ませただけだけど。 graph TD; A--&amp;gt;B; A--&amp;gt;C; B--&amp;gt;D; C--&amp;gt;D; gantt dateFormat YYYY-MM-DD title Adding GANTT diagram functionality to mermaid section A section Completed task: done, des1, 2014-01-06, 2014-01-08 Active task: active, des2, 2014-01-09, 3d Future task: des3, after des2, 5d Future task2: des4, after des3, 5d section Critical tasks Completed task</description>
     </item>
     
     <item>
@@ -207,7 +216,7 @@
       <pubDate>Sat, 28 May 2016 13:48:27 +0900</pubDate>
       
       <guid>https://blog.m-iji.me/post/blog/blog-of-policy/</guid>
-      <description>コンテンツ 種別 posts技術ログ、 雑記 slides RevealJSで操作するスライド タグ note雑記 tech技術ログ meetup勉強会ログ [技術タグ]</description>
+      <description>コンテンツ 種別 posts 技術ログ、 雑記 slides RevealJS で操作するスライド タグ note 雑記 tech 技術ログ meetup 勉強会ログ [技術タグ] [勉強会タグ] ディレクトリ構造 note, meetup /[種別]</description>
     </item>
     
     <item>
@@ -216,7 +225,7 @@
       <pubDate>Fri, 27 May 2016 14:20:56 +0900</pubDate>
       
       <guid>https://blog.m-iji.me/slide/2016/05/27/my-first-slide/</guid>
-      <description>HugoでReveal JSを始める 始める 始めた &amp;lt;div&amp;gt; hello world &amp;lt;/div&amp;gt; graph TD; A--&amp;gt;B; A--&amp;gt;C; B--&amp;gt;D; C--&amp;gt;D;</description>
+      <description>Hugo で Reveal JS を始める 始める 始めた &amp;lt;div&amp;gt; hello world &amp;lt;/div&amp;gt; graph TD; A--&amp;gt;B; A--&amp;gt;C; B--&amp;gt;D; C--&amp;gt;D;</description>
     </item>
     
     <item>
@@ -234,7 +243,7 @@
       <pubDate>Thu, 26 May 2016 21:10:04 +0900</pubDate>
       
       <guid>https://blog.m-iji.me/post/2016/05/26/ci-is-difficult/</guid>
-      <description>環境が違う サービスによっては1つ前のバージョンを使っていたりする。 開発環境は最新めなことが多いので、ハマる 入れまくり ツールやパッケージやらイ</description>
+      <description>環境が違う サービスによっては 1 つ前のバージョンを使っていたりする。 開発環境は最新めなことが多いので、ハマる 入れまくり ツールやパッケージやらイ</description>
     </item>
     
     <item>
@@ -252,7 +261,7 @@
       <pubDate>Mon, 23 May 2016 22:48:11 +0900</pubDate>
       
       <guid>https://blog.m-iji.me/post/2016/05/23/github-cli/</guid>
-      <description>リポジトリをWebから作るのがめんどくさいので導入する。 https://github.com/github/hub hub create mijime.github.io ユーザ名とパスワードを入れるのはなんか嫌。</description>
+      <description>リポジトリを Web から作るのがめんどくさいので導入する。 https://github.com/github/hub hub create mijime.github.io ユーザ名とパスワードを入れるのはなんか嫌。</description>
     </item>
     
     <item>
@@ -261,7 +270,7 @@
       <pubDate>Mon, 23 May 2016 22:39:17 +0900</pubDate>
       
       <guid>https://blog.m-iji.me/post/hugo/hugo-deploy/</guid>
-      <description>master branchのみ適用されるらしいので、 生成元はcontent branch public配下はmaster branch みたいな本来の使い方ではない使い方で運用する</description>
+      <description>master branch のみ適用されるらしいので、 生成元は content branch public 配下は master branch みたいな本来の使い方ではない使い方で運用する。</description>
     </item>
     
     <item>
@@ -270,7 +279,7 @@
       <pubDate>Mon, 23 May 2016 21:56:24 +0900</pubDate>
       
       <guid>https://blog.m-iji.me/post/blog/first-blogged/</guid>
-      <description>何を書いてく。 やったネタやQiitaの下書き、外部マウンティング的な何かを行う。</description>
+      <description>何を書いてく。 やったネタや Qiita の下書き、外部マウンティング的な何かを行う。</description>
     </item>
     
   </channel>

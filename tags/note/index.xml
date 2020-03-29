@@ -17,7 +17,7 @@
       <pubDate>Sat, 28 May 2016 13:48:27 +0900</pubDate>
       
       <guid>https://blog.m-iji.me/post/blog/blog-of-policy/</guid>
-      <description>コンテンツ 種別 posts技術ログ、 雑記 slides RevealJSで操作するスライド タグ note雑記 tech技術ログ meetup勉強会ログ [技術タグ]</description>
+      <description>コンテンツ 種別 posts 技術ログ、 雑記 slides RevealJS で操作するスライド タグ note 雑記 tech 技術ログ meetup 勉強会ログ [技術タグ] [勉強会タグ] ディレクトリ構造 note, meetup /[種別]</description>
     </item>
     
     <item>
@@ -35,7 +35,7 @@
       <pubDate>Thu, 26 May 2016 21:10:04 +0900</pubDate>
       
       <guid>https://blog.m-iji.me/post/2016/05/26/ci-is-difficult/</guid>
-      <description>環境が違う サービスによっては1つ前のバージョンを使っていたりする。 開発環境は最新めなことが多いので、ハマる 入れまくり ツールやパッケージやらイ</description>
+      <description>環境が違う サービスによっては 1 つ前のバージョンを使っていたりする。 開発環境は最新めなことが多いので、ハマる 入れまくり ツールやパッケージやらイ</description>
     </item>
     
     <item>
@@ -44,7 +44,7 @@
       <pubDate>Mon, 23 May 2016 22:48:11 +0900</pubDate>
       
       <guid>https://blog.m-iji.me/post/2016/05/23/github-cli/</guid>
-      <description>リポジトリをWebから作るのがめんどくさいので導入する。 https://github.com/github/hub hub create mijime.github.io ユーザ名とパスワードを入れるのはなんか嫌。</description>
+      <description>リポジトリを Web から作るのがめんどくさいので導入する。 https://github.com/github/hub hub create mijime.github.io ユーザ名とパスワードを入れるのはなんか嫌。</description>
     </item>
     
     <item>
@@ -53,7 +53,7 @@
       <pubDate>Mon, 23 May 2016 21:56:24 +0900</pubDate>
       
       <guid>https://blog.m-iji.me/post/blog/first-blogged/</guid>
-      <description>何を書いてく。 やったネタやQiitaの下書き、外部マウンティング的な何かを行う。</description>
+      <description>何を書いてく。 やったネタや Qiita の下書き、外部マウンティング的な何かを行う。</description>
     </item>
     
   </channel>
