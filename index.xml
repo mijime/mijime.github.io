@@ -255,5 +255,14 @@
       <description>何を書いてく。 やったネタやQiitaの下書き、外部マウンティング的な何かを行う。</description>
     </item>
     
+    <item>
+      <title></title>
+      <link>https://blog.m-iji.me/post/2020-03-28/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://blog.m-iji.me/post/2020-03-28/</guid>
+      <description>Create from github</description>
+    </item>
+    
   </channel>
 </rss>
