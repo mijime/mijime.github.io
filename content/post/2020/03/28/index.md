@@ -28,3 +28,10 @@ Date: '${d.toISOString()}'
 <!--more-->`)
 document.location.href = `https://github.com/${b}?filename=${f}&value=${v}`
 ```
+
+修正は new を edit にすればよい
+
+```javascript
+u=new URL(document.location.href)
+document.location.href=`https://github.com/mijime/mijime.github.io/edit/content/content${u.pathname}index.md`"
+```
