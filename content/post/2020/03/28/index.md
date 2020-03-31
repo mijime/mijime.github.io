@@ -33,5 +33,5 @@ document.location.href = `https://github.com/${b}?filename=${f}&value=${v}`
 
 ```javascript
 u=new URL(document.location.href)
-document.location.href=`https://github.com/mijime/mijime.github.io/edit/content/content${u.pathname}index.md`"
+document.location.href=`https://github.com/mijime/mijime.github.io/edit/content/content${u.pathname}index.md`
 ```
