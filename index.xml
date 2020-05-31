@@ -6,10 +6,21 @@
     <description>Recent content on My snippets</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>ja</language>
-    <lastBuildDate>Sun, 29 Mar 2020 08:37:25 +0000</lastBuildDate>
+    <lastBuildDate>Sun, 31 May 2020 12:39:09 +0000</lastBuildDate>
     
 	<atom:link href="https://blog.m-iji.me/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>vim でカーソル直下のgit hash commitの内容を見る</title>
+      <link>https://blog.m-iji.me/post/2020/05/31/</link>
+      <pubDate>Sun, 31 May 2020 12:39:09 +0000</pubDate>
+      
+      <guid>https://blog.m-iji.me/post/2020/05/31/</guid>
+      <description>&lt;p&gt;&lt;code&gt;git rebase -i&lt;/code&gt; でいじっているときにコミットメッセージがUpdateだけだと、あれ、なんの修正だろうってなる&lt;/p&gt;
+
+&lt;p&gt;そのときにカーソル直下のhashから&lt;code&gt;git show&lt;/code&gt;したい&lt;/p&gt;</description>
+    </item>
     
     <item>
       <title>Gulpをやめた</title>
