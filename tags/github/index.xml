@@ -2,21 +2,21 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>GitHub on My snippets</title>
-    <link>https://blog.m-iji.me/tags/github/</link>
+    <link>https://mijime.github.io/tags/github/</link>
     <description>Recent content in GitHub on My snippets</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>ja</language>
     <lastBuildDate>Mon, 23 May 2016 22:48:11 +0900</lastBuildDate>
     
-	<atom:link href="https://blog.m-iji.me/tags/github/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="https://mijime.github.io/tags/github/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>introduce a GitHub cli</title>
-      <link>https://blog.m-iji.me/post/2016/05/23/github-cli/</link>
+      <link>https://mijime.github.io/post/2016/05/23/github-cli/</link>
       <pubDate>Mon, 23 May 2016 22:48:11 +0900</pubDate>
       
-      <guid>https://blog.m-iji.me/post/2016/05/23/github-cli/</guid>
+      <guid>https://mijime.github.io/post/2016/05/23/github-cli/</guid>
       <description>リポジトリを Web から作るのがめんどくさいので導入する。 https://github.com/github/hub hub create mijime.github.io ユーザ名とパスワードを入れるのはなんか嫌。</description>
     </item>
     

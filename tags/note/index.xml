@@ -2,57 +2,57 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>note on My snippets</title>
-    <link>https://blog.m-iji.me/tags/note/</link>
+    <link>https://mijime.github.io/tags/note/</link>
     <description>Recent content in note on My snippets</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>ja</language>
     <lastBuildDate>Sat, 28 May 2016 13:48:27 +0900</lastBuildDate>
     
-	<atom:link href="https://blog.m-iji.me/tags/note/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="https://mijime.github.io/tags/note/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>ブログの方針</title>
-      <link>https://blog.m-iji.me/post/blog/blog-of-policy/</link>
+      <link>https://mijime.github.io/post/blog/blog-of-policy/</link>
       <pubDate>Sat, 28 May 2016 13:48:27 +0900</pubDate>
       
-      <guid>https://blog.m-iji.me/post/blog/blog-of-policy/</guid>
+      <guid>https://mijime.github.io/post/blog/blog-of-policy/</guid>
       <description>コンテンツ 種別 posts 技術ログ、 雑記 slides RevealJS で操作するスライド タグ note 雑記 tech 技術ログ meetup 勉強会ログ [技術タグ] [勉強会タグ] ディレクトリ構造 note, meetup /[種別]</description>
     </item>
     
     <item>
       <title>背面派、前面派</title>
-      <link>https://blog.m-iji.me/post/2016/05/26/border-implement/</link>
+      <link>https://mijime.github.io/post/2016/05/26/border-implement/</link>
       <pubDate>Thu, 26 May 2016 21:13:19 +0900</pubDate>
       
-      <guid>https://blog.m-iji.me/post/2016/05/26/border-implement/</guid>
+      <guid>https://mijime.github.io/post/2016/05/26/border-implement/</guid>
       <description>アプリ側で実装する際に、サーバ側で対応するかクライアント側で対応するか、という話。 場合によりけりなのは分かっているけど、思わずクライアント側</description>
     </item>
     
     <item>
       <title>CIを始めるのが辛い</title>
-      <link>https://blog.m-iji.me/post/2016/05/26/ci-is-difficult/</link>
+      <link>https://mijime.github.io/post/2016/05/26/ci-is-difficult/</link>
       <pubDate>Thu, 26 May 2016 21:10:04 +0900</pubDate>
       
-      <guid>https://blog.m-iji.me/post/2016/05/26/ci-is-difficult/</guid>
+      <guid>https://mijime.github.io/post/2016/05/26/ci-is-difficult/</guid>
       <description>環境が違う サービスによっては 1 つ前のバージョンを使っていたりする。 開発環境は最新めなことが多いので、ハマる 入れまくり ツールやパッケージやらイ</description>
     </item>
     
     <item>
       <title>introduce a GitHub cli</title>
-      <link>https://blog.m-iji.me/post/2016/05/23/github-cli/</link>
+      <link>https://mijime.github.io/post/2016/05/23/github-cli/</link>
       <pubDate>Mon, 23 May 2016 22:48:11 +0900</pubDate>
       
-      <guid>https://blog.m-iji.me/post/2016/05/23/github-cli/</guid>
+      <guid>https://mijime.github.io/post/2016/05/23/github-cli/</guid>
       <description>リポジトリを Web から作るのがめんどくさいので導入する。 https://github.com/github/hub hub create mijime.github.io ユーザ名とパスワードを入れるのはなんか嫌。</description>
     </item>
     
     <item>
       <title>first blogged</title>
-      <link>https://blog.m-iji.me/post/blog/first-blogged/</link>
+      <link>https://mijime.github.io/post/blog/first-blogged/</link>
       <pubDate>Mon, 23 May 2016 21:56:24 +0900</pubDate>
       
-      <guid>https://blog.m-iji.me/post/blog/first-blogged/</guid>
+      <guid>https://mijime.github.io/post/blog/first-blogged/</guid>
       <description>何を書いてく。 やったネタや Qiita の下書き、外部マウンティング的な何かを行う。</description>
     </item>
     

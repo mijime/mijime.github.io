@@ -2,21 +2,21 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>kzrb on My snippets</title>
-    <link>https://blog.m-iji.me/tags/kzrb/</link>
+    <link>https://mijime.github.io/tags/kzrb/</link>
     <description>Recent content in kzrb on My snippets</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>ja</language>
     <lastBuildDate>Sat, 18 Jun 2016 13:23:05 +0900</lastBuildDate>
     
-	<atom:link href="https://blog.m-iji.me/tags/kzrb/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="https://mijime.github.io/tags/kzrb/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title> kanazawa.rb meetup 46に参加した</title>
-      <link>https://blog.m-iji.me/post/study/kanazawa.rb/2016/06/18/</link>
+      <link>https://mijime.github.io/post/study/kanazawa.rb/2016/06/18/</link>
       <pubDate>Sat, 18 Jun 2016 13:23:05 +0900</pubDate>
       
-      <guid>https://blog.m-iji.me/post/study/kanazawa.rb/2016/06/18/</guid>
+      <guid>https://mijime.github.io/post/study/kanazawa.rb/2016/06/18/</guid>
       <description>AWS Lambda を管理するツール Lamma やってみた Ruby で書かれた lammba というリポジトリが上がったので ruby 勉強会に参加がてら触ってみた lamma 作業リポジトリ source 作業雑感 シンプル</description>
     </item>
     
