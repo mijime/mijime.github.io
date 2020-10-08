@@ -17,9 +17,9 @@
       <pubDate>Sun, 31 May 2020 12:39:09 +0000</pubDate>
       
       <guid>https://mijime.github.io/post/2020/05/31/</guid>
-      <description>&lt;p&gt;&lt;code&gt;git rebase -i&lt;/code&gt; でいじっているときにコミットメッセージがUpdateだけだと、あれ、なんの修正だろうってなる&lt;/p&gt;
+      <description>&lt;p&gt;&lt;code&gt;git rebase -i&lt;/code&gt; でいじっているときにコミットメッセージが Update だけだと、あれ、なんの修正だろうってなる&lt;/p&gt;
 
-&lt;p&gt;そのときにカーソル直下のhashから&lt;code&gt;git show&lt;/code&gt;したい&lt;/p&gt;</description>
+&lt;p&gt;そのときにカーソル直下の hash から&lt;code&gt;git show&lt;/code&gt;したい&lt;/p&gt;</description>
     </item>
     
     <item>

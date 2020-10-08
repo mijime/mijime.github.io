@@ -17,9 +17,9 @@
       <pubDate>Sun, 31 May 2020 12:39:09 +0000</pubDate>
       
       <guid>https://mijime.github.io/post/2020/05/31/</guid>
-      <description>&lt;p&gt;&lt;code&gt;git rebase -i&lt;/code&gt; でいじっているときにコミットメッセージがUpdateだけだと、あれ、なんの修正だろうってなる&lt;/p&gt;
+      <description>&lt;p&gt;&lt;code&gt;git rebase -i&lt;/code&gt; でいじっているときにコミットメッセージが Update だけだと、あれ、なんの修正だろうってなる&lt;/p&gt;
 
-&lt;p&gt;そのときにカーソル直下のhashから&lt;code&gt;git show&lt;/code&gt;したい&lt;/p&gt;</description>
+&lt;p&gt;そのときにカーソル直下の hash から&lt;code&gt;git show&lt;/code&gt;したい&lt;/p&gt;</description>
     </item>
     
     <item>
@@ -245,7 +245,7 @@
       <pubDate>Fri, 27 May 2016 14:20:56 +0900</pubDate>
       
       <guid>https://mijime.github.io/slide/2016/05/27/my-first-slide/</guid>
-      <description>Hugo で Reveal JS を始める 始める 始めた &amp;lt;div&amp;gt; hello world &amp;lt;/div&amp;gt; graph TD; A--&amp;gt;B; A--&amp;gt;C; B--&amp;gt;D; C--&amp;gt;D;</description>
+      <description>Hugo で Reveal JS を始める 始める 始めた &amp;lt;div&amp;gt;hello world&amp;lt;/div&amp;gt; graph TD; A--&amp;gt;B; A--&amp;gt;C; B--&amp;gt;D; C--&amp;gt;D;</description>
     </item>
     
     <item>
