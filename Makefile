@@ -7,7 +7,7 @@ FAVICONS = static/favicon.png \
 					 static/apple-touch-icon-144-precomposed.png
 FAVICON_BASE = assets/favicon.png
 
-HUGO = assets/hugo
+HUGO = PATH=$(PATH):assets hugo
 CONTENT = $(shell find content -name "*.md")
 LAYOUT = $(shell find layouts -name "*.html")
 
