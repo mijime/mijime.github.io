@@ -9,11 +9,11 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
-      - uses: actions/setup-node@v1
+      - uses: actions/checkout@latest
+      - uses: actions/setup-node@latest
         with:
-          node-version: 12.x
-      - uses: actions/cache@v1
+          node-version: 14.x
+      - uses: actions/cache@latest
         with:
           path: ~/.npm
           key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
@@ -27,7 +27,7 @@ jobs:
       - run: git submodule update --init --recursive
       - run: make assets/hugo
       - run: make build
-      - uses: peaceiris/actions-gh-pages@v2.5.1
+      - uses: peaceiris/actions-gh-pages@latest
         env:
           ACTIONS_DEPLOY_KEY: ${{ secrets.ACTIONS_DEPLOY_KEY }}
           PUBLISH_BRANCH: master
