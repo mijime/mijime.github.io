@@ -5,9 +5,9 @@ Tags: []
 Date: '2020-05-31T12:39:09.887Z'
 ---
 
-`git rebase -i` でいじっているときにコミットメッセージがUpdateだけだと、あれ、なんの修正だろうってなる
+`git rebase -i` でいじっているときにコミットメッセージが Update だけだと、あれ、なんの修正だろうってなる
 
-そのときにカーソル直下のhashから`git show`したい
+そのときにカーソル直下の hash から`git show`したい
 
 <!--more-->
 
@@ -15,4 +15,4 @@ Date: '2020-05-31T12:39:09.887Z'
 
 `:echo system("git show ". expand("<cword>")`
 
-本当はバッファに開いてdiffのsyntaxを当てたい。。。
+本当はバッファに開いて diff の syntax を当てたい。。。

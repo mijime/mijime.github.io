@@ -11,9 +11,7 @@ Tags: ['hugo']
 
 ```html
 {{- range (.Paginator 10).Pages }}
-<div>
-  {{ .Content }}
-</div>
+<div>{{ .Content }}</div>
 {{- end }}
 ```
 
