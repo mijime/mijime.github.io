@@ -1,7 +1,7 @@
 HUGO_VERSION = 0.59.1
 HUGO_OS = Linux
 REPO = $(shell git config remote.origin.url)
-BRANCH = master
+BRANCH = gh-pages
 PUBLIC = public
 FAVICONS = static/favicon.png \
 					 static/apple-touch-icon-144-precomposed.png
