@@ -4,7 +4,7 @@ name: Github page CI
 on:
   push:
     branches:
-      - content
+      - master
 jobs:
   build:
     runs-on: ubuntu-latest
