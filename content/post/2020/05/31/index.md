@@ -13,6 +13,6 @@ Date: '2020-05-31T12:39:09.887Z'
 
 `expand("<cword>")` で取れる。
 
-`:echo system("git show ". expand("<cword>")`
+`:echo system("git show ". expand("<cword>"))`
 
 本当はバッファに開いて diff の syntax を当てたい。。。
