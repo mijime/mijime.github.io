@@ -20,11 +20,8 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-node-
       - run: npm ci
-      - run: git submodule sync
-      - run: git submodule update --init --recursive
-      - run: make assets/hugo
-      - run: make build
+      - run: npm run build
       - uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./public
+          publish_dir: ./out
