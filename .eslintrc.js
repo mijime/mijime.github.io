@@ -1,21 +1,30 @@
 module.exports = {
-  env: {
-    browser: true,
-    es6: true
-  },
-  extends: 'standard',
-  globals: {
-    Atomics: 'readonly',
-    SharedArrayBuffer: 'readonly',
-    Reveal: 'readonly',
-    marked: 'readonly',
-    hljs: 'readonly'
-  },
+  env: { browser: true, es2021: true },
+  extends: [
+    'plugin:react/recommended',
+    'plugin:mdx/recommended',
+    'standard',
+    'prettier'
+  ],
+  plugins: ['react', '@typescript-eslint'],
+  overrides: [
+    {
+      files: ['*.mdx'],
+      extends: ['plugin:mdx/overrides']
+    }
+  ],
+  parser: '@typescript-eslint/parser',
   parserOptions: {
-    ecmaVersion: 2018,
+    ecmaFeatures: { jsx: true },
+    ecmaVersion: 12,
     sourceType: 'module'
   },
   rules: {
-    'space-before-function-paren': ['error', 'never']
+    'react/react-in-jsx-scope': 'off'
+  },
+  settings: {
+    react: {
+      version: 'detected'
+    }
   }
 }
