@@ -17,7 +17,7 @@ Date: '2019-02-28T01:49:54+09:00'
 
 3. `<C-]>` などの key mapping を設定する
 
-```vimrc
+```vim
 " ...
 Plug 'prabirshrestha/async.vim'
 Plug 'prabirshrestha/vim-lsp'
