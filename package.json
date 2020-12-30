@@ -4,15 +4,12 @@
   "description": "mijime.github.io",
   "main": "index.js",
   "scripts": {
-    "build": "npm run build:js && npm run build:css",
-    "test": "npm run lint:js && npm run lint:css && npm run lint:md",
-    "similarity": "babel-node source/js/similarity",
-    "build:js": "webpack",
-    "build:css": "postcss source/css --dir static/css",
-    "lint:js": "eslint source/js",
-    "lint:css": "stylelint source/css",
-    "lint:md": "textlint content",
-    "format": "prettier --write *.js source/**/*.{js,css} content/**/*.md"
+    "dev": "next dev",
+    "build": "next build && next export",
+    "test": "npm run lint:js && npm run lint:md",
+    "lint:js": "eslint {lib,layouts,components,pages}/**/*.ts{x,}",
+    "lint:md": "textlint pages/post",
+    "format": "prettier --write *.js {styles,components,layouts,pages}/**/*.{md,tsx,css}"
   },
   "repository": {
     "type": "git",
@@ -26,32 +23,38 @@
   },
   "homepage": "https://github.com/mijime/mijime.github.io#readme",
   "devDependencies": {
-    "@babel/cli": "^7.12.1",
-    "@babel/core": "^7.12.1",
-    "@babel/preset-env": "^7.12.1",
-    "@babel/register": "^7.12.1",
-    "babel-eslint": "^10.1.0",
-    "babel-loader": "^8.1.0",
+    "@types/node": "^14.14.16",
+    "@types/react": "^17.0.0",
+    "@typescript-eslint/eslint-plugin": "^4.11.1",
+    "@typescript-eslint/parser": "^4.11.1",
+    "autoprefixer": "^10.1.0",
     "cssnano": "^4.1.10",
-    "eslint": "^7.11.0",
-    "eslint-config-standard": "^14.1.1",
+    "eslint": "^7.16.0",
+    "eslint-config-prettier": "^7.1.0",
+    "eslint-config-standard": "^16.0.2",
     "eslint-plugin-import": "^2.22.1",
+    "eslint-plugin-mdx": "^1.8.2",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-promise": "^4.2.1",
-    "eslint-plugin-standard": "^4.0.1",
-    "kuromojin": "^2.0.0",
-    "postcss-cli": "^8.1.0",
+    "eslint-plugin-react": "^7.22.0",
+    "eslint-plugin-standard": "^5.0.0",
+    "kuromojin": "^2.1.1",
+    "next-mdx-enhanced": "^5.0.0",
     "postcss-preset-env": "^6.7.0",
-    "prettier": "^2.1.2",
-    "stylelint": "^13.7.2",
-    "stylelint-config-standard": "^20.0.0",
-    "textlint": "^11.7.6",
+    "prettier": "^2.2.1",
+    "remark-highlight.js": "^6.0.0",
+    "textlint": "^11.7.7",
     "textlint-rule-preset-japanese": "^5.0.0",
     "textlint-rule-preset-jtf-style": "^2.3.6",
-    "webpack": "^5.1.2",
-    "webpack-cli": "^4.0.0"
+    "typescript": "^4.1.3"
   },
   "browserslist": [
     "last 2 versions"
-  ]
+  ],
+  "dependencies": {
+    "bulma": "^0.9.1",
+    "highlight.js": "^10.5.0",
+    "next": "^10.0.4",
+    "tailwindcss": "^2.0.2"
+  }
 }
