@@ -1,0 +1,1 @@
+{"pageProps":{"posts":[{"slug":"2016/05/23/github-cli","content":"\nリポジトリを Web から作るのがめんどくさいので導入する。\n\nhttps://github.com/github/hub\n\n`hub create mijime.github.io`\n\nユーザ名とパスワードを入れるのはなんか嫌。\n","title":"introduce a GitHub cli","description":"","date":"2016-05-23T22:48:11+09:00","tags":["note","github"],"draft":false}],"postCount":1,"page":1,"tagName":"github"},"__N_SSG":true}
