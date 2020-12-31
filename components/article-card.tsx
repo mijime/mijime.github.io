@@ -1,18 +1,13 @@
 import { PropsWithChildren } from 'react'
 import Link from 'next/link'
-
-type ArticleCardProps = {
-  title: string
-  date: Date
-  tags: string[]
-}
+import { PostData } from '@/lib/posts'
 
 export default function ArticleCard({
   title,
   date,
   tags = [],
   children
-}: PropsWithChildren<ArticleCardProps>) {
+}: PropsWithChildren<PostData>) {
   return (
     <div className="article card">
       <div className="card-content">
