@@ -3,13 +3,15 @@ import * as path from 'path'
 import matter from 'gray-matter'
 import { buildMetadataByFrontMatter } from '@/lib/markdown'
 
+type ISODateFormat = string
+
 export type PostData = {
   slug: string
   content: string
   title: string
   description: string
   tags: string[]
-  date: Date
+  date: ISODateFormat
   draft: boolean
 }
 
@@ -49,6 +51,7 @@ async function fetchPostFromFile(filename: string): Promise<PostData> {
     ...metadata,
     slug,
     content,
+    date: new Date(metadata.date).toISOString(),
     tags: metadata.tags.map((tag: string) => tag.toLowerCase())
   }
 }
