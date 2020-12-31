@@ -12,30 +12,67 @@ export default function Pagenation({
   page,
   itemCount
 }: PagenationProps) {
-  const hasNext = page * PAGE_SIZE < itemCount
-  const hasPrev = page !== 1
+  const prevPage = page - 1
+  const nextPage = page + 1
+  const firstPage = 1
+  const lastPage = Math.ceil(itemCount / PAGE_SIZE)
   return (
-    <div className="columns">
-      {[
-        hasPrev ? (
-          <span className="column">
-            <Link key="prev" href={`${linkPrefix}/${page - 1}`}>
-              Prev
+    <nav className="pagination is-centered pt-4" role="navigation">
+      <ul className="pagination-list">
+        {page !== firstPage ? (
+          <li>
+            <Link href={`${linkPrefix}/${firstPage}`}>
+              <span className="pagination-link">{firstPage}</span>
             </Link>
-          </span>
+          </li>
         ) : (
           <></>
-        ),
-        hasNext ? (
-          <span className="column is-right has-text-right">
-            <Link key="next" href={`${linkPrefix}/${page + 1}`}>
-              Next
-            </Link>
-          </span>
+        )}
+        {page - firstPage > 2 ? (
+          <li>
+            <span className="pagination-ellipsis">&hellip;</span>
+          </li>
         ) : (
           <></>
-        )
-      ]}
-    </div>
+        )}
+        {page - firstPage > 1 ? (
+          <li>
+            <Link href={`${linkPrefix}/${prevPage}`}>
+              <span className="pagination-link">{prevPage}</span>
+            </Link>
+          </li>
+        ) : (
+          <></>
+        )}
+        <li>
+          <span className="pagination-link is-current">{page}</span>
+        </li>
+        {lastPage - page > 1 ? (
+          <li>
+            <Link href={`${linkPrefix}/${nextPage}`}>
+              <span className="pagination-link">{nextPage}</span>
+            </Link>
+          </li>
+        ) : (
+          <></>
+        )}
+        {lastPage - page > 2 ? (
+          <li>
+            <span className="pagination-ellipsis">&hellip;</span>
+          </li>
+        ) : (
+          <></>
+        )}
+        {lastPage !== page ? (
+          <li>
+            <Link href={`${linkPrefix}/${lastPage}`}>
+              <span className="pagination-link">{lastPage}</span>
+            </Link>
+          </li>
+        ) : (
+          <></>
+        )}
+      </ul>
+    </nav>
   )
 }
