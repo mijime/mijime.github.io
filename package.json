@@ -9,7 +9,7 @@
     "test": "npm run lint:js && npm run lint:md",
     "lint:js": "eslint {lib,layouts,components,pages}/**/*.{ts,tsx}",
     "lint:md": "textlint pages/post",
-    "format": "prettier --write *.{js,ts} {lib,layouts,components,pages,styles}/**/*.{ts,tsx,md,mdx,css}"
+    "format": "prettier --write *.{js,ts} .github/**/*.{md,yml,yaml} {lib,layouts,components,pages,styles}/**/*.{ts,tsx,md,mdx,css}"
   },
   "repository": {
     "type": "git",
