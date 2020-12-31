@@ -1,5 +1,4 @@
-// eslint-disable-next-line no-unused-vars
-export function buildMetadataByFrontMatter(data: { [key in string]: any }) {
+export function buildMetadataByFrontMatter(data: { [key: string]: any }) {
   return {
     title: data.title || data.Title || '',
     description: data.description || data.Description || '',
