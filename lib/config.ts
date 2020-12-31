@@ -1,3 +1,4 @@
+export const LANG = 'ja'
 export const SITE_NAME = 'My snippets'
 export const PAGE_SIZE = 5
 export const GA_TRACKING_ID = 'UA-46554348-4'

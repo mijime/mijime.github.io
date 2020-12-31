@@ -1,11 +1,11 @@
 import Document, { Html, Head, Main, NextScript } from 'next/document'
 import DefaultLayout from '@/layouts/default'
-import { GA_TRACKING_ID, SITE_VERIFICATION } from '@/lib/config'
+import { LANG, GA_TRACKING_ID, SITE_VERIFICATION } from '@/lib/config'
 
 export default class RootDocument extends Document {
   render() {
     return (
-      <Html lang="ja">
+      <Html lang={LANG}>
         <Head>
           <link rel="icon" href="/favicon.png" />
           <meta name="google-site-verification" content={SITE_VERIFICATION} />
