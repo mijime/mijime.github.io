@@ -51,8 +51,6 @@ async function fetchPostFromFile(filename: string): Promise<PostData> {
     ...metadata,
     slug,
     content,
-    date: new Date(metadata.date).toISOString(),
-    tags: metadata.tags.map((tag: string) => tag.toLowerCase())
   }
 }
 
