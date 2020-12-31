@@ -11,5 +11,17 @@ module.exports = withMdxEnhanced({
   },
   reExportDataFetching: false
 })({
-  trailingSlash: true
+  trailingSlash: true,
+  webpack(config, { isServer }) {
+    if (isServer) {
+      require('ts-node/register')
+      require('tsconfig-paths/register')
+      const { generateSitemap } = require('./scripts/generate-sitemap')
+
+      generateSitemap('public/sitemap.xml')
+        .then(() => console.log('generateSitemap::succeed'))
+        .catch(err => console.log('generateSitemap::failed', err))
+    }
+    return config
+  }
 })
