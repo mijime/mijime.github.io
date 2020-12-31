@@ -46,9 +46,9 @@ async function fetchPostFromFile(filename: string): Promise<PostData> {
   const metadata = buildMetadataByFrontMatter(data)
 
   return {
+    ...metadata,
     slug,
     content,
-    ...metadata,
     tags: metadata.tags.map((tag: string) => tag.toLowerCase())
   }
 }
@@ -77,7 +77,6 @@ export async function fetchAllTags() {
   const countByTagNames = posts
     .map(post => post.tags)
     .flat()
-    .map(x => x.toLowerCase())
     .reduce((acc: Map<string, number>, tag: string) => {
       acc.set(
         tag,
@@ -93,7 +92,5 @@ export async function fetchAllTags() {
 
 export async function fetchPostsByTag(tagName: string) {
   const posts = await fetchAllPosts()
-  return posts.filter(post =>
-    post.tags.map(x => x.toLowerCase()).includes(tagName)
-  )
+  return posts.filter(post => post.tags.includes(tagName))
 }
