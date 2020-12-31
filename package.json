@@ -23,6 +23,7 @@
   },
   "homepage": "https://github.com/mijime/mijime.github.io#readme",
   "devDependencies": {
+    "@types/gtag.js": "^0.0.4",
     "@types/node": "^14.14.17",
     "@types/nprogress": "^0.2.0",
     "@types/react": "^17.0.0",
