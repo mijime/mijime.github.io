@@ -29,7 +29,7 @@ export default function ArticleCard({
             </div>
           </div>
         </div>
-        <div className="content article-body">{children}</div>
+        <div className="content article-body pt-8">{children}</div>
       </div>
     </div>
   )
