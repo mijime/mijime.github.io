@@ -2,7 +2,6 @@
 out/
 gh-pages*
 *.lock
-public/
 static/css
 static/js
 
