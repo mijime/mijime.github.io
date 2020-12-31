@@ -21,6 +21,10 @@ export default function IndexLayout({
         </title>
       </Head>
       <ArticleCard
+        slug=""
+        content=""
+        description={metadata.description}
+        draft={metadata.draft}
         title={metadata.title}
         date={metadata.date}
         tags={metadata.tags.map((tag: string) => tag.toLowerCase())}
