@@ -20,15 +20,7 @@ export default function IndexLayout({
           {metadata.title} | {SITE_NAME}
         </title>
       </Head>
-      <ArticleCard
-        slug=""
-        content=""
-        description={metadata.description}
-        draft={metadata.draft}
-        title={metadata.title}
-        date={metadata.date}
-        tags={metadata.tags.map((tag: string) => tag.toLowerCase())}
-      >
+      <ArticleCard {...metadata} slug="" content="">
         {children}
       </ArticleCard>
     </>
