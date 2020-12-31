@@ -1,9 +1,6 @@
 module.exports = {
-  future: {
-    // removeDeprecatedGapUtilities: true,
-    // purgeLayersByDefault: true,
-  },
-  purge: ['./pages/**/*.tsx'],
+  purge: ['./layouts/**/*.tsx', './components/**/*.tsx', './pages/**/*.tsx'],
+  darkMode: 'media',
   theme: {
     extend: {}
   },
