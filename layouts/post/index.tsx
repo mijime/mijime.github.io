@@ -23,7 +23,7 @@ export default function IndexLayout({
       <ArticleCard
         title={metadata.title}
         date={metadata.date}
-        tags={metadata.tags}
+        tags={metadata.tags.map((tag: string) => tag.toLowerCase())}
       >
         {children}
       </ArticleCard>
