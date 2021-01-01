@@ -7,7 +7,7 @@ import ArticleCard from '@/components/article-card'
 import ArticleList from '@/components/article-list'
 import Pagination from '@/components/pagination'
 
-interface IndexProps {
+type IndexProps = {
   posts: PostData[]
   postCount: number
 }
