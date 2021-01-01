@@ -1,8 +1,11 @@
 import { PropsWithChildren } from 'react'
-import { PostData } from '@/lib/posts'
 import TagList from '@/components/tag-list'
 
-type ArticleCardProps = PostData
+type ArticleCardProps = {
+  title: string
+  date: string
+  tags: string[]
+}
 
 export default function ArticleCard({
   title,
