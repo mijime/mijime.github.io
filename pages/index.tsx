@@ -25,7 +25,12 @@ export default function Index({ posts, postCount }: IndexProps) {
         </ArticleCard>
       </div>
       <ArticleList posts={posts.slice(1)} />
-      <Pagination linkPrefix="/posts" page={1} itemCount={postCount} />
+      <Pagination
+        linkPrefix="/posts"
+        itemCount={postCount}
+        page={1}
+        pageSize={PAGE_SIZE}
+      />
     </>
   )
 }

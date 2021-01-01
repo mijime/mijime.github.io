@@ -24,7 +24,12 @@ export default function PostsByPage({
         </title>
       </Head>
       <ArticleList posts={posts} />
-      <Pagination linkPrefix="/posts" page={page} itemCount={postCount} />
+      <Pagination
+        linkPrefix="/posts"
+        itemCount={postCount}
+        page={page}
+        pageSize={PAGE_SIZE}
+      />
     </>
   )
 }

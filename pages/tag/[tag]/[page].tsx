@@ -28,8 +28,9 @@ export default function PostsByTagAndPage({
       <ArticleList posts={posts} />
       <Pagination
         linkPrefix={`/tag/${tagName}`}
-        page={page}
         itemCount={postCount}
+        page={page}
+        pageSize={PAGE_SIZE}
       />
     </>
   )
