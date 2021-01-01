@@ -5,7 +5,7 @@ import { SITE_NAME, PAGE_SIZE } from '@/lib/config'
 import { fetchAllPosts, PostData } from '@/lib/posts'
 import ArticleCard from '@/components/article-card'
 import ArticleList from '@/components/article-list'
-import Pagenation from '@/components/pagenation'
+import Pagination from '@/components/pagination'
 
 interface IndexProps {
   posts: PostData[]
@@ -25,7 +25,7 @@ export default function Index({ posts, postCount }: IndexProps) {
         </ArticleCard>
       </div>
       <ArticleList posts={posts.slice(1)} />
-      <Pagenation linkPrefix="/posts" page={1} itemCount={postCount} />
+      <Pagination linkPrefix="/posts" page={1} itemCount={postCount} />
     </>
   )
 }
