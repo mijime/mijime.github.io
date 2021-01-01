@@ -21,9 +21,9 @@ export default function Pagenation({
       <ul className="pagination-list">
         {page !== firstPage ? (
           <li>
-            <Link href={`${linkPrefix}/${firstPage}`}>
-              <span className="pagination-link">{firstPage}</span>
-            </Link>
+            <span className="pagination-link">
+              <Link href={`${linkPrefix}/${firstPage}`}>{'' + firstPage}</Link>
+            </span>
           </li>
         ) : (
           <></>
@@ -37,9 +37,9 @@ export default function Pagenation({
         )}
         {page - firstPage > 1 ? (
           <li>
-            <Link href={`${linkPrefix}/${prevPage}`}>
-              <span className="pagination-link">{prevPage}</span>
-            </Link>
+            <span className="pagination-link">
+              <Link href={`${linkPrefix}/${prevPage}`}>{'' + prevPage}</Link>
+            </span>
           </li>
         ) : (
           <></>
@@ -49,9 +49,9 @@ export default function Pagenation({
         </li>
         {lastPage - page > 1 ? (
           <li>
-            <Link href={`${linkPrefix}/${nextPage}`}>
-              <span className="pagination-link">{nextPage}</span>
-            </Link>
+            <span className="pagination-link">
+              <Link href={`${linkPrefix}/${nextPage}`}>{'' + nextPage}</Link>
+            </span>
           </li>
         ) : (
           <></>
@@ -65,9 +65,9 @@ export default function Pagenation({
         )}
         {lastPage !== page ? (
           <li>
-            <Link href={`${linkPrefix}/${lastPage}`}>
-              <span className="pagination-link">{lastPage}</span>
-            </Link>
+            <span className="pagination-link">
+              <Link href={`${linkPrefix}/${lastPage}`}>{'' + lastPage}</Link>
+            </span>
           </li>
         ) : (
           <></>
