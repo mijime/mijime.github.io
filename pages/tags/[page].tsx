@@ -17,7 +17,7 @@ export default function TagsByPage({
   hasPrev,
   hasNext
 }: TagsByPageProps) {
-  const pagenation = [
+  const pagination = [
     hasPrev ? <Link href={`/tags/${page - 1}`}> Prev </Link> : [],
     hasNext ? <Link href={`/tags/${page + 1}`}> Next </Link> : []
   ]
@@ -31,7 +31,7 @@ export default function TagsByPage({
       {tags.map(({ name, count }) => (
         <Link key={name} href={`/tag/${name}/1`}>{`${name} (${count})`}</Link>
       ))}
-      {pagenation}
+      {pagination}
     </>
   )
 }
