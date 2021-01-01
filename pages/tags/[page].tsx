@@ -25,7 +25,7 @@ export default function TagsByPage({
     <>
       <Head>
         <title>
-          {page} | {SITE_NAME}
+          Tags {page} | {SITE_NAME}
         </title>
       </Head>
       {tags.map(({ name, count }) => (
