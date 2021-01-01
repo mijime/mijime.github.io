@@ -1,8 +1,12 @@
 import Link from 'next/link'
-import { PostData } from '@/lib/posts'
 import TagList from '@/components/tag-list'
 
-type ArticleListItemProps = PostData
+export type ArticleListItemProps = {
+  title: string
+  slug: string
+  date: string
+  tags: string[]
+}
 
 export default function ArticleListItem({
   title,

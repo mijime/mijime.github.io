@@ -20,9 +20,7 @@ export default function IndexLayout({
           {metadata.title} | {SITE_NAME}
         </title>
       </Head>
-      <ArticleCard {...metadata} slug="" content="">
-        {children}
-      </ArticleCard>
+      <ArticleCard {...metadata}>{children}</ArticleCard>
     </>
   )
 }
