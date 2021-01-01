@@ -50,7 +50,7 @@ export const getStaticProps: GetStaticProps<TagsByPageProps> = async function ({
   params
 }) {
   const allTags = await fetchAllTags()
-  const page: number = Number(params?.page)
+  const page: number = Number(params?.tagPage)
   const tags = allTags.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
   const hasNext = page * PAGE_SIZE < allTags.length
   const hasPrev = page !== 1

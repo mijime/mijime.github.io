@@ -48,7 +48,7 @@ export const getStaticProps: GetStaticProps<PostsByPageProps> = async function (
   params
 }) {
   const allPosts = await fetchAllPosts()
-  const page: number = Number(params?.page)
+  const page: number = Number(params?.postPage)
   const posts = allPosts.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
   const postCount = allPosts.length
 
