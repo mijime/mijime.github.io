@@ -24,7 +24,12 @@ export default function PostsByPage({
         </title>
       </Head>
       <ArticleList posts={posts} />
-      <Pagination linkPrefix="/posts" page={page} itemCount={postCount} />
+      <Pagination
+        linkPrefix="/posts"
+        itemCount={postCount}
+        page={page}
+        pageSize={PAGE_SIZE}
+      />
     </>
   )
 }
@@ -43,7 +48,7 @@ export const getStaticProps: GetStaticProps<PostsByPageProps> = async function (
   params
 }) {
   const allPosts = await fetchAllPosts()
-  const page: number = Number(params?.page)
+  const page: number = Number(params?.postPage)
   const posts = allPosts.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
   const postCount = allPosts.length
 
