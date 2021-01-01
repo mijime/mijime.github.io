@@ -3,7 +3,7 @@ import Head from 'next/head'
 import { SITE_NAME, PAGE_SIZE } from '@/lib/config'
 import { fetchAllTags, fetchPostsByTag, PostData } from '@/lib/posts'
 import ArticleList from '@/components/article-list'
-import Pagenation from '@/components/pagenation'
+import Pagination from '@/components/pagination'
 
 type PostsByTagAndPageProps = {
   posts: PostData[]
@@ -26,7 +26,7 @@ export default function PostsByTagAndPage({
         </title>
       </Head>
       <ArticleList posts={posts} />
-      <Pagenation
+      <Pagination
         linkPrefix={`/tag/${tagName}`}
         page={page}
         itemCount={postCount}

@@ -1,17 +1,17 @@
 import Link from 'next/link'
 import { PAGE_SIZE } from '@/lib/config'
 
-interface PagenationProps {
+interface PaginationProps {
   linkPrefix: string
   itemCount: number
   page: number
 }
 
-export default function Pagenation({
+export default function Pagination({
   linkPrefix,
   page,
   itemCount
-}: PagenationProps) {
+}: PaginationProps) {
   const prevPage = page - 1
   const nextPage = page + 1
   const firstPage = 1
