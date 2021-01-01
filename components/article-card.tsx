@@ -2,12 +2,14 @@ import { PropsWithChildren } from 'react'
 import { PostData } from '@/lib/posts'
 import TagList from '@/components/tag-list'
 
+type ArticleCardProps = PostData
+
 export default function ArticleCard({
   title,
   date,
   tags = [],
   children
-}: PropsWithChildren<PostData>) {
+}: PropsWithChildren<ArticleCardProps>) {
   return (
     <div className="article card">
       <div className="card-content">
