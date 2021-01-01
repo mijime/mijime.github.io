@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { PAGE_SIZE } from '@/lib/config'
 
-interface PaginationProps {
+type PaginationProps = {
   linkPrefix: string
   itemCount: number
   page: number
