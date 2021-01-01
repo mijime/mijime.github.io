@@ -12,8 +12,8 @@ module.exports = withMdxEnhanced({
   reExportDataFetching: false
 })({
   trailingSlash: true,
-  webpack(config, { isServer }) {
-    if (isServer) {
+  webpack(config, { isServer, dev }) {
+    if (isServer && !dev) {
       require('ts-node/register')
       require('tsconfig-paths/register')
       const { generateSitemap } = require('./scripts/generate-sitemap')
