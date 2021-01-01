@@ -20,7 +20,7 @@ export default function PostsByPage({
     <>
       <Head>
         <title>
-          {page} | {SITE_NAME}
+          Posts: {page} | {SITE_NAME}
         </title>
       </Head>
       <ArticleList posts={posts} />
