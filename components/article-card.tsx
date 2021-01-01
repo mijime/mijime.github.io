@@ -1,5 +1,4 @@
 import { PropsWithChildren } from 'react'
-import Link from 'next/link'
 import { PostData } from '@/lib/posts'
 import TagList from '@/components/tag-list'
 
