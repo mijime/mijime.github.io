@@ -13,9 +13,11 @@ jobs:
           node-version: 15.x
       - uses: actions/cache@v2
         with:
-          path: ~/.npm
+          path: |
+            ~/.npm
+            ${{ github.workspace }}/node_modules
+            ${{ github.workspace }}/.next/cache
           key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-
       - run: npm install && npm prune
       - run: npm test
+      - run: npm run build

@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "dev": "next dev",
-    "build": "next build && next export",
+    "build": "next build",
+    "export": "next export",
     "test": "tsc && npm run lint:js && npm run lint:md",
     "lint:js": "eslint {lib,layouts,components,pages}/**/*.{ts,tsx}",
     "lint:md": "textlint pages/post",
