@@ -1,26 +1,31 @@
 import { GetStaticPaths, GetStaticProps } from 'next'
 import Head from 'next/head'
-import Link from 'next/link'
 import { SITE_NAME, PAGE_SIZE } from '@/lib/config'
 import { fetchAllTags } from '@/lib/posts'
+import Pagination from '@/components/pagination'
+import Tag from '@/components/tag'
+
+type TagCountProps = {
+  tag: string
+  count: number
+}
+
+function TagCount({ tag, count }: TagCountProps) {
+  return (
+    <div className="tags level-item has-addons is-right">
+      <Tag tag={tag} />
+      <span className="tag is-rounded">{count}</span>
+    </div>
+  )
+}
 
 type TagsByPageProps = {
   tags: Array<{ name: string; count: number }>
+  tagCount: number
   page: number
-  hasPrev: boolean
-  hasNext: boolean
 }
 
-export default function TagsByPage({
-  tags,
-  page,
-  hasPrev,
-  hasNext
-}: TagsByPageProps) {
-  const pagination = [
-    hasPrev ? <Link href={`/tags/${page - 1}`}> Prev </Link> : [],
-    hasNext ? <Link href={`/tags/${page + 1}`}> Next </Link> : []
-  ]
+export default function TagsByPage({ tags, tagCount, page }: TagsByPageProps) {
   return (
     <>
       <Head>
@@ -28,10 +33,17 @@ export default function TagsByPage({
           Tags {page} | {SITE_NAME}
         </title>
       </Head>
-      {tags.map(({ name, count }) => (
-        <Link key={name} href={`/tag/${name}/1`}>{`${name} (${count})`}</Link>
-      ))}
-      {pagination}
+      <div className="block">
+        {tags.map(({ name, count }) => (
+          <TagCount key={name} tag={name} count={count} />
+        ))}
+      </div>
+      <Pagination
+        linkPrefix="/tags"
+        itemCount={tagCount}
+        page={page}
+        pageSize={PAGE_SIZE}
+      />
     </>
   )
 }
@@ -52,10 +64,9 @@ export const getStaticProps: GetStaticProps<TagsByPageProps> = async function ({
   const allTags = await fetchAllTags()
   const page: number = Number(params?.tagPage)
   const tags = allTags.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
-  const hasNext = page * PAGE_SIZE < allTags.length
-  const hasPrev = page !== 1
+  const tagCount = allTags.length
 
   return {
-    props: { tags, page, hasPrev, hasNext }
+    props: { tags, tagCount, page }
   }
 }
