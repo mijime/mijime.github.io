@@ -1,14 +1,14 @@
-import { PropsWithChildren } from 'react'
 import Link from 'next/link'
 import { PostData } from '@/lib/posts'
+
+type ArticleListItemProps = PostData
 
 export default function ArticleListItem({
   title,
   slug,
   date,
-  tags = [],
-  children
-}: PropsWithChildren<PostData>) {
+  tags = []
+}: ArticleListItemProps) {
   return (
     <div className="block card">
       <div className="card-content is-small">
