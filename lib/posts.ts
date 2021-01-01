@@ -88,7 +88,15 @@ export async function fetchAllTags() {
 
   return Array.from(countByTagNames.entries())
     .map(([name, count]) => ({ name, count }))
-    .sort((curr, next) => (curr.count > next.count ? -1 : 1))
+    .sort((curr, next) =>
+      curr.count !== next.count
+        ? curr.count > next.count
+          ? -1
+          : 1
+        : curr.name[0] < next.name[0]
+        ? -1
+        : 1
+    )
 }
 
 export async function fetchPostsByTag(tagName: string) {
