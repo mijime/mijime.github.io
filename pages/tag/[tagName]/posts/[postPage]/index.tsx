@@ -27,9 +27,10 @@ export default function PostsByTagAndPage({
       </Head>
       <ArticleList posts={posts} />
       <Pagination
-        linkPrefix={`/tag/${tagName}`}
-        page={page}
+        linkPrefix={`/tag/${tagName}/posts`}
         itemCount={postCount}
+        page={page}
+        pageSize={PAGE_SIZE}
       />
     </>
   )
@@ -42,7 +43,7 @@ export const getStaticPaths: GetStaticPaths = async function (context) {
     paths: allTags
       .map(({ name, count }) =>
         [...Array(Math.ceil(count / PAGE_SIZE)).keys()].map(
-          page => `/tag/${name}/${page + 1}`
+          page => `/tag/${name}/posts/${page + 1}`
         )
       )
       .flat(),
@@ -53,8 +54,8 @@ export const getStaticPaths: GetStaticPaths = async function (context) {
 export const getStaticProps: GetStaticProps<PostsByTagAndPageProps> = async function ({
   params
 }) {
-  const tagName = String(params?.tag as string)
-  const page = Number(params?.page as string)
+  const tagName = String(params?.tagName as string)
+  const page = Number(params?.postPage as string)
 
   const postsByTag = await fetchPostsByTag(tagName)
   const posts = postsByTag.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
