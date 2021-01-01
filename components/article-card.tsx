@@ -1,6 +1,7 @@
 import { PropsWithChildren } from 'react'
 import Link from 'next/link'
 import { PostData } from '@/lib/posts'
+import TagList from '@/components/tag-list'
 
 export default function ArticleCard({
   title,
@@ -14,14 +15,7 @@ export default function ArticleCard({
         <div className="article-title">
           <div className="has-text-centered">
             <p className="title">{title}</p>
-            <div className="tags level-item has-addons">
-              {tags.map((tag: string) => (
-                <span key={tag} className="tag is-rounded is-info">
-                  <Link href={`/tag/${tag}/1`}>{tag}</Link>
-                </span>
-              ))}
-              <span className="tag is-rounded">{date}</span>
-            </div>
+            <TagList tags={tags} date={date} />
           </div>
         </div>
         <div className="content article-body pt-8">{children}</div>
