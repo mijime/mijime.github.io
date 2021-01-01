@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "next dev",
+    "start": "next start",
     "build": "next build",
     "export": "next export",
     "test": "tsc && npm run lint:js && npm run lint:md",
