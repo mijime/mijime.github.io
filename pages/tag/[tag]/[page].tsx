@@ -22,7 +22,7 @@ export default function PostsByTagAndPage({
     <>
       <Head>
         <title>
-          {tagName} | {SITE_NAME}
+          Tag {tagName}: {page} | {SITE_NAME}
         </title>
       </Head>
       <ArticleList posts={posts} />
