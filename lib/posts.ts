@@ -50,7 +50,7 @@ async function fetchPostFromFile(filename: string): Promise<PostData> {
   return {
     ...metadata,
     slug,
-    content,
+    content
   }
 }
 

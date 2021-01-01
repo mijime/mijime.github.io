@@ -7,7 +7,7 @@ import ArticleCard from '@/components/article-card'
 import ArticleList from '@/components/article-list'
 import Pagination from '@/components/pagination'
 
-interface IndexProps {
+type IndexProps = {
   posts: PostData[]
   postCount: number
 }
@@ -19,7 +19,7 @@ export default function Index({ posts, postCount }: IndexProps) {
       <div className="block">
         <ArticleCard {...posts[0]}>
           <p className="message">{posts[0].content.slice(0, 100)}</p>
-          <p className="has-text-right">
+          <p>
             <Link href={`/post/${posts[0].slug}`}>Read more</Link>
           </p>
         </ArticleCard>
