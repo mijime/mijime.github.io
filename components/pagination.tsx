@@ -1,21 +1,22 @@
 import Link from 'next/link'
-import { PAGE_SIZE } from '@/lib/config'
 
 type PaginationProps = {
   linkPrefix: string
   itemCount: number
   page: number
+  pageSize: number
 }
 
 export default function Pagination({
   linkPrefix,
+  itemCount,
   page,
-  itemCount
+  pageSize
 }: PaginationProps) {
   const prevPage = page - 1
   const nextPage = page + 1
   const firstPage = 1
-  const lastPage = Math.ceil(itemCount / PAGE_SIZE)
+  const lastPage = Math.ceil(itemCount / pageSize)
   return (
     <nav className="pagination is-centered pt-4" role="navigation">
       <ul className="pagination-list">
