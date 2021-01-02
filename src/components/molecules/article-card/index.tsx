@@ -1,5 +1,6 @@
 import { PropsWithChildren } from 'react'
 import Link from 'next/link'
+import Card from '@/components/atoms/card/'
 import TagList from '@/components/molecules/tag-list/'
 
 type ArticleCardProps = {
@@ -17,22 +18,12 @@ export default function ArticleCard({
   children
 }: PropsWithChildren<ArticleCardProps>) {
   return (
-    <div className="article">
-      <div className="card">
-        <div className="card-content">
-          <div className="article-title">
-            <div className="has-text-centered">
-              <p className="title">
-                <Link href={`/${slug}/`}>{title}</Link>
-              </p>
-            </div>
-            <TagList tags={tags} date={date} />
-          </div>
-          <div className="article-body pt-8">
-            <div className="content">{children}</div>
-          </div>
-        </div>
-      </div>
-    </div>
+    <Card>
+      <h1 className="py-2 text-gray-800 text-lg text-center">
+        <Link href={`/${slug}/`}>{title}</Link>
+      </h1>
+      <TagList tags={tags} date={date} />
+      <div className="text-gray-600 py-2 overflow-x-hidden">{children}</div>
+    </Card>
   )
 }
