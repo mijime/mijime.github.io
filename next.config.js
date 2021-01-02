@@ -2,7 +2,7 @@ const highlight = require('remark-highlight.js')
 const withMdxEnhanced = require('next-mdx-enhanced')
 
 module.exports = withMdxEnhanced({
-  layoutPath: 'src/components/templates/post/',
+  layoutPath: 'src/components/pages/post/',
   defaultLayout: true,
   fileExtensions: ['md', 'mdx'],
   remarkPlugins: [() => highlight({ exclude: ['mermaid'] })],

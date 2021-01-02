@@ -1,7 +1,7 @@
 import fs from 'fs'
 import matter from 'gray-matter'
 
-import { readdirRecursively } from '@/infrastructures/functions/filer'
+import { readdirRecursively } from '@/infrastructures/functions/filer/'
 
 export type MarkdownContent = {
   data: { [key: string]: string }

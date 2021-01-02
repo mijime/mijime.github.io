@@ -1,5 +1,5 @@
 import { PropsWithChildren } from 'react'
-import TagList from '@/components/molecules/tag-list'
+import TagList from '@/components/molecules/tag-list/'
 
 type ArticleCardProps = {
   title: string
