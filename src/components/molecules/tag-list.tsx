@@ -1,4 +1,4 @@
-import Tag from '@/components/tag'
+import Tag from '@/components/atoms/tag'
 
 type TagListProps = {
   tags: string[]

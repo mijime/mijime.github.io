@@ -1,30 +1,23 @@
 import Document, { Html, Head, Main, NextScript } from 'next/document'
-import DefaultLayout from '@/layouts/default'
-import { LANG, GA_TRACKING_ID, SITE_VERIFICATION } from '@/lib/config'
+import DefaultLayout from '@/components/templates/default'
+import GoogleAnalyticsScript from '@/components/functions/google-analytics-script'
+import { AnalyticsApp } from '@/applications/analytics'
+import { SitesApp } from '@/applications/sites'
 
 export default class RootDocument extends Document {
   render() {
     return (
-      <Html lang={LANG}>
+      <Html lang={SitesApp.getLangugage()}>
         <Head>
           <link rel="icon" href="/favicon.png" />
-          <meta name="google-site-verification" content={SITE_VERIFICATION} />
-          <script
-            src={`https://www.googletagmanager.com/gtag/js?id=${GA_TRACKING_ID}`}
+          <meta
+            name="google-site-verification"
+            content={SitesApp.getSiteVerification()}
           />
-          <script
-            dangerouslySetInnerHTML={{
-              __html: `
-window.dataLayer = window.dataLayer || [];
-window.gtag = function(){dataLayer.push(arguments);}
-window.gtag('js', new Date());
-window.gtag('config', '${GA_TRACKING_ID}', {page_path: window.location.pathname});
-`
-            }}
-          />
+          <GoogleAnalyticsScript trackingID={AnalyticsApp.getTrackingID()} />
         </Head>
         <body>
-          <DefaultLayout>
+          <DefaultLayout siteName={SitesApp.getSiteName()}>
             <Main />
           </DefaultLayout>
           <NextScript />

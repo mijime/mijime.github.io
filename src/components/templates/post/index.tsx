@@ -1,8 +1,9 @@
-import Head from 'next/head'
 import { PropsWithChildren } from 'react'
-import { buildMetadataByFrontMatter } from '@/lib/markdown'
-import { SITE_NAME } from '@/lib/config'
-import ArticleCard from '@/components/article-card'
+import Head from 'next/head'
+
+import { SitesApp } from '@/applications/sites'
+import ArticleCard from '@/components/molecules/article-card'
+import { buildMetadataByFrontMatter } from '@/infrastructures/functions/markdown'
 
 type IndexLayoutProps = {
   frontMatter: { [key: string]: any }
@@ -17,7 +18,7 @@ export default function IndexLayout({
     <>
       <Head>
         <title>
-          {metadata.title} | {SITE_NAME}
+          {metadata.title} | {SitesApp.getSiteName()}
         </title>
       </Head>
       <ArticleCard {...metadata}>{children}</ArticleCard>
