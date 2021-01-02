@@ -19,7 +19,7 @@ export default function ArticleItem({
       <div className="card">
         <div className="card-content">
           <div className="article-title">
-            <Link href={`/post/${slug}`}>{title}</Link>
+            <Link href={`/${slug}`}>{title}</Link>
             <TagList tags={tags} date={date} />
           </div>
         </div>
