@@ -25,7 +25,7 @@ export function IndexPage({
       </Head>
       <div className="block">
         <ArticleCard {...posts[0]}>
-          <div className="message">{posts[0].content.slice(0, 100)}</div>
+          <div className="message">{posts[0].description}</div>
           <Link href={`/post/${posts[0].slug}/`}>Read more</Link>
         </ArticleCard>
       </div>
