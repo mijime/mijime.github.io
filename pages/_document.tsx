@@ -1,8 +1,7 @@
 import Document, { Html, Head, Main, NextScript } from 'next/document'
-import DefaultLayout from '@/components/templates/default'
-import GoogleAnalyticsScript from '@/components/functions/google-analytics-script'
-import { AnalyticsApp } from '@/applications/analytics'
-import { SitesApp } from '@/applications/sites'
+import GoogleAnalyticsScript from '@/components/functions/google-analytics/script/'
+import { AnalyticsApp } from '@/applications/analytics/'
+import { SitesApp } from '@/applications/sites/'
 
 export default class RootDocument extends Document {
   render() {
@@ -17,9 +16,7 @@ export default class RootDocument extends Document {
           <GoogleAnalyticsScript trackingID={AnalyticsApp.getTrackingID()} />
         </Head>
         <body>
-          <DefaultLayout siteName={SitesApp.getSiteName()}>
-            <Main />
-          </DefaultLayout>
+          <Main />
           <NextScript />
         </body>
       </Html>

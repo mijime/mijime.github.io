@@ -1,7 +1,8 @@
 import Head from 'next/head'
-import Pagination from '@/components/molecules/pagination'
-import Tag from '@/components/atoms/tag'
+import Pagination from '@/components/molecules/pagination/'
+import Tag from '@/components/atoms/tag/'
 import { ListPageProps } from '@/components/templates/'
+import DefaultLayout from '@/components/templates/default/'
 
 type TagCountItemProps = {
   tag: string
@@ -40,7 +41,7 @@ export function TagsPage({
   tagCount
 }: TagsPageProps) {
   return (
-    <>
+    <DefaultLayout siteName={siteName}>
       <Head>
         <title>
           Tags by page ${page} | {siteName}
@@ -53,6 +54,6 @@ export function TagsPage({
         page={page}
         pageSize={pageSize}
       />
-    </>
+    </DefaultLayout>
   )
 }

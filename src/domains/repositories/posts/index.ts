@@ -1,4 +1,4 @@
-import { Post, Slug, Tag } from '@/domains/entities/posts'
+import { Post, Slug, Tag } from '@/domains/entities/posts/'
 import { PagerRequest } from '@/domains/repositories/'
 
 export type FetchPostsResponse = {

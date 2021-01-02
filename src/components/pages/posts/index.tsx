@@ -1,8 +1,9 @@
 import Head from 'next/head'
-import Pagination from '@/components/molecules/pagination'
-import ArticleList from '@/components/organisms/article-list'
+import Pagination from '@/components/molecules/pagination/'
+import ArticleList from '@/components/organisms/article-list/'
 import { ListPageProps } from '@/components/templates/'
-import { Post } from '@/domains/entities/posts'
+import DefaultLayout from '@/components/templates/default/'
+import { Post } from '@/domains/entities/posts/'
 
 export type PostsPageProps = ListPageProps & {
   posts: Post[]
@@ -17,7 +18,7 @@ export function PostsPage({
   postCount
 }: PostsPageProps) {
   return (
-    <>
+    <DefaultLayout siteName={siteName}>
       <Head>
         <title>
           Posts by page {page} | {siteName}
@@ -30,6 +31,6 @@ export function PostsPage({
         page={page}
         pageSize={pageSize}
       />
-    </>
+    </DefaultLayout>
   )
 }
