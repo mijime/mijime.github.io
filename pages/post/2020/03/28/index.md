@@ -16,8 +16,8 @@ fy = d.getFullYear()
 fm = d.getMonth() + 1 + ''
 fd = d.getDate() + ''
 ff = s => ('00' + s).substr(s.length, 2)
-b = 'mijime/mijime.github.io/new/content'
-f = `content/post/${fy}/${ff(fm)}/${ff(fd)}/index.md`
+b = 'mijime/mijime.github.io/new/master'
+f = `pages/post/${fy}/${ff(fm)}/${ff(fd)}/index.md`
 v = encodeURIComponent(`---
 Title: ''
 Draft: true
@@ -33,5 +33,5 @@ document.location.href = `https://github.com/${b}?filename=${f}&value=${v}`
 
 ```javascript
 u = new URL(document.location.href)
-document.location.href = `https://github.com/mijime/mijime.github.io/edit/content/content${u.pathname}index.md`
+document.location.href = `https://github.com/mijime/mijime.github.io/edit/master/pages${u.pathname}index.md`
 ```
