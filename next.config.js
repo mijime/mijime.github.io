@@ -2,7 +2,7 @@ const highlight = require('remark-highlight.js')
 const withMdxEnhanced = require('next-mdx-enhanced')
 
 module.exports = withMdxEnhanced({
-  layoutPath: 'layouts/post/',
+  layoutPath: 'src/components/templates/post/',
   defaultLayout: true,
   fileExtensions: ['md', 'mdx'],
   remarkPlugins: [() => highlight({ exclude: ['mermaid'] })],
@@ -16,7 +16,7 @@ module.exports = withMdxEnhanced({
     if (isServer && !dev) {
       require('ts-node/register')
       require('tsconfig-paths/register')
-      const { generateSitemap } = require('./scripts/generate-sitemap')
+      const { generateSitemap } = require('./src/scripts/generate-sitemap')
 
       generateSitemap('public/sitemap.xml')
         .then(() => console.log('generateSitemap::succeed'))
