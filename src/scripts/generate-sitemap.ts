@@ -3,7 +3,7 @@ import { PostsApp } from '@/applications/posts'
 import { SitesApp } from '@/applications/sites'
 
 async function generateSitemapXML(siteURL: string) {
-  const { posts } = await PostsApp.fetchPosts()
+  const { posts } = await PostsApp.fetchPostsByPage({ page: 1, pageSize: 500 })
   const sitemapXML = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
