@@ -1,14 +1,27 @@
 import Link from 'next/link'
 
+type PaginationLinkProps = {
+  hrefFormat: string
+  page: number
+}
+
+function PaginationLink({ hrefFormat, page }: PaginationLinkProps) {
+  return (
+    <span className="pagination-link">
+      <Link href={hrefFormat.replace('{page}', '' + page)}>{'' + page}</Link>
+    </span>
+  )
+}
+
 type PaginationProps = {
-  linkPrefix: string
+  hrefFormat: string
   itemCount: number
   page: number
   pageSize: number
 }
 
 export default function Pagination({
-  linkPrefix,
+  hrefFormat,
   itemCount,
   page,
   pageSize
@@ -22,9 +35,7 @@ export default function Pagination({
       <ul className="pagination-list">
         {page !== firstPage ? (
           <li>
-            <span className="pagination-link">
-              <Link href={`${linkPrefix}/${firstPage}`}>{'' + firstPage}</Link>
-            </span>
+            <PaginationLink hrefFormat={hrefFormat} page={firstPage} />
           </li>
         ) : (
           <></>
@@ -38,9 +49,7 @@ export default function Pagination({
         )}
         {page - firstPage > 1 ? (
           <li>
-            <span className="pagination-link">
-              <Link href={`${linkPrefix}/${prevPage}`}>{'' + prevPage}</Link>
-            </span>
+            <PaginationLink hrefFormat={hrefFormat} page={prevPage} />
           </li>
         ) : (
           <></>
@@ -50,9 +59,7 @@ export default function Pagination({
         </li>
         {lastPage - page > 1 ? (
           <li>
-            <span className="pagination-link">
-              <Link href={`${linkPrefix}/${nextPage}`}>{'' + nextPage}</Link>
-            </span>
+            <PaginationLink hrefFormat={hrefFormat} page={nextPage} />
           </li>
         ) : (
           <></>
@@ -66,9 +73,7 @@ export default function Pagination({
         )}
         {lastPage !== page ? (
           <li>
-            <span className="pagination-link">
-              <Link href={`${linkPrefix}/${lastPage}`}>{'' + lastPage}</Link>
-            </span>
+            <PaginationLink hrefFormat={hrefFormat} page={lastPage} />
           </li>
         ) : (
           <></>

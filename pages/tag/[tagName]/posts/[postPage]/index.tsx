@@ -1,67 +1,44 @@
-import { GetStaticPaths, GetStaticProps } from 'next'
-import Head from 'next/head'
-import { SITE_NAME, PAGE_SIZE } from '@/lib/config'
-import { fetchAllTags, fetchPostsByTag, PostData } from '@/lib/posts'
-import ArticleList from '@/components/article-list'
-import Pagination from '@/components/pagination'
+import { GetStaticProps, GetStaticPaths } from 'next'
+import {
+  PostsByTagPage,
+  PostsByTagPageProps
+} from '@/components/pages/tag/posts/'
+import { PostsApp } from '@/applications/posts'
+import { SitesApp } from '@/applications/sites'
 
-type PostsByTagAndPageProps = {
-  posts: PostData[]
-  postCount: number
-  page: number
-  tagName: string
-}
+export default PostsByTagPage
 
-export default function PostsByTagAndPage({
-  posts,
-  postCount,
-  page,
-  tagName
-}: PostsByTagAndPageProps) {
-  return (
-    <>
-      <Head>
-        <title>
-          Tag {tagName}: {page} | {SITE_NAME}
-        </title>
-      </Head>
-      <ArticleList posts={posts} />
-      <Pagination
-        linkPrefix={`/tag/${tagName}/posts`}
-        itemCount={postCount}
-        page={page}
-        pageSize={PAGE_SIZE}
-      />
-    </>
-  )
+export const getStaticProps: GetStaticProps<PostsByTagPageProps> = async function ({
+  params
+}) {
+  const siteName = SitesApp.getSiteName()
+  const pageSize = SitesApp.getPageSize()
+  const tag = String(params?.tagName as string)
+  const page = Number(params?.postPage as string)
+
+  const { posts, count } = await PostsApp.fetchPostsByTagAndPage({
+    tag,
+    page,
+    pageSize
+  })
+
+  return {
+    props: { siteName, page, pageSize, tag, posts, postCount: count }
+  }
 }
 
 export const getStaticPaths: GetStaticPaths = async function (context) {
-  const allTags = await fetchAllTags()
+  const pageSize = SitesApp.getPageSize()
+  const { tagCounts } = await PostsApp.fetchTagCounts()
 
   return {
-    paths: allTags
+    paths: tagCounts
       .map(({ name, count }) =>
-        [...Array(Math.ceil(count / PAGE_SIZE)).keys()].map(
-          page => `/tag/${name}/posts/${page + 1}`
+        [...Array(Math.ceil(count / pageSize)).keys()].map(
+          page => `/tag/${name}/posts/${page + 1}/`
         )
       )
       .flat(),
     fallback: false
-  }
-}
-
-export const getStaticProps: GetStaticProps<PostsByTagAndPageProps> = async function ({
-  params
-}) {
-  const tagName = String(params?.tagName as string)
-  const page = Number(params?.postPage as string)
-
-  const postsByTag = await fetchPostsByTag(tagName)
-  const posts = postsByTag.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
-  const postCount = postsByTag.length
-
-  return {
-    props: { posts, postCount, page, tagName }
   }
 }
