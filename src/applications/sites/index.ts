@@ -21,5 +21,8 @@ export const SitesApp = {
   },
   getPageSize() {
     return PAGE_SIZE
+  },
+  getGithubEditURL() {
+    return 'https://github.com/mijime/mijime.github.io/edit/master'
   }
 }
