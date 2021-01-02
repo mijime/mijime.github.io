@@ -1,0 +1,1 @@
+{"pageProps":{"siteName":"My snippets","page":1,"pageSize":5,"tag":"pelican","posts":[{"title":"PelicanのPluginの作り方","description":"\nregister 関数を用意して、 各イベントの signals に `connect` する\n\n<!--more-->\n\n```python\nfrom pelican import signals","date":"2017-10-22T12:32:19.000Z","tags":["pelican"],"draft":false,"slug":"post/python/create-pelican-plugin"}],"postCount":1},"__N_SSG":true}

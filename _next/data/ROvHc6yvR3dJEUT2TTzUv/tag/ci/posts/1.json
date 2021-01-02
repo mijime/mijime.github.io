@@ -1,0 +1,1 @@
+{"pageProps":{"siteName":"My snippets","page":1,"pageSize":5,"tag":"ci","posts":[{"title":"CIを始めるのが辛い","description":"\n- 環境が違う\n\n  サービスによっては 1 つ前のバージョンを使っていたりする。\n  開発環境は最新めなことが多いので、ハマる\n\n- 入れまくり\n\n  ツールやパッケージやらインストールするのにダ","date":"2016-05-26T12:10:04.000Z","tags":["note","ci"],"draft":false,"slug":"post/2016/05/26/ci-is-difficult"}],"postCount":1},"__N_SSG":true}
