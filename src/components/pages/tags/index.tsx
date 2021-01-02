@@ -1,6 +1,7 @@
 import Head from 'next/head'
-import Pagination from '@/components/molecules/pagination/'
+import Link from 'next/link'
 import Tag from '@/components/atoms/tag/'
+import Pagination from '@/components/molecules/pagination/'
 import { ListPageProps } from '@/components/templates/'
 import DefaultLayout from '@/components/templates/default/'
 
@@ -11,20 +12,24 @@ type TagCountItemProps = {
 
 function TagCountItem({ tag, count }: TagCountItemProps) {
   return (
-    <div className="tags level-item has-addons is-right">
-      <Tag tag={tag} />
-      <span className="tag is-rounded">{count}</span>
-    </div>
+    <Tag color="blue">
+      <Link href={`/tag/${tag}/posts/1/`}>{tag}</Link>
+      <span className="rounded-full ml-1 px-2 py-1 bg-blue-400 text-blue-100">
+        {count}
+      </span>
+    </Tag>
   )
 }
 
 function TagCountList({ tags }: { tags: { name: string; count: number }[] }) {
   return (
-    <div className="block">
+    <ul>
       {tags.map(({ name, count }) => (
-        <TagCountItem key={name} tag={name} count={count} />
+        <li key={name}>
+          <TagCountItem tag={name} count={count} />
+        </li>
       ))}
-    </div>
+    </ul>
   )
 }
 

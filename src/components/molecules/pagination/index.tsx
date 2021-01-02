@@ -7,8 +7,10 @@ type PaginationLinkProps = {
 
 function PaginationLink({ hrefFormat, page }: PaginationLinkProps) {
   return (
-    <span className="pagination-link">
-      <Link href={hrefFormat.replace('{page}', '' + page)}>{'' + page}</Link>
+    <span className="bg-gray-100 border-gray-200 text-gray-600 px-4 py-3 border-2 rounded-sm">
+      <Link href={hrefFormat.replace('{page}', String(page))}>
+        {String(page)}
+      </Link>
     </span>
   )
 }
@@ -31,8 +33,8 @@ export default function Pagination({
   const firstPage = 1
   const lastPage = Math.ceil(itemCount / pageSize)
   return (
-    <nav className="pagination is-centered pt-4" role="navigation">
-      <ul className="pagination-list">
+    <nav>
+      <ul className="flex justify-center space-x-2 py-2">
         {page !== firstPage ? (
           <li>
             <PaginationLink hrefFormat={hrefFormat} page={firstPage} />
@@ -42,7 +44,7 @@ export default function Pagination({
         )}
         {page - firstPage > 2 ? (
           <li>
-            <span className="pagination-ellipsis">&hellip;</span>
+            <span className="px-2 text-gray-400">&hellip;</span>
           </li>
         ) : (
           <></>
@@ -55,7 +57,9 @@ export default function Pagination({
           <></>
         )}
         <li>
-          <span className="pagination-link is-current">{page}</span>
+          <span className="bg-blue-100 border-blue-200 text-blue-600 px-4 py-3 border-2 rounded-sm">
+            {page}
+          </span>
         </li>
         {lastPage - page > 1 ? (
           <li>
@@ -66,7 +70,7 @@ export default function Pagination({
         )}
         {lastPage - page > 2 ? (
           <li>
-            <span className="pagination-ellipsis">&hellip;</span>
+            <span className="px-2 text-gray-400">&hellip;</span>
           </li>
         ) : (
           <></>

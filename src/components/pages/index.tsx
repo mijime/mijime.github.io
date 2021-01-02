@@ -23,7 +23,7 @@ export function IndexPage({
       <Head>
         <title>{siteName}</title>
       </Head>
-      <div className="block">
+      <div className="pb-4">
         <ArticleCard {...posts[0]}>
           <div className="message">{posts[0].description}</div>
         </ArticleCard>

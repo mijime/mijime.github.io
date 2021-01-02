@@ -1,4 +1,6 @@
+import Link from 'next/link'
 import Tag from '@/components/atoms/tag/'
+import { humanReadableDate } from '@/infrastructures/functions/date'
 
 type TagListProps = {
   tags: string[]
@@ -7,11 +9,13 @@ type TagListProps = {
 
 export default function TagList({ tags, date }: TagListProps) {
   return (
-    <div className="tags level-item is-right has-addons">
+    <div className="flex justify-end">
       {tags.map((tag: string) => (
-        <Tag key={tag} tag={tag} />
+        <Tag key={tag} color="blue">
+          <Link href={`/tag/${tag}/posts/1/`}>{tag}</Link>
+        </Tag>
       ))}
-      <span className="tag is-rounded">{date}</span>
+      <Tag color="gray">{humanReadableDate(new Date(date))}</Tag>
     </div>
   )
 }
