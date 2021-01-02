@@ -1,6 +1,6 @@
 import * as fs from 'fs'
-import { PostsApp } from '@/applications/posts'
-import { SitesApp } from '@/applications/sites'
+import { PostsApp } from '@/applications/posts/'
+import { SitesApp } from '@/applications/sites/'
 
 async function generateSitemapXML(siteURL: string) {
   const { posts } = await PostsApp.fetchPostsByPage({ page: 1, pageSize: 500 })

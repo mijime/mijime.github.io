@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import TagList from '@/components/molecules/tag-list'
+import TagList from '@/components/molecules/tag-list/'
 
 export type ArticleItemProps = {
   title: string

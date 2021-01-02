@@ -1,7 +1,7 @@
 import { GetStaticProps, GetStaticPaths } from 'next'
 import { PostsPage, PostsPageProps } from '@/components/pages/posts/'
-import { PostsApp } from '@/applications/posts'
-import { SitesApp } from '@/applications/sites'
+import { PostsApp } from '@/applications/posts/'
+import { SitesApp } from '@/applications/sites/'
 
 export default PostsPage
 

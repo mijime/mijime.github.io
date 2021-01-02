@@ -1,10 +1,10 @@
 import Head from 'next/head'
 import Link from 'next/link'
-import Pagination from '@/components/molecules/pagination'
-import ArticleCard from '@/components/molecules/article-card'
-import ArticleList from '@/components/organisms/article-list'
+import Pagination from '@/components/molecules/pagination/'
+import ArticleCard from '@/components/molecules/article-card/'
+import ArticleList from '@/components/organisms/article-list/'
 import { ListPageProps } from '@/components/templates/'
-import { Post } from '@/domains/entities/posts'
+import { Post } from '@/domains/entities/posts/'
 
 export type IndexPageProps = ListPageProps & {
   posts: Post[]
