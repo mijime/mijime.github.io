@@ -1,4 +1,5 @@
 interface Metadata {
+  slug: string
   title: string
   description: string
   date: string
@@ -14,7 +15,11 @@ export function buildMetadataByFrontMatter(data: {
     description: data.description || data.Description || '',
     date: data.date || data.Date || new Date().toISOString(),
     tags: data.tags || data.Tags || [],
-    draft: !!data.draft || !!data.Draft
+    draft: !!data.draft || !!data.Draft,
+    slug:
+      data.__resourcePath !== undefined
+        ? data.__resourcePath.replace(/\/index\.mdx?$/, '')
+        : ''
   }
   return {
     ...originMetadata,

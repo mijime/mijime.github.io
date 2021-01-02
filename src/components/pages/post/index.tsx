@@ -3,11 +3,14 @@ import Head from 'next/head'
 
 import { SitesApp } from '@/applications/sites/'
 import ArticleCard from '@/components/molecules/article-card/'
-import { buildMetadataByFrontMatter } from '@/infrastructures/functions/markdown/'
 import DefaultLayout from '@/components/templates/default/'
+import { buildMetadataByFrontMatter } from '@/infrastructures/functions/markdown/'
 
 type PostPageProps = {
-  frontMatter: { [key: string]: any }
+  frontMatter: {
+    __resourcePath: string
+    [key: string]: any
+  }
 }
 
 export default function PostPage({
