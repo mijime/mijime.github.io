@@ -10,11 +10,11 @@ export default function DefaultLayout({
   children
 }: PropsWithChildren<DefaultLayoutProps>) {
   return (
-    <>
+    <div className="font-mono">
       <Navbar siteName={siteName} />
       <div className="container">
         <div className="column is-8 is-offset-2">{children}</div>
       </div>
-    </>
+    </div>
   )
 }

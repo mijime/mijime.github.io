@@ -17,7 +17,7 @@ export type NavbarProps = {
 export default function Navbar({ siteName }: NavbarProps) {
   return (
     <HeroTitle>
-      <h1 className="title">
+      <h1 className="title font-serif">
         <Link href="/">{siteName}</Link>
       </h1>
     </HeroTitle>
