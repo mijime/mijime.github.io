@@ -1,0 +1,1 @@
+{"pageProps":{"siteName":"My snippets","page":1,"pageSize":5,"tag":"mermaid","posts":[{"title":"mermaidに対応した","description":"\ncode.language-mermaid を変換するスクリプトを噛ませただけだけど。\n\n```mermaid\n  graph TD;\n    A-->B;\n    A-->C;\n    B-->D","date":"2016-05-31T13:41:30.000Z","tags":["development","mermaid"],"draft":false,"slug":"hugo/code-mermaid"}],"postCount":1},"__N_SSG":true}
