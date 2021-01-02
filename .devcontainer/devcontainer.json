@@ -1,7 +1,0 @@
-{
-  "name": "mijime.github.io",
-  "dockerComposeFile": "../docker-compose.yml",
-  "service": "builder",
-  "workspaceFolder": "/var/app",
-  "shutdownAction": "stopCompose"
-}
