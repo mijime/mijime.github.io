@@ -7,9 +7,9 @@ type ArticleListProps = {
 
 export default function ArticleList({ posts }: ArticleListProps) {
   return (
-    <ul className="articles">
+    <ul>
       {posts.map(post => (
-        <li key={post.slug} className="block">
+        <li key={post.slug} className="pb-4">
           <ArticleItem {...post} />
         </li>
       ))}

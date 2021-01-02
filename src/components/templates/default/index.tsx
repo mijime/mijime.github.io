@@ -1,5 +1,6 @@
 import { PropsWithChildren } from 'react'
-import Navbar from '@/components/organisms/navbar/'
+import Link from 'next/link'
+import NavbarHeader from '@/components/organisms/navbar-header/'
 
 export type DefaultLayoutProps = {
   siteName: string
@@ -11,7 +12,9 @@ export default function DefaultLayout({
 }: PropsWithChildren<DefaultLayoutProps>) {
   return (
     <div className="font-mono">
-      <Navbar siteName={siteName} />
+      <NavbarHeader>
+        <Link href="/">{siteName}</Link>
+      </NavbarHeader>
       <div className="container">
         <div className="column is-8 is-offset-2">{children}</div>
       </div>

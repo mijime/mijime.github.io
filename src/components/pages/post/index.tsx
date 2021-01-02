@@ -31,7 +31,7 @@ export default function PostPage({
       <ArticleCard {...metadata}>
         {children}
 
-        <div className="has-text-right">
+        <div className="flex justify-end py-2">
           <GithubEditButton
             githubURL={githubEditURL}
             filepath={`pages/${frontMatter.__resourcePath}`}
