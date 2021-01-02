@@ -20,11 +20,15 @@ export class MarkdownPostsRepository implements PostsRepository {
   }: MarkdownFileContent): Post {
     const slug = this.convertSlugFromFile(filepath)
     const metadata = buildMetadataByFrontMatter(data)
+    const description =
+      metadata.description === undefined || metadata.description.length === 0
+        ? content.slice(0, 100)
+        : metadata.description
 
     return {
       ...metadata,
       slug,
-      content
+      description
     }
   }
 
