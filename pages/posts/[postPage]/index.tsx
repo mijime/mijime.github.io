@@ -1,58 +1,35 @@
-import { GetStaticPaths, GetStaticProps } from 'next'
-import Head from 'next/head'
-import { SITE_NAME, PAGE_SIZE } from '@/lib/config'
-import { fetchAllPosts, PostData } from '@/lib/posts'
-import ArticleList from '@/components/article-list'
-import Pagination from '@/components/pagination'
+import { GetStaticProps, GetStaticPaths } from 'next'
+import { PostsPage, PostsPageProps } from '@/components/pages/posts/'
+import { PostsApp } from '@/applications/posts'
+import { SitesApp } from '@/applications/sites'
 
-type PostsByPageProps = {
-  posts: PostData[]
-  postCount: number
-  page: number
-}
+export default PostsPage
 
-export default function PostsByPage({
-  posts,
-  postCount,
-  page
-}: PostsByPageProps) {
-  return (
-    <>
-      <Head>
-        <title>
-          Posts: {page} | {SITE_NAME}
-        </title>
-      </Head>
-      <ArticleList posts={posts} />
-      <Pagination
-        linkPrefix="/posts"
-        itemCount={postCount}
-        page={page}
-        pageSize={PAGE_SIZE}
-      />
-    </>
-  )
-}
+export const getStaticProps: GetStaticProps<PostsPageProps> = async function ({
+  params
+}) {
+  const siteName = SitesApp.getSiteName()
+  const pageSize = SitesApp.getPageSize()
+  const page = Number(params?.postPage)
 
-export const getStaticPaths: GetStaticPaths = async function (context) {
-  const allPosts = await fetchAllPosts()
-  const pageSize = Math.ceil(allPosts.length / PAGE_SIZE)
+  const { posts, count } = await PostsApp.fetchPostsByPage({
+    page,
+    pageSize
+  })
 
   return {
-    paths: [...Array(pageSize).keys()].map(page => `/posts/${page + 1}`),
-    fallback: false
+    props: { siteName, page, pageSize, posts, postCount: count }
   }
 }
 
-export const getStaticProps: GetStaticProps<PostsByPageProps> = async function ({
-  params
-}) {
-  const allPosts = await fetchAllPosts()
-  const page: number = Number(params?.postPage)
-  const posts = allPosts.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
-  const postCount = allPosts.length
+export const getStaticPaths: GetStaticPaths = async function (context) {
+  const pageSize = SitesApp.getPageSize()
+  const { count } = await PostsApp.fetchPosts()
 
   return {
-    props: { posts, postCount, page }
+    paths: [...Array(Math.ceil(count / pageSize)).keys()].map(
+      page => `/posts/${page + 1}`
+    ),
+    fallback: false
   }
 }

@@ -1,6 +1,5 @@
 import { PropsWithChildren } from 'react'
 import Link from 'next/link'
-import { SITE_NAME } from '@/lib/config'
 
 function HeroTitle({ children }: PropsWithChildren<any>) {
   return (
@@ -11,12 +10,15 @@ function HeroTitle({ children }: PropsWithChildren<any>) {
     </section>
   )
 }
+export type NavbarProps = {
+  siteName: string
+}
 
-export default function Navbar() {
+export default function Navbar({ siteName }: NavbarProps) {
   return (
     <HeroTitle>
       <h1 className="title">
-        <Link href="/">{SITE_NAME}</Link>
+        <Link href="/">{siteName}</Link>
       </h1>
     </HeroTitle>
   )
