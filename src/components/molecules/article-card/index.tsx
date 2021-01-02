@@ -1,13 +1,16 @@
 import { PropsWithChildren } from 'react'
+import Link from 'next/link'
 import TagList from '@/components/molecules/tag-list/'
 
 type ArticleCardProps = {
+  slug: string
   title: string
   date: string
   tags: string[]
 }
 
 export default function ArticleCard({
+  slug,
   title,
   date,
   tags = [],
@@ -19,7 +22,9 @@ export default function ArticleCard({
         <div className="card-content">
           <div className="article-title">
             <div className="has-text-centered">
-              <p className="title">{title}</p>
+              <p className="title">
+                <Link href={`/${slug}/`}>{title}</Link>
+              </p>
             </div>
             <TagList tags={tags} date={date} />
           </div>
