@@ -4,7 +4,7 @@ import {
   SITE_URL,
   SITE_VERIFICATION,
   PAGE_SIZE
-} from '@/infrastructures/config'
+} from '@/infrastructures/config/'
 
 export const SitesApp = {
   getSiteName() {

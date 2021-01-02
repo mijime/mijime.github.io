@@ -3,9 +3,9 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { MDXProvider } from '@mdx-js/react'
 
-import { AnalyticsApp } from '@/applications/analytics'
-import '@/components/functions/progress'
-import GoogleAnalyticsRouter from '@/components/functions/google-analytics-router'
+import { AnalyticsApp } from '@/applications/analytics/'
+import '@/components/functions/progress/'
+import GoogleAnalyticsRouter from '@/components/functions/google-analytics/router/'
 
 import 'bulma/css/bulma.css'
 import 'highlight.js/styles/github.css'

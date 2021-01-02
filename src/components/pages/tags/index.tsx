@@ -1,6 +1,6 @@
 import Head from 'next/head'
-import Pagination from '@/components/molecules/pagination'
-import Tag from '@/components/atoms/tag'
+import Pagination from '@/components/molecules/pagination/'
+import Tag from '@/components/atoms/tag/'
 import { ListPageProps } from '@/components/templates/'
 
 type TagCountItemProps = {

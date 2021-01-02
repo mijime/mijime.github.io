@@ -1,5 +1,5 @@
 import { PropsWithChildren } from 'react'
-import Navbar from '@/components/organisms/navbar'
+import Navbar from '@/components/organisms/navbar/'
 
 export type DefaultLayoutProps = {
   siteName: string

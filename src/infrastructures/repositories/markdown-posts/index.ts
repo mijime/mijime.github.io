@@ -1,15 +1,15 @@
 import * as path from 'path'
-import { buildMetadataByFrontMatter } from '@/infrastructures/functions/markdown'
+import { buildMetadataByFrontMatter } from '@/infrastructures/functions/markdown/'
 import {
   MarkdownFileContent,
   fetchMarkdownFromFile,
   fetchMarkdowns
-} from '@/infrastructures/drivers/markdown'
-import { Post, Slug, Tag } from '@/domains/entities/posts'
+} from '@/infrastructures/drivers/markdown/'
+import { Post, Slug, Tag } from '@/domains/entities/posts/'
 import {
   PostsRepository,
   FetchPostsByTagAndPageRequest
-} from '@/domains/repositories/posts'
+} from '@/domains/repositories/posts/'
 import { PagerRequest } from '@/domains/repositories/'
 
 export class MarkdownPostsRepository implements PostsRepository {

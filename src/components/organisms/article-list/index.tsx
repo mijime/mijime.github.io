@@ -1,5 +1,5 @@
-import ArticleItem from '@/components/molecules/article-item'
-import { Post } from '@/domains/entities/posts'
+import ArticleItem from '@/components/molecules/article-item/'
+import { Post } from '@/domains/entities/posts/'
 
 type ArticleListProps = {
   posts: Post[]

@@ -1,8 +1,8 @@
 import Head from 'next/head'
-import Pagination from '@/components/molecules/pagination'
-import ArticleList from '@/components/organisms/article-list'
+import Pagination from '@/components/molecules/pagination/'
+import ArticleList from '@/components/organisms/article-list/'
 import { ListPageProps } from '@/components/templates/'
-import { Post, Tag } from '@/domains/entities/posts'
+import { Post, Tag } from '@/domains/entities/posts/'
 
 export type PostsByTagPageProps = ListPageProps & {
   tag: Tag
