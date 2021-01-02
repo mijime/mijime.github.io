@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Card from '@/components/atoms/card/'
 import TagList from '@/components/molecules/tag-list/'
 
 export type ArticleItemProps = {
@@ -15,15 +16,11 @@ export default function ArticleItem({
   tags = []
 }: ArticleItemProps) {
   return (
-    <div className="article">
-      <div className="card">
-        <div className="card-content">
-          <div className="article-title">
-            <Link href={`/${slug}`}>{title}</Link>
-            <TagList tags={tags} date={date} />
-          </div>
-        </div>
-      </div>
-    </div>
+    <Card>
+      <h4 className="py-2">
+        <Link href={`/${slug}`}>{title}</Link>
+      </h4>
+      <TagList tags={tags} date={date} />
+    </Card>
   )
 }

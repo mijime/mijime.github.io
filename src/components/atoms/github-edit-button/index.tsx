@@ -12,7 +12,7 @@ export default function GithubEditButton({
   children
 }: PropsWithChildren<GithubEditButtonProps>) {
   return (
-    <button className="button">
+    <button className="border-2 bg-gray-100 border-gray-200 text-gray-600 px-2 py-1 rounded-xl">
       <Link href={`${githubURL}/${filepath}`}>
         {children !== undefined ? children : 'Edit'}
       </Link>
