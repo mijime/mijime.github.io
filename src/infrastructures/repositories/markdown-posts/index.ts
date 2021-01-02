@@ -37,12 +37,12 @@ export class MarkdownPostsRepository implements PostsRepository {
       .replace(/\.mdx?$/, '')
       .replace(/index$/, '')
       .replace(/\/$/, '')
-      .replace(/^.*\/pages\/post\//, '')
+      .replace(/^.*\/pages\//, '')
   }
 
   async fetchPostBySlug(slug: Slug) {
     const md = await fetchMarkdownFromFile(
-      path.resolve(`pages/post/${slug}/index.md`)
+      path.resolve(`pages/${slug}/index.md`)
     )
     return this.convertPostFromMarkdown(md)
   }
