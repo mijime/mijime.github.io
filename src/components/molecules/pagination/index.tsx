@@ -7,7 +7,7 @@ type PaginationLinkProps = {
 
 function PaginationLink({ hrefFormat, page }: PaginationLinkProps) {
   return (
-    <span className="bg-gray-100 border-gray-200 text-gray-600 px-4 py-3 border-2 rounded-sm">
+    <span className="border-gray-100 bg-gray-200 text-gray-600 px-4 py-3 border-2 rounded-sm">
       <Link href={hrefFormat.replace('{page}', String(page))}>
         {String(page)}
       </Link>
@@ -57,7 +57,7 @@ export default function Pagination({
           <></>
         )}
         <li>
-          <span className="bg-blue-100 border-blue-200 text-blue-600 px-4 py-3 border-2 rounded-sm">
+          <span className="border-blue-100 bg-blue-200 text-blue-400 px-4 py-3 border-2 rounded-sm">
             {page}
           </span>
         </li>

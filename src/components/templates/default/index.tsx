@@ -15,8 +15,8 @@ export default function DefaultLayout({
       <NavbarHeader>
         <Link href="/">{siteName}</Link>
       </NavbarHeader>
-      <div className="container">
-        <div className="column is-8 is-offset-2">{children}</div>
+      <div className="md:container mx-auto px-4 py-4">
+        <div>{children}</div>
       </div>
     </div>
   )
