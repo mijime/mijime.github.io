@@ -57,7 +57,7 @@ export default function Pagination({
           <></>
         )}
         <li>
-          <span className="border-blue-100 bg-blue-200 text-blue-400 px-4 py-3 border-2 rounded-sm">
+          <span className="border-blue-100 bg-blue-200 text-blue-600 px-4 py-3 border-2 rounded-sm">
             {page}
           </span>
         </li>

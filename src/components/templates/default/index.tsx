@@ -15,9 +15,7 @@ export default function DefaultLayout({
       <NavbarHeader>
         <Link href="/">{siteName}</Link>
       </NavbarHeader>
-      <div className="md:container mx-auto px-4 py-4">
-        <div>{children}</div>
-      </div>
+      <div className="md:container mx-auto px-4 py-4">{children}</div>
     </div>
   )
 }
