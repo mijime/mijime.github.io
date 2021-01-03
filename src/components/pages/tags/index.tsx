@@ -12,9 +12,9 @@ type TagCountItemProps = {
 
 function TagCountItem({ tag, count }: TagCountItemProps) {
   return (
-    <Tag color="blue">
+    <Tag className="border-blue-100 bg-blue-200 text-blue-400">
       <Link href={`/tag/${tag}/posts/1/`}>{tag}</Link>
-      <span className="rounded-full ml-1 px-2 py-1 bg-blue-400 text-blue-100">
+      <span className="rounded-full ml-1 px-2 py-1 border-2 border-blue-100 bg-blue-400 text-blue-100">
         {count}
       </span>
     </Tag>
