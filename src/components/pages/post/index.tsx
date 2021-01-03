@@ -29,7 +29,7 @@ export default function PostPage({
         </title>
       </Head>
       <ArticleCard {...metadata}>
-        {children}
+        <div className="prose">{children}</div>
 
         <div className="flex justify-end py-2">
           <GithubEditButton
