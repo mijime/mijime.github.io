@@ -1,12 +1,14 @@
 module.exports = {
   env: { browser: true, es2021: true },
   extends: [
-    'plugin:react/recommended',
+    'plugin:import/errors',
+    'plugin:import/warnings',
     'plugin:mdx/recommended',
+    'plugin:react/recommended',
     'standard',
     'prettier'
   ],
-  plugins: ['react', '@typescript-eslint'],
+  plugins: ['import', 'react', '@typescript-eslint'],
   overrides: [
     {
       files: ['*.mdx'],
@@ -20,9 +22,24 @@ module.exports = {
     sourceType: 'module'
   },
   rules: {
-    'react/react-in-jsx-scope': 'off'
+    'react/react-in-jsx-scope': 'off',
+    'import/order': [
+      'warn',
+      {
+        alphabetize: {
+          order: 'asc',
+          caseInsensitive: true
+        }
+      }
+    ]
   },
   settings: {
+    'import/resolver': {
+      node: {
+        extensions: ['.js', '.jsx', '.ts', '.tsx']
+      },
+      typescript: {}
+    },
     react: {
       version: 'detected'
     }
