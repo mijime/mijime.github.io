@@ -1,7 +1,7 @@
 import Document, { Html, Head, Main, NextScript } from 'next/document'
-import GoogleAnalyticsScript from '@/components/functions/google-analytics/script/'
 import { AnalyticsApp } from '@/applications/analytics/'
 import { SitesApp } from '@/applications/sites/'
+import GoogleAnalyticsScript from '@/components/functions/google-analytics/script/'
 
 export default class RootDocument extends Document {
   render() {
