@@ -1,6 +1,6 @@
 import Head from 'next/head'
-import Pagination from '@/components/molecules/pagination/'
 import ArticleCard from '@/components/molecules/article-card/'
+import Pagination from '@/components/molecules/pagination/'
 import ArticleList from '@/components/organisms/article-list/'
 import { ListPageProps } from '@/components/templates/'
 import DefaultLayout from '@/components/templates/default/'

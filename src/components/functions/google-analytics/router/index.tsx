@@ -1,5 +1,5 @@
-import { useEffect } from 'react'
 import { useRouter } from 'next/router'
+import { useEffect } from 'react'
 
 // https://developers.google.com/analytics/devguides/collection/gtagjs/events
 interface GTagEvent {
