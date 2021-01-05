@@ -1,7 +1,7 @@
-import { AppProps } from 'next/app'
-import Link from 'next/link'
-import Image from 'next/image'
 import { MDXProvider } from '@mdx-js/react'
+import { AppProps } from 'next/app'
+import Image from 'next/image'
+import Link from 'next/link'
 
 import { AnalyticsApp } from '@/applications/analytics/'
 import '@/components/functions/progress/'

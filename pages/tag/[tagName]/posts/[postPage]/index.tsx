@@ -1,10 +1,10 @@
 import { GetStaticProps, GetStaticPaths } from 'next'
+import { PostsApp } from '@/applications/posts/'
+import { SitesApp } from '@/applications/sites/'
 import {
   PostsByTagPage,
   PostsByTagPageProps
 } from '@/components/pages/tag/posts/'
-import { PostsApp } from '@/applications/posts/'
-import { SitesApp } from '@/applications/sites/'
 
 export default PostsByTagPage
 

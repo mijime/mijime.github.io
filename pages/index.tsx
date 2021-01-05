@@ -1,7 +1,7 @@
 import { GetStaticProps } from 'next'
-import { IndexPage, IndexPageProps } from '@/components/pages/'
 import { PostsApp } from '@/applications/posts/'
 import { SitesApp } from '@/applications/sites/'
+import { IndexPage, IndexPageProps } from '@/components/pages/'
 
 export default IndexPage
 
