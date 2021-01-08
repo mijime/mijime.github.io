@@ -1,0 +1,7 @@
+.title {
+  @apply py-2 text-gray-800 text-lg text-center;
+}
+
+.content {
+  @apply text-gray-600 py-2 overflow-x-hidden;
+}

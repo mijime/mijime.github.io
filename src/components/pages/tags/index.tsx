@@ -1,5 +1,6 @@
 import Head from 'next/head'
 import Link from 'next/link'
+
 import Tag from '@/components/atoms/tag/'
 import Pagination from '@/components/molecules/pagination/'
 import { ListPageProps } from '@/components/templates/'
@@ -10,7 +11,7 @@ type TagCountItemProps = {
   count: number
 }
 
-function TagCountItem({ tag, count }: TagCountItemProps) {
+const TagCountItem = function TagCountItem({ tag, count }: TagCountItemProps) {
   return (
     <Tag className="border-blue-100 bg-blue-200 text-blue-400">
       <Link href={`/tag/${tag}/posts/1/`}>{tag}</Link>
@@ -21,7 +22,11 @@ function TagCountItem({ tag, count }: TagCountItemProps) {
   )
 }
 
-function TagCountList({ tags }: { tags: { name: string; count: number }[] }) {
+const TagCountList = function TagCountList({
+  tags
+}: {
+  tags: { name: string; count: number }[]
+}) {
   return (
     <ul>
       {tags.map(({ name, count }) => (
@@ -38,7 +43,7 @@ export type TagsPageProps = ListPageProps & {
   tagCount: number
 }
 
-export function TagsPage({
+export const TagsPage = function TagsPage({
   siteName,
   page,
   pageSize,

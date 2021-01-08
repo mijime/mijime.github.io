@@ -7,7 +7,7 @@ interface Metadata {
   draft: boolean
 }
 
-export function buildMetadataByFrontMatter(data: {
+export const buildMetadataByFrontMatter = function buildMetadataByFrontMatter(data: {
   [key: string]: any
 }): Metadata {
   const originMetadata = {
@@ -15,11 +15,10 @@ export function buildMetadataByFrontMatter(data: {
     description: data.description || data.Description || '',
     date: data.date || data.Date || new Date().toISOString(),
     tags: data.tags || data.Tags || [],
-    draft: !!data.draft || !!data.Draft,
-    slug:
-      data.__resourcePath !== undefined
-        ? data.__resourcePath.replace(/\/index\.mdx?$/, '')
-        : ''
+    draft: Boolean(data.draft) || Boolean(data.Draft),
+    slug: data.__resourcePath
+      ? data.__resourcePath.replace(/\/index\.mdx?$/u, '')
+      : ''
   }
   return {
     ...originMetadata,

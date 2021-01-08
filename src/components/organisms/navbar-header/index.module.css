@@ -1,0 +1,7 @@
+.navbarHeader {
+  @apply bg-gray-600 py-8 md:py-32 text-center;
+}
+
+.navbarHeaderTitle {
+  @apply text-gray-100 md:text-2xl font-serif;
+}

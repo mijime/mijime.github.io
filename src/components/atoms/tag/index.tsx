@@ -1,4 +1,7 @@
+import classnames from 'classnames'
 import { PropsWithChildren } from 'react'
+
+import styles from './index.module.css'
 
 export type TagProps = {
   className?: string
@@ -8,9 +11,5 @@ export default function Tag({
   className,
   children
 }: PropsWithChildren<TagProps>) {
-  return (
-    <span className={`px-2 py-1 border-2 text-xs rounded-md ${className}`}>
-      {children}
-    </span>
-  )
+  return <span className={classnames(styles.tag, className)}>{children}</span>
 }

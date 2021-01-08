@@ -1,4 +1,8 @@
+import classnames from 'classnames'
 import Link from 'next/link'
+
+import styles from './index.module.css'
+
 import Tag from '@/components/atoms/tag/'
 import { humanReadableDate } from '@/infrastructures/functions/date'
 
@@ -9,13 +13,13 @@ type TagListProps = {
 
 export default function TagList({ tags, date }: TagListProps) {
   return (
-    <div className="flex justify-end">
+    <div className={classnames(styles.tagList)}>
       {tags.map((tag: string) => (
-        <Tag key={tag} className="bg-blue-200 border-blue-200 text-blue-600">
+        <Tag key={tag} className={classnames(styles.tagLink)}>
           <Link href={`/tag/${tag}/posts/1/`}>{tag}</Link>
         </Tag>
       ))}
-      <Tag className="bg-gray-200 border-gray-200 text-gray-600">
+      <Tag className={classnames(styles.tagDate)}>
         {humanReadableDate(new Date(date))}
       </Tag>
     </div>

@@ -1,4 +1,5 @@
 import Head from 'next/head'
+
 import ArticleCard from '@/components/molecules/article-card/'
 import Pagination from '@/components/molecules/pagination/'
 import ArticleList from '@/components/organisms/article-list/'
@@ -11,7 +12,7 @@ export type IndexPageProps = ListPageProps & {
   postCount: number
 }
 
-export function IndexPage({
+export const IndexPage = function IndexPage({
   siteName,
   page,
   pageSize,

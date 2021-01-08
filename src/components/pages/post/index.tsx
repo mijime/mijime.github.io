@@ -1,5 +1,8 @@
+import classnames from 'classnames'
 import Head from 'next/head'
 import { PropsWithChildren } from 'react'
+
+import styles from './index.module.css'
 
 import { SitesApp } from '@/applications/sites/'
 import GithubEditButton from '@/components/atoms/github-edit-button/'
@@ -29,7 +32,7 @@ export default function PostPage({
         </title>
       </Head>
       <ArticleCard {...metadata}>
-        <div className="prose">{children}</div>
+        <div className={classnames('prose', styles.prose)}>{children}</div>
 
         <div className="flex justify-end py-2">
           <GithubEditButton

@@ -1,4 +1,5 @@
-import Document, { Html, Head, Main, NextScript } from 'next/document'
+import Document, { Head, Html, Main, NextScript } from 'next/document'
+
 import { AnalyticsApp } from '@/applications/analytics/'
 import { SitesApp } from '@/applications/sites/'
 import GoogleAnalyticsScript from '@/components/functions/google-analytics/script/'

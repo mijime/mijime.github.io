@@ -1,0 +1,11 @@
+.tagList {
+  @apply flex justify-end;
+}
+
+.tagLink {
+  @apply bg-blue-200 border-blue-200 text-blue-600;
+}
+
+.tagDate {
+  @apply bg-gray-200 border-gray-200 text-gray-600;
+}

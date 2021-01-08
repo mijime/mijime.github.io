@@ -7,7 +7,6 @@ import { AnalyticsApp } from '@/applications/analytics/'
 import '@/components/functions/progress/'
 import GoogleAnalyticsRouter from '@/components/functions/google-analytics/router/'
 
-import 'highlight.js/styles/github.css'
 import '@/styles/index.css'
 
 export default function MainApp({ Component, pageProps }: AppProps) {

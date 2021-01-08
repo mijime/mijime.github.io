@@ -1,0 +1,3 @@
+.tag {
+  @apply px-2 py-1 border-2 text-xs rounded-md;
+}
