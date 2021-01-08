@@ -53,7 +53,7 @@ export class MarkdownPostsRepository implements PostsRepository {
       convertPostFromMarkdown.bind(this)
     )
     const sortedPosts = posts.sort((curr, next) =>
-      curr.date > next.date ? -1 : 1
+      curr.createdAt > next.createdAt ? -1 : 1
     )
     return { posts: sortedPosts, count: posts.length }
   }

@@ -1,5 +1,5 @@
 ---
-Date: '2016-05-25T14:05:50+09:00'
+CreatedAt: '2016-05-25T14:05:50+09:00'
 Draft: false
 Title: 'hugo pagination'
 Tags: ['hugo']

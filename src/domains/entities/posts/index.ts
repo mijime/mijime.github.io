@@ -6,6 +6,6 @@ export type Post = {
   description: string
   slug: Slug
   tags: Tag[]
-  date: ISODate
+  createdAt: ISODate
   draft: boolean
 }
