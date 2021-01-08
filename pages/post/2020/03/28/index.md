@@ -2,7 +2,7 @@
 Title: 'Create page from github'
 Draft: false
 Tags: ['javascript', 'blog', 'github']
-Date: '2020-03-29T01:23:33+09:00'
+CreatedAt: '2020-03-29T01:23:33+09:00'
 ---
 
 github から日記を書けるようにする
@@ -23,7 +23,7 @@ v = encodeURIComponent(`---
 Title: ''
 Draft: true
 Tags: []
-Date: '${d.toISOString()}'
+CreatedAt: '${d.toISOString()}'
 ---
 
 <!--more-->`)

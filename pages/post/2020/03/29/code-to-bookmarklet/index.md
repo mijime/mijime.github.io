@@ -1,7 +1,7 @@
 ---
 Title: 'codeをbookmarkletに変換する'
 Draft: false
-Date: '2020-03-29T07:58:48.611Z'
+CreatedAt: '2020-03-29T07:58:48.611Z'
 ---
 
 コードを urlencode して、その href をブックマークすればよさそう

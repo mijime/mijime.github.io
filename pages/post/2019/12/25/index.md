@@ -3,7 +3,7 @@ Title: 'macOSからChromeOSに移行したけど、いろいろ辛かった'
 Draft: false
 Description: ''
 Tags: ['development']
-Date: '2019-12-25T01:23:33+09:00'
+CreatedAt: '2019-12-25T01:23:33+09:00'
 ---
 
 初めての ChromeOS だったのでいろいろハマった

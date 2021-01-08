@@ -1,7 +1,7 @@
 ---
 Title: 'Gulpをやめた'
 Draft: false
-Date: '2020-03-29T08:37:25.431Z'
+CreatedAt: '2020-03-29T08:37:25.431Z'
 ---
 
 gulp をやめた

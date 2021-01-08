@@ -10,14 +10,14 @@ import TagList from '@/components/molecules/tag-list/'
 type ArticleCardProps = {
   slug: string
   title: string
-  date: string
+  createdAt: string
   tags: string[]
 }
 
 export default function ArticleCard({
   slug,
   title,
-  date,
+  createdAt,
   tags = [],
   children
 }: PropsWithChildren<ArticleCardProps>) {
@@ -26,7 +26,7 @@ export default function ArticleCard({
       <h1 className={classnames(styles.title)}>
         <Link href={`/${slug}/`}>{title}</Link>
       </h1>
-      <TagList tags={tags} date={date} />
+      <TagList tags={tags} createdAt={createdAt} />
       <div className={classnames(styles.content)}>{children}</div>
     </Card>
   )

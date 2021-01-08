@@ -3,7 +3,7 @@ Title: 'vim-lspはじめました'
 Draft: false
 Description: ''
 Tags: ['development']
-Date: '2019-02-28T01:49:54+09:00'
+CreatedAt: '2019-02-28T01:49:54+09:00'
 ---
 
 今まで `faith/vim-go` をありがたく使わせてもらっていたけど

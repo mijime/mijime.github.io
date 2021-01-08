@@ -9,14 +9,14 @@ import TagList from '@/components/molecules/tag-list/'
 export type ArticleItemProps = {
   title: string
   slug: string
-  date: string
+  createdAt: string
   tags: string[]
 }
 
 export default function ArticleItem({
   title,
   slug,
-  date,
+  createdAt,
   tags = []
 }: ArticleItemProps) {
   return (
@@ -24,7 +24,7 @@ export default function ArticleItem({
       <h4 className={classnames(styles.title)}>
         <Link href={`/${slug}`}>{title}</Link>
       </h4>
-      <TagList tags={tags} date={date} />
+      <TagList tags={tags} createdAt={createdAt} />
     </Card>
   )
 }
