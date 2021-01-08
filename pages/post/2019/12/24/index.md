@@ -3,7 +3,7 @@ title: 'pixelbook go を買った'
 Draft: false
 Description: ''
 Tags: ['memo']
-Date: '2019-12-24T10:15:44+09:00'
+CreatedAt: '2019-12-24T10:15:44+09:00'
 ---
 
 今のメイン PC がだいぶ古くなってきたので買い換えることにした

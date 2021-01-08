@@ -8,10 +8,10 @@ import { humanReadableDate } from '@/infrastructures/functions/date'
 
 type TagListProps = {
   tags: string[]
-  date: string
+  createdAt: string
 }
 
-export default function TagList({ tags, date }: TagListProps) {
+export default function TagList({ tags, createdAt }: TagListProps) {
   return (
     <div className={classnames(styles.tagList)}>
       {tags.map((tag: string) => (
@@ -20,7 +20,7 @@ export default function TagList({ tags, date }: TagListProps) {
         </Tag>
       ))}
       <Tag className={classnames(styles.tagDate)}>
-        {humanReadableDate(new Date(date))}
+        {humanReadableDate(new Date(createdAt))}
       </Tag>
     </div>
   )

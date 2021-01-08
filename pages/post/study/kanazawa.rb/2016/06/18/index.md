@@ -1,7 +1,7 @@
 ---
 Description: ''
 Tags: ['Development', 'lambda', 'kzrb']
-date: '2016-06-18T13:23:05+09:00'
+CreatedAt: '2016-06-18T13:23:05+09:00'
 title: ' kanazawa.rb meetup 46に参加した'
 ---
 

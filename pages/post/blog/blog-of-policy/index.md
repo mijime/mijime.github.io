@@ -1,5 +1,5 @@
 ---
-Date: '2016-05-28T13:48:27+09:00'
+CreatedAt: '2016-05-28T13:48:27+09:00'
 Draft: false
 Title: 'ブログの方針'
 Tags: ['note', 'blog']
