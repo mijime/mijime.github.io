@@ -2,7 +2,7 @@ interface Metadata {
   slug: string
   title: string
   description: string
-  date: string
+  createdAt: string
   tags: string[]
   draft: boolean
 }
@@ -13,7 +13,7 @@ export const buildMetadataByFrontMatter = function buildMetadataByFrontMatter(da
   const originMetadata = {
     title: data.title || data.Title || '',
     description: data.description || data.Description || '',
-    date: data.date || data.Date || new Date().toISOString(),
+    createdAt: data.createdAt || data.CreatedAt || new Date().toISOString(),
     tags: data.tags || data.Tags || [],
     draft: Boolean(data.draft) || Boolean(data.Draft),
     slug: data.__resourcePath
@@ -22,7 +22,7 @@ export const buildMetadataByFrontMatter = function buildMetadataByFrontMatter(da
   }
   return {
     ...originMetadata,
-    date: new Date(originMetadata.date).toISOString(),
+    createdAt: new Date(originMetadata.createdAt).toISOString(),
     tags: originMetadata.tags.map((tag: string) => tag.toLowerCase())
   }
 }

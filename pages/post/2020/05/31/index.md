@@ -2,7 +2,7 @@
 Title: 'vim でカーソル直下のgit hash commitの内容を見る'
 Draft: false
 Tags: []
-Date: '2020-05-31T12:39:09.887Z'
+CreatedAt: '2020-05-31T12:39:09.887Z'
 ---
 
 `git rebase -i` でいじっているときにコミットメッセージが Update だけだと、あれ、なんの修正だろうってなる
