@@ -41,6 +41,12 @@ const convertPostFromMarkdown = function convertPostFromMarkdown({
 }
 
 export class MarkdownPostsRepository implements PostsRepository {
+  private isProduction: boolean
+
+  constructor({ isProduction }: { isProduction: boolean }) {
+    this.isProduction = isProduction
+  }
+
   async fetchPostBySlug(slug: Slug) {
     const md = await fetchMarkdownFromFile(
       path.resolve(`pages/${slug}/index.md`)
@@ -49,9 +55,9 @@ export class MarkdownPostsRepository implements PostsRepository {
   }
 
   async fetchPosts() {
-    const posts = (await fetchMarkdowns(path.resolve('pages/post/'))).map(
-      convertPostFromMarkdown.bind(this)
-    )
+    const posts = (await fetchMarkdowns(path.resolve('pages/post/')))
+      .map(convertPostFromMarkdown)
+      .filter(post => !this.isProduction || !post.draft)
     const sortedPosts = posts.sort((curr, next) =>
       curr.date > next.date ? -1 : 1
     )
