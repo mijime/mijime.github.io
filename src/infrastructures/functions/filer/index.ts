@@ -1,6 +1,8 @@
 import fs from 'fs'
 
-export async function readdirRecursively(targetDir: string): Promise<string[]> {
+export const readdirRecursively = async function readdirRecursively(
+  targetDir: string
+): Promise<string[]> {
   const dirents = await fs.promises.readdir(targetDir, { withFileTypes: true })
   const dirs = []
   const files = []

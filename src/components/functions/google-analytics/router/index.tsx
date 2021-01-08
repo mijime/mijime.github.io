@@ -9,21 +9,27 @@ interface GTagEvent {
   value: number
 }
 
-export function event({ action, category, label, value }: GTagEvent) {
+export const event = function event({
+  action,
+  category,
+  label,
+  value
+}: GTagEvent) {
   window.gtag('event', action, {
     event_category: category,
     event_label: label,
-    value: value
+    value
   })
 }
 
-export default function GoogleAnalyticsRouter({
+const GoogleAnalyticsRouter = function GoogleAnalyticsRouter({
   trackingID
 }: {
   trackingID: string
 }) {
-  const handleRouteChange = (url: string) =>
+  const handleRouteChange = function handleRouteChange(url: string) {
     window.gtag('config', trackingID, { page_path: url })
+  }
 
   const router = useRouter()
   useEffect(() => {
@@ -32,3 +38,5 @@ export default function GoogleAnalyticsRouter({
   }, [router.events])
   return <></>
 }
+
+export default GoogleAnalyticsRouter

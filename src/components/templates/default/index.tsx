@@ -1,5 +1,9 @@
+import classnames from 'classnames'
 import Link from 'next/link'
 import { PropsWithChildren } from 'react'
+
+import styles from './index.module.css'
+
 import NavbarHeader from '@/components/organisms/navbar-header/'
 
 export type DefaultLayoutProps = {
@@ -11,11 +15,11 @@ export default function DefaultLayout({
   children
 }: PropsWithChildren<DefaultLayoutProps>) {
   return (
-    <div className="font-mono">
+    <div className={classnames(styles.defaultLayoutContent)}>
       <NavbarHeader>
         <Link href="/">{siteName}</Link>
       </NavbarHeader>
-      <div className="md:container mx-auto px-4 py-4">{children}</div>
+      <div className={classnames(styles.defaultLayoutContent)}>{children}</div>
     </div>
   )
 }

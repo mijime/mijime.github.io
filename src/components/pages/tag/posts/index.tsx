@@ -1,4 +1,5 @@
 import Head from 'next/head'
+
 import Pagination from '@/components/molecules/pagination/'
 import ArticleList from '@/components/organisms/article-list/'
 import { ListPageProps } from '@/components/templates/'
@@ -11,7 +12,7 @@ export type PostsByTagPageProps = ListPageProps & {
   postCount: number
 }
 
-export function PostsByTagPage({
+export const PostsByTagPage = function PostsByTagPage({
   siteName,
   page,
   pageSize,

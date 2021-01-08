@@ -1,4 +1,8 @@
+import classnames from 'classnames'
 import Link from 'next/link'
+
+import styles from './index.module.css'
+
 import Card from '@/components/atoms/card/'
 import TagList from '@/components/molecules/tag-list/'
 
@@ -17,7 +21,7 @@ export default function ArticleItem({
 }: ArticleItemProps) {
   return (
     <Card>
-      <h4 className="py-2">
+      <h4 className={classnames(styles.title)}>
         <Link href={`/${slug}`}>{title}</Link>
       </h4>
       <TagList tags={tags} date={date} />

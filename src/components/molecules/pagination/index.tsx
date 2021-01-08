@@ -1,13 +1,19 @@
+import classnames from 'classnames'
 import Link from 'next/link'
+
+import styles from './index.module.css'
 
 type PaginationLinkProps = {
   hrefFormat: string
   page: number
 }
 
-function PaginationLink({ hrefFormat, page }: PaginationLinkProps) {
+const PaginationLink = function PaginationLink({
+  hrefFormat,
+  page
+}: PaginationLinkProps) {
   return (
-    <span className="border-gray-100 bg-gray-200 text-gray-600 px-4 py-3 border-2 rounded-sm">
+    <span className={classnames(styles.paginationLink)}>
       <Link href={hrefFormat.replace('{page}', String(page))}>
         {String(page)}
       </Link>
@@ -22,7 +28,7 @@ type PaginationProps = {
   pageSize: number
 }
 
-export default function Pagination({
+const Pagination = function Pagination({
   hrefFormat,
   itemCount,
   page,
@@ -32,57 +38,60 @@ export default function Pagination({
   const nextPage = page + 1
   const firstPage = 1
   const lastPage = Math.ceil(itemCount / pageSize)
+
   return (
     <nav>
-      <ul className="flex justify-center space-x-2 py-2">
-        {page !== firstPage ? (
+      <ul className={classnames(styles.pagination)}>
+        {page === firstPage ? (
+          <></>
+        ) : (
           <li>
             <PaginationLink hrefFormat={hrefFormat} page={firstPage} />
           </li>
-        ) : (
-          <></>
         )}
-        {page - firstPage > 2 ? (
+        {page - firstPage <= 2 ? (
+          <></>
+        ) : (
           <li>
-            <span className="px-2 text-gray-400">&hellip;</span>
+            <span className={classnames(styles.paginationEllip)}>&hellip;</span>
           </li>
-        ) : (
-          <></>
         )}
-        {page - firstPage > 1 ? (
+        {page - firstPage <= 1 ? (
+          <></>
+        ) : (
           <li>
             <PaginationLink hrefFormat={hrefFormat} page={prevPage} />
           </li>
-        ) : (
-          <></>
         )}
         <li>
-          <span className="border-blue-100 bg-blue-200 text-blue-600 px-4 py-3 border-2 rounded-sm">
+          <span className={classnames(styles.paginationCurrentLink)}>
             {page}
           </span>
         </li>
-        {lastPage - page > 1 ? (
+        {lastPage - page <= 1 ? (
+          <></>
+        ) : (
           <li>
             <PaginationLink hrefFormat={hrefFormat} page={nextPage} />
           </li>
-        ) : (
-          <></>
         )}
-        {lastPage - page > 2 ? (
+        {lastPage - page <= 2 ? (
+          <></>
+        ) : (
           <li>
-            <span className="px-2 text-gray-400">&hellip;</span>
+            <span className={classnames(styles.paginationEllip)}>&hellip;</span>
           </li>
-        ) : (
-          <></>
         )}
-        {lastPage !== page ? (
+        {lastPage === page ? (
+          <></>
+        ) : (
           <li>
             <PaginationLink hrefFormat={hrefFormat} page={lastPage} />
           </li>
-        ) : (
-          <></>
         )}
       </ul>
     </nav>
   )
 }
+
+export default Pagination

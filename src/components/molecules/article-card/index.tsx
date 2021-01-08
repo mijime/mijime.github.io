@@ -1,5 +1,9 @@
+import classnames from 'classnames'
 import Link from 'next/link'
 import { PropsWithChildren } from 'react'
+
+import styles from './index.module.css'
+
 import Card from '@/components/atoms/card/'
 import TagList from '@/components/molecules/tag-list/'
 
@@ -19,11 +23,11 @@ export default function ArticleCard({
 }: PropsWithChildren<ArticleCardProps>) {
   return (
     <Card>
-      <h1 className="py-2 text-gray-800 text-lg text-center">
+      <h1 className={classnames(styles.title)}>
         <Link href={`/${slug}/`}>{title}</Link>
       </h1>
       <TagList tags={tags} date={date} />
-      <div className="text-gray-600 py-2 overflow-x-hidden">{children}</div>
+      <div className={classnames(styles.content)}>{children}</div>
     </Card>
   )
 }

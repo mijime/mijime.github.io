@@ -1,4 +1,5 @@
-import { GetStaticProps, GetStaticPaths } from 'next'
+import { GetStaticPaths, GetStaticProps } from 'next'
+
 import { PostsApp } from '@/applications/posts/'
 import { SitesApp } from '@/applications/sites/'
 import {
@@ -8,7 +9,7 @@ import {
 
 export default PostsByTagPage
 
-export const getStaticProps: GetStaticProps<PostsByTagPageProps> = async function ({
+export const getStaticProps: GetStaticProps<PostsByTagPageProps> = async function getStaticProps({
   params
 }) {
   const siteName = SitesApp.getSiteName()
@@ -27,7 +28,7 @@ export const getStaticProps: GetStaticProps<PostsByTagPageProps> = async functio
   }
 }
 
-export const getStaticPaths: GetStaticPaths = async function (context) {
+export const getStaticPaths: GetStaticPaths = async function getStaticPaths() {
   const pageSize = SitesApp.getPageSize()
   const { tagCounts } = await PostsApp.fetchTagCounts()
 

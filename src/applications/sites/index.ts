@@ -1,9 +1,9 @@
 import {
   LANG,
+  PAGE_SIZE,
   SITE_NAME,
   SITE_URL,
-  SITE_VERIFICATION,
-  PAGE_SIZE
+  SITE_VERIFICATION
 } from '@/infrastructures/config/'
 
 export const SitesApp = {
