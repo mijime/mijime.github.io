@@ -15,7 +15,7 @@ export default function DefaultLayout({
   children
 }: PropsWithChildren<DefaultLayoutProps>) {
   return (
-    <div className={classnames(styles.defaultLayoutContent)}>
+    <div className={classnames(styles.defaultLayout)}>
       <NavbarHeader>
         <Link href="/">{siteName}</Link>
       </NavbarHeader>
