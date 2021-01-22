@@ -1,7 +1,7 @@
 import classnames from 'classnames'
 import { PropsWithChildren } from 'react'
 
-import styles from './index.module.css'
+import styles from '@/styles/components/tag/index.module.css'
 
 export type TagProps = {
   className?: string

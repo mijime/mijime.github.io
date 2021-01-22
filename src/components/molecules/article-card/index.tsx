@@ -2,10 +2,9 @@ import classnames from 'classnames'
 import Link from 'next/link'
 import { PropsWithChildren } from 'react'
 
-import styles from './index.module.css'
-
 import Card from '@/components/atoms/card/'
 import TagList from '@/components/molecules/tag-list/'
+import styles from '@/styles/components/article-card/index.module.css'
 
 type ArticleCardProps = {
   slug: string

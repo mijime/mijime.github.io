@@ -1,9 +1,8 @@
 import classnames from 'classnames'
 
-import styles from './index.module.css'
-
 import ArticleItem from '@/components/molecules/article-item/'
 import { Post } from '@/domains/entities/posts/'
+import styles from '@/styles/components/article-list/index.module.css'
 
 type ArticleListProps = {
   posts: Post[]

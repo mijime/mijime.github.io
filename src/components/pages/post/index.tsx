@@ -2,13 +2,12 @@ import classnames from 'classnames'
 import Head from 'next/head'
 import { PropsWithChildren } from 'react'
 
-import styles from './index.module.css'
-
 import { SitesApp } from '@/applications/sites/'
 import GithubEditButton from '@/components/atoms/github-edit-button/'
 import ArticleCard from '@/components/molecules/article-card/'
 import DefaultLayout from '@/components/templates/default/'
 import { buildMetadataByFrontMatter } from '@/infrastructures/functions/markdown/'
+import styles from '@/styles/components/prose/index.module.css'
 
 type PostPageProps = {
   frontMatter: {
