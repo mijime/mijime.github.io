@@ -28,6 +28,7 @@ const getExcept = function getExcept(dir) {
       'styles',
       'components/atoms',
       'components/functions',
+      'components/molecules',
       'infrastructures'
     ]
   }
@@ -62,7 +63,7 @@ module.exports = {
   ],
   overrides: [
     { files: ['*.mdx'], extends: ['plugin:mdx/overrides'] },
-    { files: ['*.stroies.tsx'], rules: { 'import/no-restricted-paths': 'off' } }
+    { files: ['*.stories.tsx'], rules: { 'import/no-restricted-paths': 'off' } }
   ],
   parser: '@typescript-eslint/parser',
   parserOptions: {
