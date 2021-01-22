@@ -1,6 +1,6 @@
 import classnames from 'classnames'
 
-import styles from './index.module.css'
+import styles from '@/styles/components/navbar-header/index.module.css'
 
 export default function NavbarHeader({ children }: { children: any }) {
   return (

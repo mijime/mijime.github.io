@@ -2,7 +2,7 @@ import classnames from 'classnames'
 import Link from 'next/link'
 import { PropsWithChildren } from 'react'
 
-import styles from './index.module.css'
+import styles from '@/styles/components/github-edit-button/index.module.css'
 
 export type GithubEditButtonProps = {
   githubURL: string

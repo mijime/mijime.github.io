@@ -2,9 +2,8 @@ import classnames from 'classnames'
 import Link from 'next/link'
 import { PropsWithChildren } from 'react'
 
-import styles from './index.module.css'
-
 import NavbarHeader from '@/components/organisms/navbar-header/'
+import styles from '@/styles/layouts/default/index.module.css'
 
 export type DefaultLayoutProps = {
   siteName: string

@@ -21,13 +21,12 @@ const getExcept = function getExcept(dir) {
     return ['domains']
   }
   if (dir.startsWith('src/components/atoms')) {
-    return [dir.substr(4, dir.length)]
+    return ['styles']
   }
   if (dir.startsWith('src/components/molecules')) {
     return [
-      dir.substr(4, dir.length),
+      'styles',
       'components/atoms',
-      'components/molecules',
       'components/functions',
       'infrastructures'
     ]
@@ -61,7 +60,10 @@ module.exports = {
     'standard',
     'prettier'
   ],
-  overrides: [{ extends: ['plugin:mdx/overrides'], files: ['*.mdx'] }],
+  overrides: [
+    { files: ['*.mdx'], extends: ['plugin:mdx/overrides'] },
+    { files: ['*.stroies.tsx'], rules: { 'import/no-restricted-paths': 'off' } }
+  ],
   parser: '@typescript-eslint/parser',
   parserOptions: {
     ecmaFeatures: { jsx: true },

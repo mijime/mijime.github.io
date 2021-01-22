@@ -1,10 +1,9 @@
 import classnames from 'classnames'
 import Link from 'next/link'
 
-import styles from './index.module.css'
-
 import Tag from '@/components/atoms/tag/'
 import { humanReadableDate } from '@/infrastructures/functions/date'
+import styles from '@/styles/components/tag-list/index.module.css'
 
 type TagListProps = {
   tags: string[]

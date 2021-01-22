@@ -1,7 +1,7 @@
 import classnames from 'classnames'
 import Link from 'next/link'
 
-import styles from './index.module.css'
+import styles from '@/styles/components/pagination/index.module.css'
 
 type PaginationLinkProps = {
   hrefFormat: string
