@@ -87,7 +87,7 @@ Toggl にタスク管理もついた感じ。こっちのほうが反応はい�
 
 https://play.google.com/store/apps/details?id=com.franco.timer&hl=en_US&gl=US
 
-52分働いて12分休むのが最高らしい。そうなの？
+52分働いて17分休むのが最高らしい。そうなの？
 
 アプリの方で低電力モード消せ！じゃないと使わせない！なのが面倒。気持ちはわかるけど。
 
