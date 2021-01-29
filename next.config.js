@@ -1,5 +1,5 @@
-const highlight = require('remark-highlight.js')
 const withMdxEnhanced = require('next-mdx-enhanced')
+const highlight = require('remark-highlight.js')
 
 module.exports = withMdxEnhanced({
   layoutPath: 'src/components/pages/post/',
