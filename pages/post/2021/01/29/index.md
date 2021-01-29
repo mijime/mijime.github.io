@@ -2,7 +2,8 @@
 Title: '最近試した自己管理系ツール'
 Draft: false
 Tags: ['android']
-Date: '2021-01-29T13:44:00.586Z'
+Description: 最近試してみたアプリやツールをまとめておく
+CreatedAt: '2021-01-29T13:44:00.586Z'
 ---
 
 ## 試行錯誤
@@ -89,7 +90,4 @@ https://play.google.com/store/apps/details?id=com.franco.timer&hl=en_US&gl=US
 52分働いて12分休むのが最高らしい。そうなの？
 
 アプリの方で低電力モード消せ！じゃないと使わせない！なのが面倒。気持ちはわかるけど。
-
-https://play.google.com/store/apps/details?id=com.franco.timer&hl=en_US&gl=US
-
 
