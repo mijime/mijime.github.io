@@ -5,6 +5,10 @@ on:
   pull_request:
     branches:
       - master
+    paths:
+      - src/**/*.ts
+      - src/**/*.tsx
+      - pages/**/*.tsx
 
 jobs:
   build:
