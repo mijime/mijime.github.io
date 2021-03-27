@@ -1,6 +1,5 @@
 import { MDXProvider } from '@mdx-js/react'
 import { AppProps } from 'next/app'
-import Image from 'next/image'
 import Link from 'next/link'
 
 import { AnalyticsApp } from '@/applications/analytics/'
@@ -13,7 +12,7 @@ export default function MainApp({ Component, pageProps }: AppProps) {
   return (
     <>
       <GoogleAnalyticsRouter trackingID={AnalyticsApp.getTrackingID()} />
-      <MDXProvider components={{ a: Link, img: Image }}>
+      <MDXProvider components={{ a: Link }}>
         <Component {...pageProps} />
       </MDXProvider>
     </>
