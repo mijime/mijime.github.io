@@ -16,3 +16,7 @@ CreatedAt: '2020-05-31T12:39:09.887Z'
 `:echo system("git show ". expand("<cword>"))`
 
 本当はバッファに開いて diff の syntax を当てたい。。。
+
+---
+
+`Ctrl-K` で取れる
