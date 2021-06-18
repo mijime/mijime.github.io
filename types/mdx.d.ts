@@ -41,3 +41,5 @@ declare module '*.mdx' {
   let MDXComponent: (props: any) => Element
   export default MDXComponent
 }
+
+declare module 'remark-highlight.js'
