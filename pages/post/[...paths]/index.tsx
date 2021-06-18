@@ -14,13 +14,13 @@ export const getStaticProps: GetStaticProps<PostPageProps> =
     const slug = (params?.paths as string[]).join('/')
     const post = await PostsApp.fetchPostBySlug(slug)
 
-    const content = await serialize(post.content, {
+    const source = await serialize(post.content, {
       mdxOptions: {
         remarkPlugins: [() => highlight({ exclude: ['mermaid'] })]
       }
     })
 
-    return { props: { siteName, source: content, post } }
+    return { props: { siteName, source, post } }
   }
 
 export const getStaticPaths: GetStaticPaths = async function getStaticPaths() {
