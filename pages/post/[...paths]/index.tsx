@@ -1,5 +1,6 @@
 import { GetStaticPaths, GetStaticProps } from 'next'
 import { serialize } from 'next-mdx-remote/serialize'
+import highlight from 'remark-highlight.js'
 
 import { PostsApp } from '@/applications/posts/'
 import { SitesApp } from '@/applications/sites/'
@@ -13,7 +14,11 @@ export const getStaticProps: GetStaticProps<PostPageProps> =
     const slug = (params?.paths as string[]).join('/')
     const post = await PostsApp.fetchPostBySlug(slug)
 
-    const content = await serialize(post.content, { scope: post })
+    const content = await serialize(post.content, {
+      mdxOptions: {
+        remarkPlugins: [() => highlight({ exclude: ['mermaid'] })]
+      }
+    })
 
     return { props: { siteName, source: content, post } }
   }
