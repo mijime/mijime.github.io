@@ -90,6 +90,6 @@ vmc start termina --enable-audio-capture
 すれば解決した。
 
 その後、Alacritty が透過できない+画面最大化できない、という症状になったけど
-これは Logout->Login で治った。
+これは `Logout->Login` で治った。
 
 思ったより、音楽を鳴らすのに CPU を使っているけど。。pluse なんぞや。。

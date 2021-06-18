@@ -31,7 +31,7 @@ react-markdown ていうのもあったけど commonmark に準拠してるら�
 あと commonmark が割と容量食ってたのもある。
 
 remark-react を使わなかったのは highlight 系のライブラリをかます必要があったのと
-markdown -> html -> react の流れのほうが拡張しやすく感じた。
+`markdown -> html -> react` の流れのほうが拡張しやすく感じた。
 絵文字対応もさくっといけたし。
 
 なんかやるとき、もしくはデンジャラスなコードを強要されたときはまた使ってみたい。
