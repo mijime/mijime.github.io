@@ -6,22 +6,21 @@ import { TagsPage, TagsPageProps } from '@/components/pages/tags/'
 
 export default TagsPage
 
-export const getStaticProps: GetStaticProps<TagsPageProps> = async function getStaticProps({
-  params
-}) {
-  const siteName = SitesApp.getSiteName()
-  const pageSize = SitesApp.getPageSize()
-  const page = Number(params?.tagPage)
+export const getStaticProps: GetStaticProps<TagsPageProps> =
+  async function getStaticProps({ params }) {
+    const siteName = SitesApp.getSiteName()
+    const pageSize = SitesApp.getPageSize()
+    const page = Number(params?.tagPage)
 
-  const { tagCounts, count } = await PostsApp.fetchTagCountsByPage({
-    page,
-    pageSize
-  })
+    const { tagCounts, count } = await PostsApp.fetchTagCountsByPage({
+      page,
+      pageSize
+    })
 
-  return {
-    props: { siteName, page, pageSize, tags: tagCounts, tagCount: count }
+    return {
+      props: { siteName, page, pageSize, tags: tagCounts, tagCount: count }
+    }
   }
-}
 
 export const getStaticPaths: GetStaticPaths = async function getStaticPaths() {
   const pageSize = SitesApp.getPageSize()

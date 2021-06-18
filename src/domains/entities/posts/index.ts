@@ -8,4 +8,5 @@ export type Post = {
   tags: Tag[]
   createdAt: ISODate
   draft: boolean
+  content: string
 }

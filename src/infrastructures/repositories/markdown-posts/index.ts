@@ -18,7 +18,7 @@ const convertSlugFromFile = function convertSlugFromFile(filepath: string) {
     .replace(/\.mdx?$/u, '')
     .replace(/index$/u, '')
     .replace(/\/$/u, '')
-    .replace(/^.*\/pages\//u, '')
+    .replace(/^.*\/contents\//u, '')
 }
 
 const convertPostFromMarkdown = function convertPostFromMarkdown({
@@ -36,7 +36,8 @@ const convertPostFromMarkdown = function convertPostFromMarkdown({
   return {
     ...metadata,
     slug,
-    description
+    description,
+    content
   }
 }
 
@@ -49,13 +50,13 @@ export class MarkdownPostsRepository implements PostsRepository {
 
   async fetchPostBySlug(slug: Slug) {
     const md = await fetchMarkdownFromFile(
-      path.resolve(`pages/${slug}/index.md`)
+      path.resolve(`contents/${slug}/index.md`)
     )
     return convertPostFromMarkdown(md)
   }
 
   async fetchPosts() {
-    const posts = (await fetchMarkdowns(path.resolve('pages/post/')))
+    const posts = (await fetchMarkdowns(path.resolve('contents/')))
       .map(convertPostFromMarkdown)
       .filter(post => !this.isProduction || !post.draft)
     const sortedPosts = posts.sort((curr, next) =>

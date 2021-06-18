@@ -6,17 +6,18 @@ import { IndexPage, IndexPageProps } from '@/components/pages/'
 
 export default IndexPage
 
-export const getStaticProps: GetStaticProps<IndexPageProps> = async function getStaticProps() {
-  const siteName = SitesApp.getSiteName()
-  const pageSize = SitesApp.getPageSize()
-  const page = 1
+export const getStaticProps: GetStaticProps<IndexPageProps> =
+  async function getStaticProps() {
+    const siteName = SitesApp.getSiteName()
+    const pageSize = SitesApp.getPageSize()
+    const page = 1
 
-  const { posts, count } = await PostsApp.fetchPostsByPage({
-    page,
-    pageSize
-  })
+    const { posts, count } = await PostsApp.fetchPostsByPage({
+      page,
+      pageSize
+    })
 
-  return {
-    props: { siteName, page, pageSize, posts, postCount: count }
+    return {
+      props: { siteName, page, pageSize, posts, postCount: count }
+    }
   }
-}

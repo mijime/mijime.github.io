@@ -21,9 +21,7 @@ export interface PostsRepository {
     tagCounts: { name: Tag; count: number }[]
     count: number
   }>
-  fetchTagCountsByPage(
-    req: PagerRequest
-  ): Promise<{
+  fetchTagCountsByPage(req: PagerRequest): Promise<{
     tagCounts: { name: Tag; count: number }[]
     count: number
   }>

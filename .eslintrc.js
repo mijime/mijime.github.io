@@ -53,7 +53,6 @@ module.exports = {
   env: { browser: true, es2021: true },
   extends: [
     'eslint:all',
-    'plugin:mdx/recommended',
     'plugin:react/recommended',
     'plugin:import/errors',
     'plugin:import/warnings',
@@ -62,7 +61,6 @@ module.exports = {
     'prettier'
   ],
   overrides: [
-    { files: ['*.mdx'], extends: ['plugin:mdx/overrides'] },
     { files: ['*.stories.tsx'], rules: { 'import/no-restricted-paths': 'off' } }
   ],
   parser: '@typescript-eslint/parser',

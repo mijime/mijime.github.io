@@ -9,24 +9,23 @@ import {
 
 export default PostsByTagPage
 
-export const getStaticProps: GetStaticProps<PostsByTagPageProps> = async function getStaticProps({
-  params
-}) {
-  const siteName = SitesApp.getSiteName()
-  const pageSize = SitesApp.getPageSize()
-  const tag = String(params?.tagName as string)
-  const page = Number(params?.postPage as string)
+export const getStaticProps: GetStaticProps<PostsByTagPageProps> =
+  async function getStaticProps({ params }) {
+    const siteName = SitesApp.getSiteName()
+    const pageSize = SitesApp.getPageSize()
+    const tag = String(params?.tagName as string)
+    const page = Number(params?.postPage as string)
 
-  const { posts, count } = await PostsApp.fetchPostsByTagAndPage({
-    tag,
-    page,
-    pageSize
-  })
+    const { posts, count } = await PostsApp.fetchPostsByTagAndPage({
+      tag,
+      page,
+      pageSize
+    })
 
-  return {
-    props: { siteName, page, pageSize, tag, posts, postCount: count }
+    return {
+      props: { siteName, page, pageSize, tag, posts, postCount: count }
+    }
   }
-}
 
 export const getStaticPaths: GetStaticPaths = async function getStaticPaths() {
   const pageSize = SitesApp.getPageSize()
