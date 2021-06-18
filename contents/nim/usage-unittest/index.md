@@ -6,9 +6,9 @@ Draft: false
 
 ## ファイルの場所
 
-tests フォルダに .nim を配置することで始める
+tests フォルダに .nim を配置することで始める。
 
-Warning が発生するので SkipDirs に @["tests"] を追加する
+Warning が発生するので SkipDirs に `@["tests"]` を追加する。
 
 `usage-unittest.nimble`
 

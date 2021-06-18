@@ -89,7 +89,7 @@ function cosineSimilarity(curr, next) {
 
 ### 実行結果
 
-うーん、全然関係ない単語でしか一致しない、、、その通りではあるんだけど
+うーん、全然関係ない単語でしか一致しない。その通りではあるんだけど。
 
 ```
 babel-node source/js/similarity "content/posts/js/cosine-similarity.md" "content"
