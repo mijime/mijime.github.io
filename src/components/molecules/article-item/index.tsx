@@ -28,7 +28,7 @@ export default function ArticleItem({
     <Card>
       <h4 className={classnames(styles.title)}>
         {draft ? <Draft /> : <></>}
-        <Link href={`/${slug}`}>{title}</Link>
+        <Link href={`/post/${slug}`}>{title}</Link>
       </h4>
       <TagList tags={tags} createdAt={createdAt} />
     </Card>

@@ -1,43 +1,34 @@
 import classnames from 'classnames'
+import { MDXRemote, MDXRemoteSerializeResult } from 'next-mdx-remote'
 import Head from 'next/head'
 import { PropsWithChildren } from 'react'
 
 import { SitesApp } from '@/applications/sites/'
-import GithubEditButton from '@/components/atoms/github-edit-button/'
 import ArticleCard from '@/components/molecules/article-card/'
 import DefaultLayout from '@/components/templates/default/'
-import { buildMetadataByFrontMatter } from '@/infrastructures/functions/markdown/'
+import { Post } from '@/domains/entities/posts/'
 import styles from '@/styles/components/prose/index.module.css'
 
-type PostPageProps = {
-  frontMatter: {
-    __resourcePath: string
-    [key: string]: any
-  }
+export type PostPageProps = {
+  source: MDXRemoteSerializeResult
+  post: Post
 }
 
-export default function PostPage({
-  frontMatter,
-  children
-}: PropsWithChildren<PostPageProps>) {
-  const metadata = buildMetadataByFrontMatter(frontMatter)
+export const PostPage = ({
+  source,
+  post
+}: PropsWithChildren<PostPageProps>) => {
   const siteName = SitesApp.getSiteName()
-  const githubEditURL = SitesApp.getGithubEditURL()
   return (
     <DefaultLayout siteName={siteName}>
       <Head>
         <title>
-          {metadata.title} | {siteName}
+          {post.title} | {siteName}
         </title>
       </Head>
-      <ArticleCard {...metadata}>
-        <div className={classnames('prose', styles.prose)}>{children}</div>
-
-        <div className="flex justify-end py-2">
-          <GithubEditButton
-            githubURL={githubEditURL}
-            filepath={`pages/${frontMatter.__resourcePath}`}
-          ></GithubEditButton>
+      <ArticleCard {...post}>
+        <div className={classnames('prose', styles.prose)}>
+          <MDXRemote {...source} />
         </div>
       </ArticleCard>
     </DefaultLayout>

@@ -6,22 +6,21 @@ import { PostsPage, PostsPageProps } from '@/components/pages/posts/'
 
 export default PostsPage
 
-export const getStaticProps: GetStaticProps<PostsPageProps> = async function getStaticProps({
-  params
-}) {
-  const siteName = SitesApp.getSiteName()
-  const pageSize = SitesApp.getPageSize()
-  const page = Number(params?.postPage)
+export const getStaticProps: GetStaticProps<PostsPageProps> =
+  async function getStaticProps({ params }) {
+    const siteName = SitesApp.getSiteName()
+    const pageSize = SitesApp.getPageSize()
+    const page = Number(params?.postPage)
 
-  const { posts, count } = await PostsApp.fetchPostsByPage({
-    page,
-    pageSize
-  })
+    const { posts, count } = await PostsApp.fetchPostsByPage({
+      page,
+      pageSize
+    })
 
-  return {
-    props: { siteName, page, pageSize, posts, postCount: count }
+    return {
+      props: { siteName, page, pageSize, posts, postCount: count }
+    }
   }
-}
 
 export const getStaticPaths: GetStaticPaths = async function getStaticPaths() {
   const pageSize = SitesApp.getPageSize()

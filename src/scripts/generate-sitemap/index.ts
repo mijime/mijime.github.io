@@ -14,7 +14,7 @@ const generateSitemapXML = async function generateSitemapXML(siteURL: string) {
   ${posts
     .map(
       post => `<url>
-    <loc>${`${siteURL}/${post.slug}/`}</loc>
+    <loc>${`${siteURL}/post/${post.slug}/`}</loc>
     <lastmod>${post.createdAt.split('T')[0]}</lastmod>
   </url>
 `

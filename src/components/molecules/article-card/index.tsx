@@ -23,7 +23,7 @@ export default function ArticleCard({
   return (
     <Card>
       <h1 className={classnames(styles.title)}>
-        <Link href={`/${slug}/`}>{title}</Link>
+        <Link href={`/post/${slug}/`}>{title}</Link>
       </h1>
       <TagList tags={tags} createdAt={createdAt} />
       <div className={classnames(styles.content)}>{children}</div>

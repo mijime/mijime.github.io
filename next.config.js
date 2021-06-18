@@ -1,16 +1,7 @@
-const withMdxEnhanced = require('next-mdx-enhanced')
 const highlight = require('remark-highlight.js')
 
-module.exports = withMdxEnhanced({
-  layoutPath: 'src/components/pages/post/',
-  defaultLayout: true,
-  fileExtensions: ['md', 'mdx'],
-  remarkPlugins: [() => highlight({ exclude: ['mermaid'] })],
-  extendFrontMatter: {
-    phase: 'both'
-  },
-  reExportDataFetching: false
-})({
+module.exports = {
+  pageExtensions: ['tsx', 'mdx', 'md'],
   trailingSlash: true,
   webpack(config, { isServer, dev }) {
     if (isServer && !dev) {
@@ -24,4 +15,4 @@ module.exports = withMdxEnhanced({
     }
     return config
   }
-})
+}
