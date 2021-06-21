@@ -1,5 +1,5 @@
 ---
-title: 'pixelbook go を買った'
+Title: 'pixelbook go を買った'
 Draft: false
 Description: ''
 Tags: ['memo']
