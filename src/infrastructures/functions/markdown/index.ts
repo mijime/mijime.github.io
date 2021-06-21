@@ -10,11 +10,11 @@ interface Metadata {
 export const buildMetadataByFrontMatter =
   function buildMetadataByFrontMatter(data: { [key: string]: any }): Metadata {
     const originMetadata = {
-      title: data.title || data.Title || '',
-      description: data.description || data.Description || '',
-      createdAt: data.createdAt || data.CreatedAt || new Date().toISOString(),
-      tags: data.tags || data.Tags || [],
-      draft: Boolean(data.draft) || Boolean(data.Draft),
+      title: data.Title || '',
+      description: data.Description || '',
+      createdAt: data.CreatedAt || new Date().toISOString(),
+      tags: data.Tags || [],
+      draft: data.Draft?.toLowerCase() === 'true',
       slug: data.__resourcePath
         ? data.__resourcePath.replace(/\/index\.mdx?$/u, '')
         : ''

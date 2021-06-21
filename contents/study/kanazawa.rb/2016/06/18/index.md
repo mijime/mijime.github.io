@@ -2,7 +2,7 @@
 Description: ''
 Tags: ['Development', 'lambda', 'kzrb']
 CreatedAt: '2016-06-18T13:23:05+09:00'
-title: ' kanazawa.rb meetup 46に参加した'
+Title: ' kanazawa.rb meetup 46に参加した'
 ---
 
 ## AWS Lambda を管理するツール Lamma やってみた
