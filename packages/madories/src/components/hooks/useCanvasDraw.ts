@@ -9,8 +9,8 @@ import { drawTatamiCells } from "../../canvas/drawTatami";
 import { detectRooms, drawRoomLabels } from "../../canvas/roomDetection";
 import { ITEM_DEF_MAP } from "../../items";
 import type { FloorPlan, Item } from "../../types";
-import { floorTypeToColor } from "../Toolbar";
-import type { ToolMode } from "../Toolbar";
+import { floorTypeToColor } from "../toolMode";
+import type { ToolMode } from "../toolMode";
 import type { SelectionRef, ViewRef } from "./types";
 
 interface Props {

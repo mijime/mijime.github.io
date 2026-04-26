@@ -3,7 +3,7 @@ import { GestureHandler } from "../../canvas/gestureHandler";
 import { hitTestEdge } from "../../canvas/hitTest";
 import { computeBounds } from "../../canvas/export";
 import type { CopiedRegion, FloorPlan, FloorType } from "../../types";
-import type { ToolMode } from "../Toolbar";
+import type { ToolMode } from "../toolMode";
 import type { SelectionRef, ViewRef } from "./types";
 
 interface Props {

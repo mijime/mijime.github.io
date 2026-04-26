@@ -1,5 +1,5 @@
 import type { FloorPlan } from "../types";
-import { floorTypeToColor } from "../components/Toolbar";
+import { floorTypeToColor } from "../components/toolMode";
 import { drawGrid } from "./drawGrid";
 import { drawItems } from "./drawItems";
 import { drawVoidCells } from "./drawVoid";
