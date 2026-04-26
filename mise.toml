@@ -3,30 +3,30 @@ node = "lts"
 lefthook = "latest"
 bun = "latest"
 
-[tasks."format:oxfmt"]
-run = "bun run --filter '*' format:oxfmt"
-sources = ["*/*/src/**/*.{ts,tsx}"]
+[tasks."format:bun"]
+run = "bun run format"
+sources = ["*/*/src/**/*.{ts,tsx,astro}"]
 
-[tasks."check:oxlint"]
-run = "bun run --filter '*' check:oxlint"
-sources = ["*/*/src/**/*.{ts,tsx}"]
-
-[tasks."check:tsgo"]
-run = "bun run --filter '*' check:tsgo"
-sources = ["*/*/src/**/*.{ts,tsx}"]
+[tasks."check:bun"]
+run = "bun run check"
+sources = ["*/*/src/**/*.{ts,tsx,astro}"]
 
 [tasks."test:bun"]
 run = "bun test"
-sources = ["*/*/src/**/*.{ts,tsx}"]
+sources = ["*/*/src/**/*.{ts,tsx,astro}"]
 
 [tasks.format]
-depends = ["format:oxfmt"]
+depends = ["format:bun"]
 
 [tasks.check]
-depends = ["check:oxlint", "check:tsgo"]
+depends = ["check:bun"]
 
 [tasks.test]
 depends = ["test:bun"]
 
 [tasks.ci]
 depends = ["format", "check", "test"]
+
+[tasks.build]
+run = "bun run build"
+depends = ["ci"]
