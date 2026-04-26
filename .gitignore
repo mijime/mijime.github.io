@@ -1,5 +1,8 @@
 storybook-static/
+.astro/
 public/sitemap.xml
+apps/main/public/blog-meta.parquet
+apps/main/public/blog-meta.json
 
 ### https://raw.github.com/github/gitignore/218a941be92679ce67d0484547e3e142b2f5f6f0/Global/macOS.gitignore
 
@@ -9,7 +12,7 @@ public/sitemap.xml
 .LSOverride
 
 # Icon must end with two \r
-Icon
+Icon
 
 # Thumbnails
 ._*
