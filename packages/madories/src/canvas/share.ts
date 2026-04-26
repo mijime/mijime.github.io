@@ -19,7 +19,7 @@ function compress(text: string): Promise<string> {
   writer.close();
   return new Response(stream.readable).arrayBuffer().then((compressed) => {
     const binary = String.fromCodePoint(...new Uint8Array(compressed));
-    return binary.replaceAll("+", "-").replaceAll("/", "_").replaceAll("=", "");
+    return btoa(binary).replaceAll("+", "-").replaceAll("/", "_").replaceAll("=", "");
   });
 }
 
