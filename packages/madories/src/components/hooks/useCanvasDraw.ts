@@ -119,15 +119,12 @@ function drawItemAtCached(
   alpha: number,
   darkMode: boolean,
 ): void {
-  const oc = getCachedIcon(item.type, item.rotation, cellSize);
+  const oc = getCachedIcon(item.type, item.rotation, cellSize, darkMode);
   if (!oc) {
     return;
   }
   ctx.save();
   ctx.globalAlpha = alpha;
-  if (darkMode) {
-    ctx.filter = "invert(1)";
-  }
   ctx.drawImage(oc, px, py);
   ctx.restore();
 }

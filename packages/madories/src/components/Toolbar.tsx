@@ -1,3 +1,13 @@
+import {
+  Download,
+  Eraser,
+  FolderOpen,
+  MousePointer2,
+  Redo2,
+  Save,
+  Trash2,
+  Undo2,
+} from "lucide-react";
 import { useState } from "react";
 import { ITEM_CATEGORIES, ITEM_DEFS } from "../items";
 import type { FloorType, ItemType, WallType } from "../types";
@@ -111,18 +121,21 @@ export function Toolbar({
         width: "120px",
       }}
     >
-      {/* Select + Erase at top */}
       <div className="flex flex-col gap-1">
         <button
           onClick={() => onToolChange({ kind: "select" })}
-          style={btn(tool.kind === "select")}
+          style={{ ...btn(tool.kind === "select"), alignItems: "center", display: "flex", gap: "4px", justifyContent: "center" }}
+          title="選択"
         >
+          <MousePointer2 size={12} />
           選択
         </button>
         <button
           onClick={() => onToolChange({ kind: "erase" })}
-          style={btn(tool.kind === "erase", true)}
+          style={{ ...btn(tool.kind === "erase", true), alignItems: "center", display: "flex", gap: "4px", justifyContent: "center" }}
+          title="消去"
         >
+          <Eraser size={12} />
           消去
         </button>
       </div>
@@ -252,7 +265,6 @@ export function Toolbar({
         </div>
       </div>
 
-      {/* Clear */}
       <div
         className="mt-auto flex flex-col gap-1"
         style={{ borderTop: "1px solid var(--border)", paddingTop: "8px" }}
@@ -261,26 +273,28 @@ export function Toolbar({
           <button
             onClick={onUndo}
             disabled={!canUndo}
-            style={{ ...btn(false), opacity: canUndo ? 1 : 0.4, width: "50%" }}
+            title="戻す"
+            style={{ ...btn(false), alignItems: "center", display: "flex", justifyContent: "center", opacity: canUndo ? 1 : 0.4, width: "50%" }}
           >
-            ↩ 戻す
+            <Undo2 size={12} />
           </button>
           <button
             onClick={onRedo}
             disabled={!canRedo}
-            style={{ ...btn(false), opacity: canRedo ? 1 : 0.4, width: "50%" }}
+            title="進む"
+            style={{ ...btn(false), alignItems: "center", display: "flex", justifyContent: "center", opacity: canRedo ? 1 : 0.4, width: "50%" }}
           >
-            ↪ 進む
+            <Redo2 size={12} />
           </button>
         </div>
-        <button onClick={onSave} style={btn(false)}>
-          保存
+        <button onClick={onSave} title="保存" style={{ ...btn(false), alignItems: "center", display: "flex", justifyContent: "center" }}>
+          <Save size={12} />
         </button>
-        <button onClick={onLoad} style={btn(false)}>
-          読込
+        <button onClick={onLoad} title="読込" style={{ ...btn(false), alignItems: "center", display: "flex", justifyContent: "center" }}>
+          <FolderOpen size={12} />
         </button>
-        <button onClick={onExportAll} style={btn(false)}>
-          書き出し (PNG)
+        <button onClick={onExportAll} title="書き出し (PNG)" style={{ ...btn(false), alignItems: "center", display: "flex", justifyContent: "center" }}>
+          <Download size={12} />
         </button>
         <button
           onClick={() => {
@@ -288,9 +302,10 @@ export function Toolbar({
               onClear();
             }
           }}
-          style={{ ...btn(false), color: "var(--terra)" }}
+          title="全面削除"
+          style={{ ...btn(false), alignItems: "center", color: "var(--terra)", display: "flex", justifyContent: "center" }}
         >
-          全面削除
+          <Trash2 size={12} />
         </button>
       </div>
     </div>

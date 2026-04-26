@@ -4,35 +4,29 @@ export function drawSofa(
   py: number,
   w: number,
   h: number,
+  darkMode = false,
 ): void {
-  // Sofa pushed to top (back against wall), seat in lower portion
   const backH = h * 0.25;
   const seatH = h * 0.45;
   const armW = w * 0.12;
 
-  // Back
-  ctx.fillStyle = "#8B7D6B";
+  ctx.fillStyle = darkMode ? "#7a6e5e" : "#8B7D6B";
   ctx.fillRect(px, py, w, backH);
 
-  // Arms (left & right)
-  ctx.fillStyle = "#7A6B5A";
+  ctx.fillStyle = darkMode ? "#6a5e4e" : "#7A6B5A";
   ctx.fillRect(px, py + backH, armW, seatH);
   ctx.fillRect(px + w - armW, py + backH, armW, seatH);
 
-  // Seat
-  ctx.fillStyle = "#A0907D";
+  ctx.fillStyle = darkMode ? "#8c7d6a" : "#A0907D";
   ctx.fillRect(px + armW, py + backH, w - armW * 2, seatH);
 
-  // Outline
-  ctx.strokeStyle = "#5C4A3A";
+  ctx.strokeStyle = darkMode ? "#4a3828" : "#5C4A3A";
   ctx.lineWidth = 1.5;
   ctx.strokeRect(px, py, w, backH + seatH);
-  // Back/seat divider
   ctx.beginPath();
   ctx.moveTo(px, py + backH);
   ctx.lineTo(px + w, py + backH);
   ctx.stroke();
-  // Arm dividers
   ctx.beginPath();
   ctx.moveTo(px + armW, py + backH);
   ctx.lineTo(px + armW, py + backH + seatH);
