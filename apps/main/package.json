@@ -9,9 +9,8 @@
     "check": "bun run check:oxlint && bun run check:astro",
     "check:oxlint": "oxlint --format=github",
     "check:astro": "astro check",
-    "format": "bun run format:oxfmt && bun run format:prettier",
-    "format:oxfmt": "oxfmt",
-    "format:prettier": "prettier --write 'src/**/*.astro'"
+    "format": "bun run format:oxfmt",
+    "format:oxfmt": "oxfmt"
   },
   "dependencies": {
     "@astrojs/mdx": "^4.3.14",
@@ -30,8 +29,6 @@
     "@types/react-dom": "^19.2.3",
     "oxfmt": "^0.1.0",
     "oxlint": "^1.61.0",
-    "prettier": "^3.8.3",
-    "prettier-plugin-astro": "^0.14.1",
     "typescript": "^6.0.3"
   }
 }
