@@ -17,6 +17,7 @@ interface Props {
   tool: ToolMode;
   onSetWall: (cellIndex: number, edge: "top" | "left") => void;
   onSetFloorType: (cellIndex: number, floorType: FloorType | null) => void;
+  onFillRoom: (cellIndex: number) => void;
   onPlaceItem: (cellIndex: number) => void;
   onRotateItem: (cellIndex: number) => void;
   onMoveItem: (fromIndex: number, toIndex: number) => void;
@@ -48,6 +49,7 @@ export const FloorCanvas = forwardRef<FloorCanvasHandle, Props>(function FloorCa
     selectedItemCell,
     selectionRef,
     staticCanvasRef,
+    tool,
     viewRef,
   });
 
@@ -63,6 +65,7 @@ export const FloorCanvas = forwardRef<FloorCanvasHandle, Props>(function FloorCa
     floor,
     onEraseCell: props.onEraseCell,
     onEraseRegion: props.onEraseRegion,
+    onFillRoom: props.onFillRoom,
     onMoveItem: props.onMoveItem,
     onPasteRegion: props.onPasteRegion,
     onPlaceItem: props.onPlaceItem,

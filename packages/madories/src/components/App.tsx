@@ -219,6 +219,7 @@ export function App() {
           onExportAll={() => exportAllFloorsPng(building.floors, building.cellSize)}
           onShare={handleShare}
           onClear={() => dispatch({ floorId: floor.id, type: "CLEAR_FLOOR" })}
+          onRotateFloor={() => dispatch({ floorId: floor.id, type: "ROTATE_FLOOR" })}
         />
         <DslPanel
           floor={floor}
@@ -258,6 +259,15 @@ export function App() {
                 type: "SET_FLOOR_TYPE",
               })
             }
+            onFillRoom={(cellIndex) => {
+              if (tool.kind !== "floor" || tool.floorType === null) return;
+              dispatch({
+                cellIndex,
+                floorId: floor.id,
+                floorType: tool.floorType,
+                type: "FILL_ROOM",
+              });
+            }}
             onPlaceItem={(cellIndex) => {
               if (tool.kind !== "item") {
                 return;
