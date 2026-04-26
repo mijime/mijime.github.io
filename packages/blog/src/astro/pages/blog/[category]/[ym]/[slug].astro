@@ -76,6 +76,7 @@ const { Content } = await render(entry);
           div.innerHTML = svg;
           pre.replaceWith(div);
         } catch (e) {
+          // eslint-disable-next-line no-console
           console.error("[mermaid] render failed:", e, "\nInput:", text);
         }
       }),
