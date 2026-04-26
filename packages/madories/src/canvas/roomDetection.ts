@@ -163,7 +163,7 @@ export function drawRoomLabels(
     const cx = (sumX / room.cells.length + 0.5) * cellSize;
     const cy = (sumY / room.cells.length + 0.5) * cellSize;
 
-    if (!room.simpleShape) {
+    if (!room.simpleShape && room.tatami < 14) {
       continue;
     }
     const label = `${room.tatami}畳`;
