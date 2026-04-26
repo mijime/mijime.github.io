@@ -269,11 +269,11 @@ export function reducer(state: Building, action: Action): Building {
           }
         }
 
-        // Second pass: rotate walls
-        // src.wall.left (x-boundary at x, between x-1 and x) →
-        //   after CW90, this vertical line becomes horizontal line → top of new (nx, ny)
-        // src.wall.top (y-boundary at y, between y-1 and y) →
-        //   after CW90, this horizontal line becomes vertical line → left of new (nx+1, ny)
+        // Second pass: rotate walls.
+        // Src.wall.left (x-boundary at x, between x-1 and x) →
+        //   After CW90, this vertical line becomes horizontal line → top of new (nx, ny)
+        // Src.wall.top (y-boundary at y, between y-1 and y) →
+        //   After CW90, this horizontal line becomes vertical line → left of new (nx+1, ny)
         for (let y = 0; y < height; y++) {
           for (let x = 0; x < width; x++) {
             const src = cells[y * width + x];
@@ -296,7 +296,7 @@ export function reducer(state: Building, action: Action): Building {
           }
         }
 
-        return { ...floor, width: newWidth, height: newHeight, cells: newCells };
+        return { ...floor, cells: newCells, height: newHeight, width: newWidth };
       });
     }
 

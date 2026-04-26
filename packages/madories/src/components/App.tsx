@@ -257,7 +257,9 @@ export function App() {
               })
             }
             onFillRoom={(cellIndex) => {
-              if (tool.kind !== "floor" || tool.floorType === null) return;
+              if (tool.kind !== "floor" || tool.floorType === null) {
+                return;
+              }
               dispatch({
                 cellIndex,
                 floorId: floor.id,

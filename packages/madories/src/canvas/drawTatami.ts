@@ -15,7 +15,9 @@ export function drawTatamiCells(
 
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
-      if (cells[y * width + x].floorType !== "tatami") continue;
+      if (cells[y * width + x].floorType !== "tatami") {
+        continue;
+      }
 
       const px = x * cellSize;
       const py = y * cellSize;
