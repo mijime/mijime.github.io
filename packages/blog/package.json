@@ -20,9 +20,8 @@
     "check:tsgo": "tsgo --noEmit",
     "check:oxlint": "oxlint --format=github",
     "check:astro": "astro check",
-    "format": "bun run format:oxfmt && bun run format:prettier",
-    "format:oxfmt": "oxfmt",
-    "format:prettier": "prettier --write 'src/**/*.astro'"
+    "format": "bun run format:oxfmt",
+    "format:oxfmt": "oxfmt"
   },
   "dependencies": {
     "@astrojs/check": "^0.9.8",
@@ -47,8 +46,6 @@
     "duckdb": "^1.4.4",
     "oxfmt": "^0.46.0",
     "oxlint": "^1.61.0",
-    "prettier": "^3.8.3",
-    "prettier-plugin-astro": "^0.14.1",
     "remark-frontmatter": "^5.0.0",
     "remark-mdx-frontmatter": "^5.2.0",
     "vite": "^8.0.10"
