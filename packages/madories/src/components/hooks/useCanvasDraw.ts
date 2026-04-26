@@ -277,7 +277,7 @@ export function useCanvasDraw(props: Props): {
       overlayTimerRef.current = setTimeout(() => {
         wallDimRef.current = computeWallDimensions(floor, cellSize);
         drawDynamic();
-      }, 5000);
+      }, 1000);
     },
     [floor, cellSize, darkMode],
   );
