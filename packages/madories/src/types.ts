@@ -1,6 +1,6 @@
 export type WallType = "none" | "solid" | "solid_thin" | "window_full" | "window_center";
 
-export type FloorType = "wood" | "water" | "grass" | "concrete" | "void";
+export type FloorType = "wood" | "water" | "tatami" | "concrete" | "void";
 
 export interface WallFlags {
   top: WallType;
