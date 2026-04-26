@@ -77,7 +77,7 @@ function scanMeta(): PostMeta[] {
           if (!file.endsWith(".md")) continue;
           const raw = readFileSync(join(contentsDir, category, ym, file), "utf8");
           const fm = parseFrontmatter(raw);
-          if (fm.Draft === "true" || fm.Draft === true) continue;
+          if (fm.IsDraft === "true" || fm.IsDraft === true) continue;
           const tags =
             typeof fm.Tags === "string"
               ? fm.Tags.replaceAll(/[[\]'"\s]/g, "")
@@ -88,7 +88,8 @@ function scanMeta(): PostMeta[] {
             Title: String(fm.Title ?? ""),
             Description: fm.Description ? String(fm.Description) : undefined,
             Tags: tags,
-            Date: fm.Date ? String(fm.Date) : undefined,
+            CreatedAt: fm.CreatedAt ? String(fm.CreatedAt) : undefined,
+            UpdatedAt: fm.UpdatedAt ? String(fm.UpdatedAt) : undefined,
             category,
             ym,
             slug: file.replace(/\.md$/, ""),
@@ -128,7 +129,7 @@ export async function generateBlogParquet(outDir: string): Promise<void> {
 
     const db = new Database(":memory:");
     db.exec(
-      `COPY (SELECT * FROM read_json('${tmpJson}', columns={Title: 'VARCHAR', Description: 'VARCHAR', Tags: 'VARCHAR[]', Date: 'VARCHAR', category: 'VARCHAR', ym: 'VARCHAR', slug: 'VARCHAR', Keywords: 'VARCHAR[]'})) TO '${outFile}' (FORMAT PARQUET)`,
+      `COPY (SELECT * FROM read_json('${tmpJson}', columns={Title: 'VARCHAR', Description: 'VARCHAR', Tags: 'VARCHAR[]', CreatedAt: 'VARCHAR', UpdatedAt: 'VARCHAR', category: 'VARCHAR', ym: 'VARCHAR', slug: 'VARCHAR', Keywords: 'VARCHAR[]'})) TO '${outFile}' (FORMAT PARQUET)`,
       (err) => {
         try {
           unlinkSync(tmpJson);

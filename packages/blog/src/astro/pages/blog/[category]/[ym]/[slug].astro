@@ -7,7 +7,7 @@ import { getCollection, render } from "astro:content";
 export async function getStaticPaths() {
   const entries: CollectionEntry<"blog">[] = await getCollection("blog");
   return entries
-    .filter((p) => !p.data.Draft && p.id.split("/").length === 3)
+    .filter((p) => !p.data.IsDraft && p.id.split("/").length === 3)
     .map((p) => {
       const [category, ym, slugMd] = p.id.split("/");
       const slug = slugMd.replace(/\.md$/, "");
@@ -24,7 +24,7 @@ const { Content } = await render(entry);
     <header class="post-header">
       <div class="post-header-meta">
         <span class="post-header-category">{Astro.params.category}</span>
-        <span>{entry.data.Date}</span>
+        <span>{entry.data.CreatedAt}</span>
       </div>
       <h1>{entry.data.Title}</h1>
       {

@@ -18,8 +18,9 @@ const blog = defineCollection({
           .map((s) => s.trim())
           .filter(Boolean);
       }),
-    Draft: z.boolean().optional().default(false),
-    Date: z.string().optional(),
+    IsDraft: z.boolean().optional().default(false),
+    CreatedAt: z.string().optional(),
+    UpdatedAt: z.string().optional(),
   }),
 });
 
