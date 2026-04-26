@@ -72,9 +72,9 @@ interface Props {
 
 const CATEGORY_ICONS: Record<string, React.ReactNode> = {
   Wall: <BrickWall size={12} />,
+  オフィス: <MousePointer2 size={12} />,
   キッチン: <PaintRoller size={12} />,
   リビング: <Armchair size={12} />,
-  オフィス: <MousePointer2 size={12} />,
   建具: <BrickWall size={12} />,
   水回り: <PaintRoller size={12} />,
 };
@@ -150,10 +150,15 @@ export function Toolbar({
                 textAlign: "left",
               }}
               onClick={() => {
-                if (kind === "wall") onToolChange({ kind: "wall", wallType: "solid" });
-                else if (kind === "floor") onToolChange({ floorType: "wood", kind: "floor" });
-                else if (kind === "item") onToolChange({ itemType: "door", kind: "item" });
-                else onToolChange({ kind } as ToolMode);
+                if (kind === "wall") {
+                  onToolChange({ kind: "wall", wallType: "solid" });
+                } else if (kind === "floor") {
+                  onToolChange({ floorType: "wood", kind: "floor" });
+                } else if (kind === "item") {
+                  onToolChange({ itemType: "door", kind: "item" });
+                } else {
+                  onToolChange({ kind } as ToolMode);
+                }
               }}
             >
               {icon}

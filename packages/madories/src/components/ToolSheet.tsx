@@ -83,10 +83,15 @@ function ToolPanelContent({
                 color: active ? "var(--paper)" : "var(--ink)",
               }}
               onClick={() => {
-                if (kind === "wall") onToolChange({ kind: "wall", wallType: "solid" });
-                else if (kind === "floor") onToolChange({ floorType: "wood", kind: "floor" });
-                else if (kind === "item") onToolChange({ itemType: "door", kind: "item" });
-                else onToolChange({ kind } as ToolMode);
+                if (kind === "wall") {
+                  onToolChange({ kind: "wall", wallType: "solid" });
+                } else if (kind === "floor") {
+                  onToolChange({ floorType: "wood", kind: "floor" });
+                } else if (kind === "item") {
+                  onToolChange({ itemType: "door", kind: "item" });
+                } else {
+                  onToolChange({ kind } as ToolMode);
+                }
               }}
             >
               {icon}

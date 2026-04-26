@@ -29,17 +29,20 @@ function init(): AppState {
   return { activeFloorId: building.floors[0].id, building };
 }
 
-async function initFromUrl(): Promise<AppState | null> {
+function initFromUrl(): Promise<AppState | null> {
   const param = getShareParam();
-  if (!param) return null;
-  try {
-    const floors = await decodeFloors(param);
-    if (floors.length === 0) return null;
-    const building = { cellSize: 32, floors };
-    return { activeFloorId: floors[0].id, building };
-  } catch {
-    return null;
+  if (!param) {
+    return Promise.resolve(null);
   }
+  return decodeFloors(param)
+    .then((floors) => {
+      if (floors.length === 0) {
+        return null;
+      }
+      const building = { cellSize: 32, floors };
+      return { activeFloorId: floors[0].id, building };
+    })
+    .catch(() => null);
 }
 
 export function App() {
