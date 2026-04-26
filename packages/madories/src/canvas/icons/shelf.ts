@@ -4,19 +4,16 @@ export function drawShelf(
   py: number,
   w: number,
   h: number,
+  darkMode = false,
 ): void {
-  // Half-depth: only top 50% of cell
   const depth = h * 0.5;
-  // Thick back panel flush to top (wall side)
-  ctx.fillStyle = "#C8A87A";
+  ctx.fillStyle = darkMode ? "#5a3a10" : "#C8A87A";
   ctx.fillRect(px, py, w, depth * 0.3);
-  // Shelf body
-  ctx.fillStyle = "#E0C89A";
+  ctx.fillStyle = darkMode ? "#7a5020" : "#E0C89A";
   ctx.fillRect(px, py + depth * 0.3, w, depth * 0.7);
-  ctx.strokeStyle = "#8B6914";
+  ctx.strokeStyle = darkMode ? "#3a2008" : "#8B6914";
   ctx.lineWidth = 1.5;
   ctx.strokeRect(px, py, w, depth);
-  // Divider line between back and shelf
   ctx.beginPath();
   ctx.moveTo(px, py + depth * 0.3);
   ctx.lineTo(px + w, py + depth * 0.3);

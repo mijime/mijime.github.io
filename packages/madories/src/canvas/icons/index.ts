@@ -22,6 +22,7 @@ export type DrawFn = (
   py: number,
   w: number,
   h: number,
+  darkMode?: boolean,
 ) => void;
 
 export const ICON_REGISTRY = new Map<ItemType, DrawFn>([

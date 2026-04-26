@@ -1,3 +1,4 @@
+import { Download, FolderOpen, Pencil, Redo2, Save, Trash2, Undo2 } from "lucide-react";
 import { useState } from "react";
 import type { ItemCategory } from "../items";
 import { ITEM_CATEGORIES, ITEM_DEFS } from "../items";
@@ -50,7 +51,7 @@ export function ToolSheet({
     { kind: "select", label: "選択" },
   ];
 
-  const toolLabel = toolButtons.find((b) => b.kind === tool.kind)?.label ?? "✎";
+  const toolLabel = toolButtons.find((b) => b.kind === tool.kind)?.label ?? "";
 
   return (
     <>
@@ -61,7 +62,7 @@ export function ToolSheet({
         onClick={() => setOpen(true)}
         aria-label="ツール選択"
       >
-        <span className="text-lg leading-none">✎</span>
+        <Pencil size={20} />
         <span className="text-xs font-mono leading-none">{toolLabel}</span>
       </button>
 
@@ -221,7 +222,7 @@ export function ToolSheet({
           {/* Actions */}
           <div className="flex gap-2 pt-2" style={{ borderTop: "1px solid var(--border)" }}>
             <button
-              className="flex-1 py-1 rounded text-xs font-mono"
+              className="flex-1 py-2 rounded flex items-center justify-center"
               style={{
                 background: "transparent",
                 border: "1px solid var(--border)",
@@ -230,11 +231,12 @@ export function ToolSheet({
               }}
               disabled={!canUndo}
               onClick={onUndo}
+              title="戻す"
             >
-              ↩ 戻す
+              <Undo2 size={16} />
             </button>
             <button
-              className="flex-1 py-1 rounded text-xs font-mono"
+              className="flex-1 py-2 rounded flex items-center justify-center"
               style={{
                 background: "transparent",
                 border: "1px solid var(--border)",
@@ -243,33 +245,42 @@ export function ToolSheet({
               }}
               disabled={!canRedo}
               onClick={onRedo}
+              title="進む"
             >
-              ↪ 進む
+              <Redo2 size={16} />
             </button>
-          </div>
-          <div className="flex gap-2">
-            {[
-              { fn: onSave, label: "保存" },
-              { fn: onLoad, label: "読込" },
-              { fn: onExportAll, label: "書出" },
-              { fn: onClear, label: "消去" },
-            ].map(({ label, fn }) => (
-              <button
-                key={label}
-                className="flex-1 py-1 rounded text-xs font-mono"
-                style={{
-                  background: "transparent",
-                  border: "1px solid var(--border)",
-                  color: "var(--ink)",
-                }}
-                onClick={() => {
-                  fn();
-                  setOpen(false);
-                }}
-              >
-                {label}
-              </button>
-            ))}
+            <button
+              className="flex-1 py-2 rounded flex items-center justify-center"
+              style={{ background: "transparent", border: "1px solid var(--border)", color: "var(--ink)" }}
+              title="保存"
+              onClick={() => { onSave(); setOpen(false); }}
+            >
+              <Save size={16} />
+            </button>
+            <button
+              className="flex-1 py-2 rounded flex items-center justify-center"
+              style={{ background: "transparent", border: "1px solid var(--border)", color: "var(--ink)" }}
+              title="読込"
+              onClick={() => { onLoad(); setOpen(false); }}
+            >
+              <FolderOpen size={16} />
+            </button>
+            <button
+              className="flex-1 py-2 rounded flex items-center justify-center"
+              style={{ background: "transparent", border: "1px solid var(--border)", color: "var(--ink)" }}
+              title="書き出し (PNG)"
+              onClick={() => { onExportAll(); setOpen(false); }}
+            >
+              <Download size={16} />
+            </button>
+            <button
+              className="flex-1 py-2 rounded flex items-center justify-center"
+              style={{ background: "transparent", border: "1px solid var(--border)", color: "var(--terra)" }}
+              title="全面削除"
+              onClick={() => { onClear(); setOpen(false); }}
+            >
+              <Trash2 size={16} />
+            </button>
           </div>
         </div>
       </div>

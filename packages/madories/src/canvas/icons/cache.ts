@@ -8,13 +8,14 @@ export function getCachedIcon(
   type: ItemType,
   rotation: 0 | 90 | 180 | 270,
   cellSize: number,
+  darkMode = false,
 ): OffscreenCanvas | null {
   const def = ITEM_DEF_MAP.get(type);
   if (!def) {
     return null;
   }
 
-  const key = `${type}:${rotation}:${cellSize}`;
+  const key = `${type}:${rotation}:${cellSize}:${darkMode ? "d" : "l"}`;
   const hit = cache.get(key);
   if (hit) {
     return hit;
@@ -34,7 +35,7 @@ export function getCachedIcon(
   const draw = ICON_REGISTRY.get(type);
   if (draw) {
     const pad = 2;
-    draw(ctx, -naturalW / 2 + pad, -naturalH / 2 + pad, naturalW - 2 * pad, naturalH - 2 * pad);
+    draw(ctx, -naturalW / 2 + pad, -naturalH / 2 + pad, naturalW - 2 * pad, naturalH - 2 * pad, darkMode);
   }
 
   cache.set(key, oc);

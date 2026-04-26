@@ -6,6 +6,7 @@ export function drawChair(
   py: number,
   w: number,
   h: number,
+  darkMode = false,
 ): void {
   const lw = Math.max(1, w * 0.04);
   const legR = w * 0.07;
@@ -17,8 +18,7 @@ export function drawChair(
   const seatW = w * 0.8;
   const seatR = w * 0.1;
 
-  // 4 legs
-  ctx.fillStyle = "#6B4A2A";
+  ctx.fillStyle = darkMode ? "#6a4a28" : "#6B4A2A";
   for (const [lx, ly] of [
     [seatL + legR, seatTop + legR],
     [seatL + seatW - legR, seatTop + legR],
@@ -30,21 +30,20 @@ export function drawChair(
     ctx.fill();
   }
 
-  ctx.fillStyle = "#C4956A";
+  ctx.fillStyle = darkMode ? "#b07840" : "#C4956A";
   roundRect(ctx, seatL, seatTop, seatW, seatH, seatR);
   ctx.fill();
-  ctx.strokeStyle = "#8B6340";
+  ctx.strokeStyle = darkMode ? "#8a5828" : "#8B6340";
   ctx.lineWidth = lw;
   roundRect(ctx, seatL, seatTop, seatW, seatH, seatR);
   ctx.stroke();
 
-  // Backrest (directly below seat)
   const brH = h * 0.14;
   const brY = seatTop + seatH;
-  ctx.fillStyle = "#7A5230";
+  ctx.fillStyle = darkMode ? "#8a5828" : "#7A5230";
   roundRect(ctx, px + w * 0.08, brY, w * 0.84, brH, lw * 1.5);
   ctx.fill();
-  ctx.strokeStyle = "#5A3A1A";
+  ctx.strokeStyle = darkMode ? "#6a3810" : "#5A3A1A";
   ctx.lineWidth = lw * 0.7;
   roundRect(ctx, px + w * 0.08, brY, w * 0.84, brH, lw * 1.5);
   ctx.stroke();
