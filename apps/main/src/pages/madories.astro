@@ -1,0 +1,9 @@
+---
+import { App as MadoriesApp } from "@mijime/madories";
+import BaseLayout from "../layouts/base-layout.astro";
+import "@mijime/madories/index.css";
+---
+
+<BaseLayout title="madories">
+  <MadoriesApp client:only="react" />
+</BaseLayout>

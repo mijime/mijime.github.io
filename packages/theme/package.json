@@ -1,0 +1,25 @@
+{
+  "name": "@mijime/theme",
+  "version": "1.0.0",
+  "type": "module",
+  "exports": {
+    "./index.css": "./src/index.css",
+    "./DarkModeToggle": "./src/dark-mode-toggle.tsx",
+    "./useDarkMode": "./src/use-dark-mode.ts"
+  },
+  "scripts": {
+    "check": "bun run check:oxlint",
+    "check:oxlint": "oxlint --format=github",
+    "format": "bun run format:oxfmt",
+    "format:oxfmt": "oxfmt"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.14",
+    "oxfmt": "^0.46.0",
+    "oxlint": "^1.61.0"
+  },
+  "peerDependencies": {
+    "lucide-react": ">=1.0.0",
+    "react": ">=19.0.0"
+  }
+}

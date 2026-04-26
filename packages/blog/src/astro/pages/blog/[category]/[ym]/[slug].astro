@@ -1,0 +1,85 @@
+---
+export const prerender = true;
+import BlogLayout from "../../../../layouts/BlogLayout.astro";
+import type { CollectionEntry } from "astro:content";
+import { getCollection, render } from "astro:content";
+
+export async function getStaticPaths() {
+  const entries: CollectionEntry<"blog">[] = await getCollection("blog");
+  return entries
+    .filter((p) => !p.data.IsDraft && p.id.split("/").length === 3)
+    .map((p) => {
+      const [category, ym, slugMd] = p.id.split("/");
+      const slug = slugMd.replace(/\.md$/, "");
+      return { params: { category, ym, slug }, props: { entry: p } };
+    });
+}
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+---
+
+<BlogLayout title={entry.data.Title}>
+  <article>
+    <header class="post-header">
+      <div class="post-header-meta">
+        <span class="post-header-category">{Astro.params.category}</span>
+        <span>{entry.data.CreatedAt}</span>
+      </div>
+      <h1>{entry.data.Title}</h1>
+      {
+        entry.data.Tags && entry.data.Tags.length > 0 && (
+          <div class="post-header-tags">
+            {entry.data.Tags.map((t: string) => (
+              <a href={`/blog/tag/${t}`} class="post-tag">
+                {t}
+              </a>
+            ))}
+          </div>
+        )
+      }
+    </header>
+    <div class="prose">
+      <Content />
+    </div>
+  </article>
+</BlogLayout>
+
+<script>
+  const pres = document.querySelectorAll("pre[data-language='mermaid']");
+  if (pres.length > 0) {
+    const m = await import("mermaid");
+    const isDark =
+      document.documentElement.dataset.theme === "dark" ||
+      (!document.documentElement.dataset.theme &&
+        window.matchMedia("(prefers-color-scheme: dark)").matches);
+    m.default.initialize({
+      startOnLoad: false,
+      theme: isDark ? "dark" : "default",
+    });
+    await Promise.all(
+      [...pres].map(async (pre) => {
+        const code = pre.querySelector("code");
+        if (!code) return;
+        // Shiki wraps each line in <span class="line">, collect line text
+        const lines = code.querySelectorAll(".line");
+        const text = lines.length > 0
+          ? [...lines].map((l) => l.textContent ?? "").join("\n")
+          : code.textContent ?? "";
+        try {
+          const { svg } = await m.default.render(
+            `mermaid-${Math.random().toString(36).slice(2)}`,
+            text.trim(),
+          );
+          const div = document.createElement("div");
+          div.className = "mermaid-diagram";
+          div.innerHTML = svg;
+          pre.replaceWith(div);
+        } catch (e) {
+          // eslint-disable-next-line no-console
+          console.error("[mermaid] render failed:", e, "\nInput:", text);
+        }
+      }),
+    );
+  }
+</script>

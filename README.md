@@ -1,1 +1,0 @@
-# mijime.github.io
