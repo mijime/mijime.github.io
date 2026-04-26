@@ -1,0 +1,293 @@
+---
+import BaseLayout from "../layouts/base-layout.astro";
+---
+
+<BaseLayout title="mijime">
+  <div class="home">
+    <div class="home-rule home-rule--top"></div>
+
+    <div class="home-masthead">
+<h1 class="home-logotype">mijime</h1>
+      <p class="home-tagline">an engineer's notebook</p>
+    </div>
+
+    <div class="home-rule home-rule--mid"></div>
+
+    <div class="home-body">
+      <section class="home-section home-section--apps">
+        <h2 class="home-section-label">// apps</h2>
+        <ul class="home-app-list">
+          <li class="home-app-item" style="--i:0">
+            <a href="/blog/" class="home-app-link">
+              <span class="home-app-slug">blog</span>
+              <span class="home-app-desc">tech notes &amp; diary</span>
+              <span class="home-app-arrow">→</span>
+            </a>
+          </li>
+          <li class="home-app-item" style="--i:1">
+            <a href="/madories/" class="home-app-link">
+              <span class="home-app-slug">madories</span>
+              <span class="home-app-desc">floor plan editor</span>
+              <span class="home-app-arrow">→</span>
+            </a>
+          </li>
+        </ul>
+      </section>
+
+      <div class="home-col-divider"></div>
+
+      <section class="home-section home-section--meta">
+        <h2 class="home-section-label">// links</h2>
+        <ul class="home-link-list">
+          <li class="home-link-item" style="--i:2">
+            <a href="https://github.com/mijime" class="home-ext-link" target="_blank" rel="noopener">
+              <span class="home-ext-icon">⌥</span>
+              <span>github.com/mijime</span>
+            </a>
+          </li>
+        </ul>
+
+        <div class="home-stack">
+          <h2 class="home-section-label">// stack</h2>
+          <ul class="home-stack-list">
+            <li class="home-stack-item" style="--i:3">Astro</li>
+            <li class="home-stack-item" style="--i:4">Bun</li>
+            <li class="home-stack-item" style="--i:5">TypeScript</li>
+            <li class="home-stack-item" style="--i:6">DuckDB</li>
+          </ul>
+        </div>
+      </section>
+    </div>
+
+    <div class="home-rule home-rule--bottom"></div>
+
+    <footer class="home-footer">
+      <span>© mijime</span>
+      <span class="home-footer-dot">·</span>
+      <span>built with astro + bun</span>
+    </footer>
+  </div>
+</BaseLayout>
+
+<style>
+  .home {
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  /* ── Rules ──────────────────────────────────────────── */
+  .home-rule {
+    border: none;
+    border-top: 1px solid var(--border);
+  }
+  .home-rule--top { margin-top: 48px; }
+  .home-rule--mid { margin: 0; }
+  .home-rule--bottom { margin-top: auto; }
+
+  /* ── Masthead ───────────────────────────────────────── */
+  .home-masthead {
+    padding: 32px 0 28px;
+    animation: fadeUp 0.6s ease both;
+  }
+
+.home-logotype {
+    font-family: "Crimson Pro", serif;
+    font-size: clamp(52px, 12vw, 96px);
+    font-weight: 600;
+    line-height: 0.92;
+    letter-spacing: -0.03em;
+    color: var(--ink);
+    margin: 0 0 16px;
+
+    /* terra underline rule */
+    &::after {
+      content: "";
+      display: block;
+      width: 3ch;
+      height: 3px;
+      background: var(--terra);
+      margin-top: 14px;
+    }
+  }
+
+  .home-tagline {
+    font-size: 12px;
+    color: var(--mid);
+    letter-spacing: 0.1em;
+    margin: 0;
+  }
+
+  /* ── Body columns ───────────────────────────────────── */
+  .home-body {
+    display: grid;
+    grid-template-columns: 1fr 1px 1fr;
+    gap: 0 0;
+    padding: 40px 0;
+    animation: fadeUp 0.6s 0.1s ease both;
+  }
+
+  .home-col-divider {
+    background: var(--grid);
+    margin: 0 40px;
+  }
+
+  .home-section { padding: 0; }
+
+  .home-section-label {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 10px;
+    font-weight: 500;
+    color: var(--terra);
+    letter-spacing: 0.12em;
+    margin: 0 0 20px;
+  }
+
+  /* ── App list ───────────────────────────────────────── */
+  .home-app-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .home-app-item {
+    animation: fadeUp 0.5s calc(var(--i) * 0.08s + 0.2s) ease both;
+    border-bottom: 1px solid var(--grid);
+    &:first-child { border-top: 1px solid var(--grid); }
+  }
+
+  .home-app-link {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 0;
+    color: var(--ink);
+    text-decoration: none;
+    transition: color 0.15s;
+
+    &:hover {
+      color: var(--terra);
+      .home-app-arrow { transform: translateX(4px); }
+    }
+  }
+
+  .home-app-slug {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+  }
+
+  .home-app-desc {
+    font-size: 11px;
+    color: var(--mid);
+  }
+
+  .home-app-arrow {
+    font-size: 14px;
+    color: var(--terra);
+    transition: transform 0.2s ease;
+    opacity: 0.6;
+  }
+
+  /* ── Links ──────────────────────────────────────────── */
+  .home-link-list {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 32px;
+  }
+
+  .home-link-item {
+    animation: fadeUp 0.5s calc(var(--i) * 0.08s + 0.2s) ease both;
+  }
+
+  .home-ext-link {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 12px;
+    color: var(--mid);
+    text-decoration: none;
+    padding: 6px 0;
+    transition: color 0.15s;
+    letter-spacing: 0.02em;
+
+    &:hover { color: var(--terra); }
+  }
+
+  .home-ext-icon {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 11px;
+    color: var(--terra);
+    opacity: 0.7;
+  }
+
+  /* ── Stack ──────────────────────────────────────────── */
+  .home-stack { margin-top: 0; }
+
+  .home-stack-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .home-stack-item {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    color: var(--mid);
+    border: 1px solid var(--grid);
+    padding: 2px 8px;
+    animation: fadeUp 0.5s calc(var(--i) * 0.08s + 0.2s) ease both;
+  }
+
+  /* ── Footer ─────────────────────────────────────────── */
+  .home-footer {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 20px 0 32px;
+    font-size: 10px;
+    color: var(--mid);
+    letter-spacing: 0.08em;
+    animation: fadeUp 0.5s 0.5s ease both;
+  }
+
+  .home-footer-dot { color: var(--border); }
+
+  /* ── Responsive ─────────────────────────────────────── */
+  @media (max-width: 500px) {
+    .home-body {
+      grid-template-columns: 1fr;
+    }
+    .home-col-divider {
+      width: 100%;
+      height: 1px;
+      margin: 32px 0;
+    }
+    .home-section--meta { padding-top: 0; }
+  }
+
+  /* ── Animation ──────────────────────────────────────── */
+  @keyframes fadeUp {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+</style>
+

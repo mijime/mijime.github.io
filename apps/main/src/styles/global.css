@@ -1,0 +1,26 @@
+@import "@mijime/theme/index.css";
+
+@import "tailwindcss";
+@source "../../../../packages/*/src/**/*.{ts,tsx}";
+
+/* ── Shiki Syntax Highlight ─────────────────────────── */
+.shiki span {
+  color: var(--shiki-light);
+}
+.shiki {
+  background-color: var(--shiki-light-bg) !important;
+}
+:root[data-theme="dark"] .shiki span {
+  color: var(--shiki-dark);
+}
+:root[data-theme="dark"] .shiki {
+  background-color: var(--shiki-dark-bg) !important;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .shiki span {
+    color: var(--shiki-dark);
+  }
+  :root:not([data-theme="light"]) .shiki {
+    background-color: var(--shiki-dark-bg) !important;
+  }
+}
