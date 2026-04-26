@@ -5,7 +5,7 @@ import { getCollection } from "astro:content";
 
 import type { CollectionEntry } from "astro:content";
 const entries: CollectionEntry<"blog">[] = await getCollection("blog");
-const filtered = entries.filter((p) => !p.data.Draft);
+const filtered = entries.filter((p) => !p.data.IsDraft);
 const tagSet = new Set<string>();
 for (const p of filtered) {
   for (const t of p.data.Tags ?? []) tagSet.add(t);

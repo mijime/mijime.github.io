@@ -2,8 +2,9 @@ export interface PostMeta {
   Title: string;
   Description?: string;
   Tags?: string[];
-  Draft?: boolean;
-  Date?: string;
+  IsDraft?: boolean;
+  CreatedAt?: string;
+  UpdatedAt?: string;
   category: string;
   ym: string;
   slug: string;

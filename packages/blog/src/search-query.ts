@@ -43,8 +43,8 @@ export function toSQL(q: ParsedQuery, tableExpr: string): string {
   for (const tag of q.tags) {
     filterConditions.push(`list_contains(Tags, '${tag.replaceAll("'", "''")}')`);
   }
-  if (q.dateGte) filterConditions.push(`Date >= '${q.dateGte}'`);
-  if (q.dateLte) filterConditions.push(`Date <= '${q.dateLte}'`);
+  if (q.dateGte) filterConditions.push(`CreatedAt >= '${q.dateGte}'`);
+  if (q.dateLte) filterConditions.push(`CreatedAt <= '${q.dateLte}'`);
   const where = filterConditions.length > 0 ? `WHERE ${filterConditions.join(" AND ")}` : "";
 
   const scoreTerms = q.text.map((t) => {
@@ -53,8 +53,8 @@ export function toSQL(q: ParsedQuery, tableExpr: string): string {
   });
   const order =
     scoreTerms.length > 0
-      ? `${scoreTerms.join(" + ")} DESC, Date DESC NULLS LAST`
-      : `Date DESC NULLS LAST`;
+      ? `${scoreTerms.join(" + ")} DESC, CreatedAt DESC NULLS LAST`
+      : `CreatedAt DESC NULLS LAST`;
 
   return `SELECT * FROM ${tableExpr} ${where} ORDER BY ${order}`;
 }

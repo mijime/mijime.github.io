@@ -25,8 +25,9 @@ function parseRow(row: Record<string, unknown>): PostMeta {
         ? String(row.Description)
         : undefined,
     Tags: Array.isArray(tags) ? tags.map(String) : [],
-    Date: row.Date !== null && row.Date !== undefined ? String(row.Date) : undefined,
-    Draft: row.Draft === true,
+    CreatedAt: row.CreatedAt !== null && row.CreatedAt !== undefined ? String(row.CreatedAt) : undefined,
+    UpdatedAt: row.UpdatedAt !== null && row.UpdatedAt !== undefined ? String(row.UpdatedAt) : undefined,
+    IsDraft: row.IsDraft === true,
     category: String(row.category ?? ""),
     ym: String(row.ym ?? ""),
     slug: String(row.slug ?? ""),
