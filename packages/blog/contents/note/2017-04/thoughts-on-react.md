@@ -1,8 +1,8 @@
 ---
-Tags: ['Development', 'React']
-CreatedAt: '2017-04-09T22:40:10+09:00'
+Tags: ["Development", "React"]
+CreatedAt: "2017-04-09T22:40:10+09:00"
 IsDraft: false
-Title: 'ReactでMarkdownEditorを作ったかんそう'
+Title: "ReactでMarkdownEditorを作ったかんそう"
 ---
 
 オフラインで動作する Markdown エディタを React で作った際の技術選定メモ。

@@ -35,7 +35,14 @@ export function getCachedIcon(
   const draw = ICON_REGISTRY.get(type);
   if (draw) {
     const pad = 2;
-    draw(ctx, -naturalW / 2 + pad, -naturalH / 2 + pad, naturalW - 2 * pad, naturalH - 2 * pad, darkMode);
+    draw(
+      ctx,
+      -naturalW / 2 + pad,
+      -naturalH / 2 + pad,
+      naturalW - 2 * pad,
+      naturalH - 2 * pad,
+      darkMode,
+    );
   }
 
   cache.set(key, oc);

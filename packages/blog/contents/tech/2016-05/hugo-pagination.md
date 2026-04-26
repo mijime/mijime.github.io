@@ -1,8 +1,8 @@
 ---
-CreatedAt: '2016-05-25T14:05:50+09:00'
+CreatedAt: "2016-05-25T14:05:50+09:00"
 IsDraft: false
-Title: 'hugo pagination'
-Tags: ['hugo']
+Title: "hugo pagination"
+Tags: ["hugo"]
 ---
 
 Hugo では `.Paginator` を使うことでページネーションを簡単に実装できる。

@@ -4,9 +4,10 @@ export function drawDoor(
   py: number,
   w: number,
   h: number,
+  darkMode = false,
 ): void {
   const lw = Math.max(1.5, Math.min(w, h) * 0.06);
-  ctx.strokeStyle = "#5C3317";
+  ctx.strokeStyle = darkMode ? "#C8A06E" : "#5C3317";
   ctx.lineWidth = lw;
 
   // Pivot: bottom-left corner

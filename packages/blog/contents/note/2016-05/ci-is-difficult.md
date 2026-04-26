@@ -1,8 +1,8 @@
 ---
-CreatedAt: '2016-05-26T21:10:04+09:00'
+CreatedAt: "2016-05-26T21:10:04+09:00"
 IsDraft: false
-Title: 'CI環境構築でハマりやすいポイント'
-Tags: ['note', 'ci']
+Title: "CI環境構築でハマりやすいポイント"
+Tags: ["note", "ci"]
 ---
 
 CI 環境を構築する際に詰まりがちなポイントをまとめる。

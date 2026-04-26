@@ -16,7 +16,9 @@ export function drawVoidCells(
       }
     }
   }
-  if (voidCells.length === 0) { return; }
+  if (voidCells.length === 0) {
+    return;
+  }
 
   ctx.save();
   ctx.strokeStyle = color;
