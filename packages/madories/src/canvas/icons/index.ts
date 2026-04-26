@@ -37,6 +37,7 @@ export const ICON_REGISTRY = new Map<ItemType, DrawFn>([
   ["kitchen", drawKitchen],
   ["washbasin", drawWashbasin],
   ["washbasin_half", drawWashbasinHalf],
+  ["washbasin_large", drawWashbasin],
   ["fridge", drawFridge],
   ["washer", drawWasher],
   ["shelf1", drawShelf],

@@ -15,6 +15,7 @@ export type ItemType =
   | "kitchen"
   | "washbasin"
   | "washbasin_half"
+  | "washbasin_large"
   | "door"
   | "door_slide"
   | "stairs"
