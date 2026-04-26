@@ -1,87 +1,9 @@
+@import "@mijime/theme/index.css";
+
 .blog-root {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-
-  /* ── Blog Color Tokens ────────────────────────────── */
-  --mid: #8a8278;
-  --terra: #b5603a;
-  --border: #c8bfb4;
-  --grid: #e2dbd2;
-  --toolbar-bg: #f0ebe4;
-
-  :root[data-theme="dark"] & {
-    --terra: #d4845a;
-    --border: #3a342e;
-    --grid: #2e2a26;
-    --toolbar-bg: #211e1b;
-  }
-
-  @media (prefers-color-scheme: dark) {
-    :root:not([data-theme="light"]) & {
-      --terra: #d4845a;
-      --border: #3a342e;
-      --grid: #2e2a26;
-      --toolbar-bg: #211e1b;
-    }
-  }
-
-  .blog-header {
-    border-bottom: 1px solid var(--border);
-    background: var(--toolbar-bg);
-    position: sticky;
-    top: 0;
-    z-index: 100;
-  }
-
-  .blog-header-inner {
-    max-width: 860px;
-    margin: 0 auto;
-    padding: 0 24px;
-    height: 52px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-
-  .blog-logo {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    text-decoration: none;
-    color: var(--ink);
-  }
-
-  .blog-logo-mark {
-    color: var(--terra);
-    font-size: 18px;
-    line-height: 1;
-  }
-
-  .blog-logo-text {
-    font-family: "Crimson Pro", serif;
-    font-weight: 600;
-    font-size: 20px;
-    letter-spacing: 0.02em;
-  }
-
-  .blog-nav {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-  }
-
-  .blog-nav-link {
-    color: var(--mid);
-    text-decoration: none;
-    font-size: 12px;
-    letter-spacing: 0.08em;
-    text-transform: lowercase;
-    transition: color 0.15s;
-    &:hover {
-      color: var(--terra);
-    }
-  }
 
   /* ── Inline Search in Header ────────────────────────── */
   .blog-search-inline {
@@ -163,7 +85,7 @@
   /* ── Main content ───────────────────────────────────── */
   .blog-main {
     flex: 1;
-    max-width: 860px;
+    max-width: 720px;
     width: 100%;
     margin: 0 auto;
     padding: 48px 24px 80px;

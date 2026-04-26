@@ -37,7 +37,7 @@ const posts = allPosts.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
     {
       posts.map((p) => (
         <li class="post-list-item">
-          <span class="post-date">{p.CreatedAt ?? p.ym}</span>
+          <span class="post-date">{(p.CreatedAt ?? p.ym).slice(0, 10)}</span>
           <div>
             <a href={`/blog/${p.category}/${p.ym}/${p.slug}`}>{p.Title}</a>
             {p.Tags && p.Tags.length > 0 && (

@@ -1,7 +1,7 @@
 ---
 import "@mijime/blog/index.css";
 import { BlogHeaderSearch } from "../components/BlogHeaderSearch";
-import { DarkModeToggle } from "../components/DarkModeToggle";
+import { DarkModeToggle } from "@mijime/theme/DarkModeToggle";
 
 interface Props {
   title?: string;
@@ -18,13 +18,12 @@ const { title = "mijime" } = Astro.props;
   </head>
   <body>
     <div class="blog-root">
-      <header class="blog-header">
-        <div class="blog-header-inner">
-          <a href="/blog/" class="blog-logo">
-            <span class="blog-logo-mark">▪</span>
-            <span class="blog-logo-text">mijime</span>
+      <header class="site-header">
+        <div class="site-header-inner">
+          <a href="/" class="site-logo">
+            <span class="site-logo-text">mijime</span>
           </a>
-          <nav class="blog-nav">
+          <nav class="site-nav">
             <BlogHeaderSearch client:only="react" />
             <DarkModeToggle client:only="react" />
           </nav>

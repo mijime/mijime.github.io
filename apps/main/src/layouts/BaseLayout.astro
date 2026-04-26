@@ -1,5 +1,6 @@
 ---
 import "../styles/global.css";
+import { DarkModeToggle } from "@mijime/theme/DarkModeToggle";
 
 interface Props {
   title?: string;
@@ -16,6 +17,16 @@ const { title = "mijime" } = Astro.props;
     <link rel="icon" type="image/png" href="/favicon.png" />
   </head>
   <body>
+    <header class="site-header">
+      <div class="site-header-inner">
+        <a href="/" class="site-logo">
+          <span class="site-logo-text">mijime</span>
+        </a>
+        <nav class="site-nav">
+          <DarkModeToggle client:only="react" />
+        </nav>
+      </div>
+    </header>
     <slot />
   </body>
 </html>

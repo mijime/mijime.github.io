@@ -11,8 +11,7 @@
     "./index.css": "./src/index.css",
     "./integration": "./src/integration.ts",
     "./astro/components/BlogHeaderSearch": "./src/astro/components/BlogHeaderSearch.tsx",
-    "./astro/components/BlogSearch": "./src/astro/components/BlogSearch.tsx",
-    "./astro/components/DarkModeToggle": "./src/astro/components/DarkModeToggle.tsx"
+    "./astro/components/BlogSearch": "./src/astro/components/BlogSearch.tsx"
   },
   "scripts": {
     "test": "bun test",
@@ -26,8 +25,10 @@
   "dependencies": {
     "@astrojs/check": "^0.9.8",
     "@duckdb/duckdb-wasm": "^1.33.1-dev45.0",
+    "@mijime/theme": "workspace:*",
     "@shikijs/rehype": "^4.0.2",
     "lindera-js": "^0.1.4",
+    "lucide-react": "^1.11.0",
     "mdast": "^3.0.0",
     "mermaid": "^11.14.0",
     "rehype": "^13.0.2",

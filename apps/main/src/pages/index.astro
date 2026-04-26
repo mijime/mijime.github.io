@@ -7,13 +7,8 @@ import BaseLayout from "../layouts/BaseLayout.astro";
     <div class="home-rule home-rule--top"></div>
 
     <div class="home-masthead">
-      <div class="home-masthead-eyebrow">
-        <span class="home-vol">vol. ∞</span>
-        <span class="home-divider">·</span>
-        <span class="home-date" id="js-date"></span>
-      </div>
-      <h1 class="home-logotype">mijime</h1>
-      <p class="home-tagline">エンジニアのメモ帳</p>
+<h1 class="home-logotype">mijime</h1>
+      <p class="home-tagline">an engineer's notebook</p>
     </div>
 
     <div class="home-rule home-rule--mid"></div>
@@ -25,14 +20,14 @@ import BaseLayout from "../layouts/BaseLayout.astro";
           <li class="home-app-item" style="--i:0">
             <a href="/blog/" class="home-app-link">
               <span class="home-app-slug">blog</span>
-              <span class="home-app-desc">技術メモ・日記</span>
+              <span class="home-app-desc">tech notes &amp; diary</span>
               <span class="home-app-arrow">→</span>
             </a>
           </li>
           <li class="home-app-item" style="--i:1">
             <a href="/madories/" class="home-app-link">
               <span class="home-app-slug">madories</span>
-              <span class="home-app-desc">マドリ帳</span>
+              <span class="home-app-desc">floor plan editor</span>
               <span class="home-app-arrow">→</span>
             </a>
           </li>
@@ -75,25 +70,7 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 </BaseLayout>
 
 <style>
-  /* ── Tokens (inherits paper/ink from global.css) ────── */
   .home {
-    --terra: #b5603a;
-    --mid: #8a8278;
-    --border: #c8bfb4;
-    --grid: #e2dbd2;
-
-    @media (prefers-color-scheme: dark) {
-      --terra: #d4845a;
-      --border: #3a342e;
-      --grid: #2e2a26;
-    }
-
-    :root[data-theme="dark"] & {
-      --terra: #d4845a;
-      --border: #3a342e;
-      --grid: #2e2a26;
-    }
-
     min-height: 100dvh;
     display: flex;
     flex-direction: column;
@@ -117,20 +94,7 @@ import BaseLayout from "../layouts/BaseLayout.astro";
     animation: fadeUp 0.6s ease both;
   }
 
-  .home-masthead-eyebrow {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-size: 10px;
-    color: var(--mid);
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    margin-bottom: 14px;
-  }
-
-  .home-divider { color: var(--border); }
-
-  .home-logotype {
+.home-logotype {
     font-family: "Crimson Pro", serif;
     font-size: clamp(52px, 12vw, 96px);
     font-weight: 600;
@@ -327,13 +291,3 @@ import BaseLayout from "../layouts/BaseLayout.astro";
   }
 </style>
 
-<script>
-  const el = document.getElementById("js-date");
-  if (el) {
-    el.textContent = new Date().toLocaleDateString("ja-JP", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    });
-  }
-</script>

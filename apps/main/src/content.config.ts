@@ -1,5 +1,5 @@
-import { defineCollection, z } from "astro:content";
-import { glob } from "astro/loaders";
+import { defineCollection, z } from "astro:content"
+import { glob } from "astro/loaders"
 
 const blog = defineCollection({
   loader: glob({ base: "../../packages/blog/contents", pattern: "**/*.md" }),
@@ -10,18 +10,18 @@ const blog = defineCollection({
       .union([z.array(z.string()), z.string()])
       .optional()
       .transform((v) => {
-        if (!v) return undefined;
-        if (Array.isArray(v)) return v;
+        if (!v) return undefined
+        if (Array.isArray(v)) return v
         return v
           .replace(/[[\]'"]/g, "")
           .split(",")
           .map((s) => s.trim())
-          .filter(Boolean);
+          .filter(Boolean)
       }),
     IsDraft: z.boolean().optional().default(false),
     CreatedAt: z.string().optional(),
     UpdatedAt: z.string().optional(),
   }),
-});
+})
 
-export const collections = { blog };
+export const collections = { blog }
