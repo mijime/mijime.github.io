@@ -1,4 +1,5 @@
 import { v4 as uuidv4 } from "uuid";
+import { detectRooms } from "./canvas/roomDetection";
 import type { Building, Cell, CopiedRegion, FloorPlan, FloorType, Item, WallType } from "./types";
 
 function createCell(): Cell {
@@ -63,7 +64,9 @@ type Action =
       x2: number;
       y2: number;
     }
-  | { type: "ERASE_CELL"; floorId: string; cellIndex: number };
+  | { type: "ERASE_CELL"; floorId: string; cellIndex: number }
+  | { type: "FILL_ROOM"; floorId: string; cellIndex: number; floorType: FloorType }
+  | { type: "ROTATE_FLOOR"; floorId: string };
 
 function updateFloor(state: Building, floorId: string, fn: (f: FloorPlan) => FloorPlan): Building {
   return {
@@ -223,6 +226,78 @@ export function reducer(state: Building, action: Action): Building {
       return updateFloor(state, action.floorId, (floor) =>
         updateCell(floor, action.cellIndex, () => createCell()),
       );
+    }
+
+    case "FILL_ROOM": {
+      return updateFloor(state, action.floorId, (floor) => {
+        const rooms = detectRooms(floor);
+        const room = rooms.find((r) => r.cells.includes(action.cellIndex));
+        if (!room) {
+          return floor;
+        }
+        const cells = [...floor.cells];
+        for (const idx of room.cells) {
+          if (cells[idx].floorType === null) {
+            cells[idx] = { ...cells[idx], floorType: action.floorType };
+          }
+        }
+        return { ...floor, cells };
+      });
+    }
+
+    case "ROTATE_FLOOR": {
+      return updateFloor(state, action.floorId, (floor) => {
+        const { width, height, cells } = floor;
+        // CW 90°: (x,y) → (nx=height-1-y, ny=x); newWidth=height, newHeight=width
+        const newWidth = height;
+        const newHeight = width;
+        const newCells: Cell[] = Array.from({ length: newWidth * newHeight }, createCell);
+
+        // First pass: copy floorType and item
+        for (let y = 0; y < height; y++) {
+          for (let x = 0; x < width; x++) {
+            const src = cells[y * width + x];
+            const nx = height - 1 - y;
+            const ny = x;
+            newCells[ny * newWidth + nx] = {
+              ...newCells[ny * newWidth + nx],
+              floorType: src.floorType,
+              item: src.item
+                ? { ...src.item, rotation: ((src.item.rotation + 90) % 360) as 0 | 90 | 180 | 270 }
+                : null,
+            };
+          }
+        }
+
+        // Second pass: rotate walls
+        // src.wall.left (x-boundary at x, between x-1 and x) →
+        //   after CW90, this vertical line becomes horizontal line → top of new (nx, ny)
+        // src.wall.top (y-boundary at y, between y-1 and y) →
+        //   after CW90, this horizontal line becomes vertical line → left of new (nx+1, ny)
+        for (let y = 0; y < height; y++) {
+          for (let x = 0; x < width; x++) {
+            const src = cells[y * width + x];
+            const nx = height - 1 - y;
+            const ny = x;
+
+            if (src.wall.left !== "none") {
+              newCells[ny * newWidth + nx] = {
+                ...newCells[ny * newWidth + nx],
+                wall: { ...newCells[ny * newWidth + nx].wall, top: src.wall.left },
+              };
+            }
+
+            if (src.wall.top !== "none" && nx + 1 < newWidth) {
+              newCells[ny * newWidth + (nx + 1)] = {
+                ...newCells[ny * newWidth + (nx + 1)],
+                wall: { ...newCells[ny * newWidth + (nx + 1)].wall, left: src.wall.top },
+              };
+            }
+          }
+        }
+
+        return { ...floor, width: newWidth, height: newHeight, cells: newCells };
+      });
     }
 
     default: {
