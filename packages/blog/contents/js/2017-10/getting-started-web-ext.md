@@ -1,7 +1,7 @@
 ---
 Title: web-ext を使って WebExtension を始める
 CreatedAt: '2017-10-14T01:38:45+09:00'
-Draft: False
+IsDraft: False
 ---
 
 web extension 用のビルドツール `web-ext` があるらしい

@@ -1,6 +1,6 @@
 ---
 CreatedAt: '2016-05-31T22:41:30+09:00'
-Draft: false
+IsDraft: false
 Title: 'mermaidに対応した'
 Tags: ['Development', 'mermaid']
 ---

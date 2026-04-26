@@ -1,6 +1,6 @@
 ---
 Title: 'webフォントを読み込んでいる間にシステムフォントを表示する'
-Draft: false
+IsDraft: false
 CreatedAt: '2020-03-29T07:55:11.608Z'
 ---
 

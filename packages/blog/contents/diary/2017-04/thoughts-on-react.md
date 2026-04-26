@@ -1,7 +1,7 @@
 ---
 Tags: ['Development', 'React']
 CreatedAt: '2017-04-09T22:40:10+09:00'
-Draft: false
+IsDraft: false
 Title: 'ReactでMarkdownEditorを作ったかんそう'
 ---
 

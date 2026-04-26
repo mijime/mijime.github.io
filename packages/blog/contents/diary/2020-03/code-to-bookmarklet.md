@@ -1,6 +1,6 @@
 ---
 Title: 'codeをbookmarkletに変換する'
-Draft: false
+IsDraft: false
 CreatedAt: '2020-03-29T07:58:48.611Z'
 ---
 

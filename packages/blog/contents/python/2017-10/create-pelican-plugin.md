@@ -1,6 +1,6 @@
 ---
 CreatedAt: '2017-10-22T21:32:19+09:00'
-Draft: false
+IsDraft: false
 Title: 'PelicanのPluginの作り方'
 Tags: ['pelican']
 ---

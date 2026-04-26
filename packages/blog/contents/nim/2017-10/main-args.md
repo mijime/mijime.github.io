@@ -1,7 +1,7 @@
 ---
 Title: Nim の main 関数の処理方法について
 CreatedAt: '2017-10-12T13:53:00+09:00'
-Draft: False
+IsDraft: False
 ---
 
 <!--more-->

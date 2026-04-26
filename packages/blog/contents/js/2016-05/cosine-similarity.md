@@ -1,6 +1,6 @@
 ---
 CreatedAt: '2016-05-28T21:12:36+09:00'
-Draft: false
+IsDraft: false
 Title: '関連記事を探す'
 Tags: ['Development', 'JavaScript']
 ---
