@@ -1,0 +1,9 @@
+---
+export const prerender = true;
+import BlogLayout from "../../layouts/BlogLayout.astro";
+import { BlogSearch } from "../../components/BlogSearch";
+---
+
+<BlogLayout title="search">
+  <BlogSearch client:only="react" />
+</BlogLayout>

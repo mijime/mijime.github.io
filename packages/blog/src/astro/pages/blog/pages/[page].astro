@@ -1,0 +1,68 @@
+---
+export const prerender = true;
+import BlogLayout from "../../../layouts/BlogLayout.astro";
+import { getCollection } from "astro:content";
+import type { CollectionEntry } from "astro:content";
+import { PAGE_SIZE } from "@mijime/blog";
+
+export async function getStaticPaths() {
+  const entries: CollectionEntry<"blog">[] = await getCollection("blog");
+  const filtered = entries.filter((p) => !p.data.Draft);
+  const allPosts = filtered
+    .filter((p) => p.id.split("/").length === 3)
+    .map((p) => {
+      const [category, ym, slugMd] = p.id.split("/");
+      return { ...p.data, category, ym, slug: slugMd.replace(/\.md$/, "") };
+    })
+    .toSorted((a, b) => {
+      const da = a.Date ?? `${a.ym}-01`;
+      const db = b.Date ?? `${b.ym}-01`;
+      return db.localeCompare(da);
+    });
+
+  const pageCount = Math.max(1, Math.ceil(allPosts.length / PAGE_SIZE));
+  return Array.from({ length: pageCount }, (_, i) => ({
+    params: { page: String(i + 1) },
+    props: { allPosts, pageCount },
+  }));
+}
+
+const { allPosts, pageCount } = Astro.props;
+const page = Number(Astro.params.page);
+const posts = allPosts.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+---
+
+<BlogLayout title={`blog page ${page}`}>
+  <ul class="post-list">
+    {
+      posts.map((p) => (
+        <li class="post-list-item">
+          <span class="post-date">{p.Date ?? p.ym}</span>
+          <div>
+            <a href={`/blog/${p.category}/${p.ym}/${p.slug}`}>{p.Title}</a>
+            {p.Tags && p.Tags.length > 0 && (
+              <span>
+                {p.Tags.map((t: string) => (
+                  <a href={`/blog/tag/${t}`} class="post-tag">
+                    {t}
+                  </a>
+                ))}
+              </span>
+            )}
+          </div>
+        </li>
+      ))
+    }
+  </ul>
+  <nav class="pagination">
+    {
+      page > 1 && (
+        <a href={page - 1 === 1 ? "/blog/" : `/blog/pages/${page - 1}`}>
+          ← prev
+        </a>
+      )
+    }
+    <span>{page} / {pageCount}</span>
+    {page < pageCount && <a href={`/blog/pages/${page + 1}`}>next →</a>}
+  </nav>
+</BlogLayout>

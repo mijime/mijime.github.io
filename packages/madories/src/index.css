@@ -1,0 +1,48 @@
+:root {
+  --paper: #f5f0e8;
+  --ink: #2d2520;
+  --mid: #8b7d6b;
+  --grid: #d4c9b0;
+  --terra: #c4714a;
+  --window-blue: #8bafc0;
+  --toolbar-bg: #ede7da;
+  --toolbar: #ede7da;
+  --border: #c8b9a6;
+  --accent: #c4714a;
+  --paper-overlay: rgba(0, 0, 0, 0.3);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #1a1714;
+    --ink: #e8e0d4;
+    --mid: #8b7d6b;
+    --grid: #2e2a26;
+    --terra: #d4845a;
+    --window-blue: #6a8fa0;
+    --toolbar-bg: #211e1b;
+    --border: #3a342e;
+    --accent: #d4845a;
+  }
+}
+
+[data-theme="dark"] {
+  --paper: #1a1714;
+  --ink: #e8e0d4;
+  --mid: #8b7d6b;
+  --grid: #2e2a26;
+  --terra: #d4845a;
+  --window-blue: #6a8fa0;
+  --toolbar-bg: #211e1b;
+  --border: #3a342e;
+  --accent: #d4845a;
+}
+
+* {
+  font-family: "IBM Plex Mono", monospace;
+}
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+}

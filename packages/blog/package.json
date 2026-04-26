@@ -1,0 +1,59 @@
+{
+  "name": "@mijime/blog",
+  "version": "1.0.0",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./components": "./src/components.tsx",
+    "./search": "./src/search-query.ts",
+    "./duckdb": "./src/duckdb.ts",
+    "./parquet": "./src/parquet.ts",
+    "./index.css": "./src/index.css",
+    "./integration": "./src/integration.ts",
+    "./astro/components/BlogHeaderSearch": "./src/astro/components/BlogHeaderSearch.tsx",
+    "./astro/components/BlogSearch": "./src/astro/components/BlogSearch.tsx",
+    "./astro/components/DarkModeToggle": "./src/astro/components/DarkModeToggle.tsx"
+  },
+  "scripts": {
+    "test": "bun test",
+    "check": "bun run check:tsgo && bun run check:oxlint && bun run check:astro",
+    "check:tsgo": "tsgo --noEmit",
+    "check:oxlint": "oxlint --format=github",
+    "check:astro": "astro check",
+    "format": "bun run format:oxfmt && bun run format:prettier",
+    "format:oxfmt": "oxfmt",
+    "format:prettier": "prettier --write 'src/**/*.astro'"
+  },
+  "dependencies": {
+    "@astrojs/check": "^0.9.8",
+    "@duckdb/duckdb-wasm": "^1.33.1-dev45.0",
+    "@shikijs/rehype": "^4.0.2",
+    "lindera-js": "^0.1.4",
+    "mdast": "^3.0.0",
+    "mermaid": "^11.14.0",
+    "rehype": "^13.0.2",
+    "rehype-stringify": "^10.0.1",
+    "remark": "^15.0.1",
+    "remark-gfm": "^4.0.1",
+    "remark-html": "^16.0.1",
+    "remark-rehype": "^11.1.2",
+    "typescript": "^6.0.3",
+    "unist-util-visit": "^5.1.0"
+  },
+  "devDependencies": {
+    "@types/mdast": "^4.0.4",
+    "@types/react": "^19.2.14",
+    "@typescript/native-preview": "^7.0.0-dev.20260425.1",
+    "duckdb": "^1.4.4",
+    "oxfmt": "^0.46.0",
+    "oxlint": "^1.61.0",
+    "prettier": "^3.8.3",
+    "prettier-plugin-astro": "^0.14.1",
+    "remark-frontmatter": "^5.0.0",
+    "remark-mdx-frontmatter": "^5.2.0",
+    "vite": "^8.0.10"
+  },
+  "peerDependencies": {
+    "astro": ">=4.0.0"
+  }
+}
