@@ -1,0 +1,29 @@
+---
+export const prerender = true;
+import BlogLayout from "../../../layouts/BlogLayout.astro";
+import { getCollection } from "astro:content";
+
+import type { CollectionEntry } from "astro:content";
+const entries: CollectionEntry<"blog">[] = await getCollection("blog");
+const filtered = entries.filter((p) => !p.data.Draft);
+const tagSet = new Set<string>();
+for (const p of filtered) {
+  for (const t of p.data.Tags ?? []) tagSet.add(t);
+}
+const tags = [...tagSet].sort();
+---
+
+<BlogLayout title="tags">
+  <h1>Tags</h1>
+  <ul class="tag-list">
+    {
+      tags.map((t) => (
+        <li>
+          <a href={`/blog/tag/${t}`} class="post-tag">
+            {t}
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+</BlogLayout>

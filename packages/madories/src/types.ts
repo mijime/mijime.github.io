@@ -1,0 +1,65 @@
+export type WallType = "none" | "solid" | "solid_thin" | "window_full" | "window_center";
+
+export type FloorType = "wood" | "water" | "grass" | "concrete" | "void";
+
+export interface WallFlags {
+  top: WallType;
+  left: WallType;
+}
+
+export type ItemType =
+  | "chair"
+  | "desk"
+  | "toilet"
+  | "bathtub"
+  | "kitchen"
+  | "washbasin"
+  | "washbasin_half"
+  | "door"
+  | "door_slide"
+  | "stairs"
+  | "fridge"
+  | "washer"
+  | "shelf1"
+  | "shelf2"
+  | "tv"
+  | "sofa"
+  | "bed_single"
+  | "bed_double"
+  | "desk_large";
+
+export interface Item {
+  type: ItemType;
+  rotation: 0 | 90 | 180 | 270;
+}
+
+export interface Cell {
+  wall: WallFlags;
+  floorType: FloorType | null;
+  item: Item | null;
+}
+
+export interface FloorPlan {
+  id: string;
+  name: string;
+  width: number;
+  height: number;
+  cells: Cell[];
+}
+
+export interface Building {
+  cellSize: number;
+  floors: FloorPlan[];
+}
+
+export interface SaveData {
+  version: 1;
+  building: Building;
+  activeFloorId: string;
+}
+
+export interface CopiedRegion {
+  width: number;
+  height: number;
+  cells: Cell[];
+}
