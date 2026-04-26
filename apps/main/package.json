@@ -1,0 +1,37 @@
+{
+  "name": "@mijime/main",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "check": "bun run check:oxlint && bun run check:astro",
+    "check:oxlint": "oxlint --format=github",
+    "check:astro": "astro check",
+    "format": "bun run format:oxfmt && bun run format:prettier",
+    "format:oxfmt": "oxfmt",
+    "format:prettier": "prettier --write 'src/**/*.astro'"
+  },
+  "dependencies": {
+    "@astrojs/mdx": "^4.3.14",
+    "@astrojs/react": "^4.4.2",
+    "@mijime/blog": "workspace:*",
+    "@mijime/madories": "workspace:*",
+    "@tailwindcss/vite": "4.1.8",
+    "astro": "^6.1.9",
+    "react": "^19.2.5",
+    "react-dom": "^19.2.5",
+    "tailwindcss": "^4.2.4"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.8",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "oxfmt": "^0.1.0",
+    "oxlint": "^1.61.0",
+    "prettier": "^3.8.3",
+    "prettier-plugin-astro": "^0.14.1",
+    "typescript": "^6.0.3"
+  }
+}
