@@ -117,7 +117,7 @@ export const FloorCanvas = forwardRef<FloorCanvasHandle, Props>(function FloorCa
           style={{ display: "block", left: 0, position: "absolute", top: 0 }}
         />
       </div>
-      {selectedItemCell !== null &&
+      {tool.kind === "select" && selectedItemCell !== null &&
         (() => {
           const cell = floor.cells[selectedItemCell];
           if (!cell?.item) {
