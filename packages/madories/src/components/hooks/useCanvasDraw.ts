@@ -186,7 +186,9 @@ export function useCanvasDraw(props: Props): {
         const previewCells = new Set<number>();
         for (const room of rooms) {
           for (const idx of room.cells) {
-            if (floor.cells[idx].floorType === null) previewCells.add(idx);
+            if (floor.cells[idx].floorType === null) {
+              previewCells.add(idx);
+            }
           }
         }
         ctx.globalAlpha = 0.35;
