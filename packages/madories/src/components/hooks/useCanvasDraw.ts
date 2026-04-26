@@ -4,10 +4,12 @@ import { drawVoidCells } from "../../canvas/drawVoid";
 import { drawWalls } from "../../canvas/drawWalls";
 import { computeWallDimensions, fmtMm } from "../../canvas/export";
 import { clearIconCache, getCachedIcon } from "../../canvas/icons/cache";
-import { drawRoomLabels } from "../../canvas/roomDetection";
+import { drawTatamiCells } from "../../canvas/drawTatami";
+import { detectRooms, drawRoomLabels } from "../../canvas/roomDetection";
 import { ITEM_DEF_MAP } from "../../items";
 import type { FloorPlan, Item } from "../../types";
 import { floorTypeToColor } from "../Toolbar";
+import type { ToolMode } from "../Toolbar";
 import type { SelectionRef, ViewRef } from "./types";
 
 interface Props {
@@ -20,6 +22,7 @@ interface Props {
   selectionRef: SelectionRef;
   selectedItemCell: number | null;
   darkMode: boolean;
+  tool: ToolMode;
 }
 
 function cssVar(name: string): string {
@@ -141,6 +144,7 @@ export function useCanvasDraw(props: Props): {
     viewRef,
     selectionRef,
     darkMode,
+    tool,
   } = props;
 
   const ghostFloorsRef = useRef<FloorPlan[]>(ghostFloors);
@@ -172,6 +176,40 @@ export function useCanvasDraw(props: Props): {
         }
       }
     }
+    drawTatamiCells(ctx, floor, cellSize, darkMode);
+
+    if (tool.kind === "floor" && tool.floorType !== null) {
+      const previewColor = floorTypeToColor(tool.floorType, darkMode);
+      if (previewColor) {
+        const rooms = detectRooms(floor);
+        const previewCells = new Set<number>();
+        for (const room of rooms) {
+          for (const idx of room.cells) {
+            if (floor.cells[idx].floorType === null) previewCells.add(idx);
+          }
+        }
+        ctx.globalAlpha = 0.35;
+        ctx.fillStyle = previewColor;
+        for (const idx of previewCells) {
+          const rx = idx % floor.width;
+          const ry = Math.floor(idx / floor.width);
+          ctx.fillRect(rx * cellSize, ry * cellSize, cellSize, cellSize);
+        }
+        if (tool.floorType === "tatami") {
+          // Overlay tatami pattern on preview cells using a temporary fake floor
+          const previewFloor = {
+            ...floor,
+            cells: floor.cells.map((c, i) =>
+              previewCells.has(i) ? { ...c, floorType: "tatami" as const } : c,
+            ),
+          };
+          ctx.globalAlpha = 0.35;
+          drawTatamiCells(ctx, previewFloor, cellSize, darkMode);
+        }
+        ctx.globalAlpha = 1;
+      }
+    }
+
     drawVoidCells(ctx, floor, cellSize, cssVar("--ink"));
 
     drawGrid(ctx, floor.width, floor.height, cellSize, cssVar("--grid"));
@@ -279,7 +317,7 @@ export function useCanvasDraw(props: Props): {
         drawDynamic();
       }, 1000);
     },
-    [floor, cellSize, darkMode],
+    [floor, cellSize, darkMode, tool],
   );
 
   useEffect(() => {
