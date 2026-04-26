@@ -15,6 +15,7 @@ interface Props {
   selectionRef: SelectionRef;
   onSetWall: (cellIndex: number, edge: "top" | "left") => void;
   onSetFloorType: (cellIndex: number, floorType: FloorType | null) => void;
+  onFillRoom: (cellIndex: number) => void;
   onPlaceItem: (cellIndex: number) => void;
   onRotateItem: (cellIndex: number) => void;
   onMoveItem: (fromIndex: number, toIndex: number) => void;
@@ -42,6 +43,7 @@ export function usePointerHandlers(props: Props): {
     selectionRef,
     onSetWall,
     onSetFloorType,
+    onFillRoom,
     onPlaceItem,
     onRotateItem,
     onMoveItem,
@@ -295,10 +297,8 @@ export function usePointerHandlers(props: Props): {
     }
 
     if (tool.kind === "floor") {
-      const idx = getCellAtMouse(mx, my);
-      if (idx !== null) {
-        onSetFloorType(idx, tool.floorType);
-      }
+      dragStartRef.current = getCellAtMouse(mx, my);
+      dragMovedRef.current = false;
       return;
     }
 
@@ -380,6 +380,14 @@ export function usePointerHandlers(props: Props): {
     const { mx, my } = getCanvasPos(e.clientX, e.clientY);
     const idx = getCellAtMouse(mx, my);
 
+    if (tool.kind === "floor") {
+      if (!dragMovedRef.current && idx !== null && tool.floorType !== null && floor.cells[idx].floorType === null) {
+        onFillRoom(idx);
+      }
+      dragMovedRef.current = false;
+      return;
+    }
+
     if (tool.kind === "item") {
       if (start !== null && idx !== null && idx !== start) {
         dragMovedRef.current = true;
@@ -445,6 +453,7 @@ export function usePointerHandlers(props: Props): {
     if (tool.kind === "floor" && e.buttons === 1) {
       const idx = getCellAtMouse(mx, my);
       if (idx !== null) {
+        dragMovedRef.current = true;
         onSetFloorType(idx, tool.floorType);
       }
       return;
