@@ -1,6 +1,6 @@
 ---
 CreatedAt: '2016-05-26T21:10:04+09:00'
-Draft: false
+IsDraft: false
 Title: 'CIを始めるのが辛い'
 Tags: ['note', 'ci']
 ---

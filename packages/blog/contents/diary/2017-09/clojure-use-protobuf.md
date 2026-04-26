@@ -1,7 +1,7 @@
 ---
 Title: Clojure から GRPC とか ProtoBuf を触ってみる
 Tags: ['Development', 'clojure']
-Draft: true
+IsDraft: true
 Description: ''
 CreatedAt: '2017-09-17T07:48:28+09:00'
 ---

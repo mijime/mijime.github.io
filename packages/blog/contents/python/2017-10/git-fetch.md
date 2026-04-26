@@ -1,6 +1,6 @@
 ---
 CreatedAt: '2017-10-22T21:25:19+09:00'
-Draft: false
+IsDraft: false
 Title: 'Gitがインストールされていない環境でログを取得し、ハンドリングする'
 Tags: ['Git']
 ---

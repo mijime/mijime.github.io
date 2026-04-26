@@ -1,7 +1,7 @@
 ---
 Title: Nimble でユニットテストする
 CreatedAt: '2017-10-13T13:24:00+09:00'
-Draft: false
+IsDraft: false
 ---
 
 ## ファイルの場所

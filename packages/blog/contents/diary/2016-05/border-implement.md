@@ -1,6 +1,6 @@
 ---
 CreatedAt: '2016-05-26T21:13:19+09:00'
-Draft: false
+IsDraft: false
 Title: '背面派、前面派'
 Tags: ['note']
 ---

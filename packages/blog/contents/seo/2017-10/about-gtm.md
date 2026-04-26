@@ -1,7 +1,7 @@
 ---
 Title: Google tag manager の概要
 CreatedAt: '2017-10-22T03:07:56+09:00'
-Draft: false
+IsDraft: false
 ---
 
 Google tag manager は HTML タグを動的に挿入するサービス。

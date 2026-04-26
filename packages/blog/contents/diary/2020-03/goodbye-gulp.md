@@ -1,6 +1,6 @@
 ---
 Title: 'Gulpをやめた'
-Draft: false
+IsDraft: false
 CreatedAt: '2020-03-29T08:37:25.431Z'
 ---
 

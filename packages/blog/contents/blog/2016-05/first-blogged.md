@@ -1,6 +1,6 @@
 ---
 CreatedAt: '2016-05-23T21:56:24+09:00'
-Draft: false
+IsDraft: false
 Title: 'first blogged'
 Tags: ['note', 'blog']
 ---
