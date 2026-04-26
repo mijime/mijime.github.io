@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef } from "react";
 import { drawGrid } from "../../canvas/drawGrid";
+import { getItemDrawOffset } from "../../canvas/drawItems";
 import { drawVoidCells } from "../../canvas/drawVoid";
 import { drawWalls } from "../../canvas/drawWalls";
 import { computeWallDimensions, fmtMm } from "../../canvas/export";
@@ -102,13 +103,13 @@ function drawItemsCached(
       if (!def) {
         continue;
       }
-      const isRotated = cell.item.rotation === 90 || cell.item.rotation === 270;
-      const effectiveW = isRotated ? def.h : def.w;
-      const effectiveH = isRotated ? def.w : def.h;
-      if (x + effectiveW > width || y + effectiveH > height) {
+      const { effectiveW, effectiveH, offX, offY } = getItemDrawOffset(def, cell.item.rotation);
+      const drawX = x + offX;
+      const drawY = y + offY;
+      if (drawX < 0 || drawY < 0 || drawX + effectiveW > width || drawY + effectiveH > height) {
         continue;
       }
-      drawItemAtCached(ctx, cell.item, x * cellSize, y * cellSize, cellSize, 1, darkMode);
+      drawItemAtCached(ctx, cell.item, drawX * cellSize, drawY * cellSize, cellSize, 1, darkMode);
     }
   }
 }
@@ -251,9 +252,15 @@ export function useCanvasDraw(props: Props): {
     if (ghost) {
       const { item } = floor.cells[ghost.fromIdx];
       if (item) {
-        const cx = Math.floor(ghost.mx / cellSize);
-        const cy = Math.floor(ghost.my / cellSize);
-        drawItemAtCached(ctx, item, cx * cellSize, cy * cellSize, cellSize, 0.5, darkMode);
+        const def = ITEM_DEF_MAP.get(item.type);
+        if (def) {
+          const cx = Math.floor(ghost.mx / cellSize);
+          const cy = Math.floor(ghost.my / cellSize);
+          const { offX, offY } = getItemDrawOffset(def, item.rotation);
+          const drawX = cx + offX;
+          const drawY = cy + offY;
+          drawItemAtCached(ctx, item, drawX * cellSize, drawY * cellSize, cellSize, 0.5, darkMode);
+        }
       }
     }
 

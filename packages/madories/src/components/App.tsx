@@ -57,10 +57,7 @@ export function App() {
       }
     });
   }, []);
-  const [tool, setTool] = useState<ToolMode>({
-    kind: "wall",
-    wallType: "solid",
-  });
+  const [tool, setTool] = useState<ToolMode>({ kind: "select" });
   const canvasRef = useRef<FloorCanvasHandle>(null);
 
   const current = history[historyIndex];

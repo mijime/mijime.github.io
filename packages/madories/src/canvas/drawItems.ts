@@ -28,9 +28,22 @@ export function drawItemAt(
   ctx.save();
   ctx.globalAlpha = alpha;
   ctx.translate(px + boundW / 2, py + boundH / 2);
-  ctx.rotate((item.rotation * Math.PI) / 180);
+  ctx.rotate((-item.rotation * Math.PI) / 180);
   drawItemIcon(ctx, item.type, -naturalW / 2, -naturalH / 2, naturalW, naturalH);
   ctx.restore();
+}
+
+export function getItemDrawOffset(
+  def: ItemDef,
+  rotation: 0 | 90 | 180 | 270,
+): { offX: number; offY: number; effectiveW: number; effectiveH: number } {
+  const isRotated = rotation === 90 || rotation === 270;
+  const effectiveW = isRotated ? def.h : def.w;
+  const effectiveH = isRotated ? def.w : def.h;
+  const asymmetric = def.w !== def.h;
+  const offX = asymmetric && (rotation === 180 || rotation === 270) ? -(effectiveW - 1) : 0;
+  const offY = asymmetric && rotation === 180 ? -(effectiveH - 1) : 0;
+  return { effectiveH, effectiveW, offX, offY };
 }
 
 export function drawItems(ctx: CanvasRenderingContext2D, floor: FloorPlan, cellSize: number): void {
@@ -48,15 +61,15 @@ export function drawItems(ctx: CanvasRenderingContext2D, floor: FloorPlan, cellS
         continue;
       }
 
-      const isRotated = cell.item.rotation === 90 || cell.item.rotation === 270;
-      const effectiveW = isRotated ? itemDef.h : itemDef.w;
-      const effectiveH = isRotated ? itemDef.w : itemDef.h;
+      const { effectiveW, effectiveH, offX, offY } = getItemDrawOffset(itemDef, cell.item.rotation);
+      const drawX = x + offX;
+      const drawY = y + offY;
 
-      if (x + effectiveW > width || y + effectiveH > height) {
+      if (drawX < 0 || drawY < 0 || drawX + effectiveW > width || drawY + effectiveH > height) {
         continue;
       }
 
-      drawItemAt(ctx, cell.item, x * cellSize, y * cellSize, cellSize, 1, itemDef);
+      drawItemAt(ctx, cell.item, drawX * cellSize, drawY * cellSize, cellSize, 1, itemDef);
     }
   }
 }

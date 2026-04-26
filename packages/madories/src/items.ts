@@ -25,12 +25,12 @@ export const ITEM_DEFS: ItemDef[] = [
     w: 1,
   },
   { category: "水回り", h: 1, label: "洗濯機", type: "washer", w: 1 },
-  { category: "キッチン", h: 1, label: "キッチン台", type: "kitchen", w: 3 },
+  { category: "キッチン", h: 3, label: "キッチン台", type: "kitchen", w: 1 },
   { category: "キッチン", h: 1, label: "冷蔵庫", type: "fridge", w: 1 },
-  { category: "リビング", h: 1, label: "ソファ", type: "sofa", w: 2 },
-  { category: "リビング", h: 1, label: "テレビ", type: "tv", w: 2 },
+  { category: "リビング", h: 2, label: "ソファ", type: "sofa", w: 1 },
+  { category: "リビング", h: 2, label: "テレビ", type: "tv", w: 1 },
   { category: "リビング", h: 1, label: "棚(1)", type: "shelf1", w: 1 },
-  { category: "リビング", h: 1, label: "棚(2)", type: "shelf2", w: 2 },
+  { category: "リビング", h: 2, label: "棚(2)", type: "shelf2", w: 1 },
   {
     category: "リビング",
     h: 2,
@@ -46,7 +46,7 @@ export const ITEM_DEFS: ItemDef[] = [
     w: 2,
   },
   { category: "オフィス", h: 1, label: "椅子", type: "chair", w: 1 },
-  { category: "オフィス", h: 1, label: "机", type: "desk", w: 2 },
+  { category: "オフィス", h: 2, label: "机", type: "desk", w: 1 },
   { category: "オフィス", h: 2, label: "机(2x2)", type: "desk_large", w: 2 },
 ];
 
