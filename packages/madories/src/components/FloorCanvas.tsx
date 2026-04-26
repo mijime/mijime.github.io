@@ -3,7 +3,7 @@ import { exportFloorPng } from "../canvas/export";
 import type { CopiedRegion, FloorPlan, FloorType } from "../types";
 import { useCanvasDraw } from "./hooks/useCanvasDraw";
 import { usePointerHandlers } from "./hooks/usePointerHandlers";
-import type { ToolMode } from "./Toolbar";
+import type { ToolMode } from "./toolMode";
 
 export interface FloorCanvasHandle {
   exportPng: () => void;

@@ -9,7 +9,7 @@ import { DslPanel } from "./DslPanel";
 import type { FloorCanvasHandle } from "./FloorCanvas";
 import { FloorCanvas } from "./FloorCanvas";
 import { FloorTabs } from "./FloorTabs";
-import type { ToolMode } from "./Toolbar";
+import type { ToolMode } from "./toolMode";
 import { ToolSheet } from "./ToolSheet";
 
 const MAX_HISTORY = 50;
