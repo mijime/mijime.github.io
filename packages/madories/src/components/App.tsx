@@ -1,22 +1,5 @@
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
-
-function useDarkMode() {
-  const [dark, setDark] = useState(() => {
-    if (typeof document === "undefined") {
-      return false;
-    }
-    const stored = localStorage.getItem("theme");
-    if (stored) {
-      return stored === "dark";
-    }
-    return window.matchMedia("(prefers-color-scheme: dark)").matches;
-  });
-  useLayoutEffect(() => {
-    document.documentElement.dataset.theme = dark ? "dark" : "light";
-    localStorage.setItem("theme", dark ? "dark" : "light");
-  }, [dark]);
-  return [dark, setDark] as const;
-}
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useDarkMode } from "@mijime/theme/useDarkMode";
 import { exportAllFloorsPng } from "../canvas/export";
 import { buildShareUrl, decodeFloors, encodeFloors, getShareParam } from "../canvas/share";
 import { loadFromFile, loadFromStorage, saveToFile, saveToStorage } from "../storage";
@@ -30,6 +13,7 @@ import type { ToolMode } from "./Toolbar";
 import { ToolSheet } from "./ToolSheet";
 
 const MAX_HISTORY = 50;
+const MERGE_MS = 500;
 
 interface AppState {
   building: Building;
@@ -104,7 +88,6 @@ export function App() {
     floorId?: string;
     t: number;
   } | null>(null);
-  const MERGE_MS = 500;
 
   const push = useCallback(
     (next: AppState) => {
@@ -133,7 +116,6 @@ export function App() {
       lastActionRef.current = { floorId, t: now, type: action.type };
 
       if (canMerge) {
-        // Overwrite current history entry instead of pushing
         setHistory((prev) => {
           const cur = prev[historyIndex];
           const next = { ...cur, building: reducer(cur.building, action) };
@@ -180,7 +162,7 @@ export function App() {
         });
     });
   }, [building.floors]);
-  const [dark, setDark] = useDarkMode();
+  const dark = useDarkMode();
 
   const floor = building.floors.find((f) => f.id === activeFloorId) ?? building.floors[0];
   const ghostFloors = building.floors.filter((f) => f.id !== activeFloorId);
@@ -210,21 +192,6 @@ export function App() {
             }}
           />
         </div>
-        <button
-          onClick={() => setDark((d) => !d)}
-          aria-label="toggle dark mode"
-          style={{
-            background: "none",
-            border: "none",
-            color: "var(--ink)",
-            cursor: "pointer",
-            flexShrink: 0,
-            fontSize: "1rem",
-            padding: "0 0.5rem",
-          }}
-        >
-          {dark ? "☀" : "☽"}
-        </button>
       </div>
       <div className="flex flex-1 overflow-hidden">
         <ToolSheet

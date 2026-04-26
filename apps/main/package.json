@@ -10,15 +10,17 @@
     "check:oxlint": "oxlint --format=github",
     "check:astro": "astro check",
     "format": "bun run format:oxfmt",
-    "format:oxfmt": "oxfmt"
+    "format:oxfmt": "oxfmt src"
   },
   "dependencies": {
     "@astrojs/mdx": "^4.3.14",
     "@astrojs/react": "^4.4.2",
     "@mijime/blog": "workspace:*",
+    "@mijime/theme": "workspace:*",
     "@mijime/madories": "workspace:*",
     "@tailwindcss/vite": "4.1.8",
     "astro": "^6.1.9",
+    "lucide-react": "^1.11.0",
     "react": "^19.2.5",
     "react-dom": "^19.2.5",
     "tailwindcss": "^4.2.4"

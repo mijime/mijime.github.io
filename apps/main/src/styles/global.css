@@ -1,23 +1,7 @@
-@import url("https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&family=Shippori+Mincho:wght@400;600&display=swap");
+@import "@mijime/theme/index.css";
 
 @import "tailwindcss";
 @source "../../../../packages/*/src/**/*.{ts,tsx}";
-
-/* ── Color Tokens ───────────────────────────────────── */
-:root {
-  --paper: #fafaf8;
-  --ink: #1a1a18;
-}
-:root[data-theme="dark"] {
-  --paper: #1a1a18;
-  --ink: #fafaf8;
-}
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --paper: #1a1a18;
-    --ink: #fafaf8;
-  }
-}
 
 /* ── Shiki Syntax Highlight ─────────────────────────── */
 .shiki span {
@@ -39,20 +23,4 @@
   :root:not([data-theme="light"]) .shiki {
     background-color: var(--shiki-dark-bg) !important;
   }
-}
-
-/* ── Reset & Base ───────────────────────────────────── */
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-}
-
-body {
-  background: var(--paper);
-  color: var(--ink);
-  font-family: "IBM Plex Mono", monospace;
-  font-size: 14px;
-  line-height: 1.7;
-  -webkit-font-smoothing: antialiased;
 }

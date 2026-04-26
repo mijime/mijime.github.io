@@ -96,7 +96,7 @@ export function BlogSearch() {
       <ul className="post-list">
         {results.map((p) => (
           <li key={`${p.category}/${p.ym}/${p.slug}`} className="post-list-item">
-            <span className="post-date">{p.CreatedAt ?? p.ym}</span>
+            <span className="post-date">{(p.CreatedAt ?? p.ym).slice(0, 10)}</span>
             <div>
               <a href={`/blog/${p.category}/${p.ym}/${p.slug}`}>{p.Title}</a>
               {p.Tags && p.Tags.length > 0 && (

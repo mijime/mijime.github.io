@@ -1,0 +1,116 @@
+@import url("https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&family=Shippori+Mincho:wght@400;600&display=swap");
+
+/* ── Color Tokens ───────────────────────────────────── */
+:root {
+  --paper: #fafaf8;
+  --ink: #1a1a18;
+  --mid: #8a8278;
+  --terra: #b5603a;
+  --border: #c8bfb4;
+  --grid: #e2dbd2;
+  --toolbar-bg: #f0ebe4;
+}
+:root[data-theme="dark"] {
+  --paper: #1a1a18;
+  --ink: #fafaf8;
+  --terra: #d4845a;
+  --border: #3a342e;
+  --grid: #2e2a26;
+  --toolbar-bg: #211e1b;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #1a1a18;
+    --ink: #fafaf8;
+    --terra: #d4845a;
+    --border: #3a342e;
+    --grid: #2e2a26;
+    --toolbar-bg: #211e1b;
+  }
+}
+
+/* ── Base ───────────────────────────────────────────── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 14px;
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Site Header ────────────────────────────────────── */
+.site-header {
+  border-bottom: 1px solid var(--border);
+  background: var(--toolbar-bg);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.site-header-inner {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 0 24px;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.site-logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  color: var(--ink);
+}
+
+.site-logo-text {
+  font-family: "Crimson Pro", serif;
+  font-weight: 600;
+  font-size: 20px;
+  letter-spacing: 0.02em;
+}
+
+.site-nav {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.site-nav-link {
+  color: var(--mid);
+  text-decoration: none;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: lowercase;
+  transition: color 0.15s;
+}
+.site-nav-link:hover {
+  color: var(--terra);
+}
+
+.site-theme-toggle {
+  background: transparent;
+  border: 1px solid currentColor;
+  border-radius: 4px;
+  padding: 2px 8px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 12px;
+  color: var(--mid);
+  opacity: 0.6;
+  transition: opacity 0.15s;
+  display: flex;
+  align-items: center;
+}
+.site-theme-toggle:hover {
+  opacity: 1;
+}
