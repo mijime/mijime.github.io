@@ -1,4 +1,5 @@
-import { defineCollection, z } from "astro:content"
+import { defineCollection } from "astro:content"
+import { z } from "zod"
 import { glob } from "astro/loaders"
 
 const blog = defineCollection({
@@ -13,7 +14,7 @@ const blog = defineCollection({
         if (!v) return undefined
         if (Array.isArray(v)) return v
         return v
-          .replace(/[[\]'"]/g, "")
+          .replaceAll(/[[\]'"]/g, "")
           .split(",")
           .map((s) => s.trim())
           .filter(Boolean)
