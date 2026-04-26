@@ -15,13 +15,17 @@ const DIM_MARGIN = 28; // Px reserved for dimension rulers
 export const MM_PER_CELL = 910;
 
 // For drawing crop (includes floor color and items)
-export function computeBounds(floor: FloorPlan) {
-  let minX = floor.width,
-    minY = floor.height,
-    maxX = -1,
-    maxY = -1;
-  for (let y = 0; y < floor.height; y++) {
-    for (let x = 0; x < floor.width; x++) {
+export function computeBounds(
+  floor: FloorPlan,
+  region?: { x1: number; y1: number; x2: number; y2: number },
+) {
+  const x1 = region?.x1 ?? 0;
+  const y1 = region?.y1 ?? 0;
+  const x2 = region?.x2 ?? floor.width - 1;
+  const y2 = region?.y2 ?? floor.height - 1;
+  let minX = x2 + 1, minY = y2 + 1, maxX = x1 - 1, maxY = y1 - 1;
+  for (let y = y1; y <= y2; y++) {
+    for (let x = x1; x <= x2; x++) {
       const cell = floor.cells[y * floor.width + x];
       const used =
         cell.floorType !== null ||
@@ -29,22 +33,14 @@ export function computeBounds(floor: FloorPlan) {
         cell.wall.left !== "none" ||
         cell.item !== null;
       if (used) {
-        if (x < minX) {
-          minX = x;
-        }
-        if (y < minY) {
-          minY = y;
-        }
-        if (x > maxX) {
-          maxX = x;
-        }
-        if (y > maxY) {
-          maxY = y;
-        }
+        if (x < minX) minX = x;
+        if (y < minY) minY = y;
+        if (x > maxX) maxX = x;
+        if (y > maxY) maxY = y;
       }
     }
   }
-  return maxX < 0 ? undefined : { maxX, maxY, minX, minY };
+  return maxX < x1 ? undefined : { maxX, maxY, minX, minY };
 }
 
 // For dimension display: wall edges only, no items/floor color

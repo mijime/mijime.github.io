@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import { GestureHandler } from "../../canvas/gestureHandler";
 import { hitTestEdge } from "../../canvas/hitTest";
+import { computeBounds } from "../../canvas/export";
 import type { CopiedRegion, FloorPlan, FloorType } from "../../types";
 import type { ToolMode } from "../Toolbar";
 import type { SelectionRef, ViewRef } from "./types";
@@ -53,11 +54,11 @@ export function usePointerHandlers(props: Props): {
   const floorRef = useRef(floor);
   floorRef.current = floor;
 
-  const wallDraggingRef = useRef(false);
   const lastWallHitRef = useRef<string | null>(null);
   const wallDragStartPos = useRef<{ mx: number; my: number } | null>(null);
   const wallDragEdgeLock = useRef<"top" | "left" | null>(null);
   const wallDragLastPos = useRef<{ mx: number; my: number } | null>(null);
+  const wallStopTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const dragStartRef = useRef<number | null>(null);
   const dragMovedRef = useRef(false);
   const selectionStartRef = useRef<{ x: number; y: number } | null>(null);
@@ -99,7 +100,6 @@ export function usePointerHandlers(props: Props): {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [redraw, canvasRef.current?.getBoundingClientRect, viewRef.current, setSelectedItemCell]);
 
-  // Clear selection when tool changes away from select
   useEffect(() => {
     if (tool.kind !== "select") {
       selectionRef.current = null;
@@ -120,16 +120,20 @@ export function usePointerHandlers(props: Props): {
         if (!sel) {
           return;
         }
-        const x1 = Math.min(sel.x1, sel.x2);
-        const y1 = Math.min(sel.y1, sel.y2);
-        const x2 = Math.max(sel.x1, sel.x2);
-        const y2 = Math.max(sel.y1, sel.y2);
+        const rawX1 = Math.min(sel.x1, sel.x2);
+        const rawY1 = Math.min(sel.y1, sel.y2);
+        const rawX2 = Math.max(sel.x1, sel.x2);
+        const rawY2 = Math.max(sel.y1, sel.y2);
+        const f = floorRef.current;
+        const bounds = computeBounds(f, { x1: rawX1, y1: rawY1, x2: rawX2, y2: rawY2 });
+        if (!bounds) return;
+        const { minX: x1, minY: y1, maxX: x2, maxY: y2 } = bounds;
         const width = x2 - x1 + 1;
         const height = y2 - y1 + 1;
         const cells = [];
         for (let cy = y1; cy <= y2; cy++) {
           for (let cx = x1; cx <= x2; cx++) {
-            cells.push(floorRef.current.cells[cy * floorRef.current.width + cx]);
+            cells.push(f.cells[cy * f.width + cx]);
           }
         }
         copiedRef.current = { cells, height, width };
@@ -166,6 +170,12 @@ export function usePointerHandlers(props: Props): {
     return () => window.removeEventListener("keydown", handleKeyDown);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tool.kind, cellSize, selectionRef.current, selectionRef, redraw]);
+
+  useEffect(() => {
+    return () => {
+      if (wallStopTimerRef.current) clearTimeout(wallStopTimerRef.current);
+    };
+  }, []);
 
   function getCanvasPos(clientX: number, clientY: number): { mx: number; my: number } {
     const rect = canvasRef.current?.getBoundingClientRect();
@@ -205,35 +215,46 @@ export function usePointerHandlers(props: Props): {
     onRotateItem(idx);
   }
 
-  function applyWallHit(mx: number, my: number) {
-    const lock = wallDragEdgeLock.current;
-    let hit: { cx: number; cy: number; edge: "top" | "left" } | null;
-
-    if (lock === "top") {
-      const cx = Math.floor(mx / cellSize);
-      const cy = Math.round(my / cellSize);
-      hit = { cx, cy, edge: "top" };
-    } else if (lock === "left") {
-      const cx = Math.round(mx / cellSize);
-      const cy = Math.floor(my / cellSize);
-      hit = { cx, cy, edge: "left" };
-    } else {
-      hit = hitTestEdge(mx, my, cellSize);
-    }
-
-    if (!hit) {
-      return;
-    }
+  function applyWallSegment(hit: { cx: number; cy: number; edge: "top" | "left" }) {
     const idx = hit.cy * floor.width + hit.cx;
-    if (idx < 0 || idx >= floor.cells.length) {
-      return;
-    }
+    if (idx < 0 || idx >= floor.cells.length) return;
     const key = `${idx}:${hit.edge}`;
-    if (key === lastWallHitRef.current) {
-      return;
-    }
+    if (key === lastWallHitRef.current) return;
     lastWallHitRef.current = key;
     onSetWall(idx, hit.edge);
+  }
+
+  function applyWallHit(mx: number, my: number) {
+    const lock = wallDragEdgeLock.current;
+
+    if (lock === "top") {
+      const fixedCy = wallDragStartPos.current
+        ? Math.round(wallDragStartPos.current.my / cellSize)
+        : Math.round(my / cellSize);
+      const cx = Math.floor(mx / cellSize);
+      const lastCx = wallDragLastPos.current
+        ? Math.floor(wallDragLastPos.current.mx / cellSize)
+        : cx;
+      const step = cx > lastCx ? 1 : -1;
+      for (let c = lastCx; c !== cx + step; c += step) {
+        applyWallSegment({ cx: c, cy: fixedCy, edge: "top" });
+      }
+    } else if (lock === "left") {
+      const fixedCx = wallDragStartPos.current
+        ? Math.round(wallDragStartPos.current.mx / cellSize)
+        : Math.round(mx / cellSize);
+      const cy = Math.floor(my / cellSize);
+      const lastCy = wallDragLastPos.current
+        ? Math.floor(wallDragLastPos.current.my / cellSize)
+        : cy;
+      const step = cy > lastCy ? 1 : -1;
+      for (let c = lastCy; c !== cy + step; c += step) {
+        applyWallSegment({ cx: fixedCx, cy: c, edge: "left" });
+      }
+    } else {
+      const hit = hitTestEdge(mx, my, cellSize);
+      if (hit) applyWallSegment(hit);
+    }
   }
 
   function handlePointerDown(e: React.PointerEvent<HTMLCanvasElement>) {
@@ -266,12 +287,10 @@ export function usePointerHandlers(props: Props): {
     }
 
     if (tool.kind === "wall") {
-      wallDraggingRef.current = true;
       lastWallHitRef.current = null;
       wallDragStartPos.current = { mx, my };
       wallDragLastPos.current = { mx, my };
       wallDragEdgeLock.current = null;
-      applyWallHit(mx, my);
       return;
     }
 
@@ -342,11 +361,17 @@ export function usePointerHandlers(props: Props): {
     }
 
     if (tool.kind === "wall") {
-      wallDraggingRef.current = false;
+      const wasDrag = wallDragEdgeLock.current !== null;
       lastWallHitRef.current = null;
       wallDragStartPos.current = null;
       wallDragLastPos.current = null;
       wallDragEdgeLock.current = null;
+      if (wallStopTimerRef.current) clearTimeout(wallStopTimerRef.current);
+      if (!wasDrag) {
+        const { mx, my } = getCanvasPos(e.clientX, e.clientY);
+        const hit = hitTestEdge(mx, my, cellSize);
+        if (hit) applyWallSegment(hit);
+      }
       return;
     }
 
@@ -360,7 +385,8 @@ export function usePointerHandlers(props: Props): {
         dragMovedRef.current = true;
         onMoveItem(start, idx);
       } else if (!dragMovedRef.current && idx !== null) {
-        if (floor.cells[idx].item) {
+        const existing = floor.cells[idx].item;
+        if (existing && existing.type === tool.itemType) {
           onRotateItem(idx);
         } else {
           onPlaceItem(idx);
@@ -432,17 +458,8 @@ export function usePointerHandlers(props: Props): {
       return;
     }
 
-    if (tool.kind === "wall" && wallDraggingRef.current) {
-      const last = wallDragLastPos.current;
-      const dmx = last ? Math.abs(mx - last.mx) : 0;
-      const dmy = last ? Math.abs(my - last.my) : 0;
-
-      if (dmx < 2 && dmy < 2) {
-        wallDragEdgeLock.current = null;
-        wallDragStartPos.current = { mx, my };
-      }
-
-      if (!wallDragEdgeLock.current && wallDragStartPos.current) {
+    if (tool.kind === "wall" && wallDragStartPos.current) {
+      if (!wallDragEdgeLock.current) {
         const dx = Math.abs(mx - wallDragStartPos.current.mx);
         const dy = Math.abs(my - wallDragStartPos.current.my);
         if (dx > 4 || dy > 4) {
@@ -450,8 +467,15 @@ export function usePointerHandlers(props: Props): {
         }
       }
 
-      wallDragLastPos.current = { mx, my };
       applyWallHit(mx, my);
+      wallDragLastPos.current = { mx, my };
+
+      if (wallStopTimerRef.current) clearTimeout(wallStopTimerRef.current);
+      wallStopTimerRef.current = setTimeout(() => {
+        wallDragEdgeLock.current = null;
+        wallDragStartPos.current = wallDragLastPos.current;
+        lastWallHitRef.current = null;
+      }, 300);
       return;
     }
 
