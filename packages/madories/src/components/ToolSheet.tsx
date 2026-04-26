@@ -9,6 +9,7 @@ import {
   PaintRoller,
   Pencil,
   Redo2,
+  RotateCw,
   Save,
   Trash2,
   Undo2,
@@ -35,6 +36,7 @@ interface Props {
   onExportAll: () => void;
   onShare: () => void;
   onClear: () => void;
+  onRotateFloor: () => void;
   canUndo: boolean;
   canRedo: boolean;
   onUndo: () => void;
@@ -58,6 +60,7 @@ function ToolPanelContent({
   onExportAll,
   onShare,
   onClear,
+  onRotateFloor,
   canUndo,
   canRedo,
   onUndo,
@@ -289,6 +292,21 @@ function ToolPanelContent({
           }}
         >
           <Link size={16} />
+        </button>
+        <button
+          className="flex-1 py-2 rounded flex items-center justify-center"
+          style={{
+            background: "transparent",
+            border: "1px solid var(--border)",
+            color: "var(--ink)",
+          }}
+          title="90°回転"
+          onClick={() => {
+            onRotateFloor();
+            onClose?.();
+          }}
+        >
+          <RotateCw size={16} />
         </button>
         <button
           className="flex-1 py-2 rounded flex items-center justify-center"

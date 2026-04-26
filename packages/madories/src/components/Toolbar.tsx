@@ -10,6 +10,7 @@ import {
   MousePointer2,
   PaintRoller,
   Redo2,
+  RotateCw,
   Save,
   Trash2,
   Undo2,
@@ -42,7 +43,7 @@ export const FLOOR_TYPES: {
   { dark: null, label: "空白", light: null, type: null },
   { dark: "#5c4a28", label: "木材", light: "#f5deb3", type: "wood" },
   { dark: "#1a2a3a", label: "水回り", light: "#d6eef8", type: "water" },
-  { dark: "#1a3a1a", label: "芝生", light: "#90ee90", type: "grass" },
+  { dark: "#3a2e1a", label: "畳", light: "#c8b878", type: "tatami" },
   { dark: "#3a3a3a", label: "土間", light: "#d0d0d0", type: "concrete" },
   { dark: "#2a2518", label: "吹き抜け", light: "#fff8e8", type: "void" },
 ];
@@ -67,6 +68,7 @@ interface Props {
   canRedo: boolean;
   onUndo: () => void;
   onRedo: () => void;
+  onRotateFloor: () => void;
   darkMode: boolean;
 }
 
@@ -99,6 +101,7 @@ export function Toolbar({
   canRedo,
   onUndo,
   onRedo,
+  onRotateFloor,
   darkMode,
 }: Props) {
   const [openCategories, setOpenCategories] = useState<Set<string>>(new Set(["建具", "Wall"]));
@@ -369,6 +372,20 @@ export function Toolbar({
             <Link size={14} />
           </button>
         </div>
+        <button
+          onClick={onRotateFloor}
+          title="90°回転"
+          className="py-2 rounded flex items-center justify-center gap-1 text-xs font-mono"
+          style={{
+            background: "transparent",
+            border: "1px solid var(--border)",
+            color: "var(--ink)",
+            cursor: "pointer",
+          }}
+        >
+          <RotateCw size={14} />
+          回転
+        </button>
         <button
           onClick={() => {
             if (confirm("このレイヤーを全消去しますか？")) {
