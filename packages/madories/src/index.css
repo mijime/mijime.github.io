@@ -21,6 +21,7 @@
     --terra: #d4845a;
     --window-blue: #6a8fa0;
     --toolbar-bg: #211e1b;
+    --toolbar: #211e1b;
     --border: #3a342e;
     --accent: #d4845a;
   }
@@ -34,6 +35,7 @@
   --terra: #d4845a;
   --window-blue: #6a8fa0;
   --toolbar-bg: #211e1b;
+  --toolbar: #211e1b;
   --border: #3a342e;
   --accent: #d4845a;
 }

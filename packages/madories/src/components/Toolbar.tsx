@@ -1,8 +1,14 @@
 import {
+  Armchair,
+  BrickWall,
+  ChevronDown,
+  ChevronUp,
   Download,
   Eraser,
   FolderOpen,
+  Link,
   MousePointer2,
+  PaintRoller,
   Redo2,
   Save,
   Trash2,
@@ -56,6 +62,7 @@ interface Props {
   onExportAll: () => void;
   onSave: () => void;
   onLoad: () => void;
+  onShare: () => void;
   canUndo: boolean;
   canRedo: boolean;
   onUndo: () => void;
@@ -63,17 +70,14 @@ interface Props {
   darkMode: boolean;
 }
 
-const btn = (active: boolean, accent = false) => ({
-  background: active ? (accent ? "var(--terra)" : "var(--ink)") : "transparent",
-  border: `1px solid ${active ? (accent ? "var(--terra)" : "var(--ink)") : "var(--border)"}`,
-  color: active ? "var(--paper)" : "var(--ink)",
-  cursor: "pointer",
-  fontFamily: "IBM Plex Mono, monospace",
-  fontSize: "11px",
-  padding: "3px 8px",
-  textAlign: "left" as const,
-  width: "100%",
-});
+const CATEGORY_ICONS: Record<string, React.ReactNode> = {
+  Wall: <BrickWall size={12} />,
+  キッチン: <PaintRoller size={12} />,
+  リビング: <Armchair size={12} />,
+  オフィス: <MousePointer2 size={12} />,
+  建具: <BrickWall size={12} />,
+  水回り: <PaintRoller size={12} />,
+};
 
 const sectionLabel = {
   color: "var(--mid)",
@@ -90,6 +94,7 @@ export function Toolbar({
   onExportAll,
   onSave,
   onLoad,
+  onShare,
   canUndo,
   canRedo,
   onUndo,
@@ -110,93 +115,96 @@ export function Toolbar({
     });
   }
 
+  const toolButtons = [
+    { icon: <BrickWall size={14} />, kind: "wall" as const, label: "壁" },
+    { icon: <PaintRoller size={14} />, kind: "floor" as const, label: "床" },
+    { icon: <Armchair size={14} />, kind: "item" as const, label: "家具" },
+    { icon: <Eraser size={14} />, kind: "erase" as const, label: "消す" },
+    { icon: <MousePointer2 size={14} />, kind: "select" as const, label: "選択" },
+  ];
+
   return (
     <div
-      className="hidden md:flex flex-col gap-3 overflow-y-auto"
+      className="hidden md:flex flex-col gap-4 overflow-y-auto"
       style={{
-        background: "var(--toolbar-bg)",
+        background: "var(--toolbar)",
         borderRight: "1px solid var(--border)",
         fontFamily: "IBM Plex Mono, monospace",
-        padding: "10px 8px",
-        width: "120px",
+        padding: "12px 10px",
+        width: "150px",
       }}
     >
-      <div className="flex flex-col gap-1">
-        <button
-          onClick={() => onToolChange({ kind: "select" })}
-          style={{ ...btn(tool.kind === "select"), alignItems: "center", display: "flex", gap: "4px", justifyContent: "center" }}
-          title="選択"
-        >
-          <MousePointer2 size={12} />
-          選択
-        </button>
-        <button
-          onClick={() => onToolChange({ kind: "erase" })}
-          style={{ ...btn(tool.kind === "erase", true), alignItems: "center", display: "flex", gap: "4px", justifyContent: "center" }}
-          title="消去"
-        >
-          <Eraser size={12} />
-          消去
-        </button>
+      {/* Tool selector */}
+      <div className="flex flex-col gap-1.5">
+        {toolButtons.map(({ kind, label, icon }) => {
+          const active = tool.kind === kind;
+          return (
+            <button
+              key={kind}
+              className="flex items-center gap-2 px-3 py-2 rounded text-xs font-mono"
+              style={{
+                background: active ? "var(--ink)" : "transparent",
+                border: `1px solid ${active ? "var(--ink)" : "var(--border)"}`,
+                color: active ? "var(--paper)" : "var(--ink)",
+                cursor: "pointer",
+                textAlign: "left",
+              }}
+              onClick={() => {
+                if (kind === "wall") onToolChange({ kind: "wall", wallType: "solid" });
+                else if (kind === "floor") onToolChange({ floorType: "wood", kind: "floor" });
+                else if (kind === "item") onToolChange({ itemType: "door", kind: "item" });
+                else onToolChange({ kind } as ToolMode);
+              }}
+            >
+              {icon}
+              {label}
+            </button>
+          );
+        })}
       </div>
 
       <div style={{ borderTop: "1px solid var(--border)" }} />
 
-      {/* Wall — accordion */}
-      <div>
-        <button
-          onClick={() => toggleCategory("Wall")}
-          style={{
-            ...btn(false),
-            alignItems: "center",
-            background: "var(--toolbar-bg)",
-            border: "1px solid var(--border)",
-            color: "var(--ink)",
-            display: "flex",
-            justifyContent: "space-between",
-          }}
-        >
-          <span style={sectionLabel}>Wall</span>
-          <span style={{ fontSize: "9px" }}>{openCategories.has("Wall") ? "▲" : "▼"}</span>
-        </button>
-        {openCategories.has("Wall") && (
-          <div className="flex flex-col gap-0.5" style={{ marginTop: "2px", paddingLeft: "4px" }}>
-            {WALL_TYPES.map(({ type, label }) => (
-              <button
-                key={type}
-                onClick={() => onToolChange({ kind: "wall", wallType: type })}
-                style={btn(tool.kind === "wall" && tool.wallType === type)}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* Floor */}
-      <div>
-        <div style={sectionLabel}>Floor</div>
+      {/* Wall sub-options */}
+      {tool.kind === "wall" && (
         <div className="flex flex-col gap-1">
+          <div style={sectionLabel}>壁タイプ</div>
+          {WALL_TYPES.map(({ type, label }) => (
+            <button
+              key={type}
+              className="px-3 py-1 rounded text-xs font-mono text-left"
+              style={{
+                background: tool.wallType === type ? "var(--accent)" : "transparent",
+                border: "1px solid var(--border)",
+                color: tool.wallType === type ? "var(--paper)" : "var(--ink)",
+                cursor: "pointer",
+              }}
+              onClick={() => onToolChange({ kind: "wall", wallType: type })}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* Floor sub-options */}
+      {tool.kind === "floor" && (
+        <div className="flex flex-col gap-1">
+          <div style={sectionLabel}>床タイプ</div>
           {FLOOR_TYPES.map((entry) => {
-            const color = darkMode ? entry.dark : entry.light;
-            const active = tool.kind === "floor" && tool.floorType === entry.type;
+            const color = floorTypeToColor(entry.type, darkMode);
+            const active = tool.floorType === entry.type;
             return (
               <button
                 key={entry.label}
-                onClick={() => onToolChange({ floorType: entry.type, kind: "floor" })}
+                className="flex items-center gap-2 px-3 py-1 rounded text-xs font-mono"
                 style={{
-                  alignItems: "center",
                   background: "transparent",
                   border: active ? "1px solid var(--terra)" : "1px solid var(--border)",
                   color: active ? "var(--terra)" : "var(--ink)",
                   cursor: "pointer",
-                  display: "flex",
-                  fontFamily: "IBM Plex Mono, monospace",
-                  fontSize: "11px",
-                  gap: "6px",
-                  padding: "2px 6px",
                 }}
+                onClick={() => onToolChange({ floorType: entry.type, kind: "floor" })}
               >
                 <span
                   style={{
@@ -213,46 +221,46 @@ export function Toolbar({
             );
           })}
         </div>
-      </div>
+      )}
 
-      {/* Furniture — accordion by category */}
-      <div>
-        <div style={sectionLabel}>Furniture</div>
-        <div className="flex flex-col gap-0.5">
+      {/* Item sub-options */}
+      {tool.kind === "item" && (
+        <div className="flex flex-col gap-2">
+          {/* Category accordion */}
           {ITEM_CATEGORIES.map((cat) => {
             const items = ITEM_DEFS.filter((d) => d.category === cat);
             const isOpen = openCategories.has(cat);
             return (
               <div key={cat}>
                 <button
-                  onClick={() => toggleCategory(cat)}
+                  className="flex items-center justify-between w-full px-3 py-1 rounded text-xs font-mono"
                   style={{
-                    ...btn(false),
-                    alignItems: "center",
-                    background: "var(--toolbar-bg)",
+                    background: "transparent",
                     border: "1px solid var(--border)",
                     color: "var(--ink)",
-                    display: "flex",
-                    justifyContent: "space-between",
+                    cursor: "pointer",
                   }}
+                  onClick={() => toggleCategory(cat)}
                 >
-                  <span>{cat}</span>
-                  <span style={{ fontSize: "9px" }}>{isOpen ? "▲" : "▼"}</span>
+                  <span className="flex items-center gap-1.5">
+                    {CATEGORY_ICONS[cat]}
+                    {cat}
+                  </span>
+                  {isOpen ? <ChevronUp size={11} /> : <ChevronDown size={11} />}
                 </button>
                 {isOpen && (
-                  <div
-                    className="flex flex-col gap-0.5"
-                    style={{ marginTop: "2px", paddingLeft: "4px" }}
-                  >
+                  <div className="flex flex-col gap-0.5 mt-1 pl-2">
                     {items.map((def) => (
                       <button
                         key={def.type}
+                        className="px-2 py-1 rounded text-xs font-mono text-left"
+                        style={{
+                          background: tool.itemType === def.type ? "var(--accent)" : "transparent",
+                          border: "1px solid var(--border)",
+                          color: tool.itemType === def.type ? "var(--paper)" : "var(--ink)",
+                          cursor: "pointer",
+                        }}
                         onClick={() => onToolChange({ itemType: def.type, kind: "item" })}
-                        style={btn(
-                          tool.kind === "item" &&
-                            (tool as { kind: "item"; itemType: ItemType }).itemType === def.type,
-                          true,
-                        )}
                       >
                         {def.label}
                       </button>
@@ -263,8 +271,9 @@ export function Toolbar({
             );
           })}
         </div>
-      </div>
+      )}
 
+      {/* Actions */}
       <div
         className="mt-auto flex flex-col gap-1"
         style={{ borderTop: "1px solid var(--border)", paddingTop: "8px" }}
@@ -274,28 +283,87 @@ export function Toolbar({
             onClick={onUndo}
             disabled={!canUndo}
             title="戻す"
-            style={{ ...btn(false), alignItems: "center", display: "flex", justifyContent: "center", opacity: canUndo ? 1 : 0.4, width: "50%" }}
+            className="flex-1 py-2 rounded flex items-center justify-center"
+            style={{
+              background: "transparent",
+              border: "1px solid var(--border)",
+              color: "var(--ink)",
+              cursor: canUndo ? "pointer" : "default",
+              opacity: canUndo ? 1 : 0.4,
+            }}
           >
-            <Undo2 size={12} />
+            <Undo2 size={14} />
           </button>
           <button
             onClick={onRedo}
             disabled={!canRedo}
             title="進む"
-            style={{ ...btn(false), alignItems: "center", display: "flex", justifyContent: "center", opacity: canRedo ? 1 : 0.4, width: "50%" }}
+            className="flex-1 py-2 rounded flex items-center justify-center"
+            style={{
+              background: "transparent",
+              border: "1px solid var(--border)",
+              color: "var(--ink)",
+              cursor: canRedo ? "pointer" : "default",
+              opacity: canRedo ? 1 : 0.4,
+            }}
           >
-            <Redo2 size={12} />
+            <Redo2 size={14} />
           </button>
         </div>
-        <button onClick={onSave} title="保存" style={{ ...btn(false), alignItems: "center", display: "flex", justifyContent: "center" }}>
-          <Save size={12} />
-        </button>
-        <button onClick={onLoad} title="読込" style={{ ...btn(false), alignItems: "center", display: "flex", justifyContent: "center" }}>
-          <FolderOpen size={12} />
-        </button>
-        <button onClick={onExportAll} title="書き出し (PNG)" style={{ ...btn(false), alignItems: "center", display: "flex", justifyContent: "center" }}>
-          <Download size={12} />
-        </button>
+        <div className="flex gap-1">
+          <button
+            onClick={onSave}
+            title="保存"
+            className="flex-1 py-2 rounded flex items-center justify-center"
+            style={{
+              background: "transparent",
+              border: "1px solid var(--border)",
+              color: "var(--ink)",
+              cursor: "pointer",
+            }}
+          >
+            <Save size={14} />
+          </button>
+          <button
+            onClick={onLoad}
+            title="読込"
+            className="flex-1 py-2 rounded flex items-center justify-center"
+            style={{
+              background: "transparent",
+              border: "1px solid var(--border)",
+              color: "var(--ink)",
+              cursor: "pointer",
+            }}
+          >
+            <FolderOpen size={14} />
+          </button>
+          <button
+            onClick={onExportAll}
+            title="書き出し (PNG)"
+            className="flex-1 py-2 rounded flex items-center justify-center"
+            style={{
+              background: "transparent",
+              border: "1px solid var(--border)",
+              color: "var(--ink)",
+              cursor: "pointer",
+            }}
+          >
+            <Download size={14} />
+          </button>
+          <button
+            onClick={onShare}
+            title="URLでシェア"
+            className="flex-1 py-2 rounded flex items-center justify-center"
+            style={{
+              background: "transparent",
+              border: "1px solid var(--border)",
+              color: "var(--ink)",
+              cursor: "pointer",
+            }}
+          >
+            <Link size={14} />
+          </button>
+        </div>
         <button
           onClick={() => {
             if (confirm("このレイヤーを全消去しますか？")) {
@@ -303,9 +371,16 @@ export function Toolbar({
             }
           }}
           title="全面削除"
-          style={{ ...btn(false), alignItems: "center", color: "var(--terra)", display: "flex", justifyContent: "center" }}
+          className="py-2 rounded flex items-center justify-center gap-1 text-xs font-mono"
+          style={{
+            background: "transparent",
+            border: "1px solid var(--border)",
+            color: "var(--terra)",
+            cursor: "pointer",
+          }}
         >
-          <Trash2 size={12} />
+          <Trash2 size={14} />
+          削除
         </button>
       </div>
     </div>

@@ -7,11 +7,11 @@ export function drawShelf(
   darkMode = false,
 ): void {
   const depth = h * 0.5;
-  ctx.fillStyle = darkMode ? "#5a3a10" : "#C8A87A";
+  ctx.fillStyle = darkMode ? "#9a7840" : "#C8A87A";
   ctx.fillRect(px, py, w, depth * 0.3);
-  ctx.fillStyle = darkMode ? "#7a5020" : "#E0C89A";
+  ctx.fillStyle = darkMode ? "#b89050" : "#E0C89A";
   ctx.fillRect(px, py + depth * 0.3, w, depth * 0.7);
-  ctx.strokeStyle = darkMode ? "#3a2008" : "#8B6914";
+  ctx.strokeStyle = darkMode ? "#7a5820" : "#8B6914";
   ctx.lineWidth = 1.5;
   ctx.strokeRect(px, py, w, depth);
   ctx.beginPath();

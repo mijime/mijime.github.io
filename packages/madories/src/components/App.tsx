@@ -18,6 +18,7 @@ function useDarkMode() {
   return [dark, setDark] as const;
 }
 import { exportAllFloorsPng } from "../canvas/export";
+import { buildShareUrl, decodeFloors, encodeFloors, getShareParam } from "../canvas/share";
 import { loadFromFile, loadFromStorage, saveToFile, saveToStorage } from "../storage";
 import { createBuilding, reducer } from "../store";
 import type { Building, CopiedRegion, ItemType } from "../types";
@@ -26,7 +27,6 @@ import type { FloorCanvasHandle } from "./FloorCanvas";
 import { FloorCanvas } from "./FloorCanvas";
 import { FloorTabs } from "./FloorTabs";
 import type { ToolMode } from "./Toolbar";
-import { Toolbar } from "./Toolbar";
 import { ToolSheet } from "./ToolSheet";
 
 const MAX_HISTORY = 50;
@@ -45,9 +45,31 @@ function init(): AppState {
   return { activeFloorId: building.floors[0].id, building };
 }
 
+async function initFromUrl(): Promise<AppState | null> {
+  const param = getShareParam();
+  if (!param) return null;
+  try {
+    const floors = await decodeFloors(param);
+    if (floors.length === 0) return null;
+    const building = { cellSize: 32, floors };
+    return { activeFloorId: floors[0].id, building };
+  } catch {
+    return null;
+  }
+}
+
 export function App() {
   const [history, setHistory] = useState<AppState[]>(() => [init()]);
   const [historyIndex, setHistoryIndex] = useState(0);
+
+  useEffect(() => {
+    initFromUrl().then((state) => {
+      if (state) {
+        setHistory([state]);
+        setHistoryIndex(0);
+      }
+    });
+  }, []);
   const [tool, setTool] = useState<ToolMode>({
     kind: "wall",
     wallType: "solid",
@@ -144,6 +166,20 @@ export function App() {
 
   const canUndo = historyIndex > 0;
   const canRedo = historyIndex < history.length - 1;
+
+  const handleShare = useCallback(() => {
+    encodeFloors(building.floors).then((encoded) => {
+      const url = buildShareUrl(encoded);
+      navigator.clipboard
+        .writeText(url)
+        .then(() => {
+          alert("URLをコピーしました");
+        })
+        .catch(() => {
+          prompt("このURLをコピーしてください", url);
+        });
+    });
+  }, [building.floors]);
   const [dark, setDark] = useDarkMode();
 
   const floor = building.floors.find((f) => f.id === activeFloorId) ?? building.floors[0];
@@ -191,7 +227,7 @@ export function App() {
         </button>
       </div>
       <div className="flex flex-1 overflow-hidden">
-        <Toolbar
+        <ToolSheet
           tool={tool}
           onToolChange={setTool}
           darkMode={dark}
@@ -199,7 +235,6 @@ export function App() {
           canRedo={canRedo}
           onUndo={() => setHistoryIndex((i) => Math.max(0, i - 1))}
           onRedo={() => setHistoryIndex((i) => Math.min(history.length - 1, i + 1))}
-          onExportAll={() => exportAllFloorsPng(building.floors, building.cellSize)}
           onSave={() => saveToFile(building, activeFloorId)}
           onLoad={() => {
             loadFromFile().then((data) => {
@@ -211,6 +246,8 @@ export function App() {
               }
             });
           }}
+          onExportAll={() => exportAllFloorsPng(building.floors, building.cellSize)}
+          onShare={handleShare}
           onClear={() => dispatch({ floorId: floor.id, type: "CLEAR_FLOOR" })}
         />
         <DslPanel
@@ -303,28 +340,6 @@ export function App() {
           />
         </div>
       </div>
-      <ToolSheet
-        tool={tool}
-        onToolChange={setTool}
-        darkMode={dark}
-        canUndo={canUndo}
-        canRedo={canRedo}
-        onUndo={() => setHistoryIndex((i) => Math.max(0, i - 1))}
-        onRedo={() => setHistoryIndex((i) => Math.min(history.length - 1, i + 1))}
-        onSave={() => saveToFile(building, activeFloorId)}
-        onLoad={() => {
-          loadFromFile().then((data) => {
-            if (data) {
-              push({
-                activeFloorId: data.activeFloorId,
-                building: data.building,
-              });
-            }
-          });
-        }}
-        onExportAll={() => exportAllFloorsPng(building.floors, building.cellSize)}
-        onClear={() => dispatch({ floorId: floor.id, type: "CLEAR_FLOOR" })}
-      />
     </div>
   );
 }
