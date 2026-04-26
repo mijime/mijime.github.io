@@ -20,29 +20,25 @@ const useHeaderSearch = () => {
   }, []);
 
   const search = useCallback(
-    (q: string) => {
+    async (q: string) => {
       if (!ready || !q.trim()) {
         setResults([]);
         setOpen(false);
-        return Promise.resolve();
+        return;
       }
       const base = globalThis.window.location.origin;
-      return import("@mijime/blog/duckdb")
-        .then(({ queryBlogMeta }) =>
-          import("@mijime/blog/search").then(({ parseQuery, toSQL }) => {
-            const sql = toSQL(parseQuery(q), `read_parquet('${base}/blog-meta.parquet')`);
-            return queryBlogMeta(sql);
-          }),
-        )
-        .then((rows) => {
-          const typed = rows as { category: string; ym: string; slug: string; Title: string }[];
-          setResults(typed.slice(0, SEARCH_RESULT_LIMIT));
-          setOpen(typed.length > 0);
-        })
-        .catch(() => {
-          setResults([]);
-          setOpen(false);
-        });
+      try {
+        const { queryBlogMeta } = await import("@mijime/blog/duckdb");
+        const { parseQuery, toSQL } = await import("@mijime/blog/search");
+        const sql = toSQL(parseQuery(q), `read_parquet('${base}/blog-meta.parquet')`);
+        const rows = await queryBlogMeta(sql);
+        const typed = rows as { category: string; ym: string; slug: string; Title: string }[];
+        setResults(typed.slice(0, SEARCH_RESULT_LIMIT));
+        setOpen(typed.length > 0);
+      } catch {
+        setResults([]);
+        setOpen(false);
+      }
     },
     [ready],
   );

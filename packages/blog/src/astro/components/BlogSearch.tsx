@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { parseQuery, toSQL } from "@mijime/blog/search";
 import type { PostMeta } from "@mijime/blog";
 
-const runSearch = (
+const runSearch = async (
   query: string,
   setResults: (r: PostMeta[]) => void,
   setSearchError: (e: string | null) => void,
@@ -10,16 +10,15 @@ const runSearch = (
 ) => {
   const base = globalThis.window.location.origin;
   const sql = toSQL(parseQuery(query), `read_parquet('${base}/blog-meta.parquet')`);
-  return import("@mijime/blog/duckdb")
-    .then(({ queryBlogMeta }) => queryBlogMeta(sql))
-    .then((rows) => {
-      setResults(rows);
-      setSearchError(null);
-      setSearched(true);
-    })
-    .catch((error: unknown) => {
-      setSearchError(String(error));
-    });
+  try {
+    const { queryBlogMeta } = await import("@mijime/blog/duckdb");
+    const rows = await queryBlogMeta(sql);
+    setResults(rows);
+    setSearchError(null);
+    setSearched(true);
+  } catch (error: unknown) {
+    setSearchError(String(error));
+  }
 };
 
 const ResultCount = ({
