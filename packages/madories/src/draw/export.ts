@@ -1,7 +1,7 @@
 import type { FloorPlan, ItemType, WallType } from "../types";
 import { WALL_WINDOW_SCORE } from "../types";
 import { FLOOR_TYPES, floorTypeToColor } from "../components/toolMode";
-import { ITEM_DEF_MAP, ITEM_GROUP_REPRESENTATIVE, ITEM_LEGEND_LABEL } from "../items";
+import { ITEM_DEF_MAP, ITEM_GROUP_REPRESENTATIVE, ITEM_LEGEND_LABEL, WALL_LEGEND_LABEL } from "../items";
 import { getCachedIcon } from "./icons/cache";
 import { drawGrid } from "./drawGrid";
 import { drawItems } from "./drawItems";
@@ -13,13 +13,6 @@ import { drawRoomLabels } from "../floor/roomDetection";
 const LABEL_HEIGHT = 24;
 const BG = "#F5F0E8";
 const DIM_COLOR = "#5A4A3A";
-
-const WALL_LABELS: Partial<Record<WallType, string>> = {
-  solid: "壁",
-  solid_thin: "開口部",
-  window_center: "半窓",
-  window_full: "全窓",
-};
 const GRID_COLOR = "rgba(90,74,58,0.25)"; // Same RGB as DIM_COLOR at 25% opacity
 const DIM_MARGIN = 28; // Px reserved for dimension rulers
 
@@ -310,13 +303,21 @@ export function exportAllFloorsPng(floors: FloorPlan[], cellSize: number): void 
     totalWindows += scores.windows;
     floorScores.set(r.floor.id, scores);
     for (const c of r.floor.cells) {
-      if (c.floorType !== null) {usedFloorTypeSet.add(c.floorType);}
+      if (c.floorType !== null) {
+        usedFloorTypeSet.add(c.floorType);
+      }
       if (c.item) {
         const rep = ITEM_GROUP_REPRESENTATIVE.get(c.item.type) ?? c.item.type;
-        if (!seenItemTypes.has(rep)) { seenItemTypes.add(rep); usedItemTypes.push(rep); }
+        if (!seenItemTypes.has(rep)) {
+          seenItemTypes.add(rep);
+          usedItemTypes.push(rep);
+        }
       }
       for (const wt of [c.wall.top, c.wall.left] as WallType[]) {
-        if (wt !== "none" && !seenWallTypes.has(wt)) { seenWallTypes.add(wt); usedWallTypes.push(wt); }
+        if (wt !== "none" && !seenWallTypes.has(wt)) {
+          seenWallTypes.add(wt);
+          usedWallTypes.push(wt);
+        }
       }
     }
   }
@@ -336,13 +337,17 @@ export function exportAllFloorsPng(floors: FloorPlan[], cellSize: number): void 
     return Math.ceil(count / perRow);
   }
 
-  const floorLegendRows = legendEntries.length > 0 ? countRows(FLOOR_ITEM_W, legendEntries.length) : 0;
-  const wallLegendRows = usedWallTypes.length > 0 ? countRows(WALL_ITEM_W, usedWallTypes.length) : 0;
-  const itemLegendRows = usedItemTypes.length > 0 ? countRows(ICON_ITEM_W, usedItemTypes.length) : 0;
+  const floorLegendRows =
+    legendEntries.length > 0 ? countRows(FLOOR_ITEM_W, legendEntries.length) : 0;
+  const wallLegendRows =
+    usedWallTypes.length > 0 ? countRows(WALL_ITEM_W, usedWallTypes.length) : 0;
+  const itemLegendRows =
+    usedItemTypes.length > 0 ? countRows(ICON_ITEM_W, usedItemTypes.length) : 0;
   const FLOOR_LEGEND_HEIGHT = floorLegendRows * LABEL_HEIGHT;
   const WALL_LEGEND_HEIGHT = wallLegendRows * LABEL_HEIGHT;
   const ITEM_LEGEND_HEIGHT = itemLegendRows * (ICON_SIZE + 16);
-  const FOOTER_HEIGHT = LABEL_HEIGHT + FLOOR_LEGEND_HEIGHT + WALL_LEGEND_HEIGHT + ITEM_LEGEND_HEIGHT;
+  const FOOTER_HEIGHT =
+    LABEL_HEIGHT + FLOOR_LEGEND_HEIGHT + WALL_LEGEND_HEIGHT + ITEM_LEGEND_HEIGHT;
   const totalH = valid.reduce((sum, r) => sum + r.canvas.height + LABEL_HEIGHT, 0) + FOOTER_HEIGHT;
 
   const combined = document.createElement("canvas");
@@ -472,40 +477,61 @@ export function exportAllFloorsPng(floors: FloorPlan[], cellSize: number): void 
         case "solid": {
           ctx.strokeStyle = DIM_COLOR;
           ctx.lineWidth = 3;
-          ctx.beginPath(); ctx.moveTo(lx, ly); ctx.lineTo(lx + WALL_LINE_W, ly); ctx.stroke();
+          ctx.beginPath();
+          ctx.moveTo(lx, ly);
+          ctx.lineTo(lx + WALL_LINE_W, ly);
+          ctx.stroke();
           break;
         }
         case "solid_thin": {
           ctx.strokeStyle = DIM_COLOR;
           ctx.lineWidth = 1.5;
           ctx.setLineDash([2, 1.5]);
-          ctx.beginPath(); ctx.moveTo(lx, ly); ctx.lineTo(lx + WALL_LINE_W, ly); ctx.stroke();
+          ctx.beginPath();
+          ctx.moveTo(lx, ly);
+          ctx.lineTo(lx + WALL_LINE_W, ly);
+          ctx.stroke();
           ctx.setLineDash([]);
           break;
         }
         case "window_full": {
           ctx.strokeStyle = DIM_COLOR;
           ctx.lineWidth = 1.5;
-          ctx.beginPath(); ctx.moveTo(lx, ly); ctx.lineTo(lx + WALL_LINE_W, ly); ctx.stroke();
+          ctx.beginPath();
+          ctx.moveTo(lx, ly);
+          ctx.lineTo(lx + WALL_LINE_W, ly);
+          ctx.stroke();
           ctx.strokeStyle = windowBlue;
           ctx.lineWidth = 4;
-          ctx.beginPath(); ctx.moveTo(lx, ly); ctx.lineTo(lx + WALL_LINE_W, ly); ctx.stroke();
+          ctx.beginPath();
+          ctx.moveTo(lx, ly);
+          ctx.lineTo(lx + WALL_LINE_W, ly);
+          ctx.stroke();
           break;
         }
         case "window_center": {
           ctx.strokeStyle = DIM_COLOR;
           ctx.lineWidth = 3;
-          ctx.beginPath(); ctx.moveTo(lx, ly); ctx.lineTo(lx + WALL_LINE_W * 0.25, ly); ctx.stroke();
-          ctx.beginPath(); ctx.moveTo(lx + WALL_LINE_W * 0.75, ly); ctx.lineTo(lx + WALL_LINE_W, ly); ctx.stroke();
+          ctx.beginPath();
+          ctx.moveTo(lx, ly);
+          ctx.lineTo(lx + WALL_LINE_W * 0.25, ly);
+          ctx.stroke();
+          ctx.beginPath();
+          ctx.moveTo(lx + WALL_LINE_W * 0.75, ly);
+          ctx.lineTo(lx + WALL_LINE_W, ly);
+          ctx.stroke();
           ctx.strokeStyle = windowBlue;
           ctx.lineWidth = 4;
-          ctx.beginPath(); ctx.moveTo(lx + WALL_LINE_W * 0.25, ly); ctx.lineTo(lx + WALL_LINE_W * 0.75, ly); ctx.stroke();
+          ctx.beginPath();
+          ctx.moveTo(lx + WALL_LINE_W * 0.25, ly);
+          ctx.lineTo(lx + WALL_LINE_W * 0.75, ly);
+          ctx.stroke();
           break;
         }
       }
       ctx.restore();
       ctx.fillStyle = DIM_COLOR;
-      ctx.fillText(WALL_LABELS[wt] ?? wt, lx + WALL_LINE_W + 4, ly);
+      ctx.fillText(WALL_LEGEND_LABEL[wt] ?? wt, lx + WALL_LINE_W + 4, ly);
     }
   }
   offsetY += WALL_LEGEND_HEIGHT;
@@ -519,15 +545,23 @@ export function exportAllFloorsPng(floors: FloorPlan[], cellSize: number): void 
     for (let i = 0; i < usedItemTypes.length; i++) {
       const type = usedItemTypes[i];
       const def = ITEM_DEF_MAP.get(type);
-      if (!def) {continue;}
+      if (!def) {
+        continue;
+      }
       const col = i % perRow;
       const row = Math.floor(i / perRow);
       const lx = MARGIN + col * ICON_ITEM_W;
       const ly = offsetY + row * rowH + 4;
       const oc = getCachedIcon(type, 0, ICON_SIZE);
-      if (oc) {ctx.drawImage(oc, lx, ly, ICON_SIZE, ICON_SIZE);}
+      if (oc) {
+        ctx.drawImage(oc, lx, ly, ICON_SIZE, ICON_SIZE);
+      }
       ctx.fillStyle = DIM_COLOR;
-      ctx.fillText(ITEM_LEGEND_LABEL.get(type) ?? def.label, lx + ICON_SIZE / 2, ly + ICON_SIZE + 2);
+      ctx.fillText(
+        ITEM_LEGEND_LABEL.get(type) ?? def.label,
+        lx + ICON_SIZE / 2,
+        ly + ICON_SIZE + 2,
+      );
     }
   }
 

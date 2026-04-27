@@ -33,7 +33,7 @@ export type ItemType =
   | "sofa"
   | "bed_single"
   | "bed_double"
-  | "desk_large";
+  | "desk_small";
 
 export interface Item {
   type: ItemType;

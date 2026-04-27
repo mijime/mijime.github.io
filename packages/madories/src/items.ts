@@ -1,4 +1,4 @@
-import type { ItemType } from "./types";
+import type { ItemType, WallType } from "./types";
 
 export type ItemCategory = "建具" | "水回り" | "キッチン" | "リビング" | "寝室";
 
@@ -49,8 +49,8 @@ export const ITEM_DEFS: ItemDef[] = [
     w: 2,
   },
   { category: "リビング", h: 1, label: "椅子", type: "chair", w: 1 },
-  { category: "リビング", h: 2, label: "机", type: "desk", w: 1 },
-  { category: "リビング", h: 2, label: "机(大)", type: "desk_large", w: 2 },
+  { category: "リビング", h: 1, label: "机(小)", type: "desk_small", w: 1 },
+  { category: "リビング", h: 2, label: "机(大)", type: "desk", w: 1 },
 ];
 
 export const ITEM_DEF_MAP = new Map(ITEM_DEFS.map((d) => [d.type, d]));
@@ -61,7 +61,7 @@ export const ITEM_GROUP_REPRESENTATIVE = new Map<ItemType, ItemType>([
   ["washbasin_large", "washbasin"],
   ["kitchen_small", "kitchen"],
   ["shelf2", "shelf1"],
-  ["desk_large", "desk"],
+  ["desk_small", "desk"],
   ["bed_double", "bed_single"],
 ]);
 
@@ -72,5 +72,12 @@ export const ITEM_LEGEND_LABEL = new Map<ItemType, string>([
   ["desk", "机"],
   ["bed_single", "ベッド"],
 ]);
+
+export const WALL_LEGEND_LABEL: Partial<Record<WallType, string>> = {
+  solid: "壁",
+  solid_thin: "開口部",
+  window_center: "半窓",
+  window_full: "全窓",
+};
 
 export const ITEM_CATEGORIES: ItemCategory[] = ["建具", "水回り", "キッチン", "リビング", "寝室"];
