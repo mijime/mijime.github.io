@@ -14,6 +14,38 @@ import { FloorCanvas } from "./FloorCanvas";
 import { FloorTabs } from "./FloorTabs";
 import type { ToolMode } from "./toolMode";
 import { ToolSheet } from "./ToolSheet";
+import type { FloorPlan } from "../types";
+import { WALL_WINDOW_SCORE } from "../types";
+import { ITEM_DEF_MAP } from "../items";
+
+function FloorStats({ floor }: { floor: FloorPlan }) {
+  let shelfCount = 0;
+  let windowScore = 0;
+  for (const c of floor.cells) {
+    if (c.item) {shelfCount += ITEM_DEF_MAP.get(c.item.type)?.storageScore ?? 0;}
+    for (const w of [c.wall.top, c.wall.left]) {
+      windowScore += WALL_WINDOW_SCORE[w] ?? 0;
+    }
+  }
+
+  return (
+    <div
+      style={{
+        borderBottom: "1px solid var(--border)",
+        color: "var(--ink)",
+        display: "flex",
+        fontFamily: "IBM Plex Mono, monospace",
+        fontSize: "11px",
+        gap: "16px",
+        opacity: 0.7,
+        padding: "4px 10px",
+      }}
+    >
+      <span>収納: {shelfCount}</span>
+      <span>窓: {windowScore}</span>
+    </div>
+  );
+}
 
 function init(): AppState {
   const saved = loadFromStorage();
@@ -132,7 +164,9 @@ export function App() {
             push({ activeFloorId: imported.id, building: next });
           }}
         />
-        <div className="flex-1 overflow-hidden relative" style={{ background: "var(--paper)" }}>
+        <div className="flex-1 overflow-hidden relative flex flex-col" style={{ background: "var(--paper)" }}>
+          <FloorStats floor={floor} />
+          <div className="flex-1 overflow-hidden relative">
           <FloorCanvas
             ref={canvasRef}
             floor={floor}
@@ -218,6 +252,7 @@ export function App() {
               dispatch({ cellIndex, floorId: floor.id, type: "ERASE_CELL" })
             }
           />
+          </div>
         </div>
       </div>
       {toast && (

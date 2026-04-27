@@ -8,6 +8,7 @@ export interface ItemDef {
   w: number; // マス数（回転前）
   h: number;
   category: ItemCategory;
+  storageScore?: number;
 }
 
 export const ITEM_DEFS: ItemDef[] = [
@@ -31,8 +32,8 @@ export const ITEM_DEFS: ItemDef[] = [
   { category: "キッチン", h: 1, label: "冷蔵庫", type: "fridge", w: 1 },
   { category: "リビング", h: 2, label: "ソファ", type: "sofa", w: 1 },
   { category: "リビング", h: 2, label: "テレビ", type: "tv", w: 1 },
-  { category: "リビング", h: 1, label: "棚(1)", type: "shelf1", w: 1 },
-  { category: "リビング", h: 2, label: "棚(2)", type: "shelf2", w: 1 },
+  { category: "リビング", h: 1, label: "棚(1)", storageScore: 1, type: "shelf1", w: 1 },
+  { category: "リビング", h: 2, label: "棚(2)", storageScore: 2, type: "shelf2", w: 1 },
   {
     category: "寝室",
     h: 2,
