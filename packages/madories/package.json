@@ -13,8 +13,7 @@
     "check:tsgo": "tsgo --noEmit",
     "check:oxlint": "oxlint --format=github",
     "format": "bun run format:oxfmt",
-    "format:oxfmt": "oxfmt",
-    "check:similarity-ts": "similarity-ts src/ --exclude icons"
+    "format:oxfmt": "oxfmt"
   },
   "dependencies": {
     "@mijime/theme": "workspace:*",
