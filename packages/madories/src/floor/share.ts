@@ -3,11 +3,24 @@ import type { FloorPlan } from "../types";
 
 const SEPARATOR = "\n---\n";
 
-function floorsToText(floors: FloorPlan[]): string {
+export function mergeFloors(existing: FloorPlan[], parsed: FloorPlan[]): FloorPlan[] {
+  const floors = [...existing];
+  for (const parsedFloor of parsed) {
+    const existingIdx = floors.findIndex((f) => f.name === parsedFloor.name);
+    if (existingIdx !== -1) {
+      floors[existingIdx] = { ...parsedFloor, id: floors[existingIdx].id };
+    } else {
+      floors.push(parsedFloor);
+    }
+  }
+  return floors;
+}
+
+export function floorsToText(floors: FloorPlan[]): string {
   return floors.map((x) => floorToDsl(x)).join(SEPARATOR);
 }
 
-function textToFloors(text: string): FloorPlan[] {
+export function textToFloors(text: string): FloorPlan[] {
   return text.split(SEPARATOR).map((x) => dslToFloor(x));
 }
 

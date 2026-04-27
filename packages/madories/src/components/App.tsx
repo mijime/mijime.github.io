@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useDarkMode } from "@mijime/theme/useDarkMode";
 import { computeFloorScores, exportAllFloorsPng } from "../draw/export";
-import { buildShareUrl, encodeFloors } from "../floor/share";
+import { buildShareUrl, encodeFloors, mergeFloors } from "../floor/share";
 import { loadFromFile, loadFromStorage, saveToFile, saveToStorage } from "../storage";
 import { createBuilding, reducer } from "../store";
 import type { CopiedRegion, ItemType } from "../types";
@@ -143,16 +143,12 @@ export function App() {
           onRotateFloor={() => dispatch({ floorId: floor.id, type: "ROTATE_FLOOR" })}
         />
         <DslPanel
-          floor={floor}
-          onApplyFloor={(imported) => {
-            dispatch({ floor: imported, floorId: floor.id, type: "REPLACE_FLOOR" });
-          }}
-          onImportFloor={(imported) => {
-            const next = {
-              ...building,
-              floors: [...building.floors, imported],
-            };
-            push({ activeFloorId: imported.id, building: next });
+          floors={building.floors}
+          onApplyFloors={(parsed) => {
+            push({
+              activeFloorId,
+              building: { ...building, floors: mergeFloors(building.floors, parsed) },
+            });
           }}
         />
         <div
