@@ -1,5 +1,5 @@
 import { v4 as uuidv4 } from "uuid";
-import { detectRooms } from "./canvas/roomDetection";
+import { detectRooms } from "./floor/roomDetection";
 import type { Building, Cell, CopiedRegion, FloorPlan, FloorType, Item, WallType } from "./types";
 
 function createCell(): Cell {
@@ -47,6 +47,7 @@ type Action =
   | { type: "MOVE_ITEM"; floorId: string; fromIndex: number; toIndex: number }
   | { type: "ADD_FLOOR" }
   | { type: "IMPORT_FLOOR"; floor: FloorPlan }
+  | { type: "REPLACE_FLOOR"; floorId: string; floor: FloorPlan }
   | { type: "RENAME_FLOOR"; floorId: string; name: string }
   | { type: "CLEAR_FLOOR"; floorId: string }
   | { type: "REMOVE_FLOOR"; floorId: string }
@@ -178,6 +179,10 @@ export function reducer(state: Building, action: Action): Building {
 
     case "IMPORT_FLOOR": {
       return { ...state, floors: [...state.floors, action.floor] };
+    }
+
+    case "REPLACE_FLOOR": {
+      return updateFloor(state, action.floorId, () => action.floor);
     }
 
     case "RENAME_FLOOR": {
