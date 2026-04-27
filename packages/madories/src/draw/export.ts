@@ -1,5 +1,7 @@
 import type { FloorPlan } from "../types";
+import { WALL_WINDOW_SCORE } from "../types";
 import { floorTypeToColor } from "../components/toolMode";
+import { ITEM_DEF_MAP } from "../items";
 import { drawGrid } from "./drawGrid";
 import { drawItems } from "./drawItems";
 import { drawVoidCells } from "./drawVoid";
@@ -9,10 +11,25 @@ import { drawRoomLabels } from "../floor/roomDetection";
 const LABEL_HEIGHT = 24;
 const BG = "#F5F0E8";
 const DIM_COLOR = "#5A4A3A";
+const GRID_COLOR = "rgba(90,74,58,0.25)"; // Same RGB as DIM_COLOR at 25% opacity
 const DIM_MARGIN = 28; // Px reserved for dimension rulers
 
 // 1 cell = 0.5 tatami = 910mm
 export const MM_PER_CELL = 910;
+
+export function computeFloorScores(floor: FloorPlan): { storage: number; windows: number } {
+  let storage = 0;
+  let windows = 0;
+  for (const c of floor.cells) {
+    if (c.item) {
+      storage += ITEM_DEF_MAP.get(c.item.type)?.storageScore ?? 0;
+    }
+    for (const w of [c.wall.top, c.wall.left]) {
+      windows += WALL_WINDOW_SCORE[w] ?? 0;
+    }
+  }
+  return { storage, windows };
+}
 
 // For drawing crop (includes floor color and items)
 export function computeBounds(
@@ -159,7 +176,7 @@ export function renderFloorToCanvas(floor: FloorPlan, cellSize: number): HTMLCan
 
   ctx.save();
   ctx.translate(DIM_MARGIN - x1 * cellSize, DIM_MARGIN - y1 * cellSize);
-  drawGrid(ctx, floor.width, floor.height, cellSize, DIM_COLOR);
+  drawGrid(ctx, floor.width, floor.height, cellSize, GRID_COLOR);
   drawWalls(ctx, floor, cellSize, { ink: DIM_COLOR, windowBlue: "#4A90D9" });
   drawItems(ctx, floor, cellSize);
   drawRoomLabels(ctx, floor, cellSize, DIM_COLOR);
@@ -253,11 +270,13 @@ export function exportFloorPng(floor: FloorPlan, cellSize: number): void {
 export function exportAllFloorsPng(floors: FloorPlan[], cellSize: number): void {
   const tsuboPerFloor = floors.map((f) => ({
     canvas: renderFloorToCanvas(f, cellSize),
+    floor: f,
     name: f.name,
     tsubo: f.cells.filter((c) => c.floorType !== null).length / 4,
   }));
   const valid = tsuboPerFloor.filter((r) => r.canvas !== null) as {
     canvas: HTMLCanvasElement;
+    floor: FloorPlan;
     name: string;
     tsubo: number;
   }[];
@@ -265,7 +284,15 @@ export function exportAllFloorsPng(floors: FloorPlan[], cellSize: number): void 
     return;
   }
 
-  const totalTsubo = valid.reduce((sum, r) => sum + r.tsubo, 0);
+  let totalTsubo = 0;
+  let totalStorage = 0;
+  let totalWindows = 0;
+  for (const r of valid) {
+    totalTsubo += r.tsubo;
+    const scores = computeFloorScores(r.floor);
+    totalStorage += scores.storage;
+    totalWindows += scores.windows;
+  }
   const FOOTER_HEIGHT = LABEL_HEIGHT;
   const totalW = Math.max(...valid.map((r) => r.canvas.width));
   const totalH = valid.reduce((sum, r) => sum + r.canvas.height + LABEL_HEIGHT, 0) + FOOTER_HEIGHT;
@@ -279,12 +306,13 @@ export function exportAllFloorsPng(floors: FloorPlan[], cellSize: number): void 
   ctx.fillRect(0, 0, totalW, totalH);
 
   let offsetY = 0;
-  for (const { name, tsubo, canvas } of valid) {
+  for (const { name, tsubo, canvas, floor } of valid) {
     ctx.fillStyle = DIM_COLOR;
     ctx.font = "bold 13px 'IBM Plex Mono', monospace";
     ctx.textAlign = "left";
     ctx.textBaseline = "alphabetic";
-    ctx.fillText(`${name}  ${tsubo.toFixed(2)}坪`, 8, offsetY + 16);
+    const { storage, windows } = computeFloorScores(floor);
+    ctx.fillText(`${name}  ${tsubo.toFixed(2)}坪  収納:${storage}  窓:${windows}`, 8, offsetY + 16);
     offsetY += LABEL_HEIGHT;
     ctx.drawImage(canvas, 0, offsetY);
     offsetY += canvas.height;
@@ -295,7 +323,11 @@ export function exportAllFloorsPng(floors: FloorPlan[], cellSize: number): void 
   ctx.font = "bold 13px 'IBM Plex Mono', monospace";
   ctx.textAlign = "right";
   ctx.textBaseline = "alphabetic";
-  ctx.fillText(`合計 ${totalTsubo.toFixed(2)}坪`, totalW - 8, offsetY + 16);
+  ctx.fillText(
+    `合計 ${totalTsubo.toFixed(2)}坪  収納:${totalStorage}  窓:${totalWindows}`,
+    totalW - 8,
+    offsetY + 16,
+  );
 
   combined.toBlob((blob) => {
     if (!blob) {

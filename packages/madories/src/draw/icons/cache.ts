@@ -30,7 +30,7 @@ export function getCachedIcon(
   const oc = new OffscreenCanvas(boundW, boundH);
   const ctx = oc.getContext("2d")!;
   ctx.translate(boundW / 2, boundH / 2);
-  ctx.rotate((-rotation * Math.PI) / 180);
+  ctx.rotate((rotation * Math.PI) / 180);
 
   const draw = ICON_REGISTRY.get(type);
   if (draw) {
