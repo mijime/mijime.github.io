@@ -330,6 +330,7 @@ export function usePointerHandlers(props: Props): {
           if (idx !== null && floor.cells[idx].item) {
             onRotateItem(idx);
             setSelectedItemCell(idx);
+            // Must clear before onSelectionChangeRef fires below, otherwise popup stays visible
             selectionRef.current = null;
           } else {
             setSelectedItemCell(null);

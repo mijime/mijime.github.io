@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useDarkMode } from "@mijime/theme/useDarkMode";
-import { exportAllFloorsPng } from "../draw/export";
+import { computeFloorScores, exportAllFloorsPng } from "../draw/export";
 import { buildShareUrl, encodeFloors } from "../floor/share";
 import { loadFromFile, loadFromStorage, saveToFile, saveToStorage } from "../storage";
 import { createBuilding, reducer } from "../store";
@@ -15,18 +15,9 @@ import { FloorTabs } from "./FloorTabs";
 import type { ToolMode } from "./toolMode";
 import { ToolSheet } from "./ToolSheet";
 import type { FloorPlan } from "../types";
-import { WALL_WINDOW_SCORE } from "../types";
-import { ITEM_DEF_MAP } from "../items";
 
 function FloorStats({ floor }: { floor: FloorPlan }) {
-  let shelfCount = 0;
-  let windowScore = 0;
-  for (const c of floor.cells) {
-    if (c.item) {shelfCount += ITEM_DEF_MAP.get(c.item.type)?.storageScore ?? 0;}
-    for (const w of [c.wall.top, c.wall.left]) {
-      windowScore += WALL_WINDOW_SCORE[w] ?? 0;
-    }
-  }
+  const { storage, windows } = computeFloorScores(floor);
 
   return (
     <div
@@ -41,8 +32,8 @@ function FloorStats({ floor }: { floor: FloorPlan }) {
         padding: "4px 10px",
       }}
     >
-      <span>収納: {shelfCount}</span>
-      <span>窓: {windowScore}</span>
+      <span>収納: {storage}</span>
+      <span>窓: {windows}</span>
     </div>
   );
 }
@@ -164,94 +155,97 @@ export function App() {
             push({ activeFloorId: imported.id, building: next });
           }}
         />
-        <div className="flex-1 overflow-hidden relative flex flex-col" style={{ background: "var(--paper)" }}>
+        <div
+          className="flex-1 overflow-hidden relative flex flex-col"
+          style={{ background: "var(--paper)" }}
+        >
           <FloorStats floor={floor} />
           <div className="flex-1 overflow-hidden relative">
-          <FloorCanvas
-            ref={canvasRef}
-            floor={floor}
-            ghostFloors={ghostFloors}
-            cellSize={building.cellSize}
-            darkMode={dark}
-            tool={tool}
-            onSetWall={(cellIndex, edge) => {
-              if (tool.kind !== "wall") {
-                return;
+            <FloorCanvas
+              ref={canvasRef}
+              floor={floor}
+              ghostFloors={ghostFloors}
+              cellSize={building.cellSize}
+              darkMode={dark}
+              tool={tool}
+              onSetWall={(cellIndex, edge) => {
+                if (tool.kind !== "wall") {
+                  return;
+                }
+                dispatch({
+                  cellIndex,
+                  edge,
+                  floorId: floor.id,
+                  type: "SET_WALL",
+                  wallType: tool.wallType,
+                });
+              }}
+              onSetFloorType={(cellIndex, floorType) =>
+                dispatch({
+                  cellIndex,
+                  floorId: floor.id,
+                  floorType,
+                  type: "SET_FLOOR_TYPE",
+                })
               }
-              dispatch({
-                cellIndex,
-                edge,
-                floorId: floor.id,
-                type: "SET_WALL",
-                wallType: tool.wallType,
-              });
-            }}
-            onSetFloorType={(cellIndex, floorType) =>
-              dispatch({
-                cellIndex,
-                floorId: floor.id,
-                floorType,
-                type: "SET_FLOOR_TYPE",
-              })
-            }
-            onFillRoom={(cellIndex) => {
-              if (tool.kind !== "floor" || tool.floorType === null) {
-                return;
+              onFillRoom={(cellIndex) => {
+                if (tool.kind !== "floor" || tool.floorType === null) {
+                  return;
+                }
+                dispatch({
+                  cellIndex,
+                  floorId: floor.id,
+                  floorType: tool.floorType,
+                  type: "FILL_ROOM",
+                });
+              }}
+              onPlaceItem={(cellIndex) => {
+                if (tool.kind !== "item") {
+                  return;
+                }
+                dispatch({
+                  cellIndex,
+                  floorId: floor.id,
+                  item: {
+                    rotation: 0,
+                    type: (tool as { kind: "item"; itemType: ItemType }).itemType,
+                  },
+                  type: "PLACE_ITEM",
+                });
+              }}
+              onRotateItem={(cellIndex) =>
+                dispatch({ cellIndex, floorId: floor.id, type: "ROTATE_ITEM" })
               }
-              dispatch({
-                cellIndex,
-                floorId: floor.id,
-                floorType: tool.floorType,
-                type: "FILL_ROOM",
-              });
-            }}
-            onPlaceItem={(cellIndex) => {
-              if (tool.kind !== "item") {
-                return;
+              onMoveItem={(fromIndex, toIndex) =>
+                dispatch({
+                  floorId: floor.id,
+                  fromIndex,
+                  toIndex,
+                  type: "MOVE_ITEM",
+                })
               }
-              dispatch({
-                cellIndex,
-                floorId: floor.id,
-                item: {
-                  rotation: 0,
-                  type: (tool as { kind: "item"; itemType: ItemType }).itemType,
-                },
-                type: "PLACE_ITEM",
-              });
-            }}
-            onRotateItem={(cellIndex) =>
-              dispatch({ cellIndex, floorId: floor.id, type: "ROTATE_ITEM" })
-            }
-            onMoveItem={(fromIndex, toIndex) =>
-              dispatch({
-                floorId: floor.id,
-                fromIndex,
-                toIndex,
-                type: "MOVE_ITEM",
-              })
-            }
-            onPasteRegion={(originIndex: number, region: CopiedRegion) =>
-              dispatch({
-                floorId: floor.id,
-                originIndex,
-                region,
-                type: "PASTE_REGION",
-              })
-            }
-            onEraseRegion={(x1, y1, x2, y2) =>
-              dispatch({
-                floorId: floor.id,
-                type: "ERASE_REGION",
-                x1,
-                x2,
-                y1,
-                y2,
-              })
-            }
-            onEraseCell={(cellIndex) =>
-              dispatch({ cellIndex, floorId: floor.id, type: "ERASE_CELL" })
-            }
-          />
+              onPasteRegion={(originIndex: number, region: CopiedRegion) =>
+                dispatch({
+                  floorId: floor.id,
+                  originIndex,
+                  region,
+                  type: "PASTE_REGION",
+                })
+              }
+              onEraseRegion={(x1, y1, x2, y2) =>
+                dispatch({
+                  floorId: floor.id,
+                  type: "ERASE_REGION",
+                  x1,
+                  x2,
+                  y1,
+                  y2,
+                })
+              }
+              onEraseCell={(cellIndex) =>
+                dispatch({ cellIndex, floorId: floor.id, type: "ERASE_CELL" })
+              }
+            />
           </div>
         </div>
       </div>

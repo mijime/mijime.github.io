@@ -11,11 +11,25 @@ import { drawRoomLabels } from "../floor/roomDetection";
 const LABEL_HEIGHT = 24;
 const BG = "#F5F0E8";
 const DIM_COLOR = "#5A4A3A";
-const GRID_COLOR = "rgba(90,74,58,0.25)";
+const GRID_COLOR = "rgba(90,74,58,0.25)"; // Same RGB as DIM_COLOR at 25% opacity
 const DIM_MARGIN = 28; // Px reserved for dimension rulers
 
 // 1 cell = 0.5 tatami = 910mm
 export const MM_PER_CELL = 910;
+
+export function computeFloorScores(floor: FloorPlan): { storage: number; windows: number } {
+  let storage = 0;
+  let windows = 0;
+  for (const c of floor.cells) {
+    if (c.item) {
+      storage += ITEM_DEF_MAP.get(c.item.type)?.storageScore ?? 0;
+    }
+    for (const w of [c.wall.top, c.wall.left]) {
+      windows += WALL_WINDOW_SCORE[w] ?? 0;
+    }
+  }
+  return { storage, windows };
+}
 
 // For drawing crop (includes floor color and items)
 export function computeBounds(
@@ -275,10 +289,9 @@ export function exportAllFloorsPng(floors: FloorPlan[], cellSize: number): void 
   let totalWindows = 0;
   for (const r of valid) {
     totalTsubo += r.tsubo;
-    for (const c of r.floor.cells) {
-      if (c.item) {totalStorage += ITEM_DEF_MAP.get(c.item.type)?.storageScore ?? 0;}
-      for (const w of [c.wall.top, c.wall.left]) {totalWindows += WALL_WINDOW_SCORE[w] ?? 0;}
-    }
+    const scores = computeFloorScores(r.floor);
+    totalStorage += scores.storage;
+    totalWindows += scores.windows;
   }
   const FOOTER_HEIGHT = LABEL_HEIGHT;
   const totalW = Math.max(...valid.map((r) => r.canvas.width));
@@ -298,12 +311,7 @@ export function exportAllFloorsPng(floors: FloorPlan[], cellSize: number): void 
     ctx.font = "bold 13px 'IBM Plex Mono', monospace";
     ctx.textAlign = "left";
     ctx.textBaseline = "alphabetic";
-    let storage = 0;
-    let windows = 0;
-    for (const c of floor.cells) {
-      if (c.item) {storage += ITEM_DEF_MAP.get(c.item.type)?.storageScore ?? 0;}
-      for (const w of [c.wall.top, c.wall.left]) {windows += WALL_WINDOW_SCORE[w] ?? 0;}
-    }
+    const { storage, windows } = computeFloorScores(floor);
     ctx.fillText(`${name}  ${tsubo.toFixed(2)}坪  収納:${storage}  窓:${windows}`, 8, offsetY + 16);
     offsetY += LABEL_HEIGHT;
     ctx.drawImage(canvas, 0, offsetY);
@@ -315,7 +323,11 @@ export function exportAllFloorsPng(floors: FloorPlan[], cellSize: number): void 
   ctx.font = "bold 13px 'IBM Plex Mono', monospace";
   ctx.textAlign = "right";
   ctx.textBaseline = "alphabetic";
-  ctx.fillText(`合計 ${totalTsubo.toFixed(2)}坪  収納:${totalStorage}  窓:${totalWindows}`, totalW - 8, offsetY + 16);
+  ctx.fillText(
+    `合計 ${totalTsubo.toFixed(2)}坪  収納:${totalStorage}  窓:${totalWindows}`,
+    totalW - 8,
+    offsetY + 16,
+  );
 
   combined.toBlob((blob) => {
     if (!blob) {
