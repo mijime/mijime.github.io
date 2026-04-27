@@ -8,8 +8,8 @@ export function drawKitchen(
   h: number,
   darkMode = false,
 ): void {
-  const counterFill = darkMode ? "#7a6a4a" : "#EDE0C8";
-  const counterStroke = darkMode ? "#9a8a5a" : "#C8A878";
+  const counterFill = darkMode ? "#5a5a5a" : "#E0E8E8";
+  const counterStroke = darkMode ? "#7a7a7a" : "#90A8A8";
   const sinkFill = darkMode ? "#5aaac0" : "#B8E8EE";
   const sinkStroke = darkMode ? "#7acce0" : "#4682B4";
   const drainFill = darkMode ? "#3a7090" : "#4682B4";
@@ -109,7 +109,7 @@ export function drawKitchen(
     drawDivider(midRegionY);
 
     // Counter middle: カウンター質感のみ
-    ctx.fillStyle = darkMode ? "#6a5a3a" : "#E8D4B0";
+    ctx.fillStyle = darkMode ? "#505050" : "#D8E4E4";
     ctx.fillRect(px, midRegionY, w, third);
 
     drawDivider(stoveRegionY);
