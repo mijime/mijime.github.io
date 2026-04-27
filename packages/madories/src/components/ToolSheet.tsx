@@ -252,6 +252,7 @@ function ToolPanelContent({
                   onClick={() => {
                     lastItemTypeRef.current[def.category] = def.type;
                     onToolChange({ itemType: def.type, kind: "item" });
+                    onClose?.();
                   }}
                 >
                   {def.label}
