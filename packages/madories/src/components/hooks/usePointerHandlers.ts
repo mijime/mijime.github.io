@@ -1,7 +1,8 @@
 import { useEffect, useRef } from "react";
-import { GestureHandler } from "../../canvas/gestureHandler";
-import { hitTestEdge } from "../../canvas/hitTest";
-import { computeBounds } from "../../canvas/export";
+import { GestureHandler } from "../../input/gestureHandler";
+import { copyRegion, normalizeSelection, pasteOriginIndex } from "../../floor/clipboardLogic";
+import { resolveWallSegments } from "../../input/wallLogic";
+import { resolveItemAction } from "../../input/itemLogic";
 import type { CopiedRegion, FloorPlan, FloorType } from "../../types";
 import type { ToolMode } from "../toolMode";
 import type { SelectionRef, ViewRef } from "./types";
@@ -25,6 +26,7 @@ interface Props {
   redraw: (ghost?: { mx: number; my: number; fromIdx: number }) => void;
   setSelectedItemCell: (idx: number | null) => void;
   selectedItemCell: number | null;
+  onSelectionChange?: (sel: { x1: number; y1: number; x2: number; y2: number } | null) => void;
 }
 
 export function usePointerHandlers(props: Props): {
@@ -33,6 +35,9 @@ export function usePointerHandlers(props: Props): {
   handlePointerUp: (e: React.PointerEvent<HTMLCanvasElement>) => void;
   handlePointerMove: (e: React.PointerEvent<HTMLCanvasElement>) => void;
   handlePointerCancel: (e: React.PointerEvent<HTMLCanvasElement>) => void;
+  copySelection: () => void;
+  pasteSelection: () => void;
+  deleteSelection: () => void;
 } {
   const {
     canvasRef,
@@ -51,7 +56,11 @@ export function usePointerHandlers(props: Props): {
     redraw,
     setSelectedItemCell,
     selectedItemCell,
+    onSelectionChange,
   } = props;
+
+  const onSelectionChangeRef = useRef(onSelectionChange);
+  onSelectionChangeRef.current = onSelectionChange;
 
   const floorRef = useRef(floor);
   floorRef.current = floor;
@@ -100,11 +109,12 @@ export function usePointerHandlers(props: Props): {
     });
     redraw();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [redraw, canvasRef.current?.getBoundingClientRect, viewRef.current, setSelectedItemCell]);
+  }, [redraw, setSelectedItemCell]);
 
   useEffect(() => {
     if (tool.kind !== "select") {
       selectionRef.current = null;
+      onSelectionChangeRef.current?.(null);
       redraw();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -119,53 +129,25 @@ export function usePointerHandlers(props: Props): {
 
       if (isCtrl && e.key === "c") {
         const sel = selectionRef.current;
-        if (!sel) {
-          return;
-        }
-        const rawX1 = Math.min(sel.x1, sel.x2);
-        const rawY1 = Math.min(sel.y1, sel.y2);
-        const rawX2 = Math.max(sel.x1, sel.x2);
-        const rawY2 = Math.max(sel.y1, sel.y2);
-        const f = floorRef.current;
-        const bounds = computeBounds(f, { x1: rawX1, x2: rawX2, y1: rawY1, y2: rawY2 });
-        if (!bounds) {
-          return;
-        }
-        const { minX: x1, minY: y1, maxX: x2, maxY: y2 } = bounds;
-        const width = x2 - x1 + 1;
-        const height = y2 - y1 + 1;
-        const cells = [];
-        for (let cy = y1; cy <= y2; cy++) {
-          for (let cx = x1; cx <= x2; cx++) {
-            cells.push(f.cells[cy * f.width + cx]);
-          }
-        }
-        copiedRef.current = { cells, height, width };
+        if (!sel) { return; }
+        const result = copyRegion(floorRef.current, sel);
+        if (result) { copiedRef.current = result; }
       }
 
       if (isCtrl && e.key === "v") {
-        if (!copiedRef.current || !mousePosRef.current) {
-          return;
-        }
-        const { mx, my } = mousePosRef.current;
-        const cx = Math.floor(mx / cellSize);
-        const cy = Math.floor(my / cellSize);
-        const originIndex = cy * floorRef.current.width + cx;
+        if (!copiedRef.current || !mousePosRef.current) { return; }
+        const originIndex = pasteOriginIndex(mousePosRef.current, cellSize, floorRef.current);
         onPasteRegionRef.current(originIndex, copiedRef.current);
       }
 
       if (e.key === "Delete" || e.key === "Backspace") {
         const sel = selectionRef.current;
-        if (!sel) {
-          return;
-        }
+        if (!sel) { return; }
         e.preventDefault();
-        const x1 = Math.min(sel.x1, sel.x2);
-        const y1 = Math.min(sel.y1, sel.y2);
-        const x2 = Math.max(sel.x1, sel.x2);
-        const y2 = Math.max(sel.y1, sel.y2);
+        const { x1, y1, x2, y2 } = normalizeSelection(sel);
         onEraseRegionRef.current(x1, y1, x2, y2);
         selectionRef.current = null;
+        onSelectionChangeRef.current?.(null);
         redraw();
       }
     }
@@ -175,11 +157,14 @@ export function usePointerHandlers(props: Props): {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tool.kind, cellSize, selectionRef.current, selectionRef, redraw]);
 
-  useEffect(() => () => {
-    if (wallStopTimerRef.current) {
-      clearTimeout(wallStopTimerRef.current);
-    }
-  }, []);
+  useEffect(
+    () => () => {
+      if (wallStopTimerRef.current) {
+        clearTimeout(wallStopTimerRef.current);
+      }
+    },
+    [],
+  );
 
   function getCanvasPos(clientX: number, clientY: number): { mx: number; my: number } {
     const rect = canvasRef.current?.getBoundingClientRect();
@@ -233,37 +218,14 @@ export function usePointerHandlers(props: Props): {
   }
 
   function applyWallHit(mx: number, my: number) {
-    const lock = wallDragEdgeLock.current;
-
-    if (lock === "top") {
-      const fixedCy = wallDragStartPos.current
-        ? Math.round(wallDragStartPos.current.my / cellSize)
-        : Math.round(my / cellSize);
-      const cx = Math.floor(mx / cellSize);
-      const lastCx = wallDragLastPos.current
-        ? Math.floor(wallDragLastPos.current.mx / cellSize)
-        : cx;
-      const step = cx > lastCx ? 1 : -1;
-      for (let c = lastCx; c !== cx + step; c += step) {
-        applyWallSegment({ cx: c, cy: fixedCy, edge: "top" });
-      }
-    } else if (lock === "left") {
-      const fixedCx = wallDragStartPos.current
-        ? Math.round(wallDragStartPos.current.mx / cellSize)
-        : Math.round(mx / cellSize);
-      const cy = Math.floor(my / cellSize);
-      const lastCy = wallDragLastPos.current
-        ? Math.floor(wallDragLastPos.current.my / cellSize)
-        : cy;
-      const step = cy > lastCy ? 1 : -1;
-      for (let c = lastCy; c !== cy + step; c += step) {
-        applyWallSegment({ cx: fixedCx, cy: c, edge: "left" });
-      }
-    } else {
-      const hit = hitTestEdge(mx, my, cellSize);
-      if (hit) {
-        applyWallSegment(hit);
-      }
+    const segments = resolveWallSegments(
+      mx, my, cellSize,
+      wallDragEdgeLock.current,
+      wallDragStartPos.current,
+      wallDragLastPos.current,
+    );
+    for (const seg of segments) {
+      applyWallSegment(seg);
     }
   }
 
@@ -276,6 +238,12 @@ export function usePointerHandlers(props: Props): {
       pointerId: e.pointerId,
     });
     if (activePointerCountRef.current >= 2) {
+      // Cancel single-finger actions on second touch (enables pinch)
+      wallDragStartPos.current = null;
+      wallDragLastPos.current = null;
+      wallDragEdgeLock.current = null;
+      dragStartRef.current = null;
+      selectionStartRef.current = null;
       return;
     }
 
@@ -311,10 +279,8 @@ export function usePointerHandlers(props: Props): {
     }
 
     if (tool.kind === "erase") {
-      const idx = getCellAtMouse(mx, my);
-      if (idx !== null) {
-        onEraseCell(idx);
-      }
+      dragStartRef.current = getCellAtMouse(mx, my);
+      dragMovedRef.current = false;
       return;
     }
 
@@ -365,6 +331,7 @@ export function usePointerHandlers(props: Props): {
         redraw();
       }
       dragMovedRef.current = false;
+      onSelectionChangeRef.current?.(selectionRef.current);
       return;
     }
 
@@ -379,9 +346,8 @@ export function usePointerHandlers(props: Props): {
       }
       if (!wasDrag) {
         const { mx, my } = getCanvasPos(e.clientX, e.clientY);
-        const hit = hitTestEdge(mx, my, cellSize);
-        if (hit) {
-          applyWallSegment(hit);
+        for (const seg of resolveWallSegments(mx, my, cellSize, null, null, null)) {
+          applyWallSegment(seg);
         }
       }
       return;
@@ -391,6 +357,14 @@ export function usePointerHandlers(props: Props): {
     dragStartRef.current = null;
     const { mx, my } = getCanvasPos(e.clientX, e.clientY);
     const idx = getCellAtMouse(mx, my);
+
+    if (tool.kind === "erase") {
+      if (!dragMovedRef.current && idx !== null) {
+        onEraseCell(idx);
+      }
+      dragMovedRef.current = false;
+      return;
+    }
 
     if (tool.kind === "floor") {
       if (
@@ -406,29 +380,18 @@ export function usePointerHandlers(props: Props): {
     }
 
     if (tool.kind === "item") {
-      if (start !== null && idx !== null && idx !== start) {
-        dragMovedRef.current = true;
-        onMoveItem(start, idx);
-      } else if (!dragMovedRef.current && idx !== null) {
-        const existing = floor.cells[idx].item;
-        if (existing && existing.type === tool.itemType) {
-          onRotateItem(idx);
-        } else {
-          onPlaceItem(idx);
-        }
-      }
+      const action = resolveItemAction({
+        dragMoved: dragMovedRef.current,
+        endCell: idx !== null ? floor.cells[idx] : { floorType: null, item: null, wall: { left: "none", top: "none" } },
+        endIdx: idx,
+        startIdx: start,
+        toolItemType: tool.itemType,
+      });
+      if (action === "move") { onMoveItem(start!, idx!); }
+      else if (action === "rotate") { onRotateItem(idx!); }
+      else if (action === "place") { onPlaceItem(idx!); }
       dragMovedRef.current = false;
-      return;
     }
-
-    if (start === null) {
-      return;
-    }
-    if (idx === null || idx === start) {
-      return;
-    }
-    dragMovedRef.current = true;
-    onMoveItem(start, idx);
   }
 
   function handlePointerMove(e: React.PointerEvent<HTMLCanvasElement>) {
@@ -479,6 +442,7 @@ export function usePointerHandlers(props: Props): {
     if (tool.kind === "erase" && e.buttons === 1) {
       const idx = getCellAtMouse(mx, my);
       if (idx !== null) {
+        dragMovedRef.current = true;
         onEraseCell(idx);
       }
       return;
@@ -530,11 +494,38 @@ export function usePointerHandlers(props: Props): {
     e.currentTarget.releasePointerCapture(e.pointerId);
   }
 
+  function copySelection() {
+    const sel = selectionRef.current;
+    if (!sel) { return; }
+    const result = copyRegion(floorRef.current, sel);
+    if (result) { copiedRef.current = result; }
+  }
+
+  function pasteSelection() {
+    if (!copiedRef.current) { return; }
+    const pos = mousePosRef.current ?? { mx: 0, my: 0 };
+    const originIndex = pasteOriginIndex(pos, cellSize, floorRef.current);
+    onPasteRegionRef.current(originIndex, copiedRef.current);
+  }
+
+  function deleteSelection() {
+    const sel = selectionRef.current;
+    if (!sel) { return; }
+    const { x1, y1, x2, y2 } = normalizeSelection(sel);
+    onEraseRegionRef.current(x1, y1, x2, y2);
+    selectionRef.current = null;
+    onSelectionChangeRef.current?.(null);
+    redraw();
+  }
+
   return {
+    copySelection,
+    deleteSelection,
     handleContextMenu,
     handlePointerCancel,
     handlePointerDown,
     handlePointerMove,
     handlePointerUp,
+    pasteSelection,
   };
 }

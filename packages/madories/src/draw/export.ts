@@ -4,7 +4,7 @@ import { drawGrid } from "./drawGrid";
 import { drawItems } from "./drawItems";
 import { drawVoidCells } from "./drawVoid";
 import { drawWalls } from "./drawWalls";
-import { drawRoomLabels } from "./roomDetection";
+import { drawRoomLabels } from "../floor/roomDetection";
 
 const LABEL_HEIGHT = 24;
 const BG = "#F5F0E8";

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useDarkMode } from "@mijime/theme/useDarkMode";
-import { exportAllFloorsPng } from "../canvas/export";
-import { buildShareUrl, decodeFloors, encodeFloors, getShareParam } from "../canvas/share";
+import { exportAllFloorsPng } from "../draw/export";
+import { buildShareUrl, decodeFloors, encodeFloors, getShareParam } from "../floor/share";
 import { loadFromFile, loadFromStorage, saveToFile, saveToStorage } from "../storage";
 import { createBuilding, reducer } from "../store";
 import type { Building, CopiedRegion, ItemType } from "../types";
