@@ -5,15 +5,12 @@ bun = "latest"
 
 [tasks."format:bun"]
 run = "bun run format"
-sources = ["*/*/src/**/*.{ts,tsx,astro}"]
 
 [tasks."check:bun"]
 run = "bun run check"
-sources = ["*/*/src/**/*.{ts,tsx,astro}"]
 
 [tasks."test:bun"]
 run = "bun test"
-sources = ["*/*/src/**/*.{ts,tsx,astro}"]
 
 [tasks.format]
 depends = ["format:bun"]

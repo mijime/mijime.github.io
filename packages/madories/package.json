@@ -11,7 +11,7 @@
     "test": "bun test",
     "check": "bun run check:tsgo && bun run check:oxlint",
     "check:tsgo": "tsgo --noEmit",
-    "check:oxlint": "oxlint --format=github",
+    "check:oxlint": "oxlint --format=github --fix",
     "format": "bun run format:oxfmt",
     "format:oxfmt": "oxfmt"
   },
