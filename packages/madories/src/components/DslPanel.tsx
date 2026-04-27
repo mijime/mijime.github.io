@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { dslToFloor, floorToDsl } from "../canvas/dsl";
+import { dslToFloor, floorToDsl } from "../floor/dsl";
 import type { FloorPlan } from "../types";
 
 interface Props {

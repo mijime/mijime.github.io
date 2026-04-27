@@ -1,5 +1,5 @@
 import { forwardRef, useImperativeHandle, useRef, useState } from "react";
-import { exportFloorPng } from "../canvas/export";
+import { exportFloorPng } from "../draw/export";
 import type { CopiedRegion, FloorPlan, FloorType } from "../types";
 import { useCanvasDraw } from "./hooks/useCanvasDraw";
 import { usePointerHandlers } from "./hooks/usePointerHandlers";
@@ -30,6 +30,7 @@ interface Props {
 export const FloorCanvas = forwardRef<FloorCanvasHandle, Props>(function FloorCanvas(props, ref) {
   const { floor, ghostFloors, cellSize, darkMode, tool } = props;
   const [selectedItemCell, setSelectedItemCell] = useState<number | null>(null);
+  const [selectionState, setSelectionState] = useState<{ x1: number; y1: number; x2: number; y2: number } | null>(null);
   const staticCanvasRef = useRef<HTMLCanvasElement>(null);
   const dynamicCanvasRef = useRef<HTMLCanvasElement>(null);
   const viewRef = useRef({ offsetX: 0, offsetY: 0, scale: 1 });
@@ -59,6 +60,9 @@ export const FloorCanvas = forwardRef<FloorCanvasHandle, Props>(function FloorCa
     handlePointerUp,
     handlePointerMove,
     handlePointerCancel,
+    copySelection,
+    pasteSelection,
+    deleteSelection,
   } = usePointerHandlers({
     canvasRef: dynamicCanvasRef,
     cellSize,
@@ -70,6 +74,7 @@ export const FloorCanvas = forwardRef<FloorCanvasHandle, Props>(function FloorCa
     onPasteRegion: props.onPasteRegion,
     onPlaceItem: props.onPlaceItem,
     onRotateItem: props.onRotateItem,
+    onSelectionChange: setSelectionState,
     onSetFloorType: props.onSetFloorType,
     onSetWall: props.onSetWall,
     redraw,
@@ -139,22 +144,53 @@ export const FloorCanvas = forwardRef<FloorCanvasHandle, Props>(function FloorCa
             >
               <button
                 className="px-2 py-1 rounded text-xs font-mono shadow"
-                style={{ background: "var(--ink)", color: "var(--paper)" }}
-                onPointerDown={(e) => e.stopPropagation()}
-                onClick={() => {
-                  props.onRotateItem(selectedItemCell);
-                }}
-              >
-                回転
-              </button>
-              <button
-                className="px-2 py-1 rounded text-xs font-mono shadow"
                 style={{ background: "#c0392b", color: "white" }}
                 onPointerDown={(e) => e.stopPropagation()}
                 onClick={() => {
                   props.onDeleteItem(selectedItemCell);
                   setSelectedItemCell(null);
                 }}
+              >
+                削除
+              </button>
+            </div>
+          );
+        })()}
+      {tool.kind === "select" &&
+        selectionState !== null &&
+        selectedItemCell === null &&
+        (() => {
+          const { offsetX, offsetY, scale } = viewRef.current;
+          const x1 = Math.min(selectionState.x1, selectionState.x2);
+          const y1 = Math.min(selectionState.y1, selectionState.y2);
+          const px = x1 * cellSize * scale + offsetX;
+          const py = y1 * cellSize * scale + offsetY;
+          return (
+            <div
+              className="absolute flex gap-1 z-10 pointer-events-auto"
+              style={{ left: px, top: Math.max(0, py - 40) }}
+            >
+              <button
+                className="px-2 py-1 rounded text-xs font-mono shadow"
+                style={{ background: "var(--ink)", color: "var(--paper)" }}
+                onPointerDown={(e) => e.stopPropagation()}
+                onClick={copySelection}
+              >
+                コピー
+              </button>
+              <button
+                className="px-2 py-1 rounded text-xs font-mono shadow"
+                style={{ background: "var(--ink)", color: "var(--paper)" }}
+                onPointerDown={(e) => e.stopPropagation()}
+                onClick={pasteSelection}
+              >
+                ペースト
+              </button>
+              <button
+                className="px-2 py-1 rounded text-xs font-mono shadow"
+                style={{ background: "#c0392b", color: "white" }}
+                onPointerDown={(e) => e.stopPropagation()}
+                onClick={deleteSelection}
               >
                 削除
               </button>
