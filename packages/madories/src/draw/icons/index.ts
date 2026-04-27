@@ -2,7 +2,7 @@ import type { ItemType } from "../../types";
 import { drawBathtub } from "./bathtub";
 import { drawBed } from "./bed";
 import { drawChair } from "./chair";
-import { drawDesk, drawDeskLarge } from "./desk";
+import { drawDesk } from "./desk";
 import { drawDoor } from "./door";
 import { drawDoorSlide } from "./door_slide";
 import { drawFridge } from "./fridge";
@@ -31,7 +31,7 @@ export const ICON_REGISTRY = new Map<ItemType, DrawFn>([
   ["stairs", drawStairs],
   ["chair", drawChair],
   ["desk", drawDesk],
-  ["desk_large", drawDeskLarge],
+  ["desk_small", drawDesk],
   ["toilet", drawToilet],
   ["bathtub", drawBathtub],
   ["kitchen", drawKitchen],

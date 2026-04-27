@@ -19,13 +19,13 @@ import type { ItemCategory } from "../items";
 import { ITEM_CATEGORIES, ITEM_DEFS } from "../items";
 import type { ItemType } from "../types";
 import type { WallType } from "../types";
-import { FLOOR_TYPES, floorTypeToColor, type ToolMode } from "./toolMode";
+import { FLOOR_TYPES, floorTypeToSwatchStyle, type ToolMode } from "./toolMode";
 
 const WALL_TYPES: { type: WallType; label: string }[] = [
   { label: "壁", type: "solid" },
-  { label: "薄い壁", type: "solid_thin" },
+  { label: "開口部", type: "solid_thin" },
   { label: "全窓", type: "window_full" },
-  { label: "中央窓", type: "window_center" },
+  { label: "半窓", type: "window_center" },
   { label: "なし", type: "none" },
 ];
 
@@ -171,7 +171,6 @@ function ToolPanelContent({
       {tool.kind === "floor" && (
         <div style={{ display: "grid", gap: "3px", gridTemplateColumns: "1fr 1fr" }}>
           {FLOOR_TYPES.map((entry) => {
-            const color = floorTypeToColor(entry.type, darkMode);
             const active = tool.floorType === entry.type;
             return (
               <button
@@ -190,7 +189,7 @@ function ToolPanelContent({
               >
                 <span
                   style={{
-                    background: color ?? undefined,
+                    ...floorTypeToSwatchStyle(entry.type, darkMode),
                     border: "1px solid var(--border)",
                     borderRadius: "2px",
                     display: "inline-block",
