@@ -1,5 +1,10 @@
 export type WallType = "none" | "solid" | "solid_thin" | "window_full" | "window_center";
 
+export const WALL_WINDOW_SCORE: Partial<Record<WallType, number>> = {
+  window_center: 0.5,
+  window_full: 1,
+};
+
 export type FloorType = "wood" | "water" | "tatami" | "concrete" | "void";
 
 export interface WallFlags {
