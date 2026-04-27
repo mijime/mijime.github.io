@@ -1,38 +1,27 @@
-import { Copy, Download, Upload } from "lucide-react";
+import { Download, Upload } from "lucide-react";
 import { useState } from "react";
-import { dslToFloor, floorToDsl } from "../floor/dsl";
+import { floorsToText, textToFloors } from "../floor/share";
 import type { FloorPlan } from "../types";
 
 interface Props {
-  floor: FloorPlan;
-  onApplyFloor: (floor: FloorPlan) => void;
-  onImportFloor: (floor: FloorPlan) => void;
+  floors: FloorPlan[];
+  onApplyFloors: (floors: FloorPlan[]) => void;
 }
 
-export function DslPanel({ floor, onApplyFloor, onImportFloor }: Props) {
+export function DslPanel({ floors, onApplyFloors }: Props) {
   const [open, setOpen] = useState(false);
   const [text, setText] = useState("");
   const [error, setError] = useState<string | null>(null);
 
   function handleExport() {
-    setText(floorToDsl(floor));
+    setText(floorsToText(floors));
     setError(null);
   }
 
   function handleApply() {
     try {
-      const imported = dslToFloor(text);
-      onApplyFloor({ ...imported, id: floor.id });
-      setError(null);
-    } catch (error) {
-      setError(String(error));
-    }
-  }
-
-  function handleCopy() {
-    try {
-      const imported = dslToFloor(text);
-      onImportFloor(imported);
+      const imported = textToFloors(text);
+      onApplyFloors(imported);
       setError(null);
     } catch (error) {
       setError(String(error));
@@ -63,7 +52,7 @@ export function DslPanel({ floor, onApplyFloor, onImportFloor }: Props) {
           <button
             onClick={() => {
               setOpen(true);
-              setText(floorToDsl(floor));
+              setText(floorsToText(floors));
               setError(null);
             }}
             style={{
@@ -149,9 +138,6 @@ export function DslPanel({ floor, onApplyFloor, onImportFloor }: Props) {
       </button>
       <button onClick={handleApply} style={btnStyle}>
         <Upload size={14} /> apply
-      </button>
-      <button onClick={handleCopy} style={btnStyle}>
-        <Copy size={14} /> copy
       </button>
     </div>
   );
