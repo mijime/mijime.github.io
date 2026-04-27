@@ -24,8 +24,8 @@ export function DslPanel({ floor, onApplyFloor, onImportFloor }: Props) {
       const imported = dslToFloor(text);
       onApplyFloor({ ...imported, id: floor.id });
       setError(null);
-    } catch (e) {
-      setError(String(e));
+    } catch (error) {
+      setError(String(error));
     }
   }
 
@@ -34,8 +34,8 @@ export function DslPanel({ floor, onApplyFloor, onImportFloor }: Props) {
       const imported = dslToFloor(text);
       onImportFloor(imported);
       setError(null);
-    } catch (e) {
-      setError(String(e));
+    } catch (error) {
+      setError(String(error));
     }
   }
 
@@ -61,7 +61,11 @@ export function DslPanel({ floor, onApplyFloor, onImportFloor }: Props) {
       <div className="hidden md:flex">
         <div style={{ background: "var(--toolbar-bg)", borderLeft: "1px solid var(--border)" }}>
           <button
-            onClick={() => setOpen(true)}
+            onClick={() => {
+              setOpen(true);
+              setText(floorToDsl(floor));
+              setError(null);
+            }}
             style={{
               background: "transparent",
               border: "none",
@@ -96,12 +100,26 @@ export function DslPanel({ floor, onApplyFloor, onImportFloor }: Props) {
       }}
     >
       <div style={{ alignItems: "center", display: "flex", justifyContent: "space-between" }}>
-        <div style={{ color: "var(--mid)", fontSize: "9px", letterSpacing: "0.15em", textTransform: "uppercase" }}>
+        <div
+          style={{
+            color: "var(--mid)",
+            fontSize: "9px",
+            letterSpacing: "0.15em",
+            textTransform: "uppercase",
+          }}
+        >
           DSL
         </div>
         <button
           onClick={() => setOpen(false)}
-          style={{ background: "transparent", border: "none", color: "var(--mid)", cursor: "pointer", fontSize: "11px", padding: "0" }}
+          style={{
+            background: "transparent",
+            border: "none",
+            color: "var(--mid)",
+            cursor: "pointer",
+            fontSize: "11px",
+            padding: "0",
+          }}
         >
           ✕
         </button>
@@ -126,9 +144,15 @@ export function DslPanel({ floor, onApplyFloor, onImportFloor }: Props) {
           {error}
         </div>
       )}
-      <button onClick={handleExport} style={btnStyle}><Download size={14} /> export</button>
-      <button onClick={handleApply} style={btnStyle}><Upload size={14} /> apply</button>
-      <button onClick={handleCopy} style={btnStyle}><Copy size={14} /> copy</button>
+      <button onClick={handleExport} style={btnStyle}>
+        <Download size={14} /> export
+      </button>
+      <button onClick={handleApply} style={btnStyle}>
+        <Upload size={14} /> apply
+      </button>
+      <button onClick={handleCopy} style={btnStyle}>
+        <Copy size={14} /> copy
+      </button>
     </div>
   );
 }

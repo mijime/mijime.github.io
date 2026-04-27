@@ -5,7 +5,6 @@ import { useCanvasDraw } from "./hooks/useCanvasDraw";
 import { usePointerHandlers } from "./hooks/usePointerHandlers";
 import type { ToolMode } from "./toolMode";
 
-
 interface SelectionContextMenuProps {
   selectionState: { x1: number; y1: number; x2: number; y2: number };
   cellSize: number;
@@ -15,7 +14,14 @@ interface SelectionContextMenuProps {
   onDelete: () => void;
 }
 
-function SelectionContextMenu({ selectionState, cellSize, viewRef, onCopy, onPaste, onDelete }: SelectionContextMenuProps) {
+function SelectionContextMenu({
+  selectionState,
+  cellSize,
+  viewRef,
+  onCopy,
+  onPaste,
+  onDelete,
+}: SelectionContextMenuProps) {
   const { offsetX, offsetY, scale } = viewRef.current;
   const x1 = Math.min(selectionState.x1, selectionState.x2);
   const y1 = Math.min(selectionState.y1, selectionState.y2);
@@ -78,7 +84,12 @@ interface Props {
 export const FloorCanvas = forwardRef<FloorCanvasHandle, Props>(function FloorCanvas(props, ref) {
   const { floor, ghostFloors, cellSize, darkMode, tool } = props;
   const [selectedItemCell, setSelectedItemCell] = useState<number | null>(null);
-  const [selectionState, setSelectionState] = useState<{ x1: number; y1: number; x2: number; y2: number } | null>(null);
+  const [selectionState, setSelectionState] = useState<{
+    x1: number;
+    y1: number;
+    x2: number;
+    y2: number;
+  } | null>(null);
   const staticCanvasRef = useRef<HTMLCanvasElement>(null);
   const dynamicCanvasRef = useRef<HTMLCanvasElement>(null);
   const viewRef = useRef({ offsetX: 0, offsetY: 0, scale: 1 });
