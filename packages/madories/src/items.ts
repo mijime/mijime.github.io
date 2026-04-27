@@ -21,38 +21,56 @@ export const ITEM_DEFS: ItemDef[] = [
   {
     category: "水回り",
     h: 1,
-    label: "洗面台(1/2)",
+    label: "洗面台(小)",
     type: "washbasin_half",
     w: 1,
   },
-  { category: "水回り", h: 2, label: "洗面台(1x2)", type: "washbasin_large", w: 1 },
+  { category: "水回り", h: 2, label: "洗面台(大)", type: "washbasin_large", w: 1 },
   { category: "水回り", h: 1, label: "洗濯機", type: "washer", w: 1 },
-  { category: "キッチン", h: 2, label: "キッチン台(1x2)", type: "kitchen_small", w: 1 },
-  { category: "キッチン", h: 3, label: "キッチン台(1x3)", type: "kitchen", w: 1 },
+  { category: "キッチン", h: 2, label: "キッチン台(小)", type: "kitchen_small", w: 1 },
+  { category: "キッチン", h: 3, label: "キッチン台", type: "kitchen", w: 1 },
   { category: "キッチン", h: 1, label: "冷蔵庫", type: "fridge", w: 1 },
   { category: "リビング", h: 2, label: "ソファ", type: "sofa", w: 1 },
   { category: "リビング", h: 2, label: "テレビ", type: "tv", w: 1 },
-  { category: "リビング", h: 1, label: "棚(1)", storageScore: 1, type: "shelf1", w: 1 },
-  { category: "リビング", h: 2, label: "棚(2)", storageScore: 2, type: "shelf2", w: 1 },
+  { category: "リビング", h: 1, label: "棚", storageScore: 1, type: "shelf1", w: 1 },
+  { category: "リビング", h: 2, label: "棚(2段)", storageScore: 2, type: "shelf2", w: 1 },
   {
     category: "寝室",
     h: 2,
-    label: "シングルベッド",
+    label: "ベッド(シングル)",
     type: "bed_single",
     w: 1,
   },
   {
     category: "寝室",
     h: 2,
-    label: "ダブルベッド",
+    label: "ベッド(ダブル)",
     type: "bed_double",
     w: 2,
   },
   { category: "リビング", h: 1, label: "椅子", type: "chair", w: 1 },
-  { category: "リビング", h: 2, label: "机(1x2)", type: "desk", w: 1 },
-  { category: "リビング", h: 2, label: "机(2x2)", type: "desk_large", w: 2 },
+  { category: "リビング", h: 2, label: "机", type: "desk", w: 1 },
+  { category: "リビング", h: 2, label: "机(大)", type: "desk_large", w: 2 },
 ];
 
 export const ITEM_DEF_MAP = new Map(ITEM_DEFS.map((d) => [d.type, d]));
+
+// Maps variant types to their representative type for legend grouping
+export const ITEM_GROUP_REPRESENTATIVE = new Map<ItemType, ItemType>([
+  ["washbasin_half", "washbasin"],
+  ["washbasin_large", "washbasin"],
+  ["kitchen_small", "kitchen"],
+  ["shelf2", "shelf1"],
+  ["desk_large", "desk"],
+  ["bed_double", "bed_single"],
+]);
+
+export const ITEM_LEGEND_LABEL = new Map<ItemType, string>([
+  ["washbasin", "洗面台"],
+  ["kitchen", "キッチン台"],
+  ["shelf1", "棚"],
+  ["desk", "机"],
+  ["bed_single", "ベッド"],
+]);
 
 export const ITEM_CATEGORIES: ItemCategory[] = ["建具", "水回り", "キッチン", "リビング", "寝室"];
