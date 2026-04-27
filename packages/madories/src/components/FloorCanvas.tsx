@@ -5,38 +5,6 @@ import { useCanvasDraw } from "./hooks/useCanvasDraw";
 import { usePointerHandlers } from "./hooks/usePointerHandlers";
 import type { ToolMode } from "./toolMode";
 
-interface ItemContextMenuProps {
-  cellIndex: number;
-  floor: FloorPlan;
-  cellSize: number;
-  viewRef: React.RefObject<{ offsetX: number; offsetY: number; scale: number }>;
-  onDelete: () => void;
-}
-
-function ItemContextMenu({ cellIndex, floor, cellSize, viewRef, onDelete }: ItemContextMenuProps) {
-  const cell = floor.cells[cellIndex];
-  if (!cell?.item) return null;
-  const cx = cellIndex % floor.width;
-  const cy = Math.floor(cellIndex / floor.width);
-  const { offsetX, offsetY, scale } = viewRef.current;
-  const px = cx * cellSize * scale + offsetX;
-  const py = cy * cellSize * scale + offsetY;
-  return (
-    <div
-      className="absolute flex gap-1 z-10 pointer-events-auto"
-      style={{ left: px, top: Math.max(0, py - 40) }}
-    >
-      <button
-        className="px-2 py-1 rounded text-xs font-mono shadow"
-        style={{ background: "var(--terra)", color: "white" }}
-        onPointerDown={(e) => e.stopPropagation()}
-        onClick={onDelete}
-      >
-        削除
-      </button>
-    </div>
-  );
-}
 
 interface SelectionContextMenuProps {
   selectionState: { x1: number; y1: number; x2: number; y2: number };
@@ -205,19 +173,7 @@ export const FloorCanvas = forwardRef<FloorCanvasHandle, Props>(function FloorCa
           style={{ display: "block", left: 0, position: "absolute", top: 0 }}
         />
       </div>
-      {tool.kind === "select" && selectedItemCell !== null && (
-        <ItemContextMenu
-          cellIndex={selectedItemCell}
-          floor={floor}
-          cellSize={cellSize}
-          viewRef={viewRef}
-          onDelete={() => {
-            props.onEraseCell(selectedItemCell);
-            setSelectedItemCell(null);
-          }}
-        />
-      )}
-      {tool.kind === "select" && selectionState !== null && selectedItemCell === null && (
+      {tool.kind === "select" && selectionState !== null && (
         <SelectionContextMenu
           selectionState={selectionState}
           cellSize={cellSize}
