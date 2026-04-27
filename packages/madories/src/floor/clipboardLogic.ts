@@ -16,7 +16,9 @@ export function copyRegion(
 ): CopiedRegion | null {
   const { x1, y1, x2, y2 } = normalizeSelection(sel);
   const bounds = computeBounds(floor, { x1, x2, y1, y2 });
-  if (!bounds) { return null; }
+  if (!bounds) {
+    return null;
+  }
   const { minX, minY, maxX, maxY } = bounds;
   const width = maxX - minX + 1;
   const height = maxY - minY + 1;
