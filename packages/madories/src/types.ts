@@ -13,6 +13,7 @@ export type ItemType =
   | "toilet"
   | "bathtub"
   | "kitchen"
+  | "kitchen_small"
   | "washbasin"
   | "washbasin_half"
   | "washbasin_large"

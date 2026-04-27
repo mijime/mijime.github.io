@@ -246,11 +246,7 @@ export function exportFloorPng(floor: FloorPlan, cellSize: number): void {
       return;
     }
     const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `${floor.name}.png`;
-    a.click();
-    URL.revokeObjectURL(url);
+    window.open(url, "_blank");
   }, "image/png");
 }
 
@@ -306,10 +302,6 @@ export function exportAllFloorsPng(floors: FloorPlan[], cellSize: number): void 
       return;
     }
     const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "floors.png";
-    a.click();
-    URL.revokeObjectURL(url);
+    window.open(url, "_blank");
   }, "image/png");
 }

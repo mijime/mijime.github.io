@@ -119,6 +119,9 @@ export function App() {
         />
         <DslPanel
           floor={floor}
+          onApplyFloor={(imported) => {
+            dispatch({ type: "REPLACE_FLOOR", floorId: floor.id, floor: imported });
+          }}
           onImportFloor={(imported) => {
             const next = {
               ...building,

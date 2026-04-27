@@ -288,7 +288,7 @@ export function usePointerHandlers(props: Props): {
       return;
     }
     const idx = getCellAtMouse(mx, my);
-    if (idx === null || !floor.cells[idx].item) {
+    if (idx === null) {
       return;
     }
     dragStartRef.current = idx;
@@ -319,11 +319,8 @@ export function usePointerHandlers(props: Props): {
           onMoveItem(start, idx);
         } else if (!dragMovedRef.current) {
           if (idx !== null && floor.cells[idx].item) {
-            if (selectedItemCell === idx) {
-              onRotateItem(idx);
-            } else {
-              setSelectedItemCell(idx);
-            }
+            onRotateItem(idx);
+            setSelectedItemCell(idx);
           } else {
             setSelectedItemCell(null);
           }
