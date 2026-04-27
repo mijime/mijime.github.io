@@ -37,7 +37,7 @@ const PRIMARY_TOOLS = [
 ];
 
 const ITEMS_BY_CATEGORY = Object.fromEntries(
-  ITEM_CATEGORIES.map((cat) => [cat, ITEM_DEFS.filter((d) => d.category === cat)])
+  ITEM_CATEGORIES.map((cat) => [cat, ITEM_DEFS.filter((d) => d.category === cat)]),
 ) as Record<ItemCategory, typeof ITEM_DEFS>;
 
 const btnBase = {
@@ -193,7 +193,15 @@ function ToolPanelContent({
       )}
 
       {tool.kind === "item" && (
-        <div style={{ display: "flex", flexDirection: "column", gap: "6px", flex: 1, overflow: "hidden" }}>
+        <div
+          style={{
+            display: "flex",
+            flex: 1,
+            flexDirection: "column",
+            gap: "6px",
+            overflow: "hidden",
+          }}
+        >
           <div style={{ display: "flex", flexWrap: "wrap", gap: "3px" }}>
             {ITEM_CATEGORIES.map((cat) => (
               <button
@@ -250,11 +258,51 @@ function ToolPanelContent({
           {[
             { disabled: !canUndo, icon: <Undo2 size={14} />, onClick: onUndo, title: "戻す" },
             { disabled: !canRedo, icon: <Redo2 size={14} />, onClick: onRedo, title: "進む" },
-            { disabled: false, icon: <Save size={14} />, onClick: () => { onSave(); onClose?.(); }, title: "保存" },
-            { disabled: false, icon: <FolderOpen size={14} />, onClick: () => { onLoad(); onClose?.(); }, title: "読込" },
-            { disabled: false, icon: <Download size={14} />, onClick: () => { onExportAll(); onClose?.(); }, title: "書き出し" },
-            { disabled: false, icon: <Link size={14} />, onClick: () => { onShare(); onClose?.(); }, title: "シェア" },
-            { disabled: false, icon: <RotateCw size={14} />, onClick: () => { onRotateFloor(); onClose?.(); }, title: "90°回転" },
+            {
+              disabled: false,
+              icon: <Save size={14} />,
+              onClick: () => {
+                onSave();
+                onClose?.();
+              },
+              title: "保存",
+            },
+            {
+              disabled: false,
+              icon: <FolderOpen size={14} />,
+              onClick: () => {
+                onLoad();
+                onClose?.();
+              },
+              title: "読込",
+            },
+            {
+              disabled: false,
+              icon: <Download size={14} />,
+              onClick: () => {
+                onExportAll();
+                onClose?.();
+              },
+              title: "書き出し",
+            },
+            {
+              disabled: false,
+              icon: <Link size={14} />,
+              onClick: () => {
+                onShare();
+                onClose?.();
+              },
+              title: "シェア",
+            },
+            {
+              disabled: false,
+              icon: <RotateCw size={14} />,
+              onClick: () => {
+                onRotateFloor();
+                onClose?.();
+              },
+              title: "90°回転",
+            },
           ].map(({ icon, onClick, title, disabled }) => (
             <button
               key={title}
@@ -330,7 +378,9 @@ export function ToolSheet(props: Props) {
         aria-label="ツール選択"
       >
         <Pencil size={20} />
-        <span style={{ fontSize: "10px", fontFamily: "IBM Plex Mono, monospace" }}>{currentLabel}</span>
+        <span style={{ fontFamily: "IBM Plex Mono, monospace", fontSize: "10px" }}>
+          {currentLabel}
+        </span>
       </button>
 
       {open && (
@@ -351,7 +401,14 @@ export function ToolSheet(props: Props) {
         }}
       >
         <div style={{ display: "flex", justifyContent: "center", padding: "12px 0 4px" }}>
-          <div style={{ background: "var(--border)", borderRadius: "9999px", height: "4px", width: "40px" }} />
+          <div
+            style={{
+              background: "var(--border)",
+              borderRadius: "9999px",
+              height: "4px",
+              width: "40px",
+            }}
+          />
         </div>
         <ToolPanelContent {...props} onClose={() => setOpen(false)} />
       </div>

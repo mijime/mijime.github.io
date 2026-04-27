@@ -53,10 +53,4 @@ export const ITEM_DEFS: ItemDef[] = [
 
 export const ITEM_DEF_MAP = new Map(ITEM_DEFS.map((d) => [d.type, d]));
 
-export const ITEM_CATEGORIES: ItemCategory[] = [
-  "建具",
-  "水回り",
-  "キッチン",
-  "リビング",
-  "寝室",
-];
+export const ITEM_CATEGORIES: ItemCategory[] = ["建具", "水回り", "キッチン", "リビング", "寝室"];
