@@ -86,7 +86,14 @@ function ToolPanelContent({
   const [clearPending, setClearPending] = useState(false);
   const clearTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastItemTypeRef = useRef<Partial<Record<ItemCategory, ItemType>>>({});
-  useEffect(() => () => { if (clearTimerRef.current) clearTimeout(clearTimerRef.current); }, []);
+  useEffect(
+    () => () => {
+      if (clearTimerRef.current) {
+        clearTimeout(clearTimerRef.current);
+      }
+    },
+    [],
+  );
 
   return (
     <div
@@ -128,7 +135,7 @@ function ToolPanelContent({
                 } else if (kind === "item") {
                   const remembered = lastItemTypeRef.current[itemCategory];
                   const fallback = ITEMS_BY_CATEGORY[itemCategory][0].type;
-                  onToolChange({ kind: "item", itemType: remembered ?? fallback });
+                  onToolChange({ itemType: remembered ?? fallback, kind: "item" });
                 } else {
                   onToolChange({ kind } as ToolMode);
                 }
@@ -341,7 +348,9 @@ function ToolPanelContent({
               setClearPending(true);
               clearTimerRef.current = setTimeout(() => setClearPending(false), 3000);
             } else {
-              if (clearTimerRef.current) clearTimeout(clearTimerRef.current);
+              if (clearTimerRef.current) {
+                clearTimeout(clearTimerRef.current);
+              }
               setClearPending(false);
               onClear();
               onClose?.();

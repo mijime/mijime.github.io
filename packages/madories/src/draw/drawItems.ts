@@ -61,4 +61,3 @@ export function drawItems(ctx: CanvasRenderingContext2D, floor: FloorPlan, cellS
     }
   }
 }
-

@@ -55,7 +55,6 @@ export function usePointerHandlers(props: Props): {
     onEraseCell,
     redraw,
     setSelectedItemCell,
-    selectedItemCell,
     onSelectionChange,
   } = props;
 
@@ -129,20 +128,28 @@ export function usePointerHandlers(props: Props): {
 
       if (isCtrl && e.key === "c") {
         const sel = selectionRef.current;
-        if (!sel) { return; }
+        if (!sel) {
+          return;
+        }
         const result = copyRegion(floorRef.current, sel);
-        if (result) { copiedRef.current = result; }
+        if (result) {
+          copiedRef.current = result;
+        }
       }
 
       if (isCtrl && e.key === "v") {
-        if (!copiedRef.current || !mousePosRef.current) { return; }
+        if (!copiedRef.current || !mousePosRef.current) {
+          return;
+        }
         const originIndex = pasteOriginIndex(mousePosRef.current, cellSize, floorRef.current);
         onPasteRegionRef.current(originIndex, copiedRef.current);
       }
 
       if (e.key === "Delete" || e.key === "Backspace") {
         const sel = selectionRef.current;
-        if (!sel) { return; }
+        if (!sel) {
+          return;
+        }
         e.preventDefault();
         const { x1, y1, x2, y2 } = normalizeSelection(sel);
         onEraseRegionRef.current(x1, y1, x2, y2);
@@ -219,7 +226,9 @@ export function usePointerHandlers(props: Props): {
 
   function applyWallHit(mx: number, my: number) {
     const segments = resolveWallSegments(
-      mx, my, cellSize,
+      mx,
+      my,
+      cellSize,
       wallDragEdgeLock.current,
       wallDragStartPos.current,
       wallDragLastPos.current,
@@ -379,14 +388,21 @@ export function usePointerHandlers(props: Props): {
     if (tool.kind === "item") {
       const action = resolveItemAction({
         dragMoved: dragMovedRef.current,
-        endCell: idx !== null ? floor.cells[idx] : { floorType: null, item: null, wall: { left: "none", top: "none" } },
+        endCell:
+          idx !== null
+            ? floor.cells[idx]
+            : { floorType: null, item: null, wall: { left: "none", top: "none" } },
         endIdx: idx,
         startIdx: start,
         toolItemType: tool.itemType,
       });
-      if (action === "move") { onMoveItem(start!, idx!); }
-      else if (action === "rotate") { onRotateItem(idx!); }
-      else if (action === "place") { onPlaceItem(idx!); }
+      if (action === "move") {
+        onMoveItem(start!, idx!);
+      } else if (action === "rotate") {
+        onRotateItem(idx!);
+      } else if (action === "place") {
+        onPlaceItem(idx!);
+      }
       dragMovedRef.current = false;
     }
   }
@@ -493,13 +509,19 @@ export function usePointerHandlers(props: Props): {
 
   function copySelection() {
     const sel = selectionRef.current;
-    if (!sel) { return; }
+    if (!sel) {
+      return;
+    }
     const result = copyRegion(floorRef.current, sel);
-    if (result) { copiedRef.current = result; }
+    if (result) {
+      copiedRef.current = result;
+    }
   }
 
   function pasteSelection() {
-    if (!copiedRef.current) { return; }
+    if (!copiedRef.current) {
+      return;
+    }
     const pos = mousePosRef.current ?? { mx: 0, my: 0 };
     const originIndex = pasteOriginIndex(pos, cellSize, floorRef.current);
     onPasteRegionRef.current(originIndex, copiedRef.current);
@@ -507,7 +529,9 @@ export function usePointerHandlers(props: Props): {
 
   function deleteSelection() {
     const sel = selectionRef.current;
-    if (!sel) { return; }
+    if (!sel) {
+      return;
+    }
     const { x1, y1, x2, y2 } = normalizeSelection(sel);
     onEraseRegionRef.current(x1, y1, x2, y2);
     selectionRef.current = null;

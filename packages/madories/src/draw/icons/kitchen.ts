@@ -26,7 +26,12 @@ export function drawKitchen(
   ctx.fillRect(px, py, w, h);
   ctx.strokeStyle = counterStroke;
   ctx.lineWidth = Math.max(1.5, w * 0.04);
-  ctx.strokeRect(px + ctx.lineWidth / 2, py + ctx.lineWidth / 2, w - ctx.lineWidth, h - ctx.lineWidth);
+  ctx.strokeRect(
+    px + ctx.lineWidth / 2,
+    py + ctx.lineWidth / 2,
+    w - ctx.lineWidth,
+    h - ctx.lineWidth,
+  );
 
   // Helper: draw burner
   function drawBurner(bx: number, by: number, r: number) {
@@ -113,7 +118,7 @@ export function drawKitchen(
     const bR = Math.min(w * 0.2, third * 0.2);
     drawBurner(px + w * 0.28, stoveRegionY + third * 0.3, bR);
     drawBurner(px + w * 0.72, stoveRegionY + third * 0.3, bR);
-    drawBurner(px + w * 0.5,  stoveRegionY + third * 0.72, bR);
+    drawBurner(px + w * 0.5, stoveRegionY + third * 0.72, bR);
   } else {
     // 1x2: 上半分=シンク、下半分=コンロ3口三角
     const half = h / 2;
@@ -126,6 +131,6 @@ export function drawKitchen(
     const bR = Math.min(w * 0.2, half * 0.2);
     drawBurner(px + w * 0.28, stoveTop + half * 0.3, bR);
     drawBurner(px + w * 0.72, stoveTop + half * 0.3, bR);
-    drawBurner(px + w * 0.5,  stoveTop + half * 0.72, bR);
+    drawBurner(px + w * 0.5, stoveTop + half * 0.72, bR);
   }
 }

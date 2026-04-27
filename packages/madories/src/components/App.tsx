@@ -43,7 +43,9 @@ export function App() {
   }, [building, activeFloorId]);
 
   useEffect(() => {
-    if (!toast) return;
+    if (!toast) {
+      return;
+    }
     const id = setTimeout(() => setToast(null), 2000);
     return () => clearTimeout(id);
   }, [toast]);
@@ -120,7 +122,7 @@ export function App() {
         <DslPanel
           floor={floor}
           onApplyFloor={(imported) => {
-            dispatch({ type: "REPLACE_FLOOR", floorId: floor.id, floor: imported });
+            dispatch({ floor: imported, floorId: floor.id, type: "REPLACE_FLOOR" });
           }}
           onImportFloor={(imported) => {
             const next = {

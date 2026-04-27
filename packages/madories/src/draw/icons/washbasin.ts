@@ -13,9 +13,7 @@ export function drawWashbasin(
   const basinStroke = darkMode ? "#7acce0" : "#4682B4";
   const drainFill = darkMode ? "#3a7090" : "#4682B4";
   const faucetFill = darkMode ? "#909090" : "#A0A8B0";
-  const shelfFill = darkMode ? "#8a7040" : "#D4B896";
-  const shelfStroke = darkMode ? "#aa9020" : "#B09060";
-
+  // eslint-disable-next-line oxc/branches-sharing-code
   if (h > w * 1.5) {
     // 1x2 縦長: 左=鏡、右=カウンター+ボウル+蛇口 (横分割)
     const mirrorFill = darkMode ? "#1a3a4a" : "#E8F4F8";
@@ -23,8 +21,8 @@ export function drawWashbasin(
     const counterFill = darkMode ? "#6a5a40" : "#EAD8C0";
     const counterStroke = darkMode ? "#8a7a50" : "#C8A880";
 
-    // Counter background (right ~45%)
-    const divX = px + w * 0.52;
+    // Counter background (right ~65%)
+    const divX = px + w * 0.35;
     const counterW = w - (divX - px);
     ctx.fillStyle = counterFill;
     ctx.fillRect(divX, py, counterW, h);
@@ -42,9 +40,9 @@ export function drawWashbasin(
 
     // Mirror (left ~50%, inset)
     const mPad = h * 0.04;
-    const mirrorX = px + w * 0.04;
+    const mirrorX = px + w * 0.03;
     const mirrorY = py + mPad;
-    const mirrorW = w * 0.44;
+    const mirrorW = w * 0.28;
     const mirrorH = h - mPad * 2;
     const mR = Math.min(mirrorW, mirrorH) * 0.05;
 
@@ -104,7 +102,6 @@ export function drawWashbasin(
     ctx.moveTo(bX + bW / 2, fY2 + fH2);
     ctx.lineTo(bX + bW / 2, bY + bH * 0.2);
     ctx.stroke();
-    ctx.lineCap = "butt";
   } else {
     // 1x1
     const basinX = px + w * 0.1;
@@ -145,6 +142,6 @@ export function drawWashbasin(
     ctx.moveTo(px + w / 2, fBarY + fBarH);
     ctx.lineTo(px + w / 2, basinY + basinH * 0.2);
     ctx.stroke();
-    ctx.lineCap = "butt";
   }
+  ctx.lineCap = "butt";
 }
