@@ -6,7 +6,11 @@ function emptyCell(): Cell {
   return { floorType: null, item: null, wall: { left: "none", top: "none" } };
 }
 
-function makeFloor(width: number, height: number, overrides: Partial<Record<number, Partial<Cell>>> = {}): FloorPlan {
+function makeFloor(
+  width: number,
+  height: number,
+  overrides: Partial<Record<number, Partial<Cell>>> = {},
+): FloorPlan {
   const cells = Array.from({ length: width * height }, (_, i) => ({
     ...emptyCell(),
     ...overrides[i],
@@ -16,13 +20,21 @@ function makeFloor(width: number, height: number, overrides: Partial<Record<numb
 
 describe("normalizeSelection", () => {
   it("already normalized → unchanged", () => {
-    expect(normalizeSelection({ x1: 0, x2: 2, y1: 0, y2: 2 }))
-      .toEqual({ x1: 0, x2: 2, y1: 0, y2: 2 });
+    expect(normalizeSelection({ x1: 0, x2: 2, y1: 0, y2: 2 })).toEqual({
+      x1: 0,
+      x2: 2,
+      y1: 0,
+      y2: 2,
+    });
   });
 
   it("inverted selection → normalizes", () => {
-    expect(normalizeSelection({ x1: 3, x2: 1, y1: 4, y2: 2 }))
-      .toEqual({ x1: 1, x2: 3, y1: 2, y2: 4 });
+    expect(normalizeSelection({ x1: 3, x2: 1, y1: 4, y2: 2 })).toEqual({
+      x1: 1,
+      x2: 3,
+      y1: 2,
+      y2: 4,
+    });
   });
 });
 
@@ -58,13 +70,13 @@ describe("copyRegion", () => {
 
   it("copies multi-cell region in row-major order", () => {
     const floor = makeFloor(3, 2, {
-      0: { floorType: "wood" },   // (0,0)
-      1: { floorType: "water" },  // (1,0)
+      0: { floorType: "wood" }, // (0,0)
+      1: { floorType: "water" }, // (1,0)
       3: { floorType: "tatami" }, // (0,1)
-      4: { floorType: "wood" },   // (1,1)
+      4: { floorType: "wood" }, // (1,1)
     });
     const result = copyRegion(floor, { x1: 0, x2: 1, y1: 0, y2: 1 });
-    expect(result!.cells.map(c => c.floorType)).toEqual(["wood", "water", "tatami", "wood"]);
+    expect(result!.cells.map((c) => c.floorType)).toEqual(["wood", "water", "tatami", "wood"]);
   });
 });
 

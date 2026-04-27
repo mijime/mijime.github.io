@@ -139,12 +139,17 @@ export function floorToDsl(floor: FloorPlan): string {
   // Detect rooms and emit each as a pattern block
   const rooms = detectRooms(floor);
   const roomMinXY = rooms.map((r) => {
-    let minX = Infinity, minY = Infinity;
+    let minX = Infinity,
+      minY = Infinity;
     for (const idx of r.cells) {
       const x = idx % width;
       const y = Math.floor(idx / width);
-      if (x < minX) minX = x;
-      if (y < minY) minY = y;
+      if (x < minX) {
+        minX = x;
+      }
+      if (y < minY) {
+        minY = y;
+      }
     }
     return { minX, minY };
   });
@@ -208,7 +213,9 @@ export function floorToDsl(floor: FloorPlan): string {
 
     for (const { lx, ly, idx } of roomCells) {
       const { item } = cells[idx];
-      if (!item) continue;
+      if (!item) {
+        continue;
+      }
       const rot = item.rotation !== 0 ? ` ${item.rotation}` : "";
       lines.push(`  item (${lx},${ly}) ${item.type}${rot}`);
     }
@@ -219,7 +226,14 @@ export function floorToDsl(floor: FloorPlan): string {
 
   // Walls not belonging to any room cell
   const nonRoomCells = cells.map((c, idx) =>
-    inRoom.has(idx) ? { ...c, wall: { left: "none" as WallType, top: "none" as WallType }, floorType: null, item: null } : c
+    inRoom.has(idx)
+      ? {
+          ...c,
+          floorType: null,
+          item: null,
+          wall: { left: "none" as WallType, top: "none" as WallType },
+        }
+      : c,
   );
 
   for (const { x1, y1, x2, y2, edge, wallType } of packWallRuns(nonRoomCells, width, height)) {
@@ -235,9 +249,13 @@ export function floorToDsl(floor: FloorPlan): string {
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
       const idx = y * width + x;
-      if (inRoom.has(idx)) continue;
+      if (inRoom.has(idx)) {
+        continue;
+      }
       const { item } = cells[idx];
-      if (!item) continue;
+      if (!item) {
+        continue;
+      }
       const rot = item.rotation !== 0 ? ` ${item.rotation}` : "";
       lines.push(`item (${x},${y}) ${item.type}${rot}`);
     }
@@ -257,7 +275,7 @@ interface PatternCell {
   wallLeft?: WallType;
 }
 
-function rotatePatternCW90(cells: PatternCell[], maxX: number, maxY: number): PatternCell[] {
+function rotatePatternCW90(cells: PatternCell[], _maxX: number, maxY: number): PatternCell[] {
   return cells.map(({ x, y, floorType, item, wallTop, wallLeft }) => {
     const nx = maxY - y;
     const ny = x;
@@ -265,9 +283,9 @@ function rotatePatternCW90(cells: PatternCell[], maxX: number, maxY: number): Pa
       ? { ...item, rotation: ((item.rotation + 90) % 360) as 0 | 90 | 180 | 270 }
       : undefined;
     // CW90: top→left of (nx,ny), left→top of (nx,ny) but on the prev column boundary
-    // top wall at (x,y) becomes left wall at (nx+1, ny) — handled by caller shifting
-    // left wall at (x,y) becomes top wall at (nx, ny)
-    return { x: nx, y: ny, floorType, item: newItem, wallTop: wallLeft, wallLeft: wallTop };
+    // Top wall at (x,y) becomes left wall at (nx+1, ny) — handled by caller shifting
+    // Left wall at (x,y) becomes top wall at (nx, ny)
+    return { floorType, item: newItem, wallLeft: wallTop, wallTop: wallLeft, x: nx, y: ny };
   });
 }
 
@@ -286,8 +304,12 @@ function applyPatternCells(
   let maxX = 0;
   let maxY = 0;
   for (const { x, y } of cells) {
-    if (x > maxX) maxX = x;
-    if (y > maxY) maxY = y;
+    if (x > maxX) {
+      maxX = x;
+    }
+    if (y > maxY) {
+      maxY = y;
+    }
   }
 
   const steps = rotate / 90;
@@ -302,7 +324,9 @@ function applyPatternCells(
   for (const { x, y, floorType, item, wallTop, wallLeft } of cells) {
     const fx = x + ox;
     const fy = y + oy;
-    if (fx < 0 || fy < 0 || fx >= width || fy >= height) continue;
+    if (fx < 0 || fy < 0 || fx >= width || fy >= height) {
+      continue;
+    }
     const idx = fy * width + fx;
     const cur = cellOverrides.get(idx) ?? {};
     const wall = cur.wall ?? { left: "none", top: "none" };
@@ -311,8 +335,8 @@ function applyPatternCells(
       ...(floorType !== undefined ? { floorType } : {}),
       ...(item !== undefined ? { item } : {}),
       wall: {
-        top: wallTop ?? wall.top,
         left: wallLeft ?? wall.left,
+        top: wallTop ?? wall.top,
       },
     });
   }
@@ -321,12 +345,14 @@ function applyPatternCells(
 function parseCoordBlocks(coordsStr: string): { x1: number; y1: number; x2: number; y2: number }[] {
   return coordsStr.split("&").flatMap((coordStr) => {
     const cm = coordStr.match(/^\((\d+),(\d+)\)(?:-\((\d+),(\d+)\))?$/);
-    if (!cm) return [];
+    if (!cm) {
+      return [];
+    }
     const x1 = Number.parseInt(cm[1], 10);
     const y1 = Number.parseInt(cm[2], 10);
     const x2 = cm[3] !== undefined ? Number.parseInt(cm[3], 10) : x1;
     const y2 = cm[4] !== undefined ? Number.parseInt(cm[4], 10) : y1;
-    return [{ x1, y1, x2, y2 }];
+    return [{ x1, x2, y1, y2 }];
   });
 }
 
@@ -390,14 +416,19 @@ export function dslToFloor(text: string): FloorPlan {
             for (const { x1, y1, x2, y2 } of parseCoordBlocks(wm[1])) {
               for (let fy = y1; fy <= y2; fy++) {
                 for (let fx = x1; fx <= x2; fx++) {
-                  const existing = patternCells.find((c) => c.x === fx && c.y === fy);
+                  const cx = fx;
+                  const cy = fy;
+                  const existing = patternCells.find((c) => c.x === cx && c.y === cy);
                   if (existing) {
-                    if (edge === "top") existing.wallTop = wallType;
-                    else existing.wallLeft = wallType;
+                    if (edge === "top") {
+                      existing.wallTop = wallType;
+                    } else {
+                      existing.wallLeft = wallType;
+                    }
                   } else {
                     patternCells.push({
-                      x: fx,
-                      y: fy,
+                      x: cx,
+                      y: cy,
                       ...(edge === "top" ? { wallTop: wallType } : { wallLeft: wallType }),
                     });
                   }
@@ -412,9 +443,14 @@ export function dslToFloor(text: string): FloorPlan {
           for (const { x1, y1, x2, y2 } of parseCoordBlocks(fm[1])) {
             for (let fy = y1; fy <= y2; fy++) {
               for (let fx = x1; fx <= x2; fx++) {
-                const existing = patternCells.find((c) => c.x === fx && c.y === fy);
-                if (existing) existing.floorType = floorType;
-                else patternCells.push({ x: fx, y: fy, floorType });
+                const cx = fx;
+                const cy = fy;
+                const existing = patternCells.find((c) => c.x === cx && c.y === cy);
+                if (existing) {
+                  existing.floorType = floorType;
+                } else {
+                  patternCells.push({ floorType, x: cx, y: cy });
+                }
               }
             }
           }
@@ -426,8 +462,11 @@ export function dslToFloor(text: string): FloorPlan {
           const type = im[3] as ItemType;
           const rotation = (im[4] ? Number.parseInt(im[4], 10) : 0) as 0 | 90 | 180 | 270;
           const existing = patternCells.find((c) => c.x === px && c.y === py);
-          if (existing) existing.item = { type, rotation };
-          else patternCells.push({ x: px, y: py, item: { type, rotation } });
+          if (existing) {
+            existing.item = { rotation, type };
+          } else {
+            patternCells.push({ item: { rotation, type }, x: px, y: py });
+          }
         }
         i++;
       }
@@ -439,11 +478,21 @@ export function dslToFloor(text: string): FloorPlan {
   // Second pass: process main commands
   let inPatternBlock = false;
   for (const line of lines) {
-    if (!line || line.startsWith("#")) continue;
+    if (!line || line.startsWith("#")) {
+      continue;
+    }
 
-    if (line.match(/^pattern\s+/)) { inPatternBlock = true; continue; }
-    if (line === "end") { inPatternBlock = false; continue; }
-    if (inPatternBlock) continue;
+    if (/^pattern\s+/.test(line)) {
+      inPatternBlock = true;
+      continue;
+    }
+    if (line === "end") {
+      inPatternBlock = false;
+      continue;
+    }
+    if (inPatternBlock) {
+      continue;
+    }
 
     const sizeMatch = line.match(/^size\s+(\d+)\s+(\d+)$/);
     if (sizeMatch) {
@@ -463,7 +512,9 @@ export function dslToFloor(text: string): FloorPlan {
     if (wallMatch) {
       const edge = wallMatch[2] as "top" | "left";
       const wallType = wallMatch[3] as WallType;
-      if (WALL_TYPES.includes(wallType)) applyWall(wallMatch[1], edge, wallType);
+      if (WALL_TYPES.includes(wallType)) {
+        applyWall(wallMatch[1], edge, wallType);
+      }
       continue;
     }
 
@@ -488,8 +539,10 @@ export function dslToFloor(text: string): FloorPlan {
       continue;
     }
 
-    // place patternName at (x,y) [rotate 0|90|180|270]
-    const placeMatch = line.match(/^place\s+(\S+)\s+at\s+\((\d+),(\d+)\)(?:\s+rotate\s+(0|90|180|270))?$/);
+    // Place patternName at (x,y) [rotate 0|90|180|270]
+    const placeMatch = line.match(
+      /^place\s+(\S+)\s+at\s+\((\d+),(\d+)\)(?:\s+rotate\s+(0|90|180|270))?$/,
+    );
     if (placeMatch) {
       const patternName = placeMatch[1];
       const ox = Number.parseInt(placeMatch[2], 10);

@@ -10,9 +10,17 @@ export function resolveItemAction(args: {
   toolItemType: ItemType;
 }): ItemAction {
   const { startIdx, endIdx, dragMoved, endCell, toolItemType } = args;
-  if (startIdx === null || endIdx === null) { return "none"; }
-  if (startIdx !== endIdx) { return "move"; }
-  if (dragMoved) { return "none"; }
-  if (endCell.item && endCell.item.type === toolItemType) { return "rotate"; }
+  if (startIdx === null || endIdx === null) {
+    return "none";
+  }
+  if (startIdx !== endIdx) {
+    return "move";
+  }
+  if (dragMoved) {
+    return "none";
+  }
+  if (endCell.item && endCell.item.type === toolItemType) {
+    return "rotate";
+  }
   return "place";
 }
