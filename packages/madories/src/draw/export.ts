@@ -13,6 +13,7 @@ import { drawRoomLabels } from "../floor/roomDetection";
 const LABEL_HEIGHT = 24;
 const BG = "#F5F0E8";
 const DIM_COLOR = "#5A4A3A";
+
 const GRID_COLOR = "rgba(90,74,58,0.25)"; // Same RGB as DIM_COLOR at 25% opacity
 const DIM_MARGIN = 28; // Px reserved for dimension rulers
 
