@@ -23,7 +23,10 @@ export function computeBounds(
   const y1 = region?.y1 ?? 0;
   const x2 = region?.x2 ?? floor.width - 1;
   const y2 = region?.y2 ?? floor.height - 1;
-  let minX = x2 + 1, minY = y2 + 1, maxX = x1 - 1, maxY = y1 - 1;
+  let minX = x2 + 1,
+    minY = y2 + 1,
+    maxX = x1 - 1,
+    maxY = y1 - 1;
   for (let y = y1; y <= y2; y++) {
     for (let x = x1; x <= x2; x++) {
       const cell = floor.cells[y * floor.width + x];
@@ -33,10 +36,18 @@ export function computeBounds(
         cell.wall.left !== "none" ||
         cell.item !== null;
       if (used) {
-        if (x < minX) minX = x;
-        if (y < minY) minY = y;
-        if (x > maxX) maxX = x;
-        if (y > maxY) maxY = y;
+        if (x < minX) {
+          minX = x;
+        }
+        if (y < minY) {
+          minY = y;
+        }
+        if (x > maxX) {
+          maxX = x;
+        }
+        if (y > maxY) {
+          maxY = y;
+        }
       }
     }
   }
@@ -250,9 +261,9 @@ export function exportAllFloorsPng(floors: FloorPlan[], cellSize: number): void 
     tsubo: f.cells.filter((c) => c.floorType !== null).length / 4,
   }));
   const valid = tsuboPerFloor.filter((r) => r.canvas !== null) as {
+    canvas: HTMLCanvasElement;
     name: string;
     tsubo: number;
-    canvas: HTMLCanvasElement;
   }[];
   if (valid.length === 0) {
     return;
