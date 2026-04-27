@@ -9,6 +9,7 @@ import { drawRoomLabels } from "../floor/roomDetection";
 const LABEL_HEIGHT = 24;
 const BG = "#F5F0E8";
 const DIM_COLOR = "#5A4A3A";
+const GRID_COLOR = "rgba(90,74,58,0.25)";
 const DIM_MARGIN = 28; // Px reserved for dimension rulers
 
 // 1 cell = 0.5 tatami = 910mm
@@ -159,7 +160,7 @@ export function renderFloorToCanvas(floor: FloorPlan, cellSize: number): HTMLCan
 
   ctx.save();
   ctx.translate(DIM_MARGIN - x1 * cellSize, DIM_MARGIN - y1 * cellSize);
-  drawGrid(ctx, floor.width, floor.height, cellSize, DIM_COLOR);
+  drawGrid(ctx, floor.width, floor.height, cellSize, GRID_COLOR);
   drawWalls(ctx, floor, cellSize, { ink: DIM_COLOR, windowBlue: "#4A90D9" });
   drawItems(ctx, floor, cellSize);
   drawRoomLabels(ctx, floor, cellSize, DIM_COLOR);
