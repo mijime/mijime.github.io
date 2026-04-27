@@ -1,23 +1,35 @@
-import { useEffect, useState } from "react";
-import { dslToFloor, floorToDsl } from "../canvas/dsl";
+import { Copy, Download, Upload } from "lucide-react";
+import { useState } from "react";
+import { dslToFloor, floorToDsl } from "../floor/dsl";
 import type { FloorPlan } from "../types";
 
 interface Props {
   floor: FloorPlan;
+  onApplyFloor: (floor: FloorPlan) => void;
   onImportFloor: (floor: FloorPlan) => void;
 }
 
-export function DslPanel({ floor, onImportFloor }: Props) {
+export function DslPanel({ floor, onApplyFloor, onImportFloor }: Props) {
   const [open, setOpen] = useState(false);
-  const [text, setText] = useState(() => floorToDsl(floor));
+  const [text, setText] = useState("");
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
+  function handleExport() {
     setText(floorToDsl(floor));
     setError(null);
-  }, [floor.id, floor]);
+  }
 
-  function handleImport() {
+  function handleApply() {
+    try {
+      const imported = dslToFloor(text);
+      onApplyFloor({ ...imported, id: floor.id });
+      setError(null);
+    } catch (error) {
+      setError(String(error));
+    }
+  }
+
+  function handleCopy() {
     try {
       const imported = dslToFloor(text);
       onImportFloor(imported);
@@ -32,14 +44,27 @@ export function DslPanel({ floor, onImportFloor }: Props) {
     fontSize: "11px",
   };
 
+  const btnStyle: React.CSSProperties = {
+    alignItems: "center",
+    background: "transparent",
+    border: "1px solid var(--border)",
+    color: "var(--ink)",
+    cursor: "pointer",
+    display: "flex",
+    gap: "6px",
+    padding: "3px 8px",
+    ...mono,
+  };
+
   if (!open) {
     return (
       <div className="hidden md:flex">
         <div style={{ background: "var(--toolbar-bg)", borderLeft: "1px solid var(--border)" }}>
           <button
             onClick={() => {
-              setText(floorToDsl(floor));
               setOpen(true);
+              setText(floorToDsl(floor));
+              setError(null);
             }}
             style={{
               background: "transparent",
@@ -74,13 +99,7 @@ export function DslPanel({ floor, onImportFloor }: Props) {
         ...mono,
       }}
     >
-      <div
-        style={{
-          alignItems: "center",
-          display: "flex",
-          justifyContent: "space-between",
-        }}
-      >
+      <div style={{ alignItems: "center", display: "flex", justifyContent: "space-between" }}>
         <div
           style={{
             color: "var(--mid)",
@@ -125,33 +144,14 @@ export function DslPanel({ floor, onImportFloor }: Props) {
           {error}
         </div>
       )}
-      <button
-        onClick={() => setText(floorToDsl(floor))}
-        style={{
-          background: "transparent",
-          border: "1px solid var(--border)",
-          color: "var(--ink)",
-          cursor: "pointer",
-          padding: "3px 8px",
-          textAlign: "left",
-          ...mono,
-        }}
-      >
-        現在フロアを表示
+      <button onClick={handleExport} style={btnStyle}>
+        <Download size={14} /> export
       </button>
-      <button
-        onClick={handleImport}
-        style={{
-          background: "transparent",
-          border: "1px solid var(--border)",
-          color: "var(--ink)",
-          cursor: "pointer",
-          padding: "3px 8px",
-          textAlign: "left",
-          ...mono,
-        }}
-      >
-        新フロアとして追加
+      <button onClick={handleApply} style={btnStyle}>
+        <Upload size={14} /> apply
+      </button>
+      <button onClick={handleCopy} style={btnStyle}>
+        <Copy size={14} /> copy
       </button>
     </div>
   );

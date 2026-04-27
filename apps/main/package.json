@@ -7,7 +7,7 @@
     "build": "astro build",
     "preview": "astro preview",
     "check": "bun run check:oxlint && bun run check:astro",
-    "check:oxlint": "oxlint --format=github",
+    "check:oxlint": "oxlint --format=github --fix",
     "check:astro": "astro check",
     "format": "bun run format:oxfmt",
     "format:oxfmt": "oxfmt src"

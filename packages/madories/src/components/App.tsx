@@ -1,24 +1,19 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useDarkMode } from "@mijime/theme/useDarkMode";
-import { exportAllFloorsPng } from "../canvas/export";
-import { buildShareUrl, decodeFloors, encodeFloors, getShareParam } from "../canvas/share";
+import { exportAllFloorsPng } from "../draw/export";
+import { buildShareUrl, encodeFloors } from "../floor/share";
 import { loadFromFile, loadFromStorage, saveToFile, saveToStorage } from "../storage";
 import { createBuilding, reducer } from "../store";
-import type { Building, CopiedRegion, ItemType } from "../types";
+import type { CopiedRegion, ItemType } from "../types";
+import { useAppInit } from "../hooks/useAppInit";
+import { useHistory } from "../hooks/useHistory";
+import type { AppState } from "../hooks/useHistory";
 import { DslPanel } from "./DslPanel";
 import type { FloorCanvasHandle } from "./FloorCanvas";
 import { FloorCanvas } from "./FloorCanvas";
 import { FloorTabs } from "./FloorTabs";
 import type { ToolMode } from "./toolMode";
 import { ToolSheet } from "./ToolSheet";
-
-const MAX_HISTORY = 50;
-const MERGE_MS = 500;
-
-interface AppState {
-  building: Building;
-  activeFloorId: string;
-}
 
 function init(): AppState {
   const saved = loadFromStorage();
@@ -29,38 +24,17 @@ function init(): AppState {
   return { activeFloorId: building.floors[0].id, building };
 }
 
-function initFromUrl(): Promise<AppState | null> {
-  const param = getShareParam();
-  if (!param) {
-    return Promise.resolve(null);
-  }
-  return decodeFloors(param)
-    .then((floors) => {
-      if (floors.length === 0) {
-        return null;
-      }
-      const building = { cellSize: 32, floors };
-      return { activeFloorId: floors[0].id, building };
-    })
-    .catch(() => null);
-}
-
 export function App() {
-  const [history, setHistory] = useState<AppState[]>(() => [init()]);
-  const [historyIndex, setHistoryIndex] = useState(0);
+  const { current, dispatch, push, setActiveFloorId, canUndo, canRedo, undo, redo } =
+    useHistory(init());
 
-  useEffect(() => {
-    initFromUrl().then((state) => {
-      if (state) {
-        setHistory([state]);
-        setHistoryIndex(0);
-      }
-    });
-  }, []);
+  useAppInit(push);
+
   const [tool, setTool] = useState<ToolMode>({ kind: "select" });
   const canvasRef = useRef<FloorCanvasHandle>(null);
+  const [toast, setToast] = useState<string | null>(null);
+  const [fallbackUrl, setFallbackUrl] = useState<string | null>(null);
 
-  const current = history[historyIndex];
   const { building, activeFloorId } = current;
 
   useEffect(() => {
@@ -69,85 +43,12 @@ export function App() {
   }, [building, activeFloorId]);
 
   useEffect(() => {
-    function onKeyDown(e: KeyboardEvent) {
-      if ((e.metaKey || e.ctrlKey) && e.key === "z" && !e.shiftKey) {
-        e.preventDefault();
-        setHistoryIndex((i) => Math.max(0, i - 1));
-      }
-      if ((e.metaKey || e.ctrlKey) && (e.key === "y" || (e.key === "z" && e.shiftKey))) {
-        e.preventDefault();
-        setHistoryIndex((i) => Math.min(history.length - 1, i + 1));
-      }
+    if (!toast) {
+      return;
     }
-    window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
-  }, [history.length]);
-
-  const lastActionRef = useRef<{
-    type: string;
-    floorId?: string;
-    t: number;
-  } | null>(null);
-
-  const push = useCallback(
-    (next: AppState) => {
-      lastActionRef.current = null;
-      setHistory((prev) => {
-        const truncated = prev.slice(0, historyIndex + 1);
-        const newHistory = [...truncated, next];
-        return newHistory.length > MAX_HISTORY ? newHistory.slice(-MAX_HISTORY) : newHistory;
-      });
-      setHistoryIndex((i) => Math.min(i + 1, MAX_HISTORY - 1));
-    },
-    [historyIndex],
-  );
-
-  const dispatch = useCallback(
-    (action: Parameters<typeof reducer>[1]) => {
-      const now = Date.now();
-      const last = lastActionRef.current;
-      const floorId = "floorId" in action ? action.floorId : undefined;
-      const canMerge =
-        last !== null &&
-        last.type === action.type &&
-        last.floorId === floorId &&
-        now - last.t < MERGE_MS;
-
-      lastActionRef.current = { floorId, t: now, type: action.type };
-
-      if (canMerge) {
-        setHistory((prev) => {
-          const cur = prev[historyIndex];
-          const next = { ...cur, building: reducer(cur.building, action) };
-          const updated = [...prev];
-          updated[historyIndex] = next;
-          return updated;
-        });
-      } else {
-        setHistory((prev) => {
-          const cur = prev[historyIndex];
-          const next = { ...cur, building: reducer(cur.building, action) };
-          const truncated = prev.slice(0, historyIndex + 1);
-          const newHistory = [...truncated, next];
-          return newHistory.length > MAX_HISTORY ? newHistory.slice(-MAX_HISTORY) : newHistory;
-        });
-        setHistoryIndex((i) => Math.min(i + 1, MAX_HISTORY - 1));
-      }
-    },
-    [historyIndex],
-  );
-
-  const setActiveFloorId = (id: string) => {
-    setHistory((prev) => {
-      const cur = prev[historyIndex];
-      const updated = [...prev];
-      updated[historyIndex] = { ...cur, activeFloorId: id };
-      return updated;
-    });
-  };
-
-  const canUndo = historyIndex > 0;
-  const canRedo = historyIndex < history.length - 1;
+    const id = setTimeout(() => setToast(null), 2000);
+    return () => clearTimeout(id);
+  }, [toast]);
 
   const handleShare = useCallback(() => {
     encodeFloors(building.floors).then((encoded) => {
@@ -155,10 +56,10 @@ export function App() {
       navigator.clipboard
         .writeText(url)
         .then(() => {
-          alert("URLをコピーしました");
+          setToast("URLをコピーしました");
         })
         .catch(() => {
-          prompt("このURLをコピーしてください", url);
+          setFallbackUrl(url);
         });
     });
   }, [building.floors]);
@@ -200,8 +101,8 @@ export function App() {
           darkMode={dark}
           canUndo={canUndo}
           canRedo={canRedo}
-          onUndo={() => setHistoryIndex((i) => Math.max(0, i - 1))}
-          onRedo={() => setHistoryIndex((i) => Math.min(history.length - 1, i + 1))}
+          onUndo={undo}
+          onRedo={redo}
           onSave={() => saveToFile(building, activeFloorId)}
           onLoad={() => {
             loadFromFile().then((data) => {
@@ -220,6 +121,9 @@ export function App() {
         />
         <DslPanel
           floor={floor}
+          onApplyFloor={(imported) => {
+            dispatch({ floor: imported, floorId: floor.id, type: "REPLACE_FLOOR" });
+          }}
           onImportFloor={(imported) => {
             const next = {
               ...building,
@@ -313,12 +217,91 @@ export function App() {
             onEraseCell={(cellIndex) =>
               dispatch({ cellIndex, floorId: floor.id, type: "ERASE_CELL" })
             }
-            onDeleteItem={(cellIndex) =>
-              dispatch({ cellIndex, floorId: floor.id, type: "ERASE_CELL" })
-            }
           />
         </div>
       </div>
+      {toast && (
+        <div
+          style={{
+            background: "var(--ink)",
+            borderRadius: "8px",
+            bottom: "32px",
+            color: "var(--paper)",
+            fontFamily: "IBM Plex Mono, monospace",
+            fontSize: "13px",
+            left: "50%",
+            padding: "8px 18px",
+            position: "fixed",
+            transform: "translateX(-50%)",
+            zIndex: 100,
+          }}
+        >
+          {toast}
+        </div>
+      )}
+      {fallbackUrl && (
+        <div
+          style={{
+            alignItems: "center",
+            background: "rgba(0,0,0,0.4)",
+            bottom: 0,
+            display: "flex",
+            justifyContent: "center",
+            left: 0,
+            position: "fixed",
+            right: 0,
+            top: 0,
+            zIndex: 100,
+          }}
+          onClick={() => setFallbackUrl(null)}
+        >
+          <div
+            style={{
+              background: "var(--paper)",
+              borderRadius: "10px",
+              display: "flex",
+              flexDirection: "column",
+              gap: "10px",
+              maxWidth: "90vw",
+              padding: "20px",
+              width: "400px",
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div style={{ fontFamily: "IBM Plex Mono, monospace", fontSize: "13px" }}>
+              このURLをコピーしてください
+            </div>
+            <input
+              readOnly
+              value={fallbackUrl}
+              style={{
+                border: "1px solid var(--border)",
+                borderRadius: "4px",
+                fontFamily: "IBM Plex Mono, monospace",
+                fontSize: "12px",
+                padding: "6px 8px",
+                width: "100%",
+              }}
+              onFocus={(e) => e.target.select()}
+            />
+            <button
+              onClick={() => setFallbackUrl(null)}
+              style={{
+                background: "var(--ink)",
+                border: "none",
+                borderRadius: "4px",
+                color: "var(--paper)",
+                cursor: "pointer",
+                fontFamily: "IBM Plex Mono, monospace",
+                fontSize: "12px",
+                padding: "6px 0",
+              }}
+            >
+              閉じる
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

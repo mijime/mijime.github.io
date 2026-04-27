@@ -14,9 +14,10 @@ import {
   Trash2,
   Undo2,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { ItemCategory } from "../items";
 import { ITEM_CATEGORIES, ITEM_DEFS } from "../items";
+import type { ItemType } from "../types";
 import type { WallType } from "../types";
 import { FLOOR_TYPES, floorTypeToColor, type ToolMode } from "./toolMode";
 
@@ -82,6 +83,17 @@ function ToolPanelContent({
   onClose,
 }: Props & { onClose?: () => void }) {
   const [itemCategory, setItemCategory] = useState<ItemCategory>("建具");
+  const [clearPending, setClearPending] = useState(false);
+  const clearTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastItemTypeRef = useRef<Partial<Record<ItemCategory, ItemType>>>({});
+  useEffect(
+    () => () => {
+      if (clearTimerRef.current) {
+        clearTimeout(clearTimerRef.current);
+      }
+    },
+    [],
+  );
 
   return (
     <div
@@ -121,7 +133,9 @@ function ToolPanelContent({
                 } else if (kind === "floor") {
                   onToolChange({ floorType: "wood", kind: "floor" });
                 } else if (kind === "item") {
-                  onToolChange({ itemType: "door", kind: "item" });
+                  const remembered = lastItemTypeRef.current[itemCategory];
+                  const fallback = ITEMS_BY_CATEGORY[itemCategory][0].type;
+                  onToolChange({ itemType: remembered ?? fallback, kind: "item" });
                 } else {
                   onToolChange({ kind } as ToolMode);
                 }
@@ -235,7 +249,10 @@ function ToolPanelContent({
                     textOverflow: "ellipsis",
                     whiteSpace: "nowrap",
                   }}
-                  onClick={() => onToolChange({ itemType: def.type, kind: "item" })}
+                  onClick={() => {
+                    lastItemTypeRef.current[def.category] = def.type;
+                    onToolChange({ itemType: def.type, kind: "item" });
+                  }}
                 >
                   {def.label}
                 </button>
@@ -327,7 +344,14 @@ function ToolPanelContent({
         </div>
         <button
           onClick={() => {
-            if (confirm("このレイヤーを全消去しますか？")) {
+            if (!clearPending) {
+              setClearPending(true);
+              clearTimerRef.current = setTimeout(() => setClearPending(false), 3000);
+            } else {
+              if (clearTimerRef.current) {
+                clearTimeout(clearTimerRef.current);
+              }
+              setClearPending(false);
               onClear();
               onClose?.();
             }
@@ -345,7 +369,7 @@ function ToolPanelContent({
           }}
         >
           <Trash2 size={14} />
-          <span>削除</span>
+          <span>{clearPending ? "本当に削除？" : "削除"}</span>
         </button>
       </div>
     </div>

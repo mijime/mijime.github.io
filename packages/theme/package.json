@@ -9,7 +9,7 @@
   },
   "scripts": {
     "check": "bun run check:oxlint",
-    "check:oxlint": "oxlint --format=github",
+    "check:oxlint": "oxlint --format=github --fix",
     "format": "bun run format:oxfmt",
     "format:oxfmt": "oxfmt"
   },

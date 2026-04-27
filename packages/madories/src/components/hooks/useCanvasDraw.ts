@@ -1,12 +1,13 @@
 import { useCallback, useEffect, useRef } from "react";
-import { drawGrid } from "../../canvas/drawGrid";
-import { getItemDrawOffset } from "../../canvas/drawItems";
-import { drawVoidCells } from "../../canvas/drawVoid";
-import { drawWalls } from "../../canvas/drawWalls";
-import { computeWallDimensions, fmtMm } from "../../canvas/export";
-import { clearIconCache, getCachedIcon } from "../../canvas/icons/cache";
-import { drawTatamiCells } from "../../canvas/drawTatami";
-import { detectRooms, drawRoomLabels } from "../../canvas/roomDetection";
+import { drawGrid } from "../../draw/drawGrid";
+import { getItemDrawOffset } from "../../draw/drawItems";
+import { drawVoidCells } from "../../draw/drawVoid";
+import { drawWalls } from "../../draw/drawWalls";
+import { computeWallDimensions, fmtMm } from "../../draw/export";
+import { clearIconCache, getCachedIcon } from "../../draw/icons/cache";
+import { drawTatamiCells } from "../../draw/drawTatami";
+import { normalizeSelection } from "../../floor/clipboardLogic";
+import { detectRooms, drawRoomLabels } from "../../floor/roomDetection";
 import { ITEM_DEF_MAP } from "../../items";
 import type { FloorPlan, Item } from "../../types";
 import { floorTypeToColor } from "../toolMode";
@@ -268,10 +269,7 @@ export function useCanvasDraw(props: Props): {
 
     const sel = selectionRef.current;
     if (sel) {
-      const x1 = Math.min(sel.x1, sel.x2);
-      const y1 = Math.min(sel.y1, sel.y2);
-      const x2 = Math.max(sel.x1, sel.x2);
-      const y2 = Math.max(sel.y1, sel.y2);
+      const { x1, y1, x2, y2 } = normalizeSelection(sel);
       const px = x1 * cellSize;
       const py = y1 * cellSize;
       const pw = (x2 - x1 + 1) * cellSize;

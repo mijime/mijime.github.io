@@ -4,7 +4,7 @@ import { drawGrid } from "./drawGrid";
 import { drawItems } from "./drawItems";
 import { drawVoidCells } from "./drawVoid";
 import { drawWalls } from "./drawWalls";
-import { drawRoomLabels } from "./roomDetection";
+import { drawRoomLabels } from "../floor/roomDetection";
 
 const LABEL_HEIGHT = 24;
 const BG = "#F5F0E8";
@@ -246,11 +246,7 @@ export function exportFloorPng(floor: FloorPlan, cellSize: number): void {
       return;
     }
     const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `${floor.name}.png`;
-    a.click();
-    URL.revokeObjectURL(url);
+    window.open(url, "_blank");
   }, "image/png");
 }
 
@@ -306,10 +302,6 @@ export function exportAllFloorsPng(floors: FloorPlan[], cellSize: number): void 
       return;
     }
     const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "floors.png";
-    a.click();
-    URL.revokeObjectURL(url);
+    window.open(url, "_blank");
   }, "image/png");
 }
