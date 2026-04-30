@@ -9,7 +9,7 @@ Git がインストールされていない環境（AWS Lambda など）で Git 
 
 <!--more-->
 
-HTTP 経由でリポジトリを fetch し、最初のコミット時刻を取得する例:
+HTTP 経由でリポジトリを fetch し、最初のコミット時刻を取得する例を示す。
 
 ```python
 from dulwich.client import HttpGitClient

@@ -13,14 +13,14 @@ Tags: ["Development", "JavaScript"]
 - 名詞かつ3文字以上の単語のみを対象に単語ベクトルを生成
 - コサイン類似度で記事間の類似度を計算
 
-参考:
+参考にしたリンクを以下に示す。
 
 - [コサイン類似度](http://www.cse.kyoto-su.ac.jp/~g0846020/keywords/cosinSimilarity.html)
 - [TF-IDF Cos 類似度推定法](http://qiita.com/nmbakfm/items/6bb91b89571dd68fcea6)
 
 ## コード
 
-テキストを単語ベクトルに変換する:
+テキストを単語ベクトルに変換する。
 
 ```javascript
 async function parseVector(text) {
@@ -47,7 +47,7 @@ function isTargetToken(token) {
 }
 ```
 
-コサイン類似度の計算:
+コサイン類似度の計算は次のとおり。
 
 ```javascript
 function cosineSimilarity(curr, next) {

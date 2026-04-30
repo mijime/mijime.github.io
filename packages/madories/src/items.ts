@@ -80,5 +80,4 @@ export const WALL_LEGEND_LABEL: Partial<Record<WallType, string>> = {
   window_full: "全窓",
 };
 
-
 export const ITEM_CATEGORIES: ItemCategory[] = ["建具", "水回り", "キッチン", "リビング", "寝室"];
