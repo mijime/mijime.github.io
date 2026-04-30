@@ -20,7 +20,7 @@ Tags: ["astro", "nextjs", "blog", "migration"]
 
 旧構成では `contents/{yyyy}/{mm}/{slug}/index.md` というネストしたパスだった。Astro の Content Collections に合わせて `contents/{category}/{yyyy-mm}/{slug}.md` に変更した。
 
-カテゴリは記事の性質に合わせて分類:
+カテゴリは記事の性質に合わせて次のように分類した。
 
 ```
 contents/
