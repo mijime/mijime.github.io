@@ -13,6 +13,7 @@ import type { FloorCanvasHandle } from "./FloorCanvas";
 import { FloorCanvas } from "./FloorCanvas";
 import { FloorTabs } from "./FloorTabs";
 import type { ToolMode } from "./toolMode";
+import { FLOOR_TYPES, floorTypeToSwatchStyle } from "./toolMode";
 import { ToolSheet } from "./ToolSheet";
 import type { FloorPlan } from "../types";
 
@@ -57,6 +58,7 @@ export function App() {
   const canvasRef = useRef<FloorCanvasHandle>(null);
   const [toast, setToast] = useState<string | null>(null);
   const [fallbackUrl, setFallbackUrl] = useState<string | null>(null);
+  const [roomPicker, setRoomPicker] = useState<{ cellIndex: number; x: number; y: number } | null>(null);
 
   const { building, activeFloorId } = current;
 
@@ -126,6 +128,7 @@ export function App() {
           canRedo={canRedo}
           onUndo={undo}
           onRedo={redo}
+          onFitView={() => canvasRef.current?.fitToContainer()}
           onSave={() => saveToFile(building, activeFloorId)}
           onLoad={() => {
             loadFromFile().then((data) => {
@@ -164,16 +167,13 @@ export function App() {
               cellSize={building.cellSize}
               darkMode={dark}
               tool={tool}
-              onSetWall={(cellIndex, edge) => {
-                if (tool.kind !== "wall") {
-                  return;
-                }
+              onSetWall={(cellIndex, edge, wallType) => {
                 dispatch({
                   cellIndex,
                   edge,
                   floorId: floor.id,
                   type: "SET_WALL",
-                  wallType: tool.wallType,
+                  wallType,
                 });
               }}
               onSetFloorType={(cellIndex, floorType) =>
@@ -241,10 +241,95 @@ export function App() {
               onEraseCell={(cellIndex) =>
                 dispatch({ cellIndex, floorId: floor.id, type: "ERASE_CELL" })
               }
+              onLongPressRoom={(cellIndex, clientX, clientY) =>
+                setRoomPicker({ cellIndex, x: clientX, y: clientY })
+              }
+              onUndo={undo}
             />
           </div>
         </div>
       </div>
+      {roomPicker && (
+        <div
+          style={{
+            bottom: 0,
+            left: 0,
+            position: "fixed",
+            right: 0,
+            top: 0,
+            zIndex: 60,
+          }}
+          onClick={() => setRoomPicker(null)}
+        >
+          <div
+            style={{
+              background: "var(--toolbar)",
+              border: "1px solid var(--border)",
+              borderRadius: "10px",
+              boxShadow: "0 4px 24px rgba(0,0,0,0.2)",
+              display: "flex",
+              flexDirection: "column",
+              gap: "4px",
+              left: Math.min(roomPicker.x, window.innerWidth - 200),
+              padding: "8px",
+              position: "absolute",
+              top: Math.min(roomPicker.y, window.innerHeight - 300),
+              width: "180px",
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {FLOOR_TYPES.map((entry) => (
+              <button
+                key={entry.label}
+                style={{
+                  alignItems: "center",
+                  background: "transparent",
+                  border: "1px solid var(--border)",
+                  borderRadius: "6px",
+                  color: "var(--ink)",
+                  cursor: "pointer",
+                  display: "flex",
+                  fontFamily: "IBM Plex Mono, monospace",
+                  fontSize: "13px",
+                  gap: "8px",
+                  padding: "8px 10px",
+                  width: "100%",
+                }}
+                onClick={() => {
+                  if (entry.type === null) {
+                    dispatch({
+                      cellIndex: roomPicker.cellIndex,
+                      floorId: floor.id,
+                      floorType: null,
+                      type: "SET_FLOOR_TYPE",
+                    });
+                  } else {
+                    dispatch({
+                      cellIndex: roomPicker.cellIndex,
+                      floorId: floor.id,
+                      floorType: entry.type,
+                      type: "FILL_ROOM",
+                    });
+                  }
+                  setRoomPicker(null);
+                }}
+              >
+                <span
+                  style={{
+                    ...floorTypeToSwatchStyle(entry.type, dark),
+                    border: "1px solid var(--border)",
+                    borderRadius: "3px",
+                    flexShrink: 0,
+                    height: "14px",
+                    width: "14px",
+                  }}
+                />
+                {entry.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
       {toast && (
         <div
           style={{

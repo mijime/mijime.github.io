@@ -1,6 +1,6 @@
-import { forwardRef, useImperativeHandle, useRef, useState } from "react";
+import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react";
 import { exportFloorPng } from "../draw/export";
-import type { CopiedRegion, FloorPlan, FloorType } from "../types";
+import type { CopiedRegion, FloorPlan, FloorType, WallType } from "../types";
 import { useCanvasDraw } from "./hooks/useCanvasDraw";
 import { usePointerHandlers } from "./hooks/usePointerHandlers";
 import type { ToolMode } from "./toolMode";
@@ -62,6 +62,7 @@ function SelectionContextMenu({
 
 export interface FloorCanvasHandle {
   exportPng: () => void;
+  fitToContainer: () => void;
 }
 
 interface Props {
@@ -70,7 +71,7 @@ interface Props {
   cellSize: number;
   darkMode: boolean;
   tool: ToolMode;
-  onSetWall: (cellIndex: number, edge: "top" | "left") => void;
+  onSetWall: (cellIndex: number, edge: "top" | "left", wallType: WallType) => void;
   onSetFloorType: (cellIndex: number, floorType: FloorType | null) => void;
   onFillRoom: (cellIndex: number) => void;
   onPlaceItem: (cellIndex: number) => void;
@@ -79,6 +80,8 @@ interface Props {
   onPasteRegion: (originIndex: number, region: CopiedRegion) => void;
   onEraseRegion: (x1: number, y1: number, x2: number, y2: number) => void;
   onEraseCell: (cellIndex: number) => void;
+  onLongPressRoom?: (cellIndex: number, clientX: number, clientY: number) => void;
+  onUndo?: () => void;
 }
 
 export const FloorCanvas = forwardRef<FloorCanvasHandle, Props>(function FloorCanvas(props, ref) {
@@ -90,9 +93,11 @@ export const FloorCanvas = forwardRef<FloorCanvasHandle, Props>(function FloorCa
     x2: number;
     y2: number;
   } | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const staticCanvasRef = useRef<HTMLCanvasElement>(null);
   const dynamicCanvasRef = useRef<HTMLCanvasElement>(null);
   const viewRef = useRef({ offsetX: 0, offsetY: 0, scale: 1 });
+  const initializedRef = useRef(false);
   const selectionRef = useRef<{
     x1: number;
     y1: number;
@@ -129,6 +134,7 @@ export const FloorCanvas = forwardRef<FloorCanvasHandle, Props>(function FloorCa
     onEraseCell: props.onEraseCell,
     onEraseRegion: props.onEraseRegion,
     onFillRoom: props.onFillRoom,
+    onLongPressRoom: props.onLongPressRoom,
     onMoveItem: props.onMoveItem,
     onPasteRegion: props.onPasteRegion,
     onPlaceItem: props.onPlaceItem,
@@ -136,6 +142,7 @@ export const FloorCanvas = forwardRef<FloorCanvasHandle, Props>(function FloorCa
     onSelectionChange: setSelectionState,
     onSetFloorType: props.onSetFloorType,
     onSetWall: props.onSetWall,
+    onUndo: props.onUndo,
     redraw,
     selectedItemCell,
     selectionRef,
@@ -144,46 +151,81 @@ export const FloorCanvas = forwardRef<FloorCanvasHandle, Props>(function FloorCa
     viewRef,
   });
 
+  const floorRef = useRef({ cellSize, height: floor.height, width: floor.width });
+  floorRef.current = { cellSize, height: floor.height, width: floor.width };
+  const redrawRef = useRef(redraw);
+  redrawRef.current = redraw;
+
+  function calcFit(cw: number, ch: number) {
+    const { width, height, cellSize: cs } = floorRef.current;
+    const gridW = width * cs;
+    const gridH = height * cs;
+    const scale = Math.min(cw / gridW, ch / gridH) * 0.9;
+    return { offsetX: (cw - gridW * scale) / 2, offsetY: (ch - gridH * scale) / 2, scale };
+  }
+
+  function fitToContainer() {
+    const container = containerRef.current;
+    if (!container) {return;}
+    viewRef.current = calcFit(container.clientWidth, container.clientHeight);
+    redrawRef.current();
+  }
+
+  useEffect(() => {
+    const container = containerRef.current;
+    const sc = staticCanvasRef.current;
+    const dc = dynamicCanvasRef.current;
+    if (!container || !sc || !dc) {return;}
+    const observer = new ResizeObserver((entries) => {
+      const entry = entries[0];
+      if (!entry) {return;}
+      const { width: cw, height: ch } = entry.contentRect;
+      sc.width = cw;
+      sc.height = ch;
+      dc.width = cw;
+      dc.height = ch;
+      if (!initializedRef.current) {
+        initializedRef.current = true;
+        viewRef.current = calcFit(cw, ch);
+      }
+      redrawRef.current();
+    });
+    observer.observe(container);
+    return () => observer.disconnect();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   useImperativeHandle(ref, () => ({
     exportPng() {
       exportFloorPng(floor, cellSize);
     },
+    fitToContainer,
   }));
 
   return (
-    <div className="relative w-full h-full">
-      <div
-        style={{
-          height: floor.height * cellSize,
-          position: "relative",
-          width: floor.width * cellSize,
-        }}
-      >
+    <div ref={containerRef} className="relative w-full h-full">
         <canvas
           ref={staticCanvasRef}
-          width={floor.width * cellSize}
-          height={floor.height * cellSize}
           style={{
             display: "block",
+            height: "100%",
             left: 0,
             pointerEvents: "none",
             position: "absolute",
             top: 0,
+            width: "100%",
           }}
         />
         <canvas
           ref={dynamicCanvasRef}
-          width={floor.width * cellSize}
-          height={floor.height * cellSize}
           onContextMenu={handleContextMenu}
           onPointerDown={handlePointerDown}
           onPointerUp={handlePointerUp}
           onPointerMove={handlePointerMove}
           onPointerCancel={handlePointerCancel}
           className="cursor-crosshair touch-none"
-          style={{ display: "block", left: 0, position: "absolute", top: 0 }}
+          style={{ display: "block", height: "100%", left: 0, position: "absolute", top: 0, width: "100%" }}
         />
-      </div>
       {tool.kind === "select" && selectionState !== null && (
         <SelectionContextMenu
           selectionState={selectionState}
