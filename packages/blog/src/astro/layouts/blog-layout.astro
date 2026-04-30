@@ -15,6 +15,7 @@ const siteName = (import.meta.env.BLOG_SITE_NAME as string | undefined) ?? "miji
 const { title = siteName, description, ogImage, canonicalUrl, ogType = "website" } = Astro.props;
 const pageUrl = canonicalUrl ?? siteUrl;
 const ogTitle = title === siteName ? title : `${title} | ${siteName}`;
+const gtmId = import.meta.env.PUBLIC_GTM_ID as string | undefined;
 ---
 
 <!doctype html>
@@ -23,6 +24,7 @@ const ogTitle = title === siteName ? title : `${title} | ${siteName}`;
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{ogTitle}</title>
+    {gtmId && <script is:inline define:vars={{ gtmId }}>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer',gtmId);</script>}
     {canonicalUrl && <link rel="canonical" href={canonicalUrl} />}
     <meta property="og:type" content={ogType} />
     <meta property="og:site_name" content={siteName} />
@@ -36,6 +38,7 @@ const ogTitle = title === siteName ? title : `${title} | ${siteName}`;
     {ogImage && <meta name="twitter:image" content={ogImage} />}
   </head>
   <body>
+    {gtmId && <noscript><iframe src={`https://www.googletagmanager.com/ns.html?id=${gtmId}`} height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>}
     <div class="blog-root">
       <header class="site-header">
         <div class="site-header-inner">
