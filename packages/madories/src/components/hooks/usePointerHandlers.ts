@@ -3,7 +3,7 @@ import { GestureHandler } from "../../input/gestureHandler";
 import { copyRegion, normalizeSelection, pasteOriginIndex } from "../../floor/clipboardLogic";
 import { resolveWallSegments } from "../../input/wallLogic";
 import { resolveItemAction } from "../../input/itemLogic";
-import type { CopiedRegion, FloorPlan, FloorType } from "../../types";
+import type { CopiedRegion, FloorPlan, FloorType, WallType } from "../../types";
 import type { ToolMode } from "../toolMode";
 import type { SelectionRef, ViewRef } from "./types";
 
@@ -14,7 +14,7 @@ interface Props {
   tool: ToolMode;
   viewRef: ViewRef;
   selectionRef: SelectionRef;
-  onSetWall: (cellIndex: number, edge: "top" | "left") => void;
+  onSetWall: (cellIndex: number, edge: "top" | "left", wallType: WallType) => void;
   onSetFloorType: (cellIndex: number, floorType: FloorType | null) => void;
   onFillRoom: (cellIndex: number) => void;
   onPlaceItem: (cellIndex: number) => void;
@@ -23,6 +23,8 @@ interface Props {
   onPasteRegion: (originIndex: number, region: CopiedRegion) => void;
   onEraseRegion: (x1: number, y1: number, x2: number, y2: number) => void;
   onEraseCell: (cellIndex: number) => void;
+  onLongPressRoom?: (cellIndex: number, clientX: number, clientY: number) => void;
+  onUndo?: () => void;
   redraw: (ghost?: { mx: number; my: number; fromIdx: number }) => void;
   setSelectedItemCell: (idx: number | null) => void;
   selectedItemCell: number | null;
@@ -58,6 +60,11 @@ export function usePointerHandlers(props: Props): {
     onSelectionChange,
   } = props;
 
+  const onUndoRef = useRef(props.onUndo);
+  onUndoRef.current = props.onUndo;
+  const onLongPressRoomRef = useRef(props.onLongPressRoom);
+  onLongPressRoomRef.current = props.onLongPressRoom;
+
   const onSelectionChangeRef = useRef(onSelectionChange);
   onSelectionChangeRef.current = onSelectionChange;
 
@@ -80,6 +87,12 @@ export function usePointerHandlers(props: Props): {
   onPasteRegionRef.current = props.onPasteRegion;
   const onEraseRegionRef = useRef(props.onEraseRegion);
   onEraseRegionRef.current = props.onEraseRegion;
+
+  const longPressTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const longPressDownClientRef = useRef<{ x: number; y: number } | null>(null);
+  const twoFingerDownTimeRef = useRef<number | null>(null);
+  const twoFingerDownClientRef = useRef<{ x: number; y: number } | null>(null);
+  const twoFingerMovedRef = useRef(false);
 
   useEffect(() => {
     setSelectedItemCell(null);
@@ -169,6 +182,9 @@ export function usePointerHandlers(props: Props): {
       if (wallStopTimerRef.current) {
         clearTimeout(wallStopTimerRef.current);
       }
+      if (longPressTimerRef.current) {
+        clearTimeout(longPressTimerRef.current);
+      }
     },
     [],
   );
@@ -211,7 +227,10 @@ export function usePointerHandlers(props: Props): {
     onRotateItem(idx);
   }
 
-  function applyWallSegment(hit: { cx: number; cy: number; edge: "top" | "left" }) {
+  function applyWallSegment(
+    hit: { cx: number; cy: number; edge: "top" | "left" },
+    wallType: WallType,
+  ) {
     const idx = hit.cy * floor.width + hit.cx;
     if (idx < 0 || idx >= floor.cells.length) {
       return;
@@ -221,10 +240,10 @@ export function usePointerHandlers(props: Props): {
       return;
     }
     lastWallHitRef.current = key;
-    onSetWall(idx, hit.edge);
+    onSetWall(idx, hit.edge, wallType);
   }
 
-  function applyWallHit(mx: number, my: number) {
+  function applyWallHit(mx: number, my: number, wallType: WallType) {
     const segments = resolveWallSegments(
       mx,
       my,
@@ -234,7 +253,7 @@ export function usePointerHandlers(props: Props): {
       wallDragLastPos.current,
     );
     for (const seg of segments) {
-      applyWallSegment(seg);
+      applyWallSegment(seg, wallType);
     }
   }
 
@@ -253,6 +272,15 @@ export function usePointerHandlers(props: Props): {
       wallDragEdgeLock.current = null;
       dragStartRef.current = null;
       selectionStartRef.current = null;
+      if (longPressTimerRef.current) {
+        clearTimeout(longPressTimerRef.current);
+        longPressTimerRef.current = null;
+      }
+      if (activePointerCountRef.current === 2) {
+        twoFingerDownTimeRef.current = Date.now();
+        twoFingerDownClientRef.current = { x: e.clientX, y: e.clientY };
+        twoFingerMovedRef.current = false;
+      }
       return;
     }
 
@@ -278,18 +306,21 @@ export function usePointerHandlers(props: Props): {
       wallDragStartPos.current = { mx, my };
       wallDragLastPos.current = { mx, my };
       wallDragEdgeLock.current = null;
+      startLongPress(e.clientX, e.clientY);
       return;
     }
 
     if (tool.kind === "floor") {
       dragStartRef.current = getCellAtMouse(mx, my);
       dragMovedRef.current = false;
+      startLongPress(e.clientX, e.clientY);
       return;
     }
 
     if (tool.kind === "erase") {
       dragStartRef.current = getCellAtMouse(mx, my);
       dragMovedRef.current = false;
+      startLongPress(e.clientX, e.clientY);
       return;
     }
 
@@ -302,6 +333,28 @@ export function usePointerHandlers(props: Props): {
     }
     dragStartRef.current = idx;
     dragMovedRef.current = false;
+    startLongPress(e.clientX, e.clientY);
+  }
+
+  function startLongPress(clientX: number, clientY: number) {
+    longPressDownClientRef.current = { x: clientX, y: clientY };
+    longPressTimerRef.current = setTimeout(() => {
+      longPressTimerRef.current = null;
+      const pos = longPressDownClientRef.current;
+      if (!pos) {
+        return;
+      }
+      const { mx: lmx, my: lmy } = getCanvasPos(pos.x, pos.y);
+      const lidx = getCellAtMouse(lmx, lmy);
+      if (lidx === null) {
+        return;
+      }
+      if (floor.cells[lidx].item) {
+        onRotateItem(lidx);
+      } else {
+        onLongPressRoomRef.current?.(lidx, pos.x, pos.y);
+      }
+    }, 500);
   }
 
   function handlePointerUp(e: React.PointerEvent<HTMLCanvasElement>) {
@@ -310,8 +363,23 @@ export function usePointerHandlers(props: Props): {
       clientY: e.clientY,
       pointerId: e.pointerId,
     });
+    const prevCount = activePointerCountRef.current;
     activePointerCountRef.current = Math.max(0, activePointerCountRef.current - 1);
     e.currentTarget.releasePointerCapture(e.pointerId);
+    if (longPressTimerRef.current) {
+      clearTimeout(longPressTimerRef.current);
+      longPressTimerRef.current = null;
+    }
+    if (prevCount === 2 && activePointerCountRef.current === 1) {
+      const elapsed =
+        twoFingerDownTimeRef.current !== null
+          ? Date.now() - twoFingerDownTimeRef.current
+          : Infinity;
+      if (elapsed < 300 && !twoFingerMovedRef.current) {
+        onUndoRef.current?.();
+      }
+      twoFingerDownTimeRef.current = null;
+    }
     if (activePointerCountRef.current >= 1) {
       return;
     }
@@ -355,7 +423,7 @@ export function usePointerHandlers(props: Props): {
       if (!wasDrag) {
         const { mx, my } = getCanvasPos(e.clientX, e.clientY);
         for (const seg of resolveWallSegments(mx, my, cellSize, null, null, null)) {
-          applyWallSegment(seg);
+          applyWallSegment(seg, "none");
         }
       }
       return;
@@ -416,7 +484,30 @@ export function usePointerHandlers(props: Props): {
       pointerId: e.pointerId,
     });
     if (activePointerCountRef.current >= 2) {
+      if (longPressTimerRef.current) {
+        clearTimeout(longPressTimerRef.current);
+        longPressTimerRef.current = null;
+      }
+      const start = twoFingerDownClientRef.current;
+      if (start && !twoFingerMovedRef.current) {
+        const dx = e.clientX - start.x;
+        const dy = e.clientY - start.y;
+        if (dx * dx + dy * dy > 15 * 15) {
+          twoFingerMovedRef.current = true;
+        }
+      }
       return;
+    }
+    if (longPressTimerRef.current) {
+      const down = longPressDownClientRef.current;
+      if (down) {
+        const dx = e.clientX - down.x;
+        const dy = e.clientY - down.y;
+        if (dx * dx + dy * dy > 8 * 8) {
+          clearTimeout(longPressTimerRef.current);
+          longPressTimerRef.current = null;
+        }
+      }
     }
 
     const { mx, my } = getCanvasPos(e.clientX, e.clientY);
@@ -467,12 +558,18 @@ export function usePointerHandlers(props: Props): {
       if (!wallDragEdgeLock.current) {
         const dx = Math.abs(mx - wallDragStartPos.current.mx);
         const dy = Math.abs(my - wallDragStartPos.current.my);
-        if (dx > 4 || dy > 4) {
+        if (dx > 12 || dy > 12) {
           wallDragEdgeLock.current = dx > dy ? "top" : "left";
+          if (longPressTimerRef.current) {
+            clearTimeout(longPressTimerRef.current);
+            longPressTimerRef.current = null;
+          }
         }
       }
 
-      applyWallHit(mx, my);
+      if (wallDragEdgeLock.current) {
+        applyWallHit(mx, my, tool.wallType);
+      }
       wallDragLastPos.current = { mx, my };
 
       if (wallStopTimerRef.current) {
@@ -507,6 +604,10 @@ export function usePointerHandlers(props: Props): {
     gestureRef.current?.onPointerCancel({ pointerId: e.pointerId });
     activePointerCountRef.current = Math.max(0, activePointerCountRef.current - 1);
     e.currentTarget.releasePointerCapture(e.pointerId);
+    if (longPressTimerRef.current) {
+      clearTimeout(longPressTimerRef.current);
+      longPressTimerRef.current = null;
+    }
   }
 
   function copySelection() {

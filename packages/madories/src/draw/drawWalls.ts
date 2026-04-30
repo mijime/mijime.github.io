@@ -73,7 +73,7 @@ function drawEdge(
     case "solid_thin": {
       ctx.strokeStyle = colors.ink;
       ctx.lineWidth = 1.5;
-      ctx.setLineDash([cellSize * 0.3, cellSize * 0.2]);
+      ctx.setLineDash([cellSize * 0.15, cellSize * 0.1]);
       line(0, 1);
       ctx.setLineDash([]);
       break;
