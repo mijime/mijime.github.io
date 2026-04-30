@@ -5,8 +5,9 @@
   "scripts": {
     "check": "bun run check:textlint",
     "check:textlint": "textlint 'contents/**/*.md'",
-    "format": "bun run format:oxfmt",
-    "format:oxfmt": "oxfmt"
+    "format": "bun run format:oxfmt && bun run format:tags",
+    "format:oxfmt": "oxfmt",
+    "format:tags": "bun run scripts/normalize-tags.ts 'contents/**/*.md' 'contents/**/*.mdx'"
   },
   "dependencies": {
     "lindera-js": "^0.1.4"
