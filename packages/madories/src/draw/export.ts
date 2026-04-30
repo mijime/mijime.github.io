@@ -1,7 +1,12 @@
 import type { FloorPlan, ItemType, WallType } from "../types";
 import { WALL_WINDOW_SCORE } from "../types";
 import { FLOOR_TYPES, floorTypeToColor } from "../components/toolMode";
-import { ITEM_DEF_MAP, ITEM_GROUP_REPRESENTATIVE, ITEM_LEGEND_LABEL, WALL_LEGEND_LABEL } from "../items";
+import {
+  ITEM_DEF_MAP,
+  ITEM_GROUP_REPRESENTATIVE,
+  ITEM_LEGEND_LABEL,
+  WALL_LEGEND_LABEL,
+} from "../items";
 import { getCachedIcon } from "./icons/cache";
 import { drawGrid } from "./drawGrid";
 import { drawItems } from "./drawItems";
