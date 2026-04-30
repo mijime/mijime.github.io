@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { parseQuery, toSQL } from "@mijime/blog/search";
 import type { PostMeta } from "@mijime/blog";
 
@@ -49,8 +49,12 @@ export function BlogSearch() {
   const [results, setResults] = useState<PostMeta[]>([]);
   const [searchError, setSearchError] = useState<string | null>(null);
   const [searched, setSearched] = useState(false);
+  const initRef = useRef(false);
+  const pendingSearch = useRef<string | null>(null);
 
-  useEffect(() => {
+  const initDB = useCallback(() => {
+    if (initRef.current) return;
+    initRef.current = true;
     import("@mijime/blog/duckdb").then(({ getDB }) =>
       getDB()
         .then(() => setReady(true))
@@ -58,23 +62,27 @@ export function BlogSearch() {
     );
   }, []);
 
-  const search = useCallback(
-    (query: string) => {
-      if (!ready) return;
-      runSearch(query, setResults, setSearchError, setSearched);
-    },
-    [ready],
-  );
+  useEffect(() => {
+    if (!ready) return;
+    const pending = pendingSearch.current ?? q;
+    if (pending) {
+      pendingSearch.current = null;
+      runSearch(pending, setResults, setSearchError, setSearched);
+    }
+  }, [ready, q]);
 
   useEffect(() => {
-    if (ready && q) search(q);
-  }, [ready, q, search]);
+    if (q) initDB();
+  }, [initDB]);
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter") search(input);
+  const triggerSearch = (query: string) => {
+    pendingSearch.current = query;
+    initDB();
+    if (ready) {
+      pendingSearch.current = null;
+      runSearch(query, setResults, setSearchError, setSearched);
+    }
   };
-
-  const btnLabel = ready ? "search" : "loading…";
 
   return (
     <div className="search-page">
@@ -85,10 +93,13 @@ export function BlogSearch() {
           placeholder="alpha tags:react date>=:2024-01-01"
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          onKeyDown={handleKeyDown}
+          onFocus={initDB}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") triggerSearch(input);
+          }}
         />
-        <button className="search-form-btn" onClick={() => search(input)} disabled={!ready}>
-          {btnLabel}
+        <button className="search-form-btn" onClick={() => triggerSearch(input)}>
+          search
         </button>
       </div>
       <ResultCount results={results} searched={searched} searchError={searchError} />

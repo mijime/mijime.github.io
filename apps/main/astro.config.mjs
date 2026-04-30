@@ -10,12 +10,20 @@ export default defineConfig({
   integrations: [
     react(),
     mdx(),
-    blogIntegration({ globalCss: "/src/styles/global.css" }),
+    blogIntegration({
+      globalCss: "/src/styles/global.css",
+      siteUrl: "https://mijime.github.io",
+      siteName: "mijime",
+      contentsDir: join(process.cwd(), "../../packages/blog-contents/contents"),
+    }),
     {
       name: "blog-parquet",
       hooks: {
         "astro:build:start": async () => {
-          await generateBlogParquet(join(process.cwd(), "public"));
+          await generateBlogParquet(
+            join(process.cwd(), "public"),
+            join(process.cwd(), "../../packages/blog-contents/contents"),
+          );
         },
       },
     },

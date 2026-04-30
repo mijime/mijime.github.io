@@ -17,9 +17,12 @@ export async function getStaticPaths() {
 
 const { entry } = Astro.props;
 const { Content } = await render(entry);
+const { category, ym, slug } = Astro.params;
+const siteUrl = (import.meta.env.BLOG_SITE_URL as string | undefined) ?? "https://mijime.github.io";
+const canonicalUrl = `${siteUrl}/blog/${category}/${ym}/${slug}`;
 ---
 
-<BlogLayout title={entry.data.Title}>
+<BlogLayout title={entry.data.Title} description={entry.data.Description} canonicalUrl={canonicalUrl} ogType="article">
   <article>
     <header class="post-header">
       <div class="post-header-meta">

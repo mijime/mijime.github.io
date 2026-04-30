@@ -1,0 +1,21 @@
+{
+  "name": "@mijime/blog-contents",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "check": "bun run check:textlint",
+    "check:textlint": "textlint 'contents/**/*.md'",
+    "format": "bun run format:oxfmt",
+    "format:oxfmt": "oxfmt"
+  },
+  "dependencies": {
+    "lindera-js": "^0.1.4"
+  },
+  "devDependencies": {
+    "@textlint-ja/textlint-rule-preset-ai-writing": "^1.6.3",
+    "oxfmt": "^0.47.0",
+    "textlint": "^15.6.0",
+    "textlint-rule-preset-ja-technical-writing": "^12.0.2",
+    "textlint-rule-preset-japanese": "^10.0.4"
+  }
+}

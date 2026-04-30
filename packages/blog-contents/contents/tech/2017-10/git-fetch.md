@@ -2,7 +2,7 @@
 CreatedAt: "2017-10-22T21:25:19+09:00"
 IsDraft: false
 Title: "Gitがインストールされていない環境でログを取得し、ハンドリングする"
-Tags: ["Git"]
+Tags: ["git"]
 ---
 
 Git がインストールされていない環境（AWS Lambda など）で Git リポジトリを操作するには、Python の [dulwich](https://github.com/jelmer/dulwich) を使う。

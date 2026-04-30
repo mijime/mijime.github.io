@@ -1,37 +1,46 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 const SEARCH_RESULT_LIMIT = 8;
 const BLUR_DELAY_MS = 150;
 
 const useHeaderSearch = () => {
   const [input, setInput] = useState("");
-  const [ready, setReady] = useState(false);
   const [results, setResults] = useState<
     { category: string; ym: string; slug: string; Title: string }[]
   >([]);
   const [open, setOpen] = useState(false);
+  const initPromise = useRef<Promise<void> | null>(null);
+  const dbRef = useRef<{ queryBlogMeta: (sql: string) => Promise<unknown[]> } | null>(null);
 
-  useEffect(() => {
-    import("@mijime/blog/duckdb").then(({ getDB }) =>
-      getDB()
-        .then(() => setReady(true))
-        .catch(() => {}),
-    );
+  const initDB = useCallback(() => {
+    if (!initPromise.current) {
+      initPromise.current = import("@mijime/blog/duckdb")
+        .then(async (mod) => {
+          await mod.getDB();
+          dbRef.current = mod;
+        })
+        .catch(() => {
+          initPromise.current = null;
+        });
+    }
+    return initPromise.current;
   }, []);
 
   const search = useCallback(
     async (q: string) => {
-      if (!ready || !q.trim()) {
+      if (!q.trim()) {
         setResults([]);
         setOpen(false);
         return;
       }
+      await initDB();
+      const db = dbRef.current;
+      if (!db) return;
       const base = globalThis.window.location.origin;
       try {
-        const { queryBlogMeta } = await import("@mijime/blog/duckdb");
         const { parseQuery, toSQL } = await import("@mijime/blog/search");
         const sql = toSQL(parseQuery(q), `read_parquet('${base}/blog-meta.parquet')`);
-        const rows = await queryBlogMeta(sql);
+        const rows = await db.queryBlogMeta(sql);
         const typed = rows as { category: string; ym: string; slug: string; Title: string }[];
         setResults(typed.slice(0, SEARCH_RESULT_LIMIT));
         setOpen(typed.length > 0);
@@ -40,14 +49,29 @@ const useHeaderSearch = () => {
         setOpen(false);
       }
     },
-    [ready],
+    [initDB],
   );
 
-  return { input, open, ready, results, search, setInput, setOpen };
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const debouncedSearch = useCallback(
+    (q: string) => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+      debounceRef.current = setTimeout(() => search(q), 500);
+    },
+    [search],
+  );
+  useEffect(
+    () => () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    },
+    [],
+  );
+
+  return { input, open, results, search: debouncedSearch, setInput, setOpen, initDB };
 };
 
 export function BlogHeaderSearch() {
-  const { input, open, ready, results, search, setInput, setOpen } = useHeaderSearch();
+  const { input, open, results, search, setInput, setOpen, initDB } = useHeaderSearch();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setInput(e.target.value);
@@ -61,6 +85,7 @@ export function BlogHeaderSearch() {
   };
 
   const handleFocus = () => {
+    initDB();
     if (results.length > 0) setOpen(true);
   };
 
@@ -72,19 +97,16 @@ export function BlogHeaderSearch() {
     if (e.key === "Escape") setOpen(false);
   };
 
-  const placeholder = ready ? "search…" : "loading…";
-
   return (
     <div className="blog-search-inline" style={{ position: "relative" }}>
       <input
         className="blog-search-input"
-        placeholder={placeholder}
+        placeholder="search…"
         value={input}
         onChange={handleChange}
         onKeyDown={handleKeyDown}
         onBlur={handleBlur}
         onFocus={handleFocus}
-        disabled={!ready}
       />
       {open && (
         <div className="blog-search-dropdown">

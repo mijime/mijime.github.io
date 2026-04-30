@@ -2,7 +2,7 @@
 CreatedAt: "2016-05-28T21:12:36+09:00"
 IsDraft: false
 Title: "関連記事を探す"
-Tags: ["Development", "JavaScript"]
+Tags: ["development", "javascript"]
 ---
 
 ブログの関連記事機能を JavaScript + Hugo で実装した際のメモ。kuromoji で形態素解析し、コサイン類似度で類似記事を探す。

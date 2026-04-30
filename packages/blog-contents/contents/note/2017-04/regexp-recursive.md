@@ -1,6 +1,6 @@
 ---
 Description: ""
-Tags: ["Development", "JavaScript"]
+Tags: ["development", "javascript"]
 CreatedAt: "2017-04-20T07:48:28+09:00"
 Title: "JSの正規表現の再帰にはまった"
 IsDraft: false

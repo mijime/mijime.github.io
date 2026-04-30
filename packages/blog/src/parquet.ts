@@ -2,6 +2,7 @@ import duckdb from "duckdb";
 const { Database } = duckdb;
 import { writeFileSync, mkdirSync, unlinkSync, readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
+import { createRequire } from "node:module";
 import type { PostMeta } from "./types.ts";
 
 interface Token {
@@ -11,10 +12,8 @@ interface Token {
 }
 
 async function loadTokenizer(): Promise<(text: string) => Token[]> {
-  const mod = await import(
-    /* @vite-ignore */
-    "lindera-js/lindera_js.js"
-  );
+  const require = createRequire(import.meta.url);
+  const mod = require("lindera-js/lindera_js.js");
   return mod.tokenize as unknown as (text: string) => Token[];
 }
 
@@ -48,7 +47,8 @@ function extractKeywords(tokens: Token[], topN = 10): string[] {
     .map(([w]) => w);
 }
 
-const contentsDir = join(import.meta.dirname, "../contents");
+const defaultContentsDir =
+  process.env.BLOG_CONTENTS_DIR ?? join(import.meta.dirname, "../contents");
 
 function parseFrontmatter(raw: string): Record<string, unknown> {
   const match = raw.match(/^---\n([\s\S]*?)\n---/);
@@ -68,7 +68,7 @@ function parseFrontmatter(raw: string): Record<string, unknown> {
   return meta;
 }
 
-function scanMeta(): PostMeta[] {
+function scanMeta(contentsDir: string): PostMeta[] {
   const posts: PostMeta[] = [];
   try {
     for (const category of readdirSync(contentsDir)) {
@@ -103,19 +103,22 @@ function scanMeta(): PostMeta[] {
   return posts;
 }
 
-function getBody(meta: PostMeta): string {
+function getBody(meta: PostMeta, contentsDir: string): string {
   const path = join(contentsDir, meta.category, meta.ym, `${meta.slug}.md`);
   const raw = readFileSync(path, "utf8");
   const m = raw.match(/^---\n[\s\S]*?\n---\n([\s\S]*)$/);
   return m ? m[1].trim() : raw;
 }
 
-export async function generateBlogParquet(outDir: string): Promise<void> {
+export async function generateBlogParquet(
+  outDir: string,
+  contentsDir = defaultContentsDir,
+): Promise<void> {
   const tokenize = await loadTokenizer();
-  const meta = scanMeta();
+  const meta = scanMeta(contentsDir);
 
   const enriched = meta.map((p) => {
-    const body = getBody(p);
+    const body = getBody(p, contentsDir);
     const tokens: Token[] = tokenize(body);
     const keywords = extractKeywords(tokens);
     return { ...p, Keywords: keywords };
