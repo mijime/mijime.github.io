@@ -15,7 +15,8 @@
   },
   "scripts": {
     "test": "bun test",
-    "check": "bun run check:tsgo && bun run check:oxlint && bun run check:astro",
+    "check": "bun run check:tsgo && bun run check:oxlint && bun run check:astro && bun run check:textlint",
+    "check:textlint": "textlint 'contents/**/*.md'",
     "check:tsgo": "tsgo --noEmit",
     "check:oxlint": "oxlint --format=github --fix",
     "check:astro": "astro check",
@@ -23,12 +24,12 @@
     "format:oxfmt": "oxfmt"
   },
   "dependencies": {
-    "@astrojs/check": "^0.9.8",
+    "@astrojs/check": "^0.9.9",
     "@duckdb/duckdb-wasm": "^1.33.1-dev45.0",
     "@mijime/theme": "workspace:*",
     "@shikijs/rehype": "^4.0.2",
     "lindera-js": "^0.1.4",
-    "lucide-react": "^1.11.0",
+    "lucide-react": "^1.14.0",
     "mdast": "^3.0.0",
     "mermaid": "^11.14.0",
     "rehype": "^13.0.2",
@@ -39,20 +40,24 @@
     "remark-rehype": "^11.1.2",
     "typescript": "^6.0.3",
     "unist-util-visit": "^5.1.0",
-    "zod": "^4.3.6"
+    "zod": "^4.4.1"
   },
   "devDependencies": {
+    "@textlint-ja/textlint-rule-preset-ai-writing": "^1.6.3",
     "@types/mdast": "^4.0.4",
     "@types/react": "^19.2.14",
-    "@typescript/native-preview": "^7.0.0-dev.20260425.1",
+    "@typescript/native-preview": "^7.0.0-dev.20260429.1",
     "duckdb": "^1.4.4",
     "oxfmt": "^0.46.0",
-    "oxlint": "^1.61.0",
+    "oxlint": "^1.62.0",
     "remark-frontmatter": "^5.0.0",
     "remark-mdx-frontmatter": "^5.2.0",
+    "textlint": "^15.6.0",
+    "textlint-rule-preset-ja-technical-writing": "^12.0.2",
+    "textlint-rule-preset-japanese": "^10.0.4",
     "vite": "^8.0.10"
   },
   "peerDependencies": {
-    "astro": ">=4.0.0"
+    "astro": "^6.1.9"
   }
 }

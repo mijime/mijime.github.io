@@ -19,7 +19,7 @@ function regexpr(re, text, acc = []) {
 }
 ```
 
-Chrome では `g` フラグの有無で結果が変わる：
+Chrome では `g` フラグの有無で結果が変わる。
 
 ```js
 regexpr(/hello|world/, "hello world"); // => ["hello", "world"]

@@ -1,10 +1,10 @@
 import * as duckdb from "@duckdb/duckdb-wasm";
 import type { PostMeta } from "./types.ts";
 
-let _db: duckdb.AsyncDuckDB | null = null;
+let cachedDb: duckdb.AsyncDuckDB | null = null;
 
 export async function getDB(): Promise<duckdb.AsyncDuckDB> {
-  if (_db) return _db;
+  if (cachedDb) return cachedDb;
 
   const JSDELIVR_BUNDLES = duckdb.getJsDelivrBundles();
   const bundle = await duckdb.selectBundle(JSDELIVR_BUNDLES);
@@ -12,7 +12,7 @@ export async function getDB(): Promise<duckdb.AsyncDuckDB> {
   const logger = new duckdb.ConsoleLogger();
   const db = new duckdb.AsyncDuckDB(logger, worker);
   await db.instantiate(bundle.mainModule, bundle.pthreadWorker);
-  _db = db;
+  cachedDb = db;
   return db;
 }
 
