@@ -227,7 +227,10 @@ export function usePointerHandlers(props: Props): {
     onRotateItem(idx);
   }
 
-  function applyWallSegment(hit: { cx: number; cy: number; edge: "top" | "left" }, wallType: WallType) {
+  function applyWallSegment(
+    hit: { cx: number; cy: number; edge: "top" | "left" },
+    wallType: WallType,
+  ) {
     const idx = hit.cy * floor.width + hit.cx;
     if (idx < 0 || idx >= floor.cells.length) {
       return;
@@ -338,10 +341,14 @@ export function usePointerHandlers(props: Props): {
     longPressTimerRef.current = setTimeout(() => {
       longPressTimerRef.current = null;
       const pos = longPressDownClientRef.current;
-      if (!pos) {return;}
+      if (!pos) {
+        return;
+      }
       const { mx: lmx, my: lmy } = getCanvasPos(pos.x, pos.y);
       const lidx = getCellAtMouse(lmx, lmy);
-      if (lidx === null) {return;}
+      if (lidx === null) {
+        return;
+      }
       if (floor.cells[lidx].item) {
         onRotateItem(lidx);
       } else {
@@ -364,7 +371,10 @@ export function usePointerHandlers(props: Props): {
       longPressTimerRef.current = null;
     }
     if (prevCount === 2 && activePointerCountRef.current === 1) {
-      const elapsed = twoFingerDownTimeRef.current !== null ? Date.now() - twoFingerDownTimeRef.current : Infinity;
+      const elapsed =
+        twoFingerDownTimeRef.current !== null
+          ? Date.now() - twoFingerDownTimeRef.current
+          : Infinity;
       if (elapsed < 300 && !twoFingerMovedRef.current) {
         onUndoRef.current?.();
       }

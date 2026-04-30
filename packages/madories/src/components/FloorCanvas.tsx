@@ -166,7 +166,9 @@ export const FloorCanvas = forwardRef<FloorCanvasHandle, Props>(function FloorCa
 
   function fitToContainer() {
     const container = containerRef.current;
-    if (!container) {return;}
+    if (!container) {
+      return;
+    }
     viewRef.current = calcFit(container.clientWidth, container.clientHeight);
     redrawRef.current();
   }
@@ -175,10 +177,14 @@ export const FloorCanvas = forwardRef<FloorCanvasHandle, Props>(function FloorCa
     const container = containerRef.current;
     const sc = staticCanvasRef.current;
     const dc = dynamicCanvasRef.current;
-    if (!container || !sc || !dc) {return;}
+    if (!container || !sc || !dc) {
+      return;
+    }
     const observer = new ResizeObserver((entries) => {
       const entry = entries[0];
-      if (!entry) {return;}
+      if (!entry) {
+        return;
+      }
       const { width: cw, height: ch } = entry.contentRect;
       sc.width = cw;
       sc.height = ch;
@@ -192,7 +198,7 @@ export const FloorCanvas = forwardRef<FloorCanvasHandle, Props>(function FloorCa
     });
     observer.observe(container);
     return () => observer.disconnect();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useImperativeHandle(ref, () => ({
@@ -204,28 +210,35 @@ export const FloorCanvas = forwardRef<FloorCanvasHandle, Props>(function FloorCa
 
   return (
     <div ref={containerRef} className="relative w-full h-full">
-        <canvas
-          ref={staticCanvasRef}
-          style={{
-            display: "block",
-            height: "100%",
-            left: 0,
-            pointerEvents: "none",
-            position: "absolute",
-            top: 0,
-            width: "100%",
-          }}
-        />
-        <canvas
-          ref={dynamicCanvasRef}
-          onContextMenu={handleContextMenu}
-          onPointerDown={handlePointerDown}
-          onPointerUp={handlePointerUp}
-          onPointerMove={handlePointerMove}
-          onPointerCancel={handlePointerCancel}
-          className="cursor-crosshair touch-none"
-          style={{ display: "block", height: "100%", left: 0, position: "absolute", top: 0, width: "100%" }}
-        />
+      <canvas
+        ref={staticCanvasRef}
+        style={{
+          display: "block",
+          height: "100%",
+          left: 0,
+          pointerEvents: "none",
+          position: "absolute",
+          top: 0,
+          width: "100%",
+        }}
+      />
+      <canvas
+        ref={dynamicCanvasRef}
+        onContextMenu={handleContextMenu}
+        onPointerDown={handlePointerDown}
+        onPointerUp={handlePointerUp}
+        onPointerMove={handlePointerMove}
+        onPointerCancel={handlePointerCancel}
+        className="cursor-crosshair touch-none"
+        style={{
+          display: "block",
+          height: "100%",
+          left: 0,
+          position: "absolute",
+          top: 0,
+          width: "100%",
+        }}
+      />
       {tool.kind === "select" && selectionState !== null && (
         <SelectionContextMenu
           selectionState={selectionState}

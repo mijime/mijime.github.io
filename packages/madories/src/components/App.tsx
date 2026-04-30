@@ -58,7 +58,9 @@ export function App() {
   const canvasRef = useRef<FloorCanvasHandle>(null);
   const [toast, setToast] = useState<string | null>(null);
   const [fallbackUrl, setFallbackUrl] = useState<string | null>(null);
-  const [roomPicker, setRoomPicker] = useState<{ cellIndex: number; x: number; y: number } | null>(null);
+  const [roomPicker, setRoomPicker] = useState<{ cellIndex: number; x: number; y: number } | null>(
+    null,
+  );
 
   const { building, activeFloorId } = current;
 
