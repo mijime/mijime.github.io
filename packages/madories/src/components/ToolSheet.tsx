@@ -5,6 +5,7 @@ import {
   Eraser,
   FolderOpen,
   Link,
+  Maximize2,
   MousePointer2,
   PaintRoller,
   Pencil,
@@ -63,6 +64,7 @@ interface Props {
   canRedo: boolean;
   onUndo: () => void;
   onRedo: () => void;
+  onFitView: () => void;
   darkMode: boolean;
 }
 
@@ -79,6 +81,7 @@ function ToolPanelContent({
   canRedo,
   onUndo,
   onRedo,
+  onFitView,
   darkMode,
   onClose,
 }: Props & { onClose?: () => void }) {
@@ -275,6 +278,12 @@ function ToolPanelContent({
           {[
             { disabled: !canUndo, icon: <Undo2 size={14} />, onClick: onUndo, title: "戻す" },
             { disabled: !canRedo, icon: <Redo2 size={14} />, onClick: onRedo, title: "進む" },
+            {
+              disabled: false,
+              icon: <Maximize2 size={14} />,
+              onClick: onFitView,
+              title: "全体表示",
+            },
             {
               disabled: false,
               icon: <Save size={14} />,
