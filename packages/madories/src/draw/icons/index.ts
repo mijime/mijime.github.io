@@ -13,7 +13,7 @@ import { drawStairs } from "./stairs";
 import { drawToilet } from "./toilet";
 import { drawTv } from "./tv";
 import { drawWashbasin } from "./washbasin";
-import { drawWashbasinHalf } from "./washbasin_half";
+import { drawWashbasinHalf } from "./washbasin-half";
 import { drawWasher } from "./washer";
 
 export type DrawFn = (

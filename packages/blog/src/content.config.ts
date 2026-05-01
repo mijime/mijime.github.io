@@ -1,28 +1,13 @@
 import { defineCollection } from "astro:content";
-import { z } from "zod";
 import { glob } from "astro/loaders";
+import { blogSchema } from "./schema";
 
+const contentsDir =
+  (import.meta.env.BLOG_CONTENTS_DIR as string | undefined) ??
+  "../../packages/blog-contents/contents";
 const blog = defineCollection({
-  loader: glob({ base: "./contents", pattern: "**/*.md" }),
-  schema: z.object({
-    Title: z.string(),
-    Description: z.string().optional(),
-    Tags: z
-      .union([z.array(z.string()), z.string()])
-      .optional()
-      .transform((v) => {
-        if (!v) return undefined;
-        if (Array.isArray(v)) return v;
-        return v
-          .replaceAll(/[[\]'"]/gu, "")
-          .split(",")
-          .map((s) => s.trim())
-          .filter(Boolean);
-      }),
-    IsDraft: z.boolean().optional().default(false),
-    CreatedAt: z.string().optional(),
-    UpdatedAt: z.string().optional(),
-  }),
+  loader: glob({ base: contentsDir, pattern: "**/*.md" }),
+  schema: blogSchema,
 });
 
 export const collections = { blog };

@@ -1,6 +1,6 @@
 import type { FloorPlan, ItemType, WallType } from "../types";
 import { WALL_WINDOW_SCORE } from "../types";
-import { FLOOR_TYPES, floorTypeToColor } from "../components/toolMode";
+import { FLOOR_TYPES, floorTypeToColor } from "../components/tool-mode";
 import {
   ITEM_DEF_MAP,
   ITEM_GROUP_REPRESENTATIVE,
@@ -8,12 +8,12 @@ import {
   WALL_LEGEND_LABEL,
 } from "../items";
 import { getCachedIcon } from "./icons/cache";
-import { drawGrid } from "./drawGrid";
-import { drawItems } from "./drawItems";
-import { drawTatamiCells } from "./drawTatami";
-import { drawVoidCells } from "./drawVoid";
-import { drawWalls } from "./drawWalls";
-import { drawRoomLabels } from "../floor/roomDetection";
+import { drawGrid } from "./draw-grid";
+import { drawItems } from "./draw-items";
+import { drawTatamiCells } from "./draw-tatami";
+import { drawVoidCells } from "./draw-void";
+import { drawWalls } from "./draw-walls";
+import { drawRoomLabels } from "../floor/room-detection";
 
 const LABEL_HEIGHT = 24;
 const BG = "#F5F0E8";
