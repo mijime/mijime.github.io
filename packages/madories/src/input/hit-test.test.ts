@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test";
-import { hitTestEdge } from "./hitTest";
+import { hitTestEdge } from "./hit-test";
 
 describe("hitTestEdge", () => {
   const cellSize = 32;

@@ -1,9 +1,9 @@
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react";
 import { exportFloorPng } from "../draw/export";
 import type { CopiedRegion, FloorPlan, FloorType, WallType } from "../types";
-import { useCanvasDraw } from "./hooks/useCanvasDraw";
-import { usePointerHandlers } from "./hooks/usePointerHandlers";
-import type { ToolMode } from "./toolMode";
+import { useCanvasDraw } from "./hooks/use-canvas-draw";
+import { usePointerHandlers } from "./hooks/use-pointer-handlers";
+import type { ToolMode } from "./tool-mode";
 
 interface SelectionContextMenuProps {
   selectionState: { x1: number; y1: number; x2: number; y2: number };

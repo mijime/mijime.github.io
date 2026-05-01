@@ -68,32 +68,42 @@ function parseFrontmatter(raw: string): Record<string, unknown> {
   return meta;
 }
 
+function scanFile(
+  contentsDir: string,
+  category: string,
+  ym: string,
+  file: string,
+): PostMeta | null {
+  if (!file.endsWith(".md")) return null;
+  const raw = readFileSync(join(contentsDir, category, ym, file), "utf8");
+  const fm = parseFrontmatter(raw);
+  if (fm.IsDraft === "true" || fm.IsDraft === true) return null;
+  const tags =
+    typeof fm.Tags === "string"
+      ? fm.Tags.replaceAll(/[[\]'"\s]/g, "")
+          .split(",")
+          .filter(Boolean)
+      : [];
+  return {
+    Title: String(fm.Title ?? ""),
+    Description: fm.Description ? String(fm.Description) : undefined,
+    Tags: tags,
+    CreatedAt: fm.CreatedAt ? String(fm.CreatedAt) : undefined,
+    UpdatedAt: fm.UpdatedAt ? String(fm.UpdatedAt) : undefined,
+    category,
+    ym,
+    slug: file.replace(/\.md$/, ""),
+  };
+}
+
 function scanMeta(contentsDir: string): PostMeta[] {
   const posts: PostMeta[] = [];
   try {
     for (const category of readdirSync(contentsDir)) {
       for (const ym of readdirSync(join(contentsDir, category))) {
         for (const file of readdirSync(join(contentsDir, category, ym))) {
-          if (!file.endsWith(".md")) continue;
-          const raw = readFileSync(join(contentsDir, category, ym, file), "utf8");
-          const fm = parseFrontmatter(raw);
-          if (fm.IsDraft === "true" || fm.IsDraft === true) continue;
-          const tags =
-            typeof fm.Tags === "string"
-              ? fm.Tags.replaceAll(/[[\]'"\s]/g, "")
-                  .split(",")
-                  .filter(Boolean)
-              : [];
-          posts.push({
-            Title: String(fm.Title ?? ""),
-            Description: fm.Description ? String(fm.Description) : undefined,
-            Tags: tags,
-            CreatedAt: fm.CreatedAt ? String(fm.CreatedAt) : undefined,
-            UpdatedAt: fm.UpdatedAt ? String(fm.UpdatedAt) : undefined,
-            category,
-            ym,
-            slug: file.replace(/\.md$/, ""),
-          });
+          const post = scanFile(contentsDir, category, ym, file);
+          if (post) posts.push(post);
         }
       }
     }

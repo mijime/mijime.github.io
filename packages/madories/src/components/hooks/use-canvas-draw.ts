@@ -1,17 +1,17 @@
 import { useCallback, useEffect, useRef } from "react";
-import { drawGrid } from "../../draw/drawGrid";
-import { getItemDrawOffset } from "../../draw/drawItems";
-import { drawVoidCells } from "../../draw/drawVoid";
-import { drawWalls } from "../../draw/drawWalls";
+import { drawGrid } from "../../draw/draw-grid";
+import { getItemDrawOffset } from "../../draw/draw-items";
+import { drawVoidCells } from "../../draw/draw-void";
+import { drawWalls } from "../../draw/draw-walls";
 import { computeWallDimensions, fmtMm } from "../../draw/export";
 import { clearIconCache, getCachedIcon } from "../../draw/icons/cache";
-import { drawTatamiCells } from "../../draw/drawTatami";
-import { normalizeSelection } from "../../floor/clipboardLogic";
-import { detectRooms, drawRoomLabels } from "../../floor/roomDetection";
+import { drawTatamiCells } from "../../draw/draw-tatami";
+import { normalizeSelection } from "../../floor/clipboard-logic";
+import { detectRooms, drawRoomLabels } from "../../floor/room-detection";
 import { ITEM_DEF_MAP } from "../../items";
 import type { FloorPlan, Item } from "../../types";
-import { floorTypeToColor } from "../toolMode";
-import type { ToolMode } from "../toolMode";
+import { floorTypeToColor } from "../tool-mode";
+import type { ToolMode } from "../tool-mode";
 import type { SelectionRef, ViewRef } from "./types";
 
 interface Props {
@@ -184,14 +184,9 @@ export function useCanvasDraw(props: Props): {
       const previewColor = floorTypeToColor(tool.floorType, darkMode);
       if (previewColor) {
         const rooms = detectRooms(floor);
-        const previewCells = new Set<number>();
-        for (const room of rooms) {
-          for (const idx of room.cells) {
-            if (floor.cells[idx].floorType === null) {
-              previewCells.add(idx);
-            }
-          }
-        }
+        const previewCells = new Set<number>(
+          rooms.flatMap((room) => room.cells.filter((idx) => floor.cells[idx].floorType === null)),
+        );
         ctx.globalAlpha = 0.35;
         ctx.fillStyle = previewColor;
         for (const idx of previewCells) {

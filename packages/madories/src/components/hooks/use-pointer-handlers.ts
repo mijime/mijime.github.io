@@ -1,10 +1,10 @@
 import { useEffect, useRef } from "react";
-import { GestureHandler } from "../../input/gestureHandler";
-import { copyRegion, normalizeSelection, pasteOriginIndex } from "../../floor/clipboardLogic";
-import { resolveWallSegments } from "../../input/wallLogic";
-import { resolveItemAction } from "../../input/itemLogic";
+import { GestureHandler } from "../../input/gesture-handler";
+import { copyRegion, normalizeSelection, pasteOriginIndex } from "../../floor/clipboard-logic";
+import { resolveWallSegments } from "../../input/wall-logic";
+import { resolveItemAction } from "../../input/item-logic";
 import type { CopiedRegion, FloorPlan, FloorType, WallType } from "../../types";
-import type { ToolMode } from "../toolMode";
+import type { ToolMode } from "../tool-mode";
 import type { SelectionRef, ViewRef } from "./types";
 
 interface Props {

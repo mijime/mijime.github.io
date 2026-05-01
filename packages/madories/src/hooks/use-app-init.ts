@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { decodeFloors, getShareParam } from "../floor/share";
-import type { AppState } from "./useHistory";
+import type { AppState } from "./use-history";
 
 function initFromUrl(): Promise<AppState | null> {
   const param = getShareParam();

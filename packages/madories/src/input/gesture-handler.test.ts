@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test";
-import { GestureHandler } from "./gestureHandler";
+import { GestureHandler } from "./gesture-handler";
 
 describe("GestureHandler", () => {
   it("single pointer down → emits tap on up without move", () => {

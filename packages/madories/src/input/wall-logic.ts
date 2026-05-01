@@ -1,5 +1,5 @@
-import { hitTestEdge } from "./hitTest";
-import type { EdgeHit } from "./hitTest";
+import { hitTestEdge } from "./hit-test";
+import type { EdgeHit } from "./hit-test";
 
 export function resolveWallSegments(
   mx: number,

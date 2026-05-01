@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test";
-import { copyRegion, normalizeSelection, pasteOriginIndex } from "./clipboardLogic";
+import { copyRegion, normalizeSelection, pasteOriginIndex } from "./clipboard-logic";
 import type { Cell, FloorPlan } from "../types";
 
 function emptyCell(): Cell {

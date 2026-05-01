@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test";
-import { resolveItemAction } from "./itemLogic";
+import { resolveItemAction } from "./item-logic";
 import type { Cell } from "../types";
 
 function emptyCell(): Cell {

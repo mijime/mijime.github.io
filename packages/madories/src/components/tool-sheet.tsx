@@ -20,7 +20,7 @@ import type { ItemCategory } from "../items";
 import { ITEM_CATEGORIES, ITEM_DEFS } from "../items";
 import type { ItemType } from "../types";
 import type { WallType } from "../types";
-import { FLOOR_TYPES, floorTypeToSwatchStyle, type ToolMode } from "./toolMode";
+import { FLOOR_TYPES, floorTypeToSwatchStyle, type ToolMode } from "./tool-mode";
 
 const WALL_TYPES: { type: WallType; label: string }[] = [
   { label: "壁", type: "solid" },
