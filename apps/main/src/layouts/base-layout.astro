@@ -6,6 +6,7 @@ interface Props {
   title?: string;
 }
 const { title = "mijime" } = Astro.props;
+const gtmId = import.meta.env.PUBLIC_GTM_ID;
 ---
 
 <!doctype html>
@@ -15,8 +16,18 @@ const { title = "mijime" } = Astro.props;
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title}</title>
     <link rel="icon" type="image/png" href="/favicon.png" />
+    {gtmId && <script is:inline define:vars={{ gtmId }}>
+      window.dataLayer = window.dataLayer ?? [];
+      window.dataLayer.push({ "gtm.start": Date.now(), event: "gtm.js" });
+      const [existing] = document.querySelectorAll("script");
+      const script = document.createElement("script");
+      script.async = true;
+      script.src = `https://www.googletagmanager.com/gtm.js?id=${gtmId}`;
+      existing.parentNode.insertBefore(script, existing);
+    </script>}
   </head>
   <body>
+    {gtmId && <noscript><iframe src={`https://www.googletagmanager.com/ns.html?id=${gtmId}`} height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>}
     <header class="site-header">
       <div class="site-header-inner">
         <a href="/" class="site-logo">
