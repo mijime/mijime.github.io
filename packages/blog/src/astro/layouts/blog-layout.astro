@@ -1,0 +1,59 @@
+---
+import "@mijime/blog/index.css";
+import { BlogHeaderSearch } from "../components/blog-header-search";
+import { DarkModeToggle } from "@mijime/theme/DarkModeToggle";
+
+interface Props {
+  title?: string;
+  description?: string;
+  ogImage?: string;
+  canonicalUrl?: string;
+  ogType?: "article" | "website";
+}
+const siteUrl = (import.meta.env.BLOG_SITE_URL as string | undefined) ?? "https://mijime.github.io";
+const siteName = (import.meta.env.BLOG_SITE_NAME as string | undefined) ?? "mijime";
+const { title = siteName, description, ogImage, canonicalUrl, ogType = "website" } = Astro.props;
+const pageUrl = canonicalUrl ?? siteUrl;
+const ogTitle = title === siteName ? title : `${title} | ${siteName}`;
+---
+
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{ogTitle}</title>
+    {canonicalUrl && <link rel="canonical" href={canonicalUrl} />}
+    <meta property="og:type" content={ogType} />
+    <meta property="og:site_name" content={siteName} />
+    <meta property="og:title" content={ogTitle} />
+    <meta property="og:url" content={pageUrl} />
+    {description && <meta property="og:description" content={description} />}
+    {ogImage && <meta property="og:image" content={ogImage} />}
+    <meta name="twitter:card" content={ogImage ? "summary_large_image" : "summary"} />
+    <meta name="twitter:title" content={ogTitle} />
+    {description && <meta name="twitter:description" content={description} />}
+    {ogImage && <meta name="twitter:image" content={ogImage} />}
+  </head>
+  <body>
+    <div class="blog-root">
+      <header class="site-header">
+        <div class="site-header-inner">
+          <a href="/" class="site-logo">
+            <span class="site-logo-text">{siteName}</span>
+          </a>
+          <nav class="site-nav">
+            <BlogHeaderSearch client:only="react" />
+            <DarkModeToggle client:only="react" />
+          </nav>
+        </div>
+      </header>
+      <main class="blog-main">
+        <slot />
+      </main>
+      <footer class="blog-footer">
+        <span>© {siteName}</span>
+      </footer>
+    </div>
+  </body>
+</html>

@@ -48,7 +48,8 @@ function extractKeywords(tokens: Token[], topN = 10): string[] {
     .map(([w]) => w);
 }
 
-const contentsDir = join(import.meta.dirname, "../contents");
+const defaultContentsDir =
+  process.env.BLOG_CONTENTS_DIR ?? join(import.meta.dirname, "../contents");
 
 function parseFrontmatter(raw: string): Record<string, unknown> {
   const match = raw.match(/^---\n([\s\S]*?)\n---/);
@@ -68,32 +69,42 @@ function parseFrontmatter(raw: string): Record<string, unknown> {
   return meta;
 }
 
-function scanMeta(): PostMeta[] {
+function scanFile(
+  contentsDir: string,
+  category: string,
+  ym: string,
+  file: string,
+): PostMeta | null {
+  if (!file.endsWith(".md")) return null;
+  const raw = readFileSync(join(contentsDir, category, ym, file), "utf8");
+  const fm = parseFrontmatter(raw);
+  if (fm.IsDraft === "true" || fm.IsDraft === true) return null;
+  const tags =
+    typeof fm.Tags === "string"
+      ? fm.Tags.replaceAll(/[[\]'"\s]/g, "")
+          .split(",")
+          .filter(Boolean)
+      : [];
+  return {
+    Title: String(fm.Title ?? ""),
+    Description: fm.Description ? String(fm.Description) : undefined,
+    Tags: tags,
+    CreatedAt: fm.CreatedAt ? String(fm.CreatedAt) : undefined,
+    UpdatedAt: fm.UpdatedAt ? String(fm.UpdatedAt) : undefined,
+    category,
+    ym,
+    slug: file.replace(/\.md$/, ""),
+  };
+}
+
+function scanMeta(contentsDir: string): PostMeta[] {
   const posts: PostMeta[] = [];
   try {
     for (const category of readdirSync(contentsDir)) {
       for (const ym of readdirSync(join(contentsDir, category))) {
         for (const file of readdirSync(join(contentsDir, category, ym))) {
-          if (!file.endsWith(".md")) continue;
-          const raw = readFileSync(join(contentsDir, category, ym, file), "utf8");
-          const fm = parseFrontmatter(raw);
-          if (fm.IsDraft === "true" || fm.IsDraft === true) continue;
-          const tags =
-            typeof fm.Tags === "string"
-              ? fm.Tags.replaceAll(/[[\]'"\s]/g, "")
-                  .split(",")
-                  .filter(Boolean)
-              : [];
-          posts.push({
-            Title: String(fm.Title ?? ""),
-            Description: fm.Description ? String(fm.Description) : undefined,
-            Tags: tags,
-            CreatedAt: fm.CreatedAt ? String(fm.CreatedAt) : undefined,
-            UpdatedAt: fm.UpdatedAt ? String(fm.UpdatedAt) : undefined,
-            category,
-            ym,
-            slug: file.replace(/\.md$/, ""),
-          });
+          const post = scanFile(contentsDir, category, ym, file);
+          if (post) posts.push(post);
         }
       }
     }
@@ -103,19 +114,22 @@ function scanMeta(): PostMeta[] {
   return posts;
 }
 
-function getBody(meta: PostMeta): string {
+function getBody(meta: PostMeta, contentsDir: string): string {
   const path = join(contentsDir, meta.category, meta.ym, `${meta.slug}.md`);
   const raw = readFileSync(path, "utf8");
   const m = raw.match(/^---\n[\s\S]*?\n---\n([\s\S]*)$/);
   return m ? m[1].trim() : raw;
 }
 
-export async function generateBlogParquet(outDir: string): Promise<void> {
+export async function generateBlogParquet(
+  outDir: string,
+  contentsDir = defaultContentsDir,
+): Promise<void> {
   const tokenize = await loadTokenizer();
-  const meta = scanMeta();
+  const meta = scanMeta(contentsDir);
 
   const enriched = meta.map((p) => {
-    const body = getBody(p);
+    const body = getBody(p, contentsDir);
     const tokens: Token[] = tokenize(body);
     const keywords = extractKeywords(tokens);
     return { ...p, Keywords: keywords };

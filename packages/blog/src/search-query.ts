@@ -36,7 +36,7 @@ export function parseQuery(input: string): ParsedQuery {
 export function toSQL(q: ParsedQuery, tableExpr: string): string {
   const textConditions = q.text.map((t) => {
     const escaped = t.replaceAll("'", "''");
-    return `(Title ILIKE '%${escaped}%' OR list_contains(Keywords, '${escaped}'))`;
+    return `(Title ILIKE '%${escaped}%' OR Description ILIKE '%${escaped}%' OR list_contains(Keywords, '${escaped}') OR list_contains(Tags, '${escaped}'))`;
   });
   const filterConditions: string[] = [];
   if (textConditions.length > 0) filterConditions.push(`(${textConditions.join(" OR ")})`);
@@ -49,7 +49,7 @@ export function toSQL(q: ParsedQuery, tableExpr: string): string {
 
   const scoreTerms = q.text.map((t) => {
     const escaped = t.replaceAll("'", "''");
-    return `(CASE WHEN Title ILIKE '%${escaped}%' THEN 2 ELSE 0 END + len(list_filter(Keywords, k -> k = '${escaped}')))`;
+    return `(CASE WHEN Title ILIKE '%${escaped}%' THEN 2 ELSE 0 END + CASE WHEN Description ILIKE '%${escaped}%' THEN 1 ELSE 0 END + len(list_filter(Keywords, k -> k = '${escaped}')))`;
   });
   const order =
     scoreTerms.length > 0

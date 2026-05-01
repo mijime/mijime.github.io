@@ -1,10 +1,24 @@
 import { v4 as uuidv4 } from "uuid";
 import type { Cell, FloorPlan, FloorType, ItemType, WallType } from "../types";
-import { detectRooms } from "./roomDetection";
+import { detectRooms } from "./room-detection";
 
 const WALL_TYPES: WallType[] = ["none", "solid", "solid_thin", "window_full", "window_center"];
 
 // --- floor rectangle packing ---
+
+function rowMatchesFloor(
+  remaining: (FloorType | undefined)[],
+  row: number,
+  startX: number,
+  maxW: number,
+  width: number,
+  floorType: FloorType,
+): boolean {
+  for (let dx = 0; dx < maxW; dx++) {
+    if (remaining[row * width + startX + dx] !== floorType) return false;
+  }
+  return true;
+}
 
 function packFloorRects(
   cells: Cell[],
@@ -37,12 +51,9 @@ function packFloorRects(
 
       // Then: max height where each row fits that width
       let maxH = 1;
-      outer: for (let dy = 1; y + dy < height; dy++) {
-        for (let dx = 0; dx < maxW; dx++) {
-          if (remaining[(y + dy) * width + x + dx] !== floorType) {
-            break outer;
-          }
-        }
+      for (let dy = 1; y + dy < height; dy++) {
+        const rowFits = rowMatchesFloor(remaining, y + dy, x, maxW, width, floorType);
+        if (!rowFits) break;
         maxH++;
       }
 
@@ -356,6 +367,49 @@ function parseCoordBlocks(coordsStr: string): { x1: number; y1: number; x2: numb
   });
 }
 
+function upsertPatternWall(
+  patternCells: PatternCell[],
+  x1: number,
+  x2: number,
+  fy: number,
+  edge: "top" | "left",
+  wallType: WallType,
+): void {
+  for (let fx = x1; fx <= x2; fx++) {
+    const existing = patternCells.find((c) => c.x === fx && c.y === fy);
+    if (existing) {
+      if (edge === "top") {
+        existing.wallTop = wallType;
+      } else {
+        existing.wallLeft = wallType;
+      }
+    } else {
+      patternCells.push({
+        x: fx,
+        y: fy,
+        ...(edge === "top" ? { wallTop: wallType } : { wallLeft: wallType }),
+      });
+    }
+  }
+}
+
+function upsertPatternFloor(
+  patternCells: PatternCell[],
+  x1: number,
+  x2: number,
+  fy: number,
+  floorType: FloorType,
+): void {
+  for (let fx = x1; fx <= x2; fx++) {
+    const existing = patternCells.find((c) => c.x === fx && c.y === fy);
+    if (existing) {
+      existing.floorType = floorType;
+    } else {
+      patternCells.push({ floorType, x: fx, y: fy });
+    }
+  }
+}
+
 export function dslToFloor(text: string): FloorPlan {
   let width = 10;
   let height = 10;
@@ -415,24 +469,7 @@ export function dslToFloor(text: string): FloorPlan {
           if (WALL_TYPES.includes(wallType)) {
             for (const { x1, y1, x2, y2 } of parseCoordBlocks(wm[1])) {
               for (let fy = y1; fy <= y2; fy++) {
-                for (let fx = x1; fx <= x2; fx++) {
-                  const cx = fx;
-                  const cy = fy;
-                  const existing = patternCells.find((c) => c.x === cx && c.y === cy);
-                  if (existing) {
-                    if (edge === "top") {
-                      existing.wallTop = wallType;
-                    } else {
-                      existing.wallLeft = wallType;
-                    }
-                  } else {
-                    patternCells.push({
-                      x: cx,
-                      y: cy,
-                      ...(edge === "top" ? { wallTop: wallType } : { wallLeft: wallType }),
-                    });
-                  }
-                }
+                upsertPatternWall(patternCells, x1, x2, fy, edge, wallType);
               }
             }
           }
@@ -442,16 +479,7 @@ export function dslToFloor(text: string): FloorPlan {
           const floorType = fm[2] as FloorType;
           for (const { x1, y1, x2, y2 } of parseCoordBlocks(fm[1])) {
             for (let fy = y1; fy <= y2; fy++) {
-              for (let fx = x1; fx <= x2; fx++) {
-                const cx = fx;
-                const cy = fy;
-                const existing = patternCells.find((c) => c.x === cx && c.y === cy);
-                if (existing) {
-                  existing.floorType = floorType;
-                } else {
-                  patternCells.push({ floorType, x: cx, y: cy });
-                }
-              }
+              upsertPatternFloor(patternCells, x1, x2, fy, floorType);
             }
           }
         }

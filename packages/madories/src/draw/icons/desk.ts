@@ -1,4 +1,4 @@
-import { roundRect } from "./roundRect";
+import { roundRect } from "./round-rect";
 
 function drawDeskBase(
   ctx: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D,

@@ -5,16 +5,16 @@ import { buildShareUrl, encodeFloors, mergeFloors } from "../floor/share";
 import { loadFromFile, loadFromStorage, saveToFile, saveToStorage } from "../storage";
 import { createBuilding, reducer } from "../store";
 import type { CopiedRegion, ItemType } from "../types";
-import { useAppInit } from "../hooks/useAppInit";
-import { useHistory } from "../hooks/useHistory";
-import type { AppState } from "../hooks/useHistory";
-import { DslPanel } from "./DslPanel";
-import type { FloorCanvasHandle } from "./FloorCanvas";
-import { FloorCanvas } from "./FloorCanvas";
-import { FloorTabs } from "./FloorTabs";
-import type { ToolMode } from "./toolMode";
-import { FLOOR_TYPES, floorTypeToSwatchStyle } from "./toolMode";
-import { ToolSheet } from "./ToolSheet";
+import { useAppInit } from "../hooks/use-app-init";
+import { useHistory } from "../hooks/use-history";
+import type { AppState } from "../hooks/use-history";
+import { DslPanel } from "./dsl-panel";
+import type { FloorCanvasHandle } from "./floor-canvas";
+import { FloorCanvas } from "./floor-canvas";
+import { FloorTabs } from "./floor-tabs";
+import type { ToolMode } from "./tool-mode";
+import { FLOOR_TYPES, floorTypeToSwatchStyle } from "./tool-mode";
+import { ToolSheet } from "./tool-sheet";
 import type { FloorPlan } from "../types";
 
 function FloorStats({ floor }: { floor: FloorPlan }) {

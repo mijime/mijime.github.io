@@ -1,5 +1,5 @@
 import { v4 as uuidv4 } from "uuid";
-import { detectRooms } from "./floor/roomDetection";
+import { detectRooms } from "./floor/room-detection";
 import type { Building, Cell, CopiedRegion, FloorPlan, FloorType, Item, WallType } from "./types";
 
 function createCell(): Cell {
