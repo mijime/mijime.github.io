@@ -2,7 +2,6 @@ import duckdb from "duckdb";
 const { Database } = duckdb;
 import { writeFileSync, mkdirSync, unlinkSync, readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
-import { createRequire } from "node:module";
 import type { PostMeta } from "./types.ts";
 
 interface Token {
@@ -12,8 +11,10 @@ interface Token {
 }
 
 async function loadTokenizer(): Promise<(text: string) => Token[]> {
-  const require = createRequire(import.meta.url);
-  const mod = require("lindera-js/lindera_js.js");
+  const mod = await import(
+    /* @vite-ignore */
+    "lindera-js/lindera_js.js"
+  );
   return mod.tokenize as unknown as (text: string) => Token[];
 }
 
