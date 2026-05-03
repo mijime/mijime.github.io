@@ -74,9 +74,9 @@ tailscale status
 
 ## セキュリティの考慮事項
 
-- **認証パスワードは必須**: `OPENCODE_SERVER_PASSWORD` を設定しないと誰でもアクセスできてしまう
-- **Tailscale ACLで制限する**: TailscaleのACLを使って、OpenCodeサーバーへのポートアクセスを特定のデバイスやユーザーに絞ることもできる
-- **mDNSは慎重に**: `--mdns` を有効にすると `opencode.local` などでLAN内に広報されるが、Tailscale越しの利用を想定するなら不要だ
+- **認証パスワードは必須**——`OPENCODE_SERVER_PASSWORD` を設定しないと誰でもアクセスできてしまう
+- **Tailscale ACLの活用**——TailscaleのACLを使って、OpenCodeサーバーへのポートアクセスを特定のデバイスやユーザーに絞ることもできる
+- **mDNSは慎重に判断する**——`--mdns` を有効にすると `opencode.local` などでLAN内に広報されるが、Tailscale越しの利用を想定するなら不要だ
 
 ## 実際の使い心地
 
