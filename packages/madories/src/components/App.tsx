@@ -255,7 +255,23 @@ export function App() {
                 onUndo={undo}
               />
             ) : (
-              <Suspense fallback={null}>
+              <Suspense
+                fallback={
+                  <div
+                    style={{
+                      alignItems: "center",
+                      display: "flex",
+                      height: "100%",
+                      justifyContent: "center",
+                      width: "100%",
+                    }}
+                  >
+                    <span style={{ fontFamily: "IBM Plex Mono, monospace", fontSize: "13px" }}>
+                      Loading 3D…
+                    </span>
+                  </div>
+                }
+              >
                 <Preview3D floor={floor} cellSize={building.cellSize} darkMode={dark} />
               </Suspense>
             )}

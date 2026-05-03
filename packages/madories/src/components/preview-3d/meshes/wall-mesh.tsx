@@ -64,11 +64,7 @@ export function WallMesh({ cx, cy, cellSize, edge, wallType, darkMode }: Props) 
       rotation={[0, edge === "left" ? Math.PI / 2 : 0, 0]}
     >
       <planeGeometry args={[cellSize, wallHeight]} />
-      <meshStandardMaterial
-        color={color}
-        transparent={opacity < 1}
-        opacity={opacity}
-      />
+      <meshStandardMaterial color={color} transparent={opacity < 1} opacity={opacity} />
     </mesh>
   );
 }
