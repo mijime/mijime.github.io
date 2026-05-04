@@ -1,5 +1,6 @@
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { Canvas } from "@react-three/fiber";
+import { OrbitControls } from "@react-three/drei";
 import type { FloorPlan } from "../../types";
 import { generateFloorTiles, generateWallSegments } from "../../floor/geometry-3d";
 import { PreviewCamera } from "./camera";
@@ -14,9 +15,6 @@ interface Props {
 }
 
 export function FloorPlanScene({ floor, cellSize, darkMode }: Props) {
-  const [status, setStatus] = useState<string>("initializing");
-  const [err, setErr] = useState<string | null>(null);
-
   const tiles = useMemo(() => generateFloorTiles(floor), [floor]);
   const walls = useMemo(() => generateWallSegments(floor), [floor]);
 
@@ -25,63 +23,26 @@ export function FloorPlanScene({ floor, cellSize, darkMode }: Props) {
 
   const bg = darkMode ? "#1a1a1a" : "#f5f5f5";
 
+  const maxDim = Math.max(floor.width, floor.height);
+
   return (
     <>
-      {err && (
-        <div
-          style={{
-            position: "absolute",
-            inset: 0,
-            zIndex: 20,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            background: "rgba(0,0,0,0.8)",
-            color: "#ff4444",
-            fontFamily: "IBM Plex Mono, monospace",
-            fontSize: "14px",
-            padding: "20px",
-            textAlign: "center",
-          }}
-        >
-          <div>
-            <div style={{ fontWeight: "bold", marginBottom: "8px" }}>3D Error</div>
-            <div>{err}</div>
-          </div>
-        </div>
-      )}
-      <div
-        style={{
-          position: "absolute",
-          top: 8,
-          left: 8,
-          zIndex: 10,
-          background: "rgba(0,0,0,0.6)",
-          color: "#0f0",
-          fontFamily: "IBM Plex Mono, monospace",
-          fontSize: "11px",
-          padding: "4px 8px",
-          borderRadius: "4px",
-          pointerEvents: "none",
-        }}
-      >
-        3D: {status}
-      </div>
       <Canvas
         style={{ background: bg, position: "absolute", inset: 0, touchAction: "none" }}
-        onCreated={() => setStatus("created")}
         gl={{ antialias: true, alpha: false }}
-        onError={(e) => {
-          setStatus("error");
-          setErr(String(e));
-        }}
       >
         <PreviewCamera width={floor.width} height={floor.height} cellSize={cellSize} />
         <Lighting darkMode={darkMode} />
-        <mesh position={[0, 50, 0]}>
-          <boxGeometry args={[100, 100, 100]} />
-          <meshBasicMaterial color="red" />
-        </mesh>
+        <OrbitControls
+          makeDefault
+          enablePan={false}
+          minPolarAngle={Math.PI / 4}
+          maxPolarAngle={Math.PI / 4}
+          minDistance={cellSize * 3}
+          maxDistance={cellSize * maxDim * 2}
+          enableDamping
+          dampingFactor={0.1}
+        />
         <group position={[-offsetX, 0, -offsetZ]}>
           {tiles.map((tile) => (
             <FloorMesh

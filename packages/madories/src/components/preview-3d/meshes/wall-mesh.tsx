@@ -1,3 +1,4 @@
+import { memo } from "react";
 import type { WallType } from "../../../types";
 import { WALL_COLORS, WALL_HEIGHT_FACTOR } from "../materials";
 
@@ -10,7 +11,14 @@ interface Props {
   darkMode: boolean;
 }
 
-export function WallMesh({ cx, cy, cellSize, edge, wallType, darkMode }: Props) {
+export const WallMesh = memo(function WallMesh({
+  cx,
+  cy,
+  cellSize,
+  edge,
+  wallType,
+  darkMode,
+}: Props) {
   if (wallType === "none") return null;
 
   const wallHeight = cellSize * WALL_HEIGHT_FACTOR;
@@ -67,4 +75,4 @@ export function WallMesh({ cx, cy, cellSize, edge, wallType, darkMode }: Props) 
       <meshStandardMaterial color={color} transparent={opacity < 1} opacity={opacity} />
     </mesh>
   );
-}
+});
