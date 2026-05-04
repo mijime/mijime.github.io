@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, lazy, Suspense } from "react";
 import { useDarkMode } from "@mijime/theme/useDarkMode";
 import { computeFloorScores, exportAllFloorsPng } from "../draw/export";
 import { buildShareUrl, encodeFloors, mergeFloors } from "../floor/share";
@@ -16,6 +16,8 @@ import type { ToolMode } from "./tool-mode";
 import { FLOOR_TYPES, floorTypeToSwatchStyle } from "./tool-mode";
 import { ToolSheet } from "./tool-sheet";
 import type { FloorPlan } from "../types";
+
+const Preview3D = lazy(() => import("./preview-3d"));
 
 function FloorStats({ floor }: { floor: FloorPlan }) {
   const { storage, windows } = computeFloorScores(floor);
@@ -54,6 +56,7 @@ export function App() {
 
   useAppInit(push);
 
+  const [viewMode, setViewMode] = useState<"2d" | "3d">("2d");
   const [tool, setTool] = useState<ToolMode>({ kind: "select" });
   const canvasRef = useRef<FloorCanvasHandle>(null);
   const [toast, setToast] = useState<string | null>(null);
@@ -146,6 +149,8 @@ export function App() {
           onShare={handleShare}
           onClear={() => dispatch({ floorId: floor.id, type: "CLEAR_FLOOR" })}
           onRotateFloor={() => dispatch({ floorId: floor.id, type: "ROTATE_FLOOR" })}
+          viewMode={viewMode}
+          onToggleViewMode={() => setViewMode((v) => (v === "2d" ? "3d" : "2d"))}
         />
         <DslPanel
           floors={building.floors}
@@ -162,92 +167,114 @@ export function App() {
         >
           <FloorStats floor={floor} />
           <div className="flex-1 overflow-hidden relative">
-            <FloorCanvas
-              ref={canvasRef}
-              floor={floor}
-              ghostFloors={ghostFloors}
-              cellSize={building.cellSize}
-              darkMode={dark}
-              tool={tool}
-              onSetWall={(cellIndex, edge, wallType) => {
-                dispatch({
-                  cellIndex,
-                  edge,
-                  floorId: floor.id,
-                  type: "SET_WALL",
-                  wallType,
-                });
-              }}
-              onSetFloorType={(cellIndex, floorType) =>
-                dispatch({
-                  cellIndex,
-                  floorId: floor.id,
-                  floorType,
-                  type: "SET_FLOOR_TYPE",
-                })
-              }
-              onFillRoom={(cellIndex) => {
-                if (tool.kind !== "floor" || tool.floorType === null) {
-                  return;
+            {viewMode === "2d" ? (
+              <FloorCanvas
+                ref={canvasRef}
+                floor={floor}
+                ghostFloors={ghostFloors}
+                cellSize={building.cellSize}
+                darkMode={dark}
+                tool={tool}
+                onSetWall={(cellIndex, edge, wallType) => {
+                  dispatch({
+                    cellIndex,
+                    edge,
+                    floorId: floor.id,
+                    type: "SET_WALL",
+                    wallType,
+                  });
+                }}
+                onSetFloorType={(cellIndex, floorType) =>
+                  dispatch({
+                    cellIndex,
+                    floorId: floor.id,
+                    floorType,
+                    type: "SET_FLOOR_TYPE",
+                  })
                 }
-                dispatch({
-                  cellIndex,
-                  floorId: floor.id,
-                  floorType: tool.floorType,
-                  type: "FILL_ROOM",
-                });
-              }}
-              onPlaceItem={(cellIndex) => {
-                if (tool.kind !== "item") {
-                  return;
+                onFillRoom={(cellIndex) => {
+                  if (tool.kind !== "floor" || tool.floorType === null) {
+                    return;
+                  }
+                  dispatch({
+                    cellIndex,
+                    floorId: floor.id,
+                    floorType: tool.floorType,
+                    type: "FILL_ROOM",
+                  });
+                }}
+                onPlaceItem={(cellIndex) => {
+                  if (tool.kind !== "item") {
+                    return;
+                  }
+                  dispatch({
+                    cellIndex,
+                    floorId: floor.id,
+                    item: {
+                      rotation: 0,
+                      type: (tool as { kind: "item"; itemType: ItemType }).itemType,
+                    },
+                    type: "PLACE_ITEM",
+                  });
+                }}
+                onRotateItem={(cellIndex) =>
+                  dispatch({ cellIndex, floorId: floor.id, type: "ROTATE_ITEM" })
                 }
-                dispatch({
-                  cellIndex,
-                  floorId: floor.id,
-                  item: {
-                    rotation: 0,
-                    type: (tool as { kind: "item"; itemType: ItemType }).itemType,
-                  },
-                  type: "PLACE_ITEM",
-                });
-              }}
-              onRotateItem={(cellIndex) =>
-                dispatch({ cellIndex, floorId: floor.id, type: "ROTATE_ITEM" })
-              }
-              onMoveItem={(fromIndex, toIndex) =>
-                dispatch({
-                  floorId: floor.id,
-                  fromIndex,
-                  toIndex,
-                  type: "MOVE_ITEM",
-                })
-              }
-              onPasteRegion={(originIndex: number, region: CopiedRegion) =>
-                dispatch({
-                  floorId: floor.id,
-                  originIndex,
-                  region,
-                  type: "PASTE_REGION",
-                })
-              }
-              onEraseRegion={(x1, y1, x2, y2) =>
-                dispatch({
-                  floorId: floor.id,
-                  type: "ERASE_REGION",
-                  x1,
-                  x2,
-                  y1,
-                  y2,
-                })
-              }
-              onEraseCell={(cellIndex) =>
-                dispatch({ cellIndex, floorId: floor.id, type: "ERASE_CELL" })
-              }
-              onLongPressRoom={(cellIndex, clientX, clientY) =>
-                setRoomPicker({ cellIndex, x: clientX, y: clientY })
-              }
-              onUndo={undo}
-            />
+                onMoveItem={(fromIndex, toIndex) =>
+                  dispatch({
+                    floorId: floor.id,
+                    fromIndex,
+                    toIndex,
+                    type: "MOVE_ITEM",
+                  })
+                }
+                onPasteRegion={(originIndex: number, region: CopiedRegion) =>
+                  dispatch({
+                    floorId: floor.id,
+                    originIndex,
+                    region,
+                    type: "PASTE_REGION",
+                  })
+                }
+                onEraseRegion={(x1, y1, x2, y2) =>
+                  dispatch({
+                    floorId: floor.id,
+                    type: "ERASE_REGION",
+                    x1,
+                    x2,
+                    y1,
+                    y2,
+                  })
+                }
+                onEraseCell={(cellIndex) =>
+                  dispatch({ cellIndex, floorId: floor.id, type: "ERASE_CELL" })
+                }
+                onLongPressRoom={(cellIndex, clientX, clientY) =>
+                  setRoomPicker({ cellIndex, x: clientX, y: clientY })
+                }
+                onUndo={undo}
+              />
+            ) : (
+              <Suspense
+                fallback={
+                  <div
+                    style={{
+                      alignItems: "center",
+                      display: "flex",
+                      height: "100%",
+                      justifyContent: "center",
+                      width: "100%",
+                    }}
+                  >
+                    <span style={{ fontFamily: "IBM Plex Mono, monospace", fontSize: "13px" }}>
+                      Loading 3D…
+                    </span>
+                  </div>
+                }
+              >
+                <Preview3D floor={floor} cellSize={building.cellSize} darkMode={dark} />
+              </Suspense>
+            )}
           </div>
         </div>
       </div>

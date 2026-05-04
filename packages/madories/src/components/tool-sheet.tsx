@@ -14,6 +14,7 @@ import {
   Save,
   Trash2,
   Undo2,
+  View,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import type { ItemCategory } from "../items";
@@ -66,6 +67,8 @@ interface Props {
   onRedo: () => void;
   onFitView: () => void;
   darkMode: boolean;
+  viewMode?: "2d" | "3d";
+  onToggleViewMode?: () => void;
 }
 
 function ToolPanelContent({
@@ -83,6 +86,8 @@ function ToolPanelContent({
   onRedo,
   onFitView,
   darkMode,
+  viewMode,
+  onToggleViewMode,
   onClose,
 }: Props & { onClose?: () => void }) {
   const [itemCategory, setItemCategory] = useState<ItemCategory>("建具");
@@ -319,6 +324,15 @@ function ToolPanelContent({
                 onClose?.();
               },
               title: "シェア",
+            },
+            {
+              disabled: false,
+              icon: <View size={14} />,
+              onClick: () => {
+                onToggleViewMode?.();
+                onClose?.();
+              },
+              title: viewMode === "3d" ? "2D" : "3D",
             },
             {
               disabled: false,
