@@ -1,10 +1,4 @@
-import {
-  Armchair,
-  BrickWall,
-  Eraser,
-  MousePointer2,
-  PaintRoller,
-} from "lucide-react";
+import { Armchair, BrickWall, Eraser, MousePointer2, PaintRoller } from "lucide-react";
 import type { ToolMode } from "../tool-mode";
 import { btnBase } from "./styles";
 

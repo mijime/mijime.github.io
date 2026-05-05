@@ -37,13 +37,17 @@ export const StairsMesh = memo(function StairsMesh({ x, y, cellSize, item, darkM
 
     return Array.from({ length: STAIRS_STEP_COUNT }, (_, i) => {
       const stepY = stepHeight * (i + 0.5);
-      const stepZ = (i * stepDepth) - (cellSize * effectiveH / 2) + (stepDepth / 2);
+      const stepZ = i * stepDepth - (cellSize * effectiveH) / 2 + stepDepth / 2;
       const stepX = 0;
 
       return (
         <mesh key={i} position={[stepX, stepY, stepZ]}>
           <boxGeometry
-            args={[stepWidth * STAIRS_MESH_SCALE, stepHeight * STAIRS_MESH_SCALE, stepDepth * STAIRS_MESH_SCALE]}
+            args={[
+              stepWidth * STAIRS_MESH_SCALE,
+              stepHeight * STAIRS_MESH_SCALE,
+              stepDepth * STAIRS_MESH_SCALE,
+            ]}
           />
           <meshStandardMaterial color={color} />
         </mesh>

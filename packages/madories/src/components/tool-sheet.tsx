@@ -20,6 +20,8 @@ interface Props {
   onRedo: () => void;
   onFitView: () => void;
   darkMode: boolean;
+  viewMode: "2d" | "3d";
+  onToggleViewMode: () => void;
 }
 
 function ToolPanelContent({
@@ -37,6 +39,8 @@ function ToolPanelContent({
   onRedo,
   onFitView,
   darkMode,
+  viewMode,
+  onToggleViewMode,
   onClose,
 }: Props & { onClose?: () => void }) {
   return (
@@ -76,6 +80,8 @@ function ToolPanelContent({
           onClear={onClear}
           onRotateFloor={onRotateFloor}
           onClose={onClose}
+          viewMode={viewMode}
+          onToggleViewMode={onToggleViewMode}
         />
       </div>
     </div>
@@ -85,9 +91,8 @@ function ToolPanelContent({
 export function ToolSheet(props: Props) {
   const [open, setOpen] = useState(false);
   const currentLabel =
-    { wall: "壁", floor: "床", item: "家具", erase: "消す", select: "選択" }[
-      props.tool.kind
-    ] ?? "家具";
+    { wall: "壁", floor: "床", item: "家具", erase: "消す", select: "選択" }[props.tool.kind] ??
+    "家具";
 
   return (
     <>

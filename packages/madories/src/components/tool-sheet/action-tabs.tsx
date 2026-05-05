@@ -9,6 +9,7 @@ import {
   Save,
   Trash2,
   Undo2,
+  View,
 } from "lucide-react";
 import { btnBase } from "./styles";
 
@@ -35,6 +36,8 @@ interface Props {
   onClear: () => void;
   onRotateFloor: () => void;
   onClose?: () => void;
+  viewMode: "2d" | "3d";
+  onToggleViewMode: () => void;
 }
 
 export function ActionTabs({
@@ -50,6 +53,8 @@ export function ActionTabs({
   onClear,
   onRotateFloor,
   onClose,
+  viewMode,
+  onToggleViewMode,
 }: Props) {
   const [activeTab, setActiveTab] = useState<ActionTab>("edit");
   const [clearPending, setClearPending] = useState(false);
@@ -66,15 +71,73 @@ export function ActionTabs({
   ];
 
   const fileActions: ActionItem[] = [
-    { disabled: false, icon: <Save size={14} />, id: "save", onClick: () => { onSave(); onClose?.(); }, title: "保存" },
-    { disabled: false, icon: <FolderOpen size={14} />, id: "load", onClick: () => { onLoad(); onClose?.(); }, title: "読込" },
-    { disabled: false, icon: <Download size={14} />, id: "export", onClick: () => { onExportAll(); onClose?.(); }, title: "書出" },
-    { disabled: false, icon: <Link size={14} />, id: "share", onClick: () => { onShare(); onClose?.(); }, title: "共有" },
+    {
+      disabled: false,
+      icon: <Save size={14} />,
+      id: "save",
+      onClick: () => {
+        onSave();
+        onClose?.();
+      },
+      title: "保存",
+    },
+    {
+      disabled: false,
+      icon: <FolderOpen size={14} />,
+      id: "load",
+      onClick: () => {
+        onLoad();
+        onClose?.();
+      },
+      title: "読込",
+    },
+    {
+      disabled: false,
+      icon: <Download size={14} />,
+      id: "export",
+      onClick: () => {
+        onExportAll();
+        onClose?.();
+      },
+      title: "書出",
+    },
+    {
+      disabled: false,
+      icon: <Link size={14} />,
+      id: "share",
+      onClick: () => {
+        onShare();
+        onClose?.();
+      },
+      title: "共有",
+    },
   ];
 
   const operationActions: ActionItem[] = [
-    { disabled: false, icon: <Maximize2 size={14} />, id: "fitView", onClick: onFitView, title: "全体表示" },
-    { disabled: false, icon: <RotateCw size={14} />, id: "rotate", onClick: () => { onRotateFloor(); onClose?.(); }, title: "回転" },
+    {
+      disabled: false,
+      icon: <View size={14} />,
+      id: "viewMode",
+      onClick: onToggleViewMode,
+      title: viewMode === "2d" ? "3D表示" : "2D表示",
+    },
+    {
+      disabled: false,
+      icon: <Maximize2 size={14} />,
+      id: "fitView",
+      onClick: onFitView,
+      title: "全体表示",
+    },
+    {
+      disabled: false,
+      icon: <RotateCw size={14} />,
+      id: "rotate",
+      onClick: () => {
+        onRotateFloor();
+        onClose?.();
+      },
+      title: "回転",
+    },
   ];
 
   const tabDefs: { key: ActionTab; label: string; actions: ActionItem[] }[] = [

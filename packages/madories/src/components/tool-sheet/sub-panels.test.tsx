@@ -42,18 +42,10 @@ describe("SubPanels", () => {
 
   it("renders nothing for erase/select", () => {
     const eraseHtml = renderToString(
-      <SubPanels
-        tool={{ kind: "erase" }}
-        onToolChange={() => {}}
-        darkMode={false}
-      />,
+      <SubPanels tool={{ kind: "erase" }} onToolChange={() => {}} darkMode={false} />,
     );
     const selectHtml = renderToString(
-      <SubPanels
-        tool={{ kind: "select" }}
-        onToolChange={() => {}}
-        darkMode={false}
-      />,
+      <SubPanels tool={{ kind: "select" }} onToolChange={() => {}} darkMode={false} />,
     );
     expect(eraseHtml).not.toContain("壁");
     expect(selectHtml).not.toContain("壁");
