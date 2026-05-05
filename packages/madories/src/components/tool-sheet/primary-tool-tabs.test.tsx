@@ -1,18 +1,12 @@
 import { describe, expect, it } from "bun:test";
 import { renderToString } from "react-dom/server";
-import {
-  getToolModeForKind,
-  PrimaryToolTabs,
-} from "./primary-tool-tabs";
+import { getToolModeForKind, PrimaryToolTabs } from "./primary-tool-tabs";
 import type { ToolMode } from "../tool-mode";
 
 describe("PrimaryToolTabs", () => {
   it("renders 5 tabs", () => {
     const html = renderToString(
-      <PrimaryToolTabs
-        tool={{ kind: "select" }}
-        onToolChange={() => {}}
-      />,
+      <PrimaryToolTabs tool={{ kind: "select" }} onToolChange={() => {}} />,
     );
     expect(html).toContain("壁");
     expect(html).toContain("床");
@@ -23,10 +17,7 @@ describe("PrimaryToolTabs", () => {
 
   it("validates component structure", () => {
     const html = renderToString(
-      <PrimaryToolTabs
-        tool={{ kind: "select" }}
-        onToolChange={() => {}}
-      />,
+      <PrimaryToolTabs tool={{ kind: "select" }} onToolChange={() => {}} />,
     );
 
     // Verify all 5 buttons are rendered
@@ -41,9 +32,7 @@ describe("PrimaryToolTabs", () => {
     const kinds: ToolMode["kind"][] = ["wall", "floor", "item", "erase", "select"];
     for (const kind of kinds) {
       const tool = getToolModeForKind(kind);
-      const html = renderToString(
-        <PrimaryToolTabs tool={tool} onToolChange={() => {}} />,
-      );
+      const html = renderToString(<PrimaryToolTabs tool={tool} onToolChange={() => {}} />);
       expect(html).toContain("<button");
     }
   });
