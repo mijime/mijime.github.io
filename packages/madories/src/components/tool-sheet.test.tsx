@@ -5,6 +5,7 @@ import {
   PrimaryToolTabs,
 } from "./tool-sheet/primary-tool-tabs";
 import { SubPanels } from "./tool-sheet/sub-panels";
+import { ActionTabs } from "./tool-sheet/action-tabs";
 import type { ToolMode } from "./tool-mode";
 
 describe("PrimaryToolTabs", () => {
@@ -152,5 +153,29 @@ describe("SubPanels", () => {
     // "水回り" items should not be rendered
     expect(html).not.toContain("トイレ");
     expect(html).not.toContain("浴槽");
+  });
+});
+
+describe("ActionTabs", () => {
+  it("renders 3 category tabs", () => {
+    const html = renderToString(
+      <ActionTabs
+        canUndo={true}
+        canRedo={false}
+        onUndo={() => {}}
+        onRedo={() => {}}
+        onFitView={() => {}}
+        onSave={() => {}}
+        onLoad={() => {}}
+        onExportAll={() => {}}
+        onShare={() => {}}
+        onClear={() => {}}
+        onRotateFloor={() => {}}
+        onClose={() => {}}
+      />,
+    );
+    expect(html).toContain("編集");
+    expect(html).toContain("ファイル");
+    expect(html).toContain("操作");
   });
 });
