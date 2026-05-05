@@ -23,7 +23,13 @@ interface Props {
   darkMode: boolean;
 }
 
-function WallSubPanel({ tool, onToolChange }: { tool: Extract<ToolMode, { kind: "wall" }>; onToolChange: (tool: ToolMode) => void }) {
+function WallSubPanel({
+  tool,
+  onToolChange,
+}: {
+  tool: Extract<ToolMode, { kind: "wall" }>;
+  onToolChange: (tool: ToolMode) => void;
+}) {
   return (
     <div style={{ display: "flex", flexWrap: "wrap", gap: "4px" }}>
       {WALL_TYPES.map(({ type, label }) => (
@@ -45,7 +51,15 @@ function WallSubPanel({ tool, onToolChange }: { tool: Extract<ToolMode, { kind: 
   );
 }
 
-function FloorSubPanel({ tool, onToolChange, darkMode }: { tool: Extract<ToolMode, { kind: "floor" }>; onToolChange: (tool: ToolMode) => void; darkMode: boolean }) {
+function FloorSubPanel({
+  tool,
+  onToolChange,
+  darkMode,
+}: {
+  tool: Extract<ToolMode, { kind: "floor" }>;
+  onToolChange: (tool: ToolMode) => void;
+  darkMode: boolean;
+}) {
   return (
     <div style={{ display: "grid", gap: "3px", gridTemplateColumns: "1fr 1fr" }}>
       {FLOOR_TYPES.map((entry) => {
@@ -84,7 +98,13 @@ function FloorSubPanel({ tool, onToolChange, darkMode }: { tool: Extract<ToolMod
   );
 }
 
-function ItemSubPanel({ tool, onToolChange }: { tool: Extract<ToolMode, { kind: "item" }>; onToolChange: (tool: ToolMode) => void }) {
+function ItemSubPanel({
+  tool,
+  onToolChange,
+}: {
+  tool: Extract<ToolMode, { kind: "item" }>;
+  onToolChange: (tool: ToolMode) => void;
+}) {
   const [itemCategory, setItemCategory] = useState<ItemCategory>(ITEM_CATEGORIES[0]);
   const items = ITEMS_BY_CATEGORY[itemCategory];
 
