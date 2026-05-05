@@ -56,7 +56,7 @@ export function App() {
 
   useAppInit(push);
 
-  const [viewMode, setViewMode] = useState<"2d" | "3d">("2d");
+  const [viewMode] = useState<"2d" | "3d">("2d");
   const [tool, setTool] = useState<ToolMode>({ kind: "select" });
   const canvasRef = useRef<FloorCanvasHandle>(null);
   const [toast, setToast] = useState<string | null>(null);
@@ -149,8 +149,6 @@ export function App() {
           onShare={handleShare}
           onClear={() => dispatch({ floorId: floor.id, type: "CLEAR_FLOOR" })}
           onRotateFloor={() => dispatch({ floorId: floor.id, type: "ROTATE_FLOOR" })}
-          viewMode={viewMode}
-          onToggleViewMode={() => setViewMode((v) => (v === "2d" ? "3d" : "2d"))}
         />
         <DslPanel
           floors={building.floors}
