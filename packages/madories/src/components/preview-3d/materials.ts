@@ -19,3 +19,31 @@ export const WALL_COLORS: Record<
 };
 
 export const WALL_HEIGHT_FACTOR = 2.5;
+
+export const WALL_THICKNESS_FACTOR = 0.1;
+
+export const ITEM_COLORS: Record<string, { light: string; dark: string }> = {
+  chair: { light: "#8b5a2b", dark: "#5c3a1e" },
+  desk: { light: "#a0522d", dark: "#6b3a1e" },
+  desk_small: { light: "#a0522d", dark: "#6b3a1e" },
+  toilet: { light: "#f0f0f0", dark: "#cccccc" },
+  bathtub: { light: "#e0e0e0", dark: "#bbbbbb" },
+  kitchen: { light: "#d4a373", dark: "#8b6f47" },
+  kitchen_small: { light: "#d4a373", dark: "#8b6f47" },
+  washbasin: { light: "#f0f0f0", dark: "#cccccc" },
+  washbasin_half: { light: "#f0f0f0", dark: "#cccccc" },
+  washbasin_large: { light: "#f0f0f0", dark: "#cccccc" },
+  door: { light: "#8b4513", dark: "#5c2e0c" },
+  door_slide: { light: "#8b4513", dark: "#5c2e0c" },
+  stairs: { light: "#a0522d", dark: "#6b3a1e" },
+  fridge: { light: "#c0c0c0", dark: "#808080" },
+  washer: { light: "#f0f0f0", dark: "#cccccc" },
+  shelf1: { light: "#a0522d", dark: "#6b3a1e" },
+  shelf2: { light: "#a0522d", dark: "#6b3a1e" },
+  tv: { light: "#1a1a1a", dark: "#0a0a0a" },
+  sofa: { light: "#cd853f", dark: "#8b5a2b" },
+  bed_single: { light: "#4682b4", dark: "#2f5a7a" },
+  bed_double: { light: "#4682b4", dark: "#2f5a7a" },
+};
+
+export const ITEM_HEIGHT_FACTOR = 1.0;
