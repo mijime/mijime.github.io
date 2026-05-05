@@ -15,6 +15,28 @@ const PRIMARY_TOOLS = [
   { icon: MousePointer2, kind: "select" as const, label: "選択" },
 ];
 
+export type PrimaryToolKind = (typeof PRIMARY_TOOLS)[number]["kind"];
+
+export function getToolModeForKind(kind: PrimaryToolKind): ToolMode {
+  switch (kind) {
+    case "wall": {
+      return { kind: "wall", wallType: "solid" };
+    }
+    case "floor": {
+      return { kind: "floor", floorType: "wood" };
+    }
+    case "item": {
+      return { kind: "item", itemType: "door" };
+    }
+    case "erase": {
+      return { kind: "erase" };
+    }
+    case "select": {
+      return { kind: "select" };
+    }
+  }
+}
+
 const btnBase = {
   background: "transparent",
   border: "1px solid var(--border)",
@@ -52,17 +74,7 @@ export function PrimaryToolTabs({ tool, onToolChange }: Props) {
               justifyContent: "center",
               padding: "6px 2px",
             }}
-            onClick={() => {
-              if (kind === "wall") {
-                onToolChange({ kind: "wall", wallType: "solid" });
-              } else if (kind === "floor") {
-                onToolChange({ floorType: "wood", kind: "floor" });
-              } else if (kind === "item") {
-                onToolChange({ itemType: "door", kind: "item" });
-              } else {
-                onToolChange({ kind } as ToolMode);
-              }
-            }}
+            onClick={() => onToolChange(getToolModeForKind(kind))}
           >
             <Icon size={14} />
             <span style={{ fontSize: "9px" }}>{label}</span>
