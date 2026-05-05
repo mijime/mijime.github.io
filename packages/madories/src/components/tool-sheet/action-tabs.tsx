@@ -67,7 +67,7 @@ export function ActionTabs({
   ];
 
   const operationActions = [
-    { disabled: false, icon: <Maximize2 size={14} />, onClick: onFitView, title: "全体" },
+    { disabled: false, icon: <Maximize2 size={14} />, onClick: onFitView, title: "全体表示" },
     { disabled: false, icon: <RotateCw size={14} />, onClick: () => { onRotateFloor(); onClose?.(); }, title: "回転" },
   ];
 
