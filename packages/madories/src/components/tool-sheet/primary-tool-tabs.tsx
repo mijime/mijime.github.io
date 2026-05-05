@@ -6,6 +6,7 @@ import {
   PaintRoller,
 } from "lucide-react";
 import type { ToolMode } from "../tool-mode";
+import { btnBase } from "./styles";
 
 const PRIMARY_TOOLS = [
   { icon: BrickWall, kind: "wall" as const, label: "壁" },
@@ -36,15 +37,6 @@ export function getToolModeForKind(kind: PrimaryToolKind): ToolMode {
     }
   }
 }
-
-const btnBase = {
-  background: "transparent",
-  border: "1px solid var(--border)",
-  color: "var(--ink)",
-  cursor: "pointer" as const,
-  fontFamily: "IBM Plex Mono, monospace",
-  fontSize: "11px",
-};
 
 interface Props {
   tool: ToolMode;

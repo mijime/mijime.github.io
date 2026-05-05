@@ -10,17 +10,17 @@ import {
   Trash2,
   Undo2,
 } from "lucide-react";
-
-const btnBase = {
-  background: "transparent",
-  border: "1px solid var(--border)",
-  color: "var(--ink)",
-  cursor: "pointer" as const,
-  fontFamily: "IBM Plex Mono, monospace",
-  fontSize: "11px",
-};
+import { btnBase } from "./styles";
 
 type ActionTab = "edit" | "file" | "operation";
+
+interface ActionItem {
+  disabled: boolean;
+  icon: React.ReactNode;
+  id: string;
+  onClick: () => void;
+  title: string;
+}
 
 interface Props {
   canUndo: boolean;
@@ -35,7 +35,6 @@ interface Props {
   onClear: () => void;
   onRotateFloor: () => void;
   onClose?: () => void;
-  defaultTab?: ActionTab;
 }
 
 export function ActionTabs({
@@ -51,9 +50,8 @@ export function ActionTabs({
   onClear,
   onRotateFloor,
   onClose,
-  defaultTab,
 }: Props) {
-  const [activeTab, setActiveTab] = useState<ActionTab>(defaultTab ?? "edit");
+  const [activeTab, setActiveTab] = useState<ActionTab>("edit");
   const [clearPending, setClearPending] = useState(false);
 
   useEffect(() => {
@@ -62,24 +60,24 @@ export function ActionTabs({
     return () => clearTimeout(id);
   }, [clearPending]);
 
-  const editActions = [
+  const editActions: ActionItem[] = [
     { disabled: !canUndo, icon: <Undo2 size={14} />, id: "undo", onClick: onUndo, title: "戻す" },
     { disabled: !canRedo, icon: <Redo2 size={14} />, id: "redo", onClick: onRedo, title: "進む" },
   ];
 
-  const fileActions = [
+  const fileActions: ActionItem[] = [
     { disabled: false, icon: <Save size={14} />, id: "save", onClick: () => { onSave(); onClose?.(); }, title: "保存" },
     { disabled: false, icon: <FolderOpen size={14} />, id: "load", onClick: () => { onLoad(); onClose?.(); }, title: "読込" },
     { disabled: false, icon: <Download size={14} />, id: "export", onClick: () => { onExportAll(); onClose?.(); }, title: "書出" },
     { disabled: false, icon: <Link size={14} />, id: "share", onClick: () => { onShare(); onClose?.(); }, title: "共有" },
   ];
 
-  const operationActions = [
+  const operationActions: ActionItem[] = [
     { disabled: false, icon: <Maximize2 size={14} />, id: "fitView", onClick: onFitView, title: "全体表示" },
     { disabled: false, icon: <RotateCw size={14} />, id: "rotate", onClick: () => { onRotateFloor(); onClose?.(); }, title: "回転" },
   ];
 
-  const tabDefs: { key: ActionTab; label: string; actions: typeof editActions }[] = [
+  const tabDefs: { key: ActionTab; label: string; actions: ActionItem[] }[] = [
     { key: "edit", label: "編集", actions: editActions },
     { key: "file", label: "ファイル", actions: fileActions },
     { key: "operation", label: "操作", actions: operationActions },

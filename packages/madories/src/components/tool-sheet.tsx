@@ -20,8 +20,6 @@ interface Props {
   onRedo: () => void;
   onFitView: () => void;
   darkMode: boolean;
-  viewMode?: "2d" | "3d";
-  onToggleViewMode?: () => void;
 }
 
 function ToolPanelContent({

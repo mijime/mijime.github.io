@@ -3,6 +3,7 @@ import type { ItemCategory, ItemDef } from "../../items";
 import { ITEM_CATEGORIES, ITEM_DEFS } from "../../items";
 import type { WallType } from "../../types";
 import { FLOOR_TYPES, floorTypeToSwatchStyle, type ToolMode } from "../tool-mode";
+import { btnBase } from "./styles";
 
 const WALL_TYPES: { type: WallType; label: string }[] = [
   { label: "壁", type: "solid" },
@@ -15,15 +16,6 @@ const WALL_TYPES: { type: WallType; label: string }[] = [
 const ITEMS_BY_CATEGORY = Object.fromEntries(
   ITEM_CATEGORIES.map((cat) => [cat, ITEM_DEFS.filter((d) => d.category === cat)]),
 ) as Record<ItemCategory, ItemDef[]>;
-
-const btnBase = {
-  background: "transparent",
-  border: "1px solid var(--border)",
-  color: "var(--ink)",
-  cursor: "pointer" as const,
-  fontFamily: "IBM Plex Mono, monospace",
-  fontSize: "11px",
-};
 
 interface Props {
   tool: ToolMode;
