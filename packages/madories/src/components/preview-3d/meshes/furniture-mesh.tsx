@@ -1,7 +1,9 @@
 import { memo } from "react";
 import type { Item, ItemType } from "../../../types";
 import { ITEM_DEF_MAP } from "../../../items";
-import { ITEM_COLORS, ITEM_HEIGHT_FACTOR } from "../materials";
+import { ITEM_COLORS, getItemHeightFactor } from "../materials";
+
+const ITEM_MESH_SCALE = 0.9;
 
 interface Props {
   x: number;
@@ -11,7 +13,7 @@ interface Props {
   darkMode: boolean;
 }
 
-function getItemDrawOffset(
+export function getItemDrawOffset(
   w: number,
   h: number,
   rotation: 0 | 90 | 180 | 270,
@@ -20,8 +22,8 @@ function getItemDrawOffset(
   const effectiveW = isRotated ? h : w;
   const effectiveH = isRotated ? w : h;
   const asymmetric = w !== h;
-  const offX = asymmetric && rotation === 90 ? -(effectiveW - 1) : 0;
-  const offY = asymmetric && rotation === 180 ? -(effectiveH - 1) : 0;
+  const offX = asymmetric && (rotation === 90 || rotation === 270) ? -(effectiveW - 1) || 0 : 0;
+  const offY = asymmetric && (rotation === 180 || rotation === 270) ? -(effectiveH - 1) || 0 : 0;
   return { effectiveH, effectiveW, offX, offY };
 }
 
@@ -50,7 +52,7 @@ export const FurnitureMesh = memo(function FurnitureMesh({
 
   const width = effectiveW * cellSize;
   const depth = effectiveH * cellSize;
-  const height = cellSize * ITEM_HEIGHT_FACTOR;
+  const height = cellSize * getItemHeightFactor(item.type);
 
   const posX = drawX * cellSize + width / 2 - cellSize / 2;
   const posZ = drawY * cellSize + depth / 2 - cellSize / 2;
@@ -59,7 +61,7 @@ export const FurnitureMesh = memo(function FurnitureMesh({
 
   return (
     <mesh position={[posX, height / 2, posZ]}>
-      <boxGeometry args={[width * 0.9, height, depth * 0.9]} />
+      <boxGeometry args={[width * ITEM_MESH_SCALE, height, depth * ITEM_MESH_SCALE]} />
       <meshStandardMaterial color={color} />
     </mesh>
   );

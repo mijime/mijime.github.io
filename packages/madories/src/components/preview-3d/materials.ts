@@ -1,4 +1,4 @@
-import type { FloorType, WallType } from "../../types";
+import type { FloorType, ItemType, WallType } from "../../types";
 
 export const FLOOR_COLORS: Record<FloorType, { light: string; dark: string }> = {
   wood: { light: "#d4a373", dark: "#8b6f47" },
@@ -22,7 +22,7 @@ export const WALL_HEIGHT_FACTOR = 2.5;
 
 export const WALL_THICKNESS_FACTOR = 0.1;
 
-export const ITEM_COLORS: Record<string, { light: string; dark: string }> = {
+export const ITEM_COLORS: Record<ItemType, { light: string; dark: string }> = {
   chair: { light: "#8b5a2b", dark: "#5c3a1e" },
   desk: { light: "#a0522d", dark: "#6b3a1e" },
   desk_small: { light: "#a0522d", dark: "#6b3a1e" },
@@ -46,4 +46,18 @@ export const ITEM_COLORS: Record<string, { light: string; dark: string }> = {
   bed_double: { light: "#4682b4", dark: "#2f5a7a" },
 };
 
-export const ITEM_HEIGHT_FACTOR = 1.0;
+export const ITEM_HEIGHT_FACTORS: Partial<Record<ItemType, number>> = {
+  chair: 0.5,
+  bed_single: 0.5,
+  bed_double: 0.5,
+  washer: 1.5,
+  fridge: 1.5,
+  shelf1: 1.5,
+  shelf2: 1.5,
+};
+
+export const ITEM_HEIGHT_FACTOR_DEFAULT = 0.8;
+
+export function getItemHeightFactor(type: ItemType): number {
+  return ITEM_HEIGHT_FACTORS[type] ?? ITEM_HEIGHT_FACTOR_DEFAULT;
+}

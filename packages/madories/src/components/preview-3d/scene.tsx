@@ -8,6 +8,7 @@ import { Lighting } from "./lighting";
 import { FloorMesh } from "./meshes/floor-mesh";
 import { WallMesh } from "./meshes/wall-mesh";
 import { FurnitureMesh } from "./meshes/furniture-mesh";
+import { StairsMesh } from "./meshes/stairs-mesh";
 
 interface Props {
   floor: FloorPlan;
@@ -78,16 +79,28 @@ export function FloorPlanScene({ floor, cellSize, darkMode }: Props) {
               darkMode={darkMode}
             />
           ))}
-          {items.map((it, i) => (
-            <FurnitureMesh
-              key={`item-${it.x}-${it.y}-${i}`}
-              x={it.x}
-              y={it.y}
-              cellSize={cellSize}
-              item={it.item!}
-              darkMode={darkMode}
-            />
-          ))}
+          {items.map((it, i) => {
+            if (!it.item) return null;
+            return it.item.type === "stairs" ? (
+              <StairsMesh
+                key={`item-${it.x}-${it.y}-${i}`}
+                x={it.x}
+                y={it.y}
+                cellSize={cellSize}
+                item={it.item}
+                darkMode={darkMode}
+              />
+            ) : (
+              <FurnitureMesh
+                key={`item-${it.x}-${it.y}-${i}`}
+                x={it.x}
+                y={it.y}
+                cellSize={cellSize}
+                item={it.item}
+                darkMode={darkMode}
+              />
+            );
+          })}
         </group>
       </Canvas>
     </>
