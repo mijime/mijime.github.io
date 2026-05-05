@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { ItemCategory } from "../../items";
+import type { ItemCategory, ItemDef } from "../../items";
 import { ITEM_CATEGORIES, ITEM_DEFS } from "../../items";
 import type { WallType } from "../../types";
 import { FLOOR_TYPES, floorTypeToSwatchStyle, type ToolMode } from "../tool-mode";
@@ -14,7 +14,7 @@ const WALL_TYPES: { type: WallType; label: string }[] = [
 
 const ITEMS_BY_CATEGORY = Object.fromEntries(
   ITEM_CATEGORIES.map((cat) => [cat, ITEM_DEFS.filter((d) => d.category === cat)]),
-) as Record<ItemCategory, typeof ITEM_DEFS>;
+) as Record<ItemCategory, ItemDef[]>;
 
 const btnBase = {
   background: "transparent",
@@ -60,7 +60,7 @@ function FloorSubPanel({ tool, onToolChange, darkMode }: { tool: Extract<ToolMod
         const active = tool.floorType === entry.type;
         return (
           <button
-            key={entry.label}
+            key={entry.type ?? "blank"}
             style={{
               ...btnBase,
               alignItems: "center",
@@ -93,7 +93,7 @@ function FloorSubPanel({ tool, onToolChange, darkMode }: { tool: Extract<ToolMod
 }
 
 function ItemSubPanel({ tool, onToolChange }: { tool: Extract<ToolMode, { kind: "item" }>; onToolChange: (tool: ToolMode) => void }) {
-  const [itemCategory, setItemCategory] = useState<ItemCategory>("建具");
+  const [itemCategory, setItemCategory] = useState<ItemCategory>(ITEM_CATEGORIES[0]);
   const items = ITEMS_BY_CATEGORY[itemCategory];
 
   return (

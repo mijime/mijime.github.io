@@ -137,4 +137,20 @@ describe("SubPanels", () => {
     expect(eraseHtml).not.toContain("壁");
     expect(selectHtml).not.toContain("壁");
   });
+
+  it("filters items by the default category", () => {
+    const html = renderToString(
+      <SubPanels
+        tool={{ kind: "item", itemType: "door" }}
+        onToolChange={() => {}}
+        darkMode={false}
+      />,
+    );
+    // Default category is "建具", so these should be present
+    expect(html).toContain("開き戸");
+    expect(html).toContain("引き戸");
+    // "水回り" items should not be rendered
+    expect(html).not.toContain("トイレ");
+    expect(html).not.toContain("浴槽");
+  });
 });
