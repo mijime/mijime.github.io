@@ -29,15 +29,21 @@ export const StairsMesh = memo(function StairsMesh({ x, y, cellSize, item, darkM
     const effectiveW = isRotated ? def.h : def.w;
     const effectiveH = isRotated ? def.w : def.h;
 
+    const asymmetric = def.w !== def.h;
+    const offX = asymmetric && item.rotation === 90 ? -(effectiveW - 1) : 0;
+    const offY = asymmetric && item.rotation === 180 ? -(effectiveH - 1) : 0;
+    const drawX = x + offX;
+    const drawY = y + offY;
+
     const stepHeight = (cellSize * STAIRS_TOTAL_HEIGHT) / STAIRS_STEP_COUNT;
     const stepDepth = (cellSize * effectiveH) / STAIRS_STEP_COUNT;
     const stepWidth = cellSize * effectiveW;
 
     const color = getItemColor(darkMode);
 
-    return Array.from({ length: STAIRS_STEP_COUNT }, (_, i) => {
+    const stepElements = Array.from({ length: STAIRS_STEP_COUNT }, (_, i) => {
       const stepY = stepHeight * (i + 0.5);
-      const stepZ = i * stepDepth - (cellSize * effectiveH) / 2 + stepDepth / 2;
+      const stepZ = -(i * stepDepth - (cellSize * effectiveH) / 2 + stepDepth / 2);
       const stepX = 0;
 
       return (
@@ -53,10 +59,18 @@ export const StairsMesh = memo(function StairsMesh({ x, y, cellSize, item, darkM
         </mesh>
       );
     });
+
+    return { drawX, drawY, stepElements };
   }, [x, y, cellSize, item.rotation, darkMode]);
 
-  const posX = x * cellSize;
-  const posZ = y * cellSize;
+  if (!steps) return null;
 
-  return <group position={[posX, 0, posZ]}>{steps}</group>;
+  const posX = steps.drawX * cellSize;
+  const posZ = steps.drawY * cellSize;
+
+  return (
+    <group position={[posX, 0, posZ]} rotation={[0, -item.rotation * (Math.PI / 180), 0]}>
+      {steps.stepElements}
+    </group>
+  );
 });

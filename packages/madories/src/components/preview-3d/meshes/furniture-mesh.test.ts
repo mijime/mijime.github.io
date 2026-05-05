@@ -17,9 +17,9 @@ describe("getItemDrawOffset", () => {
     expect(result).toEqual({ effectiveW: 1, effectiveH: 2, offX: 0, offY: -1 });
   });
 
-  it("swaps dimensions and offsets both X and Y for 270° on larger asymmetric item", () => {
+  it("swaps dimensions but no offsets for 270° on larger asymmetric item", () => {
     const result = getItemDrawOffset(2, 3, 270);
-    expect(result).toEqual({ effectiveW: 3, effectiveH: 2, offX: -2, offY: -1 });
+    expect(result).toEqual({ effectiveW: 3, effectiveH: 2, offX: 0, offY: 0 });
   });
 
   it("returns no offset for symmetric items regardless of rotation", () => {

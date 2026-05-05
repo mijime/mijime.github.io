@@ -22,8 +22,8 @@ export function getItemDrawOffset(
   const effectiveW = isRotated ? h : w;
   const effectiveH = isRotated ? w : h;
   const asymmetric = w !== h;
-  const offX = asymmetric && (rotation === 90 || rotation === 270) ? -(effectiveW - 1) || 0 : 0;
-  const offY = asymmetric && (rotation === 180 || rotation === 270) ? -(effectiveH - 1) || 0 : 0;
+  const offX = asymmetric && rotation === 90 ? -(effectiveW - 1) || 0 : 0;
+  const offY = asymmetric && rotation === 180 ? -(effectiveH - 1) || 0 : 0;
   return { effectiveH, effectiveW, offX, offY };
 }
 
@@ -60,7 +60,7 @@ export const FurnitureMesh = memo(function FurnitureMesh({
   const color = getItemColor(item.type, darkMode);
 
   return (
-    <mesh position={[posX, height / 2, posZ]}>
+    <mesh position={[posX, height / 2, posZ]} rotation={[0, -item.rotation * (Math.PI / 180), 0]}>
       <boxGeometry args={[width * ITEM_MESH_SCALE, height, depth * ITEM_MESH_SCALE]} />
       <meshStandardMaterial color={color} />
     </mesh>
