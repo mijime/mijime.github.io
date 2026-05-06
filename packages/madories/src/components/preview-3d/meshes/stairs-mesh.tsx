@@ -31,9 +31,9 @@ export const StairsMesh = memo(function StairsMesh({ x, y, cellSize, item, darkM
     const drawY = y + offY;
 
     const stepHeight = (cellSize * STAIRS_TOTAL_HEIGHT) / STAIRS_STEP_COUNT;
-    const stepWidth = cellSize * effectiveW;
-    const stepDepth = (cellSize * effectiveH) / STAIRS_STEP_COUNT;
-    const halfSpan = (cellSize * effectiveH) / 2;
+    const stepWidth = cellSize * def.w;
+    const stepDepth = (cellSize * def.h) / STAIRS_STEP_COUNT;
+    const halfSpan = (cellSize * def.h) / 2;
 
     const color = getItemColor(darkMode);
 

@@ -25,8 +25,8 @@ export function getItemCenterPosition(
   effectiveH: number,
   cellSize: number,
 ): { posX: number; posZ: number } {
-  const posX = (drawX + effectiveW / 2) * cellSize;
-  const posZ = (drawY + effectiveH / 2) * cellSize;
+  const posX = (drawX + effectiveW / 2 - 0.5) * cellSize;
+  const posZ = (drawY + effectiveH / 2 - 0.5) * cellSize;
   return { posX, posZ };
 }
 
@@ -67,8 +67,8 @@ export const FurnitureMesh = memo(function FurnitureMesh({
   const drawX = x + offX;
   const drawY = y + offY;
 
-  const width = effectiveW * cellSize * ITEM_MESH_SCALE;
-  const depth = effectiveH * cellSize * ITEM_MESH_SCALE * getItemDepthFactor(item.type);
+  const width = def.w * cellSize * ITEM_MESH_SCALE;
+  const depth = def.h * cellSize * ITEM_MESH_SCALE * getItemDepthFactor(item.type);
   const height = cellSize * getItemHeightFactor(item.type);
 
   const { posX, posZ } = getItemCenterPosition(drawX, drawY, effectiveW, effectiveH, cellSize);

@@ -40,26 +40,26 @@ describe("getItemCenterPosition", () => {
 
   it("centers a single-tile item on its cell", () => {
     const result = getItemCenterPosition(0, 0, 1, 1, c);
-    expect(result).toEqual({ posX: 5, posZ: 5 });
+    expect(result).toEqual({ posX: 0, posZ: 0 });
   });
 
   it("centers a 1x2 item across its 2-cell span", () => {
     const result = getItemCenterPosition(0, 0, 1, 2, c);
-    expect(result).toEqual({ posX: 5, posZ: 10 });
+    expect(result).toEqual({ posX: 0, posZ: 5 });
   });
 
   it("centers a 2x1 item across its 2-cell width", () => {
     const result = getItemCenterPosition(0, 0, 2, 1, c);
-    expect(result).toEqual({ posX: 10, posZ: 5 });
+    expect(result).toEqual({ posX: 5, posZ: 0 });
   });
 
   it("accounts for draw offset in position", () => {
     const result = getItemCenterPosition(-1, 0, 2, 1, c);
-    expect(result).toEqual({ posX: 0, posZ: 5 });
+    expect(result).toEqual({ posX: -5, posZ: 0 });
   });
 
   it("works for non-zero origin cells", () => {
     const result = getItemCenterPosition(2, 3, 1, 1, c);
-    expect(result).toEqual({ posX: 25, posZ: 35 });
+    expect(result).toEqual({ posX: 20, posZ: 30 });
   });
 });
