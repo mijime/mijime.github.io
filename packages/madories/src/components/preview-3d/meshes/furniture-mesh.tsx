@@ -67,8 +67,8 @@ export const FurnitureMesh = memo(function FurnitureMesh({
   const drawX = x + offX;
   const drawY = y + offY;
 
-  const width = effectiveW * cellSize * ITEM_MESH_SCALE;
-  const depth = effectiveH * cellSize * ITEM_MESH_SCALE * getItemDepthFactor(item.type);
+  const width = def.w * cellSize * ITEM_MESH_SCALE;
+  const depth = def.h * cellSize * ITEM_MESH_SCALE * getItemDepthFactor(item.type);
   const height = cellSize * getItemHeightFactor(item.type);
 
   const { posX, posZ } = getItemCenterPosition(drawX, drawY, effectiveW, effectiveH, cellSize);
