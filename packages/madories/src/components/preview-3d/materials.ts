@@ -83,6 +83,9 @@ export const ITEM_PART_COLORS: Partial<
     leg: { light: "#6B5030", dark: "#7a5830" },
     top: { light: "#D4B896", dark: "#b08a60" },
   },
+  tv: {
+    screen: { light: "#4488BB", dark: "#1a4466" },
+  },
   washbasin_large: {
     mirror: { light: "#E8F4F8", dark: "#1a3a4a" },
     counter: { light: "#EAD8C0", dark: "#6a5a40" },

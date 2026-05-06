@@ -39,7 +39,7 @@ export const StairsMesh = memo(function StairsMesh({ x, y, cellSize, item, darkM
 
     const stepElements = Array.from({ length: STAIRS_STEP_COUNT }, (_, i) => {
       const stepY = stepHeight * (i + 0.5);
-      const stepZ = -halfSpan + stepDepth / 2 + i * stepDepth;
+      const stepZ = halfSpan - stepDepth / 2 - i * stepDepth;
 
       return (
         <mesh key={i} position={[0, stepY, stepZ]}>
