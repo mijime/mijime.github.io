@@ -2,6 +2,7 @@ import { memo, useMemo } from "react";
 import type { Item } from "../../../types";
 import { ITEM_DEF_MAP } from "../../../items";
 import { ITEM_COLORS } from "../materials";
+import { getItemCenterPosition, getItemDrawOffset } from "./furniture-mesh";
 
 interface Props {
   x: number;
@@ -25,29 +26,23 @@ export const StairsMesh = memo(function StairsMesh({ x, y, cellSize, item, darkM
     const def = ITEM_DEF_MAP.get(item.type);
     if (!def) return null;
 
-    const isRotated = item.rotation === 90 || item.rotation === 270;
-    const effectiveW = isRotated ? def.h : def.w;
-    const effectiveH = isRotated ? def.w : def.h;
-
-    const asymmetric = def.w !== def.h;
-    const offX = asymmetric && item.rotation === 90 ? -(effectiveW - 1) : 0;
-    const offY = asymmetric && item.rotation === 180 ? -(effectiveH - 1) : 0;
+    const { effectiveW, effectiveH, offX, offY } = getItemDrawOffset(def.w, def.h, item.rotation);
     const drawX = x + offX;
     const drawY = y + offY;
 
     const stepHeight = (cellSize * STAIRS_TOTAL_HEIGHT) / STAIRS_STEP_COUNT;
-    const stepDepth = (cellSize * effectiveH) / STAIRS_STEP_COUNT;
     const stepWidth = cellSize * effectiveW;
+    const stepDepth = (cellSize * effectiveH) / STAIRS_STEP_COUNT;
+    const halfSpan = (cellSize * effectiveH) / 2;
 
     const color = getItemColor(darkMode);
 
     const stepElements = Array.from({ length: STAIRS_STEP_COUNT }, (_, i) => {
       const stepY = stepHeight * (i + 0.5);
-      const stepZ = -(i * stepDepth - (cellSize * effectiveH) / 2 + stepDepth / 2);
-      const stepX = 0;
+      const stepZ = -halfSpan + stepDepth / 2 + i * stepDepth;
 
       return (
-        <mesh key={i} position={[stepX, stepY, stepZ]}>
+        <mesh key={i} position={[0, stepY, stepZ]}>
           <boxGeometry
             args={[
               stepWidth * STAIRS_MESH_SCALE,
@@ -60,16 +55,18 @@ export const StairsMesh = memo(function StairsMesh({ x, y, cellSize, item, darkM
       );
     });
 
-    return { drawX, drawY, stepElements };
-  }, [x, y, cellSize, item.rotation, darkMode]);
+    const { posX, posZ } = getItemCenterPosition(drawX, drawY, effectiveW, effectiveH, cellSize);
+
+    return { posX, posZ, stepElements };
+  }, [x, y, cellSize, item.rotation, item.type, darkMode]);
 
   if (!steps) return null;
 
-  const posX = steps.drawX * cellSize;
-  const posZ = steps.drawY * cellSize;
-
   return (
-    <group position={[posX, 0, posZ]} rotation={[0, -item.rotation * (Math.PI / 180), 0]}>
+    <group
+      position={[steps.posX, 0, steps.posZ]}
+      rotation={[0, -item.rotation * (Math.PI / 180), 0]}
+    >
       {steps.stepElements}
     </group>
   );

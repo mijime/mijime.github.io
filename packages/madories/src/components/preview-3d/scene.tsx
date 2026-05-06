@@ -9,6 +9,7 @@ import { FloorMesh } from "./meshes/floor-mesh";
 import { WallMesh } from "./meshes/wall-mesh";
 import { FurnitureMesh } from "./meshes/furniture-mesh";
 import { StairsMesh } from "./meshes/stairs-mesh";
+import { dedupFloorItems } from "./dedup-items";
 
 interface Props {
   floor: FloorPlan;
@@ -19,18 +20,7 @@ interface Props {
 export function FloorPlanScene({ floor, cellSize, darkMode }: Props) {
   const tiles = useMemo(() => generateFloorTiles(floor), [floor]);
   const walls = useMemo(() => generateWallSegments(floor), [floor]);
-  const items = useMemo(() => {
-    const result: { x: number; y: number; item: FloorPlan["cells"][number]["item"] }[] = [];
-    for (let y = 0; y < floor.height; y++) {
-      for (let x = 0; x < floor.width; x++) {
-        const cell = floor.cells[y * floor.width + x];
-        if (cell.item) {
-          result.push({ x, y, item: cell.item });
-        }
-      }
-    }
-    return result;
-  }, [floor]);
+  const items = useMemo(() => dedupFloorItems(floor), [floor]);
 
   const offsetX = (floor.width * cellSize) / 2 - cellSize / 2;
   const offsetZ = (floor.height * cellSize) / 2 - cellSize / 2;
