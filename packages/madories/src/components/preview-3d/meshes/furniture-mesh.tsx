@@ -147,6 +147,25 @@ export const FurnitureMesh = memo(function FurnitureMesh({
     );
   }
 
+  if (item.type === "tv") {
+    const screenColor = getItemPartColor("tv", "screen", darkMode);
+    const screenW = depth * 0.8;
+    const screenH = height * 0.9;
+    const screenD = depth * 0.15;
+    return (
+      <group position={[posX, 0, posZ]} rotation={rotation}>
+        <mesh position={[0, height / 2, 0]}>
+          <boxGeometry args={[width, height, depth]} />
+          <meshStandardMaterial color={color} />
+        </mesh>
+        <mesh position={[width / 2 + screenD / 2, height / 2, 0]}>
+          <boxGeometry args={[screenD, screenH, screenW]} />
+          <meshStandardMaterial color={screenColor} />
+        </mesh>
+      </group>
+    );
+  }
+
   return (
     <mesh position={[posX, height / 2, posZ]} rotation={rotation}>
       <boxGeometry args={[width, height, depth]} />

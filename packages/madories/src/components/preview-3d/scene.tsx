@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import * as THREE from "three";
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
 import type { FloorPlan } from "../../types";
@@ -25,7 +26,7 @@ export function FloorPlanScene({ floor, cellSize, darkMode }: Props) {
   const offsetX = (floor.width * cellSize) / 2 - cellSize / 2;
   const offsetZ = (floor.height * cellSize) / 2 - cellSize / 2;
 
-  const bg = darkMode ? "#1a1a1a" : "#f5f5f5";
+  const bg = darkMode ? "#1a1a1a" : "#fafaf8";
 
   const maxDim = Math.max(floor.width, floor.height);
 
@@ -34,6 +35,7 @@ export function FloorPlanScene({ floor, cellSize, darkMode }: Props) {
       <Canvas
         style={{ background: bg, position: "absolute", inset: 0, touchAction: "none" }}
         gl={{ antialias: true, alpha: false }}
+        scene={{ background: new THREE.Color(bg) }}
       >
         <PreviewCamera width={floor.width} height={floor.height} cellSize={cellSize} />
         <Lighting darkMode={darkMode} />
