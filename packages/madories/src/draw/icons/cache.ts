@@ -1,6 +1,5 @@
 import { ITEM_DEF_MAP } from "../../items";
 import type { ItemType } from "../../types";
-import { ICON_REGISTRY } from "./index";
 
 const cache = new Map<string, OffscreenCanvas>();
 
@@ -32,18 +31,15 @@ export function getCachedIcon(
   ctx.translate(boundW / 2, boundH / 2);
   ctx.rotate((rotation * Math.PI) / 180);
 
-  const draw = ICON_REGISTRY.get(type);
-  if (draw) {
-    const pad = 2;
-    draw(
-      ctx,
-      -naturalW / 2 + pad,
-      -naturalH / 2 + pad,
-      naturalW - 2 * pad,
-      naturalH - 2 * pad,
-      darkMode,
-    );
-  }
+  const pad = 2;
+  def.icon(
+    ctx,
+    -naturalW / 2 + pad,
+    -naturalH / 2 + pad,
+    naturalW - 2 * pad,
+    naturalH - 2 * pad,
+    darkMode,
+  );
 
   cache.set(key, oc);
   return oc;
