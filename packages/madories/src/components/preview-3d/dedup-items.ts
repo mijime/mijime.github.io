@@ -1,6 +1,5 @@
 import type { FloorPlan } from "../../types";
 import { ITEM_DEF_MAP } from "../../items";
-import { getItemDrawOffset } from "./meshes/furniture-mesh";
 
 export function dedupFloorItems(
   floor: FloorPlan,
@@ -16,7 +15,9 @@ export function dedupFloorItems(
       const def = ITEM_DEF_MAP.get(cell.item.type);
       if (!def) continue;
       result.push({ x, y, item: cell.item });
-      const { effectiveW, effectiveH } = getItemDrawOffset(def.w, def.h, cell.item.rotation);
+      const rotated = cell.item.rotation % 180 === 0;
+      const effectiveW = rotated ? def.w : def.h;
+      const effectiveH = rotated ? def.h : def.w;
       for (let dy = 0; dy < effectiveH; dy++) {
         for (let dx = 0; dx < effectiveW; dx++) {
           const cx = x + dx;
