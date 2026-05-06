@@ -1,7 +1,12 @@
 import { memo } from "react";
 import type { Item, ItemType } from "../../../types";
 import { ITEM_DEF_MAP } from "../../../items";
-import { ITEM_COLORS, getItemDepthFactor, getItemHeightFactor, getItemPartColor } from "../materials";
+import {
+  ITEM_COLORS,
+  getItemDepthFactor,
+  getItemHeightFactor,
+  getItemPartColor,
+} from "../materials";
 
 const ITEM_MESH_SCALE = 0.9;
 
