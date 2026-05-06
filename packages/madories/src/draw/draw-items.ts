@@ -29,8 +29,8 @@ export function getItemDrawOffset(
   const effectiveW = isRotated ? def.h : def.w;
   const effectiveH = isRotated ? def.w : def.h;
   const asymmetric = def.w !== def.h;
-  const offX = asymmetric && rotation === 90 ? -(effectiveW - 1) || 0 : 0;
-  const offY = asymmetric && rotation === 180 ? -(effectiveH - 1) || 0 : 0;
+  const offX = asymmetric && rotation === 90 && effectiveW > 1 ? -(effectiveW - 1) : 0;
+  const offY = asymmetric && rotation === 180 && effectiveH > 1 ? -(effectiveH - 1) : 0;
   return { effectiveH, effectiveW, offX, offY };
 }
 

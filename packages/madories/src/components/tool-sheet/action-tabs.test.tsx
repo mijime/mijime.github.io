@@ -35,9 +35,7 @@ describe("ActionTabs", () => {
   });
 
   it("applies disabled state when canUndo is false", () => {
-    const html = renderToString(
-      <ActionTabs {...baseProps} canUndo={false} onClose={() => {}} />,
-    );
+    const html = renderToString(<ActionTabs {...baseProps} canUndo={false} onClose={() => {}} />);
     expect(html).toContain('disabled=""');
     expect(html).toContain("opacity:0.4");
   });

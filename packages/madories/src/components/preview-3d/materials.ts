@@ -50,6 +50,8 @@ export const ITEM_HEIGHT_FACTORS: Partial<Record<ItemType, number>> = {
   chair: 0.5,
   bed_single: 0.5,
   bed_double: 0.5,
+  desk: 0.5,
+  desk_small: 0.5,
   washer: 1.5,
   fridge: 1.5,
   shelf1: 1.5,
@@ -60,4 +62,35 @@ export const ITEM_HEIGHT_FACTOR_DEFAULT = 0.8;
 
 export function getItemHeightFactor(type: ItemType): number {
   return ITEM_HEIGHT_FACTORS[type] ?? ITEM_HEIGHT_FACTOR_DEFAULT;
+}
+
+export const ITEM_DEPTH_FACTORS: Partial<Record<ItemType, number>> = {
+  tv: 0.15,
+};
+
+export function getItemDepthFactor(type: ItemType): number {
+  return ITEM_DEPTH_FACTORS[type] ?? 1;
+}
+
+export const ITEM_PART_COLORS: Partial<
+  Record<ItemType, Record<string, { light: string; dark: string }>>
+> = {
+  sofa: {
+    back: { light: "#8B7D6B", dark: "#7a6e5e" },
+    seat: { light: "#A0907D", dark: "#8c7d6a" },
+  },
+  desk: {
+    leg: { light: "#6B5030", dark: "#7a5830" },
+    top: { light: "#D4B896", dark: "#b08a60" },
+  },
+  washbasin_large: {
+    mirror: { light: "#E8F4F8", dark: "#1a3a4a" },
+    counter: { light: "#EAD8C0", dark: "#6a5a40" },
+  },
+};
+
+export function getItemPartColor(type: ItemType, part: string, darkMode: boolean): string {
+  const entry = ITEM_PART_COLORS[type]?.[part];
+  if (entry) return darkMode ? entry.dark : entry.light;
+  return darkMode ? "#666666" : "#999999";
 }

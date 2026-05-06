@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test";
-import { getItemDrawOffset } from "./furniture-mesh";
+import { getItemDrawOffset, getItemCenterPosition } from "./furniture-mesh";
 
 describe("getItemDrawOffset", () => {
   it("returns no offset for 0° rotation", () => {
@@ -32,5 +32,34 @@ describe("getItemDrawOffset", () => {
   it("handles wider items correctly at 90°", () => {
     const result = getItemDrawOffset(2, 1, 90);
     expect(result).toEqual({ effectiveW: 1, effectiveH: 2, offX: 0, offY: 0 });
+  });
+});
+
+describe("getItemCenterPosition", () => {
+  const c = 10;
+
+  it("centers a single-tile item on its cell", () => {
+    const result = getItemCenterPosition(0, 0, 1, 1, c);
+    expect(result).toEqual({ posX: 5, posZ: 5 });
+  });
+
+  it("centers a 1x2 item across its 2-cell span", () => {
+    const result = getItemCenterPosition(0, 0, 1, 2, c);
+    expect(result).toEqual({ posX: 5, posZ: 10 });
+  });
+
+  it("centers a 2x1 item across its 2-cell width", () => {
+    const result = getItemCenterPosition(0, 0, 2, 1, c);
+    expect(result).toEqual({ posX: 10, posZ: 5 });
+  });
+
+  it("accounts for draw offset in position", () => {
+    const result = getItemCenterPosition(-1, 0, 2, 1, c);
+    expect(result).toEqual({ posX: 0, posZ: 5 });
+  });
+
+  it("works for non-zero origin cells", () => {
+    const result = getItemCenterPosition(2, 3, 1, 1, c);
+    expect(result).toEqual({ posX: 25, posZ: 35 });
   });
 });
