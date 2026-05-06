@@ -30,10 +30,15 @@ describe("getItemHeightFactor", () => {
     expect(getItemHeightFactor("shelf2")).toBe(1.5);
   });
 
+  it("returns 0.5 for desk", () => {
+    expect(getItemHeightFactor("desk")).toBe(0.5);
+    expect(getItemHeightFactor("desk_small")).toBe(0.5);
+  });
+
   it("returns default 0.8 for items without explicit factor", () => {
-    expect(getItemHeightFactor("desk")).toBe(ITEM_HEIGHT_FACTOR_DEFAULT);
     expect(getItemHeightFactor("toilet")).toBe(ITEM_HEIGHT_FACTOR_DEFAULT);
     expect(getItemHeightFactor("stairs")).toBe(ITEM_HEIGHT_FACTOR_DEFAULT);
+    expect(getItemHeightFactor("kitchen")).toBe(ITEM_HEIGHT_FACTOR_DEFAULT);
   });
 });
 

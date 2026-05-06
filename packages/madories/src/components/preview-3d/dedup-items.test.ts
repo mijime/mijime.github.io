@@ -9,8 +9,16 @@ function makeFloor(w: number, h: number, cells: FloorPlan["cells"]): FloorPlan {
 describe("dedupFloorItems", () => {
   it("renders each single-tile item once", () => {
     const floor = makeFloor(2, 1, [
-      { floorType: "wood", wall: { top: "solid", left: "solid" }, item: { type: "chair", rotation: 0 } },
-      { floorType: "wood", wall: { top: "solid", left: "solid" }, item: { type: "toilet", rotation: 0 } },
+      {
+        floorType: "wood",
+        wall: { top: "solid", left: "solid" },
+        item: { type: "chair", rotation: 0 },
+      },
+      {
+        floorType: "wood",
+        wall: { top: "solid", left: "solid" },
+        item: { type: "toilet", rotation: 0 },
+      },
     ]);
     const result = dedupFloorItems(floor);
     expect(result).toHaveLength(2);
@@ -20,9 +28,17 @@ describe("dedupFloorItems", () => {
 
   it("deduplicates a 1x2 item at rotation 0", () => {
     const floor = makeFloor(2, 2, [
-      { floorType: "wood", wall: { top: "solid", left: "solid" }, item: { type: "sofa", rotation: 0 } },
+      {
+        floorType: "wood",
+        wall: { top: "solid", left: "solid" },
+        item: { type: "sofa", rotation: 0 },
+      },
       { floorType: "wood", wall: { top: "solid", left: "solid" }, item: null },
-      { floorType: "wood", wall: { top: "solid", left: "solid" }, item: { type: "sofa", rotation: 0 } },
+      {
+        floorType: "wood",
+        wall: { top: "solid", left: "solid" },
+        item: { type: "sofa", rotation: 0 },
+      },
       { floorType: "wood", wall: { top: "solid", left: "solid" }, item: null },
     ]);
     const result = dedupFloorItems(floor);
@@ -32,8 +48,16 @@ describe("dedupFloorItems", () => {
 
   it("deduplicates a 1x2 item at rotation 90", () => {
     const floor = makeFloor(2, 2, [
-      { floorType: "wood", wall: { top: "solid", left: "solid" }, item: { type: "sofa", rotation: 90 } },
-      { floorType: "wood", wall: { top: "solid", left: "solid" }, item: { type: "sofa", rotation: 90 } },
+      {
+        floorType: "wood",
+        wall: { top: "solid", left: "solid" },
+        item: { type: "sofa", rotation: 90 },
+      },
+      {
+        floorType: "wood",
+        wall: { top: "solid", left: "solid" },
+        item: { type: "sofa", rotation: 90 },
+      },
       { floorType: "wood", wall: { top: "solid", left: "solid" }, item: null },
       { floorType: "wood", wall: { top: "solid", left: "solid" }, item: null },
     ]);
@@ -44,13 +68,29 @@ describe("dedupFloorItems", () => {
 
   it("handles multiple multi-tile items", () => {
     const floor = makeFloor(2, 4, [
-      { floorType: "wood", wall: { top: "solid", left: "solid" }, item: { type: "tv", rotation: 0 } },
+      {
+        floorType: "wood",
+        wall: { top: "solid", left: "solid" },
+        item: { type: "tv", rotation: 0 },
+      },
       { floorType: "wood", wall: { top: "solid", left: "solid" }, item: null },
-      { floorType: "wood", wall: { top: "solid", left: "solid" }, item: { type: "tv", rotation: 0 } },
+      {
+        floorType: "wood",
+        wall: { top: "solid", left: "solid" },
+        item: { type: "tv", rotation: 0 },
+      },
       { floorType: "wood", wall: { top: "solid", left: "solid" }, item: null },
-      { floorType: "wood", wall: { top: "solid", left: "solid" }, item: { type: "stairs", rotation: 0 } },
+      {
+        floorType: "wood",
+        wall: { top: "solid", left: "solid" },
+        item: { type: "stairs", rotation: 0 },
+      },
       { floorType: "wood", wall: { top: "solid", left: "solid" }, item: null },
-      { floorType: "wood", wall: { top: "solid", left: "solid" }, item: { type: "stairs", rotation: 0 } },
+      {
+        floorType: "wood",
+        wall: { top: "solid", left: "solid" },
+        item: { type: "stairs", rotation: 0 },
+      },
       { floorType: "wood", wall: { top: "solid", left: "solid" }, item: null },
     ]);
     const result = dedupFloorItems(floor);

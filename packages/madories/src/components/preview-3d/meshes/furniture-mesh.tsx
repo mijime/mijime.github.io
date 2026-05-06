@@ -1,7 +1,7 @@
 import { memo } from "react";
 import type { Item, ItemType } from "../../../types";
 import { ITEM_DEF_MAP } from "../../../items";
-import { ITEM_COLORS, getItemDepthFactor, getItemHeightFactor } from "../materials";
+import { ITEM_COLORS, getItemDepthFactor, getItemHeightFactor, getItemPartColor } from "../materials";
 
 const ITEM_MESH_SCALE = 0.9;
 
@@ -72,8 +72,8 @@ export const FurnitureMesh = memo(function FurnitureMesh({
   const rotation: [number, number, number] = [0, -item.rotation * (Math.PI / 180), 0];
 
   if (item.type === "sofa") {
-    const backColor = darkMode ? "#7a6e5e" : "#8B7D6B";
-    const seatColor = darkMode ? "#8c7d6a" : "#A0907D";
+    const backColor = getItemPartColor("sofa", "back", darkMode);
+    const seatColor = getItemPartColor("sofa", "seat", darkMode);
     const backrestW = width * 0.25;
     const seatW = width * 0.45;
     const backrestX = -width / 2 + backrestW / 2;
@@ -93,9 +93,9 @@ export const FurnitureMesh = memo(function FurnitureMesh({
   }
 
   if (item.type === "desk") {
-    const legColor = darkMode ? "#7a5830" : "#6B5030";
-    const topColor = darkMode ? "#b08a60" : "#D4B896";
-    const legR = Math.min(width, depth) * 0.07;
+    const legColor = getItemPartColor("desk", "leg", darkMode);
+    const topColor = getItemPartColor("desk", "top", darkMode);
+    const legS = Math.min(width, depth) * 0.07;
     const legH = height * 0.75;
     const topH = height * 0.15;
     const inset = Math.min(width, depth) * 0.1;
@@ -109,7 +109,7 @@ export const FurnitureMesh = memo(function FurnitureMesh({
       <group position={[posX, 0, posZ]} rotation={rotation}>
         {legs.map(([lx, lz], i) => (
           <mesh key={i} position={[lx, legH / 2, lz]}>
-            <boxGeometry args={[legR * 2, legH, legR * 2]} />
+            <boxGeometry args={[legS * 2, legH, legS * 2]} />
             <meshStandardMaterial color={legColor} />
           </mesh>
         ))}
@@ -122,8 +122,8 @@ export const FurnitureMesh = memo(function FurnitureMesh({
   }
 
   if (item.type === "washbasin_large") {
-    const mirrorColor = darkMode ? "#1a3a4a" : "#E8F4F8";
-    const counterColor = darkMode ? "#6a5a40" : "#EAD8C0";
+    const mirrorColor = getItemPartColor("washbasin_large", "mirror", darkMode);
+    const counterColor = getItemPartColor("washbasin_large", "counter", darkMode);
     const mirrorW = width * 0.28;
     const counterW = width * 0.65;
     const mirrorX = -width / 2 + mirrorW / 2;
