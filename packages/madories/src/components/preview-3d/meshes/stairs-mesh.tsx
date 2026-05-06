@@ -63,7 +63,10 @@ export const StairsMesh = memo(function StairsMesh({ x, y, cellSize, item, darkM
   if (!steps) return null;
 
   return (
-    <group position={[steps.posX, 0, steps.posZ]} rotation={[0, -item.rotation * (Math.PI / 180), 0]}>
+    <group
+      position={[steps.posX, 0, steps.posZ]}
+      rotation={[0, -item.rotation * (Math.PI / 180), 0]}
+    >
       {steps.stepElements}
     </group>
   );
