@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef } from "react";
 import { drawGrid } from "../../draw/draw-grid";
-import { getItemDrawOffset } from "../../draw/draw-items";
+import { getDisplayedDimensions } from "../../draw/draw-items";
 import { drawVoidCells } from "../../draw/draw-void";
 import { drawWalls } from "../../draw/draw-walls";
 import { computeWallDimensions, fmtMm } from "../../draw/export";
@@ -104,13 +104,11 @@ function drawItemsCached(
       if (!def) {
         continue;
       }
-      const { effectiveW, effectiveH, offX, offY } = getItemDrawOffset(def, cell.item.rotation);
-      const drawX = x + offX;
-      const drawY = y + offY;
-      if (drawX < 0 || drawY < 0 || drawX + effectiveW > width || drawY + effectiveH > height) {
+      const { effectiveW, effectiveH } = getDisplayedDimensions(def, cell.item.rotation);
+      if (x < 0 || y < 0 || x + effectiveW > width || y + effectiveH > height) {
         continue;
       }
-      drawItemAtCached(ctx, cell.item, drawX * cellSize, drawY * cellSize, cellSize, 1, darkMode);
+      drawItemAtCached(ctx, cell.item, x * cellSize, y * cellSize, cellSize, 1, darkMode);
     }
   }
 }
@@ -254,10 +252,7 @@ export function useCanvasDraw(props: Props): {
         if (def) {
           const cx = Math.floor(ghost.mx / cellSize);
           const cy = Math.floor(ghost.my / cellSize);
-          const { offX, offY } = getItemDrawOffset(def, item.rotation);
-          const drawX = cx + offX;
-          const drawY = cy + offY;
-          drawItemAtCached(ctx, item, drawX * cellSize, drawY * cellSize, cellSize, 0.5, darkMode);
+          drawItemAtCached(ctx, item, cx * cellSize, cy * cellSize, cellSize, 0.5, darkMode);
         }
       }
     }
