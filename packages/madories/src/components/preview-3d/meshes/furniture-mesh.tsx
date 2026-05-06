@@ -25,8 +25,8 @@ export function getItemCenterPosition(
   effectiveH: number,
   cellSize: number,
 ): { posX: number; posZ: number } {
-  const posX = (drawX + effectiveW / 2) * cellSize;
-  const posZ = (drawY + effectiveH / 2) * cellSize;
+  const posX = (drawX + effectiveW / 2 - 0.5) * cellSize;
+  const posZ = (drawY + effectiveH / 2 - 0.5) * cellSize;
   return { posX, posZ };
 }
 
