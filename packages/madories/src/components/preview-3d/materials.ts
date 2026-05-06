@@ -61,3 +61,11 @@ export const ITEM_HEIGHT_FACTOR_DEFAULT = 0.8;
 export function getItemHeightFactor(type: ItemType): number {
   return ITEM_HEIGHT_FACTORS[type] ?? ITEM_HEIGHT_FACTOR_DEFAULT;
 }
+
+export const ITEM_DEPTH_FACTORS: Partial<Record<ItemType, number>> = {
+  tv: 0.15,
+};
+
+export function getItemDepthFactor(type: ItemType): number {
+  return ITEM_DEPTH_FACTORS[type] ?? 1;
+}

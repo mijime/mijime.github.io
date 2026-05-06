@@ -3,11 +3,12 @@ import { Canvas } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
 import type { FloorPlan } from "../../types";
 import { generateFloorTiles, generateWallSegments } from "../../floor/geometry-3d";
+import { ITEM_DEF_MAP } from "../../items";
 import { PreviewCamera } from "./camera";
 import { Lighting } from "./lighting";
 import { FloorMesh } from "./meshes/floor-mesh";
 import { WallMesh } from "./meshes/wall-mesh";
-import { FurnitureMesh } from "./meshes/furniture-mesh";
+import { FurnitureMesh, getItemDrawOffset } from "./meshes/furniture-mesh";
 import { StairsMesh } from "./meshes/stairs-mesh";
 
 interface Props {
@@ -21,12 +22,20 @@ export function FloorPlanScene({ floor, cellSize, darkMode }: Props) {
   const walls = useMemo(() => generateWallSegments(floor), [floor]);
   const items = useMemo(() => {
     const result: { x: number; y: number; item: FloorPlan["cells"][number]["item"] }[] = [];
+    const seen = new Set<string>();
     for (let y = 0; y < floor.height; y++) {
       for (let x = 0; x < floor.width; x++) {
         const cell = floor.cells[y * floor.width + x];
-        if (cell.item) {
-          result.push({ x, y, item: cell.item });
-        }
+        if (!cell.item) continue;
+        const def = ITEM_DEF_MAP.get(cell.item.type);
+        if (!def) continue;
+        const { offX, offY } = getItemDrawOffset(def.w, def.h, cell.item.rotation);
+        const drawX = x + offX;
+        const drawY = y + offY;
+        const key = `${drawX},${drawY}`;
+        if (seen.has(key)) continue;
+        seen.add(key);
+        result.push({ x, y, item: cell.item });
       }
     }
     return result;

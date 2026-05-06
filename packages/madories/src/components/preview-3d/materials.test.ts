@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test";
-import { getItemHeightFactor, ITEM_HEIGHT_FACTOR_DEFAULT } from "./materials";
+import { getItemDepthFactor, getItemHeightFactor, ITEM_HEIGHT_FACTOR_DEFAULT } from "./materials";
 
 describe("getItemHeightFactor", () => {
   it("returns 0.5 for chair", () => {
@@ -34,5 +34,17 @@ describe("getItemHeightFactor", () => {
     expect(getItemHeightFactor("desk")).toBe(ITEM_HEIGHT_FACTOR_DEFAULT);
     expect(getItemHeightFactor("toilet")).toBe(ITEM_HEIGHT_FACTOR_DEFAULT);
     expect(getItemHeightFactor("stairs")).toBe(ITEM_HEIGHT_FACTOR_DEFAULT);
+  });
+});
+
+describe("getItemDepthFactor", () => {
+  it("returns 1 for items without explicit depth factor", () => {
+    expect(getItemDepthFactor("sofa")).toBe(1);
+    expect(getItemDepthFactor("desk")).toBe(1);
+    expect(getItemDepthFactor("fridge")).toBe(1);
+  });
+
+  it("returns thinner factor for flat-screen items", () => {
+    expect(getItemDepthFactor("tv")).toBe(0.15);
   });
 });
