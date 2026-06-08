@@ -372,9 +372,9 @@ export function usePointerHandlers(props: Props): {
     }
     if (prevCount === 2 && activePointerCountRef.current === 1) {
       const elapsed =
-        twoFingerDownTimeRef.current !== null
-          ? Date.now() - twoFingerDownTimeRef.current
-          : Infinity;
+        twoFingerDownTimeRef.current === null
+          ? Infinity
+          : Date.now() - twoFingerDownTimeRef.current;
       if (elapsed < 300 && !twoFingerMovedRef.current) {
         onUndoRef.current?.();
       }
@@ -459,9 +459,9 @@ export function usePointerHandlers(props: Props): {
       const action = resolveItemAction({
         dragMoved: dragMovedRef.current,
         endCell:
-          idx !== null
-            ? floor.cells[idx]
-            : { floorType: null, item: null, wall: { left: "none", top: "none" } },
+          idx === null
+            ? { floorType: null, item: null, wall: { left: "none", top: "none" } }
+            : floor.cells[idx],
         endIdx: idx,
         startIdx: start,
         toolItemType: tool.itemType,

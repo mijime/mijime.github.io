@@ -5,7 +5,14 @@ export const WALL_WINDOW_SCORE: Partial<Record<WallType, number>> = {
   window_full: 1,
 };
 
-export type FloorType = "wood" | "water" | "tatami" | "concrete" | "void";
+export type FloorType =
+  | "wood"
+  | "water"
+  | "tatami"
+  | "concrete"
+  | "void"
+  | "exterior-concrete"
+  | "exterior-grass";
 
 export interface WallFlags {
   top: WallType;
@@ -33,7 +40,8 @@ export type ItemType =
   | "sofa"
   | "bed_single"
   | "bed_double"
-  | "desk_small";
+  | "desk_small"
+  | "car";
 
 export interface Item {
   type: ItemType;

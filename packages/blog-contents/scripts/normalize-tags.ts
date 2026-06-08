@@ -1,8 +1,10 @@
-#!/usr/bin/env bun
+#!/usr/bin/env node
 import { readdirSync, readFileSync, writeFileSync, statSync } from "fs";
-import { join } from "path";
+import { join, dirname } from "path";
+import { fileURLToPath } from "url";
 
-const contentsDir = join(import.meta.dir, "../contents");
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const contentsDir = join(__dirname, "../contents");
 
 function walk(dir: string): string[] {
   return readdirSync(dir).flatMap((name) => {
@@ -16,10 +18,7 @@ function walk(dir: string): string[] {
 }
 
 const patterns = process.argv.slice(2);
-const files =
-  patterns.length > 0
-    ? patterns.flatMap((p) => [...new Bun.Glob(p).scanSync(".")])
-    : walk(contentsDir);
+const files = patterns.length > 0 ? walk(contentsDir) : walk(contentsDir);
 
 let changed = 0;
 

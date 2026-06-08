@@ -1,8 +1,7 @@
-import { join } from "node:path";
+import path from "node:path";
 import mdx from "@astrojs/mdx";
 import react from "@astrojs/react";
 import { blogIntegration } from "@mijime/blog/integration";
-import { generateBlogParquet } from "@mijime/blog/parquet";
 import tailwindcss from "@tailwindcss/vite";
 import { defineConfig } from "astro/config";
 
@@ -14,19 +13,8 @@ export default defineConfig({
       globalCss: "/src/styles/global.css",
       siteUrl: "https://mijime.github.io",
       siteName: "mijime",
-      contentsDir: join(process.cwd(), "../../packages/blog-contents/contents"),
+      contentsDir: path.join(process.cwd(), "../../packages/blog-contents/contents"),
     }),
-    {
-      name: "blog-parquet",
-      hooks: {
-        "astro:build:start": async () => {
-          await generateBlogParquet(
-            join(process.cwd(), "public"),
-            join(process.cwd(), "../../packages/blog-contents/contents"),
-          );
-        },
-      },
-    },
   ],
   markdown: {
     shikiConfig: {
@@ -36,6 +24,9 @@ export default defineConfig({
   },
   vite: {
     plugins: [tailwindcss()],
+    resolve: {
+      dedupe: ["lucide-react", "react", "react-dom"],
+    },
     optimizeDeps: {
       include: ["react-dom/client"],
     },

@@ -10,7 +10,7 @@ interface Props {
   darkMode: boolean;
 }
 
-export const FloorMesh = memo(function FloorMesh({ cx, cy, cellSize, floorType, darkMode }: Props) {
+export const FloorMesh = memo(({ cx, cy, cellSize, floorType, darkMode }: Props) => {
   const worldX = cx * cellSize;
   const worldZ = cy * cellSize;
   const color = FLOOR_COLORS[floorType][darkMode ? "dark" : "light"];

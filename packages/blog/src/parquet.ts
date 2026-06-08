@@ -1,68 +1,25 @@
 import duckdb from "duckdb";
 const { Database } = duckdb;
 import { writeFileSync, mkdirSync, unlinkSync, readFileSync, readdirSync } from "node:fs";
-import { join } from "node:path";
+import path from "node:path";
+const { join } = path;
 import type { PostMeta } from "./types.ts";
-
-interface Token {
-  surface_form: string;
-  pos: string;
-  basic_form: string;
-}
-
-async function loadTokenizer(): Promise<(text: string) => Token[]> {
-  const mod = await import(
-    /* @vite-ignore */
-    "lindera-js/lindera_js.js"
-  );
-  return mod.tokenize as unknown as (text: string) => Token[];
-}
-
-const STOP_POS = new Set(["助詞", "助動詞", "記号", "接続詞", "感動詞"]);
-const STOP_WORDS = new Set([
-  "する",
-  "ある",
-  "なる",
-  "いる",
-  "れる",
-  "られる",
-  "こと",
-  "もの",
-  "ため",
-  "よう",
-]);
-
-function extractKeywords(tokens: Token[], topN = 10): string[] {
-  const freq = new Map<string, number>();
-  for (const t of tokens) {
-    if (!STOP_POS.has(t.pos)) {
-      const word = t.basic_form === "*" ? t.surface_form : t.basic_form;
-      if (word && word.length >= 2 && !STOP_WORDS.has(word)) {
-        freq.set(word, (freq.get(word) ?? 0) + 1);
-      }
-    }
-  }
-  return [...freq.entries()]
-    .toSorted((a, b) => b[1] - a[1])
-    .slice(0, topN)
-    .map(([w]) => w);
-}
 
 const defaultContentsDir =
   process.env.BLOG_CONTENTS_DIR ?? join(import.meta.dirname, "../contents");
 
 function parseFrontmatter(raw: string): Record<string, unknown> {
-  const match = raw.match(/^---\n([\s\S]*?)\n---/);
+  const match = raw.match(/^---\n(?<frontmatter>[\s\S]*?)\n---/u);
   if (!match) return {};
   const meta: Record<string, unknown> = {};
-  for (const line of match[1].split("\n")) {
+  for (const line of match.groups!.frontmatter.split("\n")) {
     const colon = line.indexOf(":");
     if (colon !== -1) {
       const key = line.slice(0, colon).trim();
       const val = line
         .slice(colon + 1)
         .trim()
-        .replaceAll(/^['"]|['"]$/g, "");
+        .replaceAll(/^['"]|['"]$/gu, "");
       meta[key] = val;
     }
   }
@@ -81,7 +38,7 @@ function scanFile(
   if (fm.IsDraft === "true" || fm.IsDraft === true) return null;
   const tags =
     typeof fm.Tags === "string"
-      ? fm.Tags.replaceAll(/[[\]'"\s]/g, "")
+      ? fm.Tags.replaceAll(/[[\]'"\s]/gu, "")
           .split(",")
           .filter(Boolean)
       : [];
@@ -93,7 +50,7 @@ function scanFile(
     UpdatedAt: fm.UpdatedAt ? String(fm.UpdatedAt) : undefined,
     category,
     ym,
-    slug: file.replace(/\.md$/, ""),
+    slug: file.replace(/\.md$/u, ""),
   };
 }
 
@@ -114,26 +71,12 @@ function scanMeta(contentsDir: string): PostMeta[] {
   return posts;
 }
 
-function getBody(meta: PostMeta, contentsDir: string): string {
-  const path = join(contentsDir, meta.category, meta.ym, `${meta.slug}.md`);
-  const raw = readFileSync(path, "utf8");
-  const m = raw.match(/^---\n[\s\S]*?\n---\n([\s\S]*)$/);
-  return m ? m[1].trim() : raw;
-}
-
 export async function generateBlogParquet(
   outDir: string,
   contentsDir = defaultContentsDir,
 ): Promise<void> {
-  const tokenize = await loadTokenizer();
   const meta = scanMeta(contentsDir);
-
-  const enriched = meta.map((p) => {
-    const body = getBody(p, contentsDir);
-    const tokens: Token[] = tokenize(body);
-    const keywords = extractKeywords(tokens);
-    return { ...p, Keywords: keywords };
-  });
+  const enriched = meta.map((p) => ({ ...p, Keywords: [] as string[] }));
 
   return new Promise((resolve, reject) => {
     mkdirSync(outDir, { recursive: true });

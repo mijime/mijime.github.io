@@ -8,15 +8,15 @@
     "./useDarkMode": "./src/use-dark-mode.ts"
   },
   "scripts": {
-    "check": "bun run check:oxlint",
+    "check": "pnpm run check:oxlint",
     "check:oxlint": "oxlint --format=github --fix",
-    "format": "bun run format:oxfmt",
+    "format": "pnpm run format:oxfmt",
     "format:oxfmt": "oxfmt"
   },
   "devDependencies": {
-    "@types/react": "^19.2.14",
+    "@types/react": "^19.2.17",
     "oxfmt": "^0.46.0",
-    "oxlint": "^1.62.0"
+    "oxlint": "^1.68.0"
   },
   "peerDependencies": {
     "lucide-react": "^1.14.0",

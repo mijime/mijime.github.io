@@ -9,7 +9,15 @@
     "noEmit": true,
     "skipLibCheck": true,
     "allowImportingTsExtensions": true,
-    "types": ["vite/client"]
+    "types": ["vite/client"],
+    "paths": {
+      "astro": [
+        "../../node_modules/.pnpm/astro@6.4.4_@types+node@25.9.2_jiti@2.7.0_lightningcss@1.32.0_rollup@4.61.1_tsx@4.22.4_yaml@2.9.0/node_modules/astro"
+      ],
+      "astro/*": [
+        "../../node_modules/.pnpm/astro@6.4.4_@types+node@25.9.2_jiti@2.7.0_lightningcss@1.32.0_rollup@4.61.1_tsx@4.22.4_yaml@2.9.0/node_modules/astro/*"
+      ]
+    }
   },
   "include": ["src"],
   "exclude": ["src/content.config.ts"]

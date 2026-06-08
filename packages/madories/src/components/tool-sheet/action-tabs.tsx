@@ -196,12 +196,12 @@ export function ActionTabs({
       {activeTab === "operation" && (
         <button
           onClick={() => {
-            if (!clearPending) {
-              setClearPending(true);
-            } else {
+            if (clearPending) {
               setClearPending(false);
               onClear();
               onClose?.();
+            } else {
+              setClearPending(true);
             }
           }}
           title="全面削除"

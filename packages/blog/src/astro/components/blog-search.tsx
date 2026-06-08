@@ -32,7 +32,7 @@ const ResultCount = ({
 }) => {
   if (searchError) return <p className="search-status search-error">{searchError}</p>;
   if (!searched) return null;
-  const suffix = results.length !== 1 ? "s" : "";
+  const suffix = results.length === 1 ? "" : "s";
   return (
     <p className="search-status">
       {results.length} result{suffix}
@@ -41,9 +41,11 @@ const ResultCount = ({
 };
 
 export function BlogSearch() {
-  const q =
-    new URLSearchParams(typeof window !== "undefined" ? window.location.search : "").get("q") ??
-    undefined;
+  const searchParams =
+    typeof window === "undefined"
+      ? new URLSearchParams()
+      : new URLSearchParams(window.location.search);
+  const q = searchParams.get("q") ?? undefined;
   const [input, setInput] = useState(q ?? "");
   const [ready, setReady] = useState(false);
   const [results, setResults] = useState<PostMeta[]>([]);
@@ -78,10 +80,9 @@ export function BlogSearch() {
   const triggerSearch = (query: string) => {
     pendingSearch.current = query;
     initDB();
-    if (ready) {
-      pendingSearch.current = null;
-      runSearch(query, setResults, setSearchError, setSearched);
-    }
+    if (!ready) return;
+    pendingSearch.current = null;
+    runSearch(query, setResults, setSearchError, setSearched);
   };
 
   return (

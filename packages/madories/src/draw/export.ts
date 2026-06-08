@@ -281,7 +281,13 @@ export function exportAllFloorsPng(floors: FloorPlan[], cellSize: number): void 
     canvas: renderFloorToCanvas(f, cellSize),
     floor: f,
     name: f.name,
-    tsubo: f.cells.filter((c) => c.floorType !== null).length / 4,
+    tsubo:
+      f.cells.filter(
+        (c) =>
+          c.floorType !== null &&
+          c.floorType !== "exterior-concrete" &&
+          c.floorType !== "exterior-grass",
+      ).length / 4,
   }));
   const valid = tsuboPerFloor.filter((r) => r.canvas !== null) as {
     canvas: HTMLCanvasElement;

@@ -7,25 +7,22 @@ export interface ParsedQuery {
 
 export function parseQuery(input: string): ParsedQuery {
   const result: ParsedQuery = { text: [], tags: [] };
-  const tokens = input.trim().split(/\s+/);
+  const tokens = input.trim().split(/\s+/u);
   for (const token of tokens) {
     if (!token) continue;
-    const tagMatch = token.match(/^tags?:(.+)$/i);
+    const tagMatch = token.match(/^tags?:(?<tagValue>.+)$/iu);
     if (tagMatch) {
-      const [, tagValue] = tagMatch;
-      result.tags.push(tagValue);
+      result.tags.push(tagMatch.groups!.tagValue);
       continue;
     }
-    const dateGte = token.match(/^date>=?:(.+)$/i);
+    const dateGte = token.match(/^date>=?:(?<dateGteValue>.+)$/iu);
     if (dateGte) {
-      const [, dateGteValue] = dateGte;
-      result.dateGte = dateGteValue;
+      result.dateGte = dateGte.groups!.dateGteValue;
       continue;
     }
-    const dateLte = token.match(/^date<=?:(.+)$/i);
+    const dateLte = token.match(/^date<=?:(?<dateLteValue>.+)$/iu);
     if (dateLte) {
-      const [, dateLteValue] = dateLte;
-      result.dateLte = dateLteValue;
+      result.dateLte = dateLte.groups!.dateLteValue;
       continue;
     }
     result.text.push(token);

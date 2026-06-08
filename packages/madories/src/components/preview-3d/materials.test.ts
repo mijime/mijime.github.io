@@ -1,4 +1,4 @@
-import { describe, expect, it } from "bun:test";
+import { describe, expect, it } from "vitest";
 import { getItemDepthFactor, getItemHeightFactor, ITEM_HEIGHT_FACTOR_DEFAULT } from "./materials";
 
 describe("getItemHeightFactor", () => {
