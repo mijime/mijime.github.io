@@ -52,13 +52,7 @@ function getItemColor(type: ItemType, darkMode: boolean): string {
   return darkMode ? "#666666" : "#999999";
 }
 
-export const FurnitureMesh = memo(function FurnitureMesh({
-  x,
-  y,
-  cellSize,
-  item,
-  darkMode,
-}: Props) {
+export const FurnitureMesh = memo(({ x, y, cellSize, item, darkMode }: Props) => {
   const def = ITEM_DEF_MAP.get(item.type);
   if (!def) return null;
 

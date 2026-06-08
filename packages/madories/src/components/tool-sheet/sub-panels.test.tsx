@@ -1,4 +1,4 @@
-import { describe, expect, it } from "bun:test";
+import { describe, expect, it } from "vitest";
 import { renderToString } from "react-dom/server";
 import { SubPanels } from "./sub-panels";
 

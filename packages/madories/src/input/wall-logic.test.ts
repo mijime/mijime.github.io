@@ -1,4 +1,4 @@
-import { describe, expect, it } from "bun:test";
+import { describe, expect, it } from "vitest";
 import { resolveWallSegments } from "./wall-logic";
 
 const CS = 40; // CellSize

@@ -1,6 +1,6 @@
 import type { ItemType, WallType } from "./types";
 
-export type ItemCategory = "建具" | "水回り" | "キッチン" | "リビング" | "寝室";
+export type ItemCategory = "建具" | "水回り" | "キッチン" | "リビング" | "寝室" | "外構";
 
 export interface ItemDef {
   type: ItemType;
@@ -51,6 +51,7 @@ export const ITEM_DEFS: ItemDef[] = [
   { category: "リビング", h: 1, label: "椅子", type: "chair", w: 1 },
   { category: "リビング", h: 1, label: "机(小)", type: "desk_small", w: 1 },
   { category: "リビング", h: 2, label: "机(大)", type: "desk", w: 1 },
+  { category: "外構", h: 5, label: "車", type: "car", w: 3 },
 ];
 
 export const ITEM_DEF_MAP = new Map(ITEM_DEFS.map((d) => [d.type, d]));
@@ -80,4 +81,11 @@ export const WALL_LEGEND_LABEL: Partial<Record<WallType, string>> = {
   window_full: "全窓",
 };
 
-export const ITEM_CATEGORIES: ItemCategory[] = ["建具", "水回り", "キッチン", "リビング", "寝室"];
+export const ITEM_CATEGORIES: ItemCategory[] = [
+  "建具",
+  "水回り",
+  "キッチン",
+  "リビング",
+  "寝室",
+  "外構",
+];

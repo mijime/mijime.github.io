@@ -1,4 +1,4 @@
-import { describe, expect, it } from "bun:test";
+import { describe, expect, it } from "vitest";
 import { renderToString } from "react-dom/server";
 import { getToolModeForKind, PrimaryToolTabs } from "./primary-tool-tabs";
 import type { ToolMode } from "../tool-mode";
@@ -21,7 +21,7 @@ describe("PrimaryToolTabs", () => {
     );
 
     // Verify all 5 buttons are rendered
-    const buttonMatches = html.match(/<button/g);
+    const buttonMatches = html.match(/<button/gu);
     expect(buttonMatches).toHaveLength(5);
 
     // Verify SVG icons are present (lucide-react renders SVG)

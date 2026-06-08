@@ -19,6 +19,8 @@ export const FLOOR_TYPES: {
   { dark: "#3a2e1a", label: "畳", light: "#c8b878", type: "tatami" },
   { dark: "#3a3a3a", label: "土間", light: "#d0d0d0", type: "concrete" },
   { dark: "#2a2518", label: "吹き抜け", light: "#fff8e8", type: "void" },
+  { dark: "#808080", label: "コンクリート(外構)", light: "#b0b0b0", type: "exterior-concrete" },
+  { dark: "#5a8a5a", label: "草(外構)", light: "#7cb87c", type: "exterior-grass" },
 ];
 
 export function floorTypeToColor(type: FloorType | null, darkMode: boolean): string | null {

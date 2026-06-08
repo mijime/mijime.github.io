@@ -10,7 +10,7 @@ export async function getStaticPaths() {
     .filter((p) => !p.data.IsDraft && p.id.split("/").length === 3)
     .map((p) => {
       const [category, ym, slugMd] = p.id.split("/");
-      const slug = slugMd.replace(/\.md$/, "");
+      const slug = slugMd.replace(/\.md$/u, "");
       return { params: { category, ym, slug }, props: { entry: p } };
     });
 }

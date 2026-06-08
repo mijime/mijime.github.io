@@ -1,4 +1,4 @@
-import { describe, expect, it } from "bun:test";
+import { describe, expect, it } from "vitest";
 import { resolveItemAction } from "./item-logic";
 import type { Cell } from "../types";
 
