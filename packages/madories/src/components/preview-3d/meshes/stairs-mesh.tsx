@@ -18,7 +18,7 @@ const STAIRS_MESH_SCALE = 0.95;
 
 function getItemColor(darkMode: boolean): string {
   const entry = ITEM_COLORS.stairs;
-  return entry ? (darkMode ? entry.dark : entry.light) : (darkMode ? "#666666" : "#999999");
+  return entry ? (darkMode ? entry.dark : entry.light) : darkMode ? "#666666" : "#999999";
 }
 
 export const StairsMesh = memo(({ x, y, cellSize, item, darkMode }: Props) => {
