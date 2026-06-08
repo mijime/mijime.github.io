@@ -9,6 +9,6 @@
     "format": "pnpm -r run format"
   },
   "type": "module",
-  "packageManager": "pnpm@10.0.0",
+  "packageManager": "pnpm@11.5.1",
   "workspaces": ["apps/*", "packages/*"]
 }
