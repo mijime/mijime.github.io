@@ -1,29 +1,29 @@
 [tools]
 node = "22"
 lefthook = "latest"
-bun = "latest"
+pnpm = "latest"
 
-[tasks."format:bun"]
-run = "bun run format"
+[tasks."format:pnpm"]
+run = "pnpm run format"
 
-[tasks."check:bun"]
-run = "bun run check"
+[tasks."check:pnpm"]
+run = "pnpm run check"
 
-[tasks."test:bun"]
-run = "bun test"
+[tasks."test:pnpm"]
+run = "pnpm -r run test"
 
 [tasks.format]
-depends = ["format:bun"]
+depends = ["format:pnpm"]
 
 [tasks.check]
-depends = ["check:bun"]
+depends = ["check:pnpm"]
 
 [tasks.test]
-depends = ["test:bun"]
+depends = ["test:pnpm"]
 
 [tasks.ci]
 depends = ["format", "check", "test"]
 
 [tasks.build]
-run = "bun run build"
+run = "pnpm run build"
 depends = ["ci"]

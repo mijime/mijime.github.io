@@ -25,7 +25,7 @@ const gtmId = import.meta.env.PUBLIC_GTM_ID as string | undefined;
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{ogTitle}</title>
     {gtmId && <script is:inline define:vars={{ gtmId }}>
-      window.dataLayer = window.dataLayer ?? [];
+      window.dataLayer ??= [];
       window.dataLayer.push({ "gtm.start": Date.now(), event: "gtm.js" });
       const [existing] = document.querySelectorAll("script");
       const script = document.createElement("script");

@@ -2,12 +2,13 @@
   "name": "mijime.github.io",
   "version": "1.0.0",
   "scripts": {
-    "dev": "bun run --cwd apps/main dev",
-    "preview": "bun run --cwd apps/main preview",
-    "build": "bun run --filter '*' build",
-    "check": "bun run --filter '*' check",
-    "format": "bun run --filter '*' format"
+    "dev": "pnpm --filter @mijime/main dev",
+    "preview": "pnpm --filter @mijime/main preview",
+    "build": "pnpm -r run build",
+    "check": "pnpm -r run check",
+    "format": "pnpm -r run format"
   },
   "type": "module",
+  "packageManager": "pnpm@11.5.1",
   "workspaces": ["apps/*", "packages/*"]
 }

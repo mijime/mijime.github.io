@@ -224,11 +224,10 @@ export function floorToDsl(floor: FloorPlan): string {
 
     for (const { lx, ly, idx } of roomCells) {
       const { item } = cells[idx];
-      if (!item) {
-        continue;
+      if (item) {
+        const rot = item.rotation === 0 ? "" : ` ${item.rotation}`;
+        lines.push(`  item (${lx},${ly}) ${item.type}${rot}`);
       }
-      const rot = item.rotation !== 0 ? ` ${item.rotation}` : "";
-      lines.push(`  item (${lx},${ly}) ${item.type}${rot}`);
     }
 
     lines.push("end");
@@ -260,15 +259,13 @@ export function floorToDsl(floor: FloorPlan): string {
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
       const idx = y * width + x;
-      if (inRoom.has(idx)) {
-        continue;
+      if (!inRoom.has(idx)) {
+        const { item } = cells[idx];
+        if (item) {
+          const rot = item.rotation === 0 ? "" : ` ${item.rotation}`;
+          lines.push(`item (${x},${y}) ${item.type}${rot}`);
+        }
       }
-      const { item } = cells[idx];
-      if (!item) {
-        continue;
-      }
-      const rot = item.rotation !== 0 ? ` ${item.rotation}` : "";
-      lines.push(`item (${x},${y}) ${item.type}${rot}`);
     }
   }
 
@@ -335,34 +332,33 @@ function applyPatternCells(
   for (const { x, y, floorType, item, wallTop, wallLeft } of cells) {
     const fx = x + ox;
     const fy = y + oy;
-    if (fx < 0 || fy < 0 || fx >= width || fy >= height) {
-      continue;
+    if (fx >= 0 && fy >= 0 && fx < width && fy < height) {
+      const idx = fy * width + fx;
+      const cur = cellOverrides.get(idx) ?? {};
+      const wall = cur.wall ?? { left: "none", top: "none" };
+      cellOverrides.set(idx, {
+        ...cur,
+        ...(floorType === undefined ? {} : { floorType }),
+        ...(item === undefined ? {} : { item }),
+        wall: {
+          left: wallLeft ?? wall.left,
+          top: wallTop ?? wall.top,
+        },
+      });
     }
-    const idx = fy * width + fx;
-    const cur = cellOverrides.get(idx) ?? {};
-    const wall = cur.wall ?? { left: "none", top: "none" };
-    cellOverrides.set(idx, {
-      ...cur,
-      ...(floorType !== undefined ? { floorType } : {}),
-      ...(item !== undefined ? { item } : {}),
-      wall: {
-        left: wallLeft ?? wall.left,
-        top: wallTop ?? wall.top,
-      },
-    });
   }
 }
 
 function parseCoordBlocks(coordsStr: string): { x1: number; y1: number; x2: number; y2: number }[] {
   return coordsStr.split("&").flatMap((coordStr) => {
-    const cm = coordStr.match(/^\((\d+),(\d+)\)(?:-\((\d+),(\d+)\))?$/);
+    const cm = coordStr.match(/^\((?<x1>\d+),(?<y1>\d+)\)(?:-\((?<x2>\d+),(?<y2>\d+)\))?$/u);
     if (!cm) {
       return [];
     }
-    const x1 = Number.parseInt(cm[1], 10);
-    const y1 = Number.parseInt(cm[2], 10);
-    const x2 = cm[3] !== undefined ? Number.parseInt(cm[3], 10) : x1;
-    const y2 = cm[4] !== undefined ? Number.parseInt(cm[4], 10) : y1;
+    const x1 = Number.parseInt(cm.groups!.x1, 10);
+    const y1 = Number.parseInt(cm.groups!.y1, 10);
+    const x2 = cm.groups!.x2 === undefined ? x1 : Number.parseInt(cm.groups!.x2, 10);
+    const y2 = cm.groups!.y2 === undefined ? y1 : Number.parseInt(cm.groups!.y2, 10);
     return [{ x1, x2, y1, y2 }];
   });
 }
@@ -455,40 +451,46 @@ export function dslToFloor(text: string): FloorPlan {
   let i = 0;
   while (i < lines.length) {
     const line = lines[i];
-    const patternDefMatch = line.match(/^pattern\s+(\S+)$/);
+    const patternDefMatch = line.match(/^pattern\s+(?<name>\S+)$/u);
     if (patternDefMatch) {
-      const patternName = patternDefMatch[1];
+      const patternName = patternDefMatch.groups!.name;
       const patternCells: PatternCell[] = [];
       i++;
       while (i < lines.length && lines[i] !== "end") {
         const pl = lines[i];
-        const wm = pl.match(/^wall\s+([\d(),&-]+)\s+(top|left)\s+(\S+)$/);
+        const wm = pl.match(/^wall\s+(?<coords>[\d(),&-]+)\s+(?<edge>top|left)\s+(?<type>\S+)$/u);
         if (wm) {
-          const edge = wm[2] as "top" | "left";
-          const wallType = wm[3] as WallType;
+          const edge = wm.groups!.edge as "top" | "left";
+          const wallType = wm.groups!.type as WallType;
           if (WALL_TYPES.includes(wallType)) {
-            for (const { x1, y1, x2, y2 } of parseCoordBlocks(wm[1])) {
+            for (const { x1, y1, x2, y2 } of parseCoordBlocks(wm.groups!.coords)) {
               for (let fy = y1; fy <= y2; fy++) {
                 upsertPatternWall(patternCells, x1, x2, fy, edge, wallType);
               }
             }
           }
         }
-        const fm = pl.match(/^floor\s+([\d(),&-]+)\s+(\w+)$/);
+        const fm = pl.match(/^floor\s+(?<coords>[\d(),&-]+)\s+(?<type>\w+)$/u);
         if (fm) {
-          const floorType = fm[2] as FloorType;
-          for (const { x1, y1, x2, y2 } of parseCoordBlocks(fm[1])) {
+          const floorType = fm.groups!.type as FloorType;
+          for (const { x1, y1, x2, y2 } of parseCoordBlocks(fm.groups!.coords)) {
             for (let fy = y1; fy <= y2; fy++) {
               upsertPatternFloor(patternCells, x1, x2, fy, floorType);
             }
           }
         }
-        const im = pl.match(/^item\s+\((\d+),(\d+)\)\s+(\S+)(?:\s+(0|90|180|270))?$/);
+        const im = pl.match(
+          /^item\s+\((?<x>\d+),(?<y>\d+)\)\s+(?<type>\S+)(?:\s+(?<rot>0|90|180|270))?$/u,
+        );
         if (im) {
-          const px = Number.parseInt(im[1], 10);
-          const py = Number.parseInt(im[2], 10);
-          const type = im[3] as ItemType;
-          const rotation = (im[4] ? Number.parseInt(im[4], 10) : 0) as 0 | 90 | 180 | 270;
+          const px = Number.parseInt(im.groups!.x, 10);
+          const py = Number.parseInt(im.groups!.y, 10);
+          const type = im.groups!.type as ItemType;
+          const rotation = (im.groups!.rot ? Number.parseInt(im.groups!.rot, 10) : 0) as
+            | 0
+            | 90
+            | 180
+            | 270;
           const existing = patternCells.find((c) => c.x === px && c.y === py);
           if (existing) {
             existing.item = { rotation, type };
@@ -510,7 +512,7 @@ export function dslToFloor(text: string): FloorPlan {
       continue;
     }
 
-    if (/^pattern\s+/.test(line)) {
+    if (/^pattern\s+/u.test(line)) {
       inPatternBlock = true;
       continue;
     }
@@ -522,44 +524,52 @@ export function dslToFloor(text: string): FloorPlan {
       continue;
     }
 
-    const sizeMatch = line.match(/^size\s+(\d+)\s+(\d+)$/);
+    const sizeMatch = line.match(/^size\s+(?<w>\d+)\s+(?<h>\d+)$/u);
     if (sizeMatch) {
-      width = Number.parseInt(sizeMatch[1], 10);
-      height = Number.parseInt(sizeMatch[2], 10);
+      width = Number.parseInt(sizeMatch.groups!.w, 10);
+      height = Number.parseInt(sizeMatch.groups!.h, 10);
       continue;
     }
 
-    const nameMatch = line.match(/^name\s+"([^"]*)"$/);
+    const nameMatch = line.match(/^name\s+"(?<n>[^"]*)$/u);
     if (nameMatch) {
-      name = nameMatch[1];
+      name = nameMatch.groups!.n;
       continue;
     }
 
     // Wall (x1,y1)[-(x2,y2)][&...] top|left wallType
-    const wallMatch = line.match(/^wall\s+([\d(),&-]+)\s+(top|left)\s+(\S+)$/);
+    const wallMatch = line.match(
+      /^wall\s+(?<coords>[\d(),&-]+)\s+(?<edge>top|left)\s+(?<type>\S+)$/u,
+    );
     if (wallMatch) {
-      const edge = wallMatch[2] as "top" | "left";
-      const wallType = wallMatch[3] as WallType;
+      const edge = wallMatch.groups!.edge as "top" | "left";
+      const wallType = wallMatch.groups!.type as WallType;
       if (WALL_TYPES.includes(wallType)) {
-        applyWall(wallMatch[1], edge, wallType);
+        applyWall(wallMatch.groups!.coords, edge, wallType);
       }
       continue;
     }
 
     // Floor (x1,y1)[-(x2,y2)][&...] floorType
-    const floorMatch = line.match(/^floor\s+([\d(),&-]+)\s+(\w+)$/);
+    const floorMatch = line.match(/^floor\s+(?<coords>[\d(),&-]+)\s+(?<type>\w+)$/u);
     if (floorMatch) {
-      applyFloor(floorMatch[1], floorMatch[2] as FloorType);
+      applyFloor(floorMatch.groups!.coords, floorMatch.groups!.type as FloorType);
       continue;
     }
 
     // Item (x,y) type [rotation]
-    const itemMatch = line.match(/^item\s+\((\d+),(\d+)\)\s+(\S+)(?:\s+(0|90|180|270))?$/);
+    const itemMatch = line.match(
+      /^item\s+\((?<x>\d+),(?<y>\d+)\)\s+(?<type>\S+)(?:\s+(?<rot>0|90|180|270))?$/u,
+    );
     if (itemMatch) {
-      const x = Number.parseInt(itemMatch[1], 10);
-      const y = Number.parseInt(itemMatch[2], 10);
-      const type = itemMatch[3] as ItemType;
-      const rotation = (itemMatch[4] ? Number.parseInt(itemMatch[4], 10) : 0) as 0 | 90 | 180 | 270;
+      const x = Number.parseInt(itemMatch.groups!.x, 10);
+      const y = Number.parseInt(itemMatch.groups!.y, 10);
+      const type = itemMatch.groups!.type as ItemType;
+      const rotation = (itemMatch.groups!.rot ? Number.parseInt(itemMatch.groups!.rot, 10) : 0) as
+        | 0
+        | 90
+        | 180
+        | 270;
       if (x < width && y < height) {
         const idx = y * width + x;
         cellOverrides.set(idx, { ...getCell(idx), item: { rotation, type } });
@@ -569,13 +579,17 @@ export function dslToFloor(text: string): FloorPlan {
 
     // Place patternName at (x,y) [rotate 0|90|180|270]
     const placeMatch = line.match(
-      /^place\s+(\S+)\s+at\s+\((\d+),(\d+)\)(?:\s+rotate\s+(0|90|180|270))?$/,
+      /^place\s+(?<name>\S+)\s+at\s+\((?<x>\d+),(?<y>\d+)\)(?:\s+rotate\s+(?<rot>0|90|180|270))?$/u,
     );
     if (placeMatch) {
-      const patternName = placeMatch[1];
-      const ox = Number.parseInt(placeMatch[2], 10);
-      const oy = Number.parseInt(placeMatch[3], 10);
-      const rotate = (placeMatch[4] ? Number.parseInt(placeMatch[4], 10) : 0) as 0 | 90 | 180 | 270;
+      const patternName = placeMatch.groups!.name;
+      const ox = Number.parseInt(placeMatch.groups!.x, 10);
+      const oy = Number.parseInt(placeMatch.groups!.y, 10);
+      const rotate = (placeMatch.groups!.rot ? Number.parseInt(placeMatch.groups!.rot, 10) : 0) as
+        | 0
+        | 90
+        | 180
+        | 270;
       const patternCells = patterns.get(patternName);
       if (patternCells) {
         applyPatternCells(patternCells, rotate, ox, oy, cellOverrides, width, height);

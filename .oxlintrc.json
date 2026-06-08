@@ -1,5 +1,5 @@
 {
-  "$schema": "./node_modules/.bun/oxlint@1.62.0/node_modules/oxlint/configuration_schema.json",
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
   "plugins": ["typescript", "unicorn", "oxc"],
   "categories": {
     "correctness": "error",

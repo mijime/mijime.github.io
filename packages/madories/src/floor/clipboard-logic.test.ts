@@ -1,4 +1,4 @@
-import { describe, expect, it } from "bun:test";
+import { describe, expect, it } from "vitest";
 import { copyRegion, normalizeSelection, pasteOriginIndex } from "./clipboard-logic";
 import type { Cell, FloorPlan } from "../types";
 
