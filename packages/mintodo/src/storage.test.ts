@@ -1,26 +1,37 @@
 import { afterEach, beforeEach, beforeAll, describe, expect, it } from "bun:test";
 import type { SaveData } from "./types";
 
-// Use dynamic imports to ensure fake-indexeddb polyfills globalThis.indexedDB
-// before Dexie module is evaluated (which captures indexedDB at module load time)
-let db: Awaited<ReturnType<typeof import("./db")>>["db"];
-let loadFromDexie: Awaited<ReturnType<typeof import("./storage")>>["loadFromDexie"];
-let saveToDexie: Awaited<ReturnType<typeof import("./storage")>>["saveToDexie"];
-let createInitialNodes: Awaited<ReturnType<typeof import("./store")>>["createInitialNodes"];
-let downloadJson: Awaited<ReturnType<typeof import("./storage")>>["downloadJson"];
-let parseImportedJson: Awaited<ReturnType<typeof import("./storage")>>["parseImportedJson"];
+import "fake-indexeddb/auto";
+// Use typeof import(...) in type positions to get the types of exports from modules without
+// Triggering runtime evaluation. This is purely static analysis and avoids both:
+//   1. The invalid Awaited<ReturnType<typeof import("./db")>>["db"] pattern (TS2344)
+//   2. Runtime module loading that would capture globalThis.indexedDB before fake-indexeddb runs
+type DbModule = typeof import("./db");
+type StorageModule = typeof import("./storage");
+type StoreModule = typeof import("./store");
+
+let db: DbModule["db"];
+let loadFromDexie: StorageModule["loadFromDexie"];
+let saveToDexie: StorageModule["saveToDexie"];
+let downloadJson: StorageModule["downloadJson"];
+let parseImportedJson: StorageModule["parseImportedJson"];
+let createInitialNodes: StoreModule["createInitialNodes"];
 
 beforeAll(async () => {
+  // Use dynamic imports at runtime to ensure fake-indexeddb polyfills globalThis.indexedDB
+  // Before Dexie module is evaluated (which captures indexedDB at module load time).
+  // The type aliases above are purely static and do NOT trigger runtime module evaluation.
+  // @ts-expect-error - fake-indexeddb/auto has package.json exports issues
   await import("fake-indexeddb/auto");
   const dbMod = await import("./db");
-  db = dbMod.db;
+  ({ db } = dbMod);
   const storageMod = await import("./storage");
-  loadFromDexie = storageMod.loadFromDexie;
-  saveToDexie = storageMod.saveToDexie;
+  ({ loadFromDexie } = storageMod);
+  ({ saveToDexie } = storageMod);
+  ({ downloadJson } = storageMod);
+  ({ parseImportedJson } = storageMod);
   const storeMod = await import("./store");
-  createInitialNodes = storeMod.createInitialNodes;
-  downloadJson = storageMod.downloadJson;
-  parseImportedJson = storageMod.parseImportedJson;
+  ({ createInitialNodes } = storeMod);
 });
 
 beforeEach(async () => {

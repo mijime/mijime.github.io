@@ -12,7 +12,7 @@ describe("createInitialNodes", () => {
 
   it("all non-root nodes have valid parentId", () => {
     const nodes = createInitialNodes();
-    for (const [id, node] of Object.entries(nodes)) {
+    for (const [, node] of Object.entries(nodes)) {
       if (node.isRoot) continue;
       expect(node.parentId).toBeTruthy();
       expect(nodes[node.parentId!]).toBeDefined();
