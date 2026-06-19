@@ -64,6 +64,98 @@ export function reducer(state: State, action: Action): State {
       };
     case "SET_DRAGGING":
       return { ...state, draggingNodeId: action.id };
+    case "ADD_CHILD": {
+      const parent = state.nodes[action.parentId];
+      if (!parent) return state;
+      const newId = action.newId;
+      const newNode: MindNode = {
+        categoryColor: parent.categoryColor,
+        children: [],
+        collapsed: false,
+        completed: false,
+        dueDate: "",
+        id: newId,
+        isRoot: false,
+        parentId: parent.id,
+        priority: "medium",
+        text: "新規タスク",
+        vx: (Math.random() - 0.5) * 8,
+        vy: (Math.random() - 0.5) * 8,
+        x: parent.x + (parent.x >= 0 ? 140 : -140),
+        y: parent.y + (Math.random() - 0.5) * 50,
+      };
+      return {
+        ...state,
+        nodes: {
+          ...state.nodes,
+          [newId]: newNode,
+          [parent.id]: { ...parent, children: [...parent.children, newId] },
+        },
+        selectedNodeId: newId,
+      };
+    }
+    case "UPDATE_NODE": {
+      const node = state.nodes[action.id];
+      if (!node) return state;
+      return {
+        ...state,
+        nodes: { ...state.nodes, [action.id]: { ...node, ...action.patch } },
+      };
+    }
+    case "TOGGLE_COMPLETE": {
+      const target = state.nodes[action.id];
+      if (!target) return state;
+      const next = !target.completed;
+      const updated = { ...state.nodes };
+      const cascade = (id: string) => {
+        const n = updated[id];
+        if (!n) return;
+        updated[id] = { ...n, completed: next };
+        n.children.forEach(cascade);
+      };
+      cascade(action.id);
+      return { ...state, nodes: updated };
+    }
+    case "TOGGLE_COLLAPSE": {
+      const node = state.nodes[action.id];
+      if (!node) return state;
+      return {
+        ...state,
+        nodes: { ...state.nodes, [action.id]: { ...node, collapsed: !node.collapsed } },
+      };
+    }
+    case "DELETE_NODE": {
+      const node = state.nodes[action.id];
+      if (!node || node.isRoot) return state;
+      const updated = { ...state.nodes };
+      const remove = (id: string) => {
+        const n = updated[id];
+        if (!n) return;
+        n.children.forEach(remove);
+        delete updated[id];
+      };
+      remove(action.id);
+      const parent = updated[node.parentId!];
+      const next = {
+        ...state,
+        nodes: {
+          ...updated,
+          ...(parent
+            ? { [parent.id]: { ...parent, children: parent.children.filter((c) => c !== action.id) } }
+            : {}),
+        },
+        selectedNodeId: state.selectedNodeId === action.id ? (node.parentId ?? "root") : state.selectedNodeId,
+      };
+      return next;
+    }
+    case "MOVE_NODE": {
+      const node = state.nodes[action.id];
+      if (!node) return state;
+      return {
+        ...state,
+        nodes: { ...state.nodes, [action.id]: { ...node, vx: 0, vy: 0, x: action.x, y: action.y } },
+      };
+    }
     default:
       return state;
   }

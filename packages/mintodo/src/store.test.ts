@@ -116,3 +116,106 @@ describe("reducer - OPEN_MODAL", () => {
     expect(next.modal).toBeNull();
   });
 });
+
+describe("reducer - ADD_CHILD", () => {
+  it("creates new child and selects it", () => {
+    const state = createInitialState();
+    const next = reducer(state, {
+      newId: "node-new-1",
+      parentId: "node-1",
+      type: "ADD_CHILD",
+    });
+    expect(next.selectedNodeId).toBe("node-new-1");
+    expect(next.nodes["node-new-1"].parentId).toBe("node-1");
+    expect(next.nodes["node-new-1"].isRoot).toBe(false);
+    expect(next.nodes["node-1"].children).toContain("node-new-1");
+    expect(next.nodes["node-1"].collapsed).toBe(false);
+  });
+
+  it("inherits categoryColor from parent", () => {
+    const state = createInitialState();
+    const next = reducer(state, {
+      newId: "node-new-1",
+      parentId: "node-1",
+      type: "ADD_CHILD",
+    });
+    expect(next.nodes["node-new-1"].categoryColor).toBe("sky");
+  });
+});
+
+describe("reducer - UPDATE_NODE", () => {
+  it("patches node fields", () => {
+    const state = createInitialState();
+    const next = reducer(state, {
+      id: "node-1",
+      patch: { text: "updated", priority: "low" },
+      type: "UPDATE_NODE",
+    });
+    expect(next.nodes["node-1"].text).toBe("updated");
+    expect(next.nodes["node-1"].priority).toBe("low");
+    expect(next.nodes["node-1"].categoryColor).toBe("sky");
+  });
+});
+
+describe("reducer - TOGGLE_COMPLETE", () => {
+  it("flips completed flag", () => {
+    const state = createInitialState();
+    const next = reducer(state, { id: "node-1", type: "TOGGLE_COMPLETE" });
+    expect(next.nodes["node-1"].completed).toBe(true);
+  });
+
+  it("cascades to descendants", () => {
+    const state = createInitialState();
+    const next = reducer(state, { id: "node-1", type: "TOGGLE_COMPLETE" });
+    expect(next.nodes["node-1-1"].completed).toBe(true);
+    expect(next.nodes["node-1-2"].completed).toBe(true);
+  });
+
+  it("cascades when un-completing", () => {
+    const state = createInitialState();
+    const completed = reducer(state, { id: "node-1", type: "TOGGLE_COMPLETE" });
+    const uncompleted = reducer(completed, { id: "node-1", type: "TOGGLE_COMPLETE" });
+    expect(uncompleted.nodes["node-1-1"].completed).toBe(false);
+  });
+});
+
+describe("reducer - TOGGLE_COLLAPSE", () => {
+  it("flips collapsed flag", () => {
+    const state = createInitialState();
+    const next = reducer(state, { id: "node-1", type: "TOGGLE_COLLAPSE" });
+    expect(next.nodes["node-1"].collapsed).toBe(true);
+  });
+});
+
+describe("reducer - DELETE_NODE", () => {
+  it("removes node from parent children", () => {
+    const state = createInitialState();
+    const next = reducer(state, { id: "node-1-1", type: "DELETE_NODE" });
+    expect(next.nodes["node-1-1"]).toBeUndefined();
+    expect(next.nodes["node-1"].children).not.toContain("node-1-1");
+  });
+
+  it("removes node and all descendants", () => {
+    const state = createInitialState();
+    const next = reducer(state, { id: "node-1", type: "DELETE_NODE" });
+    expect(next.nodes["node-1"]).toBeUndefined();
+    expect(next.nodes["node-1-1"]).toBeUndefined();
+    expect(next.nodes["node-1-2"]).toBeUndefined();
+    expect(next.nodes["root"].children).not.toContain("node-1");
+  });
+
+  it("selects parent when deleting selected node", () => {
+    const state = { ...createInitialState(), selectedNodeId: "node-1-1" };
+    const next = reducer(state, { id: "node-1-1", type: "DELETE_NODE" });
+    expect(next.selectedNodeId).toBe("node-1");
+  });
+});
+
+describe("reducer - MOVE_NODE", () => {
+  it("updates x and y", () => {
+    const state = createInitialState();
+    const next = reducer(state, { id: "node-1", type: "MOVE_NODE", x: 999, y: 888 });
+    expect(next.nodes["node-1"].x).toBe(999);
+    expect(next.nodes["node-1"].y).toBe(888);
+  });
+});
