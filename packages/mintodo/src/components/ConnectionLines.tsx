@@ -16,10 +16,9 @@ function isParentCollapsed(state: ReturnType<typeof useMindStore>["state"], id: 
 
 interface Props {
   containerRef: React.RefObject<HTMLDivElement | null>;
-  version: number;
 }
 
-export function ConnectionLines({ containerRef, version }: Props) {
+export function ConnectionLines({ containerRef }: Props) {
   const { state } = useMindStore();
   const isDark = document.documentElement.classList.contains("dark");
   const [size, setSize] = useState({ height: 0, width: 0 });
@@ -40,7 +39,6 @@ export function ConnectionLines({ containerRef, version }: Props) {
 
   return (
     <svg
-      key={version}
       className="absolute inset-0 pointer-events-none w-full h-full"
       style={{ width: size.width, height: size.height }}
     >

@@ -11,13 +11,18 @@ export function useStorageSync(): void {
 
   useEffect(() => {
     (async () => {
-      const loaded = await loadFromDexie();
-      if (loaded) {
-        dispatch({ nodes: loaded, type: "SET_NODES" });
-      }
-      const physics = await getMeta<boolean>("physicsEnabled");
-      if (physics === false) {
-        dispatch({ type: "TOGGLE_PHYSICS" });
+      try {
+        const loaded = await loadFromDexie();
+        if (loaded) {
+          dispatch({ nodes: loaded, type: "SET_NODES" });
+        }
+        const physics = await getMeta<boolean>("physicsEnabled");
+        if (physics === false) {
+          dispatch({ type: "TOGGLE_PHYSICS" });
+        }
+      } catch (err) {
+        // eslint-disable-next-line no-console
+        console.error("mintodo: failed to load from IndexedDB, using initial state", err);
       }
       loadedRef.current = true;
     })();
@@ -27,8 +32,14 @@ export function useStorageSync(): void {
     if (!loadedRef.current) return;
     if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
     saveTimerRef.current = setTimeout(() => {
-      saveToDexie(state.nodes).catch(() => {});
-      setMeta("physicsEnabled", state.physicsEnabled).catch(() => {});
+      saveToDexie(state.nodes).catch((err: unknown) => {
+        // eslint-disable-next-line no-console
+        console.error("mintodo: failed to save nodes", err);
+      });
+      setMeta("physicsEnabled", state.physicsEnabled).catch((err: unknown) => {
+        // eslint-disable-next-line no-console
+        console.error("mintodo: failed to save meta", err);
+      });
     }, SAVE_DEBOUNCE_MS);
     return () => {
       if (saveTimerRef.current) clearTimeout(saveTimerRef.current);

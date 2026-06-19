@@ -1,12 +1,14 @@
-import { useEffect, type RefObject } from "react";
+import { useEffect, useRef } from "react";
 import { useMindStore } from "./use-mind-store";
 
 interface Options {
-  containerRef: RefObject<HTMLDivElement | null>;
+  containerRef: React.RefObject<HTMLDivElement | null>;
 }
 
 export function usePanZoom({ containerRef }: Options): void {
   const { state, dispatch } = useMindStore();
+  const viewRef = useRef(state.view);
+  viewRef.current = state.view;
 
   useEffect(() => {
     const el = containerRef.current;
@@ -29,11 +31,12 @@ export function usePanZoom({ containerRef }: Options): void {
       const dy = e.clientY - lastY;
       lastX = e.clientX;
       lastY = e.clientY;
+      const view = viewRef.current;
       dispatch({
         type: "SET_VIEW",
         view: {
-          pan: { x: state.view.pan.x + dx, y: state.view.pan.y + dy },
-          zoom: state.view.zoom,
+          pan: { x: view.pan.x + dx, y: view.pan.y + dy },
+          zoom: view.zoom,
         },
       });
     }
@@ -42,10 +45,11 @@ export function usePanZoom({ containerRef }: Options): void {
     }
     function onWheel(e: WheelEvent) {
       e.preventDefault();
+      const view = viewRef.current;
       const factor = 1.1;
-      const next = e.deltaY < 0 ? state.view.zoom * factor : state.view.zoom / factor;
+      const next = e.deltaY < 0 ? view.zoom * factor : view.zoom / factor;
       const zoom = Math.max(0.2, Math.min(3, next));
-      dispatch({ type: "SET_VIEW", view: { pan: state.view.pan, zoom } });
+      dispatch({ type: "SET_VIEW", view: { pan: view.pan, zoom } });
     }
     function onTouchStart(e: TouchEvent) {
       if (e.target !== el) return;
@@ -60,11 +64,12 @@ export function usePanZoom({ containerRef }: Options): void {
       const dy = e.touches[0].clientY - lastY;
       lastX = e.touches[0].clientX;
       lastY = e.touches[0].clientY;
+      const view = viewRef.current;
       dispatch({
         type: "SET_VIEW",
         view: {
-          pan: { x: state.view.pan.x + dx, y: state.view.pan.y + dy },
-          zoom: state.view.zoom,
+          pan: { x: view.pan.x + dx, y: view.pan.y + dy },
+          zoom: view.zoom,
         },
       });
     }
@@ -88,5 +93,5 @@ export function usePanZoom({ containerRef }: Options): void {
       window.removeEventListener("touchmove", onTouchMove);
       window.removeEventListener("touchend", onTouchEnd);
     };
-  }, [containerRef, state.view, dispatch]);
+  }, [containerRef, dispatch]);
 }

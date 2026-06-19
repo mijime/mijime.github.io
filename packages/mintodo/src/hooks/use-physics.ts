@@ -30,7 +30,7 @@ function shouldSkip(state: State, id: string): boolean {
   return false;
 }
 
-export function usePhysics(onMoved: () => void): void {
+export function usePhysics(onMoved?: () => void): void {
   const { state } = useMindStore();
   const stateRef = useRef(state);
   stateRef.current = state;
@@ -109,7 +109,7 @@ export function usePhysics(onMoved: () => void): void {
             n.vy = 0;
           }
         }
-        if (hasMoved) onMovedRef.current();
+        if (hasMoved) onMovedRef.current?.();
       }
       rafId = requestAnimationFrame(tick);
     };

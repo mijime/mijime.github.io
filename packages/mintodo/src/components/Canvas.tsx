@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from "react";
+import { useRef } from "react";
 import { useDragNode } from "../hooks/use-drag-node";
 import { useMindStore } from "../hooks/use-mind-store";
 import { usePanZoom } from "../hooks/use-pan-zoom";
@@ -22,11 +22,9 @@ function isParentCollapsed(state: ReturnType<typeof useMindStore>["state"], id: 
 export function Canvas() {
   const { state, dispatch } = useMindStore();
   const containerRef = useRef<HTMLDivElement>(null);
-  const [linesVersion, setLinesVersion] = useState(0);
-  const onMoved = useCallback(() => setLinesVersion((v) => v + 1), []);
 
   usePanZoom({ containerRef });
-  usePhysics(onMoved);
+  usePhysics();
   useDragNode((a) => {
     dispatch({ id: a.id, type: "MOVE_NODE", x: a.x, y: a.y });
   });
@@ -42,7 +40,7 @@ export function Canvas() {
       ref={containerRef}
       className="w-full h-full cursor-grab active:cursor-grabbing canvas-grid relative overflow-hidden bg-slate-50 dark:bg-slate-900"
     >
-      <ConnectionLines containerRef={containerRef} version={linesVersion} />
+      <ConnectionLines containerRef={containerRef} />
       <div
         className="transform-container absolute w-0 h-0 top-1/2 left-1/2"
         style={{
