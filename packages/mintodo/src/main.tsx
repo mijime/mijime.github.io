@@ -1,8 +1,13 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
+import { App } from "./App";
+import "./index.css";
 
-createRoot(document.querySelector("#root")!).render(
+const rootEl = document.querySelector("#root");
+if (!rootEl) throw new Error("Missing #root element");
+
+createRoot(rootEl).render(
   <StrictMode>
-    <p>mintodo</p>
+    <App />
   </StrictMode>,
 );
