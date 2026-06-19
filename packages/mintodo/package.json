@@ -1,0 +1,46 @@
+{
+  "name": "@mijime/mintodo",
+  "version": "1.0.0",
+  "description": "Browser-based mindmap todo editor",
+  "type": "module",
+  "exports": {
+    ".": "./src/App.tsx",
+    "./index.css": "./src/index.css"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "tsgo --noEmit && vite build",
+    "preview": "vite preview",
+    "test": "bun test",
+    "check": "bun run check:tsgo && bun run check:oxlint",
+    "check:tsgo": "tsgo --noEmit",
+    "check:oxlint": "oxlint --format=github --fix",
+    "format": "bun run format:oxfmt",
+    "format:oxfmt": "oxfmt"
+  },
+  "dependencies": {
+    "@mijime/theme": "workspace:*",
+    "dexie": "^4.0.10",
+    "lucide-react": "^1.14.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.1.8",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "@typescript/native-preview": "^7.0.0-dev.20260503.1",
+    "@vitejs/plugin-react": "^5.0.0",
+    "bun-types": "^1.3.13",
+    "fake-indexeddb": "^6.0.0",
+    "oxfmt": "^0.46.0",
+    "oxlint": "^1.62.0",
+    "react": "^19.2.5",
+    "react-dom": "^19.2.5",
+    "tailwindcss": "^4.2.4",
+    "typescript": "^6.0.3",
+    "vite": "^8.0.10"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  }
+}
