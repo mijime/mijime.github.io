@@ -18,6 +18,7 @@
     "@mijime/blog": "workspace:*",
     "@mijime/theme": "workspace:*",
     "@mijime/madories": "workspace:*",
+    "@mijime/mintodo": "workspace:*",
     "@tailwindcss/vite": "4.1.8",
     "astro": "^6.1.10",
     "lucide-react": "^1.14.0",
