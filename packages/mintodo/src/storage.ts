@@ -83,11 +83,9 @@ export async function getCurrentBoardId(): Promise<string | null> {
 }
 
 export async function setCurrentBoardId(id: string | null): Promise<void> {
-  if (id === null) {
-    await db.meta.delete("currentBoardId");
-  } else {
-    await db.meta.put({ key: "currentBoardId", value: id });
-  }
+  await (id === null
+    ? db.meta.delete("currentBoardId")
+    : db.meta.put({ key: "currentBoardId", value: id }));
 }
 
 export async function hasV1Data(): Promise<boolean> {
