@@ -1,0 +1,9 @@
+---
+import { App as MintodoApp } from "@mijime/mintodo";
+import BaseLayout from "../layouts/base-layout.astro";
+import "@mijime/mintodo/index.css";
+---
+
+<BaseLayout title="mintodo">
+  <MintodoApp client:only="react" />
+</BaseLayout>
