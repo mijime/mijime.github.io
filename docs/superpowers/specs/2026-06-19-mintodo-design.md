@@ -43,9 +43,12 @@ interface MindNode {
 
 ### 永続化
 
-- `localStorage` キー: `mintodo_state` に `{ version: 1, nodes: Record<string, MindNode> }` を保存
-- 物理速度 `vx, vy` は保存対象外（初期化時に 0 へ）
-- JSON インポート / エクスポート: `version: 1, nodes` 形式
+- **Dexie.js (IndexedDB ラッパー) を使用**
+- DB 名: `mintodo`、テーブル: `nodes`、`meta` (テーマ・物理 ON/OFF フラグ用)
+- ノードは `id` を primary key として 1 レコードずつ保存
+- 物理速度 `vx, vy` は保存対象外（読み込み時に 0 へ）
+- スキーマ: `db.version(1).stores({ nodes: "id", meta: "key" })`
+- JSON インポート / エクスポート: `{ version: 1, nodes: MindNode[] }` 形式 (File API + Blob)
 - 破損データ / バージョン不一致 / 形状不正は握りつぶして初期データにフォールバック
 
 ### 機能一覧
@@ -80,7 +83,7 @@ packages/mintodo/
 ├── .gitignore
 ├── CLAUDE.md               # bun / oxlint / oxfmt / tsgo / vite を記載
 ├── index.html              # Vite エントリ (#root マウント)
-├── package.json            # @mijime/mintodo
+├── package.json            # @mijime/mintodo, deps: dexie, lucide-react
 ├── tsconfig.json           # madories と同じ compilerOptions
 ├── vite.config.ts          # React プラグイン + tailwindcss プラグイン
 └── src/
@@ -88,9 +91,10 @@ packages/mintodo/
     ├── App.tsx             # MindProvider で包む
     ├── index.css           # @import "@mijime/theme/index.css"; @import "tailwindcss";
     ├── types.ts            # MindNode, SaveData, Priority, CategoryColor, View
+    ├── db.ts               # Dexie スキーマ (MindDB)
     ├── store.ts            # reducer + Action + createInitialNodes()
     ├── store.test.ts
-    ├── storage.ts          # load/save ToStorage + ToFile
+    ├── storage.ts          # load/save ToDexie + ToFile
     ├── storage.test.ts
     ├── components/
     │   ├── Toolbar.tsx
@@ -146,7 +150,7 @@ type Action =
   | { type: "RESET" };
 ```
 
-`ADD_CHILD` の action では `state.nodes[newId] = newNode; parent.children.push(newId); selectedNodeId = newId;` までを実行する。`OPEN_MODAL` action は別途 dispatch する。実装は `useMindStore` hook で `dispatch` をラップし、副作用（モーダル開閉、localStorage 同期など）は hook 層で行う。
+`ADD_CHILD` の action では `state.nodes[newId] = newNode; parent.children.push(newId); selectedNodeId = newId;` までを実行する。`OPEN_MODAL` action は別途 dispatch する。実装は `useMindStore` hook で `dispatch` をラップし、副作用（モーダル開閉、Dexie 同期など）は hook 層で行う。
 
 ### 物理シミュレーション
 
@@ -191,8 +195,42 @@ type Action =
 
 ### 永続化
 
-`useStorageSync` フックで `nodes` の変更を 300ms デバウンスして `localStorage` へ保存。
+`useStorageSync` フックで `nodes` の変更を 300ms デバウンスして Dexie へ保存。
+読み込みは初回マウント時に 1 回だけ実行し、IndexedDB → state を初期化。
 インポート / エクスポートは `storage.ts` の純粋関数で扱い、フックでトリガー。
+
+**Dexie スキーマ:**
+
+```ts
+// db.ts
+import Dexie, { type Table } from "dexie";
+import type { MindNode } from "./types";
+
+export interface MetaEntry {
+  key: string;
+  value: unknown;
+}
+
+export class MindDB extends Dexie {
+  nodes!: Table<MindNode, string>;
+  meta!: Table<MetaEntry, string>;
+
+  constructor() {
+    super("mintodo");
+    this.version(1).stores({
+      nodes: "id",
+      meta: "key",
+    });
+  }
+}
+
+export const db = new MindDB();
+```
+
+- `nodes` テーブル: `id` を primary key。1 ノード = 1 レコード
+- `meta` テーブル: `theme`, `physicsEnabled` フラグを `key` で管理
+- ロード: `db.nodes.toArray()` → `Record<string, MindNode>` に変換
+- セーブ: `db.nodes.bulkPut(Object.values(nodes))`（全件置き換え）
 
 ### 描画戦略
 
@@ -230,7 +268,9 @@ type Action =
   - `TOGGLE_COLLAPSE`: フラグ反転
   - `DELETE_NODE`: 親の子リストから削除、自身と子孫を state から削除
   - `RESET`: 初期データに置き換え
-- `storage.test.ts`: localStorage / File API の往復（madories と同じパターン）
+- `storage.test.ts`: Dexie (IndexedDB) / File API の往復
+  - テストランナーは `bun test`
+  - IndexedDB は `fake-indexeddb` でモック (devDependencies)
 - コンポーネントテストは今回スコープ外（物理・ドラッグなど E2E 寄りのため）
 
 ## 採用しない機能（YAGNI）
@@ -249,4 +289,5 @@ type Action =
 - スタイリング: Tailwind utility class
 - アイコン: lucide-react
 - 状態管理: useReducer + Context
+- 永続化: Dexie.js (IndexedDB)
 - 開発: Vite dev server
