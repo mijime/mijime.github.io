@@ -2,8 +2,16 @@ export type Priority = "low" | "medium" | "high";
 
 export type CategoryColor = "slate" | "sky" | "emerald" | "rose";
 
+export interface Board {
+  id: string;
+  name: string;
+  createdAt: number;
+  updatedAt: number;
+}
+
 export interface MindNode {
   id: string;
+  boardId: string;
   text: string;
   parentId: string | null;
   isRoot: boolean;
@@ -24,9 +32,15 @@ export interface View {
   zoom: number;
 }
 
-export type Modal = { kind: "edit"; nodeId: string } | { kind: "help" } | null;
+export type Modal =
+  | { kind: "edit"; nodeId: string }
+  | { kind: "help" }
+  | { kind: "board-name"; mode: "create" | "rename"; boardId?: string; initialName?: string }
+  | { kind: "board-delete"; boardId: string; boardName: string }
+  | null;
 
 export interface SaveData {
-  version: 1;
+  version: 2;
+  board: { id: string; name: string };
   nodes: MindNode[];
 }
