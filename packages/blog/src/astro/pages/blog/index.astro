@@ -10,7 +10,7 @@ function parsePosts(entries: CollectionEntry<"blog">[]) {
     .filter((p) => p.id.split("/").length === 3)
     .map((p) => {
       const [category, ym, slugMd] = p.id.split("/");
-      return { ...p.data, category, ym, slug: slugMd.replace(/\.md$/, "") };
+      return { ...p.data, category, ym, slug: slugMd.replace(/\.md$/u, "") };
     })
     .toSorted((a, b) => {
       const da = a.CreatedAt ?? `${a.ym}-01`;

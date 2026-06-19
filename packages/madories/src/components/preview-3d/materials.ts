@@ -6,6 +6,8 @@ export const FLOOR_COLORS: Record<FloorType, { light: string; dark: string }> = 
   tatami: { light: "#c8d6af", dark: "#7a8f5c" },
   concrete: { light: "#b0b0b0", dark: "#707070" },
   void: { light: "#e0e0e0", dark: "#404040" },
+  "exterior-concrete": { light: "#b0b0b0", dark: "#808080" },
+  "exterior-grass": { light: "#7cb87c", dark: "#5a8a5a" },
 };
 
 export const WALL_COLORS: Record<
@@ -44,6 +46,7 @@ export const ITEM_COLORS: Record<ItemType, { light: string; dark: string }> = {
   sofa: { light: "#cd853f", dark: "#8b5a2b" },
   bed_single: { light: "#4682b4", dark: "#2f5a7a" },
   bed_double: { light: "#4682b4", dark: "#2f5a7a" },
+  car: { light: "#d71a3a", dark: "#a01a2a" },
 };
 
 export const ITEM_HEIGHT_FACTORS: Partial<Record<ItemType, number>> = {

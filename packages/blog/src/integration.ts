@@ -1,7 +1,7 @@
 import type { AstroIntegration } from "astro";
-import { join } from "node:path";
+import path from "node:path";
 
-const pagesDir = join(import.meta.dirname, "astro/pages");
+const pagesDir = path.join(import.meta.dirname, "astro/pages");
 
 export function blogIntegration(options?: {
   globalCss?: string;
@@ -31,25 +31,31 @@ export function blogIntegration(options?: {
         if (options?.globalCss) {
           injectScript("page-ssr", `import ${JSON.stringify(options.globalCss)}`);
         }
-        injectRoute({ pattern: "/blog/", entrypoint: join(pagesDir, "blog/index.astro") });
+        injectRoute({ pattern: "/blog/", entrypoint: path.join(pagesDir, "blog/index.astro") });
         injectRoute({
           pattern: "/blog/pages/[page]",
-          entrypoint: join(pagesDir, "blog/pages/[page].astro"),
+          entrypoint: path.join(pagesDir, "blog/pages/[page].astro"),
         });
         injectRoute({
           pattern: "/blog/[category]/[ym]/[slug]",
-          entrypoint: join(pagesDir, "blog/[category]/[ym]/[slug].astro"),
+          entrypoint: path.join(pagesDir, "blog/[category]/[ym]/[slug].astro"),
         });
-        injectRoute({ pattern: "/blog/tags", entrypoint: join(pagesDir, "blog/tags/index.astro") });
+        injectRoute({
+          pattern: "/blog/tags",
+          entrypoint: path.join(pagesDir, "blog/tags/index.astro"),
+        });
         injectRoute({
           pattern: "/blog/tag/[tag]",
-          entrypoint: join(pagesDir, "blog/tag/[tag]/index.astro"),
+          entrypoint: path.join(pagesDir, "blog/tag/[tag]/index.astro"),
         });
         injectRoute({
           pattern: "/blog/tag/[tag]/pages/[page]",
-          entrypoint: join(pagesDir, "blog/tag/[tag]/pages/[page].astro"),
+          entrypoint: path.join(pagesDir, "blog/tag/[tag]/pages/[page].astro"),
         });
-        injectRoute({ pattern: "/blog/search", entrypoint: join(pagesDir, "blog/search.astro") });
+        injectRoute({
+          pattern: "/blog/search",
+          entrypoint: path.join(pagesDir, "blog/search.astro"),
+        });
       },
     },
   };

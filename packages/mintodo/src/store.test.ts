@@ -1,4 +1,4 @@
-import { describe, expect, it } from "bun:test";
+import { describe, expect, it } from "vitest";
 import { createInitialNodes, createInitialState, reducer } from "./store";
 
 describe("createInitialNodes", () => {

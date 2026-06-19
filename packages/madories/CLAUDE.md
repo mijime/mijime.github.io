@@ -5,15 +5,15 @@ Browser-based floor plan editor (React + TypeScript).
 ## Commands
 
 ```bash
-bun test          # run tests
-bun run check     # type check + lint
-bun run format    # format
+pnpm test         # run tests
+pnpm run check    # type check + lint
+pnpm run format   # format
 ```
 
 ## Stack
 
-- Runtime/package manager: **bun** (not npm/npx)
-- Test runner: `bun test`
+- Runtime/package manager: **pnpm**
+- Test runner: `vitest`
 - Type check: `tsgo --noEmit`
 - Lint: `oxlint`
 - Format: `oxfmt`

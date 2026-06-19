@@ -7,10 +7,10 @@ export function mergeFloors(existing: FloorPlan[], parsed: FloorPlan[]): FloorPl
   const floors = [...existing];
   for (const parsedFloor of parsed) {
     const existingIdx = floors.findIndex((f) => f.name === parsedFloor.name);
-    if (existingIdx !== -1) {
-      floors[existingIdx] = { ...parsedFloor, id: floors[existingIdx].id };
-    } else {
+    if (existingIdx === -1) {
       floors.push(parsedFloor);
+    } else {
+      floors[existingIdx] = { ...parsedFloor, id: floors[existingIdx].id };
     }
   }
   return floors;

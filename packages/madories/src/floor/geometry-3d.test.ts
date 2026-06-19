@@ -1,4 +1,4 @@
-import { describe, expect, it } from "bun:test";
+import { describe, expect, it } from "vitest";
 import { generateFloorTiles, generateWallSegments } from "./geometry-3d";
 import type { FloorPlan } from "../types";
 

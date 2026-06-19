@@ -84,7 +84,7 @@ interface Props {
   onUndo?: () => void;
 }
 
-export const FloorCanvas = forwardRef<FloorCanvasHandle, Props>(function FloorCanvas(props, ref) {
+export const FloorCanvas = forwardRef<FloorCanvasHandle, Props>((props, ref) => {
   const { floor, ghostFloors, cellSize, darkMode, tool } = props;
   const [selectedItemCell, setSelectedItemCell] = useState<number | null>(null);
   const [selectionState, setSelectionState] = useState<{

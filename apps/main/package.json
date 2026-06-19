@@ -4,35 +4,36 @@
   "type": "module",
   "scripts": {
     "dev": "astro dev",
-    "build": "astro build",
+    "build": "node --experimental-wasm-modules ../../packages/blog/scripts/generate-parquet.mjs && astro build",
     "preview": "astro preview",
-    "check": "bun run check:oxlint && bun run check:astro",
+    "check": "pnpm run check:oxlint && pnpm run check:astro",
     "check:oxlint": "oxlint --format=github --fix",
     "check:astro": "astro check",
-    "format": "bun run format:oxfmt",
+    "format": "pnpm run format:oxfmt",
     "format:oxfmt": "oxfmt src"
   },
   "dependencies": {
     "@astrojs/mdx": "^4.3.14",
     "@astrojs/react": "^4.4.2",
     "@mijime/blog": "workspace:*",
-    "@mijime/theme": "workspace:*",
     "@mijime/madories": "workspace:*",
     "@mijime/mintodo": "workspace:*",
+    "@mijime/theme": "workspace:*",
     "@tailwindcss/vite": "4.1.8",
-    "astro": "^6.1.10",
-    "lucide-react": "^1.14.0",
-    "react": "^19.2.5",
-    "react-dom": "^19.2.5",
-    "tailwindcss": "^4.2.4",
-    "zod": "^4.4.1"
+    "astro": "^6.4.4",
+    "lucide-react": "^1.17.0",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7",
+    "tailwindcss": "^4.3.0",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.9",
-    "@types/react": "^19.2.14",
+    "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
     "oxfmt": "^0.1.0",
-    "oxlint": "^1.62.0",
+    "oxlint": "^1.68.0",
+    "tsx": "^4.22.4",
     "typescript": "^6.0.3"
   }
 }

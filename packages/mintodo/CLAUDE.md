@@ -5,16 +5,16 @@ Browser-based mindmap todo editor (React + TypeScript).
 ## Commands
 
 ```bash
-bun test          # run tests
-bun run check     # type check + lint
-bun run format    # format
-bun run dev       # vite dev server
+pnpm test         # run tests
+pnpm run check    # type check + lint
+pnpm run format   # format
+pnpm run dev      # vite dev server
 ```
 
 ## Stack
 
-- Runtime/package manager: **bun** (not npm/npx)
-- Test runner: `bun test`
+- Runtime/package manager: **pnpm**
+- Test runner: `vitest`
 - Type check: `tsgo --noEmit`
 - Lint: `oxlint`
 - Format: `oxfmt`

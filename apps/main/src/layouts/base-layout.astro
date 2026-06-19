@@ -17,7 +17,7 @@ const gtmId = import.meta.env.PUBLIC_GTM_ID;
     <title>{title}</title>
     <link rel="icon" type="image/x-icon" href="/favicon.ico" />
     {gtmId && <script is:inline define:vars={{ gtmId }}>
-      window.dataLayer = window.dataLayer ?? [];
+      window.dataLayer ??= [];
       window.dataLayer.push({ "gtm.start": Date.now(), event: "gtm.js" });
       const [existing] = document.querySelectorAll("script");
       const script = document.createElement("script");

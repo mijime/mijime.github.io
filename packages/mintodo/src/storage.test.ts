@@ -1,28 +1,10 @@
 /* eslint-disable init-declarations */
-
-import { afterEach, beforeAll, beforeEach, describe, expect, it } from "bun:test";
-import type { MindDB } from "./db";
-import type { MindNode, SaveData } from "./types";
 import "fake-indexeddb/auto";
-
-let db!: MindDB;
-let loadFromDexie!: () => Promise<Record<string, MindNode> | null>;
-let saveToDexie!: (nodes: Record<string, MindNode>) => Promise<void>;
-let downloadJson!: (data: SaveData, filename: string) => string;
-let parseImportedJson!: (text: string) => SaveData | null;
-let createInitialNodes!: () => Record<string, MindNode>;
-
-beforeAll(async () => {
-  const dbMod = await import("./db");
-  ({ db } = dbMod);
-  const storageMod = await import("./storage");
-  ({ loadFromDexie } = storageMod);
-  ({ saveToDexie } = storageMod);
-  ({ downloadJson } = storageMod);
-  ({ parseImportedJson } = storageMod);
-  const storeMod = await import("./store");
-  ({ createInitialNodes } = storeMod);
-});
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { db } from "./db";
+import { downloadJson, loadFromDexie, parseImportedJson, saveToDexie } from "./storage";
+import { createInitialNodes } from "./store";
+import type { SaveData } from "./types";
 
 beforeEach(async () => {
   await db.nodes.clear();
@@ -64,7 +46,7 @@ describe("JSON import / export", () => {
   it("downloadJson produces a Blob URL", () => {
     const data: SaveData = { version: 1, nodes: [] };
     const url = downloadJson(data, "test.json");
-    expect(url).toMatch(/^blob:/);
+    expect(url).toMatch(/^blob:/u);
     URL.revokeObjectURL(url);
   });
 

@@ -11,14 +11,7 @@ interface Props {
   darkMode: boolean;
 }
 
-export const WallMesh = memo(function WallMesh({
-  cx,
-  cy,
-  cellSize,
-  edge,
-  wallType,
-  darkMode,
-}: Props) {
+export const WallMesh = memo(({ cx, cy, cellSize, edge, wallType, darkMode }: Props) => {
   if (wallType === "none") return null;
 
   const wallHeight = cellSize * WALL_HEIGHT_FACTOR;
