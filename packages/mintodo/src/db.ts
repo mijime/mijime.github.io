@@ -8,7 +8,7 @@ export interface MetaEntry {
 
 export class MindDB extends Dexie {
   public boards!: Table<Board, string>;
-  public nodes!: Table<MindNode, string>;
+  public nodes!: Table<MindNode, [string, string]>;
   public meta!: Table<MetaEntry, string>;
 
   public constructor() {
@@ -20,7 +20,7 @@ export class MindDB extends Dexie {
     this.version(2).stores({
       meta: "key",
       boards: "id, updatedAt",
-      nodes: "id, boardId",
+      nodes: "[boardId+id], boardId",
     });
   }
 }

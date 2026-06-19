@@ -32,9 +32,9 @@ export async function createBoard(name: string): Promise<{ board: Board; rootId:
   const id = crypto.randomUUID();
   const now = Date.now();
   const board: Board = { id, name, createdAt: now, updatedAt: now };
-  const rootId = `root-${id}`;
+  const rootId = "root";
   const root: MindNode = {
-    id: rootId,
+    id: "root",
     boardId: id,
     text: name,
     parentId: null,

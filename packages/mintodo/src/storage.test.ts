@@ -56,10 +56,10 @@ describe("createBoard", () => {
     const { board, rootId } = await createBoard("My Project");
     expect(board.name).toBe("My Project");
     expect(board.id).toMatch(/^[0-9a-f-]{36}$/u);
-    expect(rootId).toMatch(/^root-/u);
+    expect(rootId).toBe("root");
     const stored = await db.boards.get(board.id);
     expect(stored).toBeDefined();
-    const root = await db.nodes.get(rootId);
+    const root = await db.nodes.get([board.id, rootId]);
     expect(root).toBeDefined();
     expect(root?.boardId).toBe(board.id);
     expect(root?.isRoot).toBe(true);
@@ -98,13 +98,13 @@ describe("loadNodesForBoard / saveNodesForBoard", () => {
     const p1 = await createBoard("P1");
     const p2 = await createBoard("P2");
     await saveNodesForBoard(p1.board.id, {
-      r1: makeNode("r1", p1.board.id, { isRoot: true, text: "p1-root" }),
+      root: makeNode("root", p1.board.id, { isRoot: true, text: "p1-root" }),
     });
     await saveNodesForBoard(p2.board.id, {
-      r2: makeNode("r2", p2.board.id, { isRoot: true, text: "p2-root" }),
+      root: makeNode("root", p2.board.id, { isRoot: true, text: "p2-root" }),
     });
     const p1Nodes = await loadNodesForBoard(p1.board.id);
-    expect(p1Nodes.r1.text).toBe("p1-root");
+    expect(p1Nodes.root.text).toBe("p1-root");
   });
 });
 
