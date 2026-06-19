@@ -1,28 +1,18 @@
-import { afterEach, beforeEach, beforeAll, describe, expect, it } from "bun:test";
-import type { SaveData } from "./types";
+/* eslint-disable init-declarations */
 
+import { afterEach, beforeAll, beforeEach, describe, expect, it } from "bun:test";
+import type { MindDB } from "./db";
+import type { MindNode, SaveData } from "./types";
 import "fake-indexeddb/auto";
-// Use typeof import(...) in type positions to get the types of exports from modules without
-// Triggering runtime evaluation. This is purely static analysis and avoids both:
-//   1. The invalid Awaited<ReturnType<typeof import("./db")>>["db"] pattern (TS2344)
-//   2. Runtime module loading that would capture globalThis.indexedDB before fake-indexeddb runs
-type DbModule = typeof import("./db");
-type StorageModule = typeof import("./storage");
-type StoreModule = typeof import("./store");
 
-let db: DbModule["db"];
-let loadFromDexie: StorageModule["loadFromDexie"];
-let saveToDexie: StorageModule["saveToDexie"];
-let downloadJson: StorageModule["downloadJson"];
-let parseImportedJson: StorageModule["parseImportedJson"];
-let createInitialNodes: StoreModule["createInitialNodes"];
+let db!: MindDB;
+let loadFromDexie!: () => Promise<Record<string, MindNode> | null>;
+let saveToDexie!: (nodes: Record<string, MindNode>) => Promise<void>;
+let downloadJson!: (data: SaveData, filename: string) => string;
+let parseImportedJson!: (text: string) => SaveData | null;
+let createInitialNodes!: () => Record<string, MindNode>;
 
 beforeAll(async () => {
-  // Use dynamic imports at runtime to ensure fake-indexeddb polyfills globalThis.indexedDB
-  // Before Dexie module is evaluated (which captures indexedDB at module load time).
-  // The type aliases above are purely static and do NOT trigger runtime module evaluation.
-  // @ts-expect-error - fake-indexeddb/auto has package.json exports issues
-  await import("fake-indexeddb/auto");
   const dbMod = await import("./db");
   ({ db } = dbMod);
   const storageMod = await import("./storage");

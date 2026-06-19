@@ -43,31 +43,40 @@ export function createInitialState(): State {
 
 export function reducer(state: State, action: Action): State {
   switch (action.type) {
-    case "SELECT":
+    case "SELECT": {
       return { ...state, selectedNodeId: action.id };
-    case "SET_VIEW":
+    }
+    case "SET_VIEW": {
       return { ...state, view: action.view };
-    case "SET_SEARCH":
+    }
+    case "SET_SEARCH": {
       return { ...state, searchQuery: action.query };
-    case "TOGGLE_HIDE_COMPLETED":
+    }
+    case "TOGGLE_HIDE_COMPLETED": {
       return { ...state, hideCompleted: !state.hideCompleted };
-    case "TOGGLE_PHYSICS":
+    }
+    case "TOGGLE_PHYSICS": {
       return { ...state, physicsEnabled: !state.physicsEnabled };
-    case "OPEN_MODAL":
+    }
+    case "OPEN_MODAL": {
       return { ...state, modal: action.modal };
-    case "SET_NODES":
+    }
+    case "SET_NODES": {
       return { ...state, nodes: action.nodes };
-    case "RESET":
+    }
+    case "RESET": {
       return {
         ...createInitialState(),
         physicsEnabled: state.physicsEnabled,
       };
-    case "SET_DRAGGING":
+    }
+    case "SET_DRAGGING": {
       return { ...state, draggingNodeId: action.id };
+    }
     case "ADD_CHILD": {
       const parent = state.nodes[action.parentId];
       if (!parent) return state;
-      const newId = action.newId;
+      const { newId } = action;
       const newNode: MindNode = {
         categoryColor: parent.categoryColor,
         children: [],
@@ -111,7 +120,7 @@ export function reducer(state: State, action: Action): State {
         const n = updated[id];
         if (!n) return;
         updated[id] = { ...n, completed: next };
-        n.children.forEach(cascade);
+        for (const childId of n.children) cascade(childId);
       };
       cascade(action.id);
       return { ...state, nodes: updated };
@@ -127,26 +136,28 @@ export function reducer(state: State, action: Action): State {
     case "DELETE_NODE": {
       const node = state.nodes[action.id];
       if (!node || node.isRoot) return state;
-      const updated = { ...state.nodes };
+      const updated = new Map(Object.entries(state.nodes));
       const remove = (id: string) => {
-        const n = updated[id];
+        const n = updated.get(id);
         if (!n) return;
-        n.children.forEach(remove);
-        delete updated[id];
+        for (const childId of n.children) remove(childId);
+        updated.delete(id);
       };
       remove(action.id);
-      const parent = updated[node.parentId!];
-      const next = {
+      const parent = node.parentId ? updated.get(node.parentId) : null;
+      if (parent) {
+        const newChildren: string[] = [];
+        for (const c of parent.children) {
+          if (c !== action.id) newChildren.push(c);
+        }
+        updated.set(parent.id, { ...parent, children: newChildren });
+      }
+      return {
         ...state,
-        nodes: {
-          ...updated,
-          ...(parent
-            ? { [parent.id]: { ...parent, children: parent.children.filter((c) => c !== action.id) } }
-            : {}),
-        },
-        selectedNodeId: state.selectedNodeId === action.id ? (node.parentId ?? "root") : state.selectedNodeId,
+        nodes: Object.fromEntries(updated),
+        selectedNodeId:
+          state.selectedNodeId === action.id ? (node.parentId ?? "root") : state.selectedNodeId,
       };
-      return next;
     }
     case "MOVE_NODE": {
       const node = state.nodes[action.id];
@@ -156,8 +167,9 @@ export function reducer(state: State, action: Action): State {
         nodes: { ...state.nodes, [action.id]: { ...node, vx: 0, vy: 0, x: action.x, y: action.y } },
       };
     }
-    default:
+    default: {
       return state;
+    }
   }
 }
 

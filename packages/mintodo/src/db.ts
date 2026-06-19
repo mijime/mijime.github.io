@@ -7,10 +7,10 @@ export interface MetaEntry {
 }
 
 export class MindDB extends Dexie {
-  nodes!: Table<MindNode, string>;
-  meta!: Table<MetaEntry, string>;
+  public nodes!: Table<MindNode, string>;
+  public meta!: Table<MetaEntry, string>;
 
-  constructor() {
+  public constructor() {
     super("mintodo");
     this.version(1).stores({
       meta: "key",

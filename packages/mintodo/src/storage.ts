@@ -49,7 +49,7 @@ export function parseImportedJson(text: string): SaveData | null {
     const data = obj as Partial<SaveData>;
     if (data.version !== 1) return null;
     if (!Array.isArray(data.nodes)) return null;
-    const nodes: MindNode[] = data.nodes.map((n) => ({ ...n, vx: 0, vy: 0 }));
+    const nodes: MindNode[] = data.nodes.map((n) => Object.assign({}, n, { vx: 0, vy: 0 }));
     return { version: 1, nodes };
   } catch {
     return null;
