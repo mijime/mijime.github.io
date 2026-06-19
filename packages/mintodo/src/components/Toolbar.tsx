@@ -1,14 +1,4 @@
-import {
-  Download,
-  Eye,
-  Keyboard,
-  Moon,
-  Network,
-  Search,
-  Sun,
-  Trash2,
-  Upload,
-} from "lucide-react";
+import { Download, Eye, Keyboard, Moon, Network, Search, Sun, Trash2, Upload } from "lucide-react";
 import { useRef } from "react";
 import { useMindStore } from "../hooks/use-mind-store";
 import { downloadJson, parseImportedJson } from "../storage";
@@ -59,7 +49,9 @@ export function Toolbar() {
           </div>
           <div>
             <h1 className="font-bold text-lg leading-tight tracking-wide">MindTodo Pro</h1>
-            <p className="text-xs text-slate-500 dark:text-slate-400">ショートカット＆期限管理対応</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400">
+              ショートカット＆期限管理対応
+            </p>
           </div>
         </div>
       </div>
@@ -123,13 +115,7 @@ export function Toolbar() {
           >
             <Upload size={16} />
           </button>
-          <input
-            ref={fileRef}
-            type="file"
-            accept=".json"
-            className="hidden"
-            onChange={onFile}
-          />
+          <input ref={fileRef} type="file" accept=".json" className="hidden" onChange={onFile} />
           <button
             type="button"
             className="p-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 transition"

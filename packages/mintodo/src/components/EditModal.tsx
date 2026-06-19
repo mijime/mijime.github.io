@@ -25,7 +25,7 @@ const PRIORITIES: { label: string; value: Priority }[] = [
 
 export function EditModal() {
   const { state, dispatch } = useMindStore();
-  const {modal} = state;
+  const { modal } = state;
   const isEdit = modal?.kind === "edit";
   const node = isEdit ? state.nodes[modal.nodeId] : null;
 
@@ -93,7 +93,9 @@ export function EditModal() {
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-400 mb-1">期限（期日）</label>
+                <label className="block text-xs font-semibold text-slate-400 mb-1">
+                  期限（期日）
+                </label>
                 <input
                   type="date"
                   value={dueDate}
@@ -102,7 +104,9 @@ export function EditModal() {
                 />
               </div>
               <div>
-                <label className="block text-xs font-semibold text-slate-400 mb-1">カテゴリーカラー</label>
+                <label className="block text-xs font-semibold text-slate-400 mb-1">
+                  カテゴリーカラー
+                </label>
                 <div className="grid grid-cols-4 gap-1.5 mt-1">
                   {CATEGORIES.map((c) => (
                     <button

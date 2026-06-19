@@ -117,7 +117,10 @@ export function NodeCard({ node }: Props) {
             {node.completed ? (
               <Check className="text-indigo-500" size={18} />
             ) : (
-              <XCircle className="text-slate-300 dark:text-slate-600 hover:text-indigo-500" size={18} />
+              <XCircle
+                className="text-slate-300 dark:text-slate-600 hover:text-indigo-500"
+                size={18}
+              />
             )}
           </button>
           <span

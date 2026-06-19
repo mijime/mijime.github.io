@@ -1,7 +1,12 @@
 import { useEffect, useRef } from "react";
 import { useMindStore } from "./use-mind-store";
 
-interface DragAction { type: "MOVE_NODE"; id: string; x: number; y: number }
+interface DragAction {
+  type: "MOVE_NODE";
+  id: string;
+  x: number;
+  y: number;
+}
 type DragCallback = (a: DragAction) => void;
 
 export function useDragNode(onMove: DragCallback): void {
@@ -40,7 +45,7 @@ export function useDragNode(onMove: DragCallback): void {
     }
     function onMouseMove(e: MouseEvent) {
       if (!isDragging || !id) return;
-      const {zoom} = stateRef.current.view;
+      const { zoom } = stateRef.current.view;
       const dx = (e.clientX - startX) / zoom;
       const dy = (e.clientY - startY) / zoom;
       onMoveRef.current({ id, type: "MOVE_NODE", x: nodeStartX + dx, y: nodeStartY + dy });
@@ -72,7 +77,7 @@ export function useDragNode(onMove: DragCallback): void {
     function onTouchMove(e: TouchEvent) {
       if (!isDragging || !id || e.touches.length !== 1) return;
       const [t] = e.touches;
-      const {zoom} = stateRef.current.view;
+      const { zoom } = stateRef.current.view;
       const dx = (t.clientX - startX) / zoom;
       const dy = (t.clientY - startY) / zoom;
       onMoveRef.current({ id, type: "MOVE_NODE", x: nodeStartX + dx, y: nodeStartY + dy });
