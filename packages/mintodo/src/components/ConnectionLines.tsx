@@ -57,12 +57,12 @@ export function ConnectionLines({ containerRef }: Props) {
         const c2x = sx + (ex - sx) * 0.5;
         const c2y = ey;
         const color = node.completed
-          ? (isDark
+          ? isDark
             ? "#334155"
-            : "#cbd5e1")
-          : (isDark
+            : "#cbd5e1"
+          : isDark
             ? "#818cf8"
-            : "#6366f1");
+            : "#6366f1";
         const pathProps = node.completed
           ? { strokeDasharray: "5,5", strokeWidth: 1.5 }
           : { strokeWidth: 3 };
