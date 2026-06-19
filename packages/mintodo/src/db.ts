@@ -1,5 +1,5 @@
 import Dexie, { type Table } from "dexie";
-import type { MindNode } from "./types";
+import type { Board, MindNode } from "./types";
 
 export interface MetaEntry {
   key: string;
@@ -7,6 +7,7 @@ export interface MetaEntry {
 }
 
 export class MindDB extends Dexie {
+  public boards!: Table<Board, string>;
   public nodes!: Table<MindNode, string>;
   public meta!: Table<MetaEntry, string>;
 
@@ -15,6 +16,11 @@ export class MindDB extends Dexie {
     this.version(1).stores({
       meta: "key",
       nodes: "id",
+    });
+    this.version(2).stores({
+      meta: "key",
+      boards: "id, updatedAt",
+      nodes: "id, boardId",
     });
   }
 }
