@@ -1,4 +1,73 @@
-import type { MindNode } from "./types";
+import type { MindNode, Modal, View } from "./types";
+
+export interface State {
+  draggingNodeId: string | null;
+  hideCompleted: boolean;
+  modal: Modal;
+  nodes: Record<string, MindNode>;
+  physicsEnabled: boolean;
+  searchQuery: string;
+  selectedNodeId: string;
+  view: View;
+}
+
+export type Action =
+  | { type: "ADD_CHILD"; newId: string; parentId: string }
+  | { type: "DELETE_NODE"; id: string }
+  | { type: "MOVE_NODE"; id: string; x: number; y: number }
+  | { type: "OPEN_MODAL"; modal: Modal }
+  | { type: "RESET" }
+  | { type: "SELECT"; id: string }
+  | { type: "SET_DRAGGING"; id: string | null }
+  | { type: "SET_NODES"; nodes: Record<string, MindNode> }
+  | { type: "SET_SEARCH"; query: string }
+  | { type: "SET_VIEW"; view: View }
+  | { type: "TOGGLE_COLLAPSE"; id: string }
+  | { type: "TOGGLE_COMPLETE"; id: string }
+  | { type: "TOGGLE_HIDE_COMPLETED" }
+  | { type: "TOGGLE_PHYSICS" }
+  | { type: "UPDATE_NODE"; id: string; patch: Partial<MindNode> };
+
+export function createInitialState(): State {
+  return {
+    draggingNodeId: null,
+    hideCompleted: false,
+    modal: null,
+    nodes: createInitialNodes(),
+    physicsEnabled: true,
+    searchQuery: "",
+    selectedNodeId: "root",
+    view: { pan: { x: 0, y: 0 }, zoom: 1 },
+  };
+}
+
+export function reducer(state: State, action: Action): State {
+  switch (action.type) {
+    case "SELECT":
+      return { ...state, selectedNodeId: action.id };
+    case "SET_VIEW":
+      return { ...state, view: action.view };
+    case "SET_SEARCH":
+      return { ...state, searchQuery: action.query };
+    case "TOGGLE_HIDE_COMPLETED":
+      return { ...state, hideCompleted: !state.hideCompleted };
+    case "TOGGLE_PHYSICS":
+      return { ...state, physicsEnabled: !state.physicsEnabled };
+    case "OPEN_MODAL":
+      return { ...state, modal: action.modal };
+    case "SET_NODES":
+      return { ...state, nodes: action.nodes };
+    case "RESET":
+      return {
+        ...createInitialState(),
+        physicsEnabled: state.physicsEnabled,
+      };
+    case "SET_DRAGGING":
+      return { ...state, draggingNodeId: action.id };
+    default:
+      return state;
+  }
+}
 
 function makeNode(
   id: string,
