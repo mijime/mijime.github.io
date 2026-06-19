@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, beforeAll, describe, expect, it } from "bun:test";
+import type { SaveData } from "./types";
 
 // Use dynamic imports to ensure fake-indexeddb polyfills globalThis.indexedDB
 // before Dexie module is evaluated (which captures indexedDB at module load time)
@@ -6,6 +7,8 @@ let db: Awaited<ReturnType<typeof import("./db")>>["db"];
 let loadFromDexie: Awaited<ReturnType<typeof import("./storage")>>["loadFromDexie"];
 let saveToDexie: Awaited<ReturnType<typeof import("./storage")>>["saveToDexie"];
 let createInitialNodes: Awaited<ReturnType<typeof import("./store")>>["createInitialNodes"];
+let downloadJson: Awaited<ReturnType<typeof import("./storage")>>["downloadJson"];
+let parseImportedJson: Awaited<ReturnType<typeof import("./storage")>>["parseImportedJson"];
 
 beforeAll(async () => {
   await import("fake-indexeddb/auto");
@@ -16,6 +19,8 @@ beforeAll(async () => {
   saveToDexie = storageMod.saveToDexie;
   const storeMod = await import("./store");
   createInitialNodes = storeMod.createInitialNodes;
+  downloadJson = storageMod.downloadJson;
+  parseImportedJson = storageMod.parseImportedJson;
 });
 
 beforeEach(async () => {
@@ -51,5 +56,31 @@ describe("saveToDexie / loadFromDexie", () => {
     const loaded = await loadFromDexie();
     expect(loaded!["root"].vx).toBe(0);
     expect(loaded!["root"].vy).toBe(0);
+  });
+});
+
+describe("JSON import / export", () => {
+  it("downloadJson produces a Blob URL", () => {
+    const data: SaveData = { version: 1, nodes: [] };
+    const url = downloadJson(data, "test.json");
+    expect(url).toMatch(/^blob:/);
+    URL.revokeObjectURL(url);
+  });
+
+  it("parseImportedJson reads valid data", () => {
+    const data: SaveData = {
+      version: 1,
+      nodes: [{ ...createInitialNodes().root, vx: 0, vy: 0 }],
+    };
+    const json = JSON.stringify(data);
+    const parsed = parseImportedJson(json);
+    expect(parsed).not.toBeNull();
+    expect(parsed!.nodes.length).toBe(1);
+  });
+
+  it("parseImportedJson returns null on invalid data", () => {
+    expect(parseImportedJson("not json")).toBeNull();
+    expect(parseImportedJson("{}")).toBeNull();
+    expect(parseImportedJson(JSON.stringify({ version: 2, nodes: [] }))).toBeNull();
   });
 });
