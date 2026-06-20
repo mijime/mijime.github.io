@@ -19,7 +19,8 @@ export function Toolbar() {
       board: { id: currentBoard?.id ?? "", name: currentBoard?.name ?? "Unknown" },
       nodes: Object.values(state.nodes),
     };
-    const url = downloadJson(data, `mintodo_backup_${new Date().toISOString().slice(0, 10)}.json`);
+    const date = new Date().toISOString().slice(0, 10);
+    const url = downloadJson(data, `mintodo_${currentBoard?.name ?? "Unknown"}_${date}.json`);
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   };
 
@@ -34,8 +35,21 @@ export function Toolbar() {
       alert("インポートに失敗しました。ファイルが壊れている可能性があります。");
       return;
     }
+    if (
+      Object.keys(state.nodes).length > 0 &&
+      !confirm(
+        `「${data.board.name}」から${data.nodes.length}件のタスクをインポートします。\nこのボードの現在のタスクは失われます。続行しますか?`,
+      )
+    ) {
+      e.target.value = "";
+      return;
+    }
+    // Rewrite boardId so nodes belong to the current board.
+    const currentId = state.currentBoardId;
     const rec: Record<string, (typeof data.nodes)[number]> = {};
-    for (const n of data.nodes) rec[n.id] = n;
+    for (const n of data.nodes) {
+      rec[n.id] = { ...n, boardId: currentId ?? n.boardId };
+    }
     dispatch({ nodes: rec, type: "SET_NODES" });
     e.target.value = "";
   };
