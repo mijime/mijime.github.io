@@ -1,6 +1,8 @@
-import type { MindNode, Modal, View } from "./types";
+import type { Board, MindNode, Modal, View } from "./types";
 
 export interface State {
+  boards: Board[];
+  currentBoardId: string | null;
   draggingNodeId: string | null;
   hideCompleted: boolean;
   modal: Modal;
@@ -12,12 +14,17 @@ export interface State {
 }
 
 export type Action =
+  | { type: "ADD_BOARD"; board: Board; initialNodes: Record<string, MindNode> }
   | { type: "ADD_CHILD"; newId: string; parentId: string }
+  | { type: "DELETE_BOARD"; id: string; nextBoardId: string | null }
   | { type: "DELETE_NODE"; id: string }
   | { type: "MOVE_NODE"; id: string; x: number; y: number }
   | { type: "OPEN_MODAL"; modal: Modal }
+  | { type: "RENAME_BOARD"; id: string; name: string }
   | { type: "RESET" }
   | { type: "SELECT"; id: string }
+  | { type: "SET_BOARDS"; boards: Board[] }
+  | { type: "SET_CURRENT_BOARD"; boardId: string | null }
   | { type: "SET_DRAGGING"; id: string | null }
   | { type: "SET_NODES"; nodes: Record<string, MindNode> }
   | { type: "SET_SEARCH"; query: string }
@@ -30,19 +37,92 @@ export type Action =
 
 export function createInitialState(): State {
   return {
+    boards: [],
+    currentBoardId: null,
     draggingNodeId: null,
     hideCompleted: false,
     modal: null,
-    nodes: createInitialNodes(),
+    nodes: {},
     physicsEnabled: true,
     searchQuery: "",
-    selectedNodeId: "root",
+    selectedNodeId: "",
     view: { pan: { x: 0, y: 0 }, zoom: 1 },
   };
 }
 
 export function reducer(state: State, action: Action): State {
   switch (action.type) {
+    case "SET_BOARDS": {
+      return { ...state, boards: action.boards };
+    }
+    case "SET_CURRENT_BOARD": {
+      return { ...state, currentBoardId: action.boardId };
+    }
+    case "ADD_BOARD": {
+      const existing = state.boards.find((b) => b.id === action.board.id);
+      if (existing) return state;
+      return {
+        ...state,
+        boards: [...state.boards, action.board],
+        currentBoardId: action.board.id,
+        nodes: action.initialNodes,
+        selectedNodeId: "root",
+      };
+    }
+    case "RENAME_BOARD": {
+      return {
+        ...state,
+        boards: state.boards.map((b) =>
+          b.id === action.id ? { ...b, name: action.name, updatedAt: Date.now() } : b,
+        ),
+      };
+    }
+    case "DELETE_BOARD": {
+      const remaining = state.boards.filter((b) => b.id !== action.id);
+      const filteredNodes: Record<string, MindNode> = {};
+      for (const [id, n] of Object.entries(state.nodes)) {
+        if (n.boardId !== action.id) filteredNodes[id] = n;
+      }
+      return {
+        ...state,
+        boards: remaining,
+        currentBoardId:
+          state.currentBoardId === action.id ? action.nextBoardId : state.currentBoardId,
+        nodes:
+          state.currentBoardId === action.id
+            ? action.nextBoardId
+              ? filteredNodes
+              : {}
+            : state.nodes,
+      };
+    }
+    case "RESET": {
+      if (!state.currentBoardId) return state;
+      const board = state.boards.find((b) => b.id === state.currentBoardId);
+      const root: MindNode = {
+        id: "root",
+        boardId: state.currentBoardId,
+        text: board?.name ?? "メインプロジェクト",
+        parentId: null,
+        isRoot: true,
+        completed: false,
+        collapsed: false,
+        priority: "medium",
+        categoryColor: "slate",
+        dueDate: "",
+        children: [],
+        x: 0,
+        y: 0,
+        vx: 0,
+        vy: 0,
+      };
+      return {
+        ...state,
+        nodes: { root },
+        selectedNodeId: "root",
+        physicsEnabled: state.physicsEnabled,
+      };
+    }
     case "SELECT": {
       return { ...state, selectedNodeId: action.id };
     }
@@ -64,12 +144,6 @@ export function reducer(state: State, action: Action): State {
     case "SET_NODES": {
       return { ...state, nodes: action.nodes };
     }
-    case "RESET": {
-      return {
-        ...createInitialState(),
-        physicsEnabled: state.physicsEnabled,
-      };
-    }
     case "SET_DRAGGING": {
       return { ...state, draggingNodeId: action.id };
     }
@@ -78,12 +152,13 @@ export function reducer(state: State, action: Action): State {
       if (!parent) return state;
       const { newId } = action;
       const newNode: MindNode = {
+        id: newId,
+        boardId: parent.boardId,
         categoryColor: parent.categoryColor,
         children: [],
         collapsed: false,
         completed: false,
         dueDate: "",
-        id: newId,
         isRoot: false,
         parentId: parent.id,
         priority: "medium",
@@ -164,116 +239,14 @@ export function reducer(state: State, action: Action): State {
       if (!node) return state;
       return {
         ...state,
-        nodes: { ...state.nodes, [action.id]: { ...node, vx: 0, vy: 0, x: action.x, y: action.y } },
+        nodes: {
+          ...state.nodes,
+          [action.id]: { ...node, vx: 0, vy: 0, x: action.x, y: action.y },
+        },
       };
     }
     default: {
       return state;
     }
   }
-}
-
-function makeNode(
-  id: string,
-  text: string,
-  opts: Partial<MindNode> & { x: number; y: number },
-): MindNode {
-  return {
-    categoryColor: "slate",
-    children: [],
-    collapsed: false,
-    completed: false,
-    dueDate: "",
-    parentId: null,
-    priority: "medium",
-    vx: 0,
-    vy: 0,
-    ...opts,
-    id,
-    isRoot: opts.isRoot ?? false,
-    text,
-  };
-}
-
-export function createInitialNodes(): Record<string, MindNode> {
-  const root = makeNode("root", "メインプロジェクト", {
-    categoryColor: "slate",
-    children: ["node-1", "node-2", "node-3"],
-    isRoot: true,
-    priority: "medium",
-    x: 0,
-    y: 0,
-  });
-
-  const node1 = makeNode("node-1", "企画・設計", {
-    categoryColor: "sky",
-    children: ["node-1-1", "node-1-2"],
-    parentId: "root",
-    priority: "high",
-    x: -250,
-    y: -120,
-  });
-
-  const node11 = makeNode("node-1-1", "要件定義書作成", {
-    categoryColor: "sky",
-    completed: true,
-    dueDate: "2026-06-25",
-    parentId: "node-1",
-    priority: "high",
-    x: -450,
-    y: -180,
-  });
-
-  const node12 = makeNode("node-1-2", "UIデザイン作成", {
-    categoryColor: "sky",
-    dueDate: "2026-07-01",
-    parentId: "node-1",
-    priority: "medium",
-    x: -450,
-    y: -70,
-  });
-
-  const node2 = makeNode("node-2", "実装フェーズ", {
-    categoryColor: "emerald",
-    children: ["node-2-1", "node-2-2"],
-    parentId: "root",
-    priority: "high",
-    x: 250,
-    y: -50,
-  });
-
-  const node21 = makeNode("node-2-1", "フロントエンド実装", {
-    categoryColor: "emerald",
-    parentId: "node-2",
-    priority: "high",
-    x: 480,
-    y: -100,
-  });
-
-  const node22 = makeNode("node-2-2", "API連携", {
-    categoryColor: "emerald",
-    parentId: "node-2",
-    priority: "medium",
-    x: 480,
-    y: 0,
-  });
-
-  const node3 = makeNode("node-3", "テスト & リリース", {
-    categoryColor: "rose",
-    parentId: "root",
-    priority: "low",
-    x: 0,
-    y: 180,
-  });
-
-  return {
-    "node-1": node1,
-    "node-1-1": node11,
-    "node-1-2": node12,
-    "node-2": node2,
-    "node-2-1": node21,
-    "node-2-2": node22,
-    "node-3": node3,
-    root,
-  };
 }

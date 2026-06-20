@@ -1,5 +1,15 @@
 import { useEffect, useRef } from "react";
-import { getMeta, loadFromDexie, saveToDexie, setMeta } from "../storage";
+import {
+  discardV1Data,
+  getCurrentBoardId,
+  getMeta,
+  hasV1Data,
+  loadBoards,
+  loadNodesForBoard,
+  saveNodesForBoard,
+  setCurrentBoardId,
+  setMeta,
+} from "../storage";
 import { useMindStore } from "./use-mind-store";
 
 const SAVE_DEBOUNCE_MS = 300;
@@ -12,9 +22,19 @@ export function useStorageSync(): void {
   useEffect(() => {
     (async () => {
       try {
-        const loaded = await loadFromDexie();
-        if (loaded) {
-          dispatch({ nodes: loaded, type: "SET_NODES" });
+        if (await hasV1Data()) {
+          await discardV1Data();
+        }
+        const boards = await loadBoards();
+        dispatch({ boards, type: "SET_BOARDS" });
+        const currentId = await getCurrentBoardId();
+        if (currentId && boards.some((b) => b.id === currentId)) {
+          dispatch({ boardId: currentId, type: "SET_CURRENT_BOARD" });
+          const nodes = await loadNodesForBoard(currentId);
+          dispatch({ nodes, type: "SET_NODES" });
+        } else {
+          await setCurrentBoardId(null);
+          dispatch({ boardId: null, type: "SET_CURRENT_BOARD" });
         }
         const physics = await getMeta<boolean>("physicsEnabled");
         if (physics === false) {
@@ -23,8 +43,9 @@ export function useStorageSync(): void {
       } catch (err) {
         // eslint-disable-next-line no-console
         console.error("mintodo: failed to load from IndexedDB, using initial state", err);
+      } finally {
+        loadedRef.current = true;
       }
-      loadedRef.current = true;
     })();
   }, [dispatch]);
 
@@ -32,10 +53,12 @@ export function useStorageSync(): void {
     if (!loadedRef.current) return;
     if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
     saveTimerRef.current = setTimeout(() => {
-      saveToDexie(state.nodes).catch((err: unknown) => {
-        // eslint-disable-next-line no-console
-        console.error("mintodo: failed to save nodes", err);
-      });
+      if (state.currentBoardId) {
+        saveNodesForBoard(state.currentBoardId, state.nodes).catch((err: unknown) => {
+          // eslint-disable-next-line no-console
+          console.error("mintodo: failed to save nodes", err);
+        });
+      }
       setMeta("physicsEnabled", state.physicsEnabled).catch((err: unknown) => {
         // eslint-disable-next-line no-console
         console.error("mintodo: failed to save meta", err);
@@ -44,5 +67,5 @@ export function useStorageSync(): void {
     return () => {
       if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
     };
-  }, [state.nodes, state.physicsEnabled]);
+  }, [state.nodes, state.currentBoardId, state.physicsEnabled]);
 }
