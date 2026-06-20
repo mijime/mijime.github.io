@@ -82,7 +82,7 @@ export function useBoardActions(): BoardActions {
     async (id: string) => {
       const boards = await loadBoards();
       const remaining = boards.filter((b) => b.id !== id);
-      const next = [...remaining].sort((a, b) => b.updatedAt - a.updatedAt)[0]?.id ?? null;
+      const next = [...remaining].toSorted((a, b) => b.updatedAt - a.updatedAt)[0]?.id ?? null;
       await deleteBoardInStorage(id);
       dispatch({ id, nextBoardId: next, type: "DELETE_BOARD" });
       await setCurrentBoardId(next);
@@ -94,7 +94,7 @@ export function useBoardActions(): BoardActions {
   const switchBoard = useCallback(
     async (id: string) => {
       // Flush any pending edits to the current board before switching
-      // to avoid losing them when the save effect re-targets to the new board.
+      // To avoid losing them when the save effect re-targets to the new board.
       try {
         if (state.currentBoardId && state.currentBoardId !== id) {
           await saveNodesForBoard(state.currentBoardId, state.nodes);

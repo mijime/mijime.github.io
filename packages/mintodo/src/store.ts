@@ -73,9 +73,7 @@ export function reducer(state: State, action: Action): State {
       return {
         ...state,
         boards: state.boards.map((b) =>
-          b.id === action.id
-            ? { ...b, name: action.name, updatedAt: Date.now() }
-            : b,
+          b.id === action.id ? { ...b, name: action.name, updatedAt: Date.now() } : b,
         ),
       };
     }

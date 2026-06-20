@@ -11,7 +11,8 @@ export function EmptyState() {
         <div className="text-6xl mb-4">🌱</div>
         <h2 className="text-2xl font-bold mb-2">最初のボードを作成</h2>
         <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">
-          プロジェクト、アイデア、ToDo...<br />
+          プロジェクト、アイデア、ToDo...
+          <br />
           ボードを作成してマインドマップを始めましょう
         </p>
         <button

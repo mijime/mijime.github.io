@@ -29,14 +29,16 @@ export function Canvas() {
     dispatch({ id: a.id, type: "MOVE_NODE", x: a.x, y: a.y });
   });
 
-  const visibleNodes = useMemo(() => 
-    Object.values(state.nodes).filter((n) => {
-      if (state.currentBoardId && n.boardId !== state.currentBoardId) return false;
-      if (isParentCollapsed(state, n.id)) return false;
-      if (state.hideCompleted && n.completed && !n.isRoot) return false;
-      return true;
-    })
-  , [state.nodes, state.currentBoardId, state.hideCompleted]);
+  const visibleNodes = useMemo(
+    () =>
+      Object.values(state.nodes).filter((n) => {
+        if (state.currentBoardId && n.boardId !== state.currentBoardId) return false;
+        if (isParentCollapsed(state, n.id)) return false;
+        if (state.hideCompleted && n.completed && !n.isRoot) return false;
+        return true;
+      }),
+    [state.nodes, state.currentBoardId, state.hideCompleted],
+  );
 
   return (
     <div

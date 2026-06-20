@@ -69,9 +69,13 @@ describe("createBoard", () => {
 describe("loadBoards", () => {
   it("returns boards sorted by updatedAt desc", async () => {
     const a = await createBoard("A");
-    await new Promise<void>((resolve) => { setTimeout(() => resolve(), 5); });
+    await new Promise<void>((resolve) => {
+      setTimeout(() => resolve(), 5);
+    });
     const b = await createBoard("B");
-    await new Promise<void>((resolve) => { setTimeout(() => resolve(), 5); });
+    await new Promise<void>((resolve) => {
+      setTimeout(() => resolve(), 5);
+    });
     const c = await createBoard("C");
     const list = await loadBoards();
     expect(list.map((x) => x.id)).toEqual([c.board.id, b.board.id, a.board.id]);
@@ -91,7 +95,7 @@ describe("loadNodesForBoard / saveNodesForBoard", () => {
     };
     await saveNodesForBoard(board.id, nodes);
     const loaded = await loadNodesForBoard(board.id);
-    expect(Object.keys(loaded).sort()).toEqual([rootId, "n-1"].sort());
+    expect(Object.keys(loaded).toSorted()).toEqual([rootId, "n-1"].toSorted());
   });
 
   it("only returns nodes for the requested board", async () => {
@@ -111,7 +115,9 @@ describe("loadNodesForBoard / saveNodesForBoard", () => {
 describe("renameBoard", () => {
   it("updates name and updatedAt", async () => {
     const { board } = await createBoard("Old");
-    await new Promise<void>((resolve) => { setTimeout(() => resolve(), 5); });
+    await new Promise<void>((resolve) => {
+      setTimeout(() => resolve(), 5);
+    });
     const before = (await db.boards.get(board.id))!.updatedAt;
     await renameBoard(board.id, "New");
     const after = await db.boards.get(board.id);

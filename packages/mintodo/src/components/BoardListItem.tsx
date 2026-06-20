@@ -73,10 +73,7 @@ export function BoardListItem({ boardId, isCurrent, onSelect, onRename, onDelete
       </div>
       <div className="mt-1.5 ml-4">
         <div className="bg-slate-200 dark:bg-slate-700 h-1 rounded-full overflow-hidden">
-          <div
-            className="bg-indigo-500 h-full transition-all"
-            style={{ width: `${rate}%` }}
-          />
+          <div className="bg-indigo-500 h-full transition-all" style={{ width: `${rate}%` }} />
         </div>
         <div className="text-[10px] text-slate-500 dark:text-slate-400 mt-1">
           {total === 0 ? "タスクなし" : `${completed}/${total} 完了 (${rate}%)`}

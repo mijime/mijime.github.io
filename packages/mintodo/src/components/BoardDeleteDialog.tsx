@@ -2,7 +2,7 @@ import { useMindStore } from "../hooks/use-mind-store";
 
 export function BoardDeleteDialog() {
   const { state, dispatch } = useMindStore();
-  const modal = state.modal;
+  const { modal } = state;
   const open = modal?.kind === "board-delete";
   if (!open) return null;
 

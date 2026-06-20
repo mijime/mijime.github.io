@@ -23,19 +23,19 @@ function Shell() {
 
   useEffect(() => {
     const onCreate = (e: Event) => {
-      const {detail} = (e as CustomEvent<{ name: string }>);
+      const { detail } = e as CustomEvent<{ name: string }>;
       // eslint-disable-next-line no-console
       actions.createBoard(detail.name).catch((err) => console.error(err));
     };
     const onRename = (e: Event) => {
-      const {detail} = (e as CustomEvent<{ name: string; mode: string; boardId?: string }>);
+      const { detail } = e as CustomEvent<{ name: string; mode: string; boardId?: string }>;
       if (detail.mode === "rename" && detail.boardId) {
         // eslint-disable-next-line no-console
         actions.renameBoard(detail.boardId, detail.name).catch((err) => console.error(err));
       }
     };
     const onDelete = (e: Event) => {
-      const {detail} = (e as CustomEvent<{ boardId: string }>);
+      const { detail } = e as CustomEvent<{ boardId: string }>;
       // eslint-disable-next-line no-console
       actions.deleteBoard(detail.boardId).catch((err) => console.error(err));
     };
