@@ -82,7 +82,7 @@ export function useBoardActions(): BoardActions {
     async (id: string) => {
       const boards = await loadBoards();
       const remaining = boards.filter((b) => b.id !== id);
-      const next = remaining.sort((a, b) => b.updatedAt - a.updatedAt)[0]?.id ?? null;
+      const next = [...remaining].sort((a, b) => b.updatedAt - a.updatedAt)[0]?.id ?? null;
       await deleteBoardInStorage(id);
       dispatch({ id, nextBoardId: next, type: "DELETE_BOARD" });
       await setCurrentBoardId(next);
@@ -95,13 +95,16 @@ export function useBoardActions(): BoardActions {
     async (id: string) => {
       // Flush any pending edits to the current board before switching
       // to avoid losing them when the save effect re-targets to the new board.
-      if (state.currentBoardId && state.currentBoardId !== id) {
-        await saveNodesForBoard(state.currentBoardId, state.nodes);
+      try {
+        if (state.currentBoardId && state.currentBoardId !== id) {
+          await saveNodesForBoard(state.currentBoardId, state.nodes);
+        }
+      } finally {
+        const nodes = await loadNodesForBoard(id);
+        dispatch({ boardId: id, type: "SET_CURRENT_BOARD" });
+        dispatch({ nodes, type: "SET_NODES" });
+        await setCurrentBoardId(id);
       }
-      const nodes = await loadNodesForBoard(id);
-      dispatch({ boardId: id, type: "SET_CURRENT_BOARD" });
-      dispatch({ nodes, type: "SET_NODES" });
-      await setCurrentBoardId(id);
     },
     [dispatch, state.currentBoardId, state.nodes],
   );
