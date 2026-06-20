@@ -13,7 +13,12 @@ export function Toolbar() {
   const fileRef = useRef<HTMLInputElement>(null);
 
   const onExport = () => {
-    const data = { nodes: Object.values(state.nodes), version: 1 as const };
+    const currentBoard = state.boards.find((b) => b.id === state.currentBoardId);
+    const data = {
+      version: 2 as const,
+      board: { id: currentBoard?.id ?? "", name: currentBoard?.name ?? "Unknown" },
+      nodes: Object.values(state.nodes),
+    };
     const url = downloadJson(data, `mintodo_backup_${new Date().toISOString().slice(0, 10)}.json`);
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   };
