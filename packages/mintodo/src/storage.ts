@@ -10,7 +10,7 @@ function arrayToRecord(arr: MindNode[]): Record<string, MindNode> {
 }
 
 export async function loadBoards(): Promise<Board[]> {
-  return await db.boards.orderBy("updatedAt").reverse().toArray();
+  return await db.boards.orderBy("updatedAt").toReversed().toArray();
 }
 
 export async function loadNodesForBoard(boardId: string): Promise<Record<string, MindNode>> {
@@ -122,9 +122,7 @@ export function parseImportedJson(text: string): SaveData | null {
     if (typeof data.board !== "object" || data.board === null) return null;
     if (typeof data.board.id !== "string" || typeof data.board.name !== "string") return null;
     if (!Array.isArray(data.nodes)) return null;
-    const nodes: MindNode[] = data.nodes.map((n) =>
-      Object.assign({}, n, { vx: 0, vy: 0 }),
-    );
+    const nodes: MindNode[] = data.nodes.map((n) => Object.assign({}, n, { vx: 0, vy: 0 }));
     return {
       version: 2,
       board: { id: data.board.id, name: data.board.name },

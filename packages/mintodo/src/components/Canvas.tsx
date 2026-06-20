@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useMemo, useRef } from "react";
 import { useDragNode } from "../hooks/use-drag-node";
 import { useMindStore } from "../hooks/use-mind-store";
 import { usePanZoom } from "../hooks/use-pan-zoom";
@@ -29,11 +29,14 @@ export function Canvas() {
     dispatch({ id: a.id, type: "MOVE_NODE", x: a.x, y: a.y });
   });
 
-  const visibleNodes = Object.values(state.nodes).filter((n) => {
-    if (isParentCollapsed(state, n.id)) return false;
-    if (state.hideCompleted && n.completed && !n.isRoot) return false;
-    return true;
-  });
+  const visibleNodes = useMemo(() => 
+    Object.values(state.nodes).filter((n) => {
+      if (state.currentBoardId && n.boardId !== state.currentBoardId) return false;
+      if (isParentCollapsed(state, n.id)) return false;
+      if (state.hideCompleted && n.completed && !n.isRoot) return false;
+      return true;
+    })
+  , [state.nodes, state.currentBoardId, state.hideCompleted]);
 
   return (
     <div

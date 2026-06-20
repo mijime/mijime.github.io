@@ -52,7 +52,7 @@ describe("useBoardActions", () => {
     await act(async () => {
       await result.current.actions.createBoard("Old");
     });
-    const { id } = result.current.store.state.boards[0];
+    const [{ id }] = result.current.store.state.boards;
     await act(async () => {
       await result.current.actions.renameBoard(id, "New");
     });
@@ -93,7 +93,7 @@ describe("useBoardActions", () => {
     await act(async () => {
       await result.current.actions.createBoard("Solo");
     });
-    const { id } = result.current.store.state.boards[0];
+    const [{ id }] = result.current.store.state.boards;
     await act(async () => {
       await result.current.actions.deleteBoard(id);
     });
@@ -205,7 +205,7 @@ describe("useBoardActions", () => {
     });
     expect(result.current.store.state.currentBoardId).toBe(a!.id);
     // Mutate the root node's text on board A
-    await act(async () => {
+    await act(() => {
       result.current.store.dispatch({
         id: "root",
         patch: { text: "Mutated" },
