@@ -10,7 +10,8 @@ function arrayToRecord(arr: MindNode[]): Record<string, MindNode> {
 }
 
 export async function loadBoards(): Promise<Board[]> {
-  return await db.boards.orderBy("updatedAt").reverse().toArray();
+  const boards = await db.boards.orderBy("updatedAt").toArray();
+  return boards.toReversed();
 }
 
 export async function loadNodesForBoard(boardId: string): Promise<Record<string, MindNode>> {
