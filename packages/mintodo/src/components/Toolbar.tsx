@@ -13,10 +13,17 @@ import {
 import { useRef } from "react";
 import { useMindStore } from "../hooks/use-mind-store";
 import { downloadJson, parseImportedJson } from "../storage";
+import { db } from "../db";
 
 function onTheme() {
   const isDark = document.documentElement.classList.toggle("dark");
   localStorage.setItem("theme", isDark ? "dark" : "light");
+}
+
+async function onReset() {
+  if (!confirm("すべてのデータを初期化しますか？（IndexedDBの全データが削除され、ページがリロードされます）")) return;
+  await db.delete();
+  location.reload();
 }
 
 export function Toolbar() {
@@ -63,11 +70,6 @@ export function Toolbar() {
     }
     dispatch({ nodes: rec, type: "SET_NODES" });
     e.target.value = "";
-  };
-
-  const onReset = () => {
-    if (!confirm("すべてのタスクを初期化しますか？")) return;
-    dispatch({ type: "RESET" });
   };
 
   const onToggleDrawer = () => dispatch({ type: "TOGGLE_DRAWER" });

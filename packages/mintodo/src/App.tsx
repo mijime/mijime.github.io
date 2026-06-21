@@ -52,7 +52,7 @@ function Shell() {
   const showCanvas = state.boards.length > 0 && state.currentBoardId !== null;
 
   return (
-    <div className="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 h-screen w-screen overflow-hidden select-none font-sans">
+    <div className="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 min-h-screen w-screen flex flex-col overflow-hidden select-none font-sans">
       <Toolbar />
       <BoardSidebar />
       {showCanvas ? <Canvas /> : <EmptyState />}
