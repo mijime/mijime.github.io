@@ -1,4 +1,15 @@
-import { Download, Eye, Keyboard, Moon, Network, Search, Sun, Trash2, Upload } from "lucide-react";
+import {
+  Download,
+  Eye,
+  Keyboard,
+  Menu,
+  Moon,
+  Network,
+  Search,
+  Sun,
+  Trash2,
+  Upload,
+} from "lucide-react";
 import { useRef } from "react";
 import { useMindStore } from "../hooks/use-mind-store";
 import { downloadJson, parseImportedJson } from "../storage";
@@ -59,18 +70,25 @@ export function Toolbar() {
     dispatch({ type: "RESET" });
   };
 
+  const onToggleDrawer = () => dispatch({ type: "TOGGLE_DRAWER" });
+
   return (
     <header className="absolute top-4 left-4 right-4 z-10 flex flex-col lg:flex-row gap-3 lg:items-center justify-between bg-white/80 dark:bg-slate-800/80 backdrop-blur-md p-4 rounded-2xl shadow-lg border border-slate-200/50 dark:border-slate-700/50 transition-all">
       <div className="flex items-center justify-between lg:justify-start gap-3 w-full lg:w-auto">
         <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={onToggleDrawer}
+            title="ボード一覧"
+            className="p-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 transition md:hidden"
+          >
+            <Menu size={18} />
+          </button>
           <div className="bg-indigo-600 text-white p-2.5 rounded-xl shadow-md shadow-indigo-500/20">
             <Network size={18} />
           </div>
           <div>
             <h1 className="font-bold text-lg leading-tight tracking-wide">MindTodo Pro</h1>
-            <p className="text-xs text-slate-500 dark:text-slate-400">
-              ショートカット＆期限管理対応
-            </p>
           </div>
         </div>
       </div>
@@ -97,12 +115,14 @@ export function Toolbar() {
           title="未完了のみ表示トグル"
           onClick={() => dispatch({ type: "TOGGLE_HIDE_COMPLETED" })}
         >
-          <Eye size={12} /> <span>未完了のみ</span>
+          <Eye size={16} /> <span className="hidden sm:inline">未完了のみ</span>
         </button>
       </div>
       <div className="flex items-center justify-between lg:justify-end gap-3 w-full lg:w-auto">
         <div className="flex items-center gap-2 bg-slate-100 dark:bg-slate-700/50 px-3 py-1.5 rounded-xl border border-slate-200/30 dark:border-slate-600/30">
-          <span className="text-xs font-semibold text-slate-600 dark:text-slate-300">自動配置</span>
+          <span className="hidden sm:inline text-xs font-semibold text-slate-600 dark:text-slate-300">
+            自動配置
+          </span>
           <button
             type="button"
             className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${

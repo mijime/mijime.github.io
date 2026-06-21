@@ -6,3 +6,13 @@ if (URL.revokeObjectURL === undefined) {
     // No-op
   };
 }
+if (globalThis.ResizeObserver === undefined) {
+  /* eslint-disable class-methods-use-this */
+  class ResizeObserverMock {
+    public observe(_target: Element): void {}
+    public unobserve(_target: Element): void {}
+    public disconnect(): void {}
+  }
+  /* eslint-enable class-methods-use-this */
+  globalThis.ResizeObserver = ResizeObserverMock as unknown as typeof ResizeObserver;
+}
