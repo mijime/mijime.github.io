@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { MindNode } from "./types";
-import { parseDSL } from "./dsl";
+import { parseDSL, serializeDSL } from "./dsl";
 
 function findNode(nodes: MindNode[], id: string): MindNode {
   const n = nodes.find((x) => x.id === id);
@@ -152,5 +152,104 @@ describe("parseDSL — attributes", () => {
   it("returns null on invalid due date", () => {
     expect(parseDSL("Root\n  X @due:2026/06/25\n", "b1")).toBeNull();
     expect(parseDSL("Root\n  X @due:not-a-date\n", "b1")).toBeNull();
+  });
+});
+
+function makeNode(
+  id: string,
+  boardId: string,
+  opts: Partial<MindNode> = {},
+): MindNode {
+  return {
+    id,
+    boardId,
+    text: opts.text ?? "node",
+    parentId: opts.parentId ?? null,
+    isRoot: opts.isRoot ?? false,
+    completed: opts.completed ?? false,
+    collapsed: false,
+    priority: opts.priority ?? "medium",
+    categoryColor: opts.categoryColor ?? "slate",
+    dueDate: opts.dueDate ?? "",
+    children: opts.children ?? [],
+    x: 0,
+    y: 0,
+    vx: 0,
+    vy: 0,
+  };
+}
+
+function fromArray(arr: MindNode[]): Record<string, MindNode> {
+  const rec: Record<string, MindNode> = {};
+  for (const n of arr) rec[n.id] = n;
+  return rec;
+}
+
+describe("serializeDSL", () => {
+  it("serializes root only", () => {
+    const out = serializeDSL(
+      { name: "Board" },
+      { root: makeNode("root", "b1", { isRoot: true, text: "Board" }) },
+    );
+    expect(out).toBe("Board\n");
+  });
+
+  it("serializes parent + child", () => {
+    const out = serializeDSL(
+      { name: "B" },
+      {
+        root: makeNode("root", "b1", { isRoot: true, text: "B", children: ["c1"] }),
+        c1: makeNode("c1", "b1", { text: "Child", parentId: "root" }),
+      },
+    );
+    expect(out).toBe("B\n  Child\n");
+  });
+
+  it("emits attributes in fixed order: priority, color, due, done", () => {
+    const out = serializeDSL(
+      { name: "B" },
+      {
+        root: makeNode("root", "b1", { isRoot: true, text: "B", children: ["c1"] }),
+        c1: makeNode("c1", "b1", {
+          text: "X",
+          parentId: "root",
+          priority: "high",
+          categoryColor: "emerald",
+          dueDate: "2026-01-01",
+          completed: true,
+        }),
+      },
+    );
+    expect(out).toBe("B\n  X @priority:high @color:emerald @due:2026-01-01 @done\n");
+  });
+
+  it("omits default attributes", () => {
+    const out = serializeDSL(
+      { name: "B" },
+      {
+        root: makeNode("root", "b1", { isRoot: true, text: "B", children: ["c1"] }),
+        c1: makeNode("c1", "b1", { text: "X", parentId: "root" }),
+      },
+    );
+    expect(out).toBe("B\n  X\n");
+  });
+
+  it("roundtrips: serialize -> parse -> serialize is stable", () => {
+    const original: Record<string, MindNode> = {
+      root: makeNode("root", "b1", { isRoot: true, text: "Board", children: ["a", "b"] }),
+      a: makeNode("a", "b1", {
+        text: "A",
+        parentId: "root",
+        priority: "high",
+        categoryColor: "sky",
+        children: ["a1"],
+      }),
+      a1: makeNode("a1", "b1", { text: "A1", parentId: "a", completed: true }),
+      b: makeNode("b", "b1", { text: "B", parentId: "root", dueDate: "2026-12-31" }),
+    };
+    const dsl = serializeDSL({ name: "Board" }, original);
+    const parsed = parseDSL(dsl, "b1")!;
+    const reserialized = serializeDSL({ name: parsed.board.name }, fromArray(parsed.nodes));
+    expect(reserialized).toBe(dsl);
   });
 });

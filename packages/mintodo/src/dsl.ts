@@ -155,12 +155,20 @@ export function serializeDSL(board: { name: string }, nodes: Record<string, Mind
   if (!rootNode) return `${board.name}\n`;
 
   const out: string[] = [];
-  const walk = (id: string, depth: number) => {
-    const n = nodes[id];
-    if (!n) return;
-    out.push(`${" ".repeat(depth * 2)}${n.text}\n`);
-    for (const cid of n.children) walk(cid, depth + 1);
+  const walk = (node: MindNode, depth: number): void => {
+    const indent = "  ".repeat(depth);
+    const attrs: string[] = [];
+    if (node.priority !== "medium") attrs.push(`@priority:${node.priority}`);
+    if (node.categoryColor !== "slate") attrs.push(`@color:${node.categoryColor}`);
+    if (node.dueDate) attrs.push(`@due:${node.dueDate}`);
+    if (node.completed) attrs.push("@done");
+    const attrStr = attrs.length > 0 ? ` ${attrs.join(" ")}` : "";
+    out.push(`${indent}${node.text}${attrStr}\n`);
+    for (const cid of node.children) {
+      const child = nodes[cid];
+      if (child) walk(child, depth + 1);
+    }
   };
-  walk(rootNode.id, 0);
+  walk(rootNode, 0);
   return out.join("");
 }
