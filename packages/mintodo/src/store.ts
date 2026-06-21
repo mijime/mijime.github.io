@@ -4,6 +4,7 @@ export interface State {
   boards: Board[];
   currentBoardId: string | null;
   draggingNodeId: string | null;
+  drawerOpen: boolean;
   hideCompleted: boolean;
   modal: Modal;
   nodes: Record<string, MindNode>;
@@ -29,8 +30,10 @@ export type Action =
   | { type: "SET_NODES"; nodes: Record<string, MindNode> }
   | { type: "SET_SEARCH"; query: string }
   | { type: "SET_VIEW"; view: View }
+  | { type: "SET_DRAWER"; open: boolean }
   | { type: "TOGGLE_COLLAPSE"; id: string }
   | { type: "TOGGLE_COMPLETE"; id: string }
+  | { type: "TOGGLE_DRAWER" }
   | { type: "TOGGLE_HIDE_COMPLETED" }
   | { type: "TOGGLE_PHYSICS" }
   | { type: "UPDATE_NODE"; id: string; patch: Partial<MindNode> };
@@ -40,6 +43,7 @@ export function createInitialState(): State {
     boards: [],
     currentBoardId: null,
     draggingNodeId: null,
+    drawerOpen: false,
     hideCompleted: false,
     modal: null,
     nodes: {},
@@ -185,6 +189,12 @@ export function reducer(state: State, action: Action): State {
         ...state,
         nodes: { ...state.nodes, [action.id]: { ...node, ...action.patch } },
       };
+    }
+    case "SET_DRAWER": {
+      return { ...state, drawerOpen: action.open };
+    }
+    case "TOGGLE_DRAWER": {
+      return { ...state, drawerOpen: !state.drawerOpen };
     }
     case "TOGGLE_COMPLETE": {
       const target = state.nodes[action.id];
