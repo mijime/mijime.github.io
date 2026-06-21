@@ -100,3 +100,57 @@ describe("parseDSL — structure", () => {
     expect(r!.nodes[1].text).toBe("Child");
   });
 });
+
+describe("parseDSL — attributes", () => {
+  it("parses @priority:high", () => {
+    const r = parseDSL("Root\n  牛乳 @priority:high\n", "b1")!;
+    const child = r.nodes.find((n) => n.text === "牛乳")!;
+    expect(child.priority).toBe("high");
+  });
+
+  it("parses @color:sky", () => {
+    const r = parseDSL("Root\n  パン @color:sky\n", "b1")!;
+    const child = r.nodes.find((n) => n.text === "パン")!;
+    expect(child.categoryColor).toBe("sky");
+  });
+
+  it("parses @due:YYYY-MM-DD", () => {
+    const r = parseDSL("Root\n  期限タスク @due:2026-06-25\n", "b1")!;
+    const child = r.nodes.find((n) => n.text === "期限タスク")!;
+    expect(child.dueDate).toBe("2026-06-25");
+  });
+
+  it("parses @done", () => {
+    const r = parseDSL("Root\n  完了済み @done\n", "b1")!;
+    const child = r.nodes.find((n) => n.text === "完了済み")!;
+    expect(child.completed).toBe(true);
+  });
+
+  it("parses multiple attributes", () => {
+    const r = parseDSL("Root\n  X @done @priority:high @color:emerald @due:2026-01-01\n", "b1")!;
+    const child = r.nodes.find((n) => n.text === "X")!;
+    expect(child.completed).toBe(true);
+    expect(child.priority).toBe("high");
+    expect(child.categoryColor).toBe("emerald");
+    expect(child.dueDate).toBe("2026-01-01");
+  });
+
+  it("ignores unknown attributes", () => {
+    const r = parseDSL("Root\n  X @foo:bar @priority:low\n", "b1")!;
+    const child = r.nodes.find((n) => n.text === "X")!;
+    expect(child.priority).toBe("low");
+  });
+
+  it("returns null on invalid priority", () => {
+    expect(parseDSL("Root\n  X @priority:urgent\n", "b1")).toBeNull();
+  });
+
+  it("returns null on invalid color", () => {
+    expect(parseDSL("Root\n  X @color:purple\n", "b1")).toBeNull();
+  });
+
+  it("returns null on invalid due date", () => {
+    expect(parseDSL("Root\n  X @due:2026/06/25\n", "b1")).toBeNull();
+    expect(parseDSL("Root\n  X @due:not-a-date\n", "b1")).toBeNull();
+  });
+});

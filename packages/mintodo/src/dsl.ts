@@ -1,8 +1,17 @@
-import type { MindNode } from "./types";
+import type { CategoryColor, MindNode, Priority } from "./types";
 
 export interface DslParseResult {
   board: { id: string; name: string };
   nodes: MindNode[];
+}
+
+const ALLOWED_PRIORITIES: ReadonlySet<Priority> = new Set(["low", "medium", "high"]);
+const ALLOWED_COLORS: ReadonlySet<CategoryColor> = new Set(["slate", "sky", "emerald", "rose"]);
+
+function isValidDate(s: string): boolean {
+  if (!/^\d{4}-\d{2}-\d{2}$/u.test(s)) return false;
+  const d = new Date(`${s}T00:00:00Z`);
+  return !Number.isNaN(d.getTime()) && d.toISOString().slice(0, 10) === s;
 }
 
 function defaultNode(boardId: string): MindNode {
@@ -40,8 +49,8 @@ export function parseDSL(text: string, boardId: string): DslParseResult | null {
 
     const match = /^(?<indent>\s*)(?<rest>.*)$/u.exec(raw);
     if (!match) continue;
-    const {indent} = match.groups!;
-    const {rest} = match.groups!;
+    const { indent } = match.groups!;
+    const { rest } = match.groups!;
 
     if (rest === "") return null;
     if (/\t/u.test(indent)) return null;
@@ -55,20 +64,65 @@ export function parseDSL(text: string, boardId: string): DslParseResult | null {
       return null;
     }
 
-    if (rest.startsWith("@")) return null;
+    const tokens = rest.split(/\s+/u);
+    const textTokens: string[] = [];
+    const attrTokens: string[] = [];
+    for (const tok of tokens) {
+      if (tok.startsWith("@")) attrTokens.push(tok);
+      else textTokens.push(tok);
+    }
 
-    const [textMatch] = rest.split(/\s+/u);
-    if (!textMatch) return null;
+    const text = textTokens.join(" ").trim();
+    if (!text) return null;
+
+    let priority: Priority = "medium";
+    let categoryColor: CategoryColor = "slate";
+    let dueDate = "";
+    let completed = false;
+
+    for (const tok of attrTokens) {
+      const colon = tok.indexOf(":");
+      const key = colon === -1 ? tok.slice(1) : tok.slice(1, colon);
+      const value = colon === -1 ? "" : tok.slice(colon + 1);
+      switch (key) {
+        case "priority": {
+          if (!ALLOWED_PRIORITIES.has(value as Priority)) return null;
+          priority = value as Priority;
+          break;
+        }
+        case "color": {
+          if (!ALLOWED_COLORS.has(value as CategoryColor)) return null;
+          categoryColor = value as CategoryColor;
+          break;
+        }
+        case "due": {
+          if (!isValidDate(value)) return null;
+          dueDate = value;
+          break;
+        }
+        case "done": {
+          completed = true;
+          break;
+        }
+        default: {
+          break;
+        }
+      }
+    }
 
     const node: MindNode = {
       ...defaultNode(boardId),
-      text: textMatch,
+      text,
+      priority,
+      categoryColor,
+      dueDate,
+      completed,
     };
 
     if (depth === 0) {
       node.id = "root";
       node.isRoot = true;
-      rootText = textMatch;
+      rootText = text;
     } else {
       node.id = `n${counter++}`;
       node.parentId = parentByDepth[depth - 1];
@@ -96,10 +150,7 @@ export function parseDSL(text: string, boardId: string): DslParseResult | null {
   };
 }
 
-export function serializeDSL(
-  board: { name: string },
-  nodes: Record<string, MindNode>,
-): string {
+export function serializeDSL(board: { name: string }, nodes: Record<string, MindNode>): string {
   const rootNode = Object.values(nodes).find((n) => n.isRoot);
   if (!rootNode) return `${board.name}\n`;
 
