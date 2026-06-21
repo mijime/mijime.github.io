@@ -7,6 +7,7 @@ import {
   deleteBoard,
   discardV1Data,
   downloadJson,
+  downloadText,
   getCurrentBoardId,
   hasV1Data,
   loadBoards,
@@ -212,5 +213,13 @@ describe("JSON import / export", () => {
     expect(
       parseImportedJson(JSON.stringify({ version: 2, board: { id: "b" }, nodes: "bad" })),
     ).toBeNull();
+  });
+});
+
+describe("downloadText", () => {
+  it("produces a Blob URL", () => {
+    const url = downloadText("hello", "test.md", "text/markdown");
+    expect(url).toMatch(/^blob:/u);
+    URL.revokeObjectURL(url);
   });
 });

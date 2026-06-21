@@ -114,6 +114,18 @@ export function downloadJson(data: SaveData, filename: string): string {
   return url;
 }
 
+export function downloadText(text: string, filename: string, mime: string): string {
+  const blob = new Blob([text], { type: mime });
+  const url = URL.createObjectURL(blob);
+  if (typeof document !== "undefined") {
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    a.click();
+  }
+  return url;
+}
+
 export function parseImportedJson(text: string): SaveData | null {
   try {
     const obj: unknown = JSON.parse(text);
