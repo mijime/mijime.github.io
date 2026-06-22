@@ -1,14 +1,4 @@
-import {
-  Eye,
-  FileText,
-  Keyboard,
-  Menu,
-  Moon,
-  Network,
-  Search,
-  Sun,
-  Trash2,
-} from "lucide-react";
+import { Eye, FileText, Keyboard, Menu, Moon, Network, Search, Sun, Trash2 } from "lucide-react";
 import { useMindStore } from "../hooks/use-mind-store";
 import { db } from "../db";
 

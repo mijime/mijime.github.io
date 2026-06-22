@@ -100,4 +100,3 @@ export async function discardV1Data(): Promise<void> {
     await db.nodes.clear();
   });
 }
-
