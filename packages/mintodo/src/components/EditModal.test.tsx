@@ -1,8 +1,9 @@
 import { act, fireEvent, render } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import type { Dispatch } from "react";
 import { EditModal } from "./EditModal";
 import { MindProvider, useMindStore } from "../hooks/use-mind-store";
-import type { State } from "../store";
+import type { Action, State } from "../store";
 import type { MindNode } from "../types";
 
 function makeNode(id: string, parentId: string | null, opts: Partial<MindNode> = {}): MindNode {
@@ -43,10 +44,12 @@ function makeState(): State {
   };
 }
 
+let capturedDispatch: Dispatch<Action> | null = null;
 let capturedState: State | null = null;
 
 function Capture() {
   capturedState = useMindStore().state;
+  capturedDispatch = useMindStore().dispatch;
   return null;
 }
 
@@ -193,5 +196,33 @@ describe("EditModal", () => {
     expect(capturedState!.nodes.a).toBeUndefined();
     expect(capturedState!.modal).toBeNull();
     window.confirm = originalConfirm;
+  });
+
+  it("属性 section collapses when the modal reopens for the same target", () => {
+    setup({ modal: { kind: "edit", nodeId: "a" } });
+
+    // Expand the 属性 section
+    const toggle = document.querySelector(
+      '[data-testid="edit-modal-attr-toggle"]',
+    ) as HTMLButtonElement;
+    act(() => {
+      fireEvent.click(toggle);
+    });
+    const dateInput = document.querySelector('input[type="date"]') as HTMLInputElement;
+    expect(dateInput).toBeTruthy();
+
+    // Close the modal
+    act(() => {
+      capturedDispatch!({ type: "OPEN_MODAL", modal: null });
+    });
+
+    // Reopen the modal for the same target node "a"
+    act(() => {
+      capturedDispatch!({ type: "OPEN_MODAL", modal: { kind: "edit", nodeId: "a" } });
+    });
+
+    // Verify 属性 section is collapsed (date input not visible)
+    const reopenedDateInput = document.querySelector('input[type="date"]');
+    expect(reopenedDateInput).toBeNull();
   });
 });

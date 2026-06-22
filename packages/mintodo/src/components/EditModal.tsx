@@ -1,5 +1,5 @@
 import { ChevronDown, ChevronUp, Pencil, Trash2 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { parseInlineDSL } from "../dsl";
 import { useMindStore } from "../hooks/use-mind-store";
 import type { CategoryColor, Priority } from "../types";
@@ -23,7 +23,7 @@ function swatchActive(c: CategoryColor, current: CategoryColor): string {
 
 export function EditModal() {
   const { state, dispatch } = useMindStore();
-  const {modal} = state;
+  const { modal } = state;
 
   // All state hooks before any early return (React rules-of-hooks)
   const [text, setText] = useState("");
@@ -66,6 +66,17 @@ export function EditModal() {
     // Key changes when modal target changes: nodeId for edit, parentId for edit-new
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [modal?.kind === "edit" ? modal.nodeId : modal?.kind === "edit-new" ? modal.parentId : null]);
+
+  // Reset expanded/barTouched when modal reopens (transitions from null to non-null)
+  const prevModalRef = useRef<typeof modal>(null);
+  useEffect(() => {
+    const wasClosed = prevModalRef.current === null;
+    prevModalRef.current = modal;
+    if (wasClosed && modal !== null) {
+      setExpanded(false);
+      setBarTouched(false);
+    }
+  }, [modal]);
 
   if (modal?.kind !== "edit" && modal?.kind !== "edit-new") return null;
   if (!isNew && !node) return null;
