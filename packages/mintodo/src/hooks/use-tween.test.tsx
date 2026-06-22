@@ -50,7 +50,7 @@ function Probe(): ReactNode {
 }
 
 describe("useTween", () => {
-  let animateSpy: ReturnType<typeof vi.spyOn>;
+  let animateSpy: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
     document.body.innerHTML = `
@@ -60,13 +60,13 @@ describe("useTween", () => {
         <line id="edge-root-a" x1="0" y1="0" x2="0" y2="-220"></line>
       </svg>
     `;
-    // jsdom doesn't have Element.prototype.animate
+    // Jsdom doesn't have Element.prototype.animate
     if (typeof Element.prototype.animate !== "function") {
-      Element.prototype.animate = vi.fn();
+      (Element.prototype as unknown as { animate: unknown }).animate = vi.fn();
     }
     animateSpy = vi
-      .spyOn(Element.prototype, "animate")
-      .mockImplementation(() => ({ cancel: () => {} }) as unknown as Animation);
+      .spyOn(Element.prototype as unknown as { animate: typeof Element.prototype.animate }, "animate")
+      .mockImplementation((() => ({ cancel: () => {} })) as unknown as typeof Element.prototype.animate) as unknown as ReturnType<typeof vi.fn>;
   });
 
   afterEach(() => {

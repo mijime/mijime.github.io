@@ -59,7 +59,11 @@ function withRadialLayout(state: State, nodes: Record<string, MindNode>): State 
   return { ...state, nodes: applyRadialLayout({ nodes }), layoutVersion: state.layoutVersion + 1 };
 }
 
-function isDescendant(nodes: Record<string, MindNode>, candidateAncestor: string, nodeId: string): boolean {
+function isDescendant(
+  nodes: Record<string, MindNode>,
+  candidateAncestor: string,
+  nodeId: string,
+): boolean {
   let cur = nodes[nodeId];
   while (cur && cur.parentId) {
     if (cur.parentId === candidateAncestor) return true;
@@ -188,10 +192,7 @@ export function reducer(state: State, action: Action): State {
         [newId]: newNode,
         [parent.id]: { ...parent, children: [...parent.children, newId] },
       };
-      return withRadialLayout(
-        { ...state, nodes: nextNodes, selectedNodeId: newId },
-        nextNodes,
-      );
+      return withRadialLayout({ ...state, nodes: nextNodes, selectedNodeId: newId }, nextNodes);
     }
     case "UPDATE_NODE": {
       const node = state.nodes[action.id];
@@ -251,7 +252,8 @@ export function reducer(state: State, action: Action): State {
         {
           ...state,
           nodes: nextNodes,
-          selectedNodeId: state.selectedNodeId === action.id ? (node.parentId ?? "root") : state.selectedNodeId,
+          selectedNodeId:
+            state.selectedNodeId === action.id ? (node.parentId ?? "root") : state.selectedNodeId,
         },
         nextNodes,
       );

@@ -111,9 +111,7 @@ describe("useDragNode", () => {
 
   it("dispatches REPARENT when dropped on a non-descendant node", () => {
     setup();
-    vi.spyOn(document, "elementFromPoint").mockReturnValue(
-      document.querySelector("#node-dom-b"),
-    );
+    vi.spyOn(document, "elementFromPoint").mockReturnValue(document.querySelector("#node-dom-b"));
     dragFromTo(50, -190, 270, 30);
     expect(lastState).not.toBeNull();
     expect(lastState!.nodes.a.parentId).toBe("b");
@@ -122,9 +120,7 @@ describe("useDragNode", () => {
 
   it("dispatches SNAP_BACK when dropped on a descendant", () => {
     setup();
-    vi.spyOn(document, "elementFromPoint").mockReturnValue(
-      document.querySelector("#node-dom-a1"),
-    );
+    vi.spyOn(document, "elementFromPoint").mockReturnValue(document.querySelector("#node-dom-a1"));
     dragFromTo(50, -190, 50, -410);
     expect(lastState).not.toBeNull();
     expect(lastState!.nodes.a.parentId).toBe("root");
@@ -132,9 +128,7 @@ describe("useDragNode", () => {
 
   it("dispatches SNAP_BACK when dropped on itself", () => {
     setup();
-    vi.spyOn(document, "elementFromPoint").mockReturnValue(
-      document.querySelector("#node-dom-a"),
-    );
+    vi.spyOn(document, "elementFromPoint").mockReturnValue(document.querySelector("#node-dom-a"));
     dragFromTo(50, -190, 60, -200);
     expect(lastState).not.toBeNull();
     expect(lastState!.nodes.a.parentId).toBe("root");
