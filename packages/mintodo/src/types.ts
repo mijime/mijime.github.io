@@ -37,6 +37,7 @@ export type Modal =
   | { kind: "help" }
   | { kind: "board-name"; mode: "create" | "rename"; boardId?: string; initialName?: string }
   | { kind: "board-delete"; boardId: string; boardName: string }
+  | { kind: "dsl-editor" }
   | null;
 
 export interface SaveData {
