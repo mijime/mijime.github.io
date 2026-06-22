@@ -516,6 +516,27 @@ describe("reducer - inline edit state", () => {
     expect(next.pendingCreationNodeId).toBe("n1");
     expect(next.nodes.n1.categoryColor).toBe("slate");
   });
+
+  it("OPEN_INLINE_EDIT on different node clears pendingCreationNodeId, so CANCEL_INLINE_EDIT does not delete originally pending node", () => {
+    const nodes = {
+      root: makeNode("root", "b-a", { isRoot: true, text: "R", children: ["n1"] }),
+      n1: makeNode("n1", "b-a", { parentId: "root", text: "" }),
+    };
+    // Simulate: ADD_CHILD set pendingCreationNodeId="n1", then user double-clicks root
+    const s = makeStateWithInline({
+      nodes,
+      editingNodeId: "n1",
+      pendingCreationNodeId: "n1",
+    });
+    const afterOpen = reducer(s, { type: "OPEN_INLINE_EDIT", nodeId: "root" });
+    expect(afterOpen.pendingCreationNodeId).toBeNull();
+    expect(afterOpen.editingNodeId).toBe("root");
+    // CANCEL_INLINE_EDIT should NOT delete n1
+    const afterCancel = reducer(afterOpen, { type: "CANCEL_INLINE_EDIT" });
+    expect(afterCancel.nodes.n1).toBeDefined();
+    expect(afterCancel.editingNodeId).toBeNull();
+    expect(afterCancel.pendingCreationNodeId).toBeNull();
+  });
 });
 
 describe("reducer - SNAP_BACK", () => {

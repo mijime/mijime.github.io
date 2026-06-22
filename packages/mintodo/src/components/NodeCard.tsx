@@ -143,6 +143,10 @@ export function NodeCard({ node }: Props) {
           onCancel={() => dispatch({ type: "CANCEL_INLINE_EDIT" })}
           onSave={(patch) => dispatch({ type: "SAVE_INLINE_EDIT", id: node.id, patch })}
           onDelete={() => {
+            if (node.isRoot) {
+              dispatch({ type: "CLOSE_INLINE_EDIT" });
+              return;
+            }
             dispatch({ id: node.id, type: "DELETE_NODE" });
             dispatch({ type: "CLOSE_INLINE_EDIT" });
           }}

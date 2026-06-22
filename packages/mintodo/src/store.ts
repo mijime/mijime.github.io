@@ -166,7 +166,12 @@ export function reducer(state: State, action: Action): State {
       );
     }
     case "OPEN_INLINE_EDIT": {
-      return { ...state, selectedNodeId: action.nodeId, editingNodeId: action.nodeId };
+      return {
+        ...state,
+        selectedNodeId: action.nodeId,
+        editingNodeId: action.nodeId,
+        pendingCreationNodeId: state.editingNodeId ? null : state.pendingCreationNodeId,
+      };
     }
     case "SELECT": {
       return { ...state, selectedNodeId: action.id };
