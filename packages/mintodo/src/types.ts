@@ -23,8 +23,6 @@ export interface MindNode {
   children: string[];
   x: number;
   y: number;
-  vx: number;
-  vy: number;
 }
 
 export interface View {

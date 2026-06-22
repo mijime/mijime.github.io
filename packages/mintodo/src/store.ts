@@ -1,4 +1,5 @@
 import type { Board, MindNode, Modal, View } from "./types";
+import { applyRadialLayout } from "./layout/radial";
 
 export interface State {
   boards: Board[];
@@ -6,9 +7,9 @@ export interface State {
   draggingNodeId: string | null;
   drawerOpen: boolean;
   hideCompleted: boolean;
+  layoutVersion: number;
   modal: Modal;
   nodes: Record<string, MindNode>;
-  physicsEnabled: boolean;
   searchQuery: string;
   selectedNodeId: string;
   view: View;
@@ -19,8 +20,8 @@ export type Action =
   | { type: "ADD_CHILD"; newId: string; parentId: string }
   | { type: "DELETE_BOARD"; id: string; nextBoardId: string | null }
   | { type: "DELETE_NODE"; id: string }
-  | { type: "MOVE_NODE"; id: string; x: number; y: number }
   | { type: "OPEN_MODAL"; modal: Modal }
+  | { type: "REPARENT"; id: string; newParentId: string }
   | { type: "RENAME_BOARD"; id: string; name: string }
   | { type: "RESET" }
   | { type: "SELECT"; id: string }
@@ -31,11 +32,11 @@ export type Action =
   | { type: "SET_SEARCH"; query: string }
   | { type: "SET_VIEW"; view: View }
   | { type: "SET_DRAWER"; open: boolean }
+  | { type: "SNAP_BACK"; id: string }
   | { type: "TOGGLE_COLLAPSE"; id: string }
   | { type: "TOGGLE_COMPLETE"; id: string }
   | { type: "TOGGLE_DRAWER" }
   | { type: "TOGGLE_HIDE_COMPLETED" }
-  | { type: "TOGGLE_PHYSICS" }
   | { type: "UPDATE_NODE"; id: string; patch: Partial<MindNode> };
 
 export function createInitialState(): State {
@@ -45,13 +46,26 @@ export function createInitialState(): State {
     draggingNodeId: null,
     drawerOpen: false,
     hideCompleted: false,
+    layoutVersion: 0,
     modal: null,
     nodes: {},
-    physicsEnabled: true,
     searchQuery: "",
     selectedNodeId: "",
     view: { pan: { x: 0, y: 0 }, zoom: 1 },
   };
+}
+
+function withRadialLayout(state: State, nodes: Record<string, MindNode>): State {
+  return { ...state, nodes: applyRadialLayout({ nodes }), layoutVersion: state.layoutVersion + 1 };
+}
+
+function isDescendant(nodes: Record<string, MindNode>, candidateAncestor: string, nodeId: string): boolean {
+  let cur = nodes[nodeId];
+  while (cur && cur.parentId) {
+    if (cur.parentId === candidateAncestor) return true;
+    cur = nodes[cur.parentId];
+  }
+  return false;
 }
 
 export function reducer(state: State, action: Action): State {
@@ -118,16 +132,16 @@ export function reducer(state: State, action: Action): State {
         children: [],
         x: 0,
         y: 0,
-        vx: 0,
-        vy: 0,
       };
-      return {
-        ...state,
-        nodes: { root },
-        selectedNodeId: "root",
-        view: { pan: { x: 0, y: 0 }, zoom: 1 },
-        physicsEnabled: state.physicsEnabled,
-      };
+      return withRadialLayout(
+        {
+          ...state,
+          nodes: { root },
+          selectedNodeId: "root",
+          view: { pan: { x: 0, y: 0 }, zoom: 1 },
+        },
+        { root },
+      );
     }
     case "SELECT": {
       return { ...state, selectedNodeId: action.id };
@@ -141,14 +155,11 @@ export function reducer(state: State, action: Action): State {
     case "TOGGLE_HIDE_COMPLETED": {
       return { ...state, hideCompleted: !state.hideCompleted };
     }
-    case "TOGGLE_PHYSICS": {
-      return { ...state, physicsEnabled: !state.physicsEnabled };
-    }
     case "OPEN_MODAL": {
       return { ...state, modal: action.modal };
     }
     case "SET_NODES": {
-      return { ...state, nodes: action.nodes };
+      return withRadialLayout({ ...state, nodes: action.nodes }, action.nodes);
     }
     case "SET_DRAGGING": {
       return { ...state, draggingNodeId: action.id };
@@ -169,20 +180,18 @@ export function reducer(state: State, action: Action): State {
         parentId: parent.id,
         priority: "medium",
         text: "新規タスク",
-        vx: (Math.random() - 0.5) * 8,
-        vy: (Math.random() - 0.5) * 8,
-        x: parent.x + (parent.x >= 0 ? 140 : -140),
-        y: parent.y + (Math.random() - 0.5) * 50,
+        x: 0,
+        y: 0,
       };
-      return {
-        ...state,
-        nodes: {
-          ...state.nodes,
-          [newId]: newNode,
-          [parent.id]: { ...parent, children: [...parent.children, newId] },
-        },
-        selectedNodeId: newId,
+      const nextNodes: Record<string, MindNode> = {
+        ...state.nodes,
+        [newId]: newNode,
+        [parent.id]: { ...parent, children: [...parent.children, newId] },
       };
+      return withRadialLayout(
+        { ...state, nodes: nextNodes, selectedNodeId: newId },
+        nextNodes,
+      );
     }
     case "UPDATE_NODE": {
       const node = state.nodes[action.id];
@@ -215,10 +224,8 @@ export function reducer(state: State, action: Action): State {
     case "TOGGLE_COLLAPSE": {
       const node = state.nodes[action.id];
       if (!node) return state;
-      return {
-        ...state,
-        nodes: { ...state.nodes, [action.id]: { ...node, collapsed: !node.collapsed } },
-      };
+      const nextNodes = { ...state.nodes, [action.id]: { ...node, collapsed: !node.collapsed } };
+      return withRadialLayout({ ...state, nodes: nextNodes }, nextNodes);
     }
     case "DELETE_NODE": {
       const node = state.nodes[action.id];
@@ -239,23 +246,43 @@ export function reducer(state: State, action: Action): State {
         }
         updated.set(parent.id, { ...parent, children: newChildren });
       }
-      return {
-        ...state,
-        nodes: Object.fromEntries(updated),
-        selectedNodeId:
-          state.selectedNodeId === action.id ? (node.parentId ?? "root") : state.selectedNodeId,
-      };
-    }
-    case "MOVE_NODE": {
-      const node = state.nodes[action.id];
-      if (!node) return state;
-      return {
-        ...state,
-        nodes: {
-          ...state.nodes,
-          [action.id]: { ...node, vx: 0, vy: 0, x: action.x, y: action.y },
+      const nextNodes = Object.fromEntries(updated);
+      return withRadialLayout(
+        {
+          ...state,
+          nodes: nextNodes,
+          selectedNodeId: state.selectedNodeId === action.id ? (node.parentId ?? "root") : state.selectedNodeId,
         },
+        nextNodes,
+      );
+    }
+
+    case "REPARENT": {
+      const node = state.nodes[action.id];
+      const newParent = state.nodes[action.newParentId];
+      if (!node || !newParent) return state;
+      if (node.isRoot || newParent.id === node.id) return withRadialLayout(state, state.nodes);
+      if (isDescendant(state.nodes, action.id, action.newParentId)) {
+        return withRadialLayout(state, state.nodes);
+      }
+      const oldParent = node.parentId ? state.nodes[node.parentId] : null;
+      const nextNodes: Record<string, MindNode> = { ...state.nodes };
+      if (oldParent) {
+        nextNodes[oldParent.id] = {
+          ...oldParent,
+          children: oldParent.children.filter((c) => c !== action.id),
+        };
+      }
+      nextNodes[action.id] = { ...node, parentId: action.newParentId };
+      nextNodes[action.newParentId] = {
+        ...newParent,
+        children: [...newParent.children, action.id],
       };
+      return withRadialLayout(state, nextNodes);
+    }
+
+    case "SNAP_BACK": {
+      return withRadialLayout(state, state.nodes);
     }
     default: {
       return state;
