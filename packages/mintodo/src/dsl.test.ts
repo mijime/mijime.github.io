@@ -170,8 +170,6 @@ function makeNode(id: string, boardId: string, opts: Partial<MindNode> = {}): Mi
     children: opts.children ?? [],
     x: 0,
     y: 0,
-    vx: 0,
-    vy: 0,
   };
 }
 
@@ -251,8 +249,6 @@ describe("serializeDSL", () => {
     for (const n of parsed.nodes) {
       expect(n.x).toBe(0);
       expect(n.y).toBe(0);
-      expect(n.vx).toBe(0);
-      expect(n.vy).toBe(0);
     }
   });
 });

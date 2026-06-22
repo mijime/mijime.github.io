@@ -17,8 +17,6 @@ function node(id: string, opts: Partial<MindNode> = {}): MindNode {
     children: opts.children ?? [],
     x: 0,
     y: 0,
-    vx: 0,
-    vy: 0,
   };
 }
 

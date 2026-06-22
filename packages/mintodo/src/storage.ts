@@ -4,7 +4,7 @@ import type { Board, MindNode } from "./types";
 function arrayToRecord(arr: MindNode[]): Record<string, MindNode> {
   const rec: Record<string, MindNode> = {};
   for (const n of arr) {
-    rec[n.id] = { ...n, vx: 0, vy: 0 };
+    rec[n.id] = n;
   }
   return rec;
 }
@@ -48,8 +48,6 @@ export async function createBoard(name: string): Promise<{ board: Board; rootId:
     children: [],
     x: 0,
     y: 0,
-    vx: 0,
-    vy: 0,
   };
   await db.transaction("rw", db.boards, db.nodes, async () => {
     await db.boards.add(board);

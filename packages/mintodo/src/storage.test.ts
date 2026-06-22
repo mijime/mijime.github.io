@@ -31,8 +31,6 @@ function makeNode(id: string, boardId: string, opts: Partial<MindNode> = {}): Mi
     children: [],
     x: 0,
     y: 0,
-    vx: 0,
-    vy: 0,
     ...opts,
   };
 }
