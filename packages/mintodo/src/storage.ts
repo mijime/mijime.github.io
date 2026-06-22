@@ -1,5 +1,5 @@
 import { db } from "./db";
-import type { Board, MindNode, SaveData } from "./types";
+import type { Board, MindNode } from "./types";
 
 function arrayToRecord(arr: MindNode[]): Record<string, MindNode> {
   const rec: Record<string, MindNode> = {};
@@ -101,47 +101,3 @@ export async function discardV1Data(): Promise<void> {
   });
 }
 
-export function downloadJson(data: SaveData, filename: string): string {
-  const json = JSON.stringify(data, undefined, 2);
-  const blob = new Blob([json], { type: "application/json" });
-  const url = URL.createObjectURL(blob);
-  if (typeof document !== "undefined") {
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = filename;
-    a.click();
-  }
-  return url;
-}
-
-export function downloadText(text: string, filename: string, mime: string): string {
-  const blob = new Blob([text], { type: mime });
-  const url = URL.createObjectURL(blob);
-  if (typeof document !== "undefined") {
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = filename;
-    a.click();
-  }
-  return url;
-}
-
-export function parseImportedJson(text: string): SaveData | null {
-  try {
-    const obj: unknown = JSON.parse(text);
-    if (typeof obj !== "object" || obj === null) return null;
-    const data = obj as Partial<SaveData>;
-    if (data.version !== 2) return null;
-    if (typeof data.board !== "object" || data.board === null) return null;
-    if (typeof data.board.id !== "string" || typeof data.board.name !== "string") return null;
-    if (!Array.isArray(data.nodes)) return null;
-    const nodes: MindNode[] = data.nodes.map((n) => Object.assign({}, n, { vx: 0, vy: 0 }));
-    return {
-      version: 2,
-      board: { id: data.board.id, name: data.board.name },
-      nodes,
-    };
-  } catch {
-    return null;
-  }
-}
