@@ -155,11 +155,7 @@ describe("parseDSL — attributes", () => {
   });
 });
 
-function makeNode(
-  id: string,
-  boardId: string,
-  opts: Partial<MindNode> = {},
-): MindNode {
+function makeNode(id: string, boardId: string, opts: Partial<MindNode> = {}): MindNode {
   return {
     id,
     boardId,
