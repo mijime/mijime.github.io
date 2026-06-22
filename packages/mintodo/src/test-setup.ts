@@ -23,3 +23,8 @@ if (globalThis.ResizeObserver === undefined) {
   /* eslint-enable class-methods-use-this */
   globalThis.ResizeObserver = ResizeObserverMock as unknown as typeof ResizeObserver;
 }
+
+// Jsdom does not support Element.animate
+if (typeof Element.prototype.animate !== "function") {
+  Element.prototype.animate = () => ({}) as Animation;
+}
