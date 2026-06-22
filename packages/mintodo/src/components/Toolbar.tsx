@@ -1,8 +1,6 @@
 import {
-  Download,
   Eye,
   FileText,
-  FileUp,
   Keyboard,
   Menu,
   Moon,
@@ -10,15 +8,9 @@ import {
   Search,
   Sun,
   Trash2,
-  Upload,
 } from "lucide-react";
-import { useRef } from "react";
 import { useMindStore } from "../hooks/use-mind-store";
-import { useBoardActions } from "../hooks/use-board-actions";
-import { downloadJson, downloadText, parseImportedJson } from "../storage";
 import { db } from "../db";
-import { parseDSL, serializeDSL } from "../dsl";
-import type { MindNode } from "../types";
 
 function onTheme() {
   const isDark = document.documentElement.classList.toggle("dark");
@@ -38,93 +30,6 @@ async function onReset() {
 
 export function Toolbar() {
   const { state, dispatch } = useMindStore();
-  const actions = useBoardActions();
-  const fileRef = useRef<HTMLInputElement>(null);
-  const dslFileRef = useRef<HTMLInputElement>(null);
-
-  const onExportDsl = () => {
-    const currentBoard = state.boards.find((b) => b.id === state.currentBoardId);
-    const text = serializeDSL({ name: currentBoard?.name ?? "Unknown" }, state.nodes);
-    const date = new Date().toISOString().slice(0, 10);
-    const url = downloadText(
-      text,
-      `mintodo_${currentBoard?.name ?? "Unknown"}_${date}.md`,
-      "text/markdown",
-    );
-    setTimeout(() => URL.revokeObjectURL(url), 1000);
-  };
-
-  const onImportDslClick = () => dslFileRef.current?.click();
-
-  const onDslFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const text = await file.text();
-    const parsed = parseDSL(text, state.currentBoardId ?? "");
-    if (!parsed) {
-      alert("DSLの読み込みに失敗しました。ファイルが壊れている可能性があります。");
-      e.target.value = "";
-      return;
-    }
-    if (
-      Object.keys(state.nodes).length > 0 &&
-      !confirm(
-        `「${parsed.board.name}」から${parsed.nodes.length}件のタスクをインポートします。\n現在のボード「${state.boards.find((b) => b.id === state.currentBoardId)?.name ?? ""}」のタスクと名前は置き換えられます。続行しますか?`,
-      )
-    ) {
-      e.target.value = "";
-      return;
-    }
-    if (state.currentBoardId) {
-      await actions.renameBoard(state.currentBoardId, parsed.board.name);
-    }
-    const rec: Record<string, MindNode> = {};
-    for (const n of parsed.nodes) rec[n.id] = n;
-    dispatch({ nodes: rec, type: "SET_NODES" });
-    e.target.value = "";
-  };
-
-  const onExport = () => {
-    const currentBoard = state.boards.find((b) => b.id === state.currentBoardId);
-    const data = {
-      version: 2 as const,
-      board: { id: currentBoard?.id ?? "", name: currentBoard?.name ?? "Unknown" },
-      nodes: Object.values(state.nodes),
-    };
-    const date = new Date().toISOString().slice(0, 10);
-    const url = downloadJson(data, `mintodo_${currentBoard?.name ?? "Unknown"}_${date}.json`);
-    setTimeout(() => URL.revokeObjectURL(url), 1000);
-  };
-
-  const onImportClick = () => fileRef.current?.click();
-
-  const onFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const text = await file.text();
-    const data = parseImportedJson(text);
-    if (!data) {
-      alert("インポートに失敗しました。ファイルが壊れている可能性があります。");
-      return;
-    }
-    if (
-      Object.keys(state.nodes).length > 0 &&
-      !confirm(
-        `「${data.board.name}」から${data.nodes.length}件のタスクをインポートします。\nこのボードの現在のタスクは失われます。続行しますか?`,
-      )
-    ) {
-      e.target.value = "";
-      return;
-    }
-    // Rewrite boardId so nodes belong to the current board.
-    const currentId = state.currentBoardId;
-    const rec: Record<string, (typeof data.nodes)[number]> = {};
-    for (const n of data.nodes) {
-      rec[n.id] = { ...n, boardId: currentId ?? n.boardId };
-    }
-    dispatch({ nodes: rec, type: "SET_NODES" });
-    e.target.value = "";
-  };
 
   const onToggleDrawer = () => dispatch({ type: "TOGGLE_DRAWER" });
 
@@ -227,46 +132,11 @@ export function Toolbar() {
             type="button"
             className="p-2 rounded transition"
             style={{ color: "var(--mid)" }}
-            title="JSONエクスポート"
-            onClick={onExport}
-          >
-            <Download size={16} />
-          </button>
-          <button
-            type="button"
-            className="p-2 rounded transition"
-            style={{ color: "var(--mid)" }}
-            title="JSONインポート"
-            onClick={onImportClick}
-          >
-            <Upload size={16} />
-          </button>
-          <button
-            type="button"
-            className="p-2 rounded transition"
-            style={{ color: "var(--mid)" }}
-            title="DSLエクスポート"
-            onClick={onExportDsl}
+            title="DSL編集"
+            onClick={() => dispatch({ modal: { kind: "dsl-editor" }, type: "OPEN_MODAL" })}
           >
             <FileText size={16} />
           </button>
-          <button
-            type="button"
-            className="p-2 rounded transition"
-            style={{ color: "var(--mid)" }}
-            title="DSLインポート"
-            onClick={onImportDslClick}
-          >
-            <FileUp size={16} />
-          </button>
-          <input ref={fileRef} type="file" accept=".json" className="hidden" onChange={onFile} />
-          <input
-            ref={dslFileRef}
-            type="file"
-            accept=".md"
-            className="hidden"
-            onChange={onDslFile}
-          />
           <button
             type="button"
             className="p-2 rounded transition"
