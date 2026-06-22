@@ -58,8 +58,7 @@ function placeChildren(
 
   if (parentDepth === 0) {
     if (kids.length === 1) {
-      const cosStart = Math.abs(Math.cos(ctx.start)) < 1e-10 ? 0 : Math.cos(ctx.start);
-      const childX = originX + cosStart * ctx.ring;
+      const childX = originX + Math.cos(ctx.start) * ctx.ring;
       const childY = originY + Math.sin(ctx.start) * ctx.ring;
       out[kids[0]] = { x: childX, y: childY };
       placeChildren(kids[0], 0, Math.PI * 2, 1, childX, childY, out, ctx);
@@ -71,7 +70,7 @@ function placeChildren(
       const childX = originX + Math.cos(angle) * ctx.ring;
       const childY = originY + Math.sin(angle) * ctx.ring;
       out[kids[i]] = { x: childX, y: childY };
-      placeChildren(kids[i], 0, Math.PI * 2, 1, childX, childY, out, ctx);
+      placeChildren(kids[i], i * slice, (i + 1) * slice, 1, childX, childY, out, ctx);
     }
     return;
   }
@@ -111,7 +110,9 @@ function place(
   placeChildren(id, arcStart, arcEnd, depth, out[id].x, out[id].y, out, ctx);
 }
 
-export function computeRadialPositions(opts: RadialOptions): Record<string, { x: number; y: number }> {
+export function computeRadialPositions(
+  opts: RadialOptions,
+): Record<string, { x: number; y: number }> {
   const ring = opts.ringDistance ?? 220;
   const start = opts.startAngle ?? -Math.PI / 2;
   const out: Record<string, { x: number; y: number }> = {};

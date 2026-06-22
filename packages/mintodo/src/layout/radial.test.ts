@@ -43,7 +43,8 @@ describe("computeRadialPositions", () => {
     const root = node("root", { isRoot: true, children: ["a"] });
     const a = node("a", { parentId: "root" });
     const pos = computeRadialPositions({ rootId: "root", nodes: nodes(root, a) });
-    expect(pos.a).toEqual({ x: 0, y: -RING });
+    expect(pos.a.x).toBeCloseTo(0, 10);
+    expect(pos.a.y).toBeCloseTo(-RING, 10);
   });
 
   it("distributes three root children evenly starting at 12 o'clock", () => {
@@ -136,6 +137,22 @@ describe("computeRadialPositions", () => {
     expect(pos.root).toBeDefined();
     expect(pos.a).toBeDefined();
     expect(Object.keys(pos)).toEqual(["root", "a"]);
+  });
+
+  it("confines each root child's subtree to its allocated arc", () => {
+    const root = node("root", { isRoot: true, children: ["a", "b"] });
+    const a = node("a", { parentId: "root", children: ["a1"] });
+    const a1 = node("a1", { parentId: "a" });
+    const b = node("b", { parentId: "root", children: ["b1"] });
+    const b1 = node("b1", { parentId: "b" });
+    const pos = computeRadialPositions({
+      rootId: "root",
+      nodes: nodes(root, a, a1, b, b1),
+    });
+    const angleA1 = Math.atan2(pos.a1.y - pos.a.y, pos.a1.x - pos.a.x);
+    const angleB1 = Math.atan2(pos.b1.y - pos.b.y, pos.b1.x - pos.b.x);
+    expect(Math.abs(angleA1 - UP)).toBeLessThan(Math.PI / 2 + 0.01);
+    expect(Math.abs(angleB1 - (UP + Math.PI))).toBeLessThan(Math.PI / 2 + 0.01);
   });
 });
 
