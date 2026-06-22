@@ -2,7 +2,7 @@ import { useMemo, useRef } from "react";
 import { useDragNode } from "../hooks/use-drag-node";
 import { useMindStore } from "../hooks/use-mind-store";
 import { usePanZoom } from "../hooks/use-pan-zoom";
-import { usePhysics } from "../hooks/use-physics";
+import { useTween } from "../hooks/use-tween";
 import { ConnectionLines } from "./ConnectionLines";
 import { NodeCard } from "./NodeCard";
 
@@ -24,10 +24,8 @@ export function Canvas() {
   const containerRef = useRef<HTMLDivElement>(null);
 
   usePanZoom({ containerRef });
-  usePhysics();
-  useDragNode((a) => {
-    dispatch({ id: a.id, type: "MOVE_NODE", x: a.x, y: a.y });
-  });
+  useTween();
+  useDragNode();
 
   const visibleNodes = useMemo(
     () =>
