@@ -1,5 +1,6 @@
 import { Check, ChevronDown, ChevronUp, EllipsisVertical, Plus, XCircle } from "lucide-react";
 import { useMindStore } from "../hooks/use-mind-store";
+import { NodeInlineEditor } from "./NodeInlineEditor";
 import { isDescendant } from "../store";
 import type { CategoryColor, MindNode } from "../types";
 
@@ -60,7 +61,12 @@ interface Props {
   node: MindNode;
 }
 
-function handleDragStart(e: React.DragEvent<HTMLDivElement>, nodeId: string, isRoot: boolean, onDispatch: ReturnType<typeof useMindStore>["dispatch"]) {
+function handleDragStart(
+  e: React.DragEvent<HTMLDivElement>,
+  nodeId: string,
+  isRoot: boolean,
+  onDispatch: ReturnType<typeof useMindStore>["dispatch"],
+) {
   if (isRoot) {
     e.preventDefault();
     return;
@@ -70,7 +76,11 @@ function handleDragStart(e: React.DragEvent<HTMLDivElement>, nodeId: string, isR
   onDispatch({ id: nodeId, type: "SET_DRAGGING" });
 }
 
-function handleDragOver(e: React.DragEvent<HTMLDivElement>, nodeId: string, state: ReturnType<typeof useMindStore>["state"]) {
+function handleDragOver(
+  e: React.DragEvent<HTMLDivElement>,
+  nodeId: string,
+  state: ReturnType<typeof useMindStore>["state"],
+) {
   const draggedId = state.draggingNodeId;
   if (!draggedId || draggedId === nodeId) return;
   if (isDescendant(state.nodes, draggedId, nodeId)) return;
@@ -78,7 +88,11 @@ function handleDragOver(e: React.DragEvent<HTMLDivElement>, nodeId: string, stat
   e.dataTransfer.dropEffect = "move";
 }
 
-function handleDragEnter(e: React.DragEvent<HTMLDivElement>, nodeId: string, state: ReturnType<typeof useMindStore>["state"]) {
+function handleDragEnter(
+  e: React.DragEvent<HTMLDivElement>,
+  nodeId: string,
+  state: ReturnType<typeof useMindStore>["state"],
+) {
   const draggedId = state.draggingNodeId;
   if (!draggedId || draggedId === nodeId) return;
   if (isDescendant(state.nodes, draggedId, nodeId)) return;
@@ -89,7 +103,12 @@ function handleDragLeave(e: React.DragEvent<HTMLDivElement>) {
   e.currentTarget.classList.remove("ring-2", "ring-sky-400");
 }
 
-function handleDrop(e: React.DragEvent<HTMLDivElement>, nodeId: string, state: ReturnType<typeof useMindStore>["state"], onDispatch: ReturnType<typeof useMindStore>["dispatch"]) {
+function handleDrop(
+  e: React.DragEvent<HTMLDivElement>,
+  nodeId: string,
+  state: ReturnType<typeof useMindStore>["state"],
+  onDispatch: ReturnType<typeof useMindStore>["dispatch"],
+) {
   e.preventDefault();
   e.currentTarget.classList.remove("ring-2", "ring-sky-400");
   const draggedId = e.dataTransfer.getData(DRAG_MIME);
@@ -109,6 +128,27 @@ export function NodeCard({ node }: Props) {
   const { dispatch, state } = useMindStore();
   const isSelected = state.selectedNodeId === node.id;
   const isMatch = state.searchQuery === "" || node.text.toLowerCase().includes(state.searchQuery);
+  const isEditing = state.editingNodeId === node.id;
+
+  if (isEditing) {
+    return (
+      <div
+        id={`node-dom-${node.id}`}
+        style={{ left: node.x, top: node.y }}
+        className="absolute -translate-x-1/2 -translate-y-1/2"
+      >
+        <NodeInlineEditor
+          node={node}
+          onCancel={() => dispatch({ type: "CANCEL_INLINE_EDIT" })}
+          onSave={(patch) => dispatch({ type: "SAVE_INLINE_EDIT", id: node.id, patch })}
+          onDelete={() => {
+            dispatch({ id: node.id, type: "DELETE_NODE" });
+            dispatch({ type: "CLOSE_INLINE_EDIT" });
+          }}
+        />
+      </div>
+    );
+  }
 
   if (node.isRoot) {
     return (
@@ -116,6 +156,14 @@ export function NodeCard({ node }: Props) {
         id={`node-dom-${node.id}`}
         data-node-id={node.id}
         draggable={!node.isRoot}
+        onClick={(e) => {
+          e.stopPropagation();
+          dispatch({ id: node.id, type: "SELECT" });
+        }}
+        onDoubleClick={(e) => {
+          e.stopPropagation();
+          dispatch({ type: "OPEN_INLINE_EDIT", nodeId: node.id });
+        }}
         onDragStart={(e) => handleDragStart(e, node.id, node.isRoot, dispatch)}
         onDragOver={(e) => handleDragOver(e, node.id, state)}
         onDragEnter={(e) => handleDragEnter(e, node.id, state)}
@@ -142,7 +190,6 @@ export function NodeCard({ node }: Props) {
             e.stopPropagation();
             const newId = `node-${Date.now()}`;
             dispatch({ newId, parentId: node.id, type: "ADD_CHILD" });
-            dispatch({ modal: { kind: "edit", nodeId: newId }, type: "OPEN_MODAL" });
           }}
         >
           <Plus size={12} />
@@ -159,6 +206,14 @@ export function NodeCard({ node }: Props) {
     <div
       id={`node-dom-${node.id}`}
       data-node-id={node.id}
+      onClick={(e) => {
+        e.stopPropagation();
+        dispatch({ id: node.id, type: "SELECT" });
+      }}
+      onDoubleClick={(e) => {
+        e.stopPropagation();
+        dispatch({ type: "OPEN_INLINE_EDIT", nodeId: node.id });
+      }}
       draggable={!node.isRoot}
       onDragStart={(e) => handleDragStart(e, node.id, node.isRoot, dispatch)}
       onDragOver={(e) => handleDragOver(e, node.id, state)}
@@ -219,6 +274,7 @@ export function NodeCard({ node }: Props) {
           )}
           <button
             type="button"
+            data-testid="ellipsis"
             className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1 rounded-md transition"
             onClick={(e) => {
               e.stopPropagation();
@@ -234,7 +290,6 @@ export function NodeCard({ node }: Props) {
               e.stopPropagation();
               const newId = `node-${Date.now()}`;
               dispatch({ newId, parentId: node.id, type: "ADD_CHILD" });
-              dispatch({ modal: { kind: "edit", nodeId: newId }, type: "OPEN_MODAL" });
             }}
           >
             <Plus size={12} />

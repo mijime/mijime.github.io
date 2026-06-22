@@ -284,3 +284,74 @@ describe("NodeCard drag-and-drop", () => {
     expect(target2.classList.contains("ring-2")).toBe(false);
   });
 });
+
+describe("NodeCard inline edit wiring", () => {
+  afterEach(() => {
+    document.body.innerHTML = "";
+  });
+
+  it("click on child node dispatches SELECT", () => {
+    const { container } = setup();
+    const childEl = container.querySelector('[data-node-id="a"]') as HTMLElement;
+    act(() => {
+      fireEvent.click(childEl);
+    });
+    expect(capturedState!.selectedNodeId).toBe("a");
+  });
+
+  it("click on root node dispatches SELECT", () => {
+    const { container } = setup();
+    const rootEl = container.querySelector('[data-node-id="root"]') as HTMLElement;
+    act(() => {
+      fireEvent.click(rootEl);
+    });
+    expect(capturedState!.selectedNodeId).toBe("root");
+  });
+
+  it("double-click on child node dispatches OPEN_INLINE_EDIT", () => {
+    const { container } = setup();
+    const childEl = container.querySelector('[data-node-id="a"]') as HTMLElement;
+    act(() => {
+      fireEvent.doubleClick(childEl);
+    });
+    expect(capturedState!.editingNodeId).toBe("a");
+    expect(capturedState!.selectedNodeId).toBe("a");
+  });
+
+  it("when editingNodeId matches node.id, NodeInlineEditor is rendered and add/collapse/ellipsis buttons are hidden", () => {
+    const s: State = {
+      ...makeState(),
+      editingNodeId: "a",
+    };
+    const { container } = render(
+      <MindProvider initialState={s}>
+        <Capture />
+        {Object.values(s.nodes).map((n: MindNode) => (
+          <NodeCard key={n.id} node={n} />
+        ))}
+      </MindProvider>,
+    );
+    const editor = container.querySelector("[data-inline-editor]") as HTMLElement;
+    expect(editor).toBeTruthy();
+    expect(editor.querySelector("textarea")).toBeTruthy();
+    // 編集モード中は ellipsis / add / collapse ボタンは出ない (NodeCard の通常 render 部分)
+    expect(editor.querySelector("[data-testid='ellipsis']")).toBeNull();
+  });
+
+  it("when editing, data-node-id div is not rendered", () => {
+    const s: State = {
+      ...makeState(),
+      editingNodeId: "a",
+    };
+    const { container } = render(
+      <MindProvider initialState={s}>
+        <Capture />
+        {Object.values(s.nodes).map((n: MindNode) => (
+          <NodeCard key={n.id} node={n} />
+        ))}
+      </MindProvider>,
+    );
+    // 編集モード時は NodeCard 由来の div (data-node-id="a") は出ない
+    expect(container.querySelector('[data-node-id="a"]')).toBeNull();
+  });
+});
