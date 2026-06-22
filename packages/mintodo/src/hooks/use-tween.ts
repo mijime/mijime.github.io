@@ -4,7 +4,10 @@ import { useMindStore } from "./use-mind-store";
 const TWEEN_DURATION = 300;
 const EASING = "cubic-bezier(0.25, 1, 0.5, 1)";
 
-interface Pos { x: number; y: number }
+interface Pos {
+  x: number;
+  y: number;
+}
 
 function snapshotPositions(nodes: Record<string, { x: number; y: number }>): Record<string, Pos> {
   const out: Record<string, Pos> = {};
@@ -12,7 +15,11 @@ function snapshotPositions(nodes: Record<string, { x: number; y: number }>): Rec
   return out;
 }
 
-function parentPosOr(state: ReturnType<typeof useMindStore>["state"], id: string, fallback: Pos): Pos {
+function parentPosOr(
+  state: ReturnType<typeof useMindStore>["state"],
+  id: string,
+  fallback: Pos,
+): Pos {
   const n = state.nodes[id];
   if (!n || !n.parentId) return fallback;
   const p = state.nodes[n.parentId];
@@ -31,13 +38,19 @@ export function useTween(): void {
   }, [state.nodes]);
 
   useEffect(() => {
-    if (state.draggingId !== null) return;
+    if (state.draggingNodeId !== null) return;
     if (seenVersionRef.current === state.layoutVersion) return;
     if (state.layoutVersion === 0) return;
 
     const prev = prevRef.current;
     const fallback: Pos = { x: 0, y: 0 };
-    const animations: Array<{ el: Element; from: Pos; to: Pos; props: "left,top" | "x1,y1,x2,y2"; parent: Pos }> = [];
+    const animations: Array<{
+      el: Element;
+      from: Pos;
+      to: Pos;
+      props: "left,top" | "x1,y1,x2,y2";
+      parent: Pos;
+    }> = [];
 
     for (const [id, n] of Object.entries(state.nodes)) {
       const p = prev[id];
@@ -52,7 +65,9 @@ export function useTween(): void {
         if (parent) {
           const edge = document.getElementById(`edge-${n.parentId}-${id}`);
           if (edge) {
-            const parentAnim = animations.find((a) => (a.el as HTMLElement).id === `node-dom-${n.parentId}`);
+            const parentAnim = animations.find(
+              (a) => (a.el as HTMLElement).id === `node-dom-${n.parentId}`,
+            );
             const parentTo: Pos = parentAnim ? parentAnim.to : { x: parent.x, y: parent.y };
             animations.push({ el: edge, from, to, props: "x1,y1,x2,y2", parent: parentTo });
           }
@@ -64,19 +79,21 @@ export function useTween(): void {
     prevRef.current = snapshotPositions(state.nodes);
 
     for (const a of animations) {
-      let keyframes: Keyframe[];
-      if (a.props === "left,top") {
-        keyframes = [
-          { left: `${a.from.x}px`, top: `${a.from.y}px` },
-          { left: `${a.to.x}px`, top: `${a.to.y}px` },
-        ];
-      } else {
-        keyframes = [
-          { x1: a.from.x, y1: a.from.y, x2: a.parent.x, y2: a.parent.y },
-          { x1: a.to.x, y1: a.to.y, x2: a.parent.x, y2: a.parent.y },
-        ];
-      }
-      a.el.animate(keyframes, { duration: TWEEN_DURATION, easing: EASING, fill: "none" });
+      const keyframes: Array<Record<string, string | number>> =
+        a.props === "left,top"
+          ? [
+              { left: `${a.from.x}px`, top: `${a.from.y}px` },
+              { left: `${a.to.x}px`, top: `${a.to.y}px` },
+            ]
+          : [
+              { x1: a.from.x, y1: a.from.y, x2: a.parent.x, y2: a.parent.y },
+              { x1: a.to.x, y1: a.to.y, x2: a.parent.x, y2: a.parent.y },
+            ];
+      a.el.animate(keyframes as unknown as Keyframe[], {
+        duration: TWEEN_DURATION,
+        easing: EASING,
+        fill: "none",
+      });
     }
-  }, [state.layoutVersion, state.draggingId, state.nodes]);
+  }, [state.layoutVersion, state.draggingNodeId, state.nodes]);
 }
