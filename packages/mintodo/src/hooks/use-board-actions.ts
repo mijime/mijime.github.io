@@ -103,6 +103,10 @@ export function useBoardActions(): BoardActions {
         const nodes = await loadNodesForBoard(id);
         dispatch({ boardId: id, type: "SET_CURRENT_BOARD" });
         dispatch({ nodes, type: "SET_NODES" });
+        dispatch({
+          type: "SET_VIEW",
+          view: { pan: { x: 0, y: 0 }, zoom: 1 },
+        });
         await setCurrentBoardId(id);
       }
     },
