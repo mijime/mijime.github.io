@@ -300,7 +300,7 @@ describe("reducer - ADD_CHILD", () => {
     expect(next.nodes["n-new"].isRoot).toBe(false);
     expect(next.nodes.root.children).toContain("n-new");
     expect(next.nodes["n-new"].x).toBeCloseTo(0);
-    expect(next.nodes["n-new"].y).toBe(-340);
+    expect(next.nodes["n-new"].y).toBe(-240);
     expect(next.layoutVersion).toBe(before + 1);
   });
 });
@@ -552,6 +552,6 @@ describe("reducer - SNAP_BACK", () => {
     const next = reducer(s, { id: "a", type: "SNAP_BACK" });
     expect(next.layoutVersion).toBe(6);
     expect(next.nodes.a.x).toBeCloseTo(0);
-    expect(next.nodes.a.y).toBe(-340);
+    expect(next.nodes.a.y).toBe(-240);
   });
 });

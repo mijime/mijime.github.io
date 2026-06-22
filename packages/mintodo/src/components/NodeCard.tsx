@@ -189,6 +189,7 @@ export function NodeCard({ node }: Props) {
         <div className="flex-1 select-none pr-1 truncate">{node.text}</div>
         <button
           type="button"
+          data-testid="add-child-root"
           className="w-7 h-7 rounded flex items-center justify-center transition"
           style={{ background: "rgba(255,255,255,0.2)" }}
           onClick={(e) => {

@@ -44,7 +44,12 @@ function leafCount(nodes: Nodes, id: string): number {
   return s;
 }
 
-interface Ctx { nodes: Nodes; ring: number; start: number; factor: number }
+interface Ctx {
+  nodes: Nodes;
+  ring: number;
+  start: number;
+  factor: number;
+}
 
 function placeChildren(
   parentId: string,
@@ -120,7 +125,7 @@ function place(
 export function computeRadialPositions(
   opts: RadialOptions,
 ): Record<string, { x: number; y: number }> {
-  const ring = opts.ringDistance ?? 340;
+  const ring = opts.ringDistance ?? 240;
   const start = opts.startAngle ?? -Math.PI / 2;
   const factor = opts.ringFactor ?? 0.12;
   const out: Record<string, { x: number; y: number }> = {};

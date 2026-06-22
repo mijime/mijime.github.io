@@ -222,3 +222,49 @@ describe("inline edit end-to-end", () => {
     expect(nodes.filter((n) => !n.isRoot)).toHaveLength(0);
   });
 });
+
+describe("centering on new node", () => {
+  beforeEach(async () => {
+    await db.open();
+    await db.boards.clear();
+    await db.nodes.clear();
+    await db.meta.clear();
+  });
+
+  it("adding a child pans the camera to center on that child", async () => {
+    render(<App />);
+    await act(async () => {
+      await flush(100);
+    });
+
+    // Create a board
+    fireEvent.click(screen.getByText("+ 新規ボード作成"));
+    const input = screen.getByPlaceholderText("例: メインプロジェクト") as HTMLInputElement;
+    fireEvent.change(input, { target: { value: "Test" } });
+    await act(() => {
+      fireEvent.click(screen.getByText("作成"));
+    });
+    await act(async () => {
+      await flush(300);
+    });
+
+    // Confirm initial transform has no y-pan (x≈0 too, but FP may produce ~1e-14)
+    const container = document.querySelector(".transform-container") as HTMLElement;
+    expect(container).toBeTruthy();
+    expect(container.style.transform).toMatch(/translate\(.*?0px\)/u);
+
+    // Click the root's + button (data-testid="add-child-root") to add a child
+    const addBtn = document.querySelector('[data-testid="add-child-root"]') as HTMLElement;
+    expect(addBtn).toBeTruthy();
+    await act(async () => {
+      fireEvent.click(addBtn);
+    });
+    await act(async () => {
+      await flush(500);
+    });
+
+    // The new child is placed at (≈0, -240) by the radial layout (RING=240, single child above root).
+    // ComputeCenterOnNode returns pan ≈ (0, 240) at zoom=1. (x may be ~1e-14 due to FP precision)
+    expect(container.style.transform).toMatch(/translate\(.*?240px\)/u);
+  });
+});

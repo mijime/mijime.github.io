@@ -104,6 +104,5 @@ export function useTween(): void {
         fill: "none",
       });
     }
-
   }, [state.layoutVersion, state.nodes]);
 }

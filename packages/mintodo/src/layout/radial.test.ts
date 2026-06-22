@@ -26,7 +26,7 @@ function nodes(...ns: MindNode[]): Record<string, MindNode> {
   return rec;
 }
 
-const RING = 340;
+const RING = 240;
 const TAU = Math.PI * 2;
 const UP = -Math.PI / 2;
 
@@ -35,9 +35,8 @@ describe("computeRadialPositions", () => {
     const root = node("root", { isRoot: true, children: ["a"] });
     const a = node("a", { parentId: "root" });
     const pos = computeRadialPositions({ rootId: "root", nodes: nodes(root, a) });
-    expect(Math.hypot(pos.a.x, pos.a.y)).toBeCloseTo(340, 5);
+    expect(Math.hypot(pos.a.x, pos.a.y)).toBeCloseTo(RING, 5);
   });
-
 
   it("places root alone at the origin", () => {
     const root = node("root", { isRoot: true });
@@ -114,7 +113,7 @@ describe("computeRadialPositions", () => {
     expect(dB).toBeGreaterThan(dA);
     expect(dC).toBeGreaterThan(dB);
     expect(dD).toBeGreaterThan(dC);
-    expect(dA).toBeCloseTo(340, 5);
+    expect(dA).toBeCloseTo(RING, 5);
   });
 
   it("hides descendants of a collapsed node", () => {
