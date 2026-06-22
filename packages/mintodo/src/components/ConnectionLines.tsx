@@ -53,21 +53,20 @@ export function ConnectionLines({ containerRef }: Props) {
         const sy = cy + parent.y * state.view.zoom + state.view.pan.y;
         const ex = cx + node.x * state.view.zoom + state.view.pan.x;
         const ey = cy + node.y * state.view.zoom + state.view.pan.y;
-        const c1x = sx + (ex - sx) * 0.5;
-        const c1y = sy;
-        const c2x = sx + (ex - sx) * 0.5;
-        const c2y = ey;
         const color = node.completed ? inactiveColor : activeColor;
-        const pathProps = node.completed
+        const strokeProps = node.completed
           ? { strokeDasharray: "5,5", strokeWidth: 1.5 }
-          : { strokeWidth: 2 };
+          : { strokeWidth: 1.5 };
         return (
-          <path
+          <line
             key={node.id}
-            d={`M ${sx} ${sy} C ${c1x} ${c1y}, ${c2x} ${c2y}, ${ex} ${ey}`}
+            id={`edge-${parent.id}-${node.id}`}
+            x1={sx}
+            y1={sy}
+            x2={ex}
+            y2={ey}
             stroke={color}
-            fill="none"
-            {...pathProps}
+            {...strokeProps}
           />
         );
       })}
