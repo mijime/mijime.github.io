@@ -58,13 +58,7 @@ describe("inline edit end-to-end", () => {
     await db.meta.clear();
   });
 
-  afterEach(async () => {
-    await db.boards.clear();
-    await db.nodes.clear();
-    await db.meta.clear();
-  });
-
-  it("dblclick on root then dblclick on child opens inline editor; type and save updates the node", async () => {
+  it("dblclick on root opens inline editor; type DSL and save updates the node in DB", async () => {
     render(<App />);
     await act(async () => {
       await flush(100);
