@@ -76,12 +76,7 @@ export function Toolbar() {
       return;
     }
     if (state.currentBoardId) {
-      try {
-        await actions.renameBoard(state.currentBoardId, parsed.board.name);
-      } catch (err) {
-        // eslint-disable-next-line no-console
-        console.error(err);
-      }
+      await actions.renameBoard(state.currentBoardId, parsed.board.name);
     }
     const rec: Record<string, MindNode> = {};
     for (const n of parsed.nodes) rec[n.id] = n;

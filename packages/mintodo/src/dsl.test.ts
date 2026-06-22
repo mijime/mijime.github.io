@@ -247,5 +247,12 @@ describe("serializeDSL", () => {
     const parsed = parseDSL(dsl, "b1")!;
     const reserialized = serializeDSL({ name: parsed.board.name }, fromArray(parsed.nodes));
     expect(reserialized).toBe(dsl);
+
+    for (const n of parsed.nodes) {
+      expect(n.x).toBe(0);
+      expect(n.y).toBe(0);
+      expect(n.vx).toBe(0);
+      expect(n.vy).toBe(0);
+    }
   });
 });
