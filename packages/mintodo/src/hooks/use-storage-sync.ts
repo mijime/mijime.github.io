@@ -34,7 +34,6 @@ export function useStorageSync(): void {
           await setCurrentBoardId(null);
           dispatch({ boardId: null, type: "SET_CURRENT_BOARD" });
         }
-
       } catch (err) {
         // eslint-disable-next-line no-console
         console.error("mintodo: failed to load from IndexedDB, using initial state", err);
@@ -54,7 +53,6 @@ export function useStorageSync(): void {
           console.error("mintodo: failed to save nodes", err);
         });
       }
-
     }, SAVE_DEBOUNCE_MS);
     return () => {
       if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
