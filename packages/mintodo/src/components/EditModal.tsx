@@ -66,19 +66,31 @@ export function EditModal() {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      style={{ background: "rgba(0,0,0,0.4)" }}
       onClick={(e) => {
         if (e.target === e.currentTarget) close();
       }}
     >
-      <div className="bg-white dark:bg-slate-800 w-full max-w-md rounded-2xl shadow-2xl border border-slate-200/50 dark:border-slate-700/50 overflow-hidden">
+      <div
+        className="w-full max-w-md rounded overflow-hidden"
+        style={{ background: "var(--paper)", border: "1px solid var(--border)" }}
+      >
         <div className="p-6">
-          <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
-            <Pencil className="text-indigo-600" size={18} /> タスクを編集
+          <h3
+            className="text-lg mb-4 flex items-center gap-2"
+            style={{ fontFamily: '"Crimson Pro", serif', fontWeight: 600, color: "var(--ink)" }}
+          >
+            <Pencil size={18} style={{ color: "var(--terra)" }} /> タスクを編集
           </h3>
           <div className="space-y-4">
             <div>
-              <label className="block text-xs font-semibold text-slate-400 mb-1">内容</label>
+              <label
+                className="block text-xs uppercase tracking-wider mb-1"
+                style={{ color: "var(--mid)" }}
+              >
+                内容
+              </label>
               <input
                 type="text"
                 value={text}
@@ -86,25 +98,41 @@ export function EditModal() {
                 onKeyDown={(e) => {
                   if (e.key === "Enter") onSave();
                 }}
-                className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full px-3 py-2 rounded text-sm outline-none"
+                style={{
+                  background: "var(--toolbar-bg)",
+                  border: "1px solid var(--border)",
+                  color: "var(--ink)",
+                }}
                 placeholder="タスクを入力..."
                 autoFocus
               />
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-400 mb-1">
+                <label
+                  className="block text-xs uppercase tracking-wider mb-1"
+                  style={{ color: "var(--mid)" }}
+                >
                   期限（期日）
                 </label>
                 <input
                   type="date"
                   value={dueDate}
                   onChange={(e) => setDueDate(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+                  className="w-full px-3 py-2 rounded text-sm outline-none"
+                  style={{
+                    background: "var(--toolbar-bg)",
+                    border: "1px solid var(--border)",
+                    color: "var(--ink)",
+                  }}
                 />
               </div>
               <div>
-                <label className="block text-xs font-semibold text-slate-400 mb-1">
+                <label
+                  className="block text-xs uppercase tracking-wider mb-1"
+                  style={{ color: "var(--mid)" }}
+                >
                   カテゴリーカラー
                 </label>
                 <div className="grid grid-cols-4 gap-1.5 mt-1">
@@ -113,7 +141,12 @@ export function EditModal() {
                       key={c.color}
                       type="button"
                       aria-label={c.label}
-                      className={`w-7 h-7 rounded-full border-2 transition ${COLOR_BG[c.color]} ${categoryColor === c.color ? "ring-4 ring-indigo-500 border-transparent" : "border-transparent"}`}
+                      className={`w-7 h-7 rounded-full border-2 transition ${COLOR_BG[c.color]}`}
+                      style={{
+                        borderColor: categoryColor === c.color ? "var(--terra)" : "transparent",
+                        outline: categoryColor === c.color ? "1px solid var(--terra)" : "none",
+                        outlineOffset: 2,
+                      }}
                       onClick={() => setCategoryColor(c.color)}
                     />
                   ))}
@@ -121,17 +154,27 @@ export function EditModal() {
               </div>
             </div>
             <div>
-              <label className="block text-xs font-semibold text-slate-400 mb-1">優先度</label>
+              <label
+                className="block text-xs uppercase tracking-wider mb-1"
+                style={{ color: "var(--mid)" }}
+              >
+                優先度
+              </label>
               <div className="grid grid-cols-3 gap-2">
                 {PRIORITIES.map((p) => (
                   <button
                     key={p.value}
                     type="button"
-                    className={`py-2 rounded-xl text-xs font-medium border transition ${
+                    className="py-2 rounded text-xs font-medium transition"
+                    style={
                       priority === p.value
-                        ? "bg-indigo-600 text-white border-indigo-600"
-                        : "border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-900"
-                    }`}
+                        ? { background: "var(--terra)", color: "var(--paper)" }
+                        : {
+                            background: "var(--paper)",
+                            border: "1px solid var(--border)",
+                            color: "var(--ink)",
+                          }
+                    }
                     onClick={() => setPriority(p.value)}
                   >
                     {p.label}
@@ -141,10 +184,14 @@ export function EditModal() {
             </div>
           </div>
         </div>
-        <div className="flex justify-between items-center bg-slate-50 dark:bg-slate-900/50 p-4 border-t border-slate-100 dark:border-slate-700/50">
+        <div
+          className="flex justify-between items-center p-4"
+          style={{ background: "var(--toolbar-bg)", borderTop: "1px solid var(--border)" }}
+        >
           <button
             type="button"
-            className="px-4 py-2.5 rounded-xl hover:bg-rose-50 dark:hover:bg-rose-950/30 text-rose-600 dark:text-rose-400 text-sm font-semibold transition flex items-center gap-1.5"
+            className="px-4 py-2 rounded text-sm font-semibold transition flex items-center gap-1.5"
+            style={{ color: "var(--terra)" }}
             onClick={onDelete}
           >
             <Trash2 size={14} /> 削除
@@ -152,14 +199,20 @@ export function EditModal() {
           <div className="flex gap-2">
             <button
               type="button"
-              className="px-4 py-2.5 rounded-xl hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 text-sm font-medium transition"
+              className="px-4 py-2 rounded text-sm font-medium transition"
+              style={{
+                background: "var(--paper)",
+                border: "1px solid var(--border)",
+                color: "var(--ink)",
+              }}
               onClick={close}
             >
               キャンセル
             </button>
             <button
               type="button"
-              className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-xl shadow-lg shadow-indigo-500/20 transition"
+              className="px-5 py-2 rounded text-sm font-semibold transition"
+              style={{ background: "var(--terra)", color: "var(--paper)" }}
               onClick={onSave}
             >
               保存

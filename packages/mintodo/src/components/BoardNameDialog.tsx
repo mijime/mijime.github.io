@@ -32,15 +32,20 @@ export function BoardNameDialog() {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
+      className="fixed inset-0 z-50 flex items-center justify-center"
+      style={{ background: "rgba(0,0,0,0.4)" }}
       onClick={close}
     >
       <form
         onSubmit={onSubmit}
         onClick={(e) => e.stopPropagation()}
-        className="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-2xl w-[420px] max-w-[90vw]"
+        className="rounded p-6 w-[420px] max-w-[90vw]"
+        style={{ background: "var(--paper)", border: "1px solid var(--border)" }}
       >
-        <h2 className="text-lg font-bold mb-4">
+        <h2
+          className="text-lg mb-4"
+          style={{ fontFamily: '"Crimson Pro", serif', fontWeight: 600, color: "var(--ink)" }}
+        >
           {modal.mode === "create" ? "新しいボード" : "ボード名を変更"}
         </h2>
         <input
@@ -50,23 +55,34 @@ export function BoardNameDialog() {
           onChange={(e) => setName(e.target.value.slice(0, MAX_NAME))}
           maxLength={MAX_NAME}
           placeholder="例: メインプロジェクト"
-          className="w-full px-3 py-2 text-sm bg-slate-100 dark:bg-slate-700 border border-transparent focus:border-indigo-500 rounded-xl outline-none"
+          className="w-full px-3 py-2 text-sm rounded outline-none"
+          style={{
+            background: "var(--toolbar-bg)",
+            border: "1px solid var(--border)",
+            color: "var(--ink)",
+          }}
         />
-        <div className="text-xs text-slate-500 mt-1">
+        <div className="text-xs mt-1" style={{ color: "var(--mid)" }}>
           {name.length} / {MAX_NAME}
         </div>
         <div className="flex justify-end gap-2 mt-4">
           <button
             type="button"
             onClick={close}
-            className="px-4 py-2 text-sm rounded-xl bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600"
+            className="px-4 py-2 text-sm rounded transition"
+            style={{
+              background: "var(--paper)",
+              border: "1px solid var(--border)",
+              color: "var(--ink)",
+            }}
           >
             キャンセル
           </button>
           <button
             type="submit"
             disabled={!name.trim()}
-            className="px-4 py-2 text-sm rounded-xl bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50"
+            className="px-4 py-2 text-sm rounded transition disabled:opacity-50"
+            style={{ background: "var(--terra)", color: "var(--paper)" }}
           >
             {modal.mode === "create" ? "作成" : "保存"}
           </button>

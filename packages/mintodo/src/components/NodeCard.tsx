@@ -1,20 +1,20 @@
 import { Check, ChevronDown, ChevronUp, EllipsisVertical, Plus, XCircle } from "lucide-react";
 import { useMindStore } from "../hooks/use-mind-store";
-import type { CategoryColor, MindNode, Priority } from "../types";
+import type { CategoryColor, MindNode } from "../types";
 
-function categoryBorderClass(c: CategoryColor): string {
+function categoryBorderColor(c: CategoryColor): string {
   switch (c) {
     case "sky": {
-      return "border-l-sky-500";
+      return "#0ea5e9";
     }
     case "emerald": {
-      return "border-l-emerald-500";
+      return "#10b981";
     }
     case "rose": {
-      return "border-l-rose-500";
+      return "#f43f5e";
     }
     default: {
-      return "border-l-slate-400 dark:border-l-slate-600";
+      return "var(--mid)";
     }
   }
 }
@@ -53,12 +53,6 @@ function dueDateBadge(dueDate: string, isCompleted: boolean): string {
   return `<span class="bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300 text-[10px] font-medium px-1.5 py-0.5 rounded-md shrink-0">あと ${days} 日</span>`;
 }
 
-function priorityBorder(p: Priority, isRoot: boolean): string {
-  if (isRoot) return "border-2 border-indigo-500";
-  if (p === "high") return "border-2 border-rose-400/50 dark:border-rose-500/30";
-  return "border-slate-200 dark:border-slate-700";
-}
-
 interface Props {
   node: MindNode;
 }
@@ -73,13 +67,22 @@ export function NodeCard({ node }: Props) {
       <div
         id={`node-dom-${node.id}`}
         data-node-id={node.id}
-        className={`absolute -translate-x-1/2 -translate-y-1/2 bg-indigo-600 text-white p-4 rounded-2xl shadow-xl shadow-indigo-500/20 font-bold border-2 border-indigo-500 flex items-center justify-between gap-3 min-w-[200px] max-w-[280px] ${isSelected ? "node-selected" : ""} ${isMatch ? "" : "opacity-30"}`}
-        style={{ left: node.x, top: node.y }}
+        className={`absolute -translate-x-1/2 -translate-y-1/2 p-4 rounded flex items-center justify-between gap-3 min-w-[200px] min-h-[60px] max-w-[280px] ${isSelected ? "node-selected" : ""} ${isMatch ? "" : "opacity-30"}`}
+        style={{
+          left: node.x,
+          top: node.y,
+          background: "var(--terra)",
+          color: "var(--paper)",
+          border: "2px solid var(--terra)",
+          fontFamily: '"Crimson Pro", serif',
+          fontWeight: 600,
+        }}
       >
         <div className="flex-1 select-none pr-1 truncate">{node.text}</div>
         <button
           type="button"
-          className="bg-white/20 hover:bg-white/30 text-white w-7 h-7 rounded-lg flex items-center justify-center transition"
+          className="w-7 h-7 rounded flex items-center justify-center transition"
+          style={{ background: "rgba(255,255,255,0.2)" }}
           onClick={(e) => {
             e.stopPropagation();
             const newId = `node-${Date.now()}`;
@@ -93,16 +96,26 @@ export function NodeCard({ node }: Props) {
     );
   }
 
-  const borderColor = categoryBorderClass(node.categoryColor);
-  const priBorder = priorityBorder(node.priority, false);
+  const borderColor = categoryBorderColor(node.categoryColor);
+  const priBorder = node.priority === "high";
   const badge = dueDateBadge(node.dueDate, node.completed);
 
   return (
     <div
       id={`node-dom-${node.id}`}
       data-node-id={node.id}
-      className={`absolute -translate-x-1/2 -translate-y-1/2 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 px-4 py-3 rounded-xl shadow-md border-l-4 ${borderColor} ${priBorder} flex flex-col justify-between gap-1.5 min-w-[220px] max-w-[320px] hover:shadow-lg transition-shadow duration-200 ${isSelected ? "node-selected" : ""} ${isMatch ? "" : "opacity-30"}`}
-      style={{ left: node.x, top: node.y }}
+      className={`absolute -translate-x-1/2 -translate-y-1/2 px-4 py-3 rounded border-l-4 flex flex-col justify-between gap-1.5 min-w-[220px] max-w-[320px] ${isSelected ? "node-selected" : ""} ${isMatch ? "" : "opacity-30"}`}
+      style={{
+        left: node.x,
+        top: node.y,
+        background: "var(--paper)",
+        color: "var(--ink)",
+        borderTop: "1px solid var(--border)",
+        borderRight: "1px solid var(--border)",
+        borderBottom: "1px solid var(--border)",
+        borderLeft: `4px solid ${borderColor}`,
+        boxShadow: priBorder ? "0 0 0 1px var(--terra)" : undefined,
+      }}
     >
       <div className="flex items-start justify-between w-full gap-2">
         <div className="flex items-start gap-2 flex-1 min-w-0">

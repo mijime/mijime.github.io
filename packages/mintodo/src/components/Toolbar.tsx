@@ -44,10 +44,7 @@ export function Toolbar() {
 
   const onExportDsl = () => {
     const currentBoard = state.boards.find((b) => b.id === state.currentBoardId);
-    const text = serializeDSL(
-      { name: currentBoard?.name ?? "Unknown" },
-      state.nodes,
-    );
+    const text = serializeDSL({ name: currentBoard?.name ?? "Unknown" }, state.nodes);
     const date = new Date().toISOString().slice(0, 10);
     const url = downloadText(
       text,
