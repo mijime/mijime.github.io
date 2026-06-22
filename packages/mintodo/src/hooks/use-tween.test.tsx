@@ -50,7 +50,7 @@ function Probe(): ReactNode {
 }
 
 describe("useTween", () => {
-  let animateSpy: ReturnType<typeof vi.fn>;
+  let animateSpy: ReturnType<typeof vi.fn> = vi.fn();
 
   beforeEach(() => {
     document.body.innerHTML = `
@@ -65,8 +65,13 @@ describe("useTween", () => {
       (Element.prototype as unknown as { animate: unknown }).animate = vi.fn();
     }
     animateSpy = vi
-      .spyOn(Element.prototype as unknown as { animate: typeof Element.prototype.animate }, "animate")
-      .mockImplementation((() => ({ cancel: () => {} })) as unknown as typeof Element.prototype.animate) as unknown as ReturnType<typeof vi.fn>;
+      .spyOn(
+        Element.prototype as unknown as { animate: typeof Element.prototype.animate },
+        "animate",
+      )
+      .mockImplementation((() => ({
+        cancel: () => {},
+      })) as unknown as typeof Element.prototype.animate) as unknown as ReturnType<typeof vi.fn>;
   });
 
   afterEach(() => {

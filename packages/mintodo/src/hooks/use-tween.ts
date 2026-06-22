@@ -63,7 +63,7 @@ export function useTween(): void {
       if (!n.isRoot && n.parentId) {
         const parent = state.nodes[n.parentId];
         if (parent) {
-          const edge = document.getElementById(`edge-${n.parentId}-${id}`);
+          const edge = document.querySelector<SVGLineElement>(`#edge-${n.parentId}-${id}`);
           if (edge) {
             const parentAnim = animations.find(
               (a) => (a.el as HTMLElement).id === `node-dom-${n.parentId}`,

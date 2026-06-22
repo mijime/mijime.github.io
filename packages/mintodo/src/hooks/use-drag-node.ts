@@ -75,7 +75,7 @@ export function useDragNode(): void {
       };
       dispatch({ id: cardId, type: "SELECT" });
       dispatch({ id: cardId, type: "SET_DRAGGING" });
-      const cardEl = document.getElementById(`node-dom-${cardId}`);
+      const cardEl = document.querySelector<HTMLElement>(`#node-dom-${cardId}`);
       if (cardEl) cardEl.style.pointerEvents = "none";
       if ("touches" in e) return;
       e.stopPropagation();
@@ -133,7 +133,7 @@ export function useDragNode(): void {
       } else {
         dispatch({ id: d.id, type: "SNAP_BACK" });
       }
-      const draggedEl = document.getElementById(`node-dom-${d.id}`);
+      const draggedEl = document.querySelector<HTMLElement>(`#node-dom-${d.id}`);
       if (draggedEl) draggedEl.style.pointerEvents = "";
       dragRef.current = null;
       dispatch({ id: null, type: "SET_DRAGGING" });
