@@ -16,6 +16,8 @@
     "unicorn/no-immediate-mutation": "off",
     "unicorn/prefer-blob-reading-methods": "off",
     "oxc/no-optional-chaining": "off",
-    "typescript/no-non-null-assertion": "off"
+    "typescript/no-non-null-assertion": "off",
+    "eslint/require-await": "off",
+    "eslint/no-void": "off"
   }
 }
