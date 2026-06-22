@@ -2,13 +2,17 @@
 @import "tailwindcss";
 @source "./**/*.{ts,tsx}";
 
-.canvas-grid {
-  background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
-  background-size: 20px 20px;
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
 }
 
-:is(.dark) .canvas-grid {
-  background-image: radial-gradient(#334155 1px, transparent 1px);
+.canvas-grid {
+  background-image: radial-gradient(var(--grid) 1px, transparent 1px);
+  background-size: 20px 20px;
 }
 
 .transform-container {
@@ -17,7 +21,10 @@
 }
 
 .node-selected {
-  box-shadow: 0 0 15px rgba(99, 102, 241, 0.4);
-  outline: 3px solid #6366f1;
-  outline-offset: 2px;
+  outline: 2px solid var(--terra);
+  outline-offset: 1px;
+}
+
+.serif {
+  font-family: "Crimson Pro", serif;
 }

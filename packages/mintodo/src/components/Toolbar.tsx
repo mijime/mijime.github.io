@@ -1,6 +1,6 @@
 import {
-  Download,
   Eye,
+  FileText,
   Keyboard,
   Menu,
   Moon,
@@ -8,11 +8,8 @@ import {
   Search,
   Sun,
   Trash2,
-  Upload,
 } from "lucide-react";
-import { useRef } from "react";
 import { useMindStore } from "../hooks/use-mind-store";
-import { downloadJson, parseImportedJson } from "../storage";
 import { db } from "../db";
 
 function onTheme() {
@@ -21,99 +18,86 @@ function onTheme() {
 }
 
 async function onReset() {
-  if (!confirm("すべてのデータを初期化しますか？（IndexedDBの全データが削除され、ページがリロードされます）")) return;
+  if (
+    !confirm(
+      "すべてのデータを初期化しますか？（IndexedDBの全データが削除され、ページがリロードされます）",
+    )
+  )
+    return;
   await db.delete();
   location.reload();
 }
 
 export function Toolbar() {
   const { state, dispatch } = useMindStore();
-  const fileRef = useRef<HTMLInputElement>(null);
-
-  const onExport = () => {
-    const currentBoard = state.boards.find((b) => b.id === state.currentBoardId);
-    const data = {
-      version: 2 as const,
-      board: { id: currentBoard?.id ?? "", name: currentBoard?.name ?? "Unknown" },
-      nodes: Object.values(state.nodes),
-    };
-    const date = new Date().toISOString().slice(0, 10);
-    const url = downloadJson(data, `mintodo_${currentBoard?.name ?? "Unknown"}_${date}.json`);
-    setTimeout(() => URL.revokeObjectURL(url), 1000);
-  };
-
-  const onImportClick = () => fileRef.current?.click();
-
-  const onFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const text = await file.text();
-    const data = parseImportedJson(text);
-    if (!data) {
-      alert("インポートに失敗しました。ファイルが壊れている可能性があります。");
-      return;
-    }
-    if (
-      Object.keys(state.nodes).length > 0 &&
-      !confirm(
-        `「${data.board.name}」から${data.nodes.length}件のタスクをインポートします。\nこのボードの現在のタスクは失われます。続行しますか?`,
-      )
-    ) {
-      e.target.value = "";
-      return;
-    }
-    // Rewrite boardId so nodes belong to the current board.
-    const currentId = state.currentBoardId;
-    const rec: Record<string, (typeof data.nodes)[number]> = {};
-    for (const n of data.nodes) {
-      rec[n.id] = { ...n, boardId: currentId ?? n.boardId };
-    }
-    dispatch({ nodes: rec, type: "SET_NODES" });
-    e.target.value = "";
-  };
 
   const onToggleDrawer = () => dispatch({ type: "TOGGLE_DRAWER" });
 
   return (
-    <header className="absolute top-4 left-4 right-4 z-10 flex flex-col lg:flex-row gap-3 lg:items-center justify-between bg-white/80 dark:bg-slate-800/80 backdrop-blur-md p-4 rounded-2xl shadow-lg border border-slate-200/50 dark:border-slate-700/50 transition-all">
+    <header
+      className="absolute top-4 left-4 right-4 z-10 flex flex-col lg:flex-row gap-3 lg:items-center justify-between p-4 rounded transition-all"
+      style={{ background: "var(--toolbar-bg)", border: "1px solid var(--border)" }}
+    >
       <div className="flex items-center justify-between lg:justify-start gap-3 w-full lg:w-auto">
         <div className="flex items-center gap-3">
           <button
             type="button"
             onClick={onToggleDrawer}
             title="ボード一覧"
-            className="p-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 transition md:hidden"
+            className="p-2 rounded transition md:hidden"
+            style={{ color: "var(--mid)" }}
           >
             <Menu size={18} />
           </button>
-          <div className="bg-indigo-600 text-white p-2.5 rounded-xl shadow-md shadow-indigo-500/20">
+          <div
+            className="p-2 rounded"
+            style={{ background: "var(--terra)", color: "var(--paper)" }}
+          >
             <Network size={18} />
           </div>
           <div>
-            <h1 className="font-bold text-lg leading-tight tracking-wide">MindTodo Pro</h1>
+            <h1
+              className="text-lg leading-tight tracking-wide"
+              style={{ fontFamily: '"Crimson Pro", serif', fontWeight: 600 }}
+            >
+              MindTodo Pro
+            </h1>
           </div>
         </div>
       </div>
       <div className="flex flex-wrap items-center gap-2 w-full lg:w-auto">
         <div className="relative flex-1 min-w-[150px] lg:max-w-[240px]">
-          <span className="absolute inset-y-0 left-3 flex items-center text-slate-400">
+          <span
+            className="absolute inset-y-0 left-3 flex items-center"
+            style={{ color: "var(--mid)" }}
+          >
             <Search size={12} />
           </span>
           <input
             type="text"
             value={state.searchQuery}
             onChange={(e) => dispatch({ query: e.target.value, type: "SET_SEARCH" })}
-            className="w-full pl-9 pr-4 py-1.5 text-sm bg-slate-100 dark:bg-slate-700/50 border border-transparent focus:border-indigo-500 rounded-xl outline-none transition"
+            className="w-full pl-9 pr-4 py-1.5 text-sm rounded outline-none transition"
+            style={{
+              background: "var(--paper)",
+              border: "1px solid var(--border)",
+              color: "var(--ink)",
+            }}
             placeholder="タスクを検索..."
           />
         </div>
         <button
           type="button"
-          className={`p-2 rounded-xl text-xs font-semibold transition flex items-center gap-1.5 ${
+          className="p-2 rounded text-xs font-semibold transition flex items-center gap-1.5"
+          style={
             state.hideCompleted
-              ? "bg-indigo-600 text-white"
-              : "bg-slate-100 dark:bg-slate-700/50 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300"
-          }`}
+              ? { background: "var(--terra)", color: "var(--paper)" }
+              : {
+                  background: "var(--paper)",
+                  border: "1px solid var(--border)",
+                  color: "var(--ink)",
+                }
+          }
           title="未完了のみ表示トグル"
           onClick={() => dispatch({ type: "TOGGLE_HIDE_COMPLETED" })}
         >
@@ -121,45 +105,42 @@ export function Toolbar() {
         </button>
       </div>
       <div className="flex items-center justify-between lg:justify-end gap-3 w-full lg:w-auto">
-        <div className="flex items-center gap-2 bg-slate-100 dark:bg-slate-700/50 px-3 py-1.5 rounded-xl border border-slate-200/30 dark:border-slate-600/30">
-          <span className="hidden sm:inline text-xs font-semibold text-slate-600 dark:text-slate-300">
+        <div
+          className="flex items-center gap-2 px-3 py-1.5 rounded"
+          style={{ background: "var(--paper)", border: "1px solid var(--border)" }}
+        >
+          <span className="hidden sm:inline text-xs font-semibold" style={{ color: "var(--ink)" }}>
             自動配置
           </span>
           <button
             type="button"
-            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-              state.physicsEnabled ? "bg-indigo-600" : "bg-slate-300 dark:bg-slate-600"
-            }`}
+            className="relative inline-flex h-5 w-9 items-center rounded-full transition-colors"
+            style={{ background: state.physicsEnabled ? "var(--terra)" : "var(--grid)" }}
             onClick={() => dispatch({ type: "TOGGLE_PHYSICS" })}
           >
             <span
-              className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                state.physicsEnabled ? "translate-x-6" : "translate-x-1"
-              }`}
+              className="inline-block h-3.5 w-3.5 transform rounded-full transition-transform"
+              style={{
+                background: "var(--paper)",
+                transform: state.physicsEnabled ? "translateX(18px)" : "translateX(3px)",
+              }}
             />
           </button>
         </div>
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-1">
           <button
             type="button"
-            className="p-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 transition"
-            title="JSONエクスポート"
-            onClick={onExport}
+            className="p-2 rounded transition"
+            style={{ color: "var(--mid)" }}
+            title="DSL編集"
+            onClick={() => dispatch({ modal: { kind: "dsl-editor" }, type: "OPEN_MODAL" })}
           >
-            <Download size={16} />
+            <FileText size={16} />
           </button>
           <button
             type="button"
-            className="p-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 transition"
-            title="JSONインポート"
-            onClick={onImportClick}
-          >
-            <Upload size={16} />
-          </button>
-          <input ref={fileRef} type="file" accept=".json" className="hidden" onChange={onFile} />
-          <button
-            type="button"
-            className="p-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 transition"
+            className="p-2 rounded transition"
+            style={{ color: "var(--mid)" }}
             title="ヘルプ・ショートカット"
             onClick={() => dispatch({ modal: { kind: "help" }, type: "OPEN_MODAL" })}
           >
@@ -167,7 +148,8 @@ export function Toolbar() {
           </button>
           <button
             type="button"
-            className="p-2.5 rounded-xl hover:bg-rose-50 dark:hover:bg-rose-950/30 text-rose-600 dark:text-rose-400 transition"
+            className="p-2 rounded transition"
+            style={{ color: "var(--terra)" }}
             title="すべてリセット"
             onClick={onReset}
           >
@@ -175,7 +157,8 @@ export function Toolbar() {
           </button>
           <button
             type="button"
-            className="p-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 transition"
+            className="p-2 rounded transition"
+            style={{ color: "var(--mid)" }}
             title="テーマ切り替え"
             onClick={onTheme}
           >

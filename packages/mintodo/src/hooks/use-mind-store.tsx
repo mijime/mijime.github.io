@@ -3,8 +3,18 @@ import { createInitialState, reducer, type Action, type State } from "../store";
 
 const MindContext = createContext<{ dispatch: Dispatch<Action>; state: State } | null>(null);
 
-export function MindProvider({ children }: { children: ReactNode }) {
-  const [state, dispatch] = useReducer(reducer, undefined, createInitialState);
+export function MindProvider({
+  children,
+  initialState,
+}: {
+  children: ReactNode;
+  initialState?: State;
+}) {
+  const [state, dispatch] = useReducer(
+    reducer,
+    undefined,
+    () => initialState ?? createInitialState(),
+  );
   return <MindContext.Provider value={{ dispatch, state }}>{children}</MindContext.Provider>;
 }
 

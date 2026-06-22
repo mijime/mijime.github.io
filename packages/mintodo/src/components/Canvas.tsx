@@ -43,11 +43,11 @@ export function Canvas() {
   return (
     <div
       ref={containerRef}
-      className="w-full h-full cursor-grab active:cursor-grabbing canvas-grid relative overflow-hidden bg-slate-50 dark:bg-slate-900"
+      className="w-full flex-1 cursor-grab active:cursor-grabbing canvas-grid relative overflow-hidden bg-slate-50 dark:bg-slate-900"
     >
       <ConnectionLines containerRef={containerRef} />
       <div
-        className="transform-container absolute w-0 h-0 top-1/2 left-1/2"
+        className="transform-container absolute w-px h-px top-1/2 left-1/2"
         style={{
           transform: `translate(${state.view.pan.x}px, ${state.view.pan.y}px) scale(${state.view.zoom})`,
         }}

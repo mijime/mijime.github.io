@@ -71,6 +71,7 @@ export function reducer(state: State, action: Action): State {
         currentBoardId: action.board.id,
         nodes: action.initialNodes,
         selectedNodeId: "root",
+        view: { pan: { x: 0, y: 0 }, zoom: 1 },
       };
     }
     case "RENAME_BOARD": {
@@ -124,6 +125,7 @@ export function reducer(state: State, action: Action): State {
         ...state,
         nodes: { root },
         selectedNodeId: "root",
+        view: { pan: { x: 0, y: 0 }, zoom: 1 },
         physicsEnabled: state.physicsEnabled,
       };
     }
