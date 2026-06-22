@@ -313,14 +313,19 @@ export function reducer(state: State, action: Action): State {
               });
             }
           }
+          const nextNodes = Object.fromEntries(updated);
           return withRadialLayout(
             {
               ...state,
-              nodes: Object.fromEntries(updated),
+              nodes: nextNodes,
               editingNodeId: null,
               pendingCreationNodeId: null,
+              selectedNodeId:
+                state.selectedNodeId === state.editingNodeId
+                  ? (target.parentId ?? "root")
+                  : state.selectedNodeId,
             },
-            Object.fromEntries(updated),
+            nextNodes,
           );
         }
       }
