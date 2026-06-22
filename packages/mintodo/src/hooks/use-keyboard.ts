@@ -13,7 +13,6 @@ export function useKeyboard(): void {
 
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
-      if (state.editingNodeId !== null) return;
       if (e.key === "Escape") {
         if (state.modal) {
           dispatch({ modal: null, type: "OPEN_MODAL" });
@@ -30,15 +29,19 @@ export function useKeyboard(): void {
       switch (e.key) {
         case "Tab": {
           e.preventDefault();
-          const newId = `node-${Date.now()}`;
-          dispatch({ newId, parentId: state.selectedNodeId, type: "ADD_CHILD" });
+          dispatch({
+            modal: { kind: "edit-new", parentId: state.selectedNodeId },
+            type: "OPEN_MODAL",
+          });
           break;
         }
         case "Enter": {
           if (!active.isRoot && active.parentId) {
             e.preventDefault();
-            const newId = `node-${Date.now()}`;
-            dispatch({ newId, parentId: active.parentId, type: "ADD_CHILD" });
+            dispatch({
+              modal: { kind: "edit-new", parentId: active.parentId },
+              type: "OPEN_MODAL",
+            });
           }
           break;
         }
@@ -63,7 +66,7 @@ export function useKeyboard(): void {
         case "E": {
           if (!active.isRoot) {
             e.preventDefault();
-            dispatch({ type: "OPEN_INLINE_EDIT", nodeId: state.selectedNodeId });
+            dispatch({ modal: { kind: "edit", nodeId: state.selectedNodeId }, type: "OPEN_MODAL" });
           }
           break;
         }

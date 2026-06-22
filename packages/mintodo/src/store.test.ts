@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { createInitialState, isDescendant, reducer, type State } from "./store";
+import { createInitialState, isDescendant, reducer } from "./store";
 import type { Board, MindNode } from "./types";
 
 function makeNode(id: string, boardId: string, opts: Partial<MindNode> = {}): MindNode {
@@ -427,115 +427,91 @@ describe("reducer - REPARENT", () => {
   });
 });
 
-describe("reducer - inline edit state", () => {
-  function makeStateWithInline(
-    overrides: {
-      editingNodeId?: string | null;
-      pendingCreationNodeId?: string | null;
-      nodes?: Record<string, MindNode>;
-    } = {},
-  ): State {
-    return {
+describe("reducer - CREATE_CHILD", () => {
+  it("creates a new child node with the given text and attributes", () => {
+    const s = {
       ...createInitialState(),
       currentBoardId: "b-a",
-      nodes: overrides.nodes ?? {
-        root: makeNode("root", "b-a", { isRoot: true, text: "R" }),
-        a: makeNode("a", "b-a", { parentId: "root", text: "A" }),
-      },
-      editingNodeId: overrides.editingNodeId ?? null,
-      pendingCreationNodeId: overrides.pendingCreationNodeId ?? null,
+      nodes: { root: makeNode("root", "b-a", { isRoot: true, children: [] }) },
     };
-  }
-
-  it("createInitialState starts with editingNodeId=null, pendingCreationNodeId=null", () => {
-    const s = createInitialState();
-    expect(s.editingNodeId).toBeNull();
-    expect(s.pendingCreationNodeId).toBeNull();
-  });
-
-  it("OPEN_INLINE_EDIT sets editingNodeId and selectedNodeId", () => {
-    const s = makeStateWithInline();
-    const next = reducer(s, { type: "OPEN_INLINE_EDIT", nodeId: "a" });
-    expect(next.editingNodeId).toBe("a");
-    expect(next.selectedNodeId).toBe("a");
-  });
-
-  it("CLOSE_INLINE_EDIT clears both edit state fields", () => {
-    const s = makeStateWithInline({ editingNodeId: "a", pendingCreationNodeId: "a" });
-    const next = reducer(s, { type: "CLOSE_INLINE_EDIT" });
-    expect(next.editingNodeId).toBeNull();
-    expect(next.pendingCreationNodeId).toBeNull();
-  });
-
-  it("CANCEL_INLINE_EDIT on existing node clears state without deleting", () => {
-    const s = makeStateWithInline({ editingNodeId: "a" });
-    const next = reducer(s, { type: "CANCEL_INLINE_EDIT" });
-    expect(next.editingNodeId).toBeNull();
-    expect(next.nodes.a).toBeDefined();
-  });
-
-  it("CANCEL_INLINE_EDIT on a newly-created node deletes it", () => {
-    const nodes = {
-      root: makeNode("root", "b-a", { isRoot: true, text: "R", children: ["a"] }),
-      a: makeNode("a", "b-a", { parentId: "root", text: "" }),
-    };
-    const s = makeStateWithInline({ nodes, editingNodeId: "a", pendingCreationNodeId: "a" });
-    const next = reducer(s, { type: "CANCEL_INLINE_EDIT" });
-    expect(next.nodes.a).toBeUndefined();
-    expect(next.nodes.root.children).not.toContain("a");
-    expect(next.editingNodeId).toBeNull();
-    expect(next.pendingCreationNodeId).toBeNull();
-  });
-
-  it("SAVE_INLINE_EDIT applies the patch to the target node and clears state", () => {
-    const s = makeStateWithInline({ editingNodeId: "a" });
     const next = reducer(s, {
-      type: "SAVE_INLINE_EDIT",
-      id: "a",
-      patch: {
-        text: "new",
-        priority: "high",
-        categoryColor: "sky",
-        dueDate: "2026-06-25",
-        completed: true,
-      },
+      type: "CREATE_CHILD",
+      newId: "n1",
+      parentId: "root",
+      text: "my task",
+      priority: "high",
+      categoryColor: "sky",
+      dueDate: "2026-07-01",
+      completed: false,
     });
-    expect(next.nodes.a.text).toBe("new");
-    expect(next.nodes.a.priority).toBe("high");
-    expect(next.nodes.a.categoryColor).toBe("sky");
-    expect(next.nodes.a.dueDate).toBe("2026-06-25");
-    expect(next.nodes.a.completed).toBe(true);
-    expect(next.editingNodeId).toBeNull();
+    expect(next.nodes.n1.text).toBe("my task");
+    expect(next.nodes.n1.priority).toBe("high");
+    expect(next.nodes.n1.categoryColor).toBe("sky");
+    expect(next.nodes.n1.dueDate).toBe("2026-07-01");
+    expect(next.nodes.n1.completed).toBe(false);
+    expect(next.nodes.n1.isRoot).toBe(false);
+    expect(next.nodes.n1.parentId).toBe("root");
   });
 
-  it("ADD_CHILD sets text='' and editingNodeId/pendingCreationNodeId to newId", () => {
-    const s = makeStateWithInline();
-    const next = reducer(s, { type: "ADD_CHILD", newId: "n1", parentId: "root" });
-    expect(next.nodes.n1.text).toBe("");
-    expect(next.editingNodeId).toBe("n1");
-    expect(next.pendingCreationNodeId).toBe("n1");
-    expect(next.nodes.n1.categoryColor).toBe("slate");
-  });
-
-  it("OPEN_INLINE_EDIT on different node clears pendingCreationNodeId, so CANCEL_INLINE_EDIT does not delete originally pending node", () => {
-    const nodes = {
-      root: makeNode("root", "b-a", { isRoot: true, text: "R", children: ["n1"] }),
-      n1: makeNode("n1", "b-a", { parentId: "root", text: "" }),
+  it("appends the new node id to the parent's children list", () => {
+    const s = {
+      ...createInitialState(),
+      currentBoardId: "b-a",
+      nodes: { root: makeNode("root", "b-a", { isRoot: true, children: [] }) },
     };
-    // Simulate: ADD_CHILD set pendingCreationNodeId="n1", then user double-clicks root
-    const s = makeStateWithInline({
-      nodes,
-      editingNodeId: "n1",
-      pendingCreationNodeId: "n1",
+    const next = reducer(s, {
+      type: "CREATE_CHILD",
+      newId: "n1",
+      parentId: "root",
+      text: "task",
+      priority: "medium",
+      categoryColor: "slate",
+      dueDate: "",
+      completed: false,
     });
-    const afterOpen = reducer(s, { type: "OPEN_INLINE_EDIT", nodeId: "root" });
-    expect(afterOpen.pendingCreationNodeId).toBeNull();
-    expect(afterOpen.editingNodeId).toBe("root");
-    // CANCEL_INLINE_EDIT should NOT delete n1
-    const afterCancel = reducer(afterOpen, { type: "CANCEL_INLINE_EDIT" });
-    expect(afterCancel.nodes.n1).toBeDefined();
-    expect(afterCancel.editingNodeId).toBeNull();
-    expect(afterCancel.pendingCreationNodeId).toBeNull();
+    expect(next.nodes.root.children).toContain("n1");
+  });
+
+  it("sets selectedNodeId to the new node id", () => {
+    const s = {
+      ...createInitialState(),
+      currentBoardId: "b-a",
+      nodes: { root: makeNode("root", "b-a", { isRoot: true, children: [] }) },
+    };
+    const next = reducer(s, {
+      type: "CREATE_CHILD",
+      newId: "n1",
+      parentId: "root",
+      text: "task",
+      priority: "medium",
+      categoryColor: "slate",
+      dueDate: "",
+      completed: false,
+    });
+    expect(next.selectedNodeId).toBe("n1");
+  });
+
+  it("computes positions via the radial layout", () => {
+    const s = {
+      ...createInitialState(),
+      currentBoardId: "b-a",
+      layoutVersion: 0,
+      nodes: { root: makeNode("root", "b-a", { isRoot: true, children: [] }) },
+    };
+    const before = s.layoutVersion;
+    const next = reducer(s, {
+      type: "CREATE_CHILD",
+      newId: "n1",
+      parentId: "root",
+      text: "task",
+      priority: "medium",
+      categoryColor: "slate",
+      dueDate: "",
+      completed: false,
+    });
+    expect(next.layoutVersion).toBe(before + 1);
+    expect(next.nodes.n1.x).toBeCloseTo(0);
+    expect(next.nodes.n1.y).toBe(-240);
   });
 });
 

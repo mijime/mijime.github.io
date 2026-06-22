@@ -6,12 +6,10 @@ export interface State {
   currentBoardId: string | null;
   draggingNodeId: string | null;
   drawerOpen: boolean;
-  editingNodeId: string | null;
   hideCompleted: boolean;
   layoutVersion: number;
   modal: Modal;
   nodes: Record<string, MindNode>;
-  pendingCreationNodeId: string | null;
   searchQuery: string;
   selectedNodeId: string;
   view: View;
@@ -39,19 +37,15 @@ export type Action =
   | { type: "TOGGLE_COMPLETE"; id: string }
   | { type: "TOGGLE_DRAWER" }
   | { type: "TOGGLE_HIDE_COMPLETED" }
-  | { type: "OPEN_INLINE_EDIT"; nodeId: string }
-  | { type: "CLOSE_INLINE_EDIT" }
-  | { type: "CANCEL_INLINE_EDIT" }
   | {
-      type: "SAVE_INLINE_EDIT";
-      id: string;
-      patch: {
-        text: string;
-        priority: Priority;
-        categoryColor: CategoryColor;
-        dueDate: string;
-        completed: boolean;
-      };
+      type: "CREATE_CHILD";
+      newId: string;
+      parentId: string;
+      text: string;
+      priority: Priority;
+      categoryColor: CategoryColor;
+      dueDate: string;
+      completed: boolean;
     }
   | { type: "UPDATE_NODE"; id: string; patch: Partial<MindNode> };
 
@@ -61,12 +55,10 @@ export function createInitialState(): State {
     currentBoardId: null,
     draggingNodeId: null,
     drawerOpen: false,
-    editingNodeId: null,
     hideCompleted: false,
     layoutVersion: 0,
     modal: null,
     nodes: {},
-    pendingCreationNodeId: null,
     searchQuery: "",
     selectedNodeId: "",
     view: { pan: { x: 0, y: 0 }, zoom: 1 },
@@ -165,14 +157,6 @@ export function reducer(state: State, action: Action): State {
         { root },
       );
     }
-    case "OPEN_INLINE_EDIT": {
-      return {
-        ...state,
-        selectedNodeId: action.nodeId,
-        editingNodeId: action.nodeId,
-        pendingCreationNodeId: state.editingNodeId ? null : state.pendingCreationNodeId,
-      };
-    }
     case "SELECT": {
       return { ...state, selectedNodeId: action.id };
     }
@@ -209,7 +193,7 @@ export function reducer(state: State, action: Action): State {
         isRoot: false,
         parentId: parent.id,
         priority: "medium",
-        text: "",
+        text: "新規タスク",
         x: 0,
         y: 0,
       };
@@ -223,9 +207,35 @@ export function reducer(state: State, action: Action): State {
           ...state,
           nodes: nextNodes,
           selectedNodeId: newId,
-          editingNodeId: newId,
-          pendingCreationNodeId: newId,
         },
+        nextNodes,
+      );
+    }
+    case "CREATE_CHILD": {
+      const parent = state.nodes[action.parentId];
+      if (!parent) return state;
+      const newNode: MindNode = {
+        id: action.newId,
+        boardId: parent.boardId,
+        categoryColor: action.categoryColor,
+        children: [],
+        collapsed: false,
+        completed: action.completed,
+        dueDate: action.dueDate,
+        isRoot: false,
+        parentId: parent.id,
+        priority: action.priority,
+        text: action.text,
+        x: 0,
+        y: 0,
+      };
+      const nextNodes: Record<string, MindNode> = {
+        ...state.nodes,
+        [action.newId]: newNode,
+        [parent.id]: { ...parent, children: [...parent.children, action.newId] },
+      };
+      return withRadialLayout(
+        { ...state, nodes: nextNodes, selectedNodeId: action.newId },
         nextNodes,
       );
     }
@@ -292,60 +302,6 @@ export function reducer(state: State, action: Action): State {
         },
         nextNodes,
       );
-    }
-
-    case "CLOSE_INLINE_EDIT": {
-      return { ...state, editingNodeId: null, pendingCreationNodeId: null };
-    }
-    case "CANCEL_INLINE_EDIT": {
-      if (state.editingNodeId && state.editingNodeId === state.pendingCreationNodeId) {
-        const target = state.nodes[state.editingNodeId];
-        if (target && !target.isRoot) {
-          const updated = new Map(Object.entries(state.nodes));
-          const remove = (id: string): void => {
-            const n = updated.get(id);
-            if (!n) return;
-            for (const cid of n.children) remove(cid);
-            updated.delete(id);
-          };
-          remove(state.editingNodeId);
-          if (target.parentId) {
-            const parent = updated.get(target.parentId);
-            if (parent) {
-              updated.set(parent.id, {
-                ...parent,
-                children: parent.children.filter((c) => c !== state.editingNodeId),
-              });
-            }
-          }
-          const nextNodes = Object.fromEntries(updated);
-          return withRadialLayout(
-            {
-              ...state,
-              nodes: nextNodes,
-              editingNodeId: null,
-              pendingCreationNodeId: null,
-              selectedNodeId:
-                state.selectedNodeId === state.editingNodeId
-                  ? (target.parentId ?? "root")
-                  : state.selectedNodeId,
-            },
-            nextNodes,
-          );
-        }
-      }
-      return { ...state, editingNodeId: null, pendingCreationNodeId: null };
-    }
-    case "SAVE_INLINE_EDIT": {
-      const node = state.nodes[action.id];
-      if (!node) return { ...state, editingNodeId: null, pendingCreationNodeId: null };
-      const updated = { ...state.nodes, [action.id]: { ...node, ...action.patch } };
-      return {
-        ...state,
-        nodes: updated,
-        editingNodeId: null,
-        pendingCreationNodeId: null,
-      };
     }
     case "REPARENT": {
       const node = state.nodes[action.id];

@@ -49,177 +49,234 @@ describe("board creation end-to-end", () => {
   });
 });
 
-describe("inline edit end-to-end", () => {
+describe("modal-based edit end-to-end", () => {
   beforeEach(async () => {
-    // Reopen after db.delete() from preceding describe blocks
     await db.open();
     await db.boards.clear();
     await db.nodes.clear();
     await db.meta.clear();
   });
 
-  it("dblclick on root opens inline editor; type DSL and save updates the node in DB", async () => {
-    render(<App />);
-    await act(async () => {
-      await flush(100);
-    });
-
+  async function createBoard(name: string): Promise<void> {
     fireEvent.click(screen.getByText("+ 新規ボード作成"));
     const input = screen.getByPlaceholderText("例: メインプロジェクト") as HTMLInputElement;
-    fireEvent.change(input, { target: { value: "Test" } });
+    fireEvent.change(input, { target: { value: name } });
     await act(() => {
       fireEvent.click(screen.getByText("作成"));
     });
     await act(async () => {
       await flush(300);
     });
+  }
 
-    // Dblclick on root to open inline editor
-    const root = document.querySelector('[data-node-id="root"]') as HTMLElement;
-    expect(root).toBeTruthy();
+  it("clicking the root + button opens the create modal", async () => {
+    render(<App />);
     await act(async () => {
-      fireEvent.doubleClick(root);
+      await flush(100);
     });
-    const editor = document.querySelector("[data-inline-editor]");
-    expect(editor).toBeTruthy();
-    const ta = editor!.querySelector("textarea") as HTMLTextAreaElement;
-    expect(ta.value).toBe("Test");
+    await createBoard("Test");
 
-    // Type new text with DSL token
+    const addBtn = document.querySelector('[data-testid="add-child-root"]') as HTMLElement;
+    expect(addBtn).toBeTruthy();
+    await act(() => {
+      fireEvent.click(addBtn);
+    });
+    const modal = document.querySelector('[data-testid="edit-modal"]');
+    expect(modal).toBeTruthy();
+    const ta = modal!.querySelector("textarea") as HTMLTextAreaElement;
+    expect(ta.value).toBe("");
+  });
+
+  it("saving the create modal with DSL creates a node and centers the camera", async () => {
+    render(<App />);
     await act(async () => {
+      await flush(100);
+    });
+    await createBoard("Test");
+
+    const addBtn = document.querySelector('[data-testid="add-child-root"]') as HTMLElement;
+    await act(() => {
+      fireEvent.click(addBtn);
+    });
+    const ta = document.querySelector('[data-testid="edit-modal-textarea"]') as HTMLTextAreaElement;
+    await act(() => {
       fireEvent.change(ta, { target: { value: "買い物 @priority:high" } });
     });
-    await act(async () => {
-      fireEvent.keyDown(ta, { key: "Enter" });
-    });
-    await act(async () => {
-      await flush(500);
-    });
-
-    // Editor should be gone, root text should be "買い物"
-    expect(document.querySelector("[data-inline-editor]")).toBeNull();
-    const rootAfter = document.querySelector('[data-node-id="root"]') as HTMLElement;
-    expect(rootAfter.textContent).toContain("買い物");
-    expect(rootAfter.textContent).not.toContain("@priority");
-
-    // Verify in DB
-    const nodes = await db.nodes.toArray();
-    const rootNode = nodes.find((n) => n.isRoot);
-    expect(rootNode).toBeTruthy();
-    expect(rootNode!.text).toBe("買い物");
-    expect(rootNode!.priority).toBe("high");
-  });
-
-  it("pressing Tab on the root creates a new child and auto-opens inline editor with empty text", async () => {
-    render(<App />);
-    await act(async () => {
-      await flush(100);
-    });
-
-    fireEvent.click(screen.getByText("+ 新規ボード作成"));
-    const input = screen.getByPlaceholderText("例: メインプロジェクト") as HTMLInputElement;
-    fireEvent.change(input, { target: { value: "Test" } });
     await act(() => {
-      fireEvent.click(screen.getByText("作成"));
-    });
-    await act(async () => {
-      await flush(300);
-    });
-
-    // Focus the body and press Tab while root is selected
-    const root = document.querySelector('[data-node-id="root"]') as HTMLElement;
-    expect(root).toBeTruthy();
-    await act(async () => {
-      // SELECT root
-      fireEvent.click(root);
-    });
-    await act(async () => {
-      fireEvent.keyDown(document.body, { key: "Tab" });
+      fireEvent.click(
+        document.querySelector('[data-testid="edit-modal-save"]') as HTMLButtonElement,
+      );
     });
     await act(async () => {
       await flush(500);
     });
 
-    // New child node should exist, editor should be open with empty text
-    const editor = document.querySelector("[data-inline-editor]");
-    expect(editor).toBeTruthy();
-    const ta = editor!.querySelector("textarea") as HTMLTextAreaElement;
-    expect(ta.value).toBe("");
+    // Modal should be gone
+    expect(document.querySelector('[data-testid="edit-modal"]')).toBeNull();
 
-    // Pressing Esc on empty new node should delete it (CANCEL_INLINE_EDIT on pending creation)
-    await act(async () => {
-      fireEvent.keyDown(ta, { key: "Escape" });
-    });
-    await act(async () => {
-      await flush(500);
-    });
-    expect(document.querySelector("[data-inline-editor]")).toBeNull();
-
+    // Node created in DB
     const nodes = await db.nodes.toArray();
-    expect(nodes.filter((n) => !n.isRoot)).toHaveLength(0);
-  });
-
-  it("saving an empty inline edit deletes the existing node", async () => {
-    render(<App />);
-    await act(async () => {
-      await flush(100);
-    });
-
-    fireEvent.click(screen.getByText("+ 新規ボード作成"));
-    const input = screen.getByPlaceholderText("例: メインプロジェクト") as HTMLInputElement;
-    fireEvent.change(input, { target: { value: "Test" } });
-    await act(() => {
-      fireEvent.click(screen.getByText("作成"));
-    });
-    await act(async () => {
-      await flush(300);
-    });
-
-    // Focus root and press Tab to create a child
-    const root = document.querySelector('[data-node-id="root"]') as HTMLElement;
-    await act(async () => {
-      fireEvent.click(root);
-    });
-    await act(async () => {
-      fireEvent.keyDown(document.body, { key: "Tab" });
-    });
-    await act(async () => {
-      await flush(500);
-    });
-
-    // Type text then save (so the node becomes a regular child, not pending)
-    const ta1 = document.querySelector("[data-inline-editor] textarea") as HTMLTextAreaElement;
-    await act(async () => {
-      fireEvent.change(ta1, { target: { value: "real task" } });
-    });
-    await act(async () => {
-      fireEvent.keyDown(ta1, { key: "Enter" });
-    });
-    await act(async () => {
-      await flush(500);
-    });
-    expect(document.querySelector("[data-inline-editor]")).toBeNull();
-
-    // Re-open inline editor on that child and clear text + save → should delete
-    const child = document.querySelector('[data-node-id^="node-"]') as HTMLElement;
+    const child = nodes.find((n) => !n.isRoot);
     expect(child).toBeTruthy();
+    expect(child!.text).toBe("買い物");
+    expect(child!.priority).toBe("high");
+
+    // Camera centered on new node (y-pan ≈ 240 at zoom=1)
+    const container = document.querySelector(".transform-container") as HTMLElement;
+    expect(container.style.transform).toMatch(/translate\(.*?240px\)/u);
+  });
+
+  it("saving the create modal with empty text and no DSL closes the modal and does not create a node", async () => {
+    render(<App />);
     await act(async () => {
-      fireEvent.doubleClick(child);
+      await flush(100);
     });
-    const ta2 = document.querySelector("[data-inline-editor] textarea") as HTMLTextAreaElement;
-    expect(ta2.value).toBe("real task");
-    await act(async () => {
-      fireEvent.change(ta2, { target: { value: "" } });
+    await createBoard("Test");
+
+    const addBtn = document.querySelector('[data-testid="add-child-root"]') as HTMLElement;
+    await act(() => {
+      fireEvent.click(addBtn);
+    });
+    await act(() => {
+      fireEvent.click(
+        document.querySelector('[data-testid="edit-modal-save"]') as HTMLButtonElement,
+      );
     });
     await act(async () => {
-      fireEvent.keyDown(ta2, { key: "Enter" });
+      await flush(500);
+    });
+
+    expect(document.querySelector('[data-testid="edit-modal"]')).toBeNull();
+    const nodes = await db.nodes.toArray();
+    expect(nodes.filter((n) => !n.isRoot)).toHaveLength(0);
+  });
+
+  it("canceling the create modal does not create a node", async () => {
+    render(<App />);
+    await act(async () => {
+      await flush(100);
+    });
+    await createBoard("Test");
+
+    const addBtn = document.querySelector('[data-testid="add-child-root"]') as HTMLElement;
+    await act(() => {
+      fireEvent.click(addBtn);
+    });
+    const ta = document.querySelector('[data-testid="edit-modal-textarea"]') as HTMLTextAreaElement;
+    await act(() => {
+      fireEvent.change(ta, { target: { value: "some text" } });
+    });
+    await act(() => {
+      fireEvent.click(
+        document.querySelector('[data-testid="edit-modal-cancel"]') as HTMLButtonElement,
+      );
+    });
+    await act(async () => {
+      await flush(500);
+    });
+
+    expect(document.querySelector('[data-testid="edit-modal"]')).toBeNull();
+    const nodes = await db.nodes.toArray();
+    expect(nodes.filter((n) => !n.isRoot)).toHaveLength(0);
+  });
+
+  it("clicking the ellipsis on a child node opens the edit modal", async () => {
+    render(<App />);
+    await act(async () => {
+      await flush(100);
+    });
+    await createBoard("Test");
+
+    // Add a child via the modal
+    const addBtn = document.querySelector('[data-testid="add-child-root"]') as HTMLElement;
+    await act(() => {
+      fireEvent.click(addBtn);
+    });
+    const ta = document.querySelector('[data-testid="edit-modal-textarea"]') as HTMLTextAreaElement;
+    await act(() => {
+      fireEvent.change(ta, { target: { value: "my task" } });
+    });
+    await act(() => {
+      fireEvent.click(
+        document.querySelector('[data-testid="edit-modal-save"]') as HTMLButtonElement,
+      );
+    });
+    await act(async () => {
+      await flush(500);
+    });
+
+    // Find the ellipsis button on the child node
+    const ellipsisBtns = document.querySelectorAll('[data-testid="ellipsis"]');
+    expect(ellipsisBtns.length).toBeGreaterThan(0);
+    await act(() => {
+      fireEvent.click(ellipsisBtns[0]);
+    });
+    await act(async () => {
+      await flush(100);
+    });
+
+    const modal = document.querySelector('[data-testid="edit-modal"]');
+    expect(modal).toBeTruthy();
+    const modalTa = modal!.querySelector("textarea") as HTMLTextAreaElement;
+    expect(modalTa.value).toBe("my task");
+  });
+
+  it("editing via modal applies DSL changes (priority, text cleaned)", async () => {
+    render(<App />);
+    await act(async () => {
+      await flush(100);
+    });
+    await createBoard("Test");
+
+    // Add a child
+    const addBtn = document.querySelector('[data-testid="add-child-root"]') as HTMLElement;
+    await act(() => {
+      fireEvent.click(addBtn);
+    });
+    const ta1 = document.querySelector(
+      '[data-testid="edit-modal-textarea"]',
+    ) as HTMLTextAreaElement;
+    await act(() => {
+      fireEvent.change(ta1, { target: { value: "initial" } });
+    });
+    await act(() => {
+      fireEvent.click(
+        document.querySelector('[data-testid="edit-modal-save"]') as HTMLButtonElement,
+      );
+    });
+    await act(async () => {
+      await flush(500);
+    });
+
+    // Open edit modal via ellipsis
+    const ellipsisBtns = document.querySelectorAll('[data-testid="ellipsis"]');
+    await act(() => {
+      fireEvent.click(ellipsisBtns[0]);
+    });
+    await act(async () => {
+      await flush(100);
+    });
+
+    const editTa = document.querySelector(
+      '[data-testid="edit-modal-textarea"]',
+    ) as HTMLTextAreaElement;
+    await act(() => {
+      fireEvent.change(editTa, { target: { value: "newtext @priority:high" } });
+    });
+    await act(() => {
+      fireEvent.click(
+        document.querySelector('[data-testid="edit-modal-save"]') as HTMLButtonElement,
+      );
     });
     await act(async () => {
       await flush(500);
     });
 
     const nodes = await db.nodes.toArray();
-    expect(nodes.filter((n) => !n.isRoot)).toHaveLength(0);
+    const child = nodes.find((n) => !n.isRoot);
+    expect(child).toBeTruthy();
+    expect(child!.text).toBe("newtext");
+    expect(child!.priority).toBe("high");
   });
 });
 
@@ -253,11 +310,25 @@ describe("centering on new node", () => {
     expect(container).toBeTruthy();
     expect(container.style.transform).toMatch(/translate\(.*?0px\)/u);
 
-    // Click the root's + button (data-testid="add-child-root") to add a child
+    // Click the root's + button (data-testid="add-child-root") to open the create modal
     const addBtn = document.querySelector('[data-testid="add-child-root"]') as HTMLElement;
     expect(addBtn).toBeTruthy();
     await act(async () => {
       fireEvent.click(addBtn);
+    });
+    await act(async () => {
+      await flush(100);
+    });
+
+    // Type text and click save
+    const ta = document.querySelector('[data-testid="edit-modal-textarea"]') as HTMLTextAreaElement;
+    await act(() => {
+      fireEvent.change(ta, { target: { value: "my task" } });
+    });
+    await act(() => {
+      fireEvent.click(
+        document.querySelector('[data-testid="edit-modal-save"]') as HTMLButtonElement,
+      );
     });
     await act(async () => {
       await flush(500);

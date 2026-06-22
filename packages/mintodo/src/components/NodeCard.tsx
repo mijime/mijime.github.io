@@ -1,6 +1,5 @@
 import { Check, ChevronDown, ChevronUp, EllipsisVertical, Plus, XCircle } from "lucide-react";
 import { useMindStore } from "../hooks/use-mind-store";
-import { NodeInlineEditor } from "./NodeInlineEditor";
 import { isDescendant } from "../store";
 import type { CategoryColor, MindNode } from "../types";
 
@@ -128,32 +127,6 @@ export function NodeCard({ node }: Props) {
   const { dispatch, state } = useMindStore();
   const isSelected = state.selectedNodeId === node.id;
   const isMatch = state.searchQuery === "" || node.text.toLowerCase().includes(state.searchQuery);
-  const isEditing = state.editingNodeId === node.id;
-
-  if (isEditing) {
-    return (
-      <div
-        id={`node-dom-${node.id}`}
-        draggable={false}
-        style={{ left: node.x, top: node.y }}
-        className="absolute -translate-x-1/2 -translate-y-1/2"
-      >
-        <NodeInlineEditor
-          node={node}
-          onCancel={() => dispatch({ type: "CANCEL_INLINE_EDIT" })}
-          onSave={(patch) => dispatch({ type: "SAVE_INLINE_EDIT", id: node.id, patch })}
-          onDelete={() => {
-            if (node.isRoot) {
-              dispatch({ type: "CLOSE_INLINE_EDIT" });
-              return;
-            }
-            dispatch({ id: node.id, type: "DELETE_NODE" });
-            dispatch({ type: "CLOSE_INLINE_EDIT" });
-          }}
-        />
-      </div>
-    );
-  }
 
   if (node.isRoot) {
     return (
@@ -161,14 +134,6 @@ export function NodeCard({ node }: Props) {
         id={`node-dom-${node.id}`}
         data-node-id={node.id}
         draggable={!node.isRoot}
-        onClick={(e) => {
-          e.stopPropagation();
-          dispatch({ id: node.id, type: "SELECT" });
-        }}
-        onDoubleClick={(e) => {
-          e.stopPropagation();
-          dispatch({ type: "OPEN_INLINE_EDIT", nodeId: node.id });
-        }}
         onDragStart={(e) => handleDragStart(e, node.id, node.isRoot, dispatch)}
         onDragOver={(e) => handleDragOver(e, node.id, state)}
         onDragEnter={(e) => handleDragEnter(e, node.id, state)}
@@ -194,8 +159,7 @@ export function NodeCard({ node }: Props) {
           style={{ background: "rgba(255,255,255,0.2)" }}
           onClick={(e) => {
             e.stopPropagation();
-            const newId = `node-${Date.now()}`;
-            dispatch({ newId, parentId: node.id, type: "ADD_CHILD" });
+            dispatch({ modal: { kind: "edit-new", parentId: node.id }, type: "OPEN_MODAL" });
           }}
         >
           <Plus size={12} />
@@ -212,14 +176,6 @@ export function NodeCard({ node }: Props) {
     <div
       id={`node-dom-${node.id}`}
       data-node-id={node.id}
-      onClick={(e) => {
-        e.stopPropagation();
-        dispatch({ id: node.id, type: "SELECT" });
-      }}
-      onDoubleClick={(e) => {
-        e.stopPropagation();
-        dispatch({ type: "OPEN_INLINE_EDIT", nodeId: node.id });
-      }}
       draggable={!node.isRoot}
       onDragStart={(e) => handleDragStart(e, node.id, node.isRoot, dispatch)}
       onDragOver={(e) => handleDragOver(e, node.id, state)}
@@ -294,8 +250,7 @@ export function NodeCard({ node }: Props) {
             className="bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-300 w-6 h-6 rounded-md flex items-center justify-center transition"
             onClick={(e) => {
               e.stopPropagation();
-              const newId = `node-${Date.now()}`;
-              dispatch({ newId, parentId: node.id, type: "ADD_CHILD" });
+              dispatch({ modal: { kind: "edit-new", parentId: node.id }, type: "OPEN_MODAL" });
             }}
           >
             <Plus size={12} />
