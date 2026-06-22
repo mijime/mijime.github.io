@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { MindNode } from "./types";
-import { parseDSL, serializeDSL } from "./dsl";
+import { parseDSL, parseInlineDSL, serializeDSL } from "./dsl";
 
 function findNode(nodes: MindNode[], id: string): MindNode {
   const n = nodes.find((x) => x.id === id);
@@ -250,5 +250,104 @@ describe("serializeDSL", () => {
       expect(n.x).toBe(0);
       expect(n.y).toBe(0);
     }
+  });
+});
+
+describe("parseInlineDSL", () => {
+  it("returns empty result for empty string", () => {
+    expect(parseInlineDSL("")).toEqual({
+      text: "",
+      hasAnyAttribute: false,
+      priority: null,
+      categoryColor: null,
+      dueDate: null,
+      completed: null,
+    });
+  });
+
+  it("returns empty result for whitespace-only string", () => {
+    expect(parseInlineDSL("   ")).toEqual({
+      text: "",
+      hasAnyAttribute: false,
+      priority: null,
+      categoryColor: null,
+      dueDate: null,
+      completed: null,
+    });
+  });
+
+  it("returns plain text without attributes", () => {
+    expect(parseInlineDSL("hello")).toEqual({
+      text: "hello",
+      hasAnyAttribute: false,
+      priority: null,
+      categoryColor: null,
+      dueDate: null,
+      completed: null,
+    });
+  });
+
+  it("extracts @priority:high", () => {
+    const r = parseInlineDSL("hello @priority:high");
+    expect(r.text).toBe("hello");
+    expect(r.hasAnyAttribute).toBe(true);
+    expect(r.priority).toBe("high");
+  });
+
+  it("extracts @done as completed flag", () => {
+    const r = parseInlineDSL("buy milk @done");
+    expect(r.text).toBe("buy milk");
+    expect(r.hasAnyAttribute).toBe(true);
+    expect(r.completed).toBe(true);
+  });
+
+  it("extracts multiple attributes", () => {
+    const r = parseInlineDSL("task @priority:high @color:sky @done @due:2026-06-25");
+    expect(r.text).toBe("task");
+    expect(r.priority).toBe("high");
+    expect(r.categoryColor).toBe("sky");
+    expect(r.completed).toBe(true);
+    expect(r.dueDate).toBe("2026-06-25");
+    expect(r.hasAnyAttribute).toBe(true);
+  });
+
+  it("keeps invalid @priority:urgent as text", () => {
+    const r = parseInlineDSL("hello @priority:urgent");
+    expect(r.text).toBe("hello @priority:urgent");
+    expect(r.priority).toBeNull();
+    expect(r.hasAnyAttribute).toBe(false);
+  });
+
+  it("keeps invalid @color:purple as text", () => {
+    const r = parseInlineDSL("hello @color:purple");
+    expect(r.text).toBe("hello @color:purple");
+    expect(r.categoryColor).toBeNull();
+    expect(r.hasAnyAttribute).toBe(false);
+  });
+
+  it("keeps invalid @due as text", () => {
+    const r = parseInlineDSL("hello @due:notadate");
+    expect(r.text).toBe("hello @due:notadate");
+    expect(r.dueDate).toBeNull();
+    expect(r.hasAnyAttribute).toBe(false);
+  });
+
+  it("keeps unknown @foo:bar as text", () => {
+    const r = parseInlineDSL("hello @foo:bar");
+    expect(r.text).toBe("hello @foo:bar");
+    expect(r.hasAnyAttribute).toBe(false);
+  });
+
+  it("handles text that is only attributes", () => {
+    const r = parseInlineDSL("@priority:high");
+    expect(r.text).toBe("");
+    expect(r.hasAnyAttribute).toBe(true);
+    expect(r.priority).toBe("high");
+  });
+
+  it("joins multi-word text with single spaces", () => {
+    const r = parseInlineDSL("foo   bar  baz @priority:high");
+    expect(r.text).toBe("foo bar baz");
+    expect(r.priority).toBe("high");
   });
 });
