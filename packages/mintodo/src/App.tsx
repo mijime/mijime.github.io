@@ -3,6 +3,7 @@ import { BoardDeleteDialog } from "./components/BoardDeleteDialog";
 import { BoardNameDialog } from "./components/BoardNameDialog";
 import { BoardSidebar } from "./components/BoardSidebar";
 import { Canvas } from "./components/Canvas";
+import { DslEditorModal } from "./components/DslEditorModal";
 import { EditModal } from "./components/EditModal";
 import { EmptyState } from "./components/EmptyState";
 import { HelpModal } from "./components/HelpModal";
@@ -52,7 +53,10 @@ function Shell() {
   const showCanvas = state.boards.length > 0 && state.currentBoardId !== null;
 
   return (
-    <div className="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 min-h-screen w-screen flex flex-col overflow-hidden select-none font-sans">
+    <div
+      className="flex flex-col overflow-hidden select-none relative h-full w-full"
+      style={{ background: "var(--paper)", color: "var(--ink)" }}
+    >
       <Toolbar />
       <BoardSidebar />
       {showCanvas ? <Canvas /> : <EmptyState />}
@@ -60,6 +64,7 @@ function Shell() {
       <StatsPanel />
       <ShortcutHint />
       <EditModal />
+      <DslEditorModal />
       <HelpModal />
       <BoardNameDialog />
       <BoardDeleteDialog />

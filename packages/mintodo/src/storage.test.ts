@@ -6,17 +6,15 @@ import {
   createBoard,
   deleteBoard,
   discardV1Data,
-  downloadJson,
   getCurrentBoardId,
   hasV1Data,
   loadBoards,
   loadNodesForBoard,
-  parseImportedJson,
   renameBoard,
   saveNodesForBoard,
   setCurrentBoardId,
 } from "./storage";
-import type { MindNode, SaveData } from "./types";
+import type { MindNode } from "./types";
 
 function makeNode(id: string, boardId: string, opts: Partial<MindNode> = {}): MindNode {
   return {
@@ -179,38 +177,3 @@ describe("migration", () => {
   });
 });
 
-describe("JSON import / export", () => {
-  it("downloadJson produces a Blob URL", () => {
-    const data: SaveData = {
-      version: 2,
-      board: { id: "b", name: "B" },
-      nodes: [],
-    };
-    const url = downloadJson(data, "test.json");
-    expect(url).toMatch(/^blob:/u);
-    URL.revokeObjectURL(url);
-  });
-
-  it("parseImportedJson reads valid v2 data", () => {
-    const data: SaveData = {
-      version: 2,
-      board: { id: "b", name: "B" },
-      nodes: [makeNode("root", "b", { isRoot: true })],
-    };
-    const json = JSON.stringify(data);
-    const parsed = parseImportedJson(json);
-    expect(parsed).not.toBeNull();
-    expect(parsed!.version).toBe(2);
-    expect(parsed!.nodes.length).toBe(1);
-  });
-
-  it("parseImportedJson returns null on invalid data", () => {
-    expect(parseImportedJson("not json")).toBeNull();
-    expect(parseImportedJson("{}")).toBeNull();
-    expect(parseImportedJson(JSON.stringify({ version: 1, nodes: [] }))).toBeNull();
-    expect(parseImportedJson(JSON.stringify({ version: 2 }))).toBeNull();
-    expect(
-      parseImportedJson(JSON.stringify({ version: 2, board: { id: "b" }, nodes: "bad" })),
-    ).toBeNull();
-  });
-});

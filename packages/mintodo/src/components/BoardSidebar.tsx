@@ -30,15 +30,24 @@ export function BoardSidebar() {
   };
 
   const sidebar = (
-    <aside className="flex flex-col h-full bg-white/80 dark:bg-slate-800/80 backdrop-blur-md rounded-2xl shadow-lg border border-slate-200/50 dark:border-slate-700/50">
-      <header className="flex items-center justify-between p-3 border-b border-slate-200/50 dark:border-slate-700/50">
-        <h2 className="text-sm font-bold">ボード</h2>
+    <aside
+      className="flex flex-col h-full rounded"
+      style={{ background: "var(--toolbar-bg)", border: "1px solid var(--border)" }}
+    >
+      <header
+        className="flex items-center justify-between p-3"
+        style={{ borderBottom: "1px solid var(--border)" }}
+      >
+        <h2 className="text-sm" style={{ fontFamily: '"Crimson Pro", serif', fontWeight: 600 }}>
+          ボード
+        </h2>
         <div className="flex items-center gap-1">
           <button
             type="button"
             onClick={onCreate}
             title="新規ボード"
-            className="p-1.5 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700"
+            className="p-1.5 rounded transition"
+            style={{ background: "var(--terra)", color: "var(--paper)" }}
           >
             <Plus size={14} />
           </button>
@@ -46,7 +55,8 @@ export function BoardSidebar() {
             type="button"
             onClick={closeDrawer}
             title="閉じる"
-            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 md:hidden"
+            className="p-1.5 rounded transition md:hidden"
+            style={{ color: "var(--mid)" }}
           >
             <X size={14} />
           </button>
@@ -54,7 +64,7 @@ export function BoardSidebar() {
       </header>
       <ul className="flex-1 overflow-y-auto p-2">
         {state.boards.length === 0 ? (
-          <li className="text-xs text-slate-400 dark:text-slate-500 text-center py-4">
+          <li className="text-xs text-center py-4" style={{ color: "var(--mid)" }}>
             まだありません
           </li>
         ) : (

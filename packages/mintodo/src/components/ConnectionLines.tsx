@@ -20,7 +20,6 @@ interface Props {
 
 export function ConnectionLines({ containerRef }: Props) {
   const { state } = useMindStore();
-  const isDark = document.documentElement.classList.contains("dark");
   const [size, setSize] = useState({ height: 0, width: 0 });
 
   useEffect(() => {
@@ -36,6 +35,8 @@ export function ConnectionLines({ containerRef }: Props) {
 
   const cx = size.width / 2;
   const cy = size.height / 2;
+  const activeColor = "var(--terra)";
+  const inactiveColor = "var(--grid)";
 
   return (
     <svg
@@ -56,16 +57,10 @@ export function ConnectionLines({ containerRef }: Props) {
         const c1y = sy;
         const c2x = sx + (ex - sx) * 0.5;
         const c2y = ey;
-        const color = node.completed
-          ? isDark
-            ? "#334155"
-            : "#cbd5e1"
-          : isDark
-            ? "#818cf8"
-            : "#6366f1";
+        const color = node.completed ? inactiveColor : activeColor;
         const pathProps = node.completed
           ? { strokeDasharray: "5,5", strokeWidth: 1.5 }
-          : { strokeWidth: 3 };
+          : { strokeWidth: 2 };
         return (
           <path
             key={node.id}

@@ -58,7 +58,7 @@ describe("reducer - SET_CURRENT_BOARD", () => {
 });
 
 describe("reducer - ADD_BOARD", () => {
-  it("adds a board and its initial nodes; sets currentBoardId", () => {
+  it("adds a board and its initial nodes; sets currentBoardId; resets view", () => {
     const s = createInitialState();
     const next = reducer(s, {
       board: boardA,
@@ -69,6 +69,22 @@ describe("reducer - ADD_BOARD", () => {
     expect(next.currentBoardId).toBe("b-a");
     expect(next.nodes.root).toBeDefined();
     expect(next.nodes.root.boardId).toBe("b-a");
+    expect(next.view).toEqual({ pan: { x: 0, y: 0 }, zoom: 1 });
+  });
+
+  it("resets view even when previous view was non-default", () => {
+    const s = {
+      ...createInitialState(),
+      boards: [boardA],
+      currentBoardId: "b-a",
+      view: { pan: { x: 500, y: 300 }, zoom: 0.5 },
+    };
+    const next = reducer(s, {
+      board: boardB,
+      initialNodes: { root: makeNode("root", boardB.id, { isRoot: true }) },
+      type: "ADD_BOARD",
+    });
+    expect(next.view).toEqual({ pan: { x: 0, y: 0 }, zoom: 1 });
   });
 
   it("appends to existing boards list", () => {
@@ -140,6 +156,18 @@ describe("reducer - RESET", () => {
     expect(next.nodes.root.boardId).toBe("b-a");
     expect(next.nodes.root.parentId).toBeNull();
     expect(next.nodes.root.children).toEqual([]);
+    expect(next.view).toEqual({ pan: { x: 0, y: 0 }, zoom: 1 });
+  });
+
+  it("resets view on reset", () => {
+    const s = {
+      ...createInitialState(),
+      boards: [boardA],
+      currentBoardId: "b-a",
+      view: { pan: { x: 500, y: 300 }, zoom: 0.5 },
+    };
+    const next = reducer(s, { type: "RESET" });
+    expect(next.view).toEqual({ pan: { x: 0, y: 0 }, zoom: 1 });
   });
 
   it("preserves physicsEnabled", () => {
