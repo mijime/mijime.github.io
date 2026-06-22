@@ -264,6 +264,7 @@ export function reducer(state: State, action: Action): State {
       const newParent = state.nodes[action.newParentId];
       if (!node || !newParent) return state;
       if (node.isRoot || newParent.id === node.id) return withRadialLayout(state, state.nodes);
+      if (node.parentId === action.newParentId) return withRadialLayout(state, state.nodes);
       if (isDescendant(state.nodes, action.id, action.newParentId)) {
         return withRadialLayout(state, state.nodes);
       }

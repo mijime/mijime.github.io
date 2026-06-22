@@ -20,7 +20,7 @@ function isParentCollapsed(state: ReturnType<typeof useMindStore>["state"], id: 
 }
 
 export function Canvas() {
-  const { state, dispatch } = useMindStore();
+  const { state } = useMindStore();
   const containerRef = useRef<HTMLDivElement>(null);
 
   usePanZoom({ containerRef });
