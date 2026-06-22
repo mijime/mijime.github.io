@@ -3,6 +3,7 @@ import { BoardDeleteDialog } from "./components/BoardDeleteDialog";
 import { BoardNameDialog } from "./components/BoardNameDialog";
 import { BoardSidebar } from "./components/BoardSidebar";
 import { Canvas } from "./components/Canvas";
+import { DslEditorModal } from "./components/DslEditorModal";
 import { EditModal } from "./components/EditModal";
 import { EmptyState } from "./components/EmptyState";
 import { HelpModal } from "./components/HelpModal";
@@ -63,6 +64,7 @@ function Shell() {
       <StatsPanel />
       <ShortcutHint />
       <EditModal />
+      <DslEditorModal />
       <HelpModal />
       <BoardNameDialog />
       <BoardDeleteDialog />
