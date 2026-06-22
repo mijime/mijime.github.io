@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { createInitialState, reducer } from "./store";
+import { createInitialState, isDescendant, reducer } from "./store";
 import type { Board, MindNode } from "./types";
 
 function makeNode(id: string, boardId: string, opts: Partial<MindNode> = {}): MindNode {
@@ -30,6 +30,34 @@ describe("createInitialState", () => {
     expect(s.boards).toEqual([]);
     expect(s.currentBoardId).toBeNull();
     expect(s.nodes).toEqual({});
+  });
+});
+
+describe("isDescendant", () => {
+  it("returns true when nodeId is a descendant of candidateAncestor", () => {
+    const nodes = {
+      root: makeNode("root", "b-a", { isRoot: true, children: ["a", "a1"] }),
+      a: makeNode("a", "b-a", { parentId: "root", children: ["a1"] }),
+      a1: makeNode("a1", "b-a", { parentId: "a" }),
+    };
+    expect(isDescendant(nodes, "root", "a1")).toBe(true);
+  });
+
+  it("returns false when nodeId is not a descendant", () => {
+    const nodes = {
+      root: makeNode("root", "b-a", { isRoot: true, children: ["a", "b"] }),
+      a: makeNode("a", "b-a", { parentId: "root" }),
+      b: makeNode("b", "b-a", { parentId: "root" }),
+    };
+    expect(isDescendant(nodes, "a", "b")).toBe(false);
+  });
+
+  it("returns false when candidateAncestor is the node itself", () => {
+    const nodes = {
+      root: makeNode("root", "b-a", { isRoot: true, children: ["a"] }),
+      a: makeNode("a", "b-a", { parentId: "root" }),
+    };
+    expect(isDescendant(nodes, "a", "a")).toBe(false);
   });
 });
 
@@ -272,7 +300,7 @@ describe("reducer - ADD_CHILD", () => {
     expect(next.nodes["n-new"].isRoot).toBe(false);
     expect(next.nodes.root.children).toContain("n-new");
     expect(next.nodes["n-new"].x).toBeCloseTo(0);
-    expect(next.nodes["n-new"].y).toBe(-220);
+    expect(next.nodes["n-new"].y).toBe(-340);
     expect(next.layoutVersion).toBe(before + 1);
   });
 });
@@ -412,6 +440,6 @@ describe("reducer - SNAP_BACK", () => {
     const next = reducer(s, { id: "a", type: "SNAP_BACK" });
     expect(next.layoutVersion).toBe(6);
     expect(next.nodes.a.x).toBeCloseTo(0);
-    expect(next.nodes.a.y).toBe(-220);
+    expect(next.nodes.a.y).toBe(-340);
   });
 });

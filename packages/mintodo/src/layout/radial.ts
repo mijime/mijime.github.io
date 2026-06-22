@@ -7,6 +7,7 @@ export interface RadialOptions {
   nodes: Nodes;
   ringDistance?: number;
   startAngle?: number;
+  ringFactor?: number;
 }
 
 function isAncestorCollapsed(nodes: Nodes, id: string): boolean {
@@ -43,6 +44,8 @@ function leafCount(nodes: Nodes, id: string): number {
   return s;
 }
 
+interface Ctx { nodes: Nodes; ring: number; start: number; factor: number }
+
 function placeChildren(
   parentId: string,
   arcStart: number,
@@ -51,7 +54,7 @@ function placeChildren(
   originX: number,
   originY: number,
   out: Record<string, { x: number; y: number }>,
-  ctx: { nodes: Nodes; ring: number; start: number },
+  ctx: Ctx,
 ): void {
   const kids = visibleChildren(ctx.nodes, parentId);
   if (kids.length === 0) return;
@@ -66,9 +69,10 @@ function placeChildren(
     }
     const slice = (Math.PI * 2) / kids.length;
     for (let i = 0; i < kids.length; i++) {
+      const ring = ctx.ring * (1 + i * ctx.factor);
       const angle = ctx.start + i * slice;
-      const childX = originX + Math.cos(angle) * ctx.ring;
-      const childY = originY + Math.sin(angle) * ctx.ring;
+      const childX = originX + Math.cos(angle) * ring;
+      const childY = originY + Math.sin(angle) * ring;
       out[kids[i]] = { x: childX, y: childY };
       placeChildren(kids[i], i * slice, (i + 1) * slice, 1, childX, childY, out, ctx);
     }
@@ -77,23 +81,25 @@ function placeChildren(
 
   const total = kids.reduce((s, c) => s + leafCount(ctx.nodes, c), 0);
   let cursor = arcStart;
-  for (const kid of kids) {
+  for (let i = 0; i < kids.length; i++) {
+    const kid = kids[i];
     const w = leafCount(ctx.nodes, kid) / total;
     const span = (arcEnd - arcStart) * w;
-    place(kid, cursor, cursor + span, parentDepth + 1, originX, originY, out, ctx);
+    place(kid, i, cursor, cursor + span, parentDepth + 1, originX, originY, out, ctx);
     cursor += span;
   }
 }
 
 function place(
   id: string,
+  i: number,
   arcStart: number,
   arcEnd: number,
   depth: number,
   originX: number,
   originY: number,
   out: Record<string, { x: number; y: number }>,
-  ctx: { nodes: Nodes; ring: number; start: number },
+  ctx: Ctx,
 ): void {
   if (depth === 0) {
     out[id] = { x: 0, y: 0 };
@@ -103,9 +109,10 @@ function place(
 
   const mid = (arcStart + arcEnd) / 2;
   const angle = ctx.start + mid;
+  const ring = ctx.ring * (1 + i * ctx.factor);
   out[id] = {
-    x: originX + Math.cos(angle) * ctx.ring,
-    y: originY + Math.sin(angle) * ctx.ring,
+    x: originX + Math.cos(angle) * ring,
+    y: originY + Math.sin(angle) * ring,
   };
   placeChildren(id, arcStart, arcEnd, depth, out[id].x, out[id].y, out, ctx);
 }
@@ -113,11 +120,12 @@ function place(
 export function computeRadialPositions(
   opts: RadialOptions,
 ): Record<string, { x: number; y: number }> {
-  const ring = opts.ringDistance ?? 220;
+  const ring = opts.ringDistance ?? 340;
   const start = opts.startAngle ?? -Math.PI / 2;
+  const factor = opts.ringFactor ?? 0.12;
   const out: Record<string, { x: number; y: number }> = {};
   if (!opts.nodes[opts.rootId]) return out;
-  place(opts.rootId, 0, Math.PI * 2, 0, 0, 0, out, { nodes: opts.nodes, ring, start });
+  place(opts.rootId, 0, 0, Math.PI * 2, 0, 0, 0, out, { nodes: opts.nodes, ring, start, factor });
   return out;
 }
 

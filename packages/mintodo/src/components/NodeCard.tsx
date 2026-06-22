@@ -1,6 +1,9 @@
 import { Check, ChevronDown, ChevronUp, EllipsisVertical, Plus, XCircle } from "lucide-react";
 import { useMindStore } from "../hooks/use-mind-store";
+import { isDescendant } from "../store";
 import type { CategoryColor, MindNode } from "../types";
+
+const DRAG_MIME = "application/x-mindnode-id";
 
 function categoryBorderColor(c: CategoryColor): string {
   switch (c) {
@@ -57,8 +60,53 @@ interface Props {
   node: MindNode;
 }
 
+function handleDragStart(e: React.DragEvent<HTMLDivElement>, nodeId: string, isRoot: boolean, onDispatch: ReturnType<typeof useMindStore>["dispatch"]) {
+  if (isRoot) {
+    e.preventDefault();
+    return;
+  }
+  e.dataTransfer.setData(DRAG_MIME, nodeId);
+  e.dataTransfer.effectAllowed = "move";
+  onDispatch({ id: nodeId, type: "SET_DRAGGING" });
+}
+
+function handleDragOver(e: React.DragEvent<HTMLDivElement>, nodeId: string, state: ReturnType<typeof useMindStore>["state"]) {
+  const draggedId = state.draggingNodeId;
+  if (!draggedId || draggedId === nodeId) return;
+  if (isDescendant(state.nodes, draggedId, nodeId)) return;
+  e.preventDefault();
+  e.dataTransfer.dropEffect = "move";
+}
+
+function handleDragEnter(e: React.DragEvent<HTMLDivElement>, nodeId: string, state: ReturnType<typeof useMindStore>["state"]) {
+  const draggedId = state.draggingNodeId;
+  if (!draggedId || draggedId === nodeId) return;
+  if (isDescendant(state.nodes, draggedId, nodeId)) return;
+  e.currentTarget.classList.add("ring-2", "ring-sky-400");
+}
+
+function handleDragLeave(e: React.DragEvent<HTMLDivElement>) {
+  e.currentTarget.classList.remove("ring-2", "ring-sky-400");
+}
+
+function handleDrop(e: React.DragEvent<HTMLDivElement>, nodeId: string, state: ReturnType<typeof useMindStore>["state"], onDispatch: ReturnType<typeof useMindStore>["dispatch"]) {
+  e.preventDefault();
+  e.currentTarget.classList.remove("ring-2", "ring-sky-400");
+  const draggedId = e.dataTransfer.getData(DRAG_MIME);
+  if (!draggedId || draggedId === nodeId) return;
+  if (isDescendant(state.nodes, draggedId, nodeId)) return;
+  onDispatch({ id: draggedId, newParentId: nodeId, type: "REPARENT" });
+}
+
+function handleDragEnd(onDispatch: ReturnType<typeof useMindStore>["dispatch"]) {
+  for (const el of document.querySelectorAll(".ring-2.ring-sky-400")) {
+    el.classList.remove("ring-2", "ring-sky-400");
+  }
+  onDispatch({ id: null, type: "SET_DRAGGING" });
+}
+
 export function NodeCard({ node }: Props) {
-  const { state, dispatch } = useMindStore();
+  const { dispatch, state } = useMindStore();
   const isSelected = state.selectedNodeId === node.id;
   const isMatch = state.searchQuery === "" || node.text.toLowerCase().includes(state.searchQuery);
 
@@ -67,6 +115,13 @@ export function NodeCard({ node }: Props) {
       <div
         id={`node-dom-${node.id}`}
         data-node-id={node.id}
+        draggable={!node.isRoot}
+        onDragStart={(e) => handleDragStart(e, node.id, node.isRoot, dispatch)}
+        onDragOver={(e) => handleDragOver(e, node.id, state)}
+        onDragEnter={(e) => handleDragEnter(e, node.id, state)}
+        onDragLeave={handleDragLeave}
+        onDrop={(e) => handleDrop(e, node.id, state, dispatch)}
+        onDragEnd={() => handleDragEnd(dispatch)}
         className={`absolute -translate-x-1/2 -translate-y-1/2 p-4 rounded flex items-center justify-between gap-3 min-w-[200px] min-h-[60px] max-w-[280px] ${isSelected ? "node-selected" : ""} ${isMatch ? "" : "opacity-30"}`}
         style={{
           left: node.x,
@@ -104,6 +159,13 @@ export function NodeCard({ node }: Props) {
     <div
       id={`node-dom-${node.id}`}
       data-node-id={node.id}
+      draggable={!node.isRoot}
+      onDragStart={(e) => handleDragStart(e, node.id, node.isRoot, dispatch)}
+      onDragOver={(e) => handleDragOver(e, node.id, state)}
+      onDragEnter={(e) => handleDragEnter(e, node.id, state)}
+      onDragLeave={handleDragLeave}
+      onDrop={(e) => handleDrop(e, node.id, state, dispatch)}
+      onDragEnd={() => handleDragEnd(dispatch)}
       className={`absolute -translate-x-1/2 -translate-y-1/2 px-4 py-3 rounded border-l-4 flex flex-col justify-between gap-1.5 min-w-[220px] max-w-[320px] ${isSelected ? "node-selected" : ""} ${isMatch ? "" : "opacity-30"}`}
       style={{
         left: node.x,

@@ -59,7 +59,7 @@ function withRadialLayout(state: State, nodes: Record<string, MindNode>): State 
   return { ...state, nodes: applyRadialLayout({ nodes }), layoutVersion: state.layoutVersion + 1 };
 }
 
-function isDescendant(
+export function isDescendant(
   nodes: Record<string, MindNode>,
   candidateAncestor: string,
   nodeId: string,

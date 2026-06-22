@@ -1,5 +1,4 @@
 import { useMemo, useRef } from "react";
-import { useDragNode } from "../hooks/use-drag-node";
 import { useMindStore } from "../hooks/use-mind-store";
 import { usePanZoom } from "../hooks/use-pan-zoom";
 import { useTween } from "../hooks/use-tween";
@@ -25,7 +24,6 @@ export function Canvas() {
 
   usePanZoom({ containerRef });
   useTween();
-  useDragNode();
 
   const visibleNodes = useMemo(
     () =>

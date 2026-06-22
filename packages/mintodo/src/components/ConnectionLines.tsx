@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { useMindStore } from "../hooks/use-mind-store";
 
+const MIN_CURVE_SPREAD = 60;
+
 function isParentCollapsed(state: ReturnType<typeof useMindStore>["state"], id: string): boolean {
   const node = state.nodes[id];
   if (!node) return true;
@@ -57,14 +59,18 @@ export function ConnectionLines({ containerRef }: Props) {
         const strokeProps = node.completed
           ? { strokeDasharray: "5,5", strokeWidth: 1.5 }
           : { strokeWidth: 1.5 };
+        const horizontalDist = ex - sx;
+        const halfDist = Math.max(Math.abs(horizontalDist) / 2, MIN_CURVE_SPREAD);
+        const sign = horizontalDist >= 0 ? 1 : -1;
+        const c1x = sx + sign * halfDist;
+        const c2x = ex - sign * halfDist;
+        const d = `M ${sx} ${sy} C ${c1x} ${sy}, ${c2x} ${ey}, ${ex} ${ey}`;
         return (
-          <line
+          <path
             key={node.id}
             id={`edge-${parent.id}-${node.id}`}
-            x1={sx}
-            y1={sy}
-            x2={ex}
-            y2={ey}
+            d={d}
+            fill="none"
             stroke={color}
             {...strokeProps}
           />

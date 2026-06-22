@@ -3,6 +3,16 @@ import { useMindStore } from "./use-mind-store";
 
 const TWEEN_DURATION = 300;
 const EASING = "cubic-bezier(0.25, 1, 0.5, 1)";
+const MIN_CURVE_SPREAD = 60;
+
+function pathD(sx: number, sy: number, ex: number, ey: number): string {
+  const horizontalDist = ex - sx;
+  const halfDist = Math.max(Math.abs(horizontalDist) / 2, MIN_CURVE_SPREAD);
+  const sign = horizontalDist >= 0 ? 1 : -1;
+  const c1x = sx + sign * halfDist;
+  const c2x = ex - sign * halfDist;
+  return `M ${sx} ${sy} C ${c1x} ${sy}, ${c2x} ${ey}, ${ex} ${ey}`;
+}
 
 interface Pos {
   x: number;
@@ -38,7 +48,6 @@ export function useTween(): void {
   }, [state.nodes]);
 
   useEffect(() => {
-    if (state.draggingNodeId !== null) return;
     if (seenVersionRef.current === state.layoutVersion) return;
     if (state.layoutVersion === 0) return;
 
@@ -63,7 +72,7 @@ export function useTween(): void {
       if (!n.isRoot && n.parentId) {
         const parent = state.nodes[n.parentId];
         if (parent) {
-          const edge = document.querySelector<SVGLineElement>(`#edge-${n.parentId}-${id}`);
+          const edge = document.querySelector<Element>(`#edge-${n.parentId}-${id}`);
           if (edge) {
             const parentAnim = animations.find(
               (a) => (a.el as HTMLElement).id === `node-dom-${n.parentId}`,
@@ -86,8 +95,8 @@ export function useTween(): void {
               { left: `${a.to.x}px`, top: `${a.to.y}px` },
             ]
           : [
-              { x1: a.from.x, y1: a.from.y, x2: a.parent.x, y2: a.parent.y },
-              { x1: a.to.x, y1: a.to.y, x2: a.parent.x, y2: a.parent.y },
+              { d: pathD(a.parent.x, a.parent.y, a.from.x, a.from.y) },
+              { d: pathD(a.parent.x, a.parent.y, a.to.x, a.to.y) },
             ];
       a.el.animate(keyframes as unknown as Keyframe[], {
         duration: TWEEN_DURATION,
@@ -95,5 +104,6 @@ export function useTween(): void {
         fill: "none",
       });
     }
-  }, [state.layoutVersion, state.draggingNodeId, state.nodes]);
+
+  }, [state.layoutVersion, state.nodes]);
 }
