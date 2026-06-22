@@ -54,12 +54,27 @@ function makeState(): State {
   return s;
 }
 
+function makeEmptyState(): State {
+  const s = createInitialState();
+  s.boards = [{ id: "b1", name: "Empty Board", createdAt: 0, updatedAt: 0 }];
+  s.currentBoardId = "b1";
+  s.nodes = {};
+  s.modal = { kind: "dsl-editor" };
+  return s;
+}
+
 function renderModal() {
   return render(
     <MindProvider initialState={makeState()}>
       <DslEditorModal />
     </MindProvider>,
   );
+}
+
+function StateInspector({ onRender }: { onRender: (state: State) => void }) {
+  const { state } = useMindStore();
+  onRender(state);
+  return null;
 }
 
 describe("DslEditorModal", () => {
@@ -96,9 +111,15 @@ describe("DslEditorModal", () => {
     });
     vi.spyOn(window, "confirm").mockReturnValue(true);
 
+    let captured: State | null = null;
     render(
       <MindProvider initialState={makeState()}>
-        <ModalWithDispatch />
+        <StateInspector
+          onRender={(s) => {
+            captured = s;
+          }}
+        />
+        <DslEditorModal />
       </MindProvider>,
     );
 
@@ -115,6 +136,8 @@ describe("DslEditorModal", () => {
 
     await waitFor(() => {
       expect(renameBoard).toHaveBeenCalledWith("b1", "新しいボード");
+      expect(captured!.nodes["n0"]?.text).toBe("タスクA");
+      expect(captured!.nodes["n0"]?.completed).toBe(true);
     });
     expect(renameBoard).toHaveBeenCalledTimes(1);
   });
@@ -174,10 +197,48 @@ describe("DslEditorModal", () => {
     });
     expect(screen.queryByText("DSL 編集")).toBeNull();
   });
-});
 
-// Helper that gives the test access to dispatch for state inspection.
-function ModalWithDispatch() {
-  const { state } = useMindStore();
-  return state.modal?.kind === "dsl-editor" ? <DslEditorModal /> : null;
-}
+  it("× button closes the modal", async () => {
+    renderModal();
+    await act(async () => {
+      fireEvent.click(screen.getByLabelText("閉じる"));
+    });
+    expect(screen.queryByText("DSL 編集")).toBeNull();
+  });
+
+  it("キャンセル button closes the modal", async () => {
+    renderModal();
+    await act(async () => {
+      fireEvent.click(screen.getByText("キャンセル"));
+    });
+    expect(screen.queryByText("DSL 編集")).toBeNull();
+  });
+
+  it("Ctrl+Enter triggers SAVE", async () => {
+    vi.spyOn(window, "confirm").mockReturnValue(true);
+
+    renderModal();
+    const textarea = screen.getByRole("textbox") as HTMLTextAreaElement;
+    await act(async () => {
+      fireEvent.change(textarea, { target: { value: "NewName\n  child\n" } });
+    });
+
+    await act(async () => {
+      fireEvent.keyDown(textarea, { key: "Enter", ctrlKey: true });
+    });
+
+    await waitFor(() => {
+      expect(mockedActions().renameBoard).toHaveBeenCalledWith("b1", "NewName");
+    });
+  });
+
+  it("Empty board opens without error", () => {
+    render(
+      <MindProvider initialState={makeEmptyState()}>
+        <DslEditorModal />
+      </MindProvider>,
+    );
+
+    expect(screen.getByText("DSL 編集")).toBeTruthy();
+  });
+});

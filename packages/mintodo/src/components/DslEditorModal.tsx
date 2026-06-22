@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useMindStore } from "../hooks/use-mind-store";
 import { useBoardActions } from "../hooks/use-board-actions";
 import { parseDSL, serializeDSL } from "../dsl";
@@ -8,7 +8,7 @@ export function DslEditorModal() {
   const { state, dispatch } = useMindStore();
   const actions = useBoardActions();
   const open = state.modal?.kind === "dsl-editor";
-  const close = () => dispatch({ modal: null, type: "OPEN_MODAL" });
+  const close = useCallback(() => dispatch({ modal: null, type: "OPEN_MODAL" }), [dispatch]);
 
   const [text, setText] = useState("");
   const [error, setError] = useState<string | null>(null);
