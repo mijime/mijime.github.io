@@ -111,14 +111,15 @@ task1
 ### 混合 (1 ノードが 2 子 + さらに子)
 ```
 task1
-  └ a                       (0, -240)
-      ├ a1  leafCount=3     ← 1 孫 + 2 曾孫
-      │  └ a1a  (angle 継承) ...
-      └ a2  leafCount=1
+  └ a                          (0, -240)         ← root's only child, arc [0, 2π]
+      ├ a1  leafCount=3        ((√2/2)·480, (√2/2)·480)     ≈ (339, 339)  screen: down-right
+      │  └ a1a                 (angle 継承)
+      └ a2  leafCount=1        (-(√2/2)·480, -(√2/2)·480) ≈ (-339, -339) screen: up-left
 ```
-- a1 は a のセクター `[0, 2π]` の 3/4 を割り当て、angle = `startAngle + (3/4)π`
-- a2 は a のセクターの 1/4、angle = `startAngle + (7/8)π`
-- 角度間隔は葉数比例で非対称
+- a1 は a のセクター `[0, 2π]` の 3/4 (`[0, 3π/2]`) を割り当て、angle = `startAngle + 3π/4` = `-π/2 + 3π/4` = `π/4`
+- a2 は a のセクターの 1/4 (`[3π/2, 2π]`)、angle = `startAngle + 7π/4` = `5π/4`
+- 角度間隔は葉数比例で非対称 (3:1)
+- a1a (a1 のひとり子) は a1 の angle = `π/4` を継承して depth 3 に配置: `(cos(π/4)·720, sin(π/4)·720)` ≈ `(509, 509)` (screen: down-right of a1)
 
 ## テスト計画
 
@@ -134,7 +135,7 @@ task1
 - `omits unknown ids and nodes absent from the map`
 - `confines each root child's subtree to its allocated arc` (a→a1 角度が 0、UP との差 π/2、丁度許容範囲内)
 
-### 期待値更新 (3 件)
+### 期待値更新 (4 件)
 
 - `uses 340 as the default ringDistance` → タイトルとコメントを修正 (実体は `RING = 240` で通る)
 - `distributes three root children evenly starting at 12 o'clock` → 期待値を「セクター中央起点 + 同一リング距離」に書き換え
