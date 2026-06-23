@@ -26,11 +26,12 @@ const boardA: Board = { id: "b-a", name: "A", createdAt: 1, updatedAt: 1 };
 const boardB: Board = { id: "b-b", name: "B", createdAt: 2, updatedAt: 2 };
 
 describe("createInitialState", () => {
-  it("starts with no boards, no current board, no nodes", () => {
+  it("starts with no boards, no current board, no nodes, and sidebar open", () => {
     const s = createInitialState();
     expect(s.boards).toEqual([]);
     expect(s.currentBoardId).toBeNull();
     expect(s.nodes).toEqual({});
+    expect(s.drawerOpen).toBe(true);
   });
 });
 
