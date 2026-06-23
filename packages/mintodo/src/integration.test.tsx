@@ -423,7 +423,7 @@ describe("kanban view end-to-end", () => {
     });
     await createBoard("Test");
     const boards = await db.boards.toArray();
-    const boardId = boards.at(-1).id;
+    const boardId = boards.at(-1)!.id;
     // Mindmap default — no meta key yet
     expect(await db.meta.get(`viewMode:${boardId}`)).toBeUndefined();
     // Toggle to kanban
