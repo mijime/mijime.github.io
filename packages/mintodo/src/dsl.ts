@@ -29,8 +29,6 @@ function defaultNode(boardId: string): MindNode {
     children: [],
     x: 0,
     y: 0,
-    vx: 0,
-    vy: 0,
   };
 }
 
@@ -38,11 +36,11 @@ export function parseDSL(text: string, boardId: string): DslParseResult | null {
   const lines = text.replaceAll(/\r\n?/gu, "\n").split("\n");
 
   const nodes: MindNode[] = [];
-  let prevDepth = 0;
   let firstNode = true;
   let counter = 0;
   let rootText = "";
-  const parentByDepth: string[] = [];
+  let hasRoot = false;
+  const stack: { depth: number; node: MindNode }[] = [];
 
   for (const raw of lines) {
     if (raw === "" || /^\s*#/u.test(raw)) continue;
@@ -60,8 +58,17 @@ export function parseDSL(text: string, boardId: string): DslParseResult | null {
     if (firstNode) {
       if (depth !== 0) return null;
       firstNode = false;
-    } else if (Math.abs(depth - prevDepth) > 1) {
-      return null;
+    }
+
+    while (stack.length > 0 && stack.at(-1)!.depth >= depth) {
+      stack.pop();
+    }
+
+    const parent = stack.length > 0 ? stack.at(-1)!.node : null;
+
+    if (parent === null && depth === 0) {
+      if (hasRoot) return null;
+      hasRoot = true;
     }
 
     const tokens = rest.split(/\s+/u);
@@ -119,30 +126,21 @@ export function parseDSL(text: string, boardId: string): DslParseResult | null {
       completed,
     };
 
-    if (depth === 0) {
+    if (parent === null) {
       node.id = "root";
       node.isRoot = true;
       rootText = text;
     } else {
       node.id = `n${counter++}`;
-      node.parentId = parentByDepth[depth - 1];
+      node.parentId = parent.id;
+      parent.children.push(node.id);
     }
 
-    parentByDepth[depth] = node.id;
-    if (depth + 1 < parentByDepth.length) parentByDepth.length = depth + 1;
-
     nodes.push(node);
-    prevDepth = depth;
+    stack.push({ depth, node });
   }
 
   if (firstNode) return null;
-
-  for (const n of nodes) {
-    if (n.parentId) {
-      const parent = nodes.find((x) => x.id === n.parentId);
-      if (parent) parent.children.push(n.id);
-    }
-  }
 
   return {
     board: { id: boardId, name: rootText },
@@ -171,4 +169,79 @@ export function serializeDSL(board: { name: string }, nodes: Record<string, Mind
   };
   walk(rootNode, 0);
   return out.join("");
+}
+
+export interface InlineDslResult {
+  text: string;
+  hasAnyAttribute: boolean;
+  priority: Priority | null;
+  categoryColor: CategoryColor | null;
+  dueDate: string | null;
+  completed: boolean | null;
+}
+
+export function parseInlineDSL(raw: string): InlineDslResult {
+  const result: InlineDslResult = {
+    text: "",
+    hasAnyAttribute: false,
+    priority: null,
+    categoryColor: null,
+    dueDate: null,
+    completed: null,
+  };
+  if (!raw) return result;
+
+  const tokens = raw.split(/\s+/u).filter((t) => t.length > 0);
+  const textTokens: string[] = [];
+
+  for (const tok of tokens) {
+    if (!tok.startsWith("@")) {
+      textTokens.push(tok);
+      continue;
+    }
+    const colon = tok.indexOf(":");
+    const key = colon === -1 ? tok.slice(1) : tok.slice(1, colon);
+    const value = colon === -1 ? "" : tok.slice(colon + 1);
+    switch (key) {
+      case "priority": {
+        if (ALLOWED_PRIORITIES.has(value as Priority)) {
+          result.priority = value as Priority;
+          result.hasAnyAttribute = true;
+        } else {
+          textTokens.push(tok);
+        }
+        break;
+      }
+      case "color": {
+        if (ALLOWED_COLORS.has(value as CategoryColor)) {
+          result.categoryColor = value as CategoryColor;
+          result.hasAnyAttribute = true;
+        } else {
+          textTokens.push(tok);
+        }
+        break;
+      }
+      case "due": {
+        if (isValidDate(value)) {
+          result.dueDate = value;
+          result.hasAnyAttribute = true;
+        } else {
+          textTokens.push(tok);
+        }
+        break;
+      }
+      case "done": {
+        result.completed = true;
+        result.hasAnyAttribute = true;
+        break;
+      }
+      default: {
+        textTokens.push(tok);
+        break;
+      }
+    }
+  }
+
+  result.text = textTokens.join(" ").trim();
+  return result;
 }

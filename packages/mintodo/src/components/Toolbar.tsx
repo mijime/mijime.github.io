@@ -1,14 +1,4 @@
-import {
-  Eye,
-  FileText,
-  Keyboard,
-  Menu,
-  Moon,
-  Network,
-  Search,
-  Sun,
-  Trash2,
-} from "lucide-react";
+import { Eye, FileText, Keyboard, Menu, Moon, Network, Search, Sun, Trash2 } from "lucide-react";
 import { useMindStore } from "../hooks/use-mind-store";
 import { db } from "../db";
 
@@ -105,28 +95,6 @@ export function Toolbar() {
         </button>
       </div>
       <div className="flex items-center justify-between lg:justify-end gap-3 w-full lg:w-auto">
-        <div
-          className="flex items-center gap-2 px-3 py-1.5 rounded"
-          style={{ background: "var(--paper)", border: "1px solid var(--border)" }}
-        >
-          <span className="hidden sm:inline text-xs font-semibold" style={{ color: "var(--ink)" }}>
-            自動配置
-          </span>
-          <button
-            type="button"
-            className="relative inline-flex h-5 w-9 items-center rounded-full transition-colors"
-            style={{ background: state.physicsEnabled ? "var(--terra)" : "var(--grid)" }}
-            onClick={() => dispatch({ type: "TOGGLE_PHYSICS" })}
-          >
-            <span
-              className="inline-block h-3.5 w-3.5 transform rounded-full transition-transform"
-              style={{
-                background: "var(--paper)",
-                transform: state.physicsEnabled ? "translateX(18px)" : "translateX(3px)",
-              }}
-            />
-          </button>
-        </div>
         <div className="flex items-center gap-1">
           <button
             type="button"

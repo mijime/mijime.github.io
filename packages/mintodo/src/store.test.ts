@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { createInitialState, reducer } from "./store";
+import { createInitialState, isDescendant, reducer } from "./store";
 import type { Board, MindNode } from "./types";
 
 function makeNode(id: string, boardId: string, opts: Partial<MindNode> = {}): MindNode {
@@ -17,8 +17,6 @@ function makeNode(id: string, boardId: string, opts: Partial<MindNode> = {}): Mi
     children: [],
     x: 0,
     y: 0,
-    vx: 0,
-    vy: 0,
     ...opts,
   };
 }
@@ -32,6 +30,34 @@ describe("createInitialState", () => {
     expect(s.boards).toEqual([]);
     expect(s.currentBoardId).toBeNull();
     expect(s.nodes).toEqual({});
+  });
+});
+
+describe("isDescendant", () => {
+  it("returns true when nodeId is a descendant of candidateAncestor", () => {
+    const nodes = {
+      root: makeNode("root", "b-a", { isRoot: true, children: ["a", "a1"] }),
+      a: makeNode("a", "b-a", { parentId: "root", children: ["a1"] }),
+      a1: makeNode("a1", "b-a", { parentId: "a" }),
+    };
+    expect(isDescendant(nodes, "root", "a1")).toBe(true);
+  });
+
+  it("returns false when nodeId is not a descendant", () => {
+    const nodes = {
+      root: makeNode("root", "b-a", { isRoot: true, children: ["a", "b"] }),
+      a: makeNode("a", "b-a", { parentId: "root" }),
+      b: makeNode("b", "b-a", { parentId: "root" }),
+    };
+    expect(isDescendant(nodes, "a", "b")).toBe(false);
+  });
+
+  it("returns false when candidateAncestor is the node itself", () => {
+    const nodes = {
+      root: makeNode("root", "b-a", { isRoot: true, children: ["a"] }),
+      a: makeNode("a", "b-a", { parentId: "root" }),
+    };
+    expect(isDescendant(nodes, "a", "a")).toBe(false);
   });
 });
 
@@ -170,10 +196,15 @@ describe("reducer - RESET", () => {
     expect(next.view).toEqual({ pan: { x: 0, y: 0 }, zoom: 1 });
   });
 
-  it("preserves physicsEnabled", () => {
-    const s = { ...createInitialState(), physicsEnabled: false };
+  it("bumps layoutVersion", () => {
+    const s = {
+      ...createInitialState(),
+      boards: [boardA],
+      currentBoardId: "b-a",
+      nodes: { root: makeNode("root", "b-a", { isRoot: true }) },
+    };
     const next = reducer(s, { type: "RESET" });
-    expect(next.physicsEnabled).toBe(false);
+    expect(next.layoutVersion).toBe(s.layoutVersion + 1);
   });
 });
 
@@ -214,14 +245,6 @@ describe("reducer - TOGGLE_HIDE_COMPLETED", () => {
   });
 });
 
-describe("reducer - TOGGLE_PHYSICS", () => {
-  it("toggles physicsEnabled", () => {
-    const s = createInitialState();
-    const next = reducer(s, { type: "TOGGLE_PHYSICS" });
-    expect(next.physicsEnabled).toBe(false);
-  });
-});
-
 describe("reducer - OPEN_MODAL", () => {
   it("opens edit modal", () => {
     const s = createInitialState();
@@ -258,13 +281,14 @@ describe("reducer - OPEN_MODAL", () => {
 });
 
 describe("reducer - ADD_CHILD", () => {
-  it("creates new child and selects it", () => {
+  it("creates new child, places it on the radial layout, selects it, bumps layoutVersion", () => {
     const s = {
       ...createInitialState(),
       boards: [boardA],
       currentBoardId: "b-a",
       nodes: { root: makeNode("root", "b-a", { isRoot: true, children: [] }) },
     };
+    const before = s.layoutVersion;
     const next = reducer(s, {
       newId: "n-new",
       parentId: "root",
@@ -275,6 +299,9 @@ describe("reducer - ADD_CHILD", () => {
     expect(next.nodes["n-new"].boardId).toBe("b-a");
     expect(next.nodes["n-new"].isRoot).toBe(false);
     expect(next.nodes.root.children).toContain("n-new");
+    expect(next.nodes["n-new"].x).toBeCloseTo(0);
+    expect(next.nodes["n-new"].y).toBe(-240);
+    expect(next.layoutVersion).toBe(before + 1);
   });
 });
 
@@ -344,14 +371,163 @@ describe("reducer - DELETE_NODE", () => {
   });
 });
 
-describe("reducer - MOVE_NODE", () => {
-  it("updates x and y", () => {
+describe("reducer - REPARENT", () => {
+  it("moves a node to a new parent's children list and re-layouts", () => {
     const s = {
       ...createInitialState(),
-      nodes: { n: makeNode("n", "b-a", { x: 0, y: 0 }) },
+      layoutVersion: 0,
+      nodes: {
+        root: makeNode("root", "b-a", { isRoot: true, children: ["a", "b"] }),
+        a: makeNode("a", "b-a", { parentId: "root" }),
+        b: makeNode("b", "b-a", { parentId: "root" }),
+      },
     };
-    const next = reducer(s, { id: "n", type: "MOVE_NODE", x: 999, y: 888 });
-    expect(next.nodes.n.x).toBe(999);
-    expect(next.nodes.n.y).toBe(888);
+    const next = reducer(s, { id: "b", newParentId: "a", type: "REPARENT" });
+    expect(next.nodes.b.parentId).toBe("a");
+    expect(next.nodes.a.children).toContain("b");
+    expect(next.nodes.root.children).not.toContain("b");
+    expect(next.layoutVersion).toBe(1);
+  });
+
+  it("rejects reparenting a node onto itself", () => {
+    const s = {
+      ...createInitialState(),
+      nodes: {
+        root: makeNode("root", "b-a", { isRoot: true, children: ["a"] }),
+        a: makeNode("a", "b-a", { parentId: "root" }),
+      },
+    };
+    const next = reducer(s, { id: "a", newParentId: "a", type: "REPARENT" });
+    expect(next.nodes.a.parentId).toBe("root");
+  });
+
+  it("rejects reparenting a node onto its descendant", () => {
+    const s = {
+      ...createInitialState(),
+      nodes: {
+        root: makeNode("root", "b-a", { isRoot: true, children: ["a"] }),
+        a: makeNode("a", "b-a", { parentId: "root", children: ["a1"] }),
+        a1: makeNode("a1", "b-a", { parentId: "a" }),
+      },
+    };
+    const next = reducer(s, { id: "a", newParentId: "a1", type: "REPARENT" });
+    expect(next.nodes.a.parentId).toBe("root");
+  });
+
+  it("rejects reparenting the root", () => {
+    const s = {
+      ...createInitialState(),
+      nodes: {
+        root: makeNode("root", "b-a", { isRoot: true, children: ["a"] }),
+        a: makeNode("a", "b-a", { parentId: "root" }),
+      },
+    };
+    const next = reducer(s, { id: "root", newParentId: "a", type: "REPARENT" });
+    expect(next.nodes.root.parentId).toBeNull();
+  });
+});
+
+describe("reducer - CREATE_CHILD", () => {
+  it("creates a new child node with the given text and attributes", () => {
+    const s = {
+      ...createInitialState(),
+      currentBoardId: "b-a",
+      nodes: { root: makeNode("root", "b-a", { isRoot: true, children: [] }) },
+    };
+    const next = reducer(s, {
+      type: "CREATE_CHILD",
+      newId: "n1",
+      parentId: "root",
+      text: "my task",
+      priority: "high",
+      categoryColor: "sky",
+      dueDate: "2026-07-01",
+      completed: false,
+    });
+    expect(next.nodes.n1.text).toBe("my task");
+    expect(next.nodes.n1.priority).toBe("high");
+    expect(next.nodes.n1.categoryColor).toBe("sky");
+    expect(next.nodes.n1.dueDate).toBe("2026-07-01");
+    expect(next.nodes.n1.completed).toBe(false);
+    expect(next.nodes.n1.isRoot).toBe(false);
+    expect(next.nodes.n1.parentId).toBe("root");
+  });
+
+  it("appends the new node id to the parent's children list", () => {
+    const s = {
+      ...createInitialState(),
+      currentBoardId: "b-a",
+      nodes: { root: makeNode("root", "b-a", { isRoot: true, children: [] }) },
+    };
+    const next = reducer(s, {
+      type: "CREATE_CHILD",
+      newId: "n1",
+      parentId: "root",
+      text: "task",
+      priority: "medium",
+      categoryColor: "slate",
+      dueDate: "",
+      completed: false,
+    });
+    expect(next.nodes.root.children).toContain("n1");
+  });
+
+  it("sets selectedNodeId to the new node id", () => {
+    const s = {
+      ...createInitialState(),
+      currentBoardId: "b-a",
+      nodes: { root: makeNode("root", "b-a", { isRoot: true, children: [] }) },
+    };
+    const next = reducer(s, {
+      type: "CREATE_CHILD",
+      newId: "n1",
+      parentId: "root",
+      text: "task",
+      priority: "medium",
+      categoryColor: "slate",
+      dueDate: "",
+      completed: false,
+    });
+    expect(next.selectedNodeId).toBe("n1");
+  });
+
+  it("computes positions via the radial layout", () => {
+    const s = {
+      ...createInitialState(),
+      currentBoardId: "b-a",
+      layoutVersion: 0,
+      nodes: { root: makeNode("root", "b-a", { isRoot: true, children: [] }) },
+    };
+    const before = s.layoutVersion;
+    const next = reducer(s, {
+      type: "CREATE_CHILD",
+      newId: "n1",
+      parentId: "root",
+      text: "task",
+      priority: "medium",
+      categoryColor: "slate",
+      dueDate: "",
+      completed: false,
+    });
+    expect(next.layoutVersion).toBe(before + 1);
+    expect(next.nodes.n1.x).toBeCloseTo(0);
+    expect(next.nodes.n1.y).toBe(-240);
+  });
+});
+
+describe("reducer - SNAP_BACK", () => {
+  it("bumps layoutVersion and re-runs the layout without changing structure", () => {
+    const s = {
+      ...createInitialState(),
+      layoutVersion: 5,
+      nodes: {
+        root: makeNode("root", "b-a", { isRoot: true, children: ["a"] }),
+        a: makeNode("a", "b-a", { parentId: "root", x: 999, y: 999 }),
+      },
+    };
+    const next = reducer(s, { id: "a", type: "SNAP_BACK" });
+    expect(next.layoutVersion).toBe(6);
+    expect(next.nodes.a.x).toBeCloseTo(0);
+    expect(next.nodes.a.y).toBe(-240);
   });
 });

@@ -23,8 +23,6 @@ export interface MindNode {
   children: string[];
   x: number;
   y: number;
-  vx: number;
-  vy: number;
 }
 
 export interface View {
@@ -34,6 +32,7 @@ export interface View {
 
 export type Modal =
   | { kind: "edit"; nodeId: string }
+  | { kind: "edit-new"; parentId: string }
   | { kind: "help" }
   | { kind: "board-name"; mode: "create" | "rename"; boardId?: string; initialName?: string }
   | { kind: "board-delete"; boardId: string; boardName: string }
