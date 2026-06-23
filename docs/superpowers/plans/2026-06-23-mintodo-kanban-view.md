@@ -62,6 +62,7 @@ No new dependencies. No db.ts changes. No layout/radial.ts changes. No BoardSide
 - Modify: `src/dsl.ts:17-33` (`defaultNode`)
 - Modify: `src/store.ts:1-344` (`State`, all `MindNode` literals)
 - Modify: `src/hooks/use-board-actions.ts:14-32` (`makeRootNode`)
+- Modify: `src/storage.ts:32-56` (`createBoard` root literal)
 - Modify: `src/store.test.ts:5-22` (`makeNode` helper)
 - Modify: `src/storage.test.ts:19-36` (`makeNode` helper)
 - Modify: `src/dsl.test.ts:210-226` (`makeNode` helper)
@@ -163,9 +164,11 @@ In the following locations in `src/store.ts`, add `status: "inbox"` to the MindN
 
 For each, insert `status: "inbox",` after the `dueDate: ""` line (or `dueDate: action.dueDate` in CREATE_CHILD).
 
-- [ ] **Step 4: Update MindNode literal in `src/hooks/use-board-actions.ts`**
+- [ ] **Step 4: Update MindNode literals in `src/storage.ts` and `src/hooks/use-board-actions.ts`**
 
-In `makeRootNode` (line 14-32), insert `status: "inbox",` after `dueDate: ""`:
+In `src/storage.ts:37-51`, insert `status: "inbox",` after `dueDate: ""` in the `createBoard` root literal.
+
+In `src/hooks/use-board-actions.ts:14-32`, insert `status: "inbox",` after `dueDate: ""` in `makeRootNode`:
 
 ```ts
 function makeRootNode(boardId: string, name: string) {
@@ -232,7 +235,7 @@ Expected: all existing tests pass (no count change yet).
 
 ```bash
 cd /Users/kojima.takashi/src/github.com/mijime/mijime.github.io
-git add packages/mintodo/src/types.ts packages/mintodo/src/dsl.ts packages/mintodo/src/store.ts packages/mintodo/src/hooks/use-board-actions.ts packages/mintodo/src/store.test.ts packages/mintodo/src/storage.test.ts packages/mintodo/src/dsl.test.ts
+git add packages/mintodo/src/types.ts packages/mintodo/src/dsl.ts packages/mintodo/src/store.ts packages/mintodo/src/hooks/use-board-actions.ts packages/mintodo/src/storage.ts packages/mintodo/src/store.test.ts packages/mintodo/src/storage.test.ts packages/mintodo/src/dsl.test.ts
 git commit -m "feat(mintodo): add TaskStatus, ViewMode, and MindNode.status field"
 ```
 
@@ -816,7 +819,8 @@ export async function loadNodesForBoard(boardId: string): Promise<Record<string,
   const all = await db.nodes.where("boardId").equals(boardId).toArray();
   const rec: Record<string, MindNode> = {};
   for (const n of all) {
-    if (n.status === undefined) {
+    const status = (n as { status?: TaskStatus }).status;
+    if (status === undefined) {
       rec[n.id] = { ...n, status: n.completed ? "done" : "inbox" };
     } else {
       rec[n.id] = n;
@@ -824,6 +828,12 @@ export async function loadNodesForBoard(boardId: string): Promise<Record<string,
   }
   return rec;
 }
+```
+
+Add `TaskStatus` to the import on line 2 of `src/storage.ts`:
+
+```ts
+import type { Board, MindNode, TaskStatus, ViewMode } from "./types";
 ```
 
 - [ ] **Step 2: Add `getViewMode` and `setViewMode`**
@@ -856,8 +866,9 @@ describe("loadNodesForBoard — status backfill", () => {
   it("backfills status='inbox' for nodes with undefined status and completed=false", async () => {
     const { board } = await createBoard("P");
     const node = makeNode("n", board.id);
-    delete (node as { status?: unknown }).status;
-    await db.nodes.put(node);
+    const legacy: Partial<MindNode> & { id: string; boardId: string } = { ...node };
+    delete legacy.status;
+    await db.nodes.put(legacy as MindNode);
     const loaded = await loadNodesForBoard(board.id);
     expect(loaded.n.status).toBe("inbox");
   });
@@ -865,8 +876,9 @@ describe("loadNodesForBoard — status backfill", () => {
   it("backfills status='done' for nodes with undefined status and completed=true", async () => {
     const { board } = await createBoard("P");
     const node = makeNode("n", board.id, { completed: true });
-    delete (node as { status?: unknown }).status;
-    await db.nodes.put(node);
+    const legacy: Partial<MindNode> & { id: string; boardId: string } = { ...node };
+    delete legacy.status;
+    await db.nodes.put(legacy as MindNode);
     const loaded = await loadNodesForBoard(board.id);
     expect(loaded.n.status).toBe("done");
   });
@@ -1138,13 +1150,30 @@ export function categoryDotClass(c: MindNode["categoryColor"]): string {
     }
   }
 }
+
+export function categoryBorderColor(c: MindNode["categoryColor"]): string {
+  switch (c) {
+    case "sky": {
+      return "#0ea5e9";
+    }
+    case "emerald": {
+      return "#10b981";
+    }
+    case "rose": {
+      return "#f43f5e";
+    }
+    default: {
+      return "var(--mid)";
+    }
+  }
+}
 ```
 
 - [ ] **Step 2: Create `src/lib/badges.test.ts`**
 
 ```ts
 import { describe, expect, it } from "vitest";
-import { formatBadges, categoryDotClass } from "./badges";
+import { formatBadges, categoryDotClass, categoryBorderColor } from "./badges";
 import type { MindNode } from "../types";
 
 function makeNode(opts: Partial<MindNode> = {}): MindNode {
@@ -1202,6 +1231,15 @@ describe("categoryDotClass", () => {
     expect(categoryDotClass("slate")).toBe("bg-slate-400");
   });
 });
+
+describe("categoryBorderColor", () => {
+  it("maps colors to hex/var values", () => {
+    expect(categoryBorderColor("sky")).toBe("#0ea5e9");
+    expect(categoryBorderColor("emerald")).toBe("#10b981");
+    expect(categoryBorderColor("rose")).toBe("#f43f5e");
+    expect(categoryBorderColor("slate")).toBe("var(--mid)");
+  });
+});
 ```
 
 - [ ] **Step 3: Refactor `NodeCard.tsx` to use the util**
@@ -1210,12 +1248,12 @@ In `src/components/NodeCard.tsx`:
 
 - Add import at top:
   ```ts
-  import { categoryDotClass, formatBadges } from "../lib/badges";
+  import { categoryBorderColor, categoryDotClass, formatBadges } from "../lib/badges";
   ```
 
 - Delete the local `dueDateBadge` function (lines 42-57).
 - Delete the local `categoryDotClass` function (lines 25-40).
-- Delete the local `categoryBorderColor` function (lines 8-23) — only used in NodeCard style. Keep it (or move to badges too) but note: only used in NodeCard. Leave it in NodeCard.
+- Delete the local `categoryBorderColor` function (lines 8-23) — it has been moved to `lib/badges.ts`.
 - Replace the badge-related lines in the non-root render (around line 173, 261-273):
   - Change `const badge = dueDateBadge(node.dueDate, node.completed);` to `const { dueHtml, showHigh, showBadgeRow } = formatBadges(node);`
   - Change `(badge || node.priority === "high") && (` to `{showBadgeRow && (`
