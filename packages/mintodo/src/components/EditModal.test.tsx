@@ -198,6 +198,29 @@ describe("EditModal", () => {
     window.confirm = originalConfirm;
   });
 
+  it("Cmd+Enter in textarea saves in edit mode", () => {
+    setup({ modal: { kind: "edit", nodeId: "a" } });
+    const ta = document.querySelector('[data-testid="edit-modal-textarea"]') as HTMLTextAreaElement;
+    act(() => {
+      fireEvent.change(ta, { target: { value: "Updated" } });
+      fireEvent.keyDown(ta, { key: "Enter", metaKey: true });
+    });
+    expect(capturedState!.modal).toBeNull();
+    expect(capturedState!.nodes.a.text).toBe("Updated");
+  });
+
+  it("Ctrl+Enter in textarea saves in edit-new mode", () => {
+    setup({ modal: { kind: "edit-new", parentId: "root" } });
+    const ta = document.querySelector('[data-testid="edit-modal-textarea"]') as HTMLTextAreaElement;
+    act(() => {
+      fireEvent.change(ta, { target: { value: "New from shortcut" } });
+      fireEvent.keyDown(ta, { key: "Enter", ctrlKey: true });
+    });
+    expect(capturedState!.modal).toBeNull();
+    const child = Object.values(capturedState!.nodes).find((n) => n.text === "New from shortcut");
+    expect(child).toBeTruthy();
+  });
+
   it("属性 section collapses when the modal reopens for the same target", () => {
     setup({ modal: { kind: "edit", nodeId: "a" } });
 

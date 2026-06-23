@@ -103,11 +103,16 @@ export function reducer(state: State, action: Action): State {
       };
     }
     case "RENAME_BOARD": {
+      const isCurrentBoard = state.currentBoardId === action.id;
+      const root = isCurrentBoard ? state.nodes["root"] : null;
+      const nextNodes =
+        root ? { ...state.nodes, root: { ...root, text: action.name } } : state.nodes;
       return {
         ...state,
         boards: state.boards.map((b) =>
           b.id === action.id ? { ...b, name: action.name, updatedAt: Date.now() } : b,
         ),
+        nodes: nextNodes,
       };
     }
     case "DELETE_BOARD": {

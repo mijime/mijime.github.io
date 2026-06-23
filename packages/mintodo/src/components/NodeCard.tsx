@@ -183,6 +183,7 @@ export function NodeCard({ node }: Props) {
       onDragLeave={handleDragLeave}
       onDrop={(e) => handleDrop(e, node.id, state, dispatch)}
       onDragEnd={() => handleDragEnd(dispatch)}
+      onClick={() => dispatch({ id: node.id, type: "SELECT" })}
       className={`absolute -translate-x-1/2 -translate-y-1/2 px-4 py-3 rounded border-l-4 flex flex-col justify-between gap-1.5 min-w-[220px] max-w-[320px] ${isSelected ? "node-selected" : ""} ${isMatch ? "" : "opacity-30"}`}
       style={{
         left: node.x,

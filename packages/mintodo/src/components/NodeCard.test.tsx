@@ -83,6 +83,30 @@ function setup(overrides?: Partial<State>) {
   );
 }
 
+describe("NodeCard selection", () => {
+  afterEach(() => {
+    document.body.innerHTML = "";
+  });
+
+  it("clicking a non-root node selects it", () => {
+    const { container } = setup();
+    const childEl = container.querySelector('[data-node-id="a"]') as HTMLElement;
+    act(() => {
+      fireEvent.click(childEl);
+    });
+    expect(capturedState!.selectedNodeId).toBe("a");
+  });
+
+  it("clicking a child button inside the card does not change selection", () => {
+    const { container } = setup();
+    const ellipsis = container.querySelector('[data-testid="ellipsis"]') as HTMLElement;
+    act(() => {
+      fireEvent.click(ellipsis);
+    });
+    expect(capturedState!.selectedNodeId).toBe("");
+  });
+});
+
 describe("NodeCard drag-and-drop", () => {
   afterEach(() => {
     document.body.innerHTML = "";
