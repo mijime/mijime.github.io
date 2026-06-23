@@ -3,6 +3,7 @@ import { BoardDeleteDialog } from "./components/BoardDeleteDialog";
 import { BoardNameDialog } from "./components/BoardNameDialog";
 import { BoardSidebar } from "./components/BoardSidebar";
 import { Canvas } from "./components/Canvas";
+import { KanbanBoard } from "./components/KanbanBoard";
 import { DslEditorModal } from "./components/DslEditorModal";
 import { EditModal } from "./components/EditModal";
 import { EmptyState } from "./components/EmptyState";
@@ -61,7 +62,15 @@ function Shell() {
     >
       <Toolbar />
       <BoardSidebar />
-      {showCanvas ? <Canvas /> : <EmptyState />}
+      {showCanvas ? (
+        state.viewMode === "kanban" ? (
+          <KanbanBoard />
+        ) : (
+          <Canvas />
+        )
+      ) : (
+        <EmptyState />
+      )}
       <ZoomControls />
       <StatsPanel />
       <ShortcutHint />
