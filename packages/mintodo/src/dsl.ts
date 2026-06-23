@@ -1,4 +1,4 @@
-import type { CategoryColor, MindNode, Priority } from "./types";
+import type { CategoryColor, MindNode, Priority, TaskStatus } from "./types";
 
 export interface DslParseResult {
   board: { id: string; name: string };
@@ -7,6 +7,7 @@ export interface DslParseResult {
 
 const ALLOWED_PRIORITIES: ReadonlySet<Priority> = new Set(["low", "medium", "high"]);
 const ALLOWED_COLORS: ReadonlySet<CategoryColor> = new Set(["slate", "sky", "emerald", "rose"]);
+const ALLOWED_STATUSES: ReadonlySet<TaskStatus> = new Set(["inbox", "wip", "review", "done"]);
 
 function isValidDate(s: string): boolean {
   if (!/^\d{4}-\d{2}-\d{2}$/u.test(s)) return false;
@@ -87,6 +88,7 @@ export function parseDSL(text: string, boardId: string): DslParseResult | null {
     let categoryColor: CategoryColor = "slate";
     let dueDate = "";
     let completed = false;
+    let status: TaskStatus = "inbox";
 
     for (const tok of attrTokens) {
       const colon = tok.indexOf(":");
@@ -110,6 +112,13 @@ export function parseDSL(text: string, boardId: string): DslParseResult | null {
         }
         case "done": {
           completed = true;
+          status = "done";
+          break;
+        }
+        case "status": {
+          if (!ALLOWED_STATUSES.has(value as TaskStatus)) return null;
+          status = value as TaskStatus;
+          if (status === "done") completed = true;
           break;
         }
         default: {
@@ -125,6 +134,7 @@ export function parseDSL(text: string, boardId: string): DslParseResult | null {
       categoryColor,
       dueDate,
       completed,
+      status,
     };
 
     if (parent === null) {
@@ -160,7 +170,7 @@ export function serializeDSL(board: { name: string }, nodes: Record<string, Mind
     if (node.priority !== "medium") attrs.push(`@priority:${node.priority}`);
     if (node.categoryColor !== "slate") attrs.push(`@color:${node.categoryColor}`);
     if (node.dueDate) attrs.push(`@due:${node.dueDate}`);
-    if (node.completed) attrs.push("@done");
+    if (node.status !== "inbox") attrs.push(`@status:${node.status}`);
     const attrStr = attrs.length > 0 ? ` ${attrs.join(" ")}` : "";
     out.push(`${indent}${node.text}${attrStr}\n`);
     for (const cid of node.children) {
@@ -179,6 +189,7 @@ export interface InlineDslResult {
   categoryColor: CategoryColor | null;
   dueDate: string | null;
   completed: boolean | null;
+  status: TaskStatus | null;
 }
 
 export function parseInlineDSL(raw: string): InlineDslResult {
@@ -189,6 +200,7 @@ export function parseInlineDSL(raw: string): InlineDslResult {
     categoryColor: null,
     dueDate: null,
     completed: null,
+    status: null,
   };
   if (!raw) return result;
 
@@ -231,8 +243,18 @@ export function parseInlineDSL(raw: string): InlineDslResult {
         }
         break;
       }
+      case "status": {
+        if (ALLOWED_STATUSES.has(value as TaskStatus)) {
+          result.status = value as TaskStatus;
+          result.hasAnyAttribute = true;
+        } else {
+          textTokens.push(tok);
+        }
+        break;
+      }
       case "done": {
         result.completed = true;
+        result.status = "done";
         result.hasAnyAttribute = true;
         break;
       }
