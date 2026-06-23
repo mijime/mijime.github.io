@@ -5,7 +5,14 @@ import { MindProvider } from "../hooks/use-mind-store";
 import { createInitialState, type State } from "../store";
 import type { MindNode, TaskStatus } from "../types";
 
-function node(opts: Partial<MindNode> & { id: string; boardId: string; parentId: string | null; status: TaskStatus }): MindNode {
+function node(
+  opts: Partial<MindNode> & {
+    id: string;
+    boardId: string;
+    parentId: string | null;
+    status: TaskStatus;
+  },
+): MindNode {
   return {
     id: opts.id,
     boardId: opts.boardId,

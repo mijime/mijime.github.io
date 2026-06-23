@@ -150,7 +150,14 @@ export function EditModal() {
       dispatch({
         type: "UPDATE_NODE",
         id: (m as { kind: "edit"; nodeId: string }).nodeId,
-        patch: { text: dsl.text, priority, categoryColor, dueDate, completed: completedFlag, status },
+        patch: {
+          text: dsl.text,
+          priority,
+          categoryColor,
+          dueDate,
+          completed: completedFlag,
+          status,
+        },
       });
     }
     dispatch({ modal: null, type: "OPEN_MODAL" });

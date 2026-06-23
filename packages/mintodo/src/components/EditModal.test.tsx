@@ -269,12 +269,22 @@ function renderEditFor(node: MindNode) {
 }
 
 describe("EditModal — status picker", () => {
-
   it("clicking a status button updates the picker and dispatch", () => {
     const node: MindNode = {
-      id: "n1", boardId: "b", text: "t", parentId: null, isRoot: false,
-      completed: false, collapsed: false, priority: "medium", categoryColor: "slate",
-      dueDate: "", status: "inbox", children: [], x: 0, y: 0,
+      id: "n1",
+      boardId: "b",
+      text: "t",
+      parentId: null,
+      isRoot: false,
+      completed: false,
+      collapsed: false,
+      priority: "medium",
+      categoryColor: "slate",
+      dueDate: "",
+      status: "inbox",
+      children: [],
+      x: 0,
+      y: 0,
     };
     renderEditFor(node);
     fireEvent.click(screen.getByTestId("edit-modal-attr-toggle"));
@@ -290,9 +300,20 @@ describe("EditModal — status picker", () => {
 
   it("inline @status:review in textarea mirrors into picker", () => {
     const node: MindNode = {
-      id: "n1", boardId: "b", text: "t", parentId: null, isRoot: false,
-      completed: false, collapsed: false, priority: "medium", categoryColor: "slate",
-      dueDate: "", status: "inbox", children: [], x: 0, y: 0,
+      id: "n1",
+      boardId: "b",
+      text: "t",
+      parentId: null,
+      isRoot: false,
+      completed: false,
+      collapsed: false,
+      priority: "medium",
+      categoryColor: "slate",
+      dueDate: "",
+      status: "inbox",
+      children: [],
+      x: 0,
+      y: 0,
     };
     renderEditFor(node);
     const ta = screen.getByTestId("edit-modal-textarea") as HTMLTextAreaElement;

@@ -62,15 +62,7 @@ function Shell() {
     >
       <Toolbar />
       <BoardSidebar />
-      {showCanvas ? (
-        state.viewMode === "kanban" ? (
-          <KanbanBoard />
-        ) : (
-          <Canvas />
-        )
-      ) : (
-        <EmptyState />
-      )}
+      {showCanvas ? state.viewMode === "kanban" ? <KanbanBoard /> : <Canvas /> : <EmptyState />}
       <ZoomControls />
       <StatsPanel />
       <ShortcutHint />

@@ -24,7 +24,9 @@ class MockDataTransfer {
   }
 }
 
-function node(opts: Partial<MindNode> & { id: string; boardId: string; parentId: string | null }): MindNode {
+function node(
+  opts: Partial<MindNode> & { id: string; boardId: string; parentId: string | null },
+): MindNode {
   return {
     id: opts.id,
     boardId: opts.boardId,
