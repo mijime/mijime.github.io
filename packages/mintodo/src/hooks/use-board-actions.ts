@@ -97,6 +97,7 @@ export function useBoardActions(): BoardActions {
     async (id: string) => {
       if (state.currentBoardId && state.currentBoardId !== id) {
         await saveNodesForBoard(state.currentBoardId, state.nodes).catch((err: unknown) => {
+          // eslint-disable-next-line no-console
           console.error("mintodo: failed to flush board before switch", err);
         });
       }
