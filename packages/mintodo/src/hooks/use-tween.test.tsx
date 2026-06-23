@@ -136,9 +136,9 @@ describe("useTween", () => {
     const kf0 = animateSpy.mock.calls[edgeCallIndex][0][0] as Record<string, string>;
     const kf1 = animateSpy.mock.calls[edgeCallIndex][0][1] as Record<string, string>;
 
-    expect(kf0.d).toMatch(/^M /u);
-    expect(kf0.d).toMatch(/0 -680$/u);
-    expect(kf1.d).toMatch(/^M /u);
-    expect(kf1.d).not.toMatch(/0 -680$/u);
+    expect(kf0.d).toMatch(/^path\("M /u);
+    expect(kf0.d).toMatch(/0 -680"\)$/u);
+    expect(kf1.d).toMatch(/^path\("M /u);
+    expect(kf1.d).not.toMatch(/0 -680"\)$/u);
   });
 });

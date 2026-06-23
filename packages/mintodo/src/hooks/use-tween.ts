@@ -95,8 +95,8 @@ export function useTween(): void {
               { left: `${a.to.x}px`, top: `${a.to.y}px` },
             ]
           : [
-              { d: pathD(a.parent.x, a.parent.y, a.from.x, a.from.y) },
-              { d: pathD(a.parent.x, a.parent.y, a.to.x, a.to.y) },
+              { d: `path("${pathD(a.parent.x, a.parent.y, a.from.x, a.from.y)}")` },
+              { d: `path("${pathD(a.parent.x, a.parent.y, a.to.x, a.to.y)}")` },
             ];
       a.el.animate(keyframes as unknown as Keyframe[], {
         duration: TWEEN_DURATION,
