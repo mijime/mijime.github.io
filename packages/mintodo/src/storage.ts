@@ -10,7 +10,7 @@ export async function loadNodesForBoard(boardId: string): Promise<Record<string,
   const all = await db.nodes.where("boardId").equals(boardId).toArray();
   const rec: Record<string, MindNode> = {};
   for (const n of all) {
-    const {status} = (n as { status?: TaskStatus });
+    const { status } = n as { status?: TaskStatus };
     rec[n.id] = status === undefined ? { ...n, status: n.completed ? "done" : "inbox" } : n;
   }
   return rec;

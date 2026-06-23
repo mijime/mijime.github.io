@@ -65,10 +65,7 @@ export function KanbanColumn({ status }: Props) {
       style={{ background: "var(--toolbar-bg)", border: "1px solid var(--border)" }}
     >
       <div className="flex items-center justify-between mb-1">
-        <h3
-          className="text-sm font-semibold"
-          style={{ color: "var(--ink)" }}
-        >
+        <h3 className="text-sm font-semibold" style={{ color: "var(--ink)" }}>
           {STATUS_LABELS[status]}
         </h3>
         <span
