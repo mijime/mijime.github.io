@@ -56,14 +56,10 @@ export function KanbanCard({ node }: Props) {
         color: "var(--ink)",
       }}
     >
-      <div
-        className="text-[10px] truncate"
-        style={{ color: "var(--mid)" }}
-        title={breadcrumb}
-      >
+      <div className="text-[10px] truncate" style={{ color: "var(--mid)" }} title={breadcrumb}>
         {breadcrumb}
       </div>
-      <div className="flex items-start gap-2">
+      <div className="flex items-start gap-2 min-w-0">
         <button
           type="button"
           data-testid={`kanban-check-${node.id}`}
@@ -74,16 +70,16 @@ export function KanbanCard({ node }: Props) {
           className="shrink-0"
         >
           {isDone ? (
-            <Check className="text-indigo-500" size={16} />
+            <Check className="text-indigo-500" size={18} />
           ) : (
             <XCircle
               className="text-slate-300 dark:text-slate-600 hover:text-indigo-500"
-              size={16}
+              size={18}
             />
           )}
         </button>
         <span
-          className={`text-sm font-medium flex-1 ${isDone ? "line-through text-slate-400 dark:text-slate-500" : ""}`}
+          className={`truncate text-sm font-medium flex-1 ${isDone ? "line-through text-slate-400 dark:text-slate-500" : ""}`}
         >
           {node.text}
         </span>
@@ -100,7 +96,10 @@ export function KanbanCard({ node }: Props) {
         </button>
       </div>
       {showBadgeRow && (
-        <div className="flex items-center justify-between pt-1.5 border-t" style={{ borderColor: "var(--border)" }}>
+        <div
+          className="flex items-center justify-between pt-1.5 border-t"
+          style={{ borderColor: "var(--border)" }}
+        >
           <div className="flex items-center gap-1.5">
             <span dangerouslySetInnerHTML={{ __html: dueHtml }} />
             {showHigh && (
