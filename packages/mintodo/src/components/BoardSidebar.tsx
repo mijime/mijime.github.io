@@ -7,11 +7,7 @@ export function BoardSidebar() {
   const { state, dispatch } = useMindStore();
   const actions = useBoardActions();
 
-  const closeDrawer = () => {
-    if (window.matchMedia("(max-width: 767px)").matches) {
-      dispatch({ open: false, type: "SET_DRAWER" });
-    }
-  };
+  const closeDrawer = () => dispatch({ open: false, type: "SET_DRAWER" });
 
   const onCreate = () => {
     closeDrawer();
@@ -35,7 +31,7 @@ export function BoardSidebar() {
 
   const sidebar = (
     <aside
-      className="flex flex-col h-full w-full rounded"
+      className="flex flex-col h-full rounded"
       style={{ background: "var(--toolbar-bg)", border: "1px solid var(--border)" }}
     >
       <header
@@ -89,9 +85,15 @@ export function BoardSidebar() {
 
   return (
     <>
-      <div className={state.drawerOpen ? "hidden md:flex w-60 shrink-0" : "hidden"}>{sidebar}</div>
+      <div
+        className={
+          `hidden md:flex w-60 shrink-0${  state.drawerOpen ? "" : " md:hidden"}`
+        }
+      >
+        {sidebar}
+      </div>
       {state.drawerOpen && (
-        <div className="fixed left-0 right-0 bottom-0 top-[52px] z-50 md:hidden">
+        <div className="fixed inset-0 z-50 md:hidden">
           <div className="absolute inset-0 bg-black/40" onClick={closeDrawer} />
           <div className="absolute left-0 top-0 bottom-0 w-72 pt-4 pl-4 pb-4 transition-transform duration-200">
             {sidebar}
