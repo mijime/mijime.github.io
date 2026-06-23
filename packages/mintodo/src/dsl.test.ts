@@ -109,15 +109,9 @@ describe("parseDSL — structure", () => {
     expect(r).not.toBeNull();
     expect(r!.nodes[1].text).toBe("Child");
   });
-});
 
   it("allows -2 indent jump: user's task1/tasks1-1/tasks1-1-1/hello + task1-2 case", () => {
-    const text =
-      "task1\n" +
-      "  tasks1-1\n" +
-      "    tasks1-1-1\n" +
-      "      hello\n" +
-      "  task1-2\n";
+    const text = "task1\n" + "  tasks1-1\n" + "    tasks1-1-1\n" + "      hello\n" + "  task1-2\n";
     const r = parseDSL(text, "b1");
     expect(r).not.toBeNull();
     expect(r!.nodes).toHaveLength(5);
@@ -157,6 +151,7 @@ describe("parseDSL — structure", () => {
   it("returns null on a second depth-0 line (multiple roots)", () => {
     expect(parseDSL("Root\nOther\n", "b1")).toBeNull();
   });
+});
 
 describe("parseDSL — attributes", () => {
   it("parses @priority:high", () => {
