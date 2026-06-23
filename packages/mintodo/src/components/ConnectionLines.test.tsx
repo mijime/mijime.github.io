@@ -35,6 +35,7 @@ function makeState(): State {
     hideCompleted: false,
     layoutVersion: 0,
     modal: null,
+    viewMode: "mindmap",
     nodes: {},
     searchQuery: "",
     selectedNodeId: "",

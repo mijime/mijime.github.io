@@ -53,6 +53,7 @@ function makeState(): State {
     hideCompleted: false,
     layoutVersion: 0,
     modal: null,
+    viewMode: "mindmap",
     searchQuery: "",
     selectedNodeId: "",
     view: { pan: { x: 0, y: 0 }, zoom: 1 },

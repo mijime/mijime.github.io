@@ -35,6 +35,7 @@ function makeState(): State {
     hideCompleted: false,
     layoutVersion: 0,
     modal: null,
+    viewMode: "mindmap",
     nodes: {
       root: makeNode("root", null, { isRoot: true, text: "Root", children: ["a"] }),
       a: makeNode("a", "root", { text: "Task A", priority: "low", categoryColor: "sky" }),

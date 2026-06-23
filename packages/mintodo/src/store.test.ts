@@ -516,6 +516,109 @@ describe("reducer - CREATE_CHILD", () => {
   });
 });
 
+describe("reducer - SET_STATUS", () => {
+  it("inbox -> wip: keeps completed=false, no cascade", () => {
+    const s = {
+      ...createInitialState(),
+      nodes: {
+        a: makeNode("a", "b-a", { status: "inbox", children: ["b"] }),
+        b: makeNode("b", "b-a", { parentId: "a", status: "inbox" }),
+      },
+    };
+    const next = reducer(s, { id: "a", status: "wip", type: "SET_STATUS" });
+    expect(next.nodes.a.status).toBe("wip");
+    expect(next.nodes.a.completed).toBe(false);
+    expect(next.nodes.b.status).toBe("inbox");
+  });
+
+  it("wip -> done: completed=true, cascades to descendants", () => {
+    const s = {
+      ...createInitialState(),
+      nodes: {
+        a: makeNode("a", "b-a", { status: "wip", children: ["b"] }),
+        b: makeNode("b", "b-a", { parentId: "a", status: "wip", children: ["c"] }),
+        c: makeNode("c", "b-a", { parentId: "b", status: "inbox" }),
+      },
+    };
+    const next = reducer(s, { id: "a", status: "done", type: "SET_STATUS" });
+    expect(next.nodes.a.status).toBe("done");
+    expect(next.nodes.a.completed).toBe(true);
+    expect(next.nodes.b.status).toBe("done");
+    expect(next.nodes.b.completed).toBe(true);
+    expect(next.nodes.c.status).toBe("done");
+    expect(next.nodes.c.completed).toBe(true);
+  });
+
+  it("done -> wip: completed=false, no cascade", () => {
+    const s = {
+      ...createInitialState(),
+      nodes: {
+        a: makeNode("a", "b-a", { status: "done", completed: true, children: ["b"] }),
+        b: makeNode("b", "b-a", { parentId: "a", status: "done", completed: true }),
+      },
+    };
+    const next = reducer(s, { id: "a", status: "wip", type: "SET_STATUS" });
+    expect(next.nodes.a.status).toBe("wip");
+    expect(next.nodes.a.completed).toBe(false);
+    expect(next.nodes.b.status).toBe("done");
+    expect(next.nodes.b.completed).toBe(true);
+  });
+
+  it("nonexistent id: state unchanged", () => {
+    const s = createInitialState();
+    const next = reducer(s, { id: "missing", status: "done", type: "SET_STATUS" });
+    expect(next).toBe(s);
+  });
+});
+
+describe("reducer - SET_VIEW_MODE", () => {
+  it("switches viewMode", () => {
+    const s = createInitialState();
+    const next = reducer(s, { type: "SET_VIEW_MODE", viewMode: "kanban" });
+    expect(next.viewMode).toBe("kanban");
+  });
+
+  it("initial state defaults to mindmap", () => {
+    expect(createInitialState().viewMode).toBe("mindmap");
+  });
+});
+
+describe("reducer - TOGGLE_COMPLETE (rewritten to delegate to SET_STATUS)", () => {
+  it("flips completed false -> true and sets status=done", () => {
+    const s = {
+      ...createInitialState(),
+      nodes: { n: makeNode("n", "b-a", { status: "inbox" }) },
+    };
+    const next = reducer(s, { id: "n", type: "TOGGLE_COMPLETE" });
+    expect(next.nodes.n.completed).toBe(true);
+    expect(next.nodes.n.status).toBe("done");
+  });
+
+  it("flips completed true -> false and sets status=review", () => {
+    const s = {
+      ...createInitialState(),
+      nodes: { n: makeNode("n", "b-a", { status: "done", completed: true }) },
+    };
+    const next = reducer(s, { id: "n", type: "TOGGLE_COMPLETE" });
+    expect(next.nodes.n.completed).toBe(false);
+    expect(next.nodes.n.status).toBe("review");
+  });
+
+  it("cascades to descendants when toggling to done", () => {
+    const s = {
+      ...createInitialState(),
+      nodes: {
+        a: makeNode("a", "b-a", { children: ["b"] }),
+        b: makeNode("b", "b-a", { parentId: "a" }),
+      },
+    };
+    const next = reducer(s, { id: "a", type: "TOGGLE_COMPLETE" });
+    expect(next.nodes.a.status).toBe("done");
+    expect(next.nodes.b.status).toBe("done");
+    expect(next.nodes.b.completed).toBe(true);
+  });
+});
+
 describe("reducer - SNAP_BACK", () => {
   it("bumps layoutVersion and re-runs the layout without changing structure", () => {
     const s = {
