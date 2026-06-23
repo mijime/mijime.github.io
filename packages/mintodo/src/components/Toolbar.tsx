@@ -1,6 +1,7 @@
 import { Eye, FileText, Keyboard, Menu, Moon, Network, Search, Sun, Trash2 } from "lucide-react";
 import { useMindStore } from "../hooks/use-mind-store";
 import { db } from "../db";
+import { ViewModeToggle } from "./ViewModeToggle";
 
 function onTheme() {
   const isDark = document.documentElement.classList.toggle("dark");
@@ -76,6 +77,7 @@ export function Toolbar() {
             placeholder="タスクを検索..."
           />
         </div>
+        <ViewModeToggle />
         <button
           type="button"
           className="p-2 rounded text-xs font-semibold transition flex items-center gap-1.5"
