@@ -2,6 +2,12 @@ export type Priority = "low" | "medium" | "high";
 
 export type CategoryColor = "slate" | "sky" | "emerald" | "rose";
 
+export type TaskStatus = "inbox" | "wip" | "review" | "done";
+
+export const TASK_STATUSES: readonly TaskStatus[] = ["inbox", "wip", "review", "done"] as const;
+
+export type ViewMode = "mindmap" | "kanban";
+
 export interface Board {
   id: string;
   name: string;
@@ -20,6 +26,7 @@ export interface MindNode {
   priority: Priority;
   categoryColor: CategoryColor;
   dueDate: string;
+  status: TaskStatus;
   children: string[];
   x: number;
   y: number;
@@ -32,7 +39,7 @@ export interface View {
 
 export type Modal =
   | { kind: "edit"; nodeId: string }
-  | { kind: "edit-new"; parentId: string }
+  | { kind: "edit-new"; parentId: string; parentStatusSeed?: TaskStatus }
   | { kind: "help" }
   | { kind: "board-name"; mode: "create" | "rename"; boardId?: string; initialName?: string }
   | { kind: "board-delete"; boardId: string; boardName: string }

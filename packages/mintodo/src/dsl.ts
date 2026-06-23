@@ -26,6 +26,7 @@ function defaultNode(boardId: string): MindNode {
     priority: "medium",
     categoryColor: "slate",
     dueDate: "",
+    status: "inbox",
     children: [],
     x: 0,
     y: 0,

@@ -105,8 +105,9 @@ export function reducer(state: State, action: Action): State {
     case "RENAME_BOARD": {
       const isCurrentBoard = state.currentBoardId === action.id;
       const root = isCurrentBoard ? state.nodes["root"] : null;
-      const nextNodes =
-        root ? { ...state.nodes, root: { ...root, text: action.name } } : state.nodes;
+      const nextNodes = root
+        ? { ...state.nodes, root: { ...root, text: action.name } }
+        : state.nodes;
       return {
         ...state,
         boards: state.boards.map((b) =>
@@ -148,10 +149,10 @@ export function reducer(state: State, action: Action): State {
         priority: "medium",
         categoryColor: "slate",
         dueDate: "",
+        status: "inbox",
         children: [],
         x: 0,
         y: 0,
-
       };
       return withRadialLayout(
         {
@@ -196,6 +197,7 @@ export function reducer(state: State, action: Action): State {
         collapsed: false,
         completed: false,
         dueDate: "",
+        status: "inbox",
         isRoot: false,
         parentId: parent.id,
         priority: "medium",
@@ -228,6 +230,7 @@ export function reducer(state: State, action: Action): State {
         collapsed: false,
         completed: action.completed,
         dueDate: action.dueDate,
+        status: "inbox",
         isRoot: false,
         parentId: parent.id,
         priority: action.priority,

@@ -18,6 +18,7 @@ function makeNode(id: string, parentId: string | null, opts: Partial<MindNode> =
     priority: "medium",
     categoryColor: "slate",
     dueDate: "",
+    status: "inbox",
     children: [],
     x: opts.x ?? 0,
     y: opts.y ?? 0,

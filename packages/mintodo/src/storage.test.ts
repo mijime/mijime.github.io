@@ -28,6 +28,7 @@ function makeNode(id: string, boardId: string, opts: Partial<MindNode> = {}): Mi
     priority: "medium",
     categoryColor: "slate",
     dueDate: "",
+    status: "inbox",
     children: [],
     x: 0,
     y: 0,
@@ -174,4 +175,3 @@ describe("migration", () => {
     expect(await db.nodes.count()).toBe(0);
   });
 });
-

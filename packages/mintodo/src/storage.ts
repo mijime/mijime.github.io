@@ -45,6 +45,7 @@ export async function createBoard(name: string): Promise<{ board: Board; rootId:
     priority: "medium",
     categoryColor: "slate",
     dueDate: "",
+    status: "inbox",
     children: [],
     x: 0,
     y: 0,
@@ -98,4 +99,3 @@ export async function discardV1Data(): Promise<void> {
     await db.nodes.clear();
   });
 }
-

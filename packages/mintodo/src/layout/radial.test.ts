@@ -14,6 +14,7 @@ function node(id: string, opts: Partial<MindNode> = {}): MindNode {
     priority: "medium",
     categoryColor: "slate",
     dueDate: "",
+    status: "inbox",
     children: opts.children ?? [],
     x: 0,
     y: 0,

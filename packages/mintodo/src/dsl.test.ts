@@ -219,6 +219,7 @@ function makeNode(id: string, boardId: string, opts: Partial<MindNode> = {}): Mi
     priority: opts.priority ?? "medium",
     categoryColor: opts.categoryColor ?? "slate",
     dueDate: opts.dueDate ?? "",
+    status: "inbox",
     children: opts.children ?? [],
     x: 0,
     y: 0,
