@@ -57,15 +57,19 @@ function Shell() {
 
   return (
     <div
-      className="flex flex-col overflow-hidden select-none relative h-full w-full"
+      className="flex h-full w-full overflow-hidden select-none"
       style={{ background: "var(--paper)", color: "var(--ink)" }}
     >
-      <Toolbar />
       <BoardSidebar />
-      {showCanvas ? state.viewMode === "kanban" ? <KanbanBoard /> : <Canvas /> : <EmptyState />}
-      <ZoomControls />
-      <StatsPanel />
-      <ShortcutHint />
+      <div className="flex-1 relative overflow-hidden">
+        <Toolbar />
+        <div className="absolute inset-0 pt-20 px-4 pb-4">
+          {showCanvas ? (state.viewMode === "kanban" ? <KanbanBoard /> : <Canvas />) : <EmptyState />}
+        </div>
+        <ZoomControls />
+        <StatsPanel />
+        <ShortcutHint />
+      </div>
       <EditModal />
       <DslEditorModal />
       <HelpModal />
