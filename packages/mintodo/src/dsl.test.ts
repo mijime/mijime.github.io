@@ -111,7 +111,7 @@ describe("parseDSL — structure", () => {
   });
 
   it("allows -2 indent jump: user's task1/tasks1-1/tasks1-1-1/hello + task1-2 case", () => {
-    const text = "task1\n" + "  tasks1-1\n" + "    tasks1-1-1\n" + "      hello\n" + "  task1-2\n";
+    const text = "task1\n  tasks1-1\n    tasks1-1-1\n      hello\n  task1-2\n";
     const r = parseDSL(text, "b1");
     expect(r).not.toBeNull();
     expect(r!.nodes).toHaveLength(5);
