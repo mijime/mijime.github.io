@@ -188,18 +188,14 @@ describe("computeRadialPositions", () => {
       parentId: "root",
       children: ["a1", "a2", "a3", "a4", "a5"],
     });
-    const aKids = ["a1", "a2", "a3", "a4", "a5"].map((id) =>
-      node(id, { parentId: "a" }),
-    );
+    const aKids = ["a1", "a2", "a3", "a4", "a5"].map((id) => node(id, { parentId: "a" }));
     const b = node("b", { parentId: "root" });
     const all = [root, a, ...aKids, b];
     const pos = computeRadialPositions({
       rootId: "root",
       nodes: nodes(...all),
     });
-    const aKidsAngles = aKids.map((kid) =>
-      Math.atan2(pos[kid.id].y, pos[kid.id].x),
-    );
+    const aKidsAngles = aKids.map((kid) => Math.atan2(pos[kid.id].y, pos[kid.id].x));
     const aMinA = Math.min(...aKidsAngles);
     const aMaxA = Math.max(...aKidsAngles);
     const bAngle = Math.atan2(pos.b.y, pos.b.x);
@@ -252,9 +248,7 @@ describe("computeRadialPositions", () => {
       parentId: "root",
       children: ["a1", "a2", "a3", "a4", "a5"],
     });
-    const aKids = ["a1", "a2", "a3", "a4", "a5"].map((id) =>
-      node(id, { parentId: "a" }),
-    );
+    const aKids = ["a1", "a2", "a3", "a4", "a5"].map((id) => node(id, { parentId: "a" }));
     const b = node("b", { parentId: "root", children: ["b1"] });
     const b1 = node("b1", { parentId: "b" });
     const all = [root, a, ...aKids, b, b1];
@@ -275,9 +269,7 @@ describe("computeRadialPositions", () => {
       isRoot: true,
       children: ["a", "b", "c", "d", "e"],
     });
-    const kids = ["a", "b", "c", "d", "e"].map((id) =>
-      node(id, { parentId: "root" }),
-    );
+    const kids = ["a", "b", "c", "d", "e"].map((id) => node(id, { parentId: "root" }));
     const pos = computeRadialPositions({
       rootId: "root",
       nodes: nodes(root, ...kids),
