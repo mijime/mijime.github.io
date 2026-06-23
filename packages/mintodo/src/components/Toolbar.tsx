@@ -1,4 +1,15 @@
-import { Eye, FileText, Keyboard, Menu, Moon, Network, Search, Sun, Trash2 } from "lucide-react";
+import {
+  Eye,
+  FileText,
+  Keyboard,
+  Moon,
+  Network,
+  PanelLeftClose,
+  PanelLeftOpen,
+  Search,
+  Sun,
+  Trash2,
+} from "lucide-react";
 import { useMindStore } from "../hooks/use-mind-store";
 import { db } from "../db";
 import { ViewModeToggle } from "./ViewModeToggle";
@@ -35,10 +46,10 @@ export function Toolbar() {
             type="button"
             onClick={onToggleDrawer}
             title="ボード一覧"
-            className="p-2 rounded transition md:hidden"
+            className="p-2 rounded transition"
             style={{ color: "var(--mid)" }}
           >
-            <Menu size={18} />
+            {state.drawerOpen ? <PanelLeftClose size={18} /> : <PanelLeftOpen size={18} />}
           </button>
           <div
             className="p-2 rounded"
