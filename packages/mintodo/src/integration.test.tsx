@@ -450,9 +450,7 @@ describe("kanban view end-to-end", () => {
     await act(() => {
       fireEvent.click(addBtn);
     });
-    const ta = document.querySelector(
-      '[data-testid="edit-modal-textarea"]',
-    ) as HTMLTextAreaElement;
+    const ta = document.querySelector('[data-testid="edit-modal-textarea"]') as HTMLTextAreaElement;
     await act(() => {
       fireEvent.change(ta, { target: { value: "drag test" } });
     });
@@ -475,10 +473,10 @@ describe("kanban view end-to-end", () => {
 
     // Card should be in inbox column (need the child, not root)
     const inboxColumn = screen.getByTestId("kanban-column-inbox");
-    const cards = inboxColumn.querySelectorAll('[data-node-id]') as NodeListOf<HTMLElement>;
+    const cards = inboxColumn.querySelectorAll("[data-node-id]") as NodeListOf<HTMLElement>;
     const childCard = [...cards].find((c) => c.dataset.nodeId !== "root");
     expect(childCard).toBeTruthy();
-    const {nodeId} = childCard!.dataset;
+    const { nodeId } = childCard!.dataset;
     expect(nodeId).toBeTruthy();
 
     // Drag the child card to the done column
