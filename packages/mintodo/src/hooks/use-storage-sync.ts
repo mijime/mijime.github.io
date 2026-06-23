@@ -2,13 +2,11 @@ import { useEffect, useRef } from "react";
 import {
   discardV1Data,
   getCurrentBoardId,
-  getMeta,
   hasV1Data,
   loadBoards,
   loadNodesForBoard,
   saveNodesForBoard,
   setCurrentBoardId,
-  setMeta,
 } from "../storage";
 import { useMindStore } from "./use-mind-store";
 
@@ -36,10 +34,6 @@ export function useStorageSync(): void {
           await setCurrentBoardId(null);
           dispatch({ boardId: null, type: "SET_CURRENT_BOARD" });
         }
-        const physics = await getMeta<boolean>("physicsEnabled");
-        if (physics === false) {
-          dispatch({ type: "TOGGLE_PHYSICS" });
-        }
       } catch (err) {
         // eslint-disable-next-line no-console
         console.error("mintodo: failed to load from IndexedDB, using initial state", err);
@@ -59,13 +53,9 @@ export function useStorageSync(): void {
           console.error("mintodo: failed to save nodes", err);
         });
       }
-      setMeta("physicsEnabled", state.physicsEnabled).catch((err: unknown) => {
-        // eslint-disable-next-line no-console
-        console.error("mintodo: failed to save meta", err);
-      });
     }, SAVE_DEBOUNCE_MS);
     return () => {
       if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
     };
-  }, [state.nodes, state.currentBoardId, state.physicsEnabled]);
+  }, [state.nodes, state.currentBoardId]);
 }

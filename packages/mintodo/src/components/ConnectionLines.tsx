@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { useMindStore } from "../hooks/use-mind-store";
 
+const MIN_CURVE_SPREAD = 60;
+
 function isParentCollapsed(state: ReturnType<typeof useMindStore>["state"], id: string): boolean {
   const node = state.nodes[id];
   if (!node) return true;
@@ -53,9 +55,12 @@ export function ConnectionLines({ containerRef }: Props) {
         const sy = cy + parent.y * state.view.zoom + state.view.pan.y;
         const ex = cx + node.x * state.view.zoom + state.view.pan.x;
         const ey = cy + node.y * state.view.zoom + state.view.pan.y;
-        const c1x = sx + (ex - sx) * 0.5;
+        const dx = ex - sx;
+        const spread = Math.max(Math.abs(dx) * 0.5, MIN_CURVE_SPREAD);
+        const sign = dx >= 0 ? 1 : -1;
+        const c1x = sx + sign * spread;
         const c1y = sy;
-        const c2x = sx + (ex - sx) * 0.5;
+        const c2x = ex - sign * spread;
         const c2y = ey;
         const color = node.completed ? inactiveColor : activeColor;
         const pathProps = node.completed
@@ -64,9 +69,10 @@ export function ConnectionLines({ containerRef }: Props) {
         return (
           <path
             key={node.id}
+            id={`edge-${parent.id}-${node.id}`}
             d={`M ${sx} ${sy} C ${c1x} ${c1y}, ${c2x} ${c2y}, ${ex} ${ey}`}
-            stroke={color}
             fill="none"
+            stroke={color}
             {...pathProps}
           />
         );

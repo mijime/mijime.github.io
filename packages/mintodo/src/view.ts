@@ -2,6 +2,13 @@ import type { MindNode, View } from "./types";
 
 const PADDING = 1.5;
 
+export function computeCenterOnNode(node: { x: number; y: number }, currentZoom: number): View {
+  return {
+    pan: { x: -node.x * currentZoom, y: -node.y * currentZoom },
+    zoom: currentZoom,
+  };
+}
+
 export function computeFitView(
   nodes: Record<string, MindNode>,
   containerWidth: number,

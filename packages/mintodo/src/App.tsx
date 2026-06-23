@@ -11,6 +11,7 @@ import { ShortcutHint } from "./components/ShortcutHint";
 import { StatsPanel } from "./components/StatsPanel";
 import { Toolbar } from "./components/Toolbar";
 import { ZoomControls } from "./components/ZoomControls";
+import { useCenterOnNewNode } from "./hooks/use-center-on-new-node";
 import { useKeyboard } from "./hooks/use-keyboard";
 import { useBoardActions } from "./hooks/use-board-actions";
 import { MindProvider, useMindStore } from "./hooks/use-mind-store";
@@ -21,6 +22,7 @@ function Shell() {
   const actions = useBoardActions();
   useStorageSync();
   useKeyboard();
+  useCenterOnNewNode();
 
   useEffect(() => {
     const onCreate = (e: Event) => {
