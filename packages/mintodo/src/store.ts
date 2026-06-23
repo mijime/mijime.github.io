@@ -1,4 +1,13 @@
-import type { Board, CategoryColor, MindNode, Modal, Priority, TaskStatus, View, ViewMode } from "./types";
+import type {
+  Board,
+  CategoryColor,
+  MindNode,
+  Modal,
+  Priority,
+  TaskStatus,
+  View,
+  ViewMode,
+} from "./types";
 import { applyRadialLayout } from "./layout/radial";
 
 export interface State {
@@ -49,6 +58,7 @@ export type Action =
       categoryColor: CategoryColor;
       dueDate: string;
       completed: boolean;
+      status: TaskStatus;
     }
   | { type: "UPDATE_NODE"; id: string; patch: Partial<MindNode> };
 
@@ -234,7 +244,7 @@ export function reducer(state: State, action: Action): State {
         collapsed: false,
         completed: action.completed,
         dueDate: action.dueDate,
-        status: "inbox",
+        status: action.status,
         isRoot: false,
         parentId: parent.id,
         priority: action.priority,
