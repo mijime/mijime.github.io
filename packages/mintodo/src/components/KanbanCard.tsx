@@ -96,10 +96,7 @@ export function KanbanCard({ node }: Props) {
         </button>
       </div>
       {showBadgeRow && (
-        <div
-          className="flex items-center justify-between pt-1.5 border-t"
-          style={{ borderColor: "var(--border)" }}
-        >
+        <div className="flex items-center justify-between w-full pt-1.5 border-t border-slate-100 dark:border-slate-700/50">
           <div className="flex items-center gap-1.5">
             <span dangerouslySetInnerHTML={{ __html: dueHtml }} />
             {showHigh && (

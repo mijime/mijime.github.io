@@ -272,7 +272,7 @@ describe("EditModal — status picker", () => {
   it("clicking a status button updates the picker and dispatch", () => {
     const node: MindNode = {
       id: "n1",
-      boardId: "b",
+      boardId: "b1",
       text: "t",
       parentId: null,
       isRoot: false,
@@ -301,7 +301,7 @@ describe("EditModal — status picker", () => {
   it("inline @status:review in textarea mirrors into picker", () => {
     const node: MindNode = {
       id: "n1",
-      boardId: "b",
+      boardId: "b1",
       text: "t",
       parentId: null,
       isRoot: false,

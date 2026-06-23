@@ -9,6 +9,25 @@ const flush = (ms: number) =>
     setTimeout(resolve, ms);
   });
 
+// Jsdom doesn't implement DataTransfer
+class MockDataTransfer {
+  private data = new Map<string, string>();
+  public types: string[] = [];
+  public effectAllowed = "move";
+  public dropEffect = "move";
+
+  public setData(format: string, data: string): void {
+    this.data.set(format, data);
+    if (!this.types.includes(format)) {
+      this.types.push(format);
+    }
+  }
+
+  public getData(format: string): string {
+    return this.data.get(format) ?? "";
+  }
+}
+
 describe("board creation end-to-end", () => {
   afterEach(async () => {
     await db.delete();
@@ -417,5 +436,65 @@ describe("kanban view end-to-end", () => {
     });
     const meta = await db.meta.get(`viewMode:${boardId}`);
     expect(meta?.value).toBe("kanban");
+  });
+
+  it("dragging a card between columns changes its status", async () => {
+    render(<App />);
+    await act(async () => {
+      await flush(100);
+    });
+    await createBoard("Test");
+
+    // Add a child node
+    const addBtn = document.querySelector('[data-testid="add-child-root"]') as HTMLElement;
+    await act(() => {
+      fireEvent.click(addBtn);
+    });
+    const ta = document.querySelector(
+      '[data-testid="edit-modal-textarea"]',
+    ) as HTMLTextAreaElement;
+    await act(() => {
+      fireEvent.change(ta, { target: { value: "drag test" } });
+    });
+    await act(() => {
+      fireEvent.click(
+        document.querySelector('[data-testid="edit-modal-save"]') as HTMLButtonElement,
+      );
+    });
+    await act(async () => {
+      await flush(500);
+    });
+
+    // Switch to kanban view
+    await act(() => {
+      fireEvent.click(screen.getByTestId("view-mode-kanban"));
+    });
+    await act(async () => {
+      await flush(100);
+    });
+
+    // Card should be in inbox column (need the child, not root)
+    const inboxColumn = screen.getByTestId("kanban-column-inbox");
+    const cards = inboxColumn.querySelectorAll('[data-node-id]') as NodeListOf<HTMLElement>;
+    const childCard = [...cards].find((c) => c.dataset.nodeId !== "root");
+    expect(childCard).toBeTruthy();
+    const {nodeId} = childCard!.dataset;
+    expect(nodeId).toBeTruthy();
+
+    // Drag the child card to the done column
+    const doneColumn = screen.getByTestId("kanban-column-done");
+    const dt = new MockDataTransfer();
+    dt.setData("application/x-mindnode-id", nodeId!);
+
+    await act(() => {
+      fireEvent.drop(doneColumn, { dataTransfer: dt as unknown as DataTransfer });
+    });
+    await act(async () => {
+      await flush(100);
+    });
+
+    // Card should now be in done column, not inbox
+    expect(screen.getByTestId("kanban-column-count-inbox").textContent).toBe("1");
+    expect(screen.getByTestId("kanban-column-count-done").textContent).toBe("1");
   });
 });
