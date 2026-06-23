@@ -56,12 +56,12 @@ function radialSeparation(a: TreeNode, b: TreeNode): number {
 }
 
 function nextLeft(v: TreeNode): TreeNode | null {
-  const {children} = v;
+  const { children } = v;
   return children ? children[0] : v.t;
 }
 
 function nextRight(v: TreeNode): TreeNode | null {
-  const {children} = v;
+  const { children } = v;
   if (!children) return v.t;
   return children.at(-1)!;
 }
@@ -78,7 +78,7 @@ function moveSubtree(wm: TreeNode, wp: TreeNode, shift: number): void {
 function executeShifts(v: TreeNode): void {
   let shift = 0;
   let change = 0;
-  const {children} = v;
+  const { children } = v;
   if (!children) return;
   for (let i = children.length - 1; i >= 0; i--) {
     const w = children[i];
@@ -88,19 +88,11 @@ function executeShifts(v: TreeNode): void {
   }
 }
 
-function nextAncestor(
-  vim: TreeNode,
-  v: TreeNode,
-  ancestor: TreeNode,
-): TreeNode {
+function nextAncestor(vim: TreeNode, v: TreeNode, ancestor: TreeNode): TreeNode {
   return vim.a.parent === v.parent ? vim.a : ancestor;
 }
 
-function apportion(
-  v: TreeNode,
-  w: TreeNode | null,
-  ancestor: TreeNode,
-): TreeNode {
+function apportion(v: TreeNode, w: TreeNode | null, ancestor: TreeNode): TreeNode {
   if (!w) return ancestor;
   let vip: TreeNode | null = v;
   let vop: TreeNode = v;
@@ -143,7 +135,7 @@ function apportion(
 }
 
 function firstWalk(v: TreeNode): void {
-  const {children} = v;
+  const { children } = v;
   const siblings = v.parent!.children!;
   const w: TreeNode | null = v.i ? siblings[v.i - 1] : null;
   if (children) {
@@ -162,7 +154,7 @@ function firstWalk(v: TreeNode): void {
 }
 
 function secondWalk(v: TreeNode): void {
-  v._.x = v.z + v.parent!.m;
+  v.x = v.z + v.parent!.m;
   v.m += v.parent!.m;
 }
 
@@ -308,19 +300,17 @@ function evenDistributeRootChildren(tree: TreeNode, startAngle: number): void {
   }
 }
 
-function toPolar(
-  tree: TreeNode,
-  ringDistance: number,
-): Record<string, { x: number; y: number }> {
+function toPolar(tree: TreeNode, ringDistance: number): Record<string, { x: number; y: number }> {
   const out: Record<string, { x: number; y: number }> = {};
   const visit = (n: TreeNode) => {
     const radius = n.y * ringDistance;
-    out[n._.id] = radius === 0
-      ? { x: 0, y: 0 }
-      : {
-          x: Math.cos(n.x) * radius,
-          y: Math.sin(n.x) * radius,
-        };
+    out[n._.id] =
+      radius === 0
+        ? { x: 0, y: 0 }
+        : {
+            x: Math.cos(n.x) * radius,
+            y: Math.sin(n.x) * radius,
+          };
     if (n.children) for (const c of n.children) visit(c);
   };
   visit(tree);
