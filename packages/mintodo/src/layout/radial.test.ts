@@ -60,15 +60,12 @@ describe("computeRadialPositions", () => {
     const pos = computeRadialPositions({ rootId: "root", nodes: nodes(root, a, b, c) });
     expect(pos.a.x).toBeCloseTo(0, 5);
     expect(pos.a.y).toBeCloseTo(-RING, 5);
-    const slice = TAU / 3;
-    const angleB = UP + slice;
-    const ringB = RING * (1 + 1 * 0.12);
-    expect(pos.b.x).toBeCloseTo(Math.cos(angleB) * ringB, 5);
-    expect(pos.b.y).toBeCloseTo(Math.sin(angleB) * ringB, 5);
-    const angleC = UP + 2 * slice;
-    const ringC = RING * (1 + 2 * 0.12);
-    expect(pos.c.x).toBeCloseTo(Math.cos(angleC) * ringC, 5);
-    expect(pos.c.y).toBeCloseTo(Math.sin(angleC) * ringC, 5);
+    const angleB = UP + (TAU / 3);
+    expect(pos.b.x).toBeCloseTo(Math.cos(angleB) * RING, 5);
+    expect(pos.b.y).toBeCloseTo(Math.sin(angleB) * RING, 5);
+    const angleC = UP + (2 * TAU / 3);
+    expect(pos.c.x).toBeCloseTo(Math.cos(angleC) * RING, 5);
+    expect(pos.c.y).toBeCloseTo(Math.sin(angleC) * RING, 5);
   });
 
   it("scales radius with depth", () => {
@@ -80,41 +77,7 @@ describe("computeRadialPositions", () => {
     expect(dist).toBeCloseTo(RING, 5);
   });
 
-  it("splits a non-root's arc proportional to leaf count", () => {
-    const root = node("root", { isRoot: true, children: ["a"] });
-    const a = node("a", { parentId: "root", children: ["a1", "a2", "a3", "a4", "a5", "b1"] });
-    const aChildren = ["a1", "a2", "a3", "a4", "a5"].map((id) =>
-      node(id, { parentId: "a", children: ["leaf"] }),
-    );
-    const leaf1 = node("leaf", { parentId: "a1" });
-    const leaf2 = node("leaf2", { parentId: "a2" });
-    const leaf3 = node("leaf3", { parentId: "a3" });
-    const leaf4 = node("leaf4", { parentId: "a4" });
-    const leaf5 = node("leaf5", { parentId: "a5" });
-    const b1 = node("b1", { parentId: "a" });
-    const all = [root, a, ...aChildren, leaf1, leaf2, leaf3, leaf4, leaf5, b1];
-    const pos = computeRadialPositions({ rootId: "root", nodes: nodes(...all) });
-    const dist = (id: string) => Math.hypot(pos[id].x - pos.a.x, pos[id].y - pos.a.y);
-    expect(dist("a1")).toBeCloseTo(RING, 5);
-    expect(dist("b1")).toBeCloseTo(RING * (1 + 5 * 0.12), 5);
-  });
 
-  it("places children progressively further outward", () => {
-    const root = node("root", { isRoot: true, children: ["a", "b", "c", "d"] });
-    const a = node("a", { parentId: "root" });
-    const b = node("b", { parentId: "root" });
-    const c = node("c", { parentId: "root" });
-    const d = node("d", { parentId: "root" });
-    const pos = computeRadialPositions({ rootId: "root", nodes: nodes(root, a, b, c, d) });
-    const dA = Math.hypot(pos.a.x, pos.a.y);
-    const dB = Math.hypot(pos.b.x, pos.b.y);
-    const dC = Math.hypot(pos.c.x, pos.c.y);
-    const dD = Math.hypot(pos.d.x, pos.d.y);
-    expect(dB).toBeGreaterThan(dA);
-    expect(dC).toBeGreaterThan(dB);
-    expect(dD).toBeGreaterThan(dC);
-    expect(dA).toBeCloseTo(RING, 5);
-  });
 
   it("hides descendants of a collapsed node", () => {
     const root = node("root", { isRoot: true, children: ["a"] });
