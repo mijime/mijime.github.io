@@ -64,7 +64,7 @@ function Shell() {
       <div className="flex-1 relative overflow-hidden">
         <Toolbar />
         <div className="absolute inset-0 pt-20 px-4 pb-4">
-          {showCanvas ? (state.viewMode === "kanban" ? <KanbanBoard /> : <Canvas />) : <EmptyState />}
+          {showCanvas ? state.viewMode === "kanban" ? <KanbanBoard /> : <Canvas /> : <EmptyState />}
         </div>
         <ZoomControls />
         <StatsPanel />

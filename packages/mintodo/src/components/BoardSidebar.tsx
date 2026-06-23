@@ -85,11 +85,7 @@ export function BoardSidebar() {
 
   return (
     <>
-      <div
-        className={
-          `hidden md:flex w-60 shrink-0${  state.drawerOpen ? "" : " md:hidden"}`
-        }
-      >
+      <div className={`hidden md:flex w-60 shrink-0${state.drawerOpen ? "" : " md:hidden"}`}>
         {sidebar}
       </div>
       {state.drawerOpen && (
