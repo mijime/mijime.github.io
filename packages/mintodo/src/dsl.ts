@@ -36,11 +36,11 @@ export function parseDSL(text: string, boardId: string): DslParseResult | null {
   const lines = text.replaceAll(/\r\n?/gu, "\n").split("\n");
 
   const nodes: MindNode[] = [];
-  let prevDepth = 0;
   let firstNode = true;
   let counter = 0;
   let rootText = "";
-  const parentByDepth: string[] = [];
+  let hasRoot = false;
+  const stack: { depth: number; node: MindNode }[] = [];
 
   for (const raw of lines) {
     if (raw === "" || /^\s*#/u.test(raw)) continue;
@@ -58,8 +58,17 @@ export function parseDSL(text: string, boardId: string): DslParseResult | null {
     if (firstNode) {
       if (depth !== 0) return null;
       firstNode = false;
-    } else if (Math.abs(depth - prevDepth) > 1) {
-      return null;
+    }
+
+    while (stack.length > 0 && stack.at(-1)!.depth >= depth) {
+      stack.pop();
+    }
+
+    const parent = stack.length > 0 ? stack.at(-1)!.node : null;
+
+    if (parent === null && depth === 0) {
+      if (hasRoot) return null;
+      hasRoot = true;
     }
 
     const tokens = rest.split(/\s+/u);
@@ -117,30 +126,21 @@ export function parseDSL(text: string, boardId: string): DslParseResult | null {
       completed,
     };
 
-    if (depth === 0) {
+    if (parent === null) {
       node.id = "root";
       node.isRoot = true;
       rootText = text;
     } else {
       node.id = `n${counter++}`;
-      node.parentId = parentByDepth[depth - 1];
+      node.parentId = parent.id;
+      parent.children.push(node.id);
     }
 
-    parentByDepth[depth] = node.id;
-    if (depth + 1 < parentByDepth.length) parentByDepth.length = depth + 1;
-
     nodes.push(node);
-    prevDepth = depth;
+    stack.push({ depth, node });
   }
 
   if (firstNode) return null;
-
-  for (const n of nodes) {
-    if (n.parentId) {
-      const parent = nodes.find((x) => x.id === n.parentId);
-      if (parent) parent.children.push(n.id);
-    }
-  }
 
   return {
     board: { id: boardId, name: rootText },

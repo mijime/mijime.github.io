@@ -82,12 +82,22 @@ describe("parseDSL — structure", () => {
     expect(parseDSL("Root\n   Child\n", "b1")).toBeNull();
   });
 
-  it("returns null on +4 indent jump", () => {
-    expect(parseDSL("Root\n      Child\n", "b1")).toBeNull();
+  it("allows +4 indent jump (deep child of root)", () => {
+    const r = parseDSL("Root\n        DeepChild\n", "b1");
+    expect(r).not.toBeNull();
+    expect(r!.nodes).toHaveLength(2);
+    const child = r!.nodes.find((n) => n.text === "DeepChild")!;
+    expect(child.parentId).toBe("root");
   });
 
-  it("returns null on -4 indent jump", () => {
-    expect(parseDSL("Root\n  A\n      B\n", "b1")).toBeNull();
+  it("allows -4 indent jump (sibling of grandchild back at root level)", () => {
+    const r = parseDSL("Root\n  A\n      B\n  C\n", "b1");
+    expect(r).not.toBeNull();
+    expect(r!.nodes).toHaveLength(4);
+    const c = r!.nodes.find((n) => n.text === "C")!;
+    expect(c.parentId).toBe("root");
+    const b = r!.nodes.find((n) => n.text === "B")!;
+    expect(b.parentId).toBe("n0");
   });
 
   it("returns null on empty text after stripping", () => {
@@ -100,6 +110,53 @@ describe("parseDSL — structure", () => {
     expect(r!.nodes[1].text).toBe("Child");
   });
 });
+
+  it("allows -2 indent jump: user's task1/tasks1-1/tasks1-1-1/hello + task1-2 case", () => {
+    const text =
+      "task1\n" +
+      "  tasks1-1\n" +
+      "    tasks1-1-1\n" +
+      "      hello\n" +
+      "  task1-2\n";
+    const r = parseDSL(text, "b1");
+    expect(r).not.toBeNull();
+    expect(r!.nodes).toHaveLength(5);
+    const task1 = root(r!.nodes);
+    expect(task1.children).toHaveLength(2);
+    const tasks1_1 = r!.nodes.find((n) => n.text === "tasks1-1")!;
+    const task1_2 = r!.nodes.find((n) => n.text === "task1-2")!;
+    expect(tasks1_1.parentId).toBe("root");
+    expect(task1_2.parentId).toBe("root");
+    const tasks1_1_1 = r!.nodes.find((n) => n.text === "tasks1-1-1")!;
+    expect(tasks1_1_1.parentId).toBe(tasks1_1.id);
+    const hello = r!.nodes.find((n) => n.text === "hello")!;
+    expect(hello.parentId).toBe(tasks1_1_1.id);
+  });
+
+  it("allows -3 indent jump: deep subtree then back to root level", () => {
+    const text = "A\n  B\n    C\n      D\n  E\n";
+    const r = parseDSL(text, "b1");
+    expect(r).not.toBeNull();
+    expect(r!.nodes).toHaveLength(5);
+    const a = root(r!.nodes);
+    const e = r!.nodes.find((n) => n.text === "E")!;
+    expect(e.parentId).toBe(a.id);
+    const b = r!.nodes.find((n) => n.text === "B")!;
+    expect(b.parentId).toBe(a.id);
+  });
+
+  it("allows arbitrary +N indent: deep child from root", () => {
+    const text = "A\n            B\n";
+    const r = parseDSL(text, "b1");
+    expect(r).not.toBeNull();
+    expect(r!.nodes).toHaveLength(2);
+    const b = r!.nodes.find((n) => n.text === "B")!;
+    expect(b.parentId).toBe("root");
+  });
+
+  it("returns null on a second depth-0 line (multiple roots)", () => {
+    expect(parseDSL("Root\nOther\n", "b1")).toBeNull();
+  });
 
 describe("parseDSL — attributes", () => {
   it("parses @priority:high", () => {
