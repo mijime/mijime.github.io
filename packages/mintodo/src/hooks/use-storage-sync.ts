@@ -34,11 +34,10 @@ export function useStorageSync(): void {
           await setCurrentBoardId(null);
           dispatch({ boardId: null, type: "SET_CURRENT_BOARD" });
         }
+        loadedRef.current = true;
       } catch (err) {
         // eslint-disable-next-line no-console
         console.error("mintodo: failed to load from IndexedDB, using initial state", err);
-      } finally {
-        loadedRef.current = true;
       }
     })();
   }, [dispatch]);

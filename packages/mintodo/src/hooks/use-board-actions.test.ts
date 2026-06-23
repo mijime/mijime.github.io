@@ -183,6 +183,43 @@ describe("useBoardActions", () => {
     expect(result.current.store.state.nodes.root.boardId).toBe(bId);
   });
 
+  it("deleting boards sequentially does not erase surviving board nodes", async () => {
+    const { result } = renderHook(
+      () => ({
+        actions: useBoardActions(),
+        store: useMindStore(),
+      }),
+      { wrapper },
+    );
+    let a: { id: string };
+    let b: { id: string };
+    let c: { id: string };
+    await act(async () => {
+      a = await result.current.actions.createBoard("A");
+    });
+    await act(async () => {
+      b = await result.current.actions.createBoard("B");
+    });
+    // Delete A (non-current, current is B)
+    await act(async () => {
+      await result.current.actions.deleteBoard(a!.id);
+    });
+    expect(result.current.store.state.currentBoardId).toBe(b!.id);
+    // Create C (current switches to C)
+    await act(async () => {
+      c = await result.current.actions.createBoard("C");
+    });
+    expect(result.current.store.state.currentBoardId).toBe(c!.id);
+    // Delete C (current, next should be B)
+    await act(async () => {
+      await result.current.actions.deleteBoard(c!.id);
+    });
+    expect(result.current.store.state.currentBoardId).toBe(b!.id);
+    // B's root node must still exist
+    expect(result.current.store.state.nodes.root).toBeDefined();
+    expect(result.current.store.state.nodes.root.boardId).toBe(b!.id);
+  });
+
   it("switchBoard flushes pending edits before switching", async () => {
     const { result } = renderHook(
       () => ({
