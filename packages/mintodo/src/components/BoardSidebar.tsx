@@ -85,7 +85,13 @@ export function BoardSidebar() {
 
   return (
     <>
-      <aside className="hidden md:flex absolute left-4 top-20 bottom-4 w-60 z-10">{sidebar}</aside>
+      <div
+        className={
+          `hidden md:flex w-60 shrink-0${  state.drawerOpen ? "" : " md:hidden"}`
+        }
+      >
+        {sidebar}
+      </div>
       {state.drawerOpen && (
         <div className="fixed inset-0 z-50 md:hidden">
           <div className="absolute inset-0 bg-black/40" onClick={closeDrawer} />
