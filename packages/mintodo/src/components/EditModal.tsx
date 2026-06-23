@@ -186,6 +186,12 @@ export function EditModal() {
                 data-testid="edit-modal-textarea"
                 value={text}
                 onChange={(e) => handleTextChange(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
+                    e.preventDefault();
+                    commit();
+                  }
+                }}
                 rows={3}
                 className="w-full px-3 py-2 rounded text-sm outline-none resize-y min-h-[60px] font-mono"
                 style={{
