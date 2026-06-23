@@ -444,6 +444,7 @@ describe("reducer - CREATE_CHILD", () => {
       categoryColor: "sky",
       dueDate: "2026-07-01",
       completed: false,
+      status: "inbox",
     });
     expect(next.nodes.n1.text).toBe("my task");
     expect(next.nodes.n1.priority).toBe("high");
@@ -469,6 +470,7 @@ describe("reducer - CREATE_CHILD", () => {
       categoryColor: "slate",
       dueDate: "",
       completed: false,
+      status: "inbox",
     });
     expect(next.nodes.root.children).toContain("n1");
   });
@@ -488,6 +490,7 @@ describe("reducer - CREATE_CHILD", () => {
       categoryColor: "slate",
       dueDate: "",
       completed: false,
+      status: "inbox",
     });
     expect(next.selectedNodeId).toBe("n1");
   });
@@ -509,6 +512,7 @@ describe("reducer - CREATE_CHILD", () => {
       categoryColor: "slate",
       dueDate: "",
       completed: false,
+      status: "inbox",
     });
     expect(next.layoutVersion).toBe(before + 1);
     expect(next.nodes.n1.x).toBeCloseTo(0);

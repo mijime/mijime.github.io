@@ -2,7 +2,7 @@ import { ChevronDown, ChevronUp, Pencil, Trash2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { parseInlineDSL } from "../dsl";
 import { useMindStore } from "../hooks/use-mind-store";
-import type { CategoryColor, Priority } from "../types";
+import type { CategoryColor, Priority, TaskStatus } from "../types";
 
 const COLORS: { value: CategoryColor; label: string; bg: string }[] = [
   { value: "slate", label: "slate", bg: "bg-slate-400" },
@@ -15,6 +15,13 @@ const PRIORITIES: { value: Priority; label: string }[] = [
   { value: "low", label: "低" },
   { value: "medium", label: "中" },
   { value: "high", label: "高" },
+];
+
+const STATUSES: { value: TaskStatus; label: string }[] = [
+  { value: "inbox", label: "受信箱" },
+  { value: "wip", label: "作業中" },
+  { value: "review", label: "レビュー" },
+  { value: "done", label: "完了" },
 ];
 
 function swatchActive(c: CategoryColor, current: CategoryColor): string {
@@ -31,7 +38,7 @@ export function EditModal() {
   const [priority, setPriority] = useState<Priority>("medium");
   const [categoryColor, setCategoryColor] = useState<CategoryColor>("slate");
   const [dueDate, setDueDate] = useState("");
-  const [completed, setCompleted] = useState(false);
+  const [status, setStatus] = useState<TaskStatus>("inbox");
   const [barTouched, setBarTouched] = useState(false);
 
   const isNew = modal?.kind === "edit-new";
@@ -51,7 +58,7 @@ export function EditModal() {
       setPriority(node.priority);
       setCategoryColor(node.categoryColor);
       setDueDate(node.dueDate);
-      setCompleted(node.completed);
+      setStatus(node.status);
       setExpanded(false);
       setBarTouched(false);
     } else if (modal?.kind === "edit-new") {
@@ -59,7 +66,7 @@ export function EditModal() {
       setPriority("medium");
       setCategoryColor("slate");
       setDueDate("");
-      setCompleted(false);
+      setStatus(modal.parentStatusSeed ?? "inbox");
       setExpanded(false);
       setBarTouched(false);
     }
@@ -90,7 +97,7 @@ export function EditModal() {
       if (dsl.priority !== null) setPriority(dsl.priority);
       if (dsl.categoryColor !== null) setCategoryColor(dsl.categoryColor);
       if (dsl.dueDate !== null) setDueDate(dsl.dueDate);
-      if (dsl.completed !== null) setCompleted(dsl.completed);
+      if (dsl.status !== null) setStatus(dsl.status);
     }
   }
 
@@ -104,6 +111,11 @@ export function EditModal() {
     setBarTouched(true);
   }
 
+  function handleStatusClick(s: TaskStatus): void {
+    setStatus(s);
+    setBarTouched(true);
+  }
+
   function handleDueDateChange(d: string): void {
     setDueDate(d);
     setBarTouched(true);
@@ -111,6 +123,7 @@ export function EditModal() {
 
   function commit(): void {
     const dsl = parseInlineDSL(text);
+    const completedFlag = status === "done";
     if (isNew) {
       if (dsl.text === "" && !dsl.hasAnyAttribute) {
         close();
@@ -125,7 +138,8 @@ export function EditModal() {
         priority,
         categoryColor,
         dueDate,
-        completed,
+        completed: completedFlag,
+        status,
       });
     } else {
       if (dsl.text === "" && !dsl.hasAnyAttribute) {
@@ -136,7 +150,7 @@ export function EditModal() {
       dispatch({
         type: "UPDATE_NODE",
         id: (m as { kind: "edit"; nodeId: string }).nodeId,
-        patch: { text: dsl.text, priority, categoryColor, dueDate, completed },
+        patch: { text: dsl.text, priority, categoryColor, dueDate, completed: completedFlag, status },
       });
     }
     dispatch({ modal: null, type: "OPEN_MODAL" });
@@ -180,7 +194,7 @@ export function EditModal() {
                 className="block text-xs uppercase tracking-wider mb-1"
                 style={{ color: "var(--mid)" }}
               >
-               内容 (DSL可: @priority:high @color:sky @due:2026-12-31 @done)
+                内容 (DSL可: @priority:high @color:sky @due:2026-12-31 @done)
               </label>
               <textarea
                 data-testid="edit-modal-textarea"
@@ -199,7 +213,6 @@ export function EditModal() {
                   border: "1px solid var(--border)",
                   color: "var(--ink)",
                 }}
-
                 placeholder="タスクを入力..."
                 autoFocus
               />
@@ -262,6 +275,38 @@ export function EditModal() {
                         }
                       >
                         {p.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <label
+                    className="block text-xs uppercase tracking-wider mb-1"
+                    style={{ color: "var(--mid)" }}
+                  >
+                    ステータス
+                  </label>
+                  <div className="grid grid-cols-4 gap-2">
+                    {STATUSES.map((s) => (
+                      <button
+                        key={s.value}
+                        type="button"
+                        data-status={s.value}
+                        data-testid={`status-${s.value}`}
+                        aria-pressed={status === s.value}
+                        onClick={() => handleStatusClick(s.value)}
+                        className="py-2 rounded text-xs font-medium transition"
+                        style={
+                          status === s.value
+                            ? { background: "var(--terra)", color: "var(--paper)" }
+                            : {
+                                background: "var(--paper)",
+                                border: "1px solid var(--border)",
+                                color: "var(--ink)",
+                              }
+                        }
+                      >
+                        {s.label}
                       </button>
                     ))}
                   </div>
