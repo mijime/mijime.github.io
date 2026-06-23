@@ -2,6 +2,7 @@ import { useCallback } from "react";
 import {
   createBoard as createBoardInStorage,
   deleteBoard as deleteBoardInStorage,
+  getViewMode,
   loadBoards,
   loadNodesForBoard,
   renameBoard as renameBoardInStorage,
@@ -105,6 +106,8 @@ export function useBoardActions(): BoardActions {
       const nodes = await loadNodesForBoard(id);
       dispatch({ boardId: id, type: "SET_CURRENT_BOARD" });
       dispatch({ nodes, type: "SET_NODES" });
+      const viewMode = await getViewMode(id);
+      dispatch({ type: "SET_VIEW_MODE", viewMode: viewMode ?? "mindmap" });
       dispatch({ type: "SET_VIEW", view: { pan: { x: 0, y: 0 }, zoom: 1 } });
       await setCurrentBoardId(id);
     },
