@@ -96,7 +96,7 @@ function apportion(v: TreeNode, w: TreeNode | null, ancestor: TreeNode): TreeNod
   if (!w) return ancestor;
   let vip: TreeNode | null = v;
   let vop: TreeNode = v;
-  let vim: TreeNode = w;
+  let vim: TreeNode | null = w;
   let [vom] = vip.parent!.children!;
   let sip = vip.m;
   let sop = vop.m;
@@ -104,9 +104,9 @@ function apportion(v: TreeNode, w: TreeNode | null, ancestor: TreeNode): TreeNod
   let som = vom.m;
   let ret = ancestor;
   while (true) {
-    vim = nextRight(vim)!;
+    vim = nextRight(vim);
     if (!vim) break;
-    vip = nextLeft(vip)!;
+    vip = nextLeft(vip);
     if (!vip) break;
     vom = nextLeft(vom)!;
     vop = nextRight(vop)!;
@@ -270,7 +270,7 @@ function d3Scale(tree: TreeNode, dx: number): void {
     if (n.x > right.x) right = n;
     if (n.children) for (const c of n.children) collect.push(c);
   }
-  const s = left === right ? 1 : radialSeparation(left, right) / 2;
+  const s = left === right ? 1 : (left.parent === right.parent ? 1 : 2) / 2;
   const tx = s - left.x;
   const kx = dx / (right.x + s + tx);
   const visit = (n: TreeNode) => {
