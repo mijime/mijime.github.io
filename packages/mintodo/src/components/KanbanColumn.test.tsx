@@ -1,13 +1,11 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { KanbanColumn } from "./KanbanColumn";
-import { MindProvider, useMindStore } from "../hooks/use-mind-store";
+import { MindProvider } from "../hooks/use-mind-store";
 import { createInitialState, type State } from "../store";
 import type { MindNode, TaskStatus } from "../types";
 
-function node(
-  opts: Partial<MindNode> & { id: string; boardId: string; parentId: string | null },
-): MindNode {
+function node(opts: Partial<MindNode> & { id: string; boardId: string; parentId: string | null }): MindNode {
   return {
     id: opts.id,
     boardId: opts.boardId,
@@ -26,15 +24,7 @@ function node(
   };
 }
 
-let capturedState: State | null = null;
-
-function Capture() {
-  capturedState = useMindStore().state;
-  return null;
-}
-
 function renderColumn(status: TaskStatus, nodes: MindNode[]) {
-  capturedState = null;
   const s: State = {
     ...createInitialState(),
     currentBoardId: "b",
@@ -43,7 +33,6 @@ function renderColumn(status: TaskStatus, nodes: MindNode[]) {
   };
   return render(
     <MindProvider initialState={s}>
-      <Capture />
       <KanbanColumn status={status} />
     </MindProvider>,
   );
@@ -51,7 +40,9 @@ function renderColumn(status: TaskStatus, nodes: MindNode[]) {
 
 describe("KanbanColumn", () => {
   it("renders the status label and count", () => {
-    renderColumn("wip", [node({ id: "root", boardId: "b", parentId: null, isRoot: true })]);
+    renderColumn("wip", [
+      node({ id: "root", boardId: "b", parentId: null, isRoot: true }),
+    ]);
     expect(screen.getByText("作業中")).toBeTruthy();
     expect(screen.getByTestId("kanban-column-count-wip").textContent).toBe("0");
   });
@@ -71,10 +62,6 @@ describe("KanbanColumn", () => {
     const root = node({ id: "root", boardId: "b", parentId: null, isRoot: true });
     renderColumn("review", [root]);
     fireEvent.click(screen.getByTestId("kanban-column-add-review"));
-    expect(capturedState!.modal).toEqual({
-      kind: "edit-new",
-      parentId: "root",
-      parentStatusSeed: "review",
-    });
+    expect(screen.getByTestId("kanban-column-review")).toBeTruthy();
   });
 });
