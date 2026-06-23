@@ -55,24 +55,25 @@ export function ConnectionLines({ containerRef }: Props) {
         const sy = cy + parent.y * state.view.zoom + state.view.pan.y;
         const ex = cx + node.x * state.view.zoom + state.view.pan.x;
         const ey = cy + node.y * state.view.zoom + state.view.pan.y;
+        const dx = ex - sx;
+        const spread = Math.max(Math.abs(dx) * 0.5, MIN_CURVE_SPREAD);
+        const sign = dx >= 0 ? 1 : -1;
+        const c1x = sx + sign * spread;
+        const c1y = sy;
+        const c2x = ex - sign * spread;
+        const c2y = ey;
         const color = node.completed ? inactiveColor : activeColor;
-        const strokeProps = node.completed
+        const pathProps = node.completed
           ? { strokeDasharray: "5,5", strokeWidth: 1.5 }
-          : { strokeWidth: 1.5 };
-        const horizontalDist = ex - sx;
-        const halfDist = Math.max(Math.abs(horizontalDist) / 2, MIN_CURVE_SPREAD);
-        const sign = horizontalDist >= 0 ? 1 : -1;
-        const c1x = sx + sign * halfDist;
-        const c2x = ex - sign * halfDist;
-        const d = `M ${sx} ${sy} C ${c1x} ${sy}, ${c2x} ${ey}, ${ex} ${ey}`;
+          : { strokeWidth: 2 };
         return (
           <path
             key={node.id}
             id={`edge-${parent.id}-${node.id}`}
-            d={d}
+            d={`M ${sx} ${sy} C ${c1x} ${c1y}, ${c2x} ${c2y}, ${ex} ${ey}`}
             fill="none"
             stroke={color}
-            {...strokeProps}
+            {...pathProps}
           />
         );
       })}

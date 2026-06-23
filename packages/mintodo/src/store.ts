@@ -146,6 +146,7 @@ export function reducer(state: State, action: Action): State {
         children: [],
         x: 0,
         y: 0,
+
       };
       return withRadialLayout(
         {

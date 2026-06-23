@@ -174,3 +174,4 @@ describe("migration", () => {
     expect(await db.nodes.count()).toBe(0);
   });
 });
+

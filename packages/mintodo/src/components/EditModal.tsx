@@ -180,7 +180,7 @@ export function EditModal() {
                 className="block text-xs uppercase tracking-wider mb-1"
                 style={{ color: "var(--mid)" }}
               >
-                内容 (DSL可: @priority:high @color:sky @due:2026-12-31 @done)
+               内容 (DSL可: @priority:high @color:sky @due:2026-12-31 @done)
               </label>
               <textarea
                 data-testid="edit-modal-textarea"
@@ -193,6 +193,7 @@ export function EditModal() {
                   border: "1px solid var(--border)",
                   color: "var(--ink)",
                 }}
+
                 placeholder="タスクを入力..."
                 autoFocus
               />
