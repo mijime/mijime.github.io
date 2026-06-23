@@ -339,3 +339,83 @@ describe("centering on new node", () => {
     expect(container.style.transform).toMatch(/translate\(.*?240px\)/u);
   });
 });
+
+describe("kanban view end-to-end", () => {
+  beforeEach(async () => {
+    await db.open();
+    await db.boards.clear();
+    await db.nodes.clear();
+    await db.meta.clear();
+  });
+
+  async function createBoard(name: string): Promise<void> {
+    fireEvent.click(screen.getByText("+ 新規ボード作成"));
+    const input = screen.getByPlaceholderText("例: メインプロジェクト") as HTMLInputElement;
+    fireEvent.change(input, { target: { value: name } });
+    await act(() => {
+      fireEvent.click(screen.getByText("作成"));
+    });
+    await act(async () => {
+      await flush(300);
+    });
+  }
+
+  it("toggles between mindmap and kanban view", async () => {
+    render(<App />);
+    await act(async () => {
+      await flush(100);
+    });
+    await createBoard("Test");
+    // Mindmap visible
+    expect(screen.queryByTestId("kanban-board")).toBeNull();
+    // Switch to kanban
+    await act(() => {
+      fireEvent.click(screen.getByTestId("view-mode-kanban"));
+    });
+    expect(screen.getByTestId("kanban-board")).toBeTruthy();
+    // Switch back
+    await act(() => {
+      fireEvent.click(screen.getByTestId("view-mode-mindmap"));
+    });
+    expect(screen.queryByTestId("kanban-board")).toBeNull();
+  });
+
+  it("kanban view shows 4 columns with the root in inbox", async () => {
+    render(<App />);
+    await act(async () => {
+      await flush(100);
+    });
+    await createBoard("Test");
+    await act(() => {
+      fireEvent.click(screen.getByTestId("view-mode-kanban"));
+    });
+    expect(screen.getByTestId("kanban-column-inbox")).toBeTruthy();
+    expect(screen.getByTestId("kanban-column-wip")).toBeTruthy();
+    expect(screen.getByTestId("kanban-column-review")).toBeTruthy();
+    expect(screen.getByTestId("kanban-column-done")).toBeTruthy();
+    const count = screen.getByTestId("kanban-column-count-inbox").textContent;
+    expect(count).toBe("1");
+  });
+
+  it("viewMode round-trips through IndexedDB meta", async () => {
+    render(<App />);
+    await act(async () => {
+      await flush(100);
+    });
+    await createBoard("Test");
+    const boards = await db.boards.toArray();
+    const boardId = boards.at(-1).id;
+    // Mindmap default — no meta key yet
+    expect(await db.meta.get(`viewMode:${boardId}`)).toBeUndefined();
+    // Toggle to kanban
+    await act(() => {
+      fireEvent.click(screen.getByTestId("view-mode-kanban"));
+    });
+    // Wait for debounce save
+    await act(async () => {
+      await flush(400);
+    });
+    const meta = await db.meta.get(`viewMode:${boardId}`);
+    expect(meta?.value).toBe("kanban");
+  });
+});
