@@ -219,7 +219,7 @@ function makeNode(id: string, boardId: string, opts: Partial<MindNode> = {}): Mi
     priority: opts.priority ?? "medium",
     categoryColor: opts.categoryColor ?? "slate",
     dueDate: opts.dueDate ?? "",
-    status: "inbox",
+    status: opts.status ?? "inbox",
     children: opts.children ?? [],
     x: 0,
     y: 0,
@@ -252,7 +252,7 @@ describe("serializeDSL", () => {
     expect(out).toBe("B\n  Child\n");
   });
 
-  it("emits attributes in fixed order: priority, color, due, done", () => {
+  it("emits attributes in fixed order: priority, color, due, status", () => {
     const out = serializeDSL(
       { name: "B" },
       {
@@ -264,10 +264,11 @@ describe("serializeDSL", () => {
           categoryColor: "emerald",
           dueDate: "2026-01-01",
           completed: true,
+          status: "done",
         }),
       },
     );
-    expect(out).toBe("B\n  X @priority:high @color:emerald @due:2026-01-01 @done\n");
+    expect(out).toBe("B\n  X @priority:high @color:emerald @due:2026-01-01 @status:done\n");
   });
 
   it("omits default attributes", () => {
@@ -315,6 +316,7 @@ describe("parseInlineDSL", () => {
       categoryColor: null,
       dueDate: null,
       completed: null,
+      status: null,
     });
   });
 
@@ -326,6 +328,7 @@ describe("parseInlineDSL", () => {
       categoryColor: null,
       dueDate: null,
       completed: null,
+      status: null,
     });
   });
 
@@ -337,6 +340,7 @@ describe("parseInlineDSL", () => {
       categoryColor: null,
       dueDate: null,
       completed: null,
+      status: null,
     });
   });
 
@@ -402,5 +406,92 @@ describe("parseInlineDSL", () => {
     const r = parseInlineDSL("foo   bar  baz @priority:high");
     expect(r.text).toBe("foo bar baz");
     expect(r.priority).toBe("high");
+  });
+});
+
+describe("parseDSL — @status attribute", () => {
+  it("parses @status:wip and sets node.status", () => {
+    const r = parseDSL("Root\n  X @status:wip\n", "b1");
+    expect(r).not.toBeNull();
+    const x = r!.nodes.find((n) => n.text === "X")!;
+    expect(x.status).toBe("wip");
+    expect(x.completed).toBe(false);
+  });
+
+  it("@status:done sets completed=true", () => {
+    const r = parseDSL("Root\n  X @status:done\n", "b1");
+    expect(r).not.toBeNull();
+    const x = r!.nodes.find((n) => n.text === "X")!;
+    expect(x.status).toBe("done");
+    expect(x.completed).toBe(true);
+  });
+
+  it("@status:unknown rejects", () => {
+    expect(parseDSL("Root\n  X @status:frozen\n", "b1")).toBeNull();
+  });
+
+  it("@done sets status=done for back-compat", () => {
+    const r = parseDSL("Root\n  X @done\n", "b1");
+    expect(r).not.toBeNull();
+    const x = r!.nodes.find((n) => n.text === "X")!;
+    expect(x.status).toBe("done");
+    expect(x.completed).toBe(true);
+  });
+});
+
+describe("serializeDSL — @status output", () => {
+  it("emits @status:wip for non-inbox status", () => {
+    const out = serializeDSL(
+      { name: "B" },
+      {
+        root: makeNode("root", "b1", { isRoot: true, text: "B", children: ["c1"] }),
+        c1: makeNode("c1", "b1", { text: "X", parentId: "root", status: "wip" }),
+      },
+    );
+    expect(out).toBe("B\n  X @status:wip\n");
+  });
+
+  it("emits @status:done (no @done) for completed nodes", () => {
+    const out = serializeDSL(
+      { name: "B" },
+      {
+        root: makeNode("root", "b1", { isRoot: true, text: "B", children: ["c1"] }),
+        c1: makeNode("c1", "b1", { text: "X", parentId: "root", status: "done", completed: true }),
+      },
+    );
+    expect(out).toBe("B\n  X @status:done\n");
+  });
+
+  it("omits @status for default inbox", () => {
+    const out = serializeDSL(
+      { name: "B" },
+      {
+        root: makeNode("root", "b1", { isRoot: true, text: "B", children: ["c1"] }),
+        c1: makeNode("c1", "b1", { text: "X", parentId: "root", status: "inbox" }),
+      },
+    );
+    expect(out).toBe("B\n  X\n");
+  });
+});
+
+describe("parseInlineDSL — @status", () => {
+  it("extracts @status:review", () => {
+    const r = parseInlineDSL("task @status:review");
+    expect(r.text).toBe("task");
+    expect(r.status).toBe("review");
+    expect(r.hasAnyAttribute).toBe(true);
+  });
+
+  it("@done sets status to done", () => {
+    const r = parseInlineDSL("task @done");
+    expect(r.completed).toBe(true);
+    expect(r.status).toBe("done");
+  });
+
+  it("keeps invalid @status:frozen as text", () => {
+    const r = parseInlineDSL("task @status:frozen");
+    expect(r.text).toBe("task @status:frozen");
+    expect(r.status).toBeNull();
+    expect(r.hasAnyAttribute).toBe(false);
   });
 });
