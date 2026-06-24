@@ -37,8 +37,8 @@ export function Toolbar() {
 
   return (
     <header
-      className="absolute top-4 left-4 right-4 z-10 flex flex-col lg:flex-row gap-3 lg:items-center justify-between p-4 rounded transition-all"
-      style={{ background: "var(--toolbar-bg)", border: "1px solid var(--border)" }}
+      className="flex flex-col lg:flex-row gap-3 lg:items-center justify-between p-4 border-b"
+      style={{ background: "var(--toolbar-bg)", borderColor: "var(--border)" }}
     >
       <div className="flex items-center justify-between lg:justify-start gap-3 w-full lg:w-auto">
         <div className="flex items-center gap-3">
@@ -79,7 +79,7 @@ export function Toolbar() {
             type="text"
             value={state.searchQuery}
             onChange={(e) => dispatch({ query: e.target.value, type: "SET_SEARCH" })}
-            className="w-full pl-9 pr-4 py-1.5 text-sm rounded outline-none transition"
+            className="w-full pl-9 pr-4 py-1.5 text-sm rounded outline-none"
             style={{
               background: "var(--paper)",
               border: "1px solid var(--border)",
