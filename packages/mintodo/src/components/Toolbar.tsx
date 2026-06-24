@@ -45,7 +45,7 @@ export function Toolbar() {
           <button
             type="button"
             onClick={onToggleDrawer}
-            title="ボード一覧"
+            title={state.drawerOpen ? "サイドバーを隠す" : "サイドバーを表示"}
             className="p-2 rounded transition"
             style={{ color: "var(--mid)" }}
           >
