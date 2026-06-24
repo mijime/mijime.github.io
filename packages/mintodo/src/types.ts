@@ -6,7 +6,7 @@ export type TaskStatus = "inbox" | "wip" | "review" | "done";
 
 export const TASK_STATUSES: readonly TaskStatus[] = ["inbox", "wip", "review", "done"] as const;
 
-export type ViewMode = "mindmap" | "kanban";
+export type ViewMode = "mindmap" | "kanban" | "text";
 
 export interface Board {
   id: string;
