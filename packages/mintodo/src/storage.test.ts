@@ -7,14 +7,12 @@ import {
   deleteBoard,
   discardV1Data,
   getCurrentBoardId,
-  getViewMode,
   hasV1Data,
   loadBoards,
   loadNodesForBoard,
   renameBoard,
   saveNodesForBoard,
   setCurrentBoardId,
-  setViewMode,
 } from "./storage";
 import type { MindNode } from "./types";
 
@@ -175,52 +173,5 @@ describe("migration", () => {
     await db.nodes.add(makeNode("orphan", "unknown"));
     await discardV1Data();
     expect(await db.nodes.count()).toBe(0);
-  });
-});
-
-describe("loadNodesForBoard — status backfill", () => {
-  it("backfills status='inbox' for nodes with undefined status and completed=false", async () => {
-    const { board } = await createBoard("P");
-    const node = makeNode("n", board.id);
-    const legacy: Partial<MindNode> & { id: string; boardId: string } = { ...node };
-    delete legacy.status;
-    await db.nodes.put(legacy as MindNode);
-    const loaded = await loadNodesForBoard(board.id);
-    expect(loaded.n.status).toBe("inbox");
-  });
-
-  it("backfills status='done' for nodes with undefined status and completed=true", async () => {
-    const { board } = await createBoard("P");
-    const node = makeNode("n", board.id, { completed: true });
-    const legacy: Partial<MindNode> & { id: string; boardId: string } = { ...node };
-    delete legacy.status;
-    await db.nodes.put(legacy as MindNode);
-    const loaded = await loadNodesForBoard(board.id);
-    expect(loaded.n.status).toBe("done");
-  });
-
-  it("preserves explicit status", async () => {
-    const { board } = await createBoard("P");
-    await db.nodes.put(makeNode("n", board.id, { status: "wip" }));
-    const loaded = await loadNodesForBoard(board.id);
-    expect(loaded.n.status).toBe("wip");
-  });
-});
-
-describe("getViewMode / setViewMode", () => {
-  it("returns undefined when not set", async () => {
-    expect(await getViewMode("missing-board")).toBeUndefined();
-  });
-
-  it("round-trips viewMode", async () => {
-    await setViewMode("b1", "kanban");
-    expect(await getViewMode("b1")).toBe("kanban");
-  });
-
-  it("is per-board (different boards do not interfere)", async () => {
-    await setViewMode("b1", "kanban");
-    await setViewMode("b2", "mindmap");
-    expect(await getViewMode("b1")).toBe("kanban");
-    expect(await getViewMode("b2")).toBe("mindmap");
   });
 });

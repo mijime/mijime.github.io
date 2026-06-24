@@ -1,13 +1,4 @@
-import type {
-  Board,
-  CategoryColor,
-  MindNode,
-  Modal,
-  Priority,
-  TaskStatus,
-  View,
-  ViewMode,
-} from "./types";
+import type { Board, CategoryColor, MindNode, Modal, Priority, View } from "./types";
 import { applyRadialLayout } from "./layout/radial";
 
 export interface State {
@@ -18,7 +9,6 @@ export interface State {
   hideCompleted: boolean;
   layoutVersion: number;
   modal: Modal;
-  viewMode: ViewMode;
   nodes: Record<string, MindNode>;
   searchQuery: string;
   selectedNodeId: string;
@@ -47,8 +37,6 @@ export type Action =
   | { type: "TOGGLE_COMPLETE"; id: string }
   | { type: "TOGGLE_DRAWER" }
   | { type: "TOGGLE_HIDE_COMPLETED" }
-  | { type: "SET_STATUS"; id: string; status: TaskStatus }
-  | { type: "SET_VIEW_MODE"; viewMode: ViewMode }
   | {
       type: "CREATE_CHILD";
       newId: string;
@@ -58,7 +46,6 @@ export type Action =
       categoryColor: CategoryColor;
       dueDate: string;
       completed: boolean;
-      status: TaskStatus;
     }
   | { type: "UPDATE_NODE"; id: string; patch: Partial<MindNode> };
 
@@ -67,11 +54,10 @@ export function createInitialState(): State {
     boards: [],
     currentBoardId: null,
     draggingNodeId: null,
-    drawerOpen: true,
+    drawerOpen: false,
     hideCompleted: false,
     layoutVersion: 0,
     modal: null,
-    viewMode: "mindmap",
     nodes: {},
     searchQuery: "",
     selectedNodeId: "",
@@ -244,7 +230,7 @@ export function reducer(state: State, action: Action): State {
         collapsed: false,
         completed: action.completed,
         dueDate: action.dueDate,
-        status: action.status,
+        status: "inbox",
         isRoot: false,
         parentId: parent.id,
         priority: action.priority,
@@ -279,8 +265,16 @@ export function reducer(state: State, action: Action): State {
     case "TOGGLE_COMPLETE": {
       const target = state.nodes[action.id];
       if (!target) return state;
-      const nextStatus: TaskStatus = target.completed ? "review" : "done";
-      return reducer(state, { id: action.id, status: nextStatus, type: "SET_STATUS" });
+      const next = !target.completed;
+      const updated = { ...state.nodes };
+      const cascade = (id: string) => {
+        const n = updated[id];
+        if (!n) return;
+        updated[id] = { ...n, completed: next };
+        for (const childId of n.children) cascade(childId);
+      };
+      cascade(action.id);
+      return { ...state, nodes: updated };
     }
     case "TOGGLE_COLLAPSE": {
       const node = state.nodes[action.id];
@@ -341,29 +335,6 @@ export function reducer(state: State, action: Action): State {
         children: [...newParent.children, action.id],
       };
       return withRadialLayout(state, nextNodes);
-    }
-
-    case "SET_VIEW_MODE": {
-      return { ...state, viewMode: action.viewMode };
-    }
-
-    case "SET_STATUS": {
-      const target = state.nodes[action.id];
-      if (!target) return state;
-      const isDone = action.status === "done";
-      const updated = { ...state.nodes };
-      const cascade = (id: string) => {
-        const n = updated[id];
-        if (!n) return;
-        updated[id] = { ...n, status: action.status, completed: isDone };
-        for (const childId of n.children) cascade(childId);
-      };
-      if (isDone) {
-        cascade(action.id);
-      } else {
-        updated[action.id] = { ...target, status: action.status, completed: false };
-      }
-      return { ...state, nodes: updated };
     }
 
     case "SNAP_BACK": {
