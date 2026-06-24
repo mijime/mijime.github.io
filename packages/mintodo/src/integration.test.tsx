@@ -608,6 +608,13 @@ describe("kanban view end-to-end", () => {
 });
 
 describe("canvas background uses --paper", () => {
+  beforeEach(async () => {
+    await db.open();
+    await db.boards.clear();
+    await db.nodes.clear();
+    await db.meta.clear();
+  });
+
   afterEach(async () => {
     await db.delete();
   });
@@ -619,12 +626,18 @@ describe("canvas background uses --paper", () => {
     });
 
     if (screen.queryByText("+ 新規ボード作成")) {
-      fireEvent.click(screen.getByText("+ 新規ボード作成"));
+      await act(() => {
+        fireEvent.click(screen.getByText("+ 新規ボード作成"));
+      });
       const input = screen.getByPlaceholderText("例: メインプロジェクト") as HTMLInputElement;
-      fireEvent.change(input, { target: { value: "Bg" } });
-      fireEvent.click(screen.getByText("作成"));
+      await act(() => {
+        fireEvent.change(input, { target: { value: "Bg" } });
+      });
+      await act(() => {
+        fireEvent.click(screen.getByText("作成"));
+      });
       await act(async () => {
-        await flush(100);
+        await flush(300);
       });
     }
 
