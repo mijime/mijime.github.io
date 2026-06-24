@@ -1,4 +1,5 @@
 import { Plus } from "lucide-react";
+import { useDroppable } from "@dnd-kit/core";
 import { useMindStore } from "../hooks/use-mind-store";
 import { KanbanCard } from "./KanbanCard";
 import type { MindNode, TaskStatus } from "../types";
@@ -9,8 +10,6 @@ const STATUS_LABELS: Record<TaskStatus, string> = {
   review: "レビュー",
   done: "完了",
 };
-
-const DRAG_MIME = "application/x-mindnode-id";
 
 interface Props {
   status: TaskStatus;
@@ -29,39 +28,10 @@ function isParentCollapsed(state: ReturnType<typeof useMindStore>["state"], id: 
   return false;
 }
 
-function handleDragOver(e: React.DragEvent<HTMLDivElement>) {
-  if (e.dataTransfer.types.includes(DRAG_MIME)) {
-    e.preventDefault();
-    e.dataTransfer.dropEffect = "move";
-  }
-}
-
-function handleDragEnter(e: React.DragEvent<HTMLDivElement>) {
-  if (!e.dataTransfer.types.includes(DRAG_MIME)) return;
-  if (e.currentTarget.contains(e.relatedTarget as Node)) return;
-  e.currentTarget.classList.add("ring-2", "ring-sky-400");
-}
-
-function handleDragLeave(e: React.DragEvent<HTMLDivElement>) {
-  if (e.currentTarget.contains(e.relatedTarget as Node)) return;
-  e.currentTarget.classList.remove("ring-2", "ring-sky-400");
-}
-
-function handleDrop(
-  e: React.DragEvent<HTMLDivElement>,
-  status: TaskStatus,
-  dispatch: ReturnType<typeof useMindStore>["dispatch"],
-) {
-  e.preventDefault();
-  e.currentTarget.classList.remove("ring-2", "ring-sky-400");
-  const id = e.dataTransfer.getData(DRAG_MIME);
-  if (!id) return;
-  dispatch({ id, status, type: "SET_STATUS" });
-  dispatch({ id: null, type: "SET_DRAGGING" });
-}
-
 export function KanbanColumn({ status }: Props) {
   const { dispatch, state } = useMindStore();
+  const { setNodeRef, isOver } = useDroppable({ id: status });
+
   const cards = Object.values(state.nodes).filter(
     (n) =>
       n.boardId === state.currentBoardId &&
@@ -72,13 +42,10 @@ export function KanbanColumn({ status }: Props) {
 
   return (
     <div
+      ref={setNodeRef}
       data-testid={`kanban-column-${status}`}
-      className="w-72 shrink-0 flex flex-col gap-2 rounded p-3"
+      className={`w-72 shrink-0 flex flex-col gap-2 rounded p-3 ${isOver ? "ring-2 ring-sky-400" : ""}`}
       style={{ background: "var(--toolbar-bg)", border: "1px solid var(--border)" }}
-      onDragOver={handleDragOver}
-      onDragEnter={handleDragEnter}
-      onDragLeave={handleDragLeave}
-      onDrop={(e) => handleDrop(e, status, dispatch)}
     >
       <div className="flex items-center justify-between mb-1">
         <h3 className="text-sm font-semibold" style={{ color: "var(--ink)" }}>
