@@ -7,7 +7,11 @@ export function BoardSidebar() {
   const { state, dispatch } = useMindStore();
   const actions = useBoardActions();
 
-  const closeDrawer = () => dispatch({ open: false, type: "SET_DRAWER" });
+  const closeDrawer = () => {
+    if (window.matchMedia("(max-width: 767px)").matches) {
+      dispatch({ open: false, type: "SET_DRAWER" });
+    }
+  };
 
   const onCreate = () => {
     closeDrawer();
@@ -85,7 +89,7 @@ export function BoardSidebar() {
 
   return (
     <>
-      <div className={`hidden md:flex w-60 shrink-0${state.drawerOpen ? "" : " md:hidden"}`}>
+      <div className={state.drawerOpen ? "hidden md:flex w-60 shrink-0" : "hidden"}>
         {sidebar}
       </div>
       {state.drawerOpen && (
