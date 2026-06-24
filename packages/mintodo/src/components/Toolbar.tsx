@@ -62,7 +62,7 @@ export function Toolbar() {
               className="text-lg leading-tight tracking-wide"
               style={{ fontFamily: '"Crimson Pro", serif', fontWeight: 600 }}
             >
-              MindTodo Pro
+              mintodo
             </h1>
           </div>
         </div>
