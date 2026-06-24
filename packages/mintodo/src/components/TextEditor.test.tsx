@@ -77,6 +77,21 @@ describe("TextEditor", () => {
     expect(screen.queryByTestId("text-editor-error")).toBeNull();
   });
 
+  it("renders preview with depth-based indentation and status dot", () => {
+    render(
+      <MindProvider initialState={makeState()}>
+        <TextEditor />
+      </MindProvider>,
+    );
+    const preview = screen.getByTestId("text-editor-preview");
+    const items = preview.querySelectorAll("li");
+    expect(items).toHaveLength(2);
+    expect(items[0].style.paddingLeft).toBe("0px");
+    expect(items[1].style.paddingLeft).toBe("16px");
+    expect(preview.textContent).toContain("Root");
+    expect(preview.textContent).toContain("Child");
+  });
+
   it("shows error when DSL is invalid", () => {
     render(
       <MindProvider initialState={makeState()}>
@@ -148,5 +163,45 @@ describe("TextEditor", () => {
       fireEvent.click(screen.getByTestId("text-editor-reset"));
     });
     expect(ta.value).toContain("* Root");
+  });
+
+  it("applies on Cmd+Enter (metaKey)", async () => {
+    vi.spyOn(window, "confirm").mockReturnValue(true);
+    render(
+      <MindProvider initialState={makeState()}>
+        <Capture />
+        <TextEditor />
+      </MindProvider>,
+    );
+    const ta = screen.getByTestId("text-editor-textarea") as HTMLTextAreaElement;
+    act(() => {
+      fireEvent.change(ta, { target: { value: "mindmap\n  * CmdRoot\n" } });
+    });
+    act(() => {
+      fireEvent.keyDown(window, { key: "Enter", metaKey: true });
+    });
+    await waitFor(() => {
+      expect(captured!.nodes.root.text).toBe("CmdRoot");
+    });
+  });
+
+  it("applies on Ctrl+Enter (ctrlKey)", async () => {
+    vi.spyOn(window, "confirm").mockReturnValue(true);
+    render(
+      <MindProvider initialState={makeState()}>
+        <Capture />
+        <TextEditor />
+      </MindProvider>,
+    );
+    const ta = screen.getByTestId("text-editor-textarea") as HTMLTextAreaElement;
+    act(() => {
+      fireEvent.change(ta, { target: { value: "mindmap\n  * CtrlRoot\n" } });
+    });
+    act(() => {
+      fireEvent.keyDown(window, { key: "Enter", ctrlKey: true });
+    });
+    await waitFor(() => {
+      expect(captured!.nodes.root.text).toBe("CtrlRoot");
+    });
   });
 });

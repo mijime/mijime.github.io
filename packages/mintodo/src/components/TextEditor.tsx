@@ -1,12 +1,25 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { parseDSL, serializeDSL } from "../dsl";
 import { useBoardActions } from "../hooks/use-board-actions";
 import { useMindStore } from "../hooks/use-mind-store";
+import { statusDotClass } from "../lib/badges";
 import type { MindNode } from "../types";
 
 interface PreviewProps {
   nodes: MindNode[];
   error: string | null;
+}
+
+function nodeDepth(record: Record<string, MindNode>, id: string): number {
+  let d = 0;
+  let cur = record[id];
+  while (cur && !cur.isRoot) {
+    const parent = record[cur.parentId ?? ""];
+    if (!parent) break;
+    cur = parent;
+    d++;
+  }
+  return d;
 }
 
 function Preview({ nodes, error }: PreviewProps) {
@@ -24,24 +37,40 @@ function Preview({ nodes, error }: PreviewProps) {
       </div>
     );
   }
+  const record: Record<string, MindNode> = {};
+  for (const n of nodes) record[n.id] = n;
   return (
-    <ul data-testid="text-editor-preview" className="text-sm flex flex-col gap-1">
-      {nodes.map((n) => (
-        <li key={n.id} style={{ paddingLeft: `${0}px` }}>
-          <span style={{ color: "var(--ink)" }}>{n.text}</span>
-          <span className="ml-2 text-[10px]" style={{ color: "var(--mid)" }}>
-            {[
-              n.priority !== "medium" && `priority:${n.priority}`,
-              n.categoryColor !== "slate" && `color:${n.categoryColor}`,
-              n.dueDate && `due:${n.dueDate}`,
-              n.status !== "inbox" && `status:${n.status}`,
-              n.completed && "done",
-            ]
-              .filter(Boolean)
-              .join(" ")}
-          </span>
-        </li>
-      ))}
+    <ul data-testid="text-editor-preview" className="text-sm flex flex-col gap-0.5 font-mono">
+      {nodes.map((n) => {
+        const depth = nodeDepth(record, n.id);
+        const attrs = [
+          n.priority !== "medium" && `priority:${n.priority}`,
+          n.categoryColor !== "slate" && `color:${n.categoryColor}`,
+          n.dueDate && `due:${n.dueDate}`,
+          n.status !== "inbox" && `status:${n.status}`,
+          n.completed && "done",
+        ]
+          .filter(Boolean)
+          .join(" ");
+        return (
+          <li
+            key={n.id}
+            className="flex items-center gap-2"
+            style={{ paddingLeft: `${depth * 16}px` }}
+          >
+            <span
+              className={`w-2 h-2 rounded-full shrink-0 ${statusDotClass(n.status)}`}
+              title={n.status}
+            />
+            <span style={{ color: "var(--ink)" }}>{n.text}</span>
+            {attrs && (
+              <span className="text-[10px]" style={{ color: "var(--mid)" }}>
+                [{attrs}]
+              </span>
+            )}
+          </li>
+        );
+      })}
     </ul>
   );
 }
@@ -75,6 +104,18 @@ export function TextEditor() {
 
   const canApply = parsed.error === null && parsed.nodes.length > 0;
 
+  const onApplyRef = useRef<() => Promise<void>>(async () => {});
+  useEffect(() => {
+    function onKeyDown(e: KeyboardEvent) {
+      if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
+        e.preventDefault();
+        void onApplyRef.current();
+      }
+    }
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, []);
+
   async function onApply() {
     if (parsed.error || !state.currentBoardId) return;
     if (
@@ -92,6 +133,9 @@ export function TextEditor() {
     }
     dispatch({ type: "SET_NODES", nodes: record });
   }
+  useEffect(() => {
+    onApplyRef.current = onApply;
+  });
 
   return (
     <div

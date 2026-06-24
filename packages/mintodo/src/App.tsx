@@ -75,7 +75,7 @@ function Shell() {
             <EmptyState />
           )}
           {state.viewMode === "mindmap" && <ZoomControls />}
-          <StatsPanel />
+          {state.viewMode !== "text" && <StatsPanel />}
         </div>
       </div>
       <EditModal />
