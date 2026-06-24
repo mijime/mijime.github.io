@@ -1,6 +1,18 @@
-import { Eye, FileText, Keyboard, Menu, Moon, Network, Search, Sun, Trash2 } from "lucide-react";
+import {
+  Eye,
+  FileText,
+  Keyboard,
+  Moon,
+  Network,
+  PanelLeftClose,
+  PanelLeftOpen,
+  Search,
+  Sun,
+  Trash2,
+} from "lucide-react";
 import { useMindStore } from "../hooks/use-mind-store";
 import { db } from "../db";
+import { ViewModeToggle } from "./ViewModeToggle";
 
 function onTheme() {
   const isDark = document.documentElement.classList.toggle("dark");
@@ -25,19 +37,19 @@ export function Toolbar() {
 
   return (
     <header
-      className="absolute top-4 left-4 right-4 z-10 flex flex-col lg:flex-row gap-3 lg:items-center justify-between p-4 rounded transition-all"
-      style={{ background: "var(--toolbar-bg)", border: "1px solid var(--border)" }}
+      className="flex flex-col lg:flex-row gap-3 lg:items-center justify-between p-4 border-b"
+      style={{ background: "var(--toolbar-bg)", borderColor: "var(--border)" }}
     >
       <div className="flex items-center justify-between lg:justify-start gap-3 w-full lg:w-auto">
         <div className="flex items-center gap-3">
           <button
             type="button"
             onClick={onToggleDrawer}
-            title="ボード一覧"
-            className="p-2 rounded transition md:hidden"
+            title={state.drawerOpen ? "サイドバーを隠す" : "サイドバーを表示"}
+            className="p-2 rounded transition"
             style={{ color: "var(--mid)" }}
           >
-            <Menu size={18} />
+            {state.drawerOpen ? <PanelLeftClose size={18} /> : <PanelLeftOpen size={18} />}
           </button>
           <div
             className="p-2 rounded"
@@ -67,7 +79,7 @@ export function Toolbar() {
             type="text"
             value={state.searchQuery}
             onChange={(e) => dispatch({ query: e.target.value, type: "SET_SEARCH" })}
-            className="w-full pl-9 pr-4 py-1.5 text-sm rounded outline-none transition"
+            className="w-full pl-9 pr-4 py-1.5 text-sm rounded outline-none"
             style={{
               background: "var(--paper)",
               border: "1px solid var(--border)",
@@ -76,6 +88,7 @@ export function Toolbar() {
             placeholder="タスクを検索..."
           />
         </div>
+        <ViewModeToggle />
         <button
           type="button"
           className="p-2 rounded text-xs font-semibold transition flex items-center gap-1.5"

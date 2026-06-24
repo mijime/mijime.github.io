@@ -18,6 +18,7 @@ function makeNode(id: string, parentId: string | null, opts: Partial<MindNode> =
     priority: "medium",
     categoryColor: "slate",
     dueDate: "",
+    status: "inbox",
     children: [],
     x: opts.x ?? 0,
     y: opts.y ?? 0,
@@ -36,6 +37,7 @@ function makeState(): State {
     hideCompleted: false,
     layoutVersion: 0,
     modal: null,
+    viewMode: "mindmap",
     nodes: {
       root: makeNode("root", null, { isRoot: true, children: ["a"] }),
       a: makeNode("a", "root", { x: 0, y: -340 }),

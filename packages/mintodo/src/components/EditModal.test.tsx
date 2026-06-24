@@ -1,9 +1,9 @@
-import { act, fireEvent, render } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { Dispatch } from "react";
 import { EditModal } from "./EditModal";
 import { MindProvider, useMindStore } from "../hooks/use-mind-store";
-import type { Action, State } from "../store";
+import { createInitialState, type Action, type State } from "../store";
 import type { MindNode } from "../types";
 
 function makeNode(id: string, parentId: string | null, opts: Partial<MindNode> = {}): MindNode {
@@ -18,6 +18,7 @@ function makeNode(id: string, parentId: string | null, opts: Partial<MindNode> =
     priority: "medium",
     categoryColor: "slate",
     dueDate: "",
+    status: "inbox",
     children: opts.children ?? [],
     x: opts.x ?? 0,
     y: opts.y ?? 0,
@@ -34,6 +35,7 @@ function makeState(): State {
     hideCompleted: false,
     layoutVersion: 0,
     modal: null,
+    viewMode: "mindmap",
     nodes: {
       root: makeNode("root", null, { isRoot: true, text: "Root", children: ["a"] }),
       a: makeNode("a", "root", { text: "Task A", priority: "low", categoryColor: "sky" }),
@@ -247,5 +249,96 @@ describe("EditModal", () => {
     // Verify 属性 section is collapsed (date input not visible)
     const reopenedDateInput = document.querySelector('input[type="date"]');
     expect(reopenedDateInput).toBeNull();
+  });
+});
+
+const ROOT: MindNode = makeNode("root", null, { isRoot: true, text: "Root", children: [] });
+
+function renderEditFor(node: MindNode) {
+  const s: State = {
+    ...createInitialState(),
+    nodes: { [node.id]: node },
+    modal: { kind: "edit", nodeId: node.id },
+    currentBoardId: "b1",
+  };
+  return render(
+    <MindProvider initialState={s}>
+      <EditModal />
+    </MindProvider>,
+  );
+}
+
+describe("EditModal — status picker", () => {
+  it("clicking a status button updates the picker and dispatch", () => {
+    const node: MindNode = {
+      id: "n1",
+      boardId: "b1",
+      text: "t",
+      parentId: null,
+      isRoot: false,
+      completed: false,
+      collapsed: false,
+      priority: "medium",
+      categoryColor: "slate",
+      dueDate: "",
+      status: "inbox",
+      children: [],
+      x: 0,
+      y: 0,
+    };
+    renderEditFor(node);
+    fireEvent.click(screen.getByTestId("edit-modal-attr-toggle"));
+    const wipBtn = screen.getByTestId("status-wip") as HTMLButtonElement;
+    act(() => {
+      fireEvent.click(wipBtn);
+    });
+    expect(wipBtn.getAttribute("aria-pressed")).toBe("true");
+    act(() => {
+      fireEvent.click(screen.getByTestId("edit-modal-save"));
+    });
+  });
+
+  it("inline @status:review in textarea mirrors into picker", () => {
+    const node: MindNode = {
+      id: "n1",
+      boardId: "b1",
+      text: "t",
+      parentId: null,
+      isRoot: false,
+      completed: false,
+      collapsed: false,
+      priority: "medium",
+      categoryColor: "slate",
+      dueDate: "",
+      status: "inbox",
+      children: [],
+      x: 0,
+      y: 0,
+    };
+    renderEditFor(node);
+    const ta = screen.getByTestId("edit-modal-textarea") as HTMLTextAreaElement;
+    act(() => {
+      fireEvent.change(ta, { target: { value: "t @status:review" } });
+    });
+    fireEvent.click(screen.getByTestId("edit-modal-attr-toggle"));
+    const reviewBtn = screen.getByTestId("status-review") as HTMLButtonElement;
+    expect(reviewBtn.getAttribute("aria-pressed")).toBe("true");
+  });
+
+  it("parentStatusSeed initializes status in edit-new modal", () => {
+    const s: State = {
+      ...createInitialState(),
+      nodes: { root: ROOT },
+      currentBoardId: "b1",
+      modal: { kind: "edit-new", parentId: "root", parentStatusSeed: "wip" },
+    };
+    render(
+      <MindProvider initialState={s}>
+        <EditModal />
+      </MindProvider>,
+    );
+    fireEvent.click(screen.getByTestId("edit-modal-attr-toggle"));
+    const wipBtn = screen.getByTestId("status-wip") as HTMLButtonElement;
+    expect(wipBtn.getAttribute("aria-pressed")).toBe("true");
   });
 });
