@@ -77,5 +77,4 @@ describe("KanbanColumn", () => {
       parentStatusSeed: "review",
     });
   });
-
 });

@@ -50,20 +50,32 @@ if (typeof globalThis.PointerEvent !== "function") {
 // Dnd-kit needs non-zero rects for collision detection.
 // eslint-disable-next-line @typescript-eslint/unbound-method
 const origGetBoundingClientRect = Element.prototype.getBoundingClientRect;
-Element.prototype.getBoundingClientRect = function  getBoundingClientRect() {
+Element.prototype.getBoundingClientRect = function getBoundingClientRect() {
   const rect = origGetBoundingClientRect.call(this);
   if (rect.width > 0 || rect.height > 0) return rect;
   // Assign reasonable defaults so dnd-kit collision detection works
   const w = 240;
   const h = 80;
-  return { x: rect.x, y: rect.y, width: w, height: h, top: rect.y, right: rect.x + w, bottom: rect.y + h, left: rect.x, toJSON: () => null } as unknown as DOMRect;
+  return {
+    x: rect.x,
+    y: rect.y,
+    width: w,
+    height: h,
+    top: rect.y,
+    right: rect.x + w,
+    bottom: rect.y + h,
+    left: rect.x,
+    toJSON: () => null,
+  } as unknown as DOMRect;
 };
 
 // Jsdom does not support setPointerCapture / releasePointerCapture / hasPointerCapture
 // Required by @dnd-kit/core PointerSensor
 function noopSetPointerCapture(_pointerId: number): void {}
 function noopReleasePointerCapture(_pointerId: number): void {}
-function noopHasPointerCapture(_pointerId: number): boolean { return false; }
+function noopHasPointerCapture(_pointerId: number): boolean {
+  return false;
+}
 if (typeof HTMLElement.prototype.setPointerCapture !== "function") {
   HTMLElement.prototype.setPointerCapture = noopSetPointerCapture;
 }

@@ -25,9 +25,7 @@ export function KanbanBoard() {
   const { dispatch, state } = useMindStore();
   const [activeId, setActiveId] = useState<string | null>(null);
 
-  const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
-  );
+  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }));
 
   function handleDragStart(event: { active: { id: string | number } }) {
     const id = String(event.active.id);
@@ -35,7 +33,10 @@ export function KanbanBoard() {
     dispatch({ id, type: "SET_DRAGGING" });
   }
 
-  function handleDragEnd(event: { active: { id: string | number }; over?: { id: string | number } | null }) {
+  function handleDragEnd(event: {
+    active: { id: string | number };
+    over?: { id: string | number } | null;
+  }) {
     const { active, over } = event;
     if (over) {
       const overId = String(over.id);
@@ -69,9 +70,7 @@ export function KanbanBoard() {
           ))}
         </div>
       </div>
-      <DragOverlay>
-        {activeNode ? <KanbanCardPreview node={activeNode} /> : null}
-      </DragOverlay>
+      <DragOverlay>{activeNode ? <KanbanCardPreview node={activeNode} /> : null}</DragOverlay>
     </DndContext>
   );
 }

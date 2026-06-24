@@ -1,5 +1,5 @@
 import { fireEvent, render, screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it } from "vitest";
 import { KanbanCard } from "./KanbanCard";
 import { MindProvider, useMindStore } from "../hooks/use-mind-store";
 import { createInitialState, type State } from "../store";

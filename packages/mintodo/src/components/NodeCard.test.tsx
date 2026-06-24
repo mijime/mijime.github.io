@@ -1,6 +1,13 @@
 import { act, fireEvent, render } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
-import { DndContext, PointerSensor, useSensor, useSensors, type UniqueIdentifier, type DroppableContainer } from "@dnd-kit/core";
+import {
+  DndContext,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type UniqueIdentifier,
+  type DroppableContainer,
+} from "@dnd-kit/core";
 import { NodeCard } from "./NodeCard";
 import { MindProvider, useMindStore } from "../hooks/use-mind-store";
 import type { State } from "../store";
@@ -54,11 +61,15 @@ function Capture() {
   return null;
 }
 
-function TestDndProvider({ children, nodeMap }: { children: React.ReactNode; nodeMap: Record<string, MindNode> }) {
+function TestDndProvider({
+  children,
+  nodeMap,
+}: {
+  children: React.ReactNode;
+  nodeMap: Record<string, MindNode>;
+}) {
   const { dispatch } = useMindStore();
-  const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
-  );
+  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }));
   // Build collision rects from state node positions (viewport coords)
   const rectMap = new Map<string, { top: number; left: number; width: number; height: number }>();
   for (const n of Object.values(nodeMap)) {
@@ -66,18 +77,24 @@ function TestDndProvider({ children, nodeMap }: { children: React.ReactNode; nod
     const h = 80;
     rectMap.set(n.id, { left: n.x, top: n.y, width: w, height: h });
   }
-  const collisionDetection = (args: { active?: { id: UniqueIdentifier }; droppableContainers: DroppableContainer[]; pointerCoordinates: { x: number; y: number } | null }) => {
+  const collisionDetection = (args: {
+    active?: { id: UniqueIdentifier };
+    droppableContainers: DroppableContainer[];
+    pointerCoordinates: { x: number; y: number } | null;
+  }) => {
     if (!args.pointerCoordinates) return [];
     const activeId = args.active ? String(args.active.id) : null;
     const px = args.pointerCoordinates.x;
     const py = args.pointerCoordinates.y;
-    return args.droppableContainers.filter((c) => {
-      // Exclude the active (dragged) node so a non-active target at the same position is selected
-      if (activeId && String(c.id) === activeId) return false;
-      const r = rectMap.get(String(c.id));
-      if (!r) return false;
-      return px >= r.left && px <= r.left + r.width && py >= r.top && py <= r.top + r.height;
-    }).map((c) => ({ id: c.id, data: { droppableContainer: c } }));
+    return args.droppableContainers
+      .filter((c) => {
+        // Exclude the active (dragged) node so a non-active target at the same position is selected
+        if (activeId && String(c.id) === activeId) return false;
+        const r = rectMap.get(String(c.id));
+        if (!r) return false;
+        return px >= r.left && px <= r.left + r.width && py >= r.top && py <= r.top + r.height;
+      })
+      .map((c) => ({ id: c.id, data: { droppableContainer: c } }));
   };
   return (
     <DndContext
@@ -112,28 +129,57 @@ function dragFromTo(source: HTMLElement, target: HTMLElement) {
   const doc = source.ownerDocument;
   act(() => {
     fireEvent.pointerDown(source, {
-      pointerId: 1, pointerType: "mouse", isPrimary: true, button: 0, buttons: 1,
-      clientX: fromX, clientY: fromY,
+      pointerId: 1,
+      pointerType: "mouse",
+      isPrimary: true,
+      button: 0,
+      buttons: 1,
+      clientX: fromX,
+      clientY: fromY,
     });
   });
   // Dispatch subsequent pointer events on document where dnd-kit's native listeners are attached
   act(() => {
-    doc.dispatchEvent(new PointerEvent("pointermove", {
-      pointerId: 1, pointerType: "mouse", isPrimary: true,
-      clientX: fromX + 10, clientY: fromY + 10, buttons: 1, bubbles: true, cancelable: true,
-    }));
+    doc.dispatchEvent(
+      new PointerEvent("pointermove", {
+        pointerId: 1,
+        pointerType: "mouse",
+        isPrimary: true,
+        clientX: fromX + 10,
+        clientY: fromY + 10,
+        buttons: 1,
+        bubbles: true,
+        cancelable: true,
+      }),
+    );
   });
   act(() => {
-    doc.dispatchEvent(new PointerEvent("pointermove", {
-      pointerId: 1, pointerType: "mouse", isPrimary: true,
-      clientX: toX, clientY: toY, buttons: 1, bubbles: true, cancelable: true,
-    }));
+    doc.dispatchEvent(
+      new PointerEvent("pointermove", {
+        pointerId: 1,
+        pointerType: "mouse",
+        isPrimary: true,
+        clientX: toX,
+        clientY: toY,
+        buttons: 1,
+        bubbles: true,
+        cancelable: true,
+      }),
+    );
   });
   act(() => {
-    doc.dispatchEvent(new PointerEvent("pointerup", {
-      pointerId: 1, pointerType: "mouse", isPrimary: true,
-      clientX: toX, clientY: toY, button: 0, bubbles: true, cancelable: true,
-    }));
+    doc.dispatchEvent(
+      new PointerEvent("pointerup", {
+        pointerId: 1,
+        pointerType: "mouse",
+        isPrimary: true,
+        clientX: toX,
+        clientY: toY,
+        button: 0,
+        bubbles: true,
+        cancelable: true,
+      }),
+    );
   });
 }
 
@@ -197,21 +243,34 @@ describe("NodeCard drag-and-drop", () => {
     const a = container.querySelector('[data-node-id="a"]') as HTMLElement;
     act(() => {
       fireEvent.pointerDown(a, {
-        pointerId: 1, pointerType: "mouse", isPrimary: true, button: 0, buttons: 1,
-        clientX: 0, clientY: 0,
+        pointerId: 1,
+        pointerType: "mouse",
+        isPrimary: true,
+        button: 0,
+        buttons: 1,
+        clientX: 0,
+        clientY: 0,
       });
     });
     act(() => {
       fireEvent.pointerMove(a, {
-        pointerId: 1, pointerType: "mouse", isPrimary: true,
-        clientX: 10, clientY: 10, buttons: 1,
+        pointerId: 1,
+        pointerType: "mouse",
+        isPrimary: true,
+        clientX: 10,
+        clientY: 10,
+        buttons: 1,
       });
     });
     expect(capturedState!.draggingNodeId).toBe("a");
     act(() => {
       fireEvent.pointerUp(a, {
-        pointerId: 1, pointerType: "mouse", isPrimary: true,
-        clientX: 10, clientY: 10, button: 0,
+        pointerId: 1,
+        pointerType: "mouse",
+        isPrimary: true,
+        clientX: 10,
+        clientY: 10,
+        button: 0,
       });
     });
   });
@@ -288,16 +347,29 @@ describe("NodeCard drag-and-drop", () => {
     const doc = a.ownerDocument;
     act(() => {
       fireEvent.pointerDown(a, {
-        pointerId: 1, pointerType: "mouse", isPrimary: true, button: 0, buttons: 1,
-        clientX: 120, clientY: 40,
+        pointerId: 1,
+        pointerType: "mouse",
+        isPrimary: true,
+        button: 0,
+        buttons: 1,
+        clientX: 120,
+        clientY: 40,
       });
     });
     // Activate the drag
     act(() => {
-      doc.dispatchEvent(new PointerEvent("pointermove", {
-        pointerId: 1, pointerType: "mouse", isPrimary: true,
-        clientX: 130, clientY: 50, buttons: 1, bubbles: true, cancelable: true,
-      }));
+      doc.dispatchEvent(
+        new PointerEvent("pointermove", {
+          pointerId: 1,
+          pointerType: "mouse",
+          isPrimary: true,
+          clientX: 130,
+          clientY: 50,
+          buttons: 1,
+          bubbles: true,
+          cancelable: true,
+        }),
+      );
     });
     // Now the drag is active; check ring appears on target
     // (collision runs and finds b as over since a is excluded)
@@ -305,10 +377,18 @@ describe("NodeCard drag-and-drop", () => {
     expect(b.className).toContain("ring-sky-400");
     // End the drag
     act(() => {
-      doc.dispatchEvent(new PointerEvent("pointerup", {
-        pointerId: 1, pointerType: "mouse", isPrimary: true,
-        clientX: 120, clientY: 40, button: 0, bubbles: true, cancelable: true,
-      }));
+      doc.dispatchEvent(
+        new PointerEvent("pointerup", {
+          pointerId: 1,
+          pointerType: "mouse",
+          isPrimary: true,
+          clientX: 120,
+          clientY: 40,
+          button: 0,
+          bubbles: true,
+          cancelable: true,
+        }),
+      );
     });
   });
 
@@ -317,27 +397,44 @@ describe("NodeCard drag-and-drop", () => {
     const a = container.querySelector('[data-node-id="a"]') as HTMLElement;
     act(() => {
       fireEvent.pointerDown(a, {
-        pointerId: 1, pointerType: "mouse", isPrimary: true, button: 0, buttons: 1,
-        clientX: 0, clientY: 0,
+        pointerId: 1,
+        pointerType: "mouse",
+        isPrimary: true,
+        button: 0,
+        buttons: 1,
+        clientX: 0,
+        clientY: 0,
       });
     });
     act(() => {
       fireEvent.pointerMove(a, {
-        pointerId: 1, pointerType: "mouse", isPrimary: true,
-        clientX: 10, clientY: 10, buttons: 1,
+        pointerId: 1,
+        pointerType: "mouse",
+        isPrimary: true,
+        clientX: 10,
+        clientY: 10,
+        buttons: 1,
       });
     });
     act(() => {
       fireEvent.pointerMove(a, {
-        pointerId: 1, pointerType: "mouse", isPrimary: true,
-        clientX: 20, clientY: 20, buttons: 1,
+        pointerId: 1,
+        pointerType: "mouse",
+        isPrimary: true,
+        clientX: 20,
+        clientY: 20,
+        buttons: 1,
       });
     });
     expect(a.className).not.toContain("ring-2");
     act(() => {
       fireEvent.pointerUp(a, {
-        pointerId: 1, pointerType: "mouse", isPrimary: true,
-        clientX: 20, clientY: 20, button: 0,
+        pointerId: 1,
+        pointerType: "mouse",
+        isPrimary: true,
+        clientX: 20,
+        clientY: 20,
+        button: 0,
       });
     });
   });
@@ -348,27 +445,44 @@ describe("NodeCard drag-and-drop", () => {
     const a1 = container.querySelector('[data-node-id="a1"]') as HTMLElement;
     act(() => {
       fireEvent.pointerDown(a, {
-        pointerId: 1, pointerType: "mouse", isPrimary: true, button: 0, buttons: 1,
-        clientX: 0, clientY: 0,
+        pointerId: 1,
+        pointerType: "mouse",
+        isPrimary: true,
+        button: 0,
+        buttons: 1,
+        clientX: 0,
+        clientY: 0,
       });
     });
     act(() => {
       fireEvent.pointerMove(a, {
-        pointerId: 1, pointerType: "mouse", isPrimary: true,
-        clientX: 10, clientY: 10, buttons: 1,
+        pointerId: 1,
+        pointerType: "mouse",
+        isPrimary: true,
+        clientX: 10,
+        clientY: 10,
+        buttons: 1,
       });
     });
     act(() => {
       fireEvent.pointerMove(a1, {
-        pointerId: 1, pointerType: "mouse", isPrimary: true,
-        clientX: 0, clientY: -340, buttons: 1,
+        pointerId: 1,
+        pointerType: "mouse",
+        isPrimary: true,
+        clientX: 0,
+        clientY: -340,
+        buttons: 1,
       });
     });
     expect(a1.className).not.toContain("ring-2");
     act(() => {
       fireEvent.pointerUp(a1, {
-        pointerId: 1, pointerType: "mouse", isPrimary: true,
-        clientX: 0, clientY: -340, button: 0,
+        pointerId: 1,
+        pointerType: "mouse",
+        isPrimary: true,
+        clientX: 0,
+        clientY: -340,
+        button: 0,
       });
     });
   });

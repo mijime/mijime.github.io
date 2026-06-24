@@ -35,7 +35,10 @@ vi.mock("@dnd-kit/core", async (importOriginal) => {
 });
 
 function pointerRectCollision(): CollisionDetection {
-  return ({ droppableContainers, pointerCoordinates }: {
+  return ({
+    droppableContainers,
+    pointerCoordinates,
+  }: {
     droppableContainers: DroppableContainer[];
     pointerCoordinates: { x: number; y: number } | null;
   }) => {
