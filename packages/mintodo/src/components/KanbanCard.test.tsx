@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
 import { KanbanCard } from "./KanbanCard";
-import { MindProvider } from "../hooks/use-mind-store";
+import { MindProvider, useMindStore } from "../hooks/use-mind-store";
 import { createInitialState, type State } from "../store";
 import type { MindNode } from "../types";
 
@@ -41,6 +41,12 @@ function renderCard(node: MindNode, others: MindNode[] = []) {
       <KanbanCard node={node} />
     </MindProvider>,
   );
+}
+
+let captured: State | null = null;
+function Capture() {
+  captured = useMindStore().state;
+  return null;
 }
 
 describe("KanbanCard multi-line text", () => {
@@ -91,13 +97,17 @@ describe("KanbanCard", () => {
     expect(card.textContent).toMatch(/Task/u);
   });
 
-  it("'+' button opens edit-new modal with the card as parent", () => {
+  it("'+' button (inside TaskCard) opens edit-new modal with the card as parent", () => {
     const root = node({ id: "root", boardId: "b", parentId: null, isRoot: true });
     const n = node({ id: "n1", boardId: "b", parentId: "root" });
-    renderCard(n, [root]);
-    fireEvent.click(screen.getByTestId("kanban-add-child-n1"));
-    const modal = screen.getByTestId("kanban-card-n1").ownerDocument.defaultView as Window;
-    void modal;
+    render(
+      <MindProvider initialState={makeState([root, n])}>
+        <Capture />
+        <KanbanCard node={n} />
+      </MindProvider>,
+    );
+    fireEvent.click(screen.getByTestId("add-child-n1"));
+    expect(captured!.modal).toEqual({ kind: "edit-new", parentId: "n1" });
   });
 
   it("has dnd-kit draggable attributes", () => {
@@ -106,5 +116,19 @@ describe("KanbanCard", () => {
     renderCard(n, [root]);
     const card = screen.getByTestId("kanban-card-n1");
     expect(card.getAttribute("role")).toBe("button");
+  });
+
+  it("clicking the card body opens the edit modal", () => {
+    const root = node({ id: "root", boardId: "b", parentId: null, isRoot: true });
+    const n1 = node({ id: "n1", boardId: "b", parentId: "root" });
+    const state = makeState([root, n1]);
+    render(
+      <MindProvider initialState={state}>
+        <Capture />
+        <KanbanCard node={state.nodes.n1} />
+      </MindProvider>,
+    );
+    fireEvent.click(screen.getByTestId("kanban-card-n1"));
+    expect(captured!.modal).toEqual({ kind: "edit", nodeId: "n1" });
   });
 });
