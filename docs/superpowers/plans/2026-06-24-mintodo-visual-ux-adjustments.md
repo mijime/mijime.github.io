@@ -548,7 +548,9 @@ export function parseInlineDSL(raw: string): InlineDslResult {
       }
     }
 
-    textLines.push(textTokens.join(" "));
+    if (textTokens.length > 0) {
+      textLines.push(textTokens.join(" "));
+    }
   }
 
   result.text = textLines.join("\n");
@@ -556,7 +558,7 @@ export function parseInlineDSL(raw: string): InlineDslResult {
 }
 ```
 
-The change from the original: the outer loop now iterates over `lines` (the result of `raw.split("\n")`) instead of over `tokens` (the result of `raw.split(/\s+/u)`). Each line is independently tokenized on whitespace, attributes are extracted per line, and non-attribute tokens are joined with a single space and accumulated into `textLines`. The final `result.text` is `textLines.join("\n")` (no `.trim()` — leading/trailing newlines are preserved as-is; the existing `EditModal` and `DslEditorModal` callers do not expect trim).
+The change from the original: the outer loop now iterates over `lines` (the result of `raw.split("\n")`) instead of over `tokens` (the result of `raw.split(/\s+/u)`). Each line is independently tokenized on whitespace, attributes are extracted per line, and non-attribute tokens are joined with a single space and accumulated into `textLines`. The `if (textTokens.length > 0)` guard drops empty / whitespace-only lines and lines that contain only attributes — this is what keeps the existing test `parseInlineDSL("   ")` returning `text: ""` intact. The final `result.text` is `textLines.join("\n")`.
 
 - [ ] **Step 4: Re-run the dsl tests to confirm they pass**
 
@@ -757,7 +759,7 @@ git -C /Users/kojima.takashi/src/github.com/mijime/mijime.github.io commit -m "f
 - Consumes: existing `App` + `db` + `flush` imports
 - Produces: a passing end-to-end test that opens the edit modal for a node, types a multi-line text, saves, and asserts the resulting mindmap card has both the newlines preserved and the new className.
 
-- [ ] **Step 1: Add the failing integration test**
+- [ ] **Step 1: Add the integration test**
 
 Append to `packages/mintodo/src/integration.test.tsx`:
 
@@ -803,27 +805,17 @@ describe("multi-line text end-to-end", () => {
 });
 ```
 
-- [ ] **Step 2: Run the new test to confirm it fails**
+- [ ] **Step 2: Run the integration test to confirm it passes**
+
+Tasks 4 and 5 are required predecessors — by the time this task starts, `parseInlineDSL` preserves `\n` and the card className includes `whitespace-pre-wrap`. The test should pass on the first run:
 
 ```bash
 pnpm test -- integration.test
 ```
 
-Expected: FAIL — the assertion on `textSpan.textContent` fails because Tasks 4 and 5 have not yet been applied (in this hypothetical first pass). The exact failure message depends on the implementation state, but it must fail at the `textSpan` existence check or the textContent check.
+Expected: PASS for the new `multi-line text end-to-end` test. If it fails, re-check that Tasks 4 and 5 have been committed and the changes are present on disk.
 
-(Note for the implementer: Tasks 4 and 5 are required predecessors. If you are running this task in isolation, run it after committing Tasks 4 and 5; the test should pass without further code changes in this task.)
-
-- [ ] **Step 3: Re-run the test (no code change)**
-
-Confirm the test passes with the cumulative work of Tasks 1-5:
-
-```bash
-pnpm test -- integration.test
-```
-
-Expected: PASS.
-
-- [ ] **Step 4: Run the full test suite and check**
+- [ ] **Step 3: Run the full test suite and check**
 
 ```bash
 pnpm test
@@ -832,7 +824,7 @@ pnpm run check
 
 Expected: all tests pass, 0 type errors, 0 lint errors.
 
-- [ ] **Step 5: Commit**
+- [ ] **Step 4: Commit**
 
 ```bash
 git -C /Users/kojima.takashi/src/github.com/mijime/mijime.github.io add packages/mintodo/src/integration.test.tsx

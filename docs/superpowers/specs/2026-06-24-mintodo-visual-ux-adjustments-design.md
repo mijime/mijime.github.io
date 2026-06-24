@@ -80,7 +80,12 @@ The `connection-lines` SVG, `NodeCard`, and `KanbanCard` components already use 
 - For each line, split on whitespace to extract tokens.
 - Collect `@key:value` (and bare `@key`) tokens as before — across all lines.
 - Collect remaining tokens as the `text` field, joined with **single spaces within a line** and **single `\n` between lines**.
-- Existing tests in `packages/mintodo/src/dsl.test.ts` that assert on `parseInlineDSL` behavior for single-line inputs (the vast majority) must continue to pass; add a new test that asserts a multi-line input `"line1\nline2 @priority:high\nline3"` returns `text: "line1\nline2\nline3"` and `priority: "high"`.
+- **Empty / whitespace-only lines are dropped** (not preserved as `"\n"` in the output). This keeps the existing test `parseInlineDSL("   ")` returning `text: ""` intact, and is the natural behavior for the typical use case where the user types text with `\n` separators but not blank lines.
+- Lines that contain **only** attributes (e.g., `"@done"` on its own line) are also dropped from the text output — they contribute to the attribute set but not to the line list.
+- Existing tests in `packages/mintodo/src/dsl.test.ts` that assert on `parseInlineDSL` behavior for single-line inputs (the vast majority) must continue to pass; add new tests that assert:
+  - `"line1\nline2 @priority:high\nline3"` returns `text: "line1\nline2\nline3"` and `priority: "high"`.
+  - `"  alpha  \n  beta  \n  gamma  "` returns `text: "alpha\nbeta\ngamma"`.
+  - `"foo\n@color:sky\nbar @done\nbaz"` returns `text: "foo\nbar\nbaz"`, `categoryColor: "sky"`, `completed: true`.
 
 `EditModal.tsx` needs no change once `parseInlineDSL` is fixed — it stores `dsl.text` which will now retain `\n`.
 
