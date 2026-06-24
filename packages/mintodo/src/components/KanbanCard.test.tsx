@@ -1,5 +1,5 @@
 import { fireEvent, render, screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it } from "vitest";
 import { KanbanCard } from "./KanbanCard";
 import { MindProvider } from "../hooks/use-mind-store";
 import { createInitialState, type State } from "../store";
@@ -42,6 +42,37 @@ function renderCard(node: MindNode, others: MindNode[] = []) {
     </MindProvider>,
   );
 }
+
+describe("KanbanCard multi-line text", () => {
+  afterEach(() => {
+    document.body.innerHTML = "";
+  });
+
+  it("renders multi-line text with whitespace-pre-wrap and max-w-[240px]", () => {
+    const multiline = "first line\nsecond line wraps to a longer one";
+    const n = node({
+      id: "n1",
+      boardId: "b",
+      parentId: "root",
+      text: multiline,
+    });
+    const root = node({
+      id: "root",
+      boardId: "b",
+      parentId: null,
+      isRoot: true,
+    });
+    renderCard(n, [root]);
+    const card = screen.getByTestId("kanban-card-n1");
+    const textSpan = card.querySelector("span.whitespace-pre-wrap") as HTMLElement;
+    expect(textSpan).toBeTruthy();
+    expect(textSpan.className).toContain("whitespace-pre-wrap");
+    expect(textSpan.className).toContain("break-words");
+    expect(textSpan.className).toContain("max-w-[240px]");
+    expect(textSpan.className).not.toContain("truncate");
+    expect(textSpan.textContent).toBe(multiline);
+  });
+});
 
 describe("KanbanCard", () => {
   it("renders the node text", () => {

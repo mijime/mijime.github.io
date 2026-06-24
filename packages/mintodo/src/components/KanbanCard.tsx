@@ -67,7 +67,7 @@ export function KanbanCard({ node }: Props) {
           )}
         </button>
         <span
-          className={`truncate text-sm font-medium flex-1 ${isDone ? "line-through text-slate-400 dark:text-slate-500" : ""}`}
+          className={`whitespace-pre-wrap break-words max-w-[240px] text-sm font-medium flex-1 ${isDone ? "line-through text-slate-400 dark:text-slate-500" : ""}`}
         >
           {node.text}
         </span>

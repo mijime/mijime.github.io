@@ -117,7 +117,7 @@ export function NodeCard({ node }: Props) {
             )}
           </button>
           <span
-            className={`truncate flex-1 text-sm font-medium ${node.completed ? "line-through text-slate-400 dark:text-slate-500" : ""}`}
+            className={`whitespace-pre-wrap break-words max-w-[240px] flex-1 text-sm font-medium ${node.completed ? "line-through text-slate-400 dark:text-slate-500" : ""}`}
           >
             {node.text}
           </span>
