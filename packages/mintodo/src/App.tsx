@@ -61,14 +61,14 @@ function Shell() {
       style={{ background: "var(--paper)", color: "var(--ink)" }}
     >
       <BoardSidebar />
-      <div className="flex-1 relative overflow-hidden">
+      <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
         <Toolbar />
-        <div className="absolute inset-0 pt-20 px-4 pb-4">
+        <div className="flex-1 relative p-4">
           {showCanvas ? state.viewMode === "kanban" ? <KanbanBoard /> : <Canvas /> : <EmptyState />}
+          {state.viewMode === "mindmap" && <ZoomControls />}
+          <StatsPanel />
+          <ShortcutHint />
         </div>
-        <ZoomControls />
-        <StatsPanel />
-        <ShortcutHint />
       </div>
       <EditModal />
       <DslEditorModal />
