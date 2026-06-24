@@ -8,7 +8,6 @@ import { DslEditorModal } from "./components/DslEditorModal";
 import { EditModal } from "./components/EditModal";
 import { EmptyState } from "./components/EmptyState";
 import { HelpModal } from "./components/HelpModal";
-import { ShortcutHint } from "./components/ShortcutHint";
 import { StatsPanel } from "./components/StatsPanel";
 import { Toolbar } from "./components/Toolbar";
 import { ZoomControls } from "./components/ZoomControls";
@@ -67,7 +66,6 @@ function Shell() {
           {showCanvas ? state.viewMode === "kanban" ? <KanbanBoard /> : <Canvas /> : <EmptyState />}
           {state.viewMode === "mindmap" && <ZoomControls />}
           <StatsPanel />
-          <ShortcutHint />
         </div>
       </div>
       <EditModal />
