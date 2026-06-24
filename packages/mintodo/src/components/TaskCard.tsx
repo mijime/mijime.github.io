@@ -55,10 +55,7 @@ export function TaskCard({ node }: Props) {
           <GitBranch size={12} />
         </button>
       </div>
-      <div
-        className="flex items-center justify-between w-full pt-1.5"
-        style={{ borderTop: `1px solid ${categoryBorderColor(node.categoryColor)}` }}
-      >
+      <div className="flex items-center justify-between w-full pt-1.5">
         <div className="flex items-center gap-1.5">
           {showBadgeRow && (
             <>
@@ -77,6 +74,10 @@ export function TaskCard({ node }: Props) {
           />
         </div>
       </div>
+      <div
+        className="w-full"
+        style={{ borderTop: `1px solid ${categoryBorderColor(node.categoryColor)}` }}
+      />
     </div>
   );
 }

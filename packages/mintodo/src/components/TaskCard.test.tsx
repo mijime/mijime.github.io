@@ -91,9 +91,8 @@ describe("TaskCard", () => {
       </MindProvider>,
     );
     const card = screen.getByTestId("task-card-n1");
-    const bottomRow = card.querySelector('[data-testid^="status-dot-"]')?.parentElement?.parentElement;
-    expect(bottomRow).toBeTruthy();
-    expect(bottomRow!.style.borderTop).toBe("1px solid rgb(244, 63, 94)");
+    const borderDiv = card.children[2] as HTMLElement;
+    expect(borderDiv.style.borderTop).toBe("1px solid rgb(244, 63, 94)");
     expect(screen.getByTestId("status-dot-n1").className).toContain("bg-emerald-500");
     expect(screen.queryByTestId("category-dot-n1")).toBeNull();
   });
