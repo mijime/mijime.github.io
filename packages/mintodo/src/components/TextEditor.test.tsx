@@ -67,42 +67,14 @@ describe("TextEditor", () => {
     expect(ta.value).toContain("* Child");
   });
 
-  it("shows preview when DSL is valid", () => {
+  it("does not show preview pane (removed)", () => {
     render(
       <MindProvider initialState={makeState()}>
         <TextEditor />
       </MindProvider>,
     );
-    expect(screen.getByTestId("text-editor-preview")).toBeTruthy();
+    expect(screen.queryByTestId("text-editor-preview")).toBeNull();
     expect(screen.queryByTestId("text-editor-error")).toBeNull();
-  });
-
-  it("renders preview with depth-based indentation and status dot", () => {
-    render(
-      <MindProvider initialState={makeState()}>
-        <TextEditor />
-      </MindProvider>,
-    );
-    const preview = screen.getByTestId("text-editor-preview");
-    const items = preview.querySelectorAll("li");
-    expect(items).toHaveLength(2);
-    expect(items[0].style.paddingLeft).toBe("0px");
-    expect(items[1].style.paddingLeft).toBe("16px");
-    expect(preview.textContent).toContain("Root");
-    expect(preview.textContent).toContain("Child");
-  });
-
-  it("shows error when DSL is invalid", () => {
-    render(
-      <MindProvider initialState={makeState()}>
-        <TextEditor />
-      </MindProvider>,
-    );
-    const ta = screen.getByTestId("text-editor-textarea") as HTMLTextAreaElement;
-    act(() => {
-      fireEvent.change(ta, { target: { value: "no header" } });
-    });
-    expect(screen.getByTestId("text-editor-error")).toBeTruthy();
   });
 
   it("applies parsed DSL on apply click and confirms", async () => {

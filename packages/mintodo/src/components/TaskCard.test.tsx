@@ -84,13 +84,17 @@ describe("TaskCard", () => {
     expect(captured!.nodes.n1.completed).toBe(true);
   });
 
-  it("renders categoryColor dot alongside status dot", () => {
+  it("uses categoryColor for bottom border and keeps status dot", () => {
     render(
       <MindProvider initialState={makeState()}>
         <TaskCard node={makeNode({ categoryColor: "rose", status: "done" })} />
       </MindProvider>,
     );
-    expect(screen.getByTestId("category-dot-n1").className).toContain("bg-rose-400");
+    const card = screen.getByTestId("task-card-n1");
+    const bottomRow = card.querySelector('[data-testid^="status-dot-"]')?.parentElement?.parentElement;
+    expect(bottomRow).toBeTruthy();
+    expect(bottomRow!.style.borderTop).toBe("1px solid rgb(244, 63, 94)");
     expect(screen.getByTestId("status-dot-n1").className).toContain("bg-emerald-500");
+    expect(screen.queryByTestId("category-dot-n1")).toBeNull();
   });
 });
