@@ -98,8 +98,8 @@ No change. `MindNode.text: string` is a plain string. Newlines are valid charact
 
 **Update / remove.**
 
-- `Toolbar.test.tsx` (if present) or the relevant test file: delete any test that exercises the theme toggle button. Delete the test for `onTheme`'s effect on `localStorage` and `<html>` class.
-- `integration.test.tsx`: remove any assertion about `document.documentElement.classList.contains("dark")` after a toggle action. Keep all other assertions (DSL round-trip, KANBAN view toggle, viewMode persistence, etc.).
+- There is no `Toolbar.test.tsx`; the theme toggle behavior is exercised only inside `integration.test.tsx`. Search for `dark` class assertions or any test that drives the toolbar's theme button, and remove or rewrite them to match the new design (no toolbar toggle; theme is set externally via `<html data-theme>`).
+- `integration.test.tsx`: remove any assertion about `document.documentElement.classList.contains("dark")` after a toggle action. Keep all other assertions (DSL round-trip, KANBAN view toggle, viewMode persistence, etc.). The integration test must continue to set `<html data-theme="dark">` directly (or via `useDarkMode`) to exercise dark-mode paths in the components.
 - `KanbanCard.test.tsx`, `NodeCard.test.tsx`: no change to behavior under test, but update any snapshot/className assertion that depended on the old single-line or `truncate` class.
 
 **Add.**
@@ -121,7 +121,7 @@ No change. `MindNode.text: string` is a plain string. Newlines are valid charact
 | `packages/mintodo/src/components/NodeCard.tsx` | Text container className (multi-line rules) |
 | `packages/mintodo/src/components/KanbanCard.tsx` | Text container className (multi-line rules) |
 | `packages/mintodo/src/store.ts` | Possible fix if any action trims `\n` from `text` (verify) |
-| `packages/mintodo/src/components/Toolbar.test.tsx` (if exists) | Remove toggle tests |
+| (no `Toolbar.test.tsx` exists) | Toggle tests live inside `integration.test.tsx` |
 | `packages/mintodo/src/components/NodeCard.test.tsx` | Update className assertion; add multi-line test |
 | `packages/mintodo/src/components/KanbanCard.test.tsx` | Update className assertion; add multi-line test |
 | `packages/mintodo/src/integration.test.tsx` | Drop `dark` class assertion; add multi-line flow test |
