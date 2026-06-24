@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { formatBadges, categoryDotClass, categoryBorderColor, statusDotClass } from "./badges";
+import { formatBadges, categoryBorderColor, statusDotClass } from "./badges";
 import type { MindNode } from "../types";
 
 function makeNode(opts: Partial<MindNode> = {}): MindNode {
@@ -22,58 +22,59 @@ function makeNode(opts: Partial<MindNode> = {}): MindNode {
   };
 }
 
+function todayString(): string {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
 describe("formatBadges", () => {
-  it("empty dueDate -> no dueHtml, showBadgeRow only if high priority", () => {
+  it("empty dueDate -> kind none, showPriority false, statusLabel INBOX", () => {
     const r = formatBadges(makeNode());
-    expect(r.dueHtml).toBe("");
-    expect(r.showHigh).toBe(false);
-    expect(r.showBadgeRow).toBe(false);
+    expect(r.due.kind).toBe("none");
+    expect(r.due.daysFromNow).toBe(0);
+    expect(r.showPriority).toBe(false);
+    expect(r.statusLabel).toBe("INBOX");
   });
 
-  it("overdue dueDate -> rose 超過 badge", () => {
-    const past = "2000-01-01";
-    const r = formatBadges(makeNode({ dueDate: past }));
-    expect(r.dueHtml).toContain("超過");
-    expect(r.showBadgeRow).toBe(true);
+  it("past dueDate -> kind overdue, negative daysFromNow", () => {
+    const r = formatBadges(makeNode({ dueDate: "2000-01-01" }));
+    expect(r.due.kind).toBe("overdue");
+    expect(r.due.daysFromNow).toBeLessThan(0);
   });
 
-  it("due today -> amber 今日 badge", () => {
-    const today = new Date();
-    const ds = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
-    const r = formatBadges(makeNode({ dueDate: ds }));
-    expect(r.dueHtml).toContain("今日");
-    expect(r.showBadgeRow).toBe(true);
+  it("due today -> kind today, daysFromNow 0", () => {
+    const r = formatBadges(makeNode({ dueDate: todayString() }));
+    expect(r.due.kind).toBe("today");
+    expect(r.due.daysFromNow).toBe(0);
   });
 
-  it("future dueDate -> あと N 日 badge", () => {
+  it("future dueDate -> kind future, positive daysFromNow", () => {
     const r = formatBadges(makeNode({ dueDate: "2099-12-31" }));
-    expect(r.dueHtml).toContain("あと");
-    expect(r.showBadgeRow).toBe(true);
+    expect(r.due.kind).toBe("future");
+    expect(r.due.daysFromNow).toBeGreaterThan(0);
   });
 
-  it("done status suppresses dueHtml", () => {
+  it("done status suppresses due to kind none", () => {
     const r = formatBadges(makeNode({ dueDate: "2000-01-01", status: "done", completed: true }));
-    expect(r.dueHtml).toBe("");
+    expect(r.due.kind).toBe("none");
   });
 
-  it("high priority -> showHigh true", () => {
-    const r = formatBadges(makeNode({ priority: "high" }));
-    expect(r.showHigh).toBe(true);
-    expect(r.showBadgeRow).toBe(true);
-  });
-
-  it("done with status but not completed suppresses dueHtml", () => {
+  it("done status but not completed also suppresses due", () => {
     const r = formatBadges(makeNode({ dueDate: "2000-01-01", status: "done", completed: false }));
-    expect(r.dueHtml).toBe("");
+    expect(r.due.kind).toBe("none");
   });
-});
 
-describe("categoryDotClass", () => {
-  it("maps colors to tailwind classes", () => {
-    expect(categoryDotClass("sky")).toBe("bg-sky-400");
-    expect(categoryDotClass("emerald")).toBe("bg-emerald-400");
-    expect(categoryDotClass("rose")).toBe("bg-rose-400");
-    expect(categoryDotClass("slate")).toBe("bg-slate-400");
+  it("showPriority is true only for high", () => {
+    expect(formatBadges(makeNode({ priority: "low" })).showPriority).toBe(false);
+    expect(formatBadges(makeNode({ priority: "medium" })).showPriority).toBe(false);
+    expect(formatBadges(makeNode({ priority: "high" })).showPriority).toBe(true);
+  });
+
+  it("statusLabel maps each TaskStatus", () => {
+    expect(formatBadges(makeNode({ status: "inbox" })).statusLabel).toBe("INBOX");
+    expect(formatBadges(makeNode({ status: "wip" })).statusLabel).toBe("WIP");
+    expect(formatBadges(makeNode({ status: "review" })).statusLabel).toBe("REVIEW");
+    expect(formatBadges(makeNode({ status: "done" })).statusLabel).toBe("DONE");
   });
 });
 
@@ -87,16 +88,10 @@ describe("categoryBorderColor", () => {
 });
 
 describe("statusDotClass", () => {
-  it("returns slate for inbox", () => {
+  it("returns the right class per status", () => {
     expect(statusDotClass("inbox")).toBe("bg-slate-400");
-  });
-  it("returns sky for wip", () => {
     expect(statusDotClass("wip")).toBe("bg-sky-500");
-  });
-  it("returns amber for review", () => {
     expect(statusDotClass("review")).toBe("bg-amber-500");
-  });
-  it("returns emerald for done", () => {
     expect(statusDotClass("done")).toBe("bg-emerald-500");
   });
 });
