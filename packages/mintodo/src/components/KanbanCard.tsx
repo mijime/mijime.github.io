@@ -1,9 +1,8 @@
 import { Check, Plus, XCircle } from "lucide-react";
+import { useDraggable } from "@dnd-kit/core";
 import { useMindStore } from "../hooks/use-mind-store";
 import { categoryDotClass, formatBadges } from "../lib/badges";
 import type { MindNode } from "../types";
-
-const DRAG_MIME = "application/x-mindnode-id";
 
 function buildBreadcrumb(nodes: Record<string, MindNode>, targetId: string): string {
   const path: string[] = [];
@@ -18,20 +17,6 @@ function buildBreadcrumb(nodes: Record<string, MindNode>, targetId: string): str
   return `… / ${path.slice(-2).join(" / ")}`;
 }
 
-function handleDragStart(
-  e: React.DragEvent<HTMLDivElement>,
-  nodeId: string,
-  dispatch: ReturnType<typeof useMindStore>["dispatch"],
-) {
-  e.dataTransfer.setData(DRAG_MIME, nodeId);
-  e.dataTransfer.effectAllowed = "move";
-  dispatch({ id: nodeId, type: "SET_DRAGGING" });
-}
-
-function handleDragEnd(dispatch: ReturnType<typeof useMindStore>["dispatch"]) {
-  dispatch({ id: null, type: "SET_DRAGGING" });
-}
-
 interface Props {
   node: MindNode;
 }
@@ -42,18 +27,21 @@ export function KanbanCard({ node }: Props) {
   const breadcrumb = buildBreadcrumb(state.nodes, node.id);
   const { dueHtml, showHigh, showBadgeRow } = formatBadges(node);
 
+  const { setNodeRef, attributes, listeners, isDragging } = useDraggable({ id: node.id });
+
   return (
     <div
+      ref={setNodeRef}
       data-testid={`kanban-card-${node.id}`}
       data-node-id={node.id}
-      draggable
-      onDragStart={(e) => handleDragStart(e, node.id, dispatch)}
-      onDragEnd={() => handleDragEnd(dispatch)}
+      {...attributes}
+      {...listeners}
       className="rounded border p-3 flex flex-col gap-2 cursor-grab active:cursor-grabbing"
       style={{
         background: "var(--paper)",
         borderColor: "var(--border)",
         color: "var(--ink)",
+        opacity: isDragging ? 0.4 : 1,
       }}
     >
       <div className="text-[10px] truncate" style={{ color: "var(--mid)" }} title={breadcrumb}>
