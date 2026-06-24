@@ -1,5 +1,5 @@
 import { fireEvent, render, screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import { TaskCard } from "./TaskCard";
 import { MindProvider, useMindStore } from "../hooks/use-mind-store";
 import type { MindNode } from "../types";
@@ -36,11 +36,11 @@ function makeState(over: Partial<State> = {}): State {
     modal: null,
     viewMode: "mindmap",
     searchQuery: "",
-    selectedNodeId: null,
+    selectedNodeId: "",
     view: { pan: { x: 0, y: 0 }, zoom: 1 },
     nodes: { root: makeNode({ id: "root", isRoot: true }), n1: makeNode() },
     ...over,
-  } as State;
+  };
 }
 
 let captured: State | null = null;
