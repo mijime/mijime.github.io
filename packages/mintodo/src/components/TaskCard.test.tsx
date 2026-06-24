@@ -84,16 +84,25 @@ describe("TaskCard", () => {
     expect(captured!.nodes.n1.completed).toBe(true);
   });
 
-  it("uses categoryColor for bottom border and keeps status dot", () => {
-    render(
+  it("uses categoryColor for the hairline and renders the collapsed done dot", () => {
+    const { container } = render(
       <MindProvider initialState={makeState()}>
-        <TaskCard node={makeNode({ categoryColor: "rose", status: "done" })} />
+        <TaskCard node={makeNode({ categoryColor: "rose", status: "done", completed: true })} />
       </MindProvider>,
     );
     const card = screen.getByTestId("task-card-n1");
-    const borderDiv = card.children[2] as HTMLElement;
-    expect(borderDiv.style.borderTop).toBe("1px solid rgb(244, 63, 94)");
-    expect(screen.getByTestId("status-dot-n1").className).toContain("bg-emerald-500");
-    expect(screen.queryByTestId("category-dot-n1")).toBeNull();
+    // Done: DOM is [BodyRow, Hairline]; hairline is at index 1
+    const hairline = card.children[1] as HTMLElement;
+    expect(hairline.style.borderTop).toBe("1px solid rgb(244, 63, 94)");
+    expect(hairline.style.opacity).toBe("0.35");
+    // Collapsed done: an 8px emerald dot inside BodyRow
+    const bodyRow = card.children[0] as HTMLElement;
+    const dot = bodyRow.querySelector("span.rounded-full.bg-emerald-500") as HTMLElement | null;
+    expect(dot).not.toBeNull();
+    // Meta row (and its StatusDot) is absent
+    expect(screen.queryByTestId("status-dot-n1")).toBeNull();
+    // The body uses Crimson Pro for the title
+    const title = container.querySelector("span.whitespace-pre-wrap") as HTMLElement;
+    expect(title.style.fontFamily).toContain("Crimson Pro");
   });
 });
