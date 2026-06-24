@@ -2,22 +2,15 @@ import {
   Eye,
   FileText,
   Keyboard,
-  Moon,
   Network,
   PanelLeftClose,
   PanelLeftOpen,
   Search,
-  Sun,
   Trash2,
 } from "lucide-react";
 import { useMindStore } from "../hooks/use-mind-store";
 import { db } from "../db";
 import { ViewModeToggle } from "./ViewModeToggle";
-
-function onTheme() {
-  const isDark = document.documentElement.classList.toggle("dark");
-  localStorage.setItem("theme", isDark ? "dark" : "light");
-}
 
 async function onReset() {
   if (
@@ -135,16 +128,6 @@ export function Toolbar() {
             onClick={onReset}
           >
             <Trash2 size={18} />
-          </button>
-          <button
-            type="button"
-            className="p-2 rounded transition"
-            style={{ color: "var(--mid)" }}
-            title="テーマ切り替え"
-            onClick={onTheme}
-          >
-            <Moon size={18} className="dark:hidden" />
-            <Sun size={18} className="hidden dark:block" />
           </button>
         </div>
       </div>

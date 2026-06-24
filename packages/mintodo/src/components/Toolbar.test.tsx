@@ -17,4 +17,13 @@ describe("Toolbar header", () => {
     const h1 = screen.getByRole("heading", { level: 1 });
     expect(h1.textContent).toBe("mintodo");
   });
+
+  it("does not render a theme toggle button", () => {
+    render(
+      <MindProvider>
+        <Toolbar />
+      </MindProvider>,
+    );
+    expect(screen.queryByTitle("テーマ切り替え")).toBeNull();
+  });
 });
