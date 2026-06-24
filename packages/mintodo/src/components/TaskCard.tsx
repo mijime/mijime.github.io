@@ -82,15 +82,22 @@ export function TaskCard({ node }: Props) {
       data-node-id={node.id}
       className="flex flex-col gap-1.5 min-w-0"
     >
-      {isDone ? null : metaRow}
+      {isDone ? null : (
+        <>
+          {metaRow}
+          <div
+            className="w-full"
+            style={{ borderTop: `1px solid ${hairlineColor}` }}
+          />
+        </>
+      )}
       {bodyRow}
-      <div
-        className="w-full"
-        style={{
-          borderTop: `1px solid ${hairlineColor}`,
-          opacity: isDone ? 0.35 : 1,
-        }}
-      />
+      {isDone ? (
+        <div
+          className="w-full"
+          style={{ borderTop: `1px solid ${hairlineColor}`, opacity: 0.35 }}
+        />
+      ) : null}
     </div>
   );
 }
