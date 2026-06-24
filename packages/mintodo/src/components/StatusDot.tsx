@@ -15,6 +15,8 @@ export function StatusDot({ status, dimmed = false, testId }: Props) {
       style={{
         boxShadow: "0 0 0 2px var(--paper), 0 0 0 3px var(--mid)",
       }}
+      aria-label={`status: ${status}`}
+      title={`status: ${status}`}
     />
   );
 }
