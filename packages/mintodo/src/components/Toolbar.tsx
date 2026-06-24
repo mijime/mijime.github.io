@@ -1,6 +1,5 @@
 import {
   Eye,
-  FileText,
   Keyboard,
   Network,
   PanelLeftClose,
@@ -102,15 +101,6 @@ export function Toolbar() {
       </div>
       <div className="flex items-center justify-between lg:justify-end gap-3 w-full lg:w-auto">
         <div className="flex items-center gap-1">
-          <button
-            type="button"
-            className="p-2 rounded transition"
-            style={{ color: "var(--mid)" }}
-            title="DSL編集"
-            onClick={() => dispatch({ modal: { kind: "dsl-editor" }, type: "OPEN_MODAL" })}
-          >
-            <FileText size={16} />
-          </button>
           <button
             type="button"
             className="p-2 rounded transition"
