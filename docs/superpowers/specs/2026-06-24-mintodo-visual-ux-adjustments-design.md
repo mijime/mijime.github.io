@@ -72,7 +72,17 @@ The `connection-lines` SVG, `NodeCard`, and `KanbanCard` components already use 
 
 ### 4. Multi-line card display
 
-**Edit side** (no change to behavior, just verify). `EditModal.tsx` already renders a `<textarea>` for the text input; the reducer stores `text` as the raw string, including newlines. **Verify during implementation**: the reducer's `UPDATE_NODE` and `CREATE_CHILD`/`ADD_CHILD` actions store `text` verbatim (no `.trim()` on the multi-line value). If any path strips newlines, fix the reducer to preserve them.
+**Edit side — fix required.** `EditModal.tsx` calls `parseInlineDSL(text)` and stores `dsl.text` (see `EditModal.tsx:124-164`). `parseInlineDSL` (in `packages/mintodo/src/dsl.ts:195`) tokenizes with `raw.split(/\s+/u).filter((t) => t.length > 0)` — this **collapses all whitespace, including newlines, into single spaces**. So a textarea input of `"line1\nline2"` is stored as `"line1 line2"`, losing the user's line break. The reducer itself (`UPDATE_NODE`, `CREATE_CHILD`) preserves the value verbatim — the truncation is purely in the parser.
+
+**Required fix:** change `parseInlineDSL` to preserve newlines in the returned `text` while still extracting `@key:value` attribute tokens from anywhere in the input. The implementation must:
+
+- Split the input on `\n` first (line-aware tokenization).
+- For each line, split on whitespace to extract tokens.
+- Collect `@key:value` (and bare `@key`) tokens as before — across all lines.
+- Collect remaining tokens as the `text` field, joined with **single spaces within a line** and **single `\n` between lines**.
+- Existing tests in `packages/mintodo/src/dsl.test.ts` that assert on `parseInlineDSL` behavior for single-line inputs (the vast majority) must continue to pass; add a new test that asserts a multi-line input `"line1\nline2 @priority:high\nline3"` returns `text: "line1\nline2\nline3"` and `priority: "high"`.
+
+`EditModal.tsx` needs no change once `parseInlineDSL` is fixed — it stores `dsl.text` which will now retain `\n`.
 
 **Display side.**
 
@@ -120,10 +130,12 @@ No change. `MindNode.text: string` is a plain string. Newlines are valid charact
 | `packages/mintodo/src/components/Canvas.tsx` | `bg-slate-50 dark:bg-slate-900` → `bg-[var(--paper)]` |
 | `packages/mintodo/src/components/NodeCard.tsx` | Text container className (multi-line rules) |
 | `packages/mintodo/src/components/KanbanCard.tsx` | Text container className (multi-line rules) |
-| `packages/mintodo/src/store.ts` | Possible fix if any action trims `\n` from `text` (verify) |
+| `packages/mintodo/src/store.ts` | (verified: no change needed — `UPDATE_NODE` and `CREATE_CHILD` store `text` verbatim) |
+| `packages/mintodo/src/dsl.ts` | `parseInlineDSL` — preserve `\n` in returned `text` |
 | (no `Toolbar.test.tsx` exists) | Toggle tests live inside `integration.test.tsx` |
 | `packages/mintodo/src/components/NodeCard.test.tsx` | Update className assertion; add multi-line test |
 | `packages/mintodo/src/components/KanbanCard.test.tsx` | Update className assertion; add multi-line test |
+| `packages/mintodo/src/dsl.test.ts` | Add `parseInlineDSL` multi-line test (newline preserved) |
 | `packages/mintodo/src/integration.test.tsx` | Drop `dark` class assertion; add multi-line flow test |
 
 Net change: roughly +30 / -50 lines.
