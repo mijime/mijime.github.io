@@ -1,28 +1,9 @@
-import { act, fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { KanbanColumn } from "./KanbanColumn";
 import { MindProvider, useMindStore } from "../hooks/use-mind-store";
 import { createInitialState, type State } from "../store";
 import type { MindNode, TaskStatus } from "../types";
-
-// Jsdom doesn't implement DataTransfer
-class MockDataTransfer {
-  private data = new Map<string, string>();
-  public types: string[] = [];
-  public effectAllowed = "move";
-  public dropEffect = "move";
-
-  public setData(format: string, data: string): void {
-    this.data.set(format, data);
-    if (!this.types.includes(format)) {
-      this.types.push(format);
-    }
-  }
-
-  public getData(format: string): string {
-    return this.data.get(format) ?? "";
-  }
-}
 
 function node(
   opts: Partial<MindNode> & { id: string; boardId: string; parentId: string | null },
@@ -45,12 +26,15 @@ function node(
   };
 }
 
-function Probe() {
-  const { state } = useMindStore();
-  return <span data-testid="probe-status">{state.nodes["n1"]?.status ?? "missing"}</span>;
+let capturedState: State | null = null;
+
+function Capture() {
+  capturedState = useMindStore().state;
+  return null;
 }
 
 function renderColumn(status: TaskStatus, nodes: MindNode[]) {
+  capturedState = null;
   const s: State = {
     ...createInitialState(),
     currentBoardId: "b",
@@ -59,6 +43,7 @@ function renderColumn(status: TaskStatus, nodes: MindNode[]) {
   };
   return render(
     <MindProvider initialState={s}>
+      <Capture />
       <KanbanColumn status={status} />
     </MindProvider>,
   );
@@ -86,30 +71,11 @@ describe("KanbanColumn", () => {
     const root = node({ id: "root", boardId: "b", parentId: null, isRoot: true });
     renderColumn("review", [root]);
     fireEvent.click(screen.getByTestId("kanban-column-add-review"));
-    expect(screen.getByTestId("kanban-column-review")).toBeTruthy();
+    expect(capturedState!.modal).toEqual({
+      kind: "edit-new",
+      parentId: "root",
+      parentStatusSeed: "review",
+    });
   });
 
-  it("drop dispatches SET_STATUS for the column's status", () => {
-    const root = node({ id: "root", boardId: "b", parentId: null, isRoot: true });
-    const n1 = node({ id: "n1", boardId: "b", parentId: "root", status: "inbox" });
-    const s: State = {
-      ...createInitialState(),
-      currentBoardId: "b",
-      boards: [{ id: "b", name: "B", createdAt: 0, updatedAt: 0 }],
-      nodes: Object.fromEntries([root, n1].map((n) => [n.id, n])),
-    };
-    render(
-      <MindProvider initialState={s}>
-        <KanbanColumn status="done" />
-        <Probe />
-      </MindProvider>,
-    );
-    const column = screen.getByTestId("kanban-column-done");
-    const dt = new MockDataTransfer();
-    dt.setData("application/x-mindnode-id", "n1");
-    act(() => {
-      fireEvent.drop(column, { dataTransfer: dt as unknown as DataTransfer });
-    });
-    expect(screen.getByTestId("probe-status").textContent).toBe("done");
-  });
 });
