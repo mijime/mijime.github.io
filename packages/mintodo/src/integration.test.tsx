@@ -35,7 +35,10 @@ vi.mock("@dnd-kit/core", async (importOriginal) => {
 });
 
 function pointerRectCollision(): CollisionDetection {
-  return ({ droppableContainers, pointerCoordinates }: {
+  return ({
+    droppableContainers,
+    pointerCoordinates,
+  }: {
     droppableContainers: DroppableContainer[];
     pointerCoordinates: { x: number; y: number } | null;
   }) => {
@@ -601,5 +604,34 @@ describe("kanban view end-to-end", () => {
     } finally {
       collisionRef.value = undefined;
     }
+  });
+});
+
+describe("canvas background uses --paper", () => {
+  afterEach(async () => {
+    await db.delete();
+  });
+
+  it("renders the canvas container with bg-[var(--paper)] (no slate-50)", async () => {
+    render(<App />);
+    await act(async () => {
+      await flush(100);
+    });
+
+    if (screen.queryByText("+ 新規ボード作成")) {
+      fireEvent.click(screen.getByText("+ 新規ボード作成"));
+      const input = screen.getByPlaceholderText("例: メインプロジェクト") as HTMLInputElement;
+      fireEvent.change(input, { target: { value: "Bg" } });
+      fireEvent.click(screen.getByText("作成"));
+      await act(async () => {
+        await flush(100);
+      });
+    }
+
+    const canvasContainer = document.querySelector(".canvas-grid") as HTMLElement;
+    expect(canvasContainer).toBeTruthy();
+    expect(canvasContainer.className).toContain("bg-[var(--paper)]");
+    expect(canvasContainer.className).not.toContain("bg-slate-50");
+    expect(canvasContainer.className).not.toContain("dark:bg-slate-900");
   });
 });

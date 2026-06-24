@@ -52,9 +52,7 @@ export function Canvas() {
   usePanZoom({ containerRef });
   useTween();
 
-  const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
-  );
+  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }));
 
   const visibleNodes = useMemo(
     () =>
@@ -73,15 +71,15 @@ export function Canvas() {
     dispatch({ id, type: "SET_DRAGGING" });
   }
 
-  function handleDragEnd(event: { active: { id: string | number }; over?: { id: string | number } | null }) {
+  function handleDragEnd(event: {
+    active: { id: string | number };
+    over?: { id: string | number } | null;
+  }) {
     const { active, over } = event;
     if (over) {
       const draggedId = String(active.id);
       const targetId = String(over.id);
-      if (
-        draggedId !== targetId &&
-        !isDescendant(state.nodes, draggedId, targetId)
-      ) {
+      if (draggedId !== targetId && !isDescendant(state.nodes, draggedId, targetId)) {
         dispatch({ id: draggedId, newParentId: targetId, type: "REPARENT" });
       }
     }
@@ -105,7 +103,7 @@ export function Canvas() {
     >
       <div
         ref={containerRef}
-        className="w-full h-full cursor-grab active:cursor-grabbing canvas-grid relative overflow-hidden bg-slate-50 dark:bg-slate-900"
+        className="w-full h-full cursor-grab active:cursor-grabbing canvas-grid relative overflow-hidden bg-[var(--paper)]"
       >
         <ConnectionLines containerRef={containerRef} />
         <div
