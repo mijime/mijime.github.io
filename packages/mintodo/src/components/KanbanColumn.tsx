@@ -44,10 +44,10 @@ export function KanbanColumn({ status }: Props) {
     <div
       ref={setNodeRef}
       data-testid={`kanban-column-${status}`}
-      className={`w-72 shrink-0 flex flex-col gap-2 rounded p-3 ${isOver ? "ring-2 ring-sky-400" : ""}`}
+      className={`w-72 shrink-0 flex flex-col gap-2 rounded p-3 h-full ${isOver ? "ring-2 ring-sky-400" : ""}`}
       style={{ background: "var(--toolbar-bg)", border: "1px solid var(--border)" }}
     >
-      <div className="flex items-center justify-between mb-1">
+      <div className="flex items-center justify-between mb-1 shrink-0">
         <h3 className="text-sm font-semibold" style={{ color: "var(--ink)" }}>
           {STATUS_LABELS[status]}
         </h3>
@@ -59,7 +59,7 @@ export function KanbanColumn({ status }: Props) {
           {cards.length}
         </span>
       </div>
-      <div className="flex flex-col gap-2 overflow-y-auto min-h-[80px]">
+      <div className="flex flex-col gap-2 flex-1 min-h-0 overflow-y-auto">
         {cards.map((n: MindNode) => (
           <KanbanCard key={n.id} node={n} />
         ))}
@@ -72,7 +72,7 @@ export function KanbanColumn({ status }: Props) {
               type: "OPEN_MODAL",
             })
           }
-          className="mt-1 py-2 rounded text-xs flex items-center justify-center gap-1 transition"
+          className="mt-1 py-2 rounded text-xs flex items-center justify-center gap-1 transition shrink-0"
           style={{
             background: "var(--paper)",
             border: "1px dashed var(--border)",

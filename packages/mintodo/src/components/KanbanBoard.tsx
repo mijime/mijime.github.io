@@ -63,8 +63,8 @@ export function KanbanBoard() {
       onDragEnd={handleDragEnd}
       onDragCancel={handleDragCancel}
     >
-      <div data-testid="kanban-board" className="w-full h-full overflow-x-auto">
-        <div className="flex flex-row gap-4 p-4 min-h-full">
+      <div data-testid="kanban-board" className="w-full h-full overflow-hidden flex flex-col">
+        <div className="flex flex-row gap-4 p-4 min-h-full overflow-x-auto overflow-y-hidden flex-1">
           {TASK_STATUSES.map((status) => (
             <KanbanColumn key={status} status={status} />
           ))}
