@@ -20,10 +20,7 @@ export function NodeCard({ node }: Props) {
     listeners,
     isDragging,
   } = useDraggable({ id: node.id, disabled: node.isRoot });
-  const {
-    setNodeRef: dropRef,
-    isOver,
-  } = useDroppable({ id: node.id });
+  const { setNodeRef: dropRef, isOver } = useDroppable({ id: node.id });
 
   const setNodeRef = (el: HTMLElement | null) => {
     dragRef(el);
