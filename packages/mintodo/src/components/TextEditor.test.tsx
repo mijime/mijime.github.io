@@ -1,6 +1,7 @@
 import "fake-indexeddb/auto";
-import { act, fireEvent, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
+import { db } from "../db";
 import { TextEditor } from "./TextEditor";
 import { MindProvider, useMindStore } from "../hooks/use-mind-store";
 import type { MindNode } from "../types";
@@ -37,9 +38,12 @@ function makeState(over: Partial<State> = {}): State {
     modal: null,
     viewMode: "text",
     searchQuery: "",
-    selectedNodeId: null,
+    selectedNodeId: "",
     view: { pan: { x: 0, y: 0 }, zoom: 1 },
-    nodes: { root: makeNode({ id: "root", isRoot: true, text: "Root", children: ["n1"] }), n1: makeNode() },
+    nodes: {
+      root: makeNode({ id: "root", isRoot: true, text: "Root", children: ["n1"] }),
+      n1: makeNode(),
+    },
     ...over,
   };
 }
@@ -86,8 +90,9 @@ describe("TextEditor", () => {
     expect(screen.getByTestId("text-editor-error")).toBeTruthy();
   });
 
-  it("applies parsed DSL on apply click and confirms", () => {
+  it("applies parsed DSL on apply click and confirms", async () => {
     vi.spyOn(window, "confirm").mockReturnValue(true);
+    await db.boards.put({ id: "b1", name: "Root", createdAt: 0, updatedAt: 0 });
     render(
       <MindProvider initialState={makeState()}>
         <Capture />
@@ -103,7 +108,9 @@ describe("TextEditor", () => {
     act(() => {
       fireEvent.click(screen.getByTestId("text-editor-apply"));
     });
-    expect(captured!.nodes.root.text).toBe("NewRoot");
+    await waitFor(() => {
+      expect(captured!.nodes.root.text).toBe("NewRoot");
+    });
     expect(captured!.boards[0].name).toBe("NewRoot");
   });
 

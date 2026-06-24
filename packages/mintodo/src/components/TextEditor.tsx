@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { parseDSL, serializeDSL } from "../dsl";
+import { useBoardActions } from "../hooks/use-board-actions";
 import { useMindStore } from "../hooks/use-mind-store";
 import type { MindNode } from "../types";
 
@@ -11,16 +12,17 @@ interface PreviewProps {
 function Preview({ nodes, error }: PreviewProps) {
   if (error) {
     return (
-      <div
-        data-testid="text-editor-error"
-        className="text-sm text-rose-500 dark:text-rose-400"
-      >
+      <div data-testid="text-editor-error" className="text-sm text-rose-500 dark:text-rose-400">
         {error}
       </div>
     );
   }
   if (nodes.length === 0) {
-    return <div className="text-sm" style={{ color: "var(--mid)" }}>(ノードなし)</div>;
+    return (
+      <div className="text-sm" style={{ color: "var(--mid)" }}>
+        (ノードなし)
+      </div>
+    );
   }
   return (
     <ul data-testid="text-editor-preview" className="text-sm flex flex-col gap-1">
@@ -47,6 +49,7 @@ function Preview({ nodes, error }: PreviewProps) {
 export function TextEditor() {
   const { state, dispatch } = useMindStore();
   const board = state.boards.find((b) => b.id === state.currentBoardId);
+  const actions = useBoardActions();
 
   const initial = useMemo(
     () => serializeDSL({ name: board?.name ?? "" }, state.nodes),
@@ -62,13 +65,17 @@ export function TextEditor() {
   const parsed = useMemo(() => {
     if (!text.trim()) return { error: "DSL が空です" as string | null, nodes: [] as MindNode[] };
     const r = parseDSL(text, state.currentBoardId ?? "");
-    if (!r) return { error: "DSL の形式が不正です。ヘッダ `mindmap`・インデント・属性値を確認してください。", nodes: [] };
+    if (!r)
+      return {
+        error: "DSL の形式が不正です。ヘッダ `mindmap`・インデント・属性値を確認してください。",
+        nodes: [],
+      };
     return { error: null, nodes: r.nodes };
   }, [text, state.currentBoardId]);
 
   const canApply = parsed.error === null && parsed.nodes.length > 0;
 
-  function onApply() {
+  async function onApply() {
     if (parsed.error || !state.currentBoardId) return;
     if (
       !window.confirm(
@@ -81,7 +88,7 @@ export function TextEditor() {
     for (const n of parsed.nodes) record[n.id] = n;
     const newRootName = parsed.nodes.find((n) => n.isRoot)?.text ?? "";
     if (newRootName && board && newRootName !== board.name) {
-      dispatch({ type: "RENAME_BOARD", id: state.currentBoardId, name: newRootName });
+      await actions.renameBoard(state.currentBoardId, newRootName);
     }
     dispatch({ type: "SET_NODES", nodes: record });
   }
@@ -112,7 +119,10 @@ export function TextEditor() {
             border: "1px solid var(--border)",
           }}
         >
-          <div className="text-[10px] uppercase tracking-wider mb-2" style={{ color: "var(--mid)" }}>
+          <div
+            className="text-[10px] uppercase tracking-wider mb-2"
+            style={{ color: "var(--mid)" }}
+          >
             プレビュー ({parsed.nodes.length} ノード)
           </div>
           <Preview nodes={parsed.nodes} error={parsed.error} />

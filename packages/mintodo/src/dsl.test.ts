@@ -31,7 +31,7 @@ describe("parseDSL — Mermaid mindmap", () => {
       "mindmap\n  * X @priority:high @color:rose @due:2026-06-25 @status:wip\n",
       "b1",
     )!;
-    const n = r.nodes[0];
+    const [n] = r.nodes;
     expect(n.priority).toBe("high");
     expect(n.categoryColor).toBe("rose");
     expect(n.dueDate).toBe("2026-06-25");
