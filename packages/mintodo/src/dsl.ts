@@ -125,7 +125,7 @@ export function parseDSL(text: string, boardId: string): DslParseResult | null {
 
     const match = /^[*]\s+(?<body>.*)$/u.exec(rest);
     if (!match) return null;
-    const {body} = match.groups!;
+    const { body } = match.groups!;
 
     const tokens = body.split(/\s+/u).filter((t) => t.length > 0);
     const parsed = parseAttributes(tokens);
@@ -193,7 +193,7 @@ export function serializeDSL(board: { name: string }, nodes: Record<string, Mind
     }
   };
   walk(rootNode, 0);
-  return `${out.join("\n")  }\n`;
+  return `${out.join("\n")}\n`;
 }
 
 export interface InlineDslResult {
