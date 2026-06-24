@@ -3,6 +3,7 @@ import { BoardDeleteDialog } from "./components/BoardDeleteDialog";
 import { BoardNameDialog } from "./components/BoardNameDialog";
 import { BoardSidebar } from "./components/BoardSidebar";
 import { Canvas } from "./components/Canvas";
+import { KanbanBoard } from "./components/KanbanBoard";
 import { DslEditorModal } from "./components/DslEditorModal";
 import { EditModal } from "./components/EditModal";
 import { EmptyState } from "./components/EmptyState";
@@ -56,15 +57,19 @@ function Shell() {
 
   return (
     <div
-      className="flex flex-col overflow-hidden select-none relative h-full w-full"
+      className="flex h-full w-full overflow-hidden select-none"
       style={{ background: "var(--paper)", color: "var(--ink)" }}
     >
-      <Toolbar />
       <BoardSidebar />
-      {showCanvas ? <Canvas /> : <EmptyState />}
-      <ZoomControls />
-      <StatsPanel />
-      <ShortcutHint />
+      <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
+        <Toolbar />
+        <div className="flex-1 relative p-4">
+          {showCanvas ? state.viewMode === "kanban" ? <KanbanBoard /> : <Canvas /> : <EmptyState />}
+          {state.viewMode === "mindmap" && <ZoomControls />}
+          <StatsPanel />
+          <ShortcutHint />
+        </div>
+      </div>
       <EditModal />
       <DslEditorModal />
       <HelpModal />

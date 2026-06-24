@@ -9,6 +9,25 @@ const flush = (ms: number) =>
     setTimeout(resolve, ms);
   });
 
+// Jsdom doesn't implement DataTransfer
+class MockDataTransfer {
+  private data = new Map<string, string>();
+  public types: string[] = [];
+  public effectAllowed = "move";
+  public dropEffect = "move";
+
+  public setData(format: string, data: string): void {
+    this.data.set(format, data);
+    if (!this.types.includes(format)) {
+      this.types.push(format);
+    }
+  }
+
+  public getData(format: string): string {
+    return this.data.get(format) ?? "";
+  }
+}
+
 describe("board creation end-to-end", () => {
   afterEach(async () => {
     await db.delete();
@@ -337,5 +356,143 @@ describe("centering on new node", () => {
     // The new child is placed at (≈0, -240) by the radial layout (RING=240, single child above root).
     // ComputeCenterOnNode returns pan ≈ (0, 240) at zoom=1. (x may be ~1e-14 due to FP precision)
     expect(container.style.transform).toMatch(/translate\(.*?240px\)/u);
+  });
+});
+
+describe("kanban view end-to-end", () => {
+  beforeEach(async () => {
+    await db.open();
+    await db.boards.clear();
+    await db.nodes.clear();
+    await db.meta.clear();
+  });
+
+  async function createBoard(name: string): Promise<void> {
+    fireEvent.click(screen.getByText("+ 新規ボード作成"));
+    const input = screen.getByPlaceholderText("例: メインプロジェクト") as HTMLInputElement;
+    fireEvent.change(input, { target: { value: name } });
+    await act(() => {
+      fireEvent.click(screen.getByText("作成"));
+    });
+    await act(async () => {
+      await flush(300);
+    });
+  }
+
+  it("toggles between mindmap and kanban view", async () => {
+    render(<App />);
+    await act(async () => {
+      await flush(100);
+    });
+    await createBoard("Test");
+    // Mindmap visible
+    expect(screen.queryByTestId("kanban-board")).toBeNull();
+    // Switch to kanban
+    await act(() => {
+      fireEvent.click(screen.getByTestId("view-mode-kanban"));
+    });
+    expect(screen.getByTestId("kanban-board")).toBeTruthy();
+    // Switch back
+    await act(() => {
+      fireEvent.click(screen.getByTestId("view-mode-mindmap"));
+    });
+    expect(screen.queryByTestId("kanban-board")).toBeNull();
+  });
+
+  it("kanban view shows 4 columns with the root in inbox", async () => {
+    render(<App />);
+    await act(async () => {
+      await flush(100);
+    });
+    await createBoard("Test");
+    await act(() => {
+      fireEvent.click(screen.getByTestId("view-mode-kanban"));
+    });
+    expect(screen.getByTestId("kanban-column-inbox")).toBeTruthy();
+    expect(screen.getByTestId("kanban-column-wip")).toBeTruthy();
+    expect(screen.getByTestId("kanban-column-review")).toBeTruthy();
+    expect(screen.getByTestId("kanban-column-done")).toBeTruthy();
+    const count = screen.getByTestId("kanban-column-count-inbox").textContent;
+    expect(count).toBe("1");
+  });
+
+  it("viewMode round-trips through IndexedDB meta", async () => {
+    render(<App />);
+    await act(async () => {
+      await flush(100);
+    });
+    await createBoard("Test");
+    const boards = await db.boards.toArray();
+    const boardId = boards.at(-1)!.id;
+    // Mindmap default — no meta key yet
+    expect(await db.meta.get(`viewMode:${boardId}`)).toBeUndefined();
+    // Toggle to kanban
+    await act(() => {
+      fireEvent.click(screen.getByTestId("view-mode-kanban"));
+    });
+    // Wait for debounce save
+    await act(async () => {
+      await flush(400);
+    });
+    const meta = await db.meta.get(`viewMode:${boardId}`);
+    expect(meta?.value).toBe("kanban");
+  });
+
+  it("dragging a card between columns changes its status", async () => {
+    render(<App />);
+    await act(async () => {
+      await flush(100);
+    });
+    await createBoard("Test");
+
+    // Add a child node
+    const addBtn = document.querySelector('[data-testid="add-child-root"]') as HTMLElement;
+    await act(() => {
+      fireEvent.click(addBtn);
+    });
+    const ta = document.querySelector('[data-testid="edit-modal-textarea"]') as HTMLTextAreaElement;
+    await act(() => {
+      fireEvent.change(ta, { target: { value: "drag test" } });
+    });
+    await act(() => {
+      fireEvent.click(
+        document.querySelector('[data-testid="edit-modal-save"]') as HTMLButtonElement,
+      );
+    });
+    await act(async () => {
+      await flush(500);
+    });
+
+    // Switch to kanban view
+    await act(() => {
+      fireEvent.click(screen.getByTestId("view-mode-kanban"));
+    });
+    await act(async () => {
+      await flush(100);
+    });
+
+    // Card should be in inbox column (need the child, not root)
+    const inboxColumn = screen.getByTestId("kanban-column-inbox");
+    const cards = inboxColumn.querySelectorAll("[data-node-id]") as NodeListOf<HTMLElement>;
+    const childCard = [...cards].find((c) => c.dataset.nodeId !== "root");
+    expect(childCard).toBeTruthy();
+    const { nodeId } = childCard!.dataset;
+    expect(nodeId).toBeTruthy();
+
+    // Drag the child card to the done column
+    const doneColumn = screen.getByTestId("kanban-column-done");
+    const dt = new MockDataTransfer();
+    dt.setData("application/x-mindnode-id", nodeId!);
+
+    await act(() => {
+      fireEvent.drop(doneColumn, { dataTransfer: dt as unknown as DataTransfer });
+    });
+    await act(async () => {
+      await flush(100);
+    });
+
+    // Card should now be in done column, not inbox
+    expect(screen.getByTestId("kanban-column-count-inbox").textContent).toBe("1");
+    expect(screen.getByTestId("kanban-column-count-done").textContent).toBe("1");
   });
 });

@@ -1,13 +1,5 @@
 import { db } from "./db";
-import type { Board, MindNode } from "./types";
-
-function arrayToRecord(arr: MindNode[]): Record<string, MindNode> {
-  const rec: Record<string, MindNode> = {};
-  for (const n of arr) {
-    rec[n.id] = n;
-  }
-  return rec;
-}
+import type { Board, MindNode, TaskStatus, ViewMode } from "./types";
 
 export async function loadBoards(): Promise<Board[]> {
   const boards = await db.boards.orderBy("updatedAt").toArray();
@@ -16,7 +8,12 @@ export async function loadBoards(): Promise<Board[]> {
 
 export async function loadNodesForBoard(boardId: string): Promise<Record<string, MindNode>> {
   const all = await db.nodes.where("boardId").equals(boardId).toArray();
-  return arrayToRecord(all);
+  const rec: Record<string, MindNode> = {};
+  for (const n of all) {
+    const { status } = n as { status?: TaskStatus };
+    rec[n.id] = status === undefined ? { ...n, status: n.completed ? "done" : "inbox" } : n;
+  }
+  return rec;
 }
 
 export async function saveNodesForBoard(
@@ -45,6 +42,7 @@ export async function createBoard(name: string): Promise<{ board: Board; rootId:
     priority: "medium",
     categoryColor: "slate",
     dueDate: "",
+    status: "inbox",
     children: [],
     x: 0,
     y: 0,
@@ -99,3 +97,11 @@ export async function discardV1Data(): Promise<void> {
   });
 }
 
+export async function getViewMode(boardId: string): Promise<ViewMode | undefined> {
+  const entry = await db.meta.get(`viewMode:${boardId}`);
+  return entry?.value as ViewMode | undefined;
+}
+
+export async function setViewMode(boardId: string, viewMode: ViewMode): Promise<void> {
+  await db.meta.put({ key: `viewMode:${boardId}`, value: viewMode });
+}
