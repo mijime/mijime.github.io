@@ -34,113 +34,127 @@ function defaultNode(boardId: string): MindNode {
   };
 }
 
+function parseAttributes(tokens: string[]): {
+  text: string;
+  priority: Priority;
+  categoryColor: CategoryColor;
+  dueDate: string;
+  completed: boolean;
+  status: TaskStatus;
+} | null {
+  const textTokens: string[] = [];
+  const attrTokens: string[] = [];
+  for (const tok of tokens) {
+    if (tok.startsWith("@")) attrTokens.push(tok);
+    else textTokens.push(tok);
+  }
+  const text = textTokens.join(" ").trim();
+  if (!text) return null;
+
+  let priority: Priority = "medium";
+  let categoryColor: CategoryColor = "slate";
+  let dueDate = "";
+  let completed = false;
+  let status: TaskStatus = "inbox";
+
+  for (const tok of attrTokens) {
+    const colon = tok.indexOf(":");
+    const key = colon === -1 ? tok.slice(1) : tok.slice(1, colon);
+    const value = colon === -1 ? "" : tok.slice(colon + 1);
+    switch (key) {
+      case "priority": {
+        if (!ALLOWED_PRIORITIES.has(value as Priority)) return null;
+        priority = value as Priority;
+        break;
+      }
+      case "color": {
+        if (!ALLOWED_COLORS.has(value as CategoryColor)) return null;
+        categoryColor = value as CategoryColor;
+        break;
+      }
+      case "due": {
+        if (!isValidDate(value)) return null;
+        dueDate = value;
+        break;
+      }
+      case "done": {
+        completed = true;
+        status = "done";
+        break;
+      }
+      case "status": {
+        if (!ALLOWED_STATUSES.has(value as TaskStatus)) return null;
+        status = value as TaskStatus;
+        if (status === "done") completed = true;
+        break;
+      }
+      default: {
+        break;
+      }
+    }
+  }
+
+  return { text, priority, categoryColor, dueDate, completed, status };
+}
+
 export function parseDSL(text: string, boardId: string): DslParseResult | null {
   const lines = text.replaceAll(/\r\n?/gu, "\n").split("\n");
+  if (lines.length === 0) return null;
+  const header = lines[0].trim().toLowerCase();
+  if (header !== "mindmap") return null;
 
   const nodes: MindNode[] = [];
-  let firstNode = true;
   let counter = 0;
   let rootText = "";
   let hasRoot = false;
   const stack: { depth: number; node: MindNode }[] = [];
 
-  for (const raw of lines) {
+  for (let i = 1; i < lines.length; i++) {
+    const raw = lines[i];
     if (raw === "" || /^\s*#/u.test(raw)) continue;
 
-    const match = /^(?<indent>\s*)(?<rest>.*)$/u.exec(raw);
-    if (!match) continue;
-    const { indent } = match.groups!;
-    const { rest } = match.groups!;
+    const m = /^(?<indent>\s*)(?<rest>.*)$/u.exec(raw);
+    if (!m) continue;
+    const { indent } = m.groups!;
+    const { rest } = m.groups!;
 
     if (rest === "") return null;
     if (/\t/u.test(indent)) return null;
     if (indent.length % 2 !== 0) return null;
     const depth = indent.length / 2;
 
-    if (firstNode) {
-      if (depth !== 0) return null;
-      firstNode = false;
-    }
+    const match = /^[*]\s+(?<body>.*)$/u.exec(rest);
+    if (!match) return null;
+    const body = match.groups!.body;
+
+    const tokens = body.split(/\s+/u).filter((t) => t.length > 0);
+    const parsed = parseAttributes(tokens);
+    if (!parsed) return null;
 
     while (stack.length > 0 && stack.at(-1)!.depth >= depth) {
       stack.pop();
     }
 
     const parent = stack.length > 0 ? stack.at(-1)!.node : null;
-
-    if (parent === null && depth === 0) {
+    if (parent === null) {
       if (hasRoot) return null;
       hasRoot = true;
     }
 
-    const tokens = rest.split(/\s+/u);
-    const textTokens: string[] = [];
-    const attrTokens: string[] = [];
-    for (const tok of tokens) {
-      if (tok.startsWith("@")) attrTokens.push(tok);
-      else textTokens.push(tok);
-    }
-
-    const text = textTokens.join(" ").trim();
-    if (!text) return null;
-
-    let priority: Priority = "medium";
-    let categoryColor: CategoryColor = "slate";
-    let dueDate = "";
-    let completed = false;
-    let status: TaskStatus = "inbox";
-
-    for (const tok of attrTokens) {
-      const colon = tok.indexOf(":");
-      const key = colon === -1 ? tok.slice(1) : tok.slice(1, colon);
-      const value = colon === -1 ? "" : tok.slice(colon + 1);
-      switch (key) {
-        case "priority": {
-          if (!ALLOWED_PRIORITIES.has(value as Priority)) return null;
-          priority = value as Priority;
-          break;
-        }
-        case "color": {
-          if (!ALLOWED_COLORS.has(value as CategoryColor)) return null;
-          categoryColor = value as CategoryColor;
-          break;
-        }
-        case "due": {
-          if (!isValidDate(value)) return null;
-          dueDate = value;
-          break;
-        }
-        case "done": {
-          completed = true;
-          status = "done";
-          break;
-        }
-        case "status": {
-          if (!ALLOWED_STATUSES.has(value as TaskStatus)) return null;
-          status = value as TaskStatus;
-          if (status === "done") completed = true;
-          break;
-        }
-        default: {
-          break;
-        }
-      }
-    }
-
     const node: MindNode = {
       ...defaultNode(boardId),
-      text,
-      priority,
-      categoryColor,
-      dueDate,
-      completed,
-      status,
+      text: parsed.text,
+      priority: parsed.priority,
+      categoryColor: parsed.categoryColor,
+      dueDate: parsed.dueDate,
+      completed: parsed.completed,
+      status: parsed.status,
     };
 
     if (parent === null) {
       node.id = "root";
       node.isRoot = true;
-      rootText = text;
+      rootText = parsed.text;
     } else {
       node.id = `n${counter++}`;
       node.parentId = parent.id;
@@ -151,7 +165,7 @@ export function parseDSL(text: string, boardId: string): DslParseResult | null {
     stack.push({ depth, node });
   }
 
-  if (firstNode) return null;
+  if (!hasRoot) return null;
 
   return {
     board: { id: boardId, name: rootText },
@@ -159,27 +173,30 @@ export function parseDSL(text: string, boardId: string): DslParseResult | null {
   };
 }
 
-export function serializeDSL(board: { name: string }, nodes: Record<string, MindNode>): string {
+export function serializeDSL(
+  board: { name: string },
+  nodes: Record<string, MindNode>,
+): string {
   const rootNode = Object.values(nodes).find((n) => n.isRoot);
-  if (!rootNode) return `${board.name}\n`;
+  if (!rootNode) return `mindmap\n  * ${board.name}\n`;
 
-  const out: string[] = [];
+  const out: string[] = ["mindmap"];
   const walk = (node: MindNode, depth: number): void => {
-    const indent = "  ".repeat(depth);
+    const indent = "  ".repeat(depth + 1);
     const attrs: string[] = [];
     if (node.priority !== "medium") attrs.push(`@priority:${node.priority}`);
     if (node.categoryColor !== "slate") attrs.push(`@color:${node.categoryColor}`);
     if (node.dueDate) attrs.push(`@due:${node.dueDate}`);
     if (node.status !== "inbox") attrs.push(`@status:${node.status}`);
     const attrStr = attrs.length > 0 ? ` ${attrs.join(" ")}` : "";
-    out.push(`${indent}${node.text}${attrStr}\n`);
+    out.push(`${indent}* ${node.text}${attrStr}`);
     for (const cid of node.children) {
       const child = nodes[cid];
       if (child) walk(child, depth + 1);
     }
   };
   walk(rootNode, 0);
-  return out.join("");
+  return out.join("\n") + "\n";
 }
 
 export interface InlineDslResult {

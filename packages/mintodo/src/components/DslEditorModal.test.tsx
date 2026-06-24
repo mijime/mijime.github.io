@@ -95,7 +95,7 @@ describe("DslEditorModal", () => {
   it("renders the modal with serialized DSL in the textarea", () => {
     renderModal();
     const textarea = screen.getByRole("textbox") as HTMLTextAreaElement;
-    expect(textarea.value).toBe("Test Board\n  牛乳 @priority:high\n");
+    expect(textarea.value).toBe("mindmap\n  * Test Board\n    * 牛乳 @priority:high\n");
   });
 
   it("SAVE dispatches SET_NODES and renames the board", async () => {
@@ -124,7 +124,7 @@ describe("DslEditorModal", () => {
     const textarea = screen.getByRole("textbox") as HTMLTextAreaElement;
     await act(async () => {
       fireEvent.change(textarea, {
-        target: { value: "新しいボード\n  タスクA @done\n  タスクB\n" },
+        target: { value: "mindmap\n  * 新しいボード\n    * タスクA @done\n    * タスクB\n" },
       });
     });
 
@@ -164,7 +164,7 @@ describe("DslEditorModal", () => {
     renderModal();
     const textarea = screen.getByRole("textbox") as HTMLTextAreaElement;
     await act(async () => {
-      fireEvent.change(textarea, { target: { value: "NewName\n  child\n" } });
+      fireEvent.change(textarea, { target: { value: "mindmap\n  * NewName\n    * child\n" } });
     });
 
     await act(async () => {
@@ -218,7 +218,7 @@ describe("DslEditorModal", () => {
     renderModal();
     const textarea = screen.getByRole("textbox") as HTMLTextAreaElement;
     await act(async () => {
-      fireEvent.change(textarea, { target: { value: "NewName\n  child\n" } });
+      fireEvent.change(textarea, { target: { value: "mindmap\n  * NewName\n    * child\n" } });
     });
 
     await act(async () => {
