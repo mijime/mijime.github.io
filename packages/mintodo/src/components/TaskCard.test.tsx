@@ -84,6 +84,19 @@ describe("TaskCard", () => {
     expect(captured!.nodes.n1.completed).toBe(true);
   });
 
+  it("places the hairline between meta and body in the not-done case", () => {
+    render(
+      <MindProvider initialState={makeState()}>
+        <TaskCard node={makeNode({ status: "wip", categoryColor: "sky" })} />
+      </MindProvider>,
+    );
+    const card = screen.getByTestId("task-card-n1");
+    // [MetaRow, Hairline, BodyRow] — children[1] is the hairline
+    const hairline = card.children[1] as HTMLElement;
+    expect(hairline.style.borderTop).toBe("1px solid rgb(14, 165, 233)");
+    expect(hairline.style.opacity).toBe("");
+  });
+
   it("uses categoryColor for the hairline and renders the collapsed done dot", () => {
     const { container } = render(
       <MindProvider initialState={makeState()}>
