@@ -407,6 +407,26 @@ describe("parseInlineDSL", () => {
     expect(r.text).toBe("foo bar baz");
     expect(r.priority).toBe("high");
   });
+
+  it("preserves newlines in the returned text while extracting attributes", () => {
+    const r = parseInlineDSL("line1\nline2 @priority:high\nline3");
+    expect(r.text).toBe("line1\nline2\nline3");
+    expect(r.priority).toBe("high");
+    expect(r.hasAnyAttribute).toBe(true);
+  });
+
+  it("preserves multiple newlines and trims per-line whitespace", () => {
+    const r = parseInlineDSL("  alpha  \n  beta  \n  gamma  ");
+    expect(r.text).toBe("alpha\nbeta\ngamma");
+    expect(r.hasAnyAttribute).toBe(false);
+  });
+
+  it("extracts attributes from any line, regardless of position", () => {
+    const r = parseInlineDSL("foo\n@color:sky\nbar @done\nbaz");
+    expect(r.text).toBe("foo\nbar\nbaz");
+    expect(r.categoryColor).toBe("sky");
+    expect(r.completed).toBe(true);
+  });
 });
 
 describe("parseDSL — @status attribute", () => {

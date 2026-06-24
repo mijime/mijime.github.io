@@ -204,67 +204,76 @@ export function parseInlineDSL(raw: string): InlineDslResult {
   };
   if (!raw) return result;
 
-  const tokens = raw.split(/\s+/u).filter((t) => t.length > 0);
-  const textTokens: string[] = [];
+  const lines = raw.split("\n");
+  const textLines: string[] = [];
 
-  for (const tok of tokens) {
-    if (!tok.startsWith("@")) {
-      textTokens.push(tok);
-      continue;
-    }
-    const colon = tok.indexOf(":");
-    const key = colon === -1 ? tok.slice(1) : tok.slice(1, colon);
-    const value = colon === -1 ? "" : tok.slice(colon + 1);
-    switch (key) {
-      case "priority": {
-        if (ALLOWED_PRIORITIES.has(value as Priority)) {
-          result.priority = value as Priority;
-          result.hasAnyAttribute = true;
-        } else {
-          textTokens.push(tok);
-        }
-        break;
-      }
-      case "color": {
-        if (ALLOWED_COLORS.has(value as CategoryColor)) {
-          result.categoryColor = value as CategoryColor;
-          result.hasAnyAttribute = true;
-        } else {
-          textTokens.push(tok);
-        }
-        break;
-      }
-      case "due": {
-        if (isValidDate(value)) {
-          result.dueDate = value;
-          result.hasAnyAttribute = true;
-        } else {
-          textTokens.push(tok);
-        }
-        break;
-      }
-      case "status": {
-        if (ALLOWED_STATUSES.has(value as TaskStatus)) {
-          result.status = value as TaskStatus;
-          result.hasAnyAttribute = true;
-        } else {
-          textTokens.push(tok);
-        }
-        break;
-      }
-      case "done": {
-        result.completed = true;
-        result.status = "done";
-        result.hasAnyAttribute = true;
-        break;
-      }
-      default: {
+  for (const line of lines) {
+    const tokens = line.split(/\s+/u).filter((t) => t.length > 0);
+    const textTokens: string[] = [];
+
+    for (const tok of tokens) {
+      if (!tok.startsWith("@")) {
         textTokens.push(tok);
-        break;
+        continue;
       }
+      const colon = tok.indexOf(":");
+      const key = colon === -1 ? tok.slice(1) : tok.slice(1, colon);
+      const value = colon === -1 ? "" : tok.slice(colon + 1);
+      switch (key) {
+        case "priority": {
+          if (ALLOWED_PRIORITIES.has(value as Priority)) {
+            result.priority = value as Priority;
+            result.hasAnyAttribute = true;
+          } else {
+            textTokens.push(tok);
+          }
+          break;
+        }
+        case "color": {
+          if (ALLOWED_COLORS.has(value as CategoryColor)) {
+            result.categoryColor = value as CategoryColor;
+            result.hasAnyAttribute = true;
+          } else {
+            textTokens.push(tok);
+          }
+          break;
+        }
+        case "due": {
+          if (isValidDate(value)) {
+            result.dueDate = value;
+            result.hasAnyAttribute = true;
+          } else {
+            textTokens.push(tok);
+          }
+          break;
+        }
+        case "status": {
+          if (ALLOWED_STATUSES.has(value as TaskStatus)) {
+            result.status = value as TaskStatus;
+            result.hasAnyAttribute = true;
+          } else {
+            textTokens.push(tok);
+          }
+          break;
+        }
+        case "done": {
+          result.completed = true;
+          result.status = "done";
+          result.hasAnyAttribute = true;
+          break;
+        }
+        default: {
+          textTokens.push(tok);
+          break;
+        }
+      }
+    }
+
+    if (textTokens.length > 0) {
+      textLines.push(textTokens.join(" "));
     }
   }
 
-  result.text = textTokens.join(" ").trim();
+  result.text = textLines.join("\n");
   return result;
 }
