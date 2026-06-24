@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { formatBadges, categoryDotClass, categoryBorderColor } from "./badges";
+import { formatBadges, categoryDotClass, categoryBorderColor, statusDotClass } from "./badges";
 import type { MindNode } from "../types";
 
 function makeNode(opts: Partial<MindNode> = {}): MindNode {
@@ -83,5 +83,20 @@ describe("categoryBorderColor", () => {
     expect(categoryBorderColor("emerald")).toBe("#10b981");
     expect(categoryBorderColor("rose")).toBe("#f43f5e");
     expect(categoryBorderColor("slate")).toBe("var(--mid)");
+  });
+});
+
+describe("statusDotClass", () => {
+  it("returns slate for inbox", () => {
+    expect(statusDotClass("inbox")).toBe("bg-slate-400");
+  });
+  it("returns sky for wip", () => {
+    expect(statusDotClass("wip")).toBe("bg-sky-500");
+  });
+  it("returns amber for review", () => {
+    expect(statusDotClass("review")).toBe("bg-amber-500");
+  });
+  it("returns emerald for done", () => {
+    expect(statusDotClass("done")).toBe("bg-emerald-500");
   });
 });

@@ -64,3 +64,20 @@ export function categoryBorderColor(c: MindNode["categoryColor"]): string {
     }
   }
 }
+
+export function statusDotClass(s: MindNode["status"]): string {
+  switch (s) {
+    case "wip": {
+      return "bg-sky-500";
+    }
+    case "review": {
+      return "bg-amber-500";
+    }
+    case "done": {
+      return "bg-emerald-500";
+    }
+    default: {
+      return "bg-slate-400";
+    }
+  }
+}
