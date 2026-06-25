@@ -89,6 +89,46 @@ describe("EditModal", () => {
     expect(ta.value).toBe("");
   });
 
+  it("renders the breadcrumb of the edited node in edit mode", () => {
+    const { container } = setup({ modal: { kind: "edit", nodeId: "a" } });
+    const title = container.querySelector('[data-testid="edit-modal-title"]') as HTMLElement;
+    expect(title.textContent).toContain("Root / Task A");
+    expect(title.getAttribute("title")).toBe("Root / Task A");
+  });
+
+  it("renders the parent's breadcrumb + ' + 新規' in edit-new mode", () => {
+    const { container } = setup({ modal: { kind: "edit-new", parentId: "a" } });
+    const title = container.querySelector('[data-testid="edit-modal-title"]') as HTMLElement;
+    expect(title.textContent).toBe("Root / Task A + 新規");
+    expect(title.getAttribute("title")).toBe("Root / Task A + 新規");
+  });
+
+  it("renders the board root text + ' + 新規' when adding under the root", () => {
+    const { container } = setup({ modal: { kind: "edit-new", parentId: "root" } });
+    const title = container.querySelector('[data-testid="edit-modal-title"]') as HTMLElement;
+    expect(title.textContent).toBe("Root + 新規");
+  });
+
+  it("truncates the breadcrumb to '… / last / last' on a 4-level chain in edit mode", () => {
+    const deepState: State = {
+      ...makeState(),
+      nodes: {
+        root: makeNode("root", null, { isRoot: true, text: "R", children: ["a"] }),
+        a: makeNode("a", "root", { text: "A", children: ["b"] }),
+        b: makeNode("b", "a", { text: "B", children: ["c"] }),
+        c: makeNode("c", "b", { text: "C" }),
+      },
+      modal: { kind: "edit", nodeId: "c" },
+    };
+    const { container } = render(
+      <MindProvider initialState={deepState}>
+        <EditModal />
+      </MindProvider>,
+    );
+    const title = container.querySelector('[data-testid="edit-modal-title"]') as HTMLElement;
+    expect(title.textContent).toBe("… / B / C");
+  });
+
   it("updates the node on save in edit mode", () => {
     setup({ modal: { kind: "edit", nodeId: "a" } });
     const saveBtn = document.querySelector('[data-testid="edit-modal-save"]') as HTMLButtonElement;

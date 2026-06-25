@@ -71,10 +71,7 @@ describe("buildBreadcrumb", () => {
   });
 
   it("returns the collected prefix when the parent chain is broken mid-walk", () => {
-    const nodes = {
-      root: n("root", null, { isRoot: true, text: "R", children: ["a"] }),
-      a: n("a", "root", { text: "A", children: ["missing"] }),
-    };
-    expect(buildBreadcrumb(nodes, "a")).toBe("R / A");
+    const nodes = { a: n("a", "missing-parent", { text: "A" }) };
+    expect(buildBreadcrumb(nodes, "a")).toBe("A");
   });
 });

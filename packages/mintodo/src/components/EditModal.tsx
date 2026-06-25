@@ -2,6 +2,7 @@ import { ChevronDown, ChevronUp, Pencil, Trash2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { parseInlineDSL } from "../dsl";
 import { useMindStore } from "../hooks/use-mind-store";
+import { buildBreadcrumb } from "../lib/breadcrumb";
 import type { CategoryColor, Priority, TaskStatus } from "../types";
 
 const COLORS: { value: CategoryColor; label: string; bg: string }[] = [
@@ -89,6 +90,10 @@ export function EditModal() {
   if (!isNew && !node) return null;
 
   const m = modal as { kind: "edit"; nodeId: string } | { kind: "edit-new"; parentId: string };
+  const breadcrumb =
+    m.kind === "edit-new"
+      ? `${buildBreadcrumb(state.nodes, m.parentId)} + 新規`
+      : buildBreadcrumb(state.nodes, m.nodeId);
 
   function handleTextChange(value: string): void {
     setText(value);
@@ -189,11 +194,13 @@ export function EditModal() {
       >
         <div className="p-6">
           <h3
-            className="text-lg mb-4 flex items-center gap-2"
+            data-testid="edit-modal-title"
+            className="text-lg mb-4 flex items-center gap-2 truncate"
             style={{ fontFamily: '"Crimson Pro", serif', fontWeight: 600, color: "var(--ink)" }}
+            title={breadcrumb}
           >
             <Pencil size={18} style={{ color: "var(--terra)" }} />
-            {isNew ? "新規タスク" : "タスクを編集"}
+            {breadcrumb}
           </h3>
           <div className="space-y-4">
             <div>
