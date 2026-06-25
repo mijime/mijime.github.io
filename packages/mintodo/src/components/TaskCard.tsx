@@ -85,10 +85,7 @@ export function TaskCard({ node }: Props) {
       {isDone ? null : (
         <>
           {metaRow}
-          <div
-            className="w-full"
-            style={{ borderTop: `1px solid ${hairlineColor}` }}
-          />
+          <div className="w-full" style={{ borderTop: `1px solid ${hairlineColor}` }} />
         </>
       )}
       {bodyRow}

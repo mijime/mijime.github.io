@@ -62,10 +62,7 @@ export function TextEditor() {
   });
 
   return (
-    <div
-      data-testid="text-editor"
-      className="w-full h-full flex flex-col overflow-hidden"
-    >
+    <div data-testid="text-editor" className="w-full h-full flex flex-col overflow-hidden">
       <textarea
         data-testid="text-editor-textarea"
         value={text}
