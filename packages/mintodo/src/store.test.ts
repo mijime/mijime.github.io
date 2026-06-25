@@ -695,4 +695,17 @@ describe("reducer - DELETE_COMPLETED", () => {
     const next = reducer(s, { type: "DELETE_COMPLETED" });
     expect(next).toBe(s);
   });
+
+  it("is a no-op when no completed nodes exist", () => {
+    const s = {
+      ...createInitialState(),
+      currentBoardId: "b-a",
+      nodes: {
+        root: makeNode("root", "b-a", { isRoot: true, children: ["a"] }),
+        a: makeNode("a", "b-a", { parentId: "root", status: "inbox", completed: false }),
+      },
+    };
+    const next = reducer(s, { type: "DELETE_COMPLETED" });
+    expect(next).toBe(s);
+  });
 });

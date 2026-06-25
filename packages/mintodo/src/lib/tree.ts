@@ -1,9 +1,5 @@
 import type { MindNode } from "../types";
 
-export function isLeaf(nodes: Record<string, MindNode>, id: string): boolean {
-  return (nodes[id]?.children.length ?? 0) === 0;
-}
-
 export function countDescendants(
   nodes: Record<string, MindNode>,
   id: string,

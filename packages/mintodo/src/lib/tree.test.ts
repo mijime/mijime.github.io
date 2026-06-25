@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { MindNode } from "../types";
-import { countDescendants, isKanbanVisible, isLeaf } from "./tree";
+import { countDescendants, isKanbanVisible } from "./tree";
 
 function n(id: string, opts: Partial<MindNode> = {}): MindNode {
   return {
@@ -21,19 +21,6 @@ function n(id: string, opts: Partial<MindNode> = {}): MindNode {
     ...opts,
   };
 }
-
-describe("isLeaf", () => {
-  it("returns true for a node with no children", () => {
-    const nodes = { root: n("root"), a: n("a", { parentId: "root" }) };
-    nodes.root = { ...nodes.root, children: ["a"] };
-    expect(isLeaf(nodes, "a")).toBe(true);
-  });
-
-  it("returns false for a node with children", () => {
-    const nodes = { root: n("root", { children: ["a"] }), a: n("a", { parentId: "root" }) };
-    expect(isLeaf(nodes, "root")).toBe(false);
-  });
-});
 
 describe("countDescendants", () => {
   it("returns 0/0 for a leaf", () => {
