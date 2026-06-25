@@ -86,7 +86,14 @@ describe("KanbanColumn", () => {
   });
 
   it("hides a parent that has a non-completed leaf descendant (leaves only)", () => {
-    const root = node({ id: "root", boardId: "b", parentId: null, isRoot: true, status: "inbox", children: ["p"] });
+    const root = node({
+      id: "root",
+      boardId: "b",
+      parentId: null,
+      isRoot: true,
+      status: "inbox",
+      children: ["p"],
+    });
     const p = node({
       id: "p",
       boardId: "b",
@@ -104,7 +111,14 @@ describe("KanbanColumn", () => {
   });
 
   it("shows a parent instead of its leaves when every leaf descendant is completed", () => {
-    const root = node({ id: "root", boardId: "b", parentId: null, isRoot: true, status: "inbox", children: ["p"] });
+    const root = node({
+      id: "root",
+      boardId: "b",
+      parentId: null,
+      isRoot: true,
+      status: "inbox",
+      children: ["p"],
+    });
     const p = node({
       id: "p",
       boardId: "b",
