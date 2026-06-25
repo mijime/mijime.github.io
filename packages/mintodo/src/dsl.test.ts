@@ -38,8 +38,11 @@ describe("parseDSL — Mermaid mindmap", () => {
     expect(n.status).toBe("wip");
   });
 
-  it("returns null when header is missing", () => {
-    expect(parseDSL("  * Root\n", "b1")).toBeNull();
+  it("parses without the 'mindmap' header (board name is the first line)", () => {
+    const r = parseDSL("  * Root\n", "b1");
+    expect(r).not.toBeNull();
+    expect(r!.board.name).toBe("Root");
+    expect(r!.nodes[0].isRoot).toBe(true);
   });
 
   it("returns null when indent is invalid (tab or odd)", () => {

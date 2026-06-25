@@ -1,4 +1,5 @@
 import {
+  CheckCircle2,
   Eye,
   Keyboard,
   Network,
@@ -26,6 +27,11 @@ export function Toolbar() {
   const { state, dispatch } = useMindStore();
 
   const onToggleDrawer = () => dispatch({ type: "TOGGLE_DRAWER" });
+  const onDeleteCompleted = () => {
+    if (!state.currentBoardId) return;
+    if (!window.confirm("完了済みのタスクをすべて削除しますか？")) return;
+    dispatch({ type: "DELETE_COMPLETED" });
+  };
 
   return (
     <header
@@ -97,6 +103,20 @@ export function Toolbar() {
           onClick={() => dispatch({ type: "TOGGLE_HIDE_COMPLETED" })}
         >
           <Eye size={16} /> <span className="hidden sm:inline">未完了のみ</span>
+        </button>
+        <button
+          type="button"
+          data-testid="toolbar-delete-completed"
+          className="p-2 rounded text-xs font-semibold transition flex items-center gap-1.5"
+          style={{
+            background: "var(--paper)",
+            border: "1px solid var(--border)",
+            color: "var(--ink)",
+          }}
+          title="完了済みタスクをすべて削除"
+          onClick={onDeleteCompleted}
+        >
+          <CheckCircle2 size={16} /> <span className="hidden sm:inline">完了を削除</span>
         </button>
       </div>
       <div className="flex items-center justify-between lg:justify-end gap-3 w-full lg:w-auto">

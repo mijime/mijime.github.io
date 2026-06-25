@@ -227,13 +227,14 @@ describe("NodeCard selection", () => {
     document.body.innerHTML = "";
   });
 
-  it("clicking a non-root node selects it", () => {
+  it("clicking a non-root node selects it and opens the edit modal", () => {
     const { container } = setup();
     const childEl = container.querySelector('[data-node-id="a"]') as HTMLElement;
     act(() => {
       fireEvent.click(childEl);
     });
     expect(capturedState!.selectedNodeId).toBe("a");
+    expect(capturedState!.modal).toEqual({ kind: "edit", nodeId: "a" });
   });
 
   it("clicking a child button inside the card does not change selection", () => {

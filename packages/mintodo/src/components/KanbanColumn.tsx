@@ -1,6 +1,7 @@
 import { Plus } from "lucide-react";
 import { useDroppable } from "@dnd-kit/core";
 import { useMindStore } from "../hooks/use-mind-store";
+import { isKanbanVisible } from "../lib/tree";
 import { KanbanCard } from "./KanbanCard";
 import type { MindNode, TaskStatus } from "../types";
 
@@ -37,6 +38,7 @@ export function KanbanColumn({ status }: Props) {
       n.boardId === state.currentBoardId &&
       n.status === status &&
       !isParentCollapsed(state, n.id) &&
+      isKanbanVisible(state.nodes, n.id) &&
       !(state.hideCompleted && n.completed && !n.isRoot),
   );
 

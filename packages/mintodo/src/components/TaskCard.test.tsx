@@ -59,7 +59,7 @@ describe("TaskCard", () => {
     );
     expect(screen.getByText("牛乳")).toBeTruthy();
     expect(screen.getByTestId("add-child-n1")).toBeTruthy();
-    expect(screen.getByTestId("status-dot-n1").className).toContain("bg-sky-500");
+    expect(screen.getByTestId("status-dot-button-n1").className).toContain("bg-sky-500");
   });
 
   it("opens edit-new modal when add-child is clicked", () => {
@@ -97,6 +97,62 @@ describe("TaskCard", () => {
     expect(hairline.style.opacity).toBe("");
   });
 
+  it("clicking the status dot cycles status backwards", () => {
+    render(
+      <MindProvider initialState={makeState()}>
+        <Capture />
+        <TaskCard node={makeNode({ status: "wip" })} />
+      </MindProvider>,
+    );
+    fireEvent.click(screen.getByTestId("status-dot-button-n1"));
+    expect(captured!.nodes.n1.status).toBe("inbox");
+  });
+
+  it("shows child progress M/N when the node has children", () => {
+    const child1 = makeNode({ id: "c1", parentId: "n1", completed: true });
+    const child2 = makeNode({ id: "c2", parentId: "n1", completed: false });
+    const state = makeState({
+      nodes: {
+        root: makeNode({ id: "root", isRoot: true }),
+        n1: makeNode({ status: "wip", children: ["c1", "c2"] }),
+        c1: child1,
+        c2: child2,
+      },
+    });
+    render(
+      <MindProvider initialState={state}>
+        <TaskCard node={state.nodes.n1!} />
+      </MindProvider>,
+    );
+    expect(screen.getByTestId("task-card-progress-n1").textContent).toBe("1 / 2");
+  });
+
+  it("hides the progress row when the node is a leaf", () => {
+    render(
+      <MindProvider initialState={makeState()}>
+        <TaskCard node={makeNode()} />
+      </MindProvider>,
+    );
+    expect(screen.queryByTestId("task-card-progress-n1")).toBeNull();
+  });
+
+  it("hides the progress row when the node is done", () => {
+    const child = makeNode({ id: "c1", parentId: "n1", completed: true });
+    const state = makeState({
+      nodes: {
+        root: makeNode({ id: "root", isRoot: true }),
+        n1: makeNode({ status: "done", completed: true, children: ["c1"] }),
+        c1: child,
+      },
+    });
+    render(
+      <MindProvider initialState={state}>
+        <TaskCard node={state.nodes.n1!} />
+      </MindProvider>,
+    );
+    expect(screen.queryByTestId("task-card-progress-n1")).toBeNull();
+  });
+
   it("uses categoryColor for the hairline and renders the collapsed done dot", () => {
     const { container } = render(
       <MindProvider initialState={makeState()}>
@@ -113,7 +169,7 @@ describe("TaskCard", () => {
     const dot = bodyRow.querySelector("span.rounded-full.bg-emerald-500") as HTMLElement | null;
     expect(dot).not.toBeNull();
     // Meta row (and its StatusDot) is absent
-    expect(screen.queryByTestId("status-dot-n1")).toBeNull();
+    expect(screen.queryByTestId("status-dot-button-n1")).toBeNull();
     // The body uses Crimson Pro for the title
     const title = container.querySelector("span.whitespace-pre-wrap") as HTMLElement;
     expect(title.style.fontFamily).toContain("Crimson Pro");

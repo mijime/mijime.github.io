@@ -446,7 +446,7 @@ describe("kanban view end-to-end", () => {
     expect(screen.queryByTestId("kanban-board")).toBeNull();
   });
 
-  it("kanban view shows 4 columns with the root in inbox", async () => {
+  it("kanban view shows 4 columns", async () => {
     render(<App />);
     await act(async () => {
       await flush(100);
@@ -460,7 +460,7 @@ describe("kanban view end-to-end", () => {
     expect(screen.getByTestId("kanban-column-review")).toBeTruthy();
     expect(screen.getByTestId("kanban-column-done")).toBeTruthy();
     const count = screen.getByTestId("kanban-column-count-inbox").textContent;
-    expect(count).toBe("1");
+    expect(count).toBe("0");
   });
 
   it("viewMode round-trips through IndexedDB meta", async () => {
@@ -599,7 +599,7 @@ describe("kanban view end-to-end", () => {
         await flush(100);
       });
 
-      expect(screen.getByTestId("kanban-column-count-inbox").textContent).toBe("1");
+      expect(screen.getByTestId("kanban-column-count-inbox").textContent).toBe("0");
       expect(screen.getByTestId("kanban-column-count-done").textContent).toBe("1");
     } finally {
       collisionRef.value = undefined;

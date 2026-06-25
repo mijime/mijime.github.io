@@ -49,6 +49,7 @@ export type Action =
   | { type: "TOGGLE_HIDE_COMPLETED" }
   | { type: "SET_STATUS"; id: string; status: TaskStatus }
   | { type: "SET_VIEW_MODE"; viewMode: ViewMode }
+  | { type: "DELETE_COMPLETED" }
   | {
       type: "CREATE_CHILD";
       newId: string;
@@ -368,6 +369,35 @@ export function reducer(state: State, action: Action): State {
 
     case "SNAP_BACK": {
       return withRadialLayout(state, state.nodes);
+    }
+    case "DELETE_COMPLETED": {
+      const boardId = state.currentBoardId;
+      if (!boardId) return state;
+      const toDelete = Object.values(state.nodes).filter(
+        (n) => n.boardId === boardId && n.completed && !n.isRoot,
+      );
+      if (toDelete.length === 0) return state;
+      const updated = new Map(Object.entries(state.nodes));
+      const remove = (id: string) => {
+        const n = updated.get(id);
+        if (!n) return;
+        for (const childId of n.children) remove(childId);
+        updated.delete(id);
+      };
+      for (const n of toDelete) remove(n.id);
+      for (const [id, n] of updated) {
+        if (n.children.length === 0) continue;
+        const filtered = n.children.filter((c) => updated.has(c));
+        if (filtered.length !== n.children.length) {
+          updated.set(id, { ...n, children: filtered });
+        }
+      }
+      const nextNodes = Object.fromEntries(updated);
+      const nextSelected = nextNodes[state.selectedNodeId] ? state.selectedNodeId : "root";
+      return withRadialLayout(
+        { ...state, nodes: nextNodes, selectedNodeId: nextSelected },
+        nextNodes,
+      );
     }
     default: {
       return state;
