@@ -105,9 +105,8 @@ function apportion(v: TreeNode, w: TreeNode | null, ancestor: TreeNode): TreeNod
   let ret = ancestor;
   while (true) {
     vim = nextRight(vim);
-    if (!vim) break;
     vip = nextLeft(vip);
-    if (!vip) break;
+    if (!vim || !vip) break;
     vom = nextLeft(vom)!;
     vop = nextRight(vop)!;
     vop.a = v;
