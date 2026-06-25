@@ -1,0 +1,80 @@
+import { describe, expect, it } from "vitest";
+import type { MindNode } from "../types";
+import { buildBreadcrumb } from "./breadcrumb";
+
+function n(id: string, parentId: string | null, opts: Partial<MindNode> = {}): MindNode {
+  return {
+    id,
+    boardId: "b1",
+    text: opts.text ?? id,
+    parentId,
+    isRoot: parentId === null,
+    completed: false,
+    collapsed: false,
+    priority: "medium",
+    categoryColor: "slate",
+    dueDate: "",
+    status: "inbox",
+    children: opts.children ?? [],
+    x: 0,
+    y: 0,
+    ...opts,
+  };
+}
+
+describe("buildBreadcrumb", () => {
+  it("returns '' when targetId is not in nodes", () => {
+    expect(buildBreadcrumb({}, "missing")).toBe("");
+  });
+
+  it("returns just the root text when the target is the root", () => {
+    const nodes = { root: n("root", null, { isRoot: true, text: "My Board" }) };
+    expect(buildBreadcrumb(nodes, "root")).toBe("My Board");
+  });
+
+  it("joins 2 levels with ' / '", () => {
+    const nodes = {
+      root: n("root", null, { isRoot: true, text: "R", children: ["a"] }),
+      a: n("a", "root", { text: "A" }),
+    };
+    expect(buildBreadcrumb(nodes, "a")).toBe("R / A");
+  });
+
+  it("joins 3 levels with ' / ' (no truncation)", () => {
+    const nodes = {
+      root: n("root", null, { isRoot: true, text: "R", children: ["a"] }),
+      a: n("a", "root", { text: "A", children: ["b"] }),
+      b: n("b", "a", { text: "B" }),
+    };
+    expect(buildBreadcrumb(nodes, "b")).toBe("R / A / B");
+  });
+
+  it("truncates to '… / last / last' when 4 levels deep", () => {
+    const nodes = {
+      root: n("root", null, { isRoot: true, text: "R", children: ["a"] }),
+      a: n("a", "root", { text: "A", children: ["b"] }),
+      b: n("b", "a", { text: "B", children: ["c"] }),
+      c: n("c", "b", { text: "C" }),
+    };
+    expect(buildBreadcrumb(nodes, "c")).toBe("… / B / C");
+  });
+
+  it("truncates to '… / last / last' when 5+ levels deep (only last two shown)", () => {
+    const nodes = {
+      root: n("root", null, { isRoot: true, text: "R", children: ["a"] }),
+      a: n("a", "root", { text: "A", children: ["b"] }),
+      b: n("b", "a", { text: "B", children: ["c"] }),
+      c: n("c", "b", { text: "C", children: ["d"] }),
+      d: n("d", "c", { text: "D" }),
+    };
+    expect(buildBreadcrumb(nodes, "d")).toBe("… / C / D");
+  });
+
+  it("returns the collected prefix when the parent chain is broken mid-walk", () => {
+    const nodes = {
+      root: n("root", null, { isRoot: true, text: "R", children: ["a"] }),
+      a: n("a", "root", { text: "A", children: ["missing"] }),
+    };
+    expect(buildBreadcrumb(nodes, "a")).toBe("R / A");
+  });
+});
