@@ -1,20 +1,8 @@
 import { useDraggable } from "@dnd-kit/core";
 import { useMindStore } from "../hooks/use-mind-store";
+import { buildBreadcrumb } from "../lib/breadcrumb";
 import type { MindNode } from "../types";
 import { TaskCard } from "./TaskCard";
-
-function buildBreadcrumb(nodes: Record<string, MindNode>, targetId: string): string {
-  const path: string[] = [];
-  let cur = nodes[targetId];
-  while (cur) {
-    path.unshift(cur.text);
-    if (!cur.parentId) break;
-    cur = nodes[cur.parentId];
-    if (!cur) break;
-  }
-  if (path.length <= 3) return path.join(" / ");
-  return `… / ${path.slice(-2).join(" / ")}`;
-}
 
 interface Props {
   node: MindNode;
