@@ -54,14 +54,14 @@ describe("KanbanBoard", () => {
     expect(screen.getByTestId("kanban-column-done")).toBeTruthy();
   });
 
-  it("distributes nodes to their status columns", () => {
+  it("distributes nodes to their status columns (root is excluded)", () => {
     const root = node({ id: "root", boardId: "b", parentId: null, isRoot: true, status: "inbox" });
     const wipNode = node({ id: "n1", boardId: "b", parentId: "root", status: "wip" });
     const doneNode = node({ id: "n2", boardId: "b", parentId: "root", status: "done" });
     renderBoard([root, wipNode, doneNode]);
     expect(screen.getByTestId("kanban-column-count-wip").textContent).toBe("1");
     expect(screen.getByTestId("kanban-column-count-done").textContent).toBe("1");
-    expect(screen.getByTestId("kanban-column-count-inbox").textContent).toBe("1");
+    expect(screen.getByTestId("kanban-column-count-inbox").textContent).toBe("0");
     expect(screen.getByTestId("kanban-column-count-review").textContent).toBe("0");
   });
 });

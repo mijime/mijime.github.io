@@ -29,6 +29,14 @@ export function isKanbanVisible(nodes: Record<string, MindNode>, id: string): bo
   const node = nodes[id];
   if (!node) return false;
   if (node.isRoot) return false;
+  let current: MindNode | null = node.parentId ? (nodes[node.parentId] ?? null) : null;
+  while (current && !current.isRoot) {
+    if (current.children.length > 0) {
+      const { total, completed } = countDescendants(nodes, current.id);
+      if (total > 0 && total === completed) return false;
+    }
+    current = current.parentId ? (nodes[current.parentId] ?? null) : null;
+  }
   if (node.children.length === 0) return true;
   const { total, completed } = countDescendants(nodes, id);
   return total > 0 && total === completed;

@@ -20,7 +20,7 @@ function node(
     categoryColor: "slate",
     dueDate: "",
     status: opts.status ?? "inbox",
-    children: [],
+    children: opts.children ?? [],
     x: 0,
     y: 0,
   };
@@ -76,5 +76,49 @@ describe("KanbanColumn", () => {
       parentId: "root",
       parentStatusSeed: "review",
     });
+  });
+
+  it("excludes the root even when its status matches the column", () => {
+    const root = node({ id: "root", boardId: "b", parentId: null, isRoot: true, status: "inbox" });
+    renderColumn("inbox", [root]);
+    expect(screen.queryByTestId("kanban-card-root")).toBeNull();
+    expect(screen.getByTestId("kanban-column-count-inbox").textContent).toBe("0");
+  });
+
+  it("hides a parent that has a non-completed leaf descendant (leaves only)", () => {
+    const root = node({ id: "root", boardId: "b", parentId: null, isRoot: true, status: "inbox", children: ["p"] });
+    const p = node({
+      id: "p",
+      boardId: "b",
+      parentId: "root",
+      status: "wip",
+      completed: false,
+      children: ["a", "b"],
+    });
+    const a = node({ id: "a", boardId: "b", parentId: "p", status: "done", completed: true });
+    const b = node({ id: "b", boardId: "b", parentId: "p", status: "wip", completed: false });
+    renderColumn("wip", [root, p, a, b]);
+    expect(screen.queryByTestId("kanban-card-p")).toBeNull();
+    expect(screen.getByTestId("kanban-card-b")).toBeTruthy();
+    expect(screen.getByTestId("kanban-column-count-wip").textContent).toBe("1");
+  });
+
+  it("shows a parent instead of its leaves when every leaf descendant is completed", () => {
+    const root = node({ id: "root", boardId: "b", parentId: null, isRoot: true, status: "inbox", children: ["p"] });
+    const p = node({
+      id: "p",
+      boardId: "b",
+      parentId: "root",
+      status: "done",
+      completed: true,
+      children: ["a", "b"],
+    });
+    const a = node({ id: "a", boardId: "b", parentId: "p", status: "done", completed: true });
+    const b = node({ id: "b", boardId: "b", parentId: "p", status: "done", completed: true });
+    renderColumn("done", [root, p, a, b]);
+    expect(screen.getByTestId("kanban-card-p")).toBeTruthy();
+    expect(screen.queryByTestId("kanban-card-a")).toBeNull();
+    expect(screen.queryByTestId("kanban-card-b")).toBeNull();
+    expect(screen.getByTestId("kanban-column-count-done").textContent).toBe("1");
   });
 });
