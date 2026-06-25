@@ -95,6 +95,7 @@ export function NodeCard({ node }: Props) {
         borderLeft: `4px solid ${borderColor}`,
         boxShadow: priBorder ? "0 0 0 1px var(--terra)" : undefined,
         opacity: isDragging ? 0.4 : 1,
+        touchAction: "none",
       }}
     >
       <div className="flex items-start justify-between w-full gap-2">
