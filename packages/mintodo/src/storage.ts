@@ -44,6 +44,8 @@ export async function createBoard(name: string): Promise<{ board: Board; rootId:
     dueDate: "",
     status: "inbox",
     children: [],
+    estimate: null,
+    workLogs: [],
     x: 0,
     y: 0,
   };

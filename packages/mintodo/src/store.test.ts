@@ -16,6 +16,8 @@ function makeNode(id: string, boardId: string, opts: Partial<MindNode> = {}): Mi
     dueDate: "",
     status: "inbox",
     children: [],
+    estimate: null,
+    workLogs: [],
     x: 0,
     y: 0,
     ...opts,
@@ -702,5 +704,45 @@ describe("reducer - DELETE_COMPLETED", () => {
     };
     const next = reducer(s, { type: "DELETE_COMPLETED" });
     expect(next).toBe(s);
+  });
+});
+
+describe("reducer — new fields (estimate, workLogs)", () => {
+  it("SET_NODES round-trips the estimate field", () => {
+    const s = createInitialState();
+    const nodes: Record<string, MindNode> = {
+      root: makeNode("root", "b-a", { isRoot: true, text: "R", estimate: 8, workLogs: [] }),
+      a: makeNode("a", "b-a", { parentId: "root", text: "A", estimate: null, workLogs: [] }),
+    };
+    const next = reducer(s, { nodes, type: "SET_NODES" });
+    expect(next.nodes.root.estimate).toBe(8);
+    expect(next.nodes.a.estimate).toBeNull();
+  });
+
+  it("UPDATE_NODE with estimate patches the field", () => {
+    const s = { ...createInitialState(), nodes: { n: makeNode("n", "b-a", { estimate: null }) } };
+    const next = reducer(s, { id: "n", patch: { estimate: 8 }, type: "UPDATE_NODE" });
+    expect(next.nodes.n.estimate).toBe(8);
+  });
+
+  it("RESET produces a root with estimate: null and workLogs: []", () => {
+    const s = { ...createInitialState(), boards: [{ id: "b-a", name: "X", createdAt: 0, updatedAt: 0 }], currentBoardId: "b-a" };
+    const next = reducer(s, { type: "RESET" });
+    expect(next.nodes.root.estimate).toBeNull();
+    expect(next.nodes.root.workLogs).toEqual([]);
+  });
+
+  it("ADD_CHILD produces a child with estimate: null and workLogs: []", () => {
+    const s = { ...createInitialState(), nodes: { root: makeNode("root", "b-a", { isRoot: true, children: [] }) } };
+    const next = reducer(s, { newId: "n1", parentId: "root", type: "ADD_CHILD" });
+    expect(next.nodes.n1.estimate).toBeNull();
+    expect(next.nodes.n1.workLogs).toEqual([]);
+  });
+
+  it("CREATE_CHILD produces a child with estimate: null and workLogs: []", () => {
+    const s = { ...createInitialState(), currentBoardId: "b-a", nodes: { root: makeNode("root", "b-a", { isRoot: true, children: [] }) } };
+    const next = reducer(s, { type: "CREATE_CHILD", newId: "n1", parentId: "root", text: "task", priority: "medium", categoryColor: "slate", dueDate: "", completed: false, status: "inbox" });
+    expect(next.nodes.n1.estimate).toBeNull();
+    expect(next.nodes.n1.workLogs).toEqual([]);
   });
 });

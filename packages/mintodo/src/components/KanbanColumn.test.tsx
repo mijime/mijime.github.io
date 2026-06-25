@@ -21,6 +21,8 @@ function node(
     dueDate: "",
     status: opts.status ?? "inbox",
     children: opts.children ?? [],
+    estimate: null,
+    workLogs: [],
     x: 0,
     y: 0,
   };

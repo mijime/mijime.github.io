@@ -29,6 +29,8 @@ function defaultNode(boardId: string): MindNode {
     dueDate: "",
     status: "inbox",
     children: [],
+    estimate: null,
+    workLogs: [],
     x: 0,
     y: 0,
   };

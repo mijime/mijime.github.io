@@ -20,6 +20,8 @@ function makeNode(id: string, parentId: string | null, opts: Partial<MindNode> =
     dueDate: "",
     status: "inbox",
     children: opts.children ?? [],
+    estimate: null,
+    workLogs: [],
     x: opts.x ?? 0,
     y: opts.y ?? 0,
     ...opts,
@@ -323,6 +325,8 @@ describe("EditModal — status picker", () => {
       dueDate: "",
       status: "inbox",
       children: [],
+      estimate: null,
+      workLogs: [],
       x: 0,
       y: 0,
     };
@@ -352,6 +356,8 @@ describe("EditModal — status picker", () => {
       dueDate: "",
       status: "inbox",
       children: [],
+      estimate: null,
+      workLogs: [],
       x: 0,
       y: 0,
     };

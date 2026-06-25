@@ -27,6 +27,8 @@ function makeRootNode(boardId: string, name: string) {
       dueDate: "",
       status: "inbox" as const,
       children: [],
+      estimate: null,
+      workLogs: [],
       x: 0,
       y: 0,
     },

@@ -21,6 +21,8 @@ function makeNode(over: Partial<MindNode> = {}): MindNode {
     dueDate: "",
     status: "inbox",
     children: [],
+    estimate: null,
+    workLogs: [],
     x: 0,
     y: 0,
     ...over,

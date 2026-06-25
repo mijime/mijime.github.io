@@ -27,6 +27,8 @@ function makeNode(id: string, parentId: string | null, opts: Partial<MindNode> =
     dueDate: "",
     status: "inbox",
     children: opts.children ?? [],
+    estimate: null,
+    workLogs: [],
     x: opts.x ?? 0,
     y: opts.y ?? 0,
     ...opts,

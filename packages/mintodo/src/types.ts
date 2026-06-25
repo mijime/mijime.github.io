@@ -28,6 +28,8 @@ export interface MindNode {
   dueDate: string;
   status: TaskStatus;
   children: string[];
+  estimate: number | null;
+  workLogs: WorkLogEntry[];
   x: number;
   y: number;
 }
@@ -43,7 +45,14 @@ export type Modal =
   | { kind: "help" }
   | { kind: "board-name"; mode: "create" | "rename"; boardId?: string; initialName?: string }
   | { kind: "board-delete"; boardId: string; boardName: string }
+  | { kind: "work-log"; nodeId: string }
   | null;
+
+export interface WorkLogEntry {
+  id: string;
+  timestamp: number;
+  text: string;
+}
 
 export interface SaveData {
   version: 2;

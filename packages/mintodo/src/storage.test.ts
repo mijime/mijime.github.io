@@ -32,6 +32,8 @@ function makeNode(id: string, boardId: string, opts: Partial<MindNode> = {}): Mi
     dueDate: "",
     status: "inbox",
     children: [],
+    estimate: null,
+    workLogs: [],
     x: 0,
     y: 0,
     ...opts,

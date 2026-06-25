@@ -26,6 +26,8 @@ function node(
     dueDate: "",
     status: opts.status,
     children: [],
+    estimate: null,
+    workLogs: [],
     x: 0,
     y: 0,
   };

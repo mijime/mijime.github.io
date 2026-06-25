@@ -16,6 +16,8 @@ function n(id: string, parentId: string | null, opts: Partial<MindNode> = {}): M
     dueDate: "",
     status: "inbox",
     children: opts.children ?? [],
+    estimate: null,
+    workLogs: [],
     x: 0,
     y: 0,
     ...opts,
