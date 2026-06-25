@@ -101,7 +101,8 @@ export function parseDSL(text: string, boardId: string): DslParseResult | null {
   const lines = text.replaceAll(/\r\n?/gu, "\n").split("\n");
   if (lines.length === 0) return null;
   const header = lines[0].trim().toLowerCase();
-  if (header !== "mindmap") return null;
+  const hasHeader = header === "mindmap";
+  const startIndex = hasHeader ? 1 : 0;
 
   const nodes: MindNode[] = [];
   let counter = 0;
@@ -109,7 +110,7 @@ export function parseDSL(text: string, boardId: string): DslParseResult | null {
   let hasRoot = false;
   const stack: { depth: number; node: MindNode }[] = [];
 
-  for (let i = 1; i < lines.length; i++) {
+  for (let i = startIndex; i < lines.length; i++) {
     const raw = lines[i];
     if (raw === "" || /^\s*#/u.test(raw)) continue;
 
@@ -175,9 +176,9 @@ export function parseDSL(text: string, boardId: string): DslParseResult | null {
 
 export function serializeDSL(board: { name: string }, nodes: Record<string, MindNode>): string {
   const rootNode = Object.values(nodes).find((n) => n.isRoot);
-  if (!rootNode) return `mindmap\n  * ${board.name}\n`;
+  if (!rootNode) return `  * ${board.name}\n`;
 
-  const out: string[] = ["mindmap"];
+  const out: string[] = [];
   const walk = (node: MindNode, depth: number): void => {
     const indent = "  ".repeat(depth + 1);
     const attrs: string[] = [];

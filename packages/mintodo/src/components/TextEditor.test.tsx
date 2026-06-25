@@ -55,14 +55,14 @@ function Capture() {
 }
 
 describe("TextEditor", () => {
-  it("renders the serialized DSL on mount", () => {
+  it("renders the serialized DSL on mount (no 'mindmap' header)", () => {
     render(
       <MindProvider initialState={makeState()}>
         <TextEditor />
       </MindProvider>,
     );
     const ta = screen.getByTestId("text-editor-textarea") as HTMLTextAreaElement;
-    expect(ta.value).toContain("mindmap");
+    expect(ta.value).not.toContain("mindmap");
     expect(ta.value).toContain("* Root");
     expect(ta.value).toContain("* Child");
   });
