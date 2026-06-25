@@ -59,7 +59,7 @@ describe("TaskCard", () => {
     );
     expect(screen.getByText("牛乳")).toBeTruthy();
     expect(screen.getByTestId("add-child-n1")).toBeTruthy();
-    expect(screen.getByTestId("status-dot-n1").className).toContain("bg-sky-500");
+    expect(screen.getByTestId("status-dot-button-n1").className).toContain("bg-sky-500");
   });
 
   it("opens edit-new modal when add-child is clicked", () => {
@@ -97,6 +97,17 @@ describe("TaskCard", () => {
     expect(hairline.style.opacity).toBe("");
   });
 
+  it("clicking the status dot cycles status backwards", () => {
+    render(
+      <MindProvider initialState={makeState()}>
+        <Capture />
+        <TaskCard node={makeNode({ status: "wip" })} />
+      </MindProvider>,
+    );
+    fireEvent.click(screen.getByTestId("status-dot-button-n1"));
+    expect(captured!.nodes.n1.status).toBe("inbox");
+  });
+
   it("uses categoryColor for the hairline and renders the collapsed done dot", () => {
     const { container } = render(
       <MindProvider initialState={makeState()}>
@@ -113,7 +124,7 @@ describe("TaskCard", () => {
     const dot = bodyRow.querySelector("span.rounded-full.bg-emerald-500") as HTMLElement | null;
     expect(dot).not.toBeNull();
     // Meta row (and its StatusDot) is absent
-    expect(screen.queryByTestId("status-dot-n1")).toBeNull();
+    expect(screen.queryByTestId("status-dot-button-n1")).toBeNull();
     // The body uses Crimson Pro for the title
     const title = container.querySelector("span.whitespace-pre-wrap") as HTMLElement;
     expect(title.style.fontFamily).toContain("Crimson Pro");

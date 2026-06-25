@@ -1,5 +1,5 @@
-import { render, screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { fireEvent, render, screen } from "@testing-library/react";
+import { describe, expect, it, vi } from "vitest";
 import { StatusDot } from "./StatusDot";
 
 describe("StatusDot", () => {
@@ -30,5 +30,14 @@ describe("StatusDot", () => {
     const el = container.querySelector("span") as HTMLElement;
     expect(el.style.boxShadow).toContain("var(--paper)");
     expect(el.style.boxShadow).toContain("var(--mid)");
+  });
+
+  it("renders as a button and calls onClick when onClick is provided", () => {
+    const onClick = vi.fn();
+    render(<StatusDot status="wip" testId="btn" onClick={onClick} />);
+    const el = screen.getByTestId("btn");
+    expect(el.tagName).toBe("BUTTON");
+    fireEvent.click(el);
+    expect(onClick).toHaveBeenCalledTimes(1);
   });
 });

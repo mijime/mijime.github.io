@@ -1,5 +1,6 @@
 import { useMindStore } from "../hooks/use-mind-store";
 import { categoryBorderColor, formatBadges } from "../lib/badges";
+import { previousStatus } from "../lib/status-cycle";
 import { DueBadge } from "./DueBadge";
 import { StatusDot } from "./StatusDot";
 import { TaskCheckbox } from "./TaskCheckbox";
@@ -23,7 +24,17 @@ export function TaskCard({ node }: Props) {
         {statusLabel}
       </span>
       <span className="ml-auto">
-        <StatusDot status={node.status} testId={`status-dot-${node.id}`} />
+        <StatusDot
+          status={node.status}
+          testId={`status-dot-button-${node.id}`}
+          onClick={() =>
+            dispatch({
+              id: node.id,
+              status: previousStatus(node.status),
+              type: "SET_STATUS",
+            })
+          }
+        />
       </span>
     </div>
   );
