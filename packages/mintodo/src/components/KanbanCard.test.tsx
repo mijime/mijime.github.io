@@ -1,5 +1,5 @@
 import { fireEvent, render, screen } from "@testing-library/react";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { KanbanCard } from "./KanbanCard";
 import { MindProvider, useMindStore } from "../hooks/use-mind-store";
 import { createInitialState, type State } from "../store";
@@ -50,6 +50,9 @@ function Capture() {
 }
 
 describe("KanbanCard multi-line text", () => {
+  beforeEach(() => {
+    captured = null;
+  });
   afterEach(() => {
     document.body.innerHTML = "";
   });

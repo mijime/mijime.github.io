@@ -103,7 +103,7 @@ export function Canvas() {
     >
       <div
         ref={containerRef}
-        className="w-full h-full cursor-grab active:cursor-grabbing canvas-grid relative overflow-hidden bg-slate-50 dark:bg-slate-900"
+        className="w-full h-full cursor-grab active:cursor-grabbing canvas-grid relative overflow-hidden bg-[var(--paper)]"
       >
         <ConnectionLines containerRef={containerRef} />
         <div

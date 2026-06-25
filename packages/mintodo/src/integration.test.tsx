@@ -606,3 +606,104 @@ describe("kanban view end-to-end", () => {
     }
   });
 });
+
+describe("canvas background uses --paper", () => {
+  beforeEach(async () => {
+    await db.open();
+    await db.boards.clear();
+    await db.nodes.clear();
+    await db.meta.clear();
+  });
+
+  afterEach(async () => {
+    await db.delete();
+  });
+
+  it("renders the canvas container with bg-[var(--paper)] (no slate-50)", async () => {
+    render(<App />);
+    await act(async () => {
+      await flush(100);
+    });
+
+    if (screen.queryByText("+ 新規ボード作成")) {
+      await act(() => {
+        fireEvent.click(screen.getByText("+ 新規ボード作成"));
+      });
+      const input = screen.getByPlaceholderText("例: メインプロジェクト") as HTMLInputElement;
+      await act(() => {
+        fireEvent.change(input, { target: { value: "Bg" } });
+      });
+      await act(() => {
+        fireEvent.click(screen.getByText("作成"));
+      });
+      await act(async () => {
+        await flush(300);
+      });
+    }
+
+    const canvasContainer = document.querySelector(".canvas-grid") as HTMLElement;
+    expect(canvasContainer).toBeTruthy();
+    expect(canvasContainer.className).toContain("bg-[var(--paper)]");
+    expect(canvasContainer.className).not.toContain("bg-slate-50");
+    expect(canvasContainer.className).not.toContain("dark:bg-slate-900");
+  });
+});
+
+describe("multi-line text end-to-end", () => {
+  beforeEach(async () => {
+    await db.open();
+    await db.boards.clear();
+    await db.nodes.clear();
+    await db.meta.clear();
+  });
+
+  afterEach(async () => {
+    await db.delete();
+  });
+
+  it("preserves newlines from the edit modal to the mindmap card", async () => {
+    render(<App />);
+    await act(async () => {
+      await flush(100);
+    });
+
+    if (screen.queryByText("+ 新規ボード作成")) {
+      await act(() => {
+        fireEvent.click(screen.getByText("+ 新規ボード作成"));
+      });
+      const input = screen.getByPlaceholderText("例: メインプロジェクト") as HTMLInputElement;
+      await act(() => {
+        fireEvent.change(input, { target: { value: "Multi" } });
+      });
+      await act(() => {
+        fireEvent.click(screen.getByText("作成"));
+      });
+      await act(async () => {
+        await flush(300);
+      });
+    }
+
+    await act(() => {
+      fireEvent.click(screen.getByTestId("add-child-root"));
+    });
+    await act(async () => {
+      await flush(50);
+    });
+
+    const multiline = "first\nsecond\nthird line is a bit longer to force wrap";
+    const textarea = screen.getByTestId("edit-modal-textarea") as HTMLTextAreaElement;
+    await act(() => {
+      fireEvent.change(textarea, { target: { value: multiline } });
+    });
+    await act(() => {
+      fireEvent.click(screen.getByText("保存"));
+    });
+    await act(async () => {
+      await flush(300);
+    });
+
+    const textSpan = document.querySelector("span.whitespace-pre-wrap") as HTMLElement;
+    expect(textSpan).toBeTruthy();
+    expect(textSpan.textContent).toBe(multiline);
+  });
+});

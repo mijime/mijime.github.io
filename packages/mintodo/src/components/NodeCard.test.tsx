@@ -198,6 +198,30 @@ function setup(overrides?: Partial<State>) {
   );
 }
 
+describe("NodeCard multi-line text", () => {
+  afterEach(() => {
+    document.body.innerHTML = "";
+  });
+
+  it("renders multi-line text with whitespace-pre-wrap and max-w-[240px]", () => {
+    const multiline = "line1\nline2 line3 line4 line5 line6 line7 line8 line9 line10";
+    const { container } = setup({
+      nodes: {
+        root: makeNode("root", null, { isRoot: true, children: ["a"] }),
+        a: makeNode("a", "root", { x: 0, y: -340, text: multiline }),
+      },
+    });
+    const a = container.querySelector('[data-node-id="a"]') as HTMLElement;
+    const textSpan = a.querySelector("span.whitespace-pre-wrap") as HTMLElement;
+    expect(textSpan).toBeTruthy();
+    expect(textSpan.className).toContain("whitespace-pre-wrap");
+    expect(textSpan.className).toContain("break-words");
+    expect(textSpan.className).toContain("max-w-[240px]");
+    expect(textSpan.className).not.toContain("truncate");
+    expect(textSpan.textContent).toBe(multiline);
+  });
+});
+
 describe("NodeCard selection", () => {
   afterEach(() => {
     document.body.innerHTML = "";

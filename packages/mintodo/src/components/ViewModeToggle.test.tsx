@@ -21,10 +21,11 @@ function renderToggle(initialViewMode: ViewMode = "mindmap") {
 }
 
 describe("ViewModeToggle", () => {
-  it("renders both buttons", () => {
+  it("renders three buttons", () => {
     renderToggle();
     expect(screen.getByTestId("view-mode-mindmap")).toBeTruthy();
     expect(screen.getByTestId("view-mode-kanban")).toBeTruthy();
+    expect(screen.getByTestId("view-mode-text")).toBeTruthy();
   });
 
   it("highlights the active mode", () => {

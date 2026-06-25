@@ -6,7 +6,7 @@ export type TaskStatus = "inbox" | "wip" | "review" | "done";
 
 export const TASK_STATUSES: readonly TaskStatus[] = ["inbox", "wip", "review", "done"] as const;
 
-export type ViewMode = "mindmap" | "kanban";
+export type ViewMode = "mindmap" | "kanban" | "text";
 
 export interface Board {
   id: string;
@@ -43,7 +43,6 @@ export type Modal =
   | { kind: "help" }
   | { kind: "board-name"; mode: "create" | "rename"; boardId?: string; initialName?: string }
   | { kind: "board-delete"; boardId: string; boardName: string }
-  | { kind: "dsl-editor" }
   | null;
 
 export interface SaveData {
