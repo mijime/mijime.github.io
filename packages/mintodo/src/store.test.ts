@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { createInitialState, isDescendant, reducer } from "./store";
-import type { Board, MindNode } from "./types";
+import type { Board, MindNode, WorkLogEntry } from "./types";
 
 function makeNode(id: string, boardId: string, opts: Partial<MindNode> = {}): MindNode {
   return {
@@ -726,23 +726,91 @@ describe("reducer — new fields (estimate, workLogs)", () => {
   });
 
   it("RESET produces a root with estimate: null and workLogs: []", () => {
-    const s = { ...createInitialState(), boards: [{ id: "b-a", name: "X", createdAt: 0, updatedAt: 0 }], currentBoardId: "b-a" };
+    const s = {
+      ...createInitialState(),
+      boards: [{ id: "b-a", name: "X", createdAt: 0, updatedAt: 0 }],
+      currentBoardId: "b-a",
+    };
     const next = reducer(s, { type: "RESET" });
     expect(next.nodes.root.estimate).toBeNull();
     expect(next.nodes.root.workLogs).toEqual([]);
   });
 
   it("ADD_CHILD produces a child with estimate: null and workLogs: []", () => {
-    const s = { ...createInitialState(), nodes: { root: makeNode("root", "b-a", { isRoot: true, children: [] }) } };
+    const s = {
+      ...createInitialState(),
+      nodes: { root: makeNode("root", "b-a", { isRoot: true, children: [] }) },
+    };
     const next = reducer(s, { newId: "n1", parentId: "root", type: "ADD_CHILD" });
     expect(next.nodes.n1.estimate).toBeNull();
     expect(next.nodes.n1.workLogs).toEqual([]);
   });
 
   it("CREATE_CHILD produces a child with estimate: null and workLogs: []", () => {
-    const s = { ...createInitialState(), currentBoardId: "b-a", nodes: { root: makeNode("root", "b-a", { isRoot: true, children: [] }) } };
-    const next = reducer(s, { type: "CREATE_CHILD", newId: "n1", parentId: "root", text: "task", priority: "medium", categoryColor: "slate", dueDate: "", completed: false, status: "inbox" });
+    const s = {
+      ...createInitialState(),
+      currentBoardId: "b-a",
+      nodes: { root: makeNode("root", "b-a", { isRoot: true, children: [] }) },
+    };
+    const next = reducer(s, {
+      type: "CREATE_CHILD",
+      newId: "n1",
+      parentId: "root",
+      text: "task",
+      priority: "medium",
+      categoryColor: "slate",
+      dueDate: "",
+      completed: false,
+      status: "inbox",
+    });
     expect(next.nodes.n1.estimate).toBeNull();
     expect(next.nodes.n1.workLogs).toEqual([]);
+  });
+});
+
+describe("reducer — ADD_WORK_LOG", () => {
+  it("appends an entry to the node's workLogs", () => {
+    const s = { ...createInitialState(), nodes: { n: makeNode("n", "b-a", { workLogs: [] }) } };
+    const entry: WorkLogEntry = { id: "wl-1", timestamp: 1000, text: "Did X" };
+    const next = reducer(s, { type: "ADD_WORK_LOG", nodeId: "n", entry });
+    expect(next.nodes.n.workLogs).toHaveLength(1);
+    expect(next.nodes.n.workLogs[0]).toEqual(entry);
+  });
+
+  it("does NOT trigger a layout recompute (layoutVersion unchanged)", () => {
+    const s = { ...createInitialState(), layoutVersion: 5, nodes: { n: makeNode("n", "b-a", { workLogs: [] }) } };
+    const entry: WorkLogEntry = { id: "wl-2", timestamp: 2000, text: "Did Y" };
+    const next = reducer(s, { type: "ADD_WORK_LOG", nodeId: "n", entry });
+    expect(next.layoutVersion).toBe(5);
+  });
+
+  it("is a no-op when nodeId is missing", () => {
+    const s = createInitialState();
+    const entry: WorkLogEntry = { id: "wl-3", timestamp: 3000, text: "Z" };
+    const next = reducer(s, { type: "ADD_WORK_LOG", nodeId: "missing", entry });
+    expect(next).toBe(s);
+  });
+});
+
+describe("reducer — DELETE_WORK_LOG", () => {
+  it("removes the entry by id and leaves others intact", () => {
+    const e1: WorkLogEntry = { id: "wl-1", timestamp: 1000, text: "X" };
+    const e2: WorkLogEntry = { id: "wl-2", timestamp: 2000, text: "Y" };
+    const s = { ...createInitialState(), nodes: { n: makeNode("n", "b-a", { workLogs: [e1, e2] }) } };
+    const next = reducer(s, { type: "DELETE_WORK_LOG", nodeId: "n", entryId: "wl-1" });
+    expect(next.nodes.n.workLogs).toHaveLength(1);
+    expect(next.nodes.n.workLogs[0]).toEqual(e2);
+  });
+
+  it("is a no-op when entryId is not found", () => {
+    const s = { ...createInitialState(), nodes: { n: makeNode("n", "b-a", { workLogs: [{ id: "wl-1", timestamp: 1000, text: "X" }] }) } };
+    const next = reducer(s, { type: "DELETE_WORK_LOG", nodeId: "n", entryId: "missing" });
+    expect(next.nodes.n.workLogs).toHaveLength(1);
+  });
+
+  it("is a no-op when nodeId is missing", () => {
+    const s = createInitialState();
+    const next = reducer(s, { type: "DELETE_WORK_LOG", nodeId: "missing", entryId: "wl-1" });
+    expect(next).toBe(s);
   });
 });

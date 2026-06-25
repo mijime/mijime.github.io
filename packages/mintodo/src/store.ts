@@ -7,6 +7,7 @@ import type {
   TaskStatus,
   View,
   ViewMode,
+  WorkLogEntry,
 } from "./types";
 import { nextStatus } from "./lib/status-cycle";
 import { applyRadialLayout } from "./layout/radial";
@@ -62,7 +63,9 @@ export type Action =
       completed: boolean;
       status: TaskStatus;
     }
-  | { type: "UPDATE_NODE"; id: string; patch: Partial<MindNode> };
+  | { type: "UPDATE_NODE"; id: string; patch: Partial<MindNode> }
+  | { type: "ADD_WORK_LOG"; nodeId: string; entry: WorkLogEntry }
+  | { type: "DELETE_WORK_LOG"; nodeId: string; entryId: string };
 
 export function createInitialState(): State {
   return {
@@ -405,6 +408,22 @@ export function reducer(state: State, action: Action): State {
         { ...state, nodes: nextNodes, selectedNodeId: nextSelected },
         nextNodes,
       );
+    }
+    case "ADD_WORK_LOG": {
+      const node = state.nodes[action.nodeId];
+      if (!node) return state;
+      return {
+        ...state,
+        nodes: { ...state.nodes, [action.nodeId]: { ...node, workLogs: [...node.workLogs, action.entry] } },
+      };
+    }
+    case "DELETE_WORK_LOG": {
+      const node = state.nodes[action.nodeId];
+      if (!node) return state;
+      return {
+        ...state,
+        nodes: { ...state.nodes, [action.nodeId]: { ...node, workLogs: node.workLogs.filter((e) => e.id !== action.entryId) } },
+      };
     }
     default: {
       return state;
