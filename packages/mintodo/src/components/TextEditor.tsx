@@ -1,16 +1,13 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { parseDSL, serializeDSL } from "../dsl";
-import { useBoardActions } from "../hooks/use-board-actions";
 import { useMindStore } from "../hooks/use-mind-store";
-import type { MindNode } from "../types";
 
 export function TextEditor() {
   const { state, dispatch } = useMindStore();
   const board = state.boards.find((b) => b.id === state.currentBoardId);
-  const actions = useBoardActions();
 
   const initial = useMemo(
-    () => serializeDSL({ name: board?.name ?? "" }, state.nodes),
+    () => serializeDSL(state.nodes),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [],
   );
@@ -23,7 +20,7 @@ export function TextEditor() {
   const canApply = useMemo(() => {
     if (!text.trim()) return false;
     const r = parseDSL(text, state.currentBoardId ?? "");
-    return r !== null && r.nodes.length > 0;
+    return r.ok;
   }, [text, state.currentBoardId]);
 
   const onApplyRef = useRef<() => Promise<void>>(async () => {});
@@ -41,21 +38,15 @@ export function TextEditor() {
   async function onApply() {
     if (!state.currentBoardId) return;
     const r = parseDSL(text, state.currentBoardId);
-    if (!r) return;
+    if (!r.ok) return;
     if (
       !window.confirm(
-        `DSL を適用するとボード「${board?.name ?? ""}」のタスクがすべて置き換わり、ボード名も「${r.nodes.find((n) => n.isRoot)?.text ?? ""}」に変更されます。続行しますか?`,
+        `DSL を適用するとボード「${board?.name ?? ""}」のタスクがすべて置き換わります。続行しますか?`,
       )
     ) {
       return;
     }
-    const record: Record<string, MindNode> = {};
-    for (const n of r.nodes) record[n.id] = n;
-    const newRootName = r.nodes.find((n) => n.isRoot)?.text ?? "";
-    if (newRootName && board && newRootName !== board.name) {
-      await actions.renameBoard(state.currentBoardId, newRootName);
-    }
-    dispatch({ type: "SET_NODES", nodes: record });
+    dispatch({ type: "SET_NODES", nodes: r.nodes });
   }
   useEffect(() => {
     onApplyRef.current = onApply;
@@ -81,7 +72,7 @@ export function TextEditor() {
         <button
           type="button"
           data-testid="text-editor-reset"
-          onClick={() => setText(serializeDSL({ name: board?.name ?? "" }, state.nodes))}
+          onClick={() => setText(serializeDSL(state.nodes))}
           className="px-3 py-1.5 text-sm rounded transition"
           style={{
             background: "var(--paper)",

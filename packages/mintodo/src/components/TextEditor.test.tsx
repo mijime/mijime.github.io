@@ -43,7 +43,7 @@ function makeState(over: Partial<State> = {}): State {
     selectedNodeId: "",
     view: { pan: { x: 0, y: 0 }, zoom: 1 },
     nodes: {
-      root: makeNode({ id: "root", isRoot: true, text: "Root", children: ["n1"] }),
+      root: makeNode({ id: "root", isRoot: true, text: "", children: ["n1"] }),
       n1: makeNode(),
     },
     ...over,
@@ -57,16 +57,14 @@ function Capture() {
 }
 
 describe("TextEditor", () => {
-  it("renders the serialized DSL on mount (no 'mindmap' header)", () => {
+  it("renders the serialized DSL on mount (new Markdown format)", () => {
     render(
       <MindProvider initialState={makeState()}>
         <TextEditor />
       </MindProvider>,
     );
     const ta = screen.getByTestId("text-editor-textarea") as HTMLTextAreaElement;
-    expect(ta.value).not.toContain("mindmap");
-    expect(ta.value).toContain("* Root");
-    expect(ta.value).toContain("* Child");
+    expect(ta.value).toContain("- [ ] Child");
   });
 
   it("does not show preview pane (removed)", () => {
@@ -91,16 +89,16 @@ describe("TextEditor", () => {
     const ta = screen.getByTestId("text-editor-textarea") as HTMLTextAreaElement;
     act(() => {
       fireEvent.change(ta, {
-        target: { value: "mindmap\n  * NewRoot\n    * NewChild\n" },
+        target: { value: "# NewRoot\n  - [ ] NewChild\n" },
       });
     });
     act(() => {
       fireEvent.click(screen.getByTestId("text-editor-apply"));
     });
     await waitFor(() => {
-      expect(captured!.nodes.root.text).toBe("NewRoot");
+      const newRoot = Object.values(captured!.nodes).find((n) => n.text === "NewRoot");
+      expect(newRoot).toBeTruthy();
     });
-    expect(captured!.boards[0].name).toBe("NewRoot");
   });
 
   it("does not apply when confirm is cancelled", () => {
@@ -114,13 +112,14 @@ describe("TextEditor", () => {
     const ta = screen.getByTestId("text-editor-textarea") as HTMLTextAreaElement;
     act(() => {
       fireEvent.change(ta, {
-        target: { value: "mindmap\n  * Replaced\n" },
+        target: { value: "# Replaced\n" },
       });
     });
     act(() => {
       fireEvent.click(screen.getByTestId("text-editor-apply"));
     });
-    expect(captured!.nodes.root.text).toBe("Root");
+    const root = Object.values(captured!.nodes).find((n) => n.text === "Child");
+    expect(root).toBeTruthy();
   });
 
   it("resets textarea to current DSL on reset click", () => {
@@ -136,7 +135,7 @@ describe("TextEditor", () => {
     act(() => {
       fireEvent.click(screen.getByTestId("text-editor-reset"));
     });
-    expect(ta.value).toContain("* Root");
+    expect(ta.value).toContain("- [ ] Child");
   });
 
   it("applies on Cmd+Enter (metaKey)", async () => {
@@ -149,13 +148,14 @@ describe("TextEditor", () => {
     );
     const ta = screen.getByTestId("text-editor-textarea") as HTMLTextAreaElement;
     act(() => {
-      fireEvent.change(ta, { target: { value: "mindmap\n  * CmdRoot\n" } });
+      fireEvent.change(ta, { target: { value: "# CmdRoot\n" } });
     });
     act(() => {
       fireEvent.keyDown(window, { key: "Enter", metaKey: true });
     });
     await waitFor(() => {
-      expect(captured!.nodes.root.text).toBe("CmdRoot");
+      const root = Object.values(captured!.nodes).find((n) => n.text === "CmdRoot");
+      expect(root).toBeTruthy();
     });
   });
 
@@ -169,13 +169,14 @@ describe("TextEditor", () => {
     );
     const ta = screen.getByTestId("text-editor-textarea") as HTMLTextAreaElement;
     act(() => {
-      fireEvent.change(ta, { target: { value: "mindmap\n  * CtrlRoot\n" } });
+      fireEvent.change(ta, { target: { value: "# CtrlRoot\n" } });
     });
     act(() => {
       fireEvent.keyDown(window, { key: "Enter", ctrlKey: true });
     });
     await waitFor(() => {
-      expect(captured!.nodes.root.text).toBe("CtrlRoot");
+      const root = Object.values(captured!.nodes).find((n) => n.text === "CtrlRoot");
+      expect(root).toBeTruthy();
     });
   });
 });
