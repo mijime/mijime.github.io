@@ -47,13 +47,11 @@ export function TaskCard({ node }: Props) {
 
   const bodyRow = (
     <div className="flex items-start gap-2 min-w-0">
-      {isDone ? null : (
-        <TaskCheckbox
-          isDone={isDone}
-          onToggle={() => dispatch({ id: node.id, type: "TOGGLE_COMPLETE" })}
-          testId={`task-check-${node.id}`}
-        />
-      )}
+      <TaskCheckbox
+        isDone={isDone}
+        onToggle={() => dispatch({ id: node.id, type: "TOGGLE_COMPLETE" })}
+        testId={`task-check-${node.id}`}
+      />
       <span
         className={`whitespace-pre-wrap break-words max-w-[240px] flex-1 text-[15px] leading-[1.3] ${
           isDone ? "line-through" : ""
@@ -66,13 +64,7 @@ export function TaskCard({ node }: Props) {
       >
         {node.text}
       </span>
-      {isDone ? (
-        <span
-          className="w-2 h-2 rounded-full bg-emerald-500 shrink-0 mt-[5px]"
-          aria-label="completed"
-          title="completed"
-        />
-      ) : (
+      {isDone ? null : (
         <button
           type="button"
           data-testid={`add-child-${node.id}`}

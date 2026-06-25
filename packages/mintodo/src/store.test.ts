@@ -319,32 +319,6 @@ describe("reducer - UPDATE_NODE", () => {
   });
 });
 
-describe("reducer - TOGGLE_COMPLETE", () => {
-  it("flips completed flag", () => {
-    const s = {
-      ...createInitialState(),
-      nodes: { n: makeNode("n", "b-a") },
-    };
-    const next = reducer(s, { id: "n", type: "TOGGLE_COMPLETE" });
-    expect(next.nodes.n.completed).toBe(true);
-  });
-
-  it("cascades to descendants", () => {
-    const s = {
-      ...createInitialState(),
-      nodes: {
-        a: makeNode("a", "b-a", { children: ["b"] }),
-        b: makeNode("b", "b-a", { parentId: "a", children: ["c"] }),
-        c: makeNode("c", "b-a", { parentId: "b" }),
-      },
-    };
-    const next = reducer(s, { id: "a", type: "TOGGLE_COMPLETE" });
-    expect(next.nodes.a.completed).toBe(true);
-    expect(next.nodes.b.completed).toBe(true);
-    expect(next.nodes.c.completed).toBe(true);
-  });
-});
-
 describe("reducer - TOGGLE_COLLAPSE", () => {
   it("flips collapsed flag", () => {
     const s = {
@@ -589,36 +563,57 @@ describe("reducer - SET_VIEW_MODE", () => {
 });
 
 describe("reducer - TOGGLE_COMPLETE (rewritten to delegate to SET_STATUS)", () => {
-  it("flips completed false -> true and sets status=done", () => {
+  it("advances inbox -> wip when checkbox clicked", () => {
     const s = {
       ...createInitialState(),
       nodes: { n: makeNode("n", "b-a", { status: "inbox" }) },
     };
     const next = reducer(s, { id: "n", type: "TOGGLE_COMPLETE" });
-    expect(next.nodes.n.completed).toBe(true);
-    expect(next.nodes.n.status).toBe("done");
+    expect(next.nodes.n.status).toBe("wip");
+    expect(next.nodes.n.completed).toBe(false);
   });
 
-  it("flips completed true -> false and sets status=review", () => {
+  it("advances wip -> review", () => {
+    const s = {
+      ...createInitialState(),
+      nodes: { n: makeNode("n", "b-a", { status: "wip" }) },
+    };
+    const next = reducer(s, { id: "n", type: "TOGGLE_COMPLETE" });
+    expect(next.nodes.n.status).toBe("review");
+    expect(next.nodes.n.completed).toBe(false);
+  });
+
+  it("advances review -> done", () => {
+    const s = {
+      ...createInitialState(),
+      nodes: { n: makeNode("n", "b-a", { status: "review" }) },
+    };
+    const next = reducer(s, { id: "n", type: "TOGGLE_COMPLETE" });
+    expect(next.nodes.n.status).toBe("done");
+    expect(next.nodes.n.completed).toBe(true);
+  });
+
+  it("resets done -> inbox when checkbox clicked on completed", () => {
     const s = {
       ...createInitialState(),
       nodes: { n: makeNode("n", "b-a", { status: "done", completed: true }) },
     };
     const next = reducer(s, { id: "n", type: "TOGGLE_COMPLETE" });
+    expect(next.nodes.n.status).toBe("inbox");
     expect(next.nodes.n.completed).toBe(false);
-    expect(next.nodes.n.status).toBe("review");
   });
 
-  it("cascades to descendants when toggling to done", () => {
+  it("cascades to descendants when advancing to done", () => {
     const s = {
       ...createInitialState(),
       nodes: {
-        a: makeNode("a", "b-a", { children: ["b"] }),
+        a: makeNode("a", "b-a", { status: "review", children: ["b"] }),
         b: makeNode("b", "b-a", { parentId: "a" }),
       },
     };
     const next = reducer(s, { id: "a", type: "TOGGLE_COMPLETE" });
     expect(next.nodes.a.status).toBe("done");
+    expect(next.nodes.a.completed).toBe(true);
     expect(next.nodes.b.status).toBe("done");
     expect(next.nodes.b.completed).toBe(true);
   });

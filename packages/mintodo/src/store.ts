@@ -8,6 +8,7 @@ import type {
   View,
   ViewMode,
 } from "./types";
+import { nextStatus } from "./lib/status-cycle";
 import { applyRadialLayout } from "./layout/radial";
 
 export interface State {
@@ -280,8 +281,8 @@ export function reducer(state: State, action: Action): State {
     case "TOGGLE_COMPLETE": {
       const target = state.nodes[action.id];
       if (!target) return state;
-      const nextStatus: TaskStatus = target.completed ? "review" : "done";
-      return reducer(state, { id: action.id, status: nextStatus, type: "SET_STATUS" });
+      const next: TaskStatus = target.completed ? "inbox" : nextStatus(target.status);
+      return reducer(state, { id: action.id, status: next, type: "SET_STATUS" });
     }
     case "TOGGLE_COLLAPSE": {
       const node = state.nodes[action.id];

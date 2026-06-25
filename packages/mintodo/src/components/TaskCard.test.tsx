@@ -73,7 +73,7 @@ describe("TaskCard", () => {
     expect(captured!.modal).toEqual({ kind: "edit-new", parentId: "n1" });
   });
 
-  it("toggles complete when checkbox is clicked", () => {
+  it("clicking the checkbox advances status inbox -> wip", () => {
     render(
       <MindProvider initialState={makeState()}>
         <Capture />
@@ -81,7 +81,8 @@ describe("TaskCard", () => {
       </MindProvider>,
     );
     fireEvent.click(screen.getByTestId("task-check-n1"));
-    expect(captured!.nodes.n1.completed).toBe(true);
+    expect(captured!.nodes.n1.status).toBe("wip");
+    expect(captured!.nodes.n1.completed).toBe(false);
   });
 
   it("places the hairline between meta and body in the not-done case", () => {
@@ -153,7 +154,7 @@ describe("TaskCard", () => {
     expect(screen.queryByTestId("task-card-progress-n1")).toBeNull();
   });
 
-  it("uses categoryColor for the hairline and renders the collapsed done dot", () => {
+  it("uses categoryColor for the hairline and renders checkbox when done", () => {
     const { container } = render(
       <MindProvider initialState={makeState()}>
         <TaskCard node={makeNode({ categoryColor: "rose", status: "done", completed: true })} />
@@ -164,10 +165,8 @@ describe("TaskCard", () => {
     const hairline = card.children[1] as HTMLElement;
     expect(hairline.style.borderTop).toBe("1px solid rgb(244, 63, 94)");
     expect(hairline.style.opacity).toBe("0.35");
-    // Collapsed done: an 8px emerald dot inside BodyRow
-    const bodyRow = card.children[0] as HTMLElement;
-    const dot = bodyRow.querySelector("span.rounded-full.bg-emerald-500") as HTMLElement | null;
-    expect(dot).not.toBeNull();
+    // Checkbox is always rendered, even when done
+    expect(screen.getByTestId("task-check-n1")).toBeTruthy();
     // Meta row (and its StatusDot) is absent
     expect(screen.queryByTestId("status-dot-button-n1")).toBeNull();
     // The body uses Crimson Pro for the title
