@@ -562,8 +562,8 @@ describe("reducer - SET_VIEW_MODE", () => {
   });
 });
 
-describe("reducer - TOGGLE_COMPLETE (rewritten to delegate to SET_STATUS)", () => {
-  it("advances inbox -> wip when checkbox clicked", () => {
+describe("reducer - TOGGLE_COMPLETE", () => {
+  it("advances inbox -> wip", () => {
     const s = {
       ...createInitialState(),
       nodes: { n: makeNode("n", "b-a", { status: "inbox" }) },
@@ -593,7 +593,7 @@ describe("reducer - TOGGLE_COMPLETE (rewritten to delegate to SET_STATUS)", () =
     expect(next.nodes.n.completed).toBe(true);
   });
 
-  it("resets done -> inbox when checkbox clicked on completed", () => {
+  it("resets done -> inbox", () => {
     const s = {
       ...createInitialState(),
       nodes: { n: makeNode("n", "b-a", { status: "done", completed: true }) },

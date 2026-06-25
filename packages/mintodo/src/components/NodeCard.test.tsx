@@ -227,14 +227,41 @@ describe("NodeCard selection", () => {
     document.body.innerHTML = "";
   });
 
-  it("clicking a non-root node selects it and opens the edit modal", () => {
+  it("clicking an unselected node selects it without opening the edit modal", () => {
     const { container } = setup();
     const childEl = container.querySelector('[data-node-id="a"]') as HTMLElement;
     act(() => {
       fireEvent.click(childEl);
     });
     expect(capturedState!.selectedNodeId).toBe("a");
+    expect(capturedState!.modal).toBeNull();
+  });
+
+  it("clicking an already-selected node opens the edit modal", () => {
+    const { container } = setup({ selectedNodeId: "a" });
+    const childEl = container.querySelector('[data-node-id="a"]') as HTMLElement;
+    act(() => {
+      fireEvent.click(childEl);
+    });
+    expect(capturedState!.selectedNodeId).toBe("a");
     expect(capturedState!.modal).toEqual({ kind: "edit", nodeId: "a" });
+  });
+
+  it("clicking another node while one is selected switches selection without opening the modal", () => {
+    const { container } = setup({
+      selectedNodeId: "a",
+      nodes: {
+        root: makeNode("root", null, { isRoot: true, children: ["a", "b"] }),
+        a: makeNode("a", "root", { x: 0, y: -340 }),
+        b: makeNode("b", "root", { x: 0, y: 340 }),
+      },
+    });
+    const bEl = container.querySelector('[data-node-id="b"]') as HTMLElement;
+    act(() => {
+      fireEvent.click(bEl);
+    });
+    expect(capturedState!.selectedNodeId).toBe("b");
+    expect(capturedState!.modal).toBeNull();
   });
 
   it("clicking a child button inside the card does not change selection", () => {

@@ -1,11 +1,10 @@
 import { useMemo } from "react";
 import { useMindStore } from "../hooks/use-mind-store";
 import { categoryBorderColor, formatBadges } from "../lib/badges";
-import { previousStatus } from "../lib/status-cycle";
+import { nextStatus, previousStatus } from "../lib/status-cycle";
 import { countDescendants } from "../lib/tree";
 import { DueBadge } from "./DueBadge";
 import { StatusDot } from "./StatusDot";
-import { TaskCheckbox } from "./TaskCheckbox";
 import { priorityClass } from "./priority";
 import type { MindNode } from "../types";
 
@@ -29,28 +28,23 @@ export function TaskCard({ node }: Props) {
       <span className="text-[9px] tracking-widest" style={{ color: "var(--mid)" }}>
         {statusLabel}
       </span>
-      <span className="ml-auto">
-        <StatusDot
-          status={node.status}
-          testId={`status-dot-button-${node.id}`}
-          onClick={() =>
-            dispatch({
-              id: node.id,
-              status: previousStatus(node.status),
-              type: "SET_STATUS",
-            })
-          }
-        />
-      </span>
     </div>
   );
 
   const bodyRow = (
     <div className="flex items-start gap-2 min-w-0">
-      <TaskCheckbox
-        isDone={isDone}
-        onToggle={() => dispatch({ id: node.id, type: "TOGGLE_COMPLETE" })}
-        testId={`task-check-${node.id}`}
+      <StatusDot
+        status={node.status}
+        showCheckIcon
+        className="mt-1"
+        testId={`task-status-${node.id}`}
+        onClick={() => {
+          const next = node.status === "done" ? "inbox" : nextStatus(node.status);
+          dispatch({ id: node.id, status: next, type: "SET_STATUS" });
+        }}
+        onDoubleClick={() =>
+          dispatch({ id: node.id, status: previousStatus(node.status), type: "SET_STATUS" })
+        }
       />
       <span
         className={`whitespace-pre-wrap break-words max-w-[240px] flex-1 text-[15px] leading-[1.3] ${

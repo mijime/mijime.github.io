@@ -80,8 +80,11 @@ export function NodeCard({ node }: Props) {
       {...attributes}
       {...listeners}
       onClick={() => {
-        dispatch({ id: node.id, type: "SELECT" });
-        dispatch({ modal: { kind: "edit", nodeId: node.id }, type: "OPEN_MODAL" });
+        if (isSelected) {
+          dispatch({ modal: { kind: "edit", nodeId: node.id }, type: "OPEN_MODAL" });
+        } else {
+          dispatch({ id: node.id, type: "SELECT" });
+        }
       }}
       className={`absolute -translate-x-1/2 -translate-y-1/2 px-4 py-3 rounded border-l-4 flex flex-col gap-1.5 min-w-[220px] max-w-[320px] ${isSelected ? "node-selected" : ""} ${isMatch ? "" : "opacity-30"} ${isRingVisible ? "ring-2 ring-sky-400" : ""}`}
       style={{
