@@ -43,6 +43,7 @@ export function KanbanCard({ node }: Props) {
         borderColor: "var(--border)",
         color: "var(--ink)",
         opacity: isDragging ? 0.4 : 1,
+        touchAction: "none",
       }}
     >
       <div className="text-[10px] truncate" style={{ color: "var(--mid)" }} title={breadcrumb}>
