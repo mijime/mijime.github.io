@@ -1,9 +1,7 @@
 import { unified } from "unified";
 import remarkParse from "remark-parse";
 import remarkGfm from "remark-gfm";
-import type {
-  Root, List, ListItem, Paragraph, PhrasingContent,
-} from "mdast";
+import type { Root, List, ListItem, Paragraph, PhrasingContent } from "mdast";
 
 import type { CategoryColor, MindNode, Priority, TaskStatus, WorkLogEntry } from "./types";
 
@@ -14,7 +12,12 @@ export type ParseResult =
 const ALLOWED_PRIORITIES: ReadonlySet<Priority> = new Set(["low", "medium", "high"]);
 const ALLOWED_COLORS: ReadonlySet<CategoryColor> = new Set(["slate", "sky", "emerald", "rose"]);
 const ALLOWED_STATUSES: ReadonlySet<TaskStatus> = new Set(["inbox", "wip", "review", "done"]);
-const GLYPH_FOR_STATUS: Record<TaskStatus, string> = { inbox: " ", wip: "-", review: "|", done: "x" };
+const GLYPH_FOR_STATUS: Record<TaskStatus, string> = {
+  inbox: " ",
+  wip: "-",
+  review: "|",
+  done: "x",
+};
 
 function isValidDate(s: string): boolean {
   if (!/^\d{4}-\d{2}-\d{2}$/u.test(s)) return false;
@@ -27,8 +30,13 @@ function pad2(n: number): string {
 }
 
 function parseAttributes(tokens: string[]): {
-  text: string; priority: Priority; categoryColor: CategoryColor;
-  dueDate: string; completed: boolean; status: TaskStatus; estimate: number | null;
+  text: string;
+  priority: Priority;
+  categoryColor: CategoryColor;
+  dueDate: string;
+  completed: boolean;
+  status: TaskStatus;
+  estimate: number | null;
 } | null {
   const textTokens: string[] = [];
   const attrTokens: string[] = [];
@@ -105,16 +113,37 @@ function indentOf(node: { position?: { start: { column: number } } }): number {
   return (node.position?.start.column ?? 1) - 1;
 }
 
-function makeNodeData(id: string, parentId: string, p: {
-  text: string; priority: Priority; categoryColor: CategoryColor;
-  dueDate: string; completed: boolean; status: TaskStatus; estimate: number | null;
-  boardId: string;
-}): MindNode {
+function makeNodeData(
+  id: string,
+  parentId: string,
+  p: {
+    text: string;
+    priority: Priority;
+    categoryColor: CategoryColor;
+    dueDate: string;
+    completed: boolean;
+    status: TaskStatus;
+    estimate: number | null;
+    boardId: string;
+  },
+): MindNode {
   return {
-    id, boardId: p.boardId, text: p.text, parentId, isRoot: false,
-    completed: p.completed, collapsed: false, priority: p.priority,
-    categoryColor: p.categoryColor, dueDate: p.dueDate, status: p.status,
-    estimate: p.estimate, workLogs: [], children: [], x: 0, y: 0,
+    id,
+    boardId: p.boardId,
+    text: p.text,
+    parentId,
+    isRoot: false,
+    completed: p.completed,
+    collapsed: false,
+    priority: p.priority,
+    categoryColor: p.categoryColor,
+    dueDate: p.dueDate,
+    status: p.status,
+    estimate: p.estimate,
+    workLogs: [],
+    children: [],
+    x: 0,
+    y: 0,
   };
 }
 
@@ -156,9 +185,16 @@ function processListItem(
   } else if (item.checked === false) {
     kind = "task-inbox";
   } else if (/^\[[^\s\-|x]\]\s/u.test(fullText)) {
-    return { ok: false, reason: `行 ${line}: チェックボックスの状態は \`[ ]\` / \`[-]\` / \`[|]\` / \`[x]\` のいずれかである必要があります`, line };
+    return {
+      ok: false,
+      reason: `行 ${line}: チェックボックスの状態は \`[ ]\` / \`[-]\` / \`[|]\` / \`[x]\` のいずれかである必要があります`,
+      line,
+    };
   } else {
-    const tsMatch = /^(?<y>\d{4})-(?<m>\d{2})-(?<d>\d{2}) (?<h>\d{2}):(?<min>\d{2}): (?<rest>.*)$/u.exec(fullText);
+    const tsMatch =
+      /^(?<y>\d{4})-(?<m>\d{2})-(?<d>\d{2}) (?<h>\d{2}):(?<min>\d{2}): (?<rest>.*)$/u.exec(
+        fullText,
+      );
     if (tsMatch) {
       const [, y, m, d, h, min, rest] = tsMatch;
       const dt = new Date(Number(y), Number(m) - 1, Number(d), Number(h), Number(min));
@@ -186,7 +222,11 @@ function processListItem(
       return { ok: false, reason: `行 ${line}: 作業履歴の前にタスクが見当たりません`, line };
     }
     if (depth !== lastTask.depth + 1) {
-      return { ok: false, reason: `行 ${line}: 作業履歴のインデントが不正です (親タスクの 1 レベル下げて配置してください)`, line };
+      return {
+        ok: false,
+        reason: `行 ${line}: 作業履歴のインデントが不正です (親タスクの 1 レベル下げて配置してください)`,
+        line,
+      };
     }
     const entry: WorkLogEntry = {
       id: `wl-${worklogTimestamp}-${counter.value++}`,
@@ -199,15 +239,24 @@ function processListItem(
   }
 
   let status: TaskStatus = "inbox";
-  if (kind === "task-inbox") { status = "inbox"; }
-  else if (kind === "task-done") { status = "done"; }
-  else if (kind === "task-wip") { status = "wip"; }
-  else if (kind === "task-review") { status = "review"; }
+  if (kind === "task-inbox") {
+    status = "inbox";
+  } else if (kind === "task-done") {
+    status = "done";
+  } else if (kind === "task-wip") {
+    status = "wip";
+  } else if (kind === "task-review") {
+    status = "review";
+  }
 
   const tokens = bodyText.split(/\s+/u).filter((t) => t.length > 0);
   const parsed = parseAttributes(tokens);
   if (!parsed) {
-    return { ok: false, reason: `行 ${line}: チェックボックスの状態は \`[ ]\` / \`[-]\` / \`[|]\` / \`[x]\` のいずれかである必要があります`, line };
+    return {
+      ok: false,
+      reason: `行 ${line}: チェックボックスの状態は \`[ ]\` / \`[-]\` / \`[|]\` / \`[x]\` のいずれかである必要があります`,
+      line,
+    };
   }
   const finalStatus = parsed.status === "inbox" ? status : parsed.status;
   const finalCompleted = parsed.completed || kind === "task-done";
@@ -223,7 +272,10 @@ function processListItem(
   }
 
   const node = makeNodeData(nodeId, parentId, {
-    ...parsed, completed: finalCompleted, status: finalStatus, boardId,
+    ...parsed,
+    completed: finalCompleted,
+    status: finalStatus,
+    boardId,
   });
   nodes[nodeId] = node;
   if (parentId !== IMPLICIT_ROOT_ID) nodes[parentId].children.push(nodeId);
@@ -257,7 +309,8 @@ function processList(
 }
 
 export function parseDSL(text: string, boardId: string): ParseResult {
-  if (!text.trim()) return { ok: false, reason: "トップレベル要素がありません (空のドキュメントです)", line: 0 };
+  if (!text.trim())
+    return { ok: false, reason: "トップレベル要素がありません (空のドキュメントです)", line: 0 };
 
   const lines = text.split("\n");
   for (let i = 0; i < lines.length; i++) {
@@ -287,14 +340,25 @@ export function parseDSL(text: string, boardId: string): ParseResult {
   let hasContent = false;
 
   for (const block of tree.children) {
-      if (block.type === "heading") {
+    if (block.type === "heading") {
       if (block.depth < 1 || block.depth > 3) {
-        return { ok: false, reason: `行 ${block.position?.start.line ?? 0}: 見出しレベルが不正です (#, ##, ### のみサポート)`, line: block.position?.start.line ?? 0 };
+        return {
+          ok: false,
+          reason: `行 ${block.position?.start.line ?? 0}: 見出しレベルが不正です (#, ##, ### のみサポート)`,
+          line: block.position?.start.line ?? 0,
+        };
       }
-      const headingText = block.children.map((c) => (c.type === "text" || c.type === "inlineCode" ? c.value : "")).join("");
+      const headingText = block.children
+        .map((c) => (c.type === "text" || c.type === "inlineCode" ? c.value : ""))
+        .join("");
       const tokens = headingText.split(/\s+/u).filter((t) => t.length > 0);
       const parsed = parseAttributes(tokens);
-      if (!parsed) return { ok: false, reason: `行 ${block.position?.start.line ?? 0}: 見出しの解析に失敗しました`, line: block.position?.start.line ?? 0 };
+      if (!parsed)
+        return {
+          ok: false,
+          reason: `行 ${block.position?.start.line ?? 0}: 見出しの解析に失敗しました`,
+          line: block.position?.start.line ?? 0,
+        };
       const depth = block.depth - 1;
       while (stack.length > 0 && stack.at(-1)!.depth >= depth) stack.pop();
       const parentEntry = stack.length > 0 ? stack.at(-1)! : null;
@@ -305,11 +369,22 @@ export function parseDSL(text: string, boardId: string): ParseResult {
         usedIds.add(nodeId);
       }
       const node: MindNode = {
-        id: nodeId, boardId, text: parsed.text, parentId,
-        isRoot: false, completed: false, collapsed: false,
-        priority: parsed.priority, categoryColor: parsed.categoryColor,
-        dueDate: parsed.dueDate, status: "inbox", children: [],
-        x: 0, y: 0, estimate: parsed.estimate, workLogs: [],
+        id: nodeId,
+        boardId,
+        text: parsed.text,
+        parentId,
+        isRoot: false,
+        completed: false,
+        collapsed: false,
+        priority: parsed.priority,
+        categoryColor: parsed.categoryColor,
+        dueDate: parsed.dueDate,
+        status: "inbox",
+        children: [],
+        x: 0,
+        y: 0,
+        estimate: parsed.estimate,
+        workLogs: [],
       };
       nodes[nodeId] = node;
       if (parentId !== IMPLICIT_ROOT_ID) nodes[parentId].children.push(nodeId);
@@ -324,13 +399,22 @@ export function parseDSL(text: string, boardId: string): ParseResult {
     } else if (block.type === "paragraph") {
       const t = paragraphText(block).trim();
       if (/^#{1,2}[^ #]/u.test(t)) continue;
-      return { ok: false, reason: `行 ${block.position?.start.line ?? 0}: 認識できない行です`, line: block.position?.start.line ?? 0 };
+      return {
+        ok: false,
+        reason: `行 ${block.position?.start.line ?? 0}: 認識できない行です`,
+        line: block.position?.start.line ?? 0,
+      };
     } else {
-      return { ok: false, reason: `行 ${block.position?.start.line ?? 0}: サポートされていないノード ${block.type}`, line: block.position?.start.line ?? 0 };
+      return {
+        ok: false,
+        reason: `行 ${block.position?.start.line ?? 0}: サポートされていないノード ${block.type}`,
+        line: block.position?.start.line ?? 0,
+      };
     }
   }
 
-  if (!hasContent) return { ok: false, reason: "トップレベル要素がありません (空のドキュメントです)", line: 0 };
+  if (!hasContent)
+    return { ok: false, reason: "トップレベル要素がありません (空のドキュメントです)", line: 0 };
   return { ok: true, nodes, rootText: "" };
 }
 
@@ -345,11 +429,7 @@ function buildAttrSuffix(node: MindNode): string {
   return attrs.length > 0 ? ` ${attrs.join(" ")}` : "";
 }
 
-function serializeNode(
-  node: MindNode,
-  nodes: Record<string, MindNode>,
-  depth: number,
-): string {
+function serializeNode(node: MindNode, nodes: Record<string, MindNode>, depth: number): string {
   const attrStr = buildAttrSuffix(node);
   const lines: string[] = [];
   if (depth <= 2 && node.children.length > 0) {
@@ -388,54 +468,83 @@ export function serializeDSL(nodes: Record<string, MindNode>): string {
 }
 
 export interface InlineDslResult {
-  text: string; hasAnyAttribute: boolean; priority: Priority | null;
-  categoryColor: CategoryColor | null; dueDate: string | null;
-  completed: boolean | null; status: TaskStatus | null; estimate: number | null;
+  text: string;
+  hasAnyAttribute: boolean;
+  priority: Priority | null;
+  categoryColor: CategoryColor | null;
+  dueDate: string | null;
+  completed: boolean | null;
+  status: TaskStatus | null;
+  estimate: number | null;
 }
 
 export function parseInlineDSL(raw: string): InlineDslResult {
   const result: InlineDslResult = {
-    text: "", hasAnyAttribute: false, priority: null,
-    categoryColor: null, dueDate: null, completed: null, status: null, estimate: null,
+    text: "",
+    hasAnyAttribute: false,
+    priority: null,
+    categoryColor: null,
+    dueDate: null,
+    completed: null,
+    status: null,
+    estimate: null,
   };
   if (!raw) return result;
   for (const line of raw.split("\n")) {
     const tokens = line.split(/\s+/u).filter((t) => t.length > 0);
     const textTokens: string[] = [];
     for (const tok of tokens) {
-      if (!tok.startsWith("@")) { textTokens.push(tok); continue; }
+      if (!tok.startsWith("@")) {
+        textTokens.push(tok);
+        continue;
+      }
       const colon = tok.indexOf(":");
       const key = colon === -1 ? tok.slice(1) : tok.slice(1, colon);
       const value = colon === -1 ? "" : tok.slice(colon + 1);
       switch (key) {
         case "priority": {
-          if (ALLOWED_PRIORITIES.has(value as Priority)) { result.priority = value as Priority; result.hasAnyAttribute = true; }
-          else textTokens.push(tok);
+          if (ALLOWED_PRIORITIES.has(value as Priority)) {
+            result.priority = value as Priority;
+            result.hasAnyAttribute = true;
+          } else textTokens.push(tok);
           break;
         }
         case "color": {
-          if (ALLOWED_COLORS.has(value as CategoryColor)) { result.categoryColor = value as CategoryColor; result.hasAnyAttribute = true; }
-          else textTokens.push(tok);
+          if (ALLOWED_COLORS.has(value as CategoryColor)) {
+            result.categoryColor = value as CategoryColor;
+            result.hasAnyAttribute = true;
+          } else textTokens.push(tok);
           break;
         }
         case "due": {
-          if (isValidDate(value)) { result.dueDate = value; result.hasAnyAttribute = true; }
-          else textTokens.push(tok);
+          if (isValidDate(value)) {
+            result.dueDate = value;
+            result.hasAnyAttribute = true;
+          } else textTokens.push(tok);
           break;
         }
         case "status": {
-          if (ALLOWED_STATUSES.has(value as TaskStatus)) { result.status = value as TaskStatus; result.hasAnyAttribute = true; }
-          else textTokens.push(tok);
+          if (ALLOWED_STATUSES.has(value as TaskStatus)) {
+            result.status = value as TaskStatus;
+            result.hasAnyAttribute = true;
+          } else textTokens.push(tok);
           break;
         }
-        case "done": { result.completed = true; result.status = "done"; result.hasAnyAttribute = true; break;
+        case "done": {
+          result.completed = true;
+          result.status = "done";
+          result.hasAnyAttribute = true;
+          break;
         }
         case "estimate": {
           const n = Number(value);
           result.estimate = Number.isFinite(n) && n > 0 ? n : null;
-          result.hasAnyAttribute = true; break;
+          result.hasAnyAttribute = true;
+          break;
         }
-        default: { textTokens.push(tok); break;
+        default: {
+          textTokens.push(tok);
+          break;
         }
       }
     }
