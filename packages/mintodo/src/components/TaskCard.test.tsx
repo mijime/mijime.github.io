@@ -108,6 +108,51 @@ describe("TaskCard", () => {
     expect(captured!.nodes.n1.status).toBe("inbox");
   });
 
+  it("shows child progress M/N when the node has children", () => {
+    const child1 = makeNode({ id: "c1", parentId: "n1", completed: true });
+    const child2 = makeNode({ id: "c2", parentId: "n1", completed: false });
+    const state = makeState({
+      nodes: {
+        root: makeNode({ id: "root", isRoot: true }),
+        n1: makeNode({ status: "wip", children: ["c1", "c2"] }),
+        c1: child1,
+        c2: child2,
+      },
+    });
+    render(
+      <MindProvider initialState={state}>
+        <TaskCard node={state.nodes.n1!} />
+      </MindProvider>,
+    );
+    expect(screen.getByTestId("task-card-progress-n1").textContent).toBe("1 / 2");
+  });
+
+  it("hides the progress row when the node is a leaf", () => {
+    render(
+      <MindProvider initialState={makeState()}>
+        <TaskCard node={makeNode()} />
+      </MindProvider>,
+    );
+    expect(screen.queryByTestId("task-card-progress-n1")).toBeNull();
+  });
+
+  it("hides the progress row when the node is done", () => {
+    const child = makeNode({ id: "c1", parentId: "n1", completed: true });
+    const state = makeState({
+      nodes: {
+        root: makeNode({ id: "root", isRoot: true }),
+        n1: makeNode({ status: "done", completed: true, children: ["c1"] }),
+        c1: child,
+      },
+    });
+    render(
+      <MindProvider initialState={state}>
+        <TaskCard node={state.nodes.n1!} />
+      </MindProvider>,
+    );
+    expect(screen.queryByTestId("task-card-progress-n1")).toBeNull();
+  });
+
   it("uses categoryColor for the hairline and renders the collapsed done dot", () => {
     const { container } = render(
       <MindProvider initialState={makeState()}>

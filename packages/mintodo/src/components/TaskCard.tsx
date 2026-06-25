@@ -1,6 +1,8 @@
+import { useMemo } from "react";
 import { useMindStore } from "../hooks/use-mind-store";
 import { categoryBorderColor, formatBadges } from "../lib/badges";
 import { previousStatus } from "../lib/status-cycle";
+import { countDescendants } from "../lib/tree";
 import { DueBadge } from "./DueBadge";
 import { StatusDot } from "./StatusDot";
 import { TaskCheckbox } from "./TaskCheckbox";
@@ -12,10 +14,14 @@ interface Props {
 }
 
 export function TaskCard({ node }: Props) {
-  const { dispatch } = useMindStore();
+  const { dispatch, state } = useMindStore();
   const isDone = node.status === "done" || node.completed;
   const { due, statusLabel } = formatBadges(node);
   const hairlineColor = categoryBorderColor(node.categoryColor);
+  const { total: childTotal, completed: childCompleted } = useMemo(
+    () => countDescendants(state.nodes, node.id),
+    [state.nodes, node.id],
+  );
 
   const metaRow = isDone ? null : (
     <div className="flex items-center gap-1.5 min-w-0" style={{ minHeight: "18px" }}>
@@ -100,6 +106,15 @@ export function TaskCard({ node }: Props) {
         </>
       )}
       {bodyRow}
+      {!isDone && childTotal > 0 ? (
+        <div
+          data-testid={`task-card-progress-${node.id}`}
+          className="text-[10px] tracking-wider"
+          style={{ color: "var(--mid)" }}
+        >
+          {childCompleted} / {childTotal}
+        </div>
+      ) : null}
       {isDone ? (
         <div
           className="w-full"
