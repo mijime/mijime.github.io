@@ -640,3 +640,59 @@ describe("reducer - SNAP_BACK", () => {
     expect(next.nodes.a.y).toBe(-240);
   });
 });
+
+describe("reducer - DELETE_COMPLETED", () => {
+  it("removes completed non-root nodes and cascades into subtrees", () => {
+    const s = {
+      ...createInitialState(),
+      currentBoardId: "b-a",
+      nodes: {
+        root: makeNode("root", "b-a", { isRoot: true, children: ["p"] }),
+        p: makeNode("p", "b-a", {
+          parentId: "root",
+          status: "done",
+          completed: true,
+          children: ["c", "d"],
+        }),
+        c: makeNode("c", "b-a", { parentId: "p", status: "done", completed: true }),
+        d: makeNode("d", "b-a", { parentId: "p", status: "inbox", completed: false }),
+      },
+    };
+    const next = reducer(s, { type: "DELETE_COMPLETED" });
+    expect(Object.keys(next.nodes).toSorted()).toEqual(["root"].toSorted());
+    expect(next.nodes.p).toBeUndefined();
+    expect(next.nodes.c).toBeUndefined();
+    expect(next.nodes.d).toBeUndefined();
+    expect(next.nodes.root.children).toEqual([]);
+  });
+
+  it("never deletes the root (defensive)", () => {
+    const s = {
+      ...createInitialState(),
+      currentBoardId: "b-a",
+      nodes: { root: makeNode("root", "b-a", { isRoot: true, status: "done", completed: true }) },
+    };
+    const next = reducer(s, { type: "DELETE_COMPLETED" });
+    expect(next.nodes.root).toBeDefined();
+  });
+
+  it("resets selectedNodeId to root when the selected node is deleted", () => {
+    const s = {
+      ...createInitialState(),
+      currentBoardId: "b-a",
+      selectedNodeId: "p",
+      nodes: {
+        root: makeNode("root", "b-a", { isRoot: true, children: ["p"] }),
+        p: makeNode("p", "b-a", { parentId: "root", status: "done", completed: true }),
+      },
+    };
+    const next = reducer(s, { type: "DELETE_COMPLETED" });
+    expect(next.selectedNodeId).toBe("root");
+  });
+
+  it("is a no-op when there is no current board", () => {
+    const s = { ...createInitialState(), currentBoardId: null };
+    const next = reducer(s, { type: "DELETE_COMPLETED" });
+    expect(next).toBe(s);
+  });
+});
