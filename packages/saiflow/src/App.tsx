@@ -25,13 +25,7 @@ function RightPanel() {
         ))}
       </div>
       <div className="flex-1 overflow-hidden">
-        {view === "table" ? (
-          <ResultTable />
-        ) : view === "line" ? (
-          <LineChart />
-        ) : (
-          <BarChart />
-        )}
+        {view === "table" ? <ResultTable /> : view === "line" ? <LineChart /> : <BarChart />}
       </div>
     </div>
   );
