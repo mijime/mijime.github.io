@@ -22,12 +22,30 @@ function RightPanel() {
             className={`px-2 py-0.5 text-xs rounded ${view === v ? "bg-(--terra) text-white" : "text-(--ink) opacity-50"}`}
             onClick={() => setView(v)}
           >
-            {v === "table" ? "表" : v === "line" ? "折れ線" : v === "bar" ? "収支" : v === "area" ? "面" : "円"}
+            {v === "table"
+              ? "収支表"
+              : v === "line"
+                ? "資産推移"
+                : v === "bar"
+                  ? "収支比較"
+                  : v === "area"
+                    ? "資産構成"
+                    : "最終配分"}
           </button>
         ))}
       </div>
       <div className="flex-1 overflow-hidden">
-        {view === "table" ? <ResultTable /> : view === "line" ? <LineChart /> : view === "bar" ? <BarChart /> : view === "area" ? <AreaChartView /> : <PieChartView />}
+        {view === "table" ? (
+          <ResultTable />
+        ) : view === "line" ? (
+          <LineChart />
+        ) : view === "bar" ? (
+          <BarChart />
+        ) : view === "area" ? (
+          <AreaChartView />
+        ) : (
+          <PieChartView />
+        )}
       </div>
     </div>
   );

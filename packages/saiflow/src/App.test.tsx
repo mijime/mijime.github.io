@@ -16,8 +16,10 @@ describe("App", () => {
 
   it("renders view toggle buttons", () => {
     render(<App />);
-    expect(screen.getByRole("button", { name: "表" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "折れ線" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "収支" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "収支表" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "資産推移" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "収支比較" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "資産構成" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "最終配分" })).toBeInTheDocument();
   });
 });

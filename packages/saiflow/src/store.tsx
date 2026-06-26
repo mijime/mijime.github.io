@@ -58,24 +58,33 @@ export function initialState(): State {
 
 export function reducer(state: State, action: Action): State {
   switch (action.type) {
-    case "SET_DSL":
+    case "SET_DSL": {
       return { ...state, dslText: action.text };
-    case "SET_AGE":
+    }
+    case "SET_AGE": {
       return { ...state, currentAge: action.age };
-    case "SET_YEARS":
+    }
+    case "SET_YEARS": {
       return { ...state, simulationYears: action.years };
-    case "SET_TAB":
+    }
+    case "SET_TAB": {
       return { ...state, activeTab: action.tab };
-    case "SET_PARSED":
+    }
+    case "SET_PARSED": {
       return { ...state, parsed: action.parsed };
-    case "SET_ROWS":
+    }
+    case "SET_ROWS": {
       return { ...state, rows: action.rows };
-    case "SET_SCENARIOS":
+    }
+    case "SET_SCENARIOS": {
       return { ...state, scenarios: action.scenarios, activeScenarioIndex: 0 };
-    case "SET_ACTIVE_SCENARIO":
+    }
+    case "SET_ACTIVE_SCENARIO": {
       return { ...state, activeScenarioIndex: action.index };
-    default:
+    }
+    default: {
       return state;
+    }
   }
 }
 

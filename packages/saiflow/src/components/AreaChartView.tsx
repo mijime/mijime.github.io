@@ -1,9 +1,16 @@
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
+import {
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+} from "recharts";
 import { useSaiflowState } from "../store";
 
-const COLORS = [
-  "#63b3ed", "#fc8181", "#48bb78", "#f6ad55", "#9f7aea", "#ed64a6",
-];
+const COLORS = ["#63b3ed", "#fc8181", "#48bb78", "#f6ad55", "#9f7aea", "#ed64a6"];
 
 export function AreaChartView() {
   const state = useSaiflowState();
@@ -12,10 +19,7 @@ export function AreaChartView() {
 
   const assetNames = Object.keys(rows[0].balances);
   const chartData = rows.map((r) =>
-    Object.fromEntries([
-      ["age", r.age],
-      ...assetNames.map((n) => [n, r.balances[n] ?? 0]),
-    ]),
+    Object.fromEntries([["age", r.age], ...assetNames.map((n) => [n, r.balances[n] ?? 0])]),
   );
 
   return (
@@ -24,7 +28,12 @@ export function AreaChartView() {
         <AreaChart data={chartData}>
           <CartesianGrid strokeDasharray="3 3" stroke="rgba(128,128,128,0.15)" />
           <XAxis dataKey="age" tick={{ fontSize: 12 }} stroke="var(--ink)" opacity={0.5} />
-          <YAxis tick={{ fontSize: 12 }} stroke="var(--ink)" opacity={0.5} tickFormatter={(v: number) => Math.round(v).toLocaleString()} />
+          <YAxis
+            tick={{ fontSize: 12 }}
+            stroke="var(--ink)"
+            opacity={0.5}
+            tickFormatter={(v: number) => Math.round(v).toLocaleString()}
+          />
           <Tooltip />
           <Legend />
           {assetNames.map((name, i) => (
