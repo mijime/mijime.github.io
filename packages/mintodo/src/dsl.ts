@@ -139,6 +139,7 @@ interface ParsedAttrs {
   priority: Priority;
   categoryColor: CategoryColor;
   dueDate: string;
+  startDate: string;
   completed: boolean;
   status: TaskStatus;
   estimate: number | null;
@@ -157,6 +158,7 @@ function parseAttributes(raw: string): ParsedAttrs | null {
   let priority: Priority = "medium";
   let categoryColor: CategoryColor = "slate";
   let dueDate = "";
+  let startDate = "";
   let completed = false;
   let status: TaskStatus = "inbox";
   let estimate: number | null = null;
@@ -196,12 +198,17 @@ function parseAttributes(raw: string): ParsedAttrs | null {
         estimate = Number.isFinite(n) && n > 0 ? n : null;
         break;
       }
+      case "start": {
+        if (!isValidDate(value)) return null;
+        startDate = value;
+        break;
+      }
       default: {
         break;
       }
     }
   }
-  return { text, priority, categoryColor, dueDate, completed, status, estimate };
+  return { text, priority, categoryColor, dueDate, startDate, completed, status, estimate };
 }
 
 function makeNode(id: string, parentId: string, boardId: string, attrs: ParsedAttrs): MindNode {
@@ -216,6 +223,7 @@ function makeNode(id: string, parentId: string, boardId: string, attrs: ParsedAt
     priority: attrs.priority,
     categoryColor: attrs.categoryColor,
     dueDate: attrs.dueDate,
+    startDate: attrs.startDate,
     status: attrs.status,
     children: [],
     x: 0,
@@ -258,6 +266,7 @@ export function parseDSL(text: string, boardId: string): ParseResult {
     priority: "medium",
     categoryColor: "slate",
     dueDate: "",
+    startDate: "",
     status: "inbox",
     children: [],
     x: 0,
@@ -342,6 +351,7 @@ function buildAttrSuffix(node: MindNode): string {
   if (node.dueDate) attrs.push(`@due:${node.dueDate}`);
   if (node.status !== "inbox" && node.status !== "done") attrs.push(`@status:${node.status}`);
   if (node.estimate !== null && node.estimate > 0) attrs.push(`@estimate:${node.estimate}`);
+  if (node.startDate) attrs.push(`@start:${node.startDate}`);
   if (node.completed && node.status === "done") attrs.push("@done");
   return attrs.length > 0 ? ` ${attrs.join(" ")}` : "";
 }
@@ -384,6 +394,7 @@ export interface InlineDslResult {
   priority: Priority | null;
   categoryColor: CategoryColor | null;
   dueDate: string | null;
+  startDate: string | null;
   completed: boolean | null;
   status: TaskStatus | null;
   estimate: number | null;
@@ -396,6 +407,7 @@ export function parseInlineDSL(raw: string): InlineDslResult {
     priority: null,
     categoryColor: null,
     dueDate: null,
+    startDate: null,
     completed: null,
     status: null,
     estimate: null,
@@ -451,6 +463,13 @@ export function parseInlineDSL(raw: string): InlineDslResult {
           const n = Number(value);
           result.estimate = Number.isFinite(n) && n > 0 ? n : null;
           result.hasAnyAttribute = true;
+          break;
+        }
+        case "start": {
+          if (isValidDate(value)) {
+            result.startDate = value;
+            result.hasAnyAttribute = true;
+          } else textTokens.push(tok);
           break;
         }
         default: {

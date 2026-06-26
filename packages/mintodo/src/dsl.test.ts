@@ -200,6 +200,7 @@ function rootNode(text = ""): MindNode {
     priority: "medium",
     categoryColor: "slate",
     dueDate: "",
+    startDate: "",
     status: "inbox",
     children: ["a"],
     x: 0,
@@ -361,8 +362,8 @@ describe("parseInlineDSL", () => {
 });
 
 describe("realistic boards", () => {
-	const samples = {
-		"personal project with worklog history": `# 2026 Q2 個人プロジェクト
+  const samples = {
+    "personal project with worklog history": `# 2026 Q2 個人プロジェクト
 
 - [-] メインプロジェクト
   - [x] 要件定義 @priority:high @due:2026-04-15
@@ -383,7 +384,7 @@ describe("realistic boards", () => {
   - [x] 健康診断 @due:2026-05-10
     - 2026-05-08 09:00: 受診完了
 `,
-		"gantt-friendly board with estimates": `# Web アプリ再構築
+    "gantt-friendly board with estimates": `# Web アプリ再構築
 
 - [-] Phase 1: MVP
   - [-] 認証機能 @estimate:16
@@ -402,7 +403,7 @@ describe("realistic boards", () => {
   - [ ] E2E テスト @estimate:16
 - [ ] Phase 3: GA
 `,
-		"reading notes (worklog-heavy)": `# 読書メモ
+    "reading notes (worklog-heavy)": `# 読書メモ
 
 - [-] 技術書
   - [x] Domain Modeling Made Functional
@@ -421,7 +422,7 @@ describe("realistic boards", () => {
     - 2026-04-22 11:00: 要約作成
     - 2026-04-25 16:00: 社内勉強会で発表
 `,
-		"edge cases (status glyphs + colors + deep nesting)": `# Edge cases @priority:high
+    "edge cases (status glyphs + colors + deep nesting)": `# Edge cases @priority:high
 
 - [ ] wip の特殊グリフ
   - [-] 進行中タスク @status:wip
@@ -443,50 +444,50 @@ describe("realistic boards", () => {
               - [ ] レベル7 (leaf)
                 - 2026-06-26 10:00: もう限界
 `,
-	} as const;
+  } as const;
 
-	type SampleKey = keyof typeof samples;
-	const expectedNodeCount: Record<SampleKey, number> = {
-		"personal project with worklog history": 11,
-		"gantt-friendly board with estimates": 11,
-		"reading notes (worklog-heavy)": 8,
-		"edge cases (status glyphs + colors + deep nesting)": 18,
-	};
+  type SampleKey = keyof typeof samples;
+  const expectedNodeCount: Record<SampleKey, number> = {
+    "personal project with worklog history": 11,
+    "gantt-friendly board with estimates": 11,
+    "reading notes (worklog-heavy)": 8,
+    "edge cases (status glyphs + colors + deep nesting)": 18,
+  };
 
-	for (const [name, src] of Object.entries(samples)) {
-		it(`parses: ${name}`, () => {
-			const r = parseDSL(src, "b1");
-			expect(r.ok).toBe(true);
-			if (!r.ok) return;
-			const nonRoot = Object.values(r.nodes).filter((n) => !n.isRoot);
-			expect(nonRoot).toHaveLength(expectedNodeCount[name as SampleKey]);
-		});
+  for (const [name, src] of Object.entries(samples)) {
+    it(`parses: ${name}`, () => {
+      const r = parseDSL(src, "b1");
+      expect(r.ok).toBe(true);
+      if (!r.ok) return;
+      const nonRoot = Object.values(r.nodes).filter((n) => !n.isRoot);
+      expect(nonRoot).toHaveLength(expectedNodeCount[name as SampleKey]);
+    });
 
-		it(`round-trips: ${name}`, () => {
-			const r1 = parseDSL(src, "b1");
-			expect(r1.ok).toBe(true);
-			if (!r1.ok) return;
-			const serialized = serializeDSL(r1.nodes);
-			const r2 = parseDSL(serialized, "b1");
-			expect(r2.ok).toBe(true);
-			if (!r2.ok) return;
-			const c1 = Object.values(r1.nodes).filter((n) => !n.isRoot).length;
-			const c2 = Object.values(r2.nodes).filter((n) => !n.isRoot).length;
-			expect(c2).toBe(c1);
-			const text1 = Object.values(r1.nodes)
-				.filter((n) => !n.isRoot)
-				.map((n) => n.text)
-				.toSorted();
-			const text2 = Object.values(r2.nodes)
-				.filter((n) => !n.isRoot)
-				.map((n) => n.text)
-				.toSorted();
-			expect(text2).toEqual(text1);
-			const r3 = parseDSL(serializeDSL(r2.nodes), "b1");
-			expect(r3.ok).toBe(true);
-			if (!r3.ok) return;
-			const c3 = Object.values(r3.nodes).filter((n) => !n.isRoot).length;
-			expect(c3).toBe(c1);
-		});
-	}
+    it(`round-trips: ${name}`, () => {
+      const r1 = parseDSL(src, "b1");
+      expect(r1.ok).toBe(true);
+      if (!r1.ok) return;
+      const serialized = serializeDSL(r1.nodes);
+      const r2 = parseDSL(serialized, "b1");
+      expect(r2.ok).toBe(true);
+      if (!r2.ok) return;
+      const c1 = Object.values(r1.nodes).filter((n) => !n.isRoot).length;
+      const c2 = Object.values(r2.nodes).filter((n) => !n.isRoot).length;
+      expect(c2).toBe(c1);
+      const text1 = Object.values(r1.nodes)
+        .filter((n) => !n.isRoot)
+        .map((n) => n.text)
+        .toSorted();
+      const text2 = Object.values(r2.nodes)
+        .filter((n) => !n.isRoot)
+        .map((n) => n.text)
+        .toSorted();
+      expect(text2).toEqual(text1);
+      const r3 = parseDSL(serializeDSL(r2.nodes), "b1");
+      expect(r3.ok).toBe(true);
+      if (!r3.ok) return;
+      const c3 = Object.values(r3.nodes).filter((n) => !n.isRoot).length;
+      expect(c3).toBe(c1);
+    });
+  }
 });

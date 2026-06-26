@@ -26,6 +26,7 @@ export interface MindNode {
   priority: Priority;
   categoryColor: CategoryColor;
   dueDate: string;
+  startDate: string;
   status: TaskStatus;
   children: string[];
   estimate: number | null;
