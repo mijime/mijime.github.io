@@ -832,3 +832,33 @@ describe("reducer — DELETE_WORK_LOG", () => {
     expect(next).toBe(s);
   });
 });
+
+describe("reducer — REORDER_CHILDREN", () => {
+  const root = makeNode("root", "b-a", { isRoot: true, children: ["a", "b", "c"] });
+  const a = makeNode("a", "b-a", { parentId: "root", status: "inbox" });
+  const b = makeNode("b", "b-a", { parentId: "root", status: "wip" });
+  const c = makeNode("c", "b-a", { parentId: "root", status: "wip" });
+
+  it("reorders two siblings in a parent's children array", () => {
+    const s = { ...createInitialState(), nodes: { root, a, b, c } };
+    const next = reducer(s, { type: "REORDER_CHILDREN", nodeId: "b", targetId: "a" });
+    expect(next.nodes.root.children).toEqual(["b", "a", "c"]);
+  });
+
+  it("no-ops when node and target have different parents", () => {
+    const p1 = makeNode("p1", "b-a", { children: ["n1"] });
+    const p2 = makeNode("p2", "b-a", { parentId: "p1", children: ["n2"] });
+    const n1 = makeNode("n1", "b-a", { parentId: "p1" });
+    const n2 = makeNode("n2", "b-a", { parentId: "p2" });
+    const s = { ...createInitialState(), nodes: { p1, p2, n1, n2 } };
+    const next = reducer(s, { type: "REORDER_CHILDREN", nodeId: "n2", targetId: "n1" });
+    expect(next.nodes.p1.children).toEqual(["n1"]);
+    expect(next.nodes.p2.children).toEqual(["n2"]);
+  });
+
+  it("no-ops when node or target is not found", () => {
+    const s = createInitialState();
+    const next = reducer(s, { type: "REORDER_CHILDREN", nodeId: "nope", targetId: "also" });
+    expect(next).toBe(s);
+  });
+});

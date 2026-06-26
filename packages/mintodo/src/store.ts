@@ -34,6 +34,7 @@ export type Action =
   | { type: "DELETE_NODE"; id: string }
   | { type: "OPEN_MODAL"; modal: Modal }
   | { type: "REPARENT"; id: string; newParentId: string }
+  | { type: "REORDER_CHILDREN"; nodeId: string; targetId: string }
   | { type: "RENAME_BOARD"; id: string; name: string }
   | { type: "RESET" }
   | { type: "SELECT"; id: string }
@@ -431,6 +432,25 @@ export function reducer(state: State, action: Action): State {
           ...state.nodes,
           [action.nodeId]: { ...node, workLogs: [...node.workLogs, action.entry] },
         },
+      };
+    }
+    case "REORDER_CHILDREN": {
+      const node = state.nodes[action.nodeId];
+      const target = state.nodes[action.targetId];
+      if (!node || !target) return state;
+      if (node.id === target.id) return state;
+      if (node.parentId !== target.parentId || !node.parentId) return state;
+      const parent = state.nodes[node.parentId];
+      if (!parent) return state;
+      const oldIndex = parent.children.indexOf(node.id);
+      const newIndex = parent.children.indexOf(target.id);
+      if (oldIndex === -1 || newIndex === -1) return state;
+      const newChildren = [...parent.children];
+      const [item] = newChildren.splice(oldIndex, 1);
+      newChildren.splice(newIndex, 0, item!);
+      return {
+        ...state,
+        nodes: { ...state.nodes, [parent.id]: { ...parent, children: newChildren } },
       };
     }
     case "DELETE_WORK_LOG": {
