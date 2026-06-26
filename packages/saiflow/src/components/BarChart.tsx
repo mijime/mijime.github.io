@@ -30,15 +30,15 @@ export function BarChart() {
     interaction: { intersect: false, mode: "index" as const },
     plugins: {
       legend: { position: "top" as const },
-        tooltip: {
-          callbacks: {
-            label: (ctx: TooltipItem<"bar">) => {
-              const v = Number(ctx.raw) || 0;
-              if (ctx.datasetIndex === 1) return `支出: ${Math.abs(v)}`;
-              return `収入: ${v}`;
-            },
+      tooltip: {
+        callbacks: {
+          label: (ctx: TooltipItem<"bar">) => {
+            const v = Number(ctx.raw) || 0;
+            if (ctx.datasetIndex === 1) return `支出: ${Math.abs(v)}`;
+            return `収入: ${v}`;
           },
         },
+      },
     },
     scales: {
       x: { stacked: true },
