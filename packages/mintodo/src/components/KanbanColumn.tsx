@@ -1,7 +1,9 @@
+import { useMemo } from "react";
 import { Plus } from "lucide-react";
 import { useDroppable } from "@dnd-kit/core";
+import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { useMindStore } from "../hooks/use-mind-store";
-import { isKanbanVisible } from "../lib/tree";
+import { isKanbanVisible, sortByDfs } from "../lib/tree";
 import { KanbanCard } from "./KanbanCard";
 import type { MindNode, TaskStatus } from "../types";
 
@@ -33,16 +35,26 @@ export function KanbanColumn({ status }: Props) {
   const { dispatch, state } = useMindStore();
   const { setNodeRef, isOver } = useDroppable({ id: status });
 
+  const dfsOrder = useMemo(() => sortByDfs(state.nodes), [state.nodes]);
+
   const q = state.searchQuery.toLowerCase();
-  const cards = Object.values(state.nodes).filter(
-    (n) =>
+  const cards: MindNode[] = [];
+  for (const id of dfsOrder) {
+    const n = state.nodes[id];
+    if (!n) continue;
+    if (
       n.boardId === state.currentBoardId &&
       n.status === status &&
       !isParentCollapsed(state, n.id) &&
       isKanbanVisible(state.nodes, n.id) &&
       !(state.hideCompleted && n.completed && !n.isRoot) &&
-      (state.searchQuery === "" || n.text.toLowerCase().includes(q)),
-  );
+      (state.searchQuery === "" || n.text.toLowerCase().includes(q))
+    ) {
+      cards.push(n);
+    }
+  }
+
+  const sortedIds = cards.map((n) => n.id);
 
   return (
     <div
@@ -64,9 +76,11 @@ export function KanbanColumn({ status }: Props) {
         </span>
       </div>
       <div className="flex flex-col gap-2 flex-1 min-h-0 overflow-y-auto">
-        {cards.map((n: MindNode) => (
-          <KanbanCard key={n.id} node={n} />
-        ))}
+        <SortableContext items={sortedIds} strategy={verticalListSortingStrategy}>
+          {cards.map((n: MindNode) => (
+            <KanbanCard key={n.id} node={n} />
+          ))}
+        </SortableContext>
         <button
           type="button"
           data-testid={`kanban-column-add-${status}`}

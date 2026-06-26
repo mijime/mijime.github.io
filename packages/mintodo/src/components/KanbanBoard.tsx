@@ -1,5 +1,12 @@
 import { useState } from "react";
-import { DndContext, DragOverlay, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
+import {
+  DndContext,
+  DragOverlay,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  closestCenter,
+} from "@dnd-kit/core";
 import { TASK_STATUSES, type TaskStatus, type MindNode } from "../types";
 import { useMindStore } from "../hooks/use-mind-store";
 import { KanbanColumn } from "./KanbanColumn";
@@ -38,11 +45,15 @@ export function KanbanBoard() {
     over?: { id: string | number } | null;
   }) {
     const { active, over } = event;
+    const activeId = String(active.id);
+
     if (over) {
       const overId = String(over.id);
       const taskStatuses: readonly string[] = TASK_STATUSES;
       if (taskStatuses.includes(overId)) {
-        dispatch({ id: String(active.id), status: overId as TaskStatus, type: "SET_STATUS" });
+        dispatch({ id: activeId, status: overId as TaskStatus, type: "SET_STATUS" });
+      } else {
+        dispatch({ type: "REORDER_CHILDREN", nodeId: activeId, targetId: overId });
       }
     }
     dispatch({ id: null, type: "SET_DRAGGING" });
@@ -59,6 +70,7 @@ export function KanbanBoard() {
   return (
     <DndContext
       sensors={sensors}
+      collisionDetection={closestCenter}
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
       onDragCancel={handleDragCancel}

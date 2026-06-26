@@ -1,4 +1,5 @@
-import { useDraggable } from "@dnd-kit/core";
+import { useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 import { ListOrdered, Pencil } from "lucide-react";
 import { useMindStore } from "../hooks/use-mind-store";
 import { parentBreadcrumb } from "../lib/breadcrumb";
@@ -13,7 +14,19 @@ export function KanbanCard({ node }: Props) {
   const { dispatch, state } = useMindStore();
   const breadcrumb = parentBreadcrumb(state.nodes, node.id);
 
-  const { setNodeRef, attributes, listeners, isDragging } = useDraggable({ id: node.id });
+  const { setNodeRef, attributes, listeners, isDragging, transform, transition } = useSortable({
+    id: node.id,
+  });
+
+  const style = {
+    background: "var(--paper)",
+    borderColor: "var(--border)",
+    color: "var(--ink)",
+    opacity: isDragging ? 0.4 : 1,
+    touchAction: "none",
+    transform: CSS.Translate.toString(transform),
+    transition,
+  };
 
   return (
     <div
@@ -23,13 +36,7 @@ export function KanbanCard({ node }: Props) {
       {...attributes}
       {...listeners}
       className="rounded border p-3 flex flex-col gap-2 cursor-grab active:cursor-grabbing"
-      style={{
-        background: "var(--paper)",
-        borderColor: "var(--border)",
-        color: "var(--ink)",
-        opacity: isDragging ? 0.4 : 1,
-        touchAction: "none",
-      }}
+      style={style}
     >
       <div className="flex items-center justify-between">
         <span
