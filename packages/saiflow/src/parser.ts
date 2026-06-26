@@ -1,8 +1,6 @@
 import type { AssetOp, Event, ParseError, SimulationConfig } from "./types";
 
-export function parseDSL(
-  text: string,
-): { config: SimulationConfig } | { errors: ParseError[] } {
+export function parseDSL(text: string): { config: SimulationConfig } | { errors: ParseError[] } {
   const errors: ParseError[] = [];
   const initialAssets: { name: string; value: number }[] = [];
   const events: Event[] = [];
@@ -47,7 +45,10 @@ export function parseDSL(
     if (section === "events") {
       const parts = line.split(",");
       if (parts.length < 4) {
-        errors.push({ line: lineNum, message: `"イベント名,開始年,終了年,操作..." 形式である必要があります` });
+        errors.push({
+          line: lineNum,
+          message: `"イベント名,開始年,終了年,操作..." 形式である必要があります`,
+        });
         continue;
       }
       const name = parts[0].trim();
