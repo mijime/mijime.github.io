@@ -7,4 +7,10 @@ describe("App", () => {
     render(<App />);
     expect(screen.getByLabelText("現在年齢")).toBeInTheDocument();
   });
+
+  it("renders editor tabs", () => {
+    render(<App />);
+    expect(screen.getByRole("button", { name: "DSL" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "GUI" })).toBeInTheDocument();
+  });
 });
