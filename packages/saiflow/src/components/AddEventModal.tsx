@@ -178,7 +178,7 @@ function MortgageForm({
   const handleSave = () => {
     if (propertyPrice <= 0) return;
     const multiplier = 1 + interestRate / 100;
-    const annualPayment = result !== null ? result.annual : 0;
+    const annualPayment = result === null ? 0 : result.annual;
     const events: Event[] = [];
     if (downPayment > 0) {
       events.push({

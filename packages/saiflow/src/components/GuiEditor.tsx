@@ -133,7 +133,7 @@ export function GuiEditor() {
     );
   }
 
-  const events = scenario.events;
+  const { events } = scenario;
 
   return (
     <div className="flex flex-col h-full">
