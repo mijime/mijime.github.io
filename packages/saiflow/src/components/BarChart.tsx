@@ -32,13 +32,31 @@ export function BarChart() {
     <div className="h-full overflow-auto">
       <svg width={width} height={height} className="font-sans text-xs">
         {/* 0 line */}
-        <line x1={padding.left} y1={midY} x2={width - padding.right} y2={midY} stroke="rgba(128,128,128,0.3)" />
+        <line
+          x1={padding.left}
+          y1={midY}
+          x2={width - padding.right}
+          y2={midY}
+          stroke="rgba(128,128,128,0.3)"
+        />
 
         {/* Y axis ticks (income side) */}
         {[0, tickStep, tickStep * 2, tickStep * 3, tickStep * 4].map((v) => (
           <g key={`i${v}`}>
-            <line x1={padding.left} y1={incomeY(v)!} x2={width - padding.right} y2={incomeY(v)!} stroke="rgba(128,128,128,0.08)" />
-            <text x={padding.left - 6} y={incomeY(v)! + 4} textAnchor="end" fill="var(--ink)" opacity={0.5}>
+            <line
+              x1={padding.left}
+              y1={incomeY(v)!}
+              x2={width - padding.right}
+              y2={incomeY(v)!}
+              stroke="rgba(128,128,128,0.08)"
+            />
+            <text
+              x={padding.left - 6}
+              y={incomeY(v)! + 4}
+              textAnchor="end"
+              fill="var(--ink)"
+              opacity={0.5}
+            >
               {Math.round(v)}
             </text>
           </g>
@@ -52,8 +70,8 @@ export function BarChart() {
             y={incomeY(r.totalIncome)!}
             width={barW}
             height={midY - incomeY(r.totalIncome)!}
-            rx={2}
-            fill="rgba(72, 187, 120, 0.7)"
+            rx={3}
+            fill="rgba(72, 187, 120, 0.6)"
           />
         ))}
 
@@ -65,8 +83,8 @@ export function BarChart() {
             y={midY}
             width={barW}
             height={expenseH(r.totalExpense)}
-            rx={2}
-            fill="rgba(252, 129, 129, 0.7)"
+            rx={3}
+            fill="rgba(252, 129, 129, 0.6)"
           />
         ))}
 
@@ -86,11 +104,26 @@ export function BarChart() {
           strokeWidth={1.5}
         />
 
+        {/* Data dots */}
+        {rows.map((r, i) => (
+          <g key={`dot${i}`}>
+            <circle cx={x(i)} cy={incomeY(r.totalIncome)!} r={2.5} fill="rgba(72, 187, 120, 1)" />
+            <circle cx={x(i)} cy={midY + expenseH(r.totalExpense)} r={2.5} fill="rgba(252, 129, 129, 1)" />
+          </g>
+        ))}
+
         {/* X axis labels */}
         {rows.map((r, i) => {
           if (i % xTickInterval !== 0 && i !== rows.length - 1) return null;
           return (
-            <text key={i} x={x(i)} y={height - padding.bottom + 16} textAnchor="middle" fill="var(--ink)" opacity={0.5}>
+            <text
+              key={i}
+              x={x(i)}
+              y={height - padding.bottom + 16}
+              textAnchor="middle"
+              fill="var(--ink)"
+              opacity={0.5}
+            >
               {r.age}
             </text>
           );
@@ -100,11 +133,15 @@ export function BarChart() {
         <g transform={`translate(${padding.left}, 6)`}>
           <g>
             <rect x={0} y={-10} width={14} height={10} rx={2} fill="rgba(72, 187, 120, 0.7)" />
-            <text x={18} y={0} fill="var(--ink)" opacity={0.7} fontSize={11}>収入</text>
+            <text x={18} y={0} fill="var(--ink)" opacity={0.7} fontSize={11}>
+              収入
+            </text>
           </g>
           <g transform="translate(60, 0)">
             <rect x={0} y={-10} width={14} height={10} rx={2} fill="rgba(252, 129, 129, 0.7)" />
-            <text x={18} y={0} fill="var(--ink)" opacity={0.7} fontSize={11}>支出</text>
+            <text x={18} y={0} fill="var(--ink)" opacity={0.7} fontSize={11}>
+              支出
+            </text>
           </g>
         </g>
       </svg>
