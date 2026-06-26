@@ -3,6 +3,7 @@ import { BoardDeleteDialog } from "./components/BoardDeleteDialog";
 import { BoardNameDialog } from "./components/BoardNameDialog";
 import { BoardSidebar } from "./components/BoardSidebar";
 import { Canvas } from "./components/Canvas";
+import { GanttBoard } from "./components/GanttBoard";
 import { KanbanBoard } from "./components/KanbanBoard";
 import { TextEditor } from "./components/TextEditor";
 import { EditModal } from "./components/EditModal";
@@ -10,6 +11,7 @@ import { EmptyState } from "./components/EmptyState";
 import { HelpModal } from "./components/HelpModal";
 import { StatsPanel } from "./components/StatsPanel";
 import { Toolbar } from "./components/Toolbar";
+import { WorkLogModal } from "./components/WorkLogModal";
 import { ZoomControls } from "./components/ZoomControls";
 import { useCenterOnNewNode } from "./hooks/use-center-on-new-node";
 import { useKeyboard } from "./hooks/use-keyboard";
@@ -26,7 +28,8 @@ function Shell() {
 
   useEffect(() => {
     const onCreate = (e: Event) => {
-      const { detail } = e as CustomEvent<{ name: string }>;
+      const { detail } = e as CustomEvent<{ name: string; mode: string }>;
+      if (detail.mode !== "create") return;
       // eslint-disable-next-line no-console
       actions.createBoard(detail.name).catch((err) => console.error(err));
     };
@@ -66,6 +69,8 @@ function Shell() {
           {showCanvas ? (
             state.viewMode === "kanban" ? (
               <KanbanBoard />
+            ) : state.viewMode === "gantt" ? (
+              <GanttBoard />
             ) : state.viewMode === "text" ? (
               <TextEditor />
             ) : (
@@ -80,6 +85,7 @@ function Shell() {
       </div>
       <EditModal />
       <HelpModal />
+      <WorkLogModal />
       <BoardNameDialog />
       <BoardDeleteDialog />
     </div>

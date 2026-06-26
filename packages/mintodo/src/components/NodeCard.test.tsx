@@ -27,9 +27,12 @@ function makeNode(id: string, parentId: string | null, opts: Partial<MindNode> =
     dueDate: "",
     status: "inbox",
     children: opts.children ?? [],
+    estimate: null,
+    workLogs: [],
     x: opts.x ?? 0,
     y: opts.y ?? 0,
     ...opts,
+    startDate: opts.startDate ?? "",
   };
 }
 
@@ -227,14 +230,57 @@ describe("NodeCard selection", () => {
     document.body.innerHTML = "";
   });
 
-  it("clicking a non-root node selects it and opens the edit modal", () => {
+  it("clicking an unselected node selects it without opening the edit modal", () => {
     const { container } = setup();
     const childEl = container.querySelector('[data-node-id="a"]') as HTMLElement;
     act(() => {
       fireEvent.click(childEl);
     });
     expect(capturedState!.selectedNodeId).toBe("a");
-    expect(capturedState!.modal).toEqual({ kind: "edit", nodeId: "a" });
+    expect(capturedState!.modal).toBeNull();
+  });
+
+  it("clicking an already-selected node does NOT open the edit modal", () => {
+    const { container } = setup({ selectedNodeId: "a" });
+    const childEl = container.querySelector('[data-node-id="a"]') as HTMLElement;
+    act(() => {
+      fireEvent.click(childEl);
+    });
+    expect(capturedState!.selectedNodeId).toBe("a");
+    expect(capturedState!.modal).toBeNull();
+  });
+
+  it("work-log button opens work-log modal", () => {
+    const { container } = setup({ selectedNodeId: "a" });
+    act(() => {
+      fireEvent.click(container.querySelector('[data-testid="worklog-button-a"]')!);
+    });
+    expect(capturedState!.modal).toEqual({ kind: "work-log", nodeId: "a" });
+  });
+
+  it("clicking work-log button does not change selection", () => {
+    const { container } = setup();
+    act(() => {
+      fireEvent.click(container.querySelector('[data-testid="worklog-button-a"]')!);
+    });
+    expect(capturedState!.selectedNodeId).toBe("");
+  });
+
+  it("clicking another node while one is selected switches selection without opening the modal", () => {
+    const { container } = setup({
+      selectedNodeId: "a",
+      nodes: {
+        root: makeNode("root", null, { isRoot: true, children: ["a", "b"] }),
+        a: makeNode("a", "root", { x: 0, y: -340 }),
+        b: makeNode("b", "root", { x: 0, y: 340 }),
+      },
+    });
+    const bEl = container.querySelector('[data-node-id="b"]') as HTMLElement;
+    act(() => {
+      fireEvent.click(bEl);
+    });
+    expect(capturedState!.selectedNodeId).toBe("b");
+    expect(capturedState!.modal).toBeNull();
   });
 
   it("clicking a child button inside the card does not change selection", () => {

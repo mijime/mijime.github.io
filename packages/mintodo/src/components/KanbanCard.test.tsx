@@ -19,8 +19,11 @@ function node(
     priority: opts.priority ?? "medium",
     categoryColor: opts.categoryColor ?? "slate",
     dueDate: opts.dueDate ?? "",
+    startDate: "",
     status: opts.status ?? "inbox",
     children: opts.children ?? [],
+    estimate: null,
+    workLogs: [],
     x: 0,
     y: 0,
   };
@@ -121,7 +124,7 @@ describe("KanbanCard", () => {
     expect(card.getAttribute("role")).toBe("button");
   });
 
-  it("clicking the card body opens the edit modal", () => {
+  it("clicking the card body does NOT open the edit modal", () => {
     const root = node({ id: "root", boardId: "b", parentId: null, isRoot: true });
     const n1 = node({ id: "n1", boardId: "b", parentId: "root" });
     const state = makeState([root, n1]);
@@ -132,6 +135,34 @@ describe("KanbanCard", () => {
       </MindProvider>,
     );
     fireEvent.click(screen.getByTestId("kanban-card-n1"));
+    expect(captured!.modal).toBeNull();
+  });
+
+  it("pencil button opens edit modal", () => {
+    const root = node({ id: "root", boardId: "b", parentId: null, isRoot: true });
+    const n1 = node({ id: "n1", boardId: "b", parentId: "root" });
+    const state = makeState([root, n1]);
+    render(
+      <MindProvider initialState={state}>
+        <Capture />
+        <KanbanCard node={state.nodes.n1} />
+      </MindProvider>,
+    );
+    fireEvent.click(screen.getByTestId("kanban-card-edit-n1"));
     expect(captured!.modal).toEqual({ kind: "edit", nodeId: "n1" });
+  });
+
+  it("work-log button opens work-log modal", () => {
+    const root = node({ id: "root", boardId: "b", parentId: null, isRoot: true });
+    const n1 = node({ id: "n1", boardId: "b", parentId: "root" });
+    const state = makeState([root, n1]);
+    render(
+      <MindProvider initialState={state}>
+        <Capture />
+        <KanbanCard node={state.nodes.n1} />
+      </MindProvider>,
+    );
+    fireEvent.click(screen.getByTestId("kanban-card-worklog-n1"));
+    expect(captured!.modal).toEqual({ kind: "work-log", nodeId: "n1" });
   });
 });

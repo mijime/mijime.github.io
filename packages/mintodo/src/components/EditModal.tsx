@@ -2,6 +2,7 @@ import { ChevronDown, ChevronUp, Pencil, Trash2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { parseInlineDSL } from "../dsl";
 import { useMindStore } from "../hooks/use-mind-store";
+import { buildBreadcrumb, parentBreadcrumb } from "../lib/breadcrumb";
 import type { CategoryColor, Priority, TaskStatus } from "../types";
 
 const COLORS: { value: CategoryColor; label: string; bg: string }[] = [
@@ -40,6 +41,7 @@ export function EditModal() {
   const [dueDate, setDueDate] = useState("");
   const [status, setStatus] = useState<TaskStatus>("inbox");
   const [barTouched, setBarTouched] = useState(false);
+  const [localEstimate, setLocalEstimate] = useState<number | null>(null);
 
   const isNew = modal?.kind === "edit-new";
   const node = isNew ? null : modal?.kind === "edit" ? state.nodes[modal.nodeId] : null;
@@ -59,6 +61,7 @@ export function EditModal() {
       setCategoryColor(node.categoryColor);
       setDueDate(node.dueDate);
       setStatus(node.status);
+      setLocalEstimate(node.estimate);
       setExpanded(false);
       setBarTouched(false);
     } else if (modal?.kind === "edit-new") {
@@ -67,6 +70,7 @@ export function EditModal() {
       setCategoryColor("slate");
       setDueDate("");
       setStatus(modal.parentStatusSeed ?? "inbox");
+      setLocalEstimate(null);
       setExpanded(false);
       setBarTouched(false);
     }
@@ -89,6 +93,10 @@ export function EditModal() {
   if (!isNew && !node) return null;
 
   const m = modal as { kind: "edit"; nodeId: string } | { kind: "edit-new"; parentId: string };
+  const breadcrumb =
+    m.kind === "edit-new"
+      ? `${buildBreadcrumb(state.nodes, m.parentId)} + 新規`
+      : parentBreadcrumb(state.nodes, m.nodeId);
 
   function handleTextChange(value: string): void {
     setText(value);
@@ -140,6 +148,7 @@ export function EditModal() {
         dueDate,
         completed: completedFlag,
         status,
+        estimate: localEstimate,
       });
     } else {
       if (dsl.text === "" && !dsl.hasAnyAttribute) {
@@ -157,6 +166,7 @@ export function EditModal() {
           dueDate,
           completed: completedFlag,
           status,
+          estimate: localEstimate,
         },
       });
     }
@@ -165,7 +175,6 @@ export function EditModal() {
 
   function handleDelete(): void {
     if (isNew) return;
-    if (!window.confirm("このタスクと、紐づくすべての子タスクを削除しますか？")) return;
     dispatch({ id: (m as { kind: "edit"; nodeId: string }).nodeId, type: "DELETE_NODE" });
     dispatch({ modal: null, type: "OPEN_MODAL" });
   }
@@ -189,11 +198,13 @@ export function EditModal() {
       >
         <div className="p-6">
           <h3
-            className="text-lg mb-4 flex items-center gap-2"
+            data-testid="edit-modal-title"
+            className="text-lg mb-4 flex items-center gap-2 truncate"
             style={{ fontFamily: '"Crimson Pro", serif', fontWeight: 600, color: "var(--ink)" }}
+            title={breadcrumb}
           >
             <Pencil size={18} style={{ color: "var(--terra)" }} />
-            {isNew ? "新規タスク" : "タスクを編集"}
+            {breadcrumb}
           </h3>
           <div className="space-y-4">
             <div>
@@ -329,6 +340,32 @@ export function EditModal() {
                     type="date"
                     value={dueDate}
                     onChange={(e) => handleDueDateChange(e.target.value)}
+                    className="w-full px-3 py-2 rounded text-sm outline-none"
+                    style={{
+                      background: "var(--toolbar-bg)",
+                      border: "1px solid var(--border)",
+                      color: "var(--ink)",
+                    }}
+                  />
+                </div>
+                <div>
+                  <label
+                    className="block text-xs uppercase tracking-wider mb-1"
+                    style={{ color: "var(--mid)" }}
+                  >
+                    見積もり (時間)
+                  </label>
+                  <input
+                    type="number"
+                    data-testid="edit-modal-estimate"
+                    min={0}
+                    step={0.5}
+                    value={localEstimate === null ? "" : localEstimate}
+                    onChange={(e) =>
+                      setLocalEstimate(
+                        e.target.value === "" ? null : Math.max(0, Number(e.target.value)),
+                      )
+                    }
                     className="w-full px-3 py-2 rounded text-sm outline-none"
                     style={{
                       background: "var(--toolbar-bg)",

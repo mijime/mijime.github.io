@@ -7,7 +7,9 @@ import type {
   TaskStatus,
   View,
   ViewMode,
+  WorkLogEntry,
 } from "./types";
+import { nextStatus } from "./lib/status-cycle";
 import { applyRadialLayout } from "./layout/radial";
 
 export interface State {
@@ -60,8 +62,11 @@ export type Action =
       dueDate: string;
       completed: boolean;
       status: TaskStatus;
+      estimate: number | null;
     }
-  | { type: "UPDATE_NODE"; id: string; patch: Partial<MindNode> };
+  | { type: "UPDATE_NODE"; id: string; patch: Partial<MindNode> }
+  | { type: "ADD_WORK_LOG"; nodeId: string; entry: WorkLogEntry }
+  | { type: "DELETE_WORK_LOG"; nodeId: string; entryId: string };
 
 export function createInitialState(): State {
   return {
@@ -164,8 +169,11 @@ export function reducer(state: State, action: Action): State {
         priority: "medium",
         categoryColor: "slate",
         dueDate: "",
+        startDate: "",
         status: "inbox",
         children: [],
+        estimate: null,
+        workLogs: [],
         x: 0,
         y: 0,
       };
@@ -195,7 +203,16 @@ export function reducer(state: State, action: Action): State {
       return { ...state, modal: action.modal };
     }
     case "SET_NODES": {
-      return withRadialLayout({ ...state, nodes: action.nodes }, action.nodes);
+      const { root } = action.nodes;
+      const nextBoards =
+        root && state.currentBoardId
+          ? state.boards.map((b) =>
+              b.id === state.currentBoardId && b.name !== root.text
+                ? { ...b, name: root.text, updatedAt: Date.now() }
+                : b,
+            )
+          : state.boards;
+      return withRadialLayout({ ...state, nodes: action.nodes, boards: nextBoards }, action.nodes);
     }
     case "SET_DRAGGING": {
       return { ...state, draggingNodeId: action.id };
@@ -209,9 +226,12 @@ export function reducer(state: State, action: Action): State {
         boardId: parent.boardId,
         categoryColor: parent.categoryColor,
         children: [],
+        estimate: null,
+        workLogs: [],
         collapsed: false,
         completed: false,
         dueDate: "",
+        startDate: "",
         status: "inbox",
         isRoot: false,
         parentId: parent.id,
@@ -242,9 +262,12 @@ export function reducer(state: State, action: Action): State {
         boardId: parent.boardId,
         categoryColor: action.categoryColor,
         children: [],
+        estimate: action.estimate,
+        workLogs: [],
         collapsed: false,
         completed: action.completed,
         dueDate: action.dueDate,
+        startDate: "",
         status: action.status,
         isRoot: false,
         parentId: parent.id,
@@ -280,8 +303,8 @@ export function reducer(state: State, action: Action): State {
     case "TOGGLE_COMPLETE": {
       const target = state.nodes[action.id];
       if (!target) return state;
-      const nextStatus: TaskStatus = target.completed ? "review" : "done";
-      return reducer(state, { id: action.id, status: nextStatus, type: "SET_STATUS" });
+      const next: TaskStatus = target.completed ? "inbox" : nextStatus(target.status);
+      return reducer(state, { id: action.id, status: next, type: "SET_STATUS" });
     }
     case "TOGGLE_COLLAPSE": {
       const node = state.nodes[action.id];
@@ -398,6 +421,31 @@ export function reducer(state: State, action: Action): State {
         { ...state, nodes: nextNodes, selectedNodeId: nextSelected },
         nextNodes,
       );
+    }
+    case "ADD_WORK_LOG": {
+      const node = state.nodes[action.nodeId];
+      if (!node) return state;
+      return {
+        ...state,
+        nodes: {
+          ...state.nodes,
+          [action.nodeId]: { ...node, workLogs: [...node.workLogs, action.entry] },
+        },
+      };
+    }
+    case "DELETE_WORK_LOG": {
+      const node = state.nodes[action.nodeId];
+      if (!node) return state;
+      return {
+        ...state,
+        nodes: {
+          ...state.nodes,
+          [action.nodeId]: {
+            ...node,
+            workLogs: node.workLogs.filter((e) => e.id !== action.entryId),
+          },
+        },
+      };
     }
     default: {
       return state;

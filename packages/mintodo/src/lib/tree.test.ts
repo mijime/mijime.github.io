@@ -16,9 +16,12 @@ function n(id: string, opts: Partial<MindNode> = {}): MindNode {
     dueDate: "",
     status: "inbox",
     children: [],
+    estimate: null,
+    workLogs: [],
     x: 0,
     y: 0,
     ...opts,
+    startDate: opts.startDate ?? "",
   };
 }
 
@@ -68,5 +71,24 @@ describe("isKanbanVisible", () => {
       b: n("b", { parentId: "p", completed: false }),
     };
     expect(isKanbanVisible(nodes, "p")).toBe(false);
+  });
+
+  it("returns true for a leaf under a fully-completed ancestor", () => {
+    const nodes = {
+      root: n("root", { children: ["p"] }),
+      p: n("p", { parentId: "root", children: ["g"], completed: true }),
+      g: n("g", { parentId: "p", completed: true }),
+    };
+    expect(isKanbanVisible(nodes, "g")).toBe(true);
+  });
+
+  it("returns true for a leaf under a fully-completed intermediate ancestor", () => {
+    const nodes = {
+      root: n("root", { children: ["p"] }),
+      p: n("p", { parentId: "root", children: ["g"], completed: true }),
+      g: n("g", { parentId: "p", children: ["a"], completed: true }),
+      a: n("a", { parentId: "g", completed: true }),
+    };
+    expect(isKanbanVisible(nodes, "a")).toBe(true);
   });
 });

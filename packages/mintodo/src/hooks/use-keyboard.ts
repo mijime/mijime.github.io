@@ -56,9 +56,7 @@ export function useKeyboard(): void {
         case "Backspace": {
           if (!active.isRoot) {
             e.preventDefault();
-            if (confirm("このタスクと、紐づくすべての子タスクを削除しますか？")) {
-              dispatch({ id: state.selectedNodeId, type: "DELETE_NODE" });
-            }
+            dispatch({ id: state.selectedNodeId, type: "DELETE_NODE" });
           }
           break;
         }

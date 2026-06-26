@@ -1,5 +1,5 @@
-import { fireEvent, render, screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { act, fireEvent, render, screen } from "@testing-library/react";
+import { describe, expect, it, vi } from "vitest";
 import { TaskCard } from "./TaskCard";
 import { MindProvider, useMindStore } from "../hooks/use-mind-store";
 import type { MindNode } from "../types";
@@ -19,9 +19,12 @@ function makeNode(over: Partial<MindNode> = {}): MindNode {
     dueDate: "",
     status: "inbox",
     children: [],
+    estimate: null,
+    workLogs: [],
     x: 0,
     y: 0,
     ...over,
+    startDate: over.startDate ?? "",
   };
 }
 
@@ -59,7 +62,7 @@ describe("TaskCard", () => {
     );
     expect(screen.getByText("牛乳")).toBeTruthy();
     expect(screen.getByTestId("add-child-n1")).toBeTruthy();
-    expect(screen.getByTestId("status-dot-button-n1").className).toContain("bg-sky-500");
+    expect(screen.getByTestId("task-status-n1").className).toContain("bg-sky-500");
   });
 
   it("opens edit-new modal when add-child is clicked", () => {
@@ -73,15 +76,72 @@ describe("TaskCard", () => {
     expect(captured!.modal).toEqual({ kind: "edit-new", parentId: "n1" });
   });
 
-  it("toggles complete when checkbox is clicked", () => {
+  it("clicking the status dot advances status inbox -> wip", () => {
     render(
       <MindProvider initialState={makeState()}>
         <Capture />
         <TaskCard node={makeNode()} />
       </MindProvider>,
     );
-    fireEvent.click(screen.getByTestId("task-check-n1"));
-    expect(captured!.nodes.n1.completed).toBe(true);
+    vi.useFakeTimers();
+    fireEvent.click(screen.getByTestId("task-status-n1"));
+    act(() => {
+      vi.advanceTimersByTime(200);
+    });
+    expect(captured!.nodes.n1.status).toBe("wip");
+    expect(captured!.nodes.n1.completed).toBe(false);
+    vi.useRealTimers();
+  });
+
+  it("clicking the status dot from done resets to inbox", () => {
+    render(
+      <MindProvider initialState={makeState()}>
+        <Capture />
+        <TaskCard node={makeNode({ status: "done", completed: true })} />
+      </MindProvider>,
+    );
+    vi.useFakeTimers();
+    fireEvent.click(screen.getByTestId("task-status-n1"));
+    act(() => {
+      vi.advanceTimersByTime(200);
+    });
+    expect(captured!.nodes.n1.status).toBe("inbox");
+    expect(captured!.nodes.n1.completed).toBe(false);
+    vi.useRealTimers();
+  });
+
+  it("double clicking the status dot goes back one status", () => {
+    render(
+      <MindProvider initialState={makeState()}>
+        <Capture />
+        <TaskCard node={makeNode({ status: "wip" })} />
+      </MindProvider>,
+    );
+    fireEvent.dblClick(screen.getByTestId("task-status-n1"));
+    expect(captured!.nodes.n1.status).toBe("inbox");
+  });
+
+  it("double clicking the status dot from review goes to wip", () => {
+    render(
+      <MindProvider initialState={makeState()}>
+        <Capture />
+        <TaskCard node={makeNode({ status: "review" })} />
+      </MindProvider>,
+    );
+    fireEvent.dblClick(screen.getByTestId("task-status-n1"));
+    expect(captured!.nodes.n1.status).toBe("wip");
+  });
+
+  it("double clicking the status dot from done goes to review", () => {
+    render(
+      <MindProvider initialState={makeState()}>
+        <Capture />
+        <TaskCard node={makeNode({ status: "done", completed: true })} />
+      </MindProvider>,
+    );
+    fireEvent.dblClick(screen.getByTestId("task-status-n1"));
+    expect(captured!.nodes.n1.status).toBe("review");
+    expect(captured!.nodes.n1.completed).toBe(false);
   });
 
   it("places the hairline between meta and body in the not-done case", () => {
@@ -95,17 +155,6 @@ describe("TaskCard", () => {
     const hairline = card.children[1] as HTMLElement;
     expect(hairline.style.borderTop).toBe("1px solid rgb(14, 165, 233)");
     expect(hairline.style.opacity).toBe("");
-  });
-
-  it("clicking the status dot cycles status backwards", () => {
-    render(
-      <MindProvider initialState={makeState()}>
-        <Capture />
-        <TaskCard node={makeNode({ status: "wip" })} />
-      </MindProvider>,
-    );
-    fireEvent.click(screen.getByTestId("status-dot-button-n1"));
-    expect(captured!.nodes.n1.status).toBe("inbox");
   });
 
   it("shows child progress M/N when the node has children", () => {
@@ -153,7 +202,7 @@ describe("TaskCard", () => {
     expect(screen.queryByTestId("task-card-progress-n1")).toBeNull();
   });
 
-  it("uses categoryColor for the hairline and renders the collapsed done dot", () => {
+  it("uses categoryColor for the hairline and renders status dot when done", () => {
     const { container } = render(
       <MindProvider initialState={makeState()}>
         <TaskCard node={makeNode({ categoryColor: "rose", status: "done", completed: true })} />
@@ -164,11 +213,7 @@ describe("TaskCard", () => {
     const hairline = card.children[1] as HTMLElement;
     expect(hairline.style.borderTop).toBe("1px solid rgb(244, 63, 94)");
     expect(hairline.style.opacity).toBe("0.35");
-    // Collapsed done: an 8px emerald dot inside BodyRow
-    const bodyRow = card.children[0] as HTMLElement;
-    const dot = bodyRow.querySelector("span.rounded-full.bg-emerald-500") as HTMLElement | null;
-    expect(dot).not.toBeNull();
-    // Meta row (and its StatusDot) is absent
+    // Meta row status dot is absent
     expect(screen.queryByTestId("status-dot-button-n1")).toBeNull();
     // The body uses Crimson Pro for the title
     const title = container.querySelector("span.whitespace-pre-wrap") as HTMLElement;

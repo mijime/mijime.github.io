@@ -1,6 +1,6 @@
 import "fake-indexeddb/auto";
-import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { act, fireEvent, render, screen } from "@testing-library/react";
+import { beforeEach, afterEach, describe, expect, it, vi } from "vitest";
 import { db } from "../db";
 import { TextEditor } from "./TextEditor";
 import { MindProvider, useMindStore } from "../hooks/use-mind-store";
@@ -23,7 +23,10 @@ function makeNode(over: Partial<MindNode> = {}): MindNode {
     children: [],
     x: 0,
     y: 0,
+    estimate: null,
+    workLogs: [],
     ...over,
+    startDate: over.startDate ?? "",
   };
 }
 
@@ -54,8 +57,19 @@ function Capture() {
   return null;
 }
 
-describe("TextEditor", () => {
-  it("renders the serialized DSL on mount (no 'mindmap' header)", () => {
+describe("TextEditor auto-save", () => {
+  beforeEach(async () => {
+    await db.open();
+    await db.boards.clear();
+    await db.nodes.clear();
+    await db.meta.clear();
+    await db.boards.put({ id: "b1", name: "Root", createdAt: 0, updatedAt: 0 });
+  });
+  afterEach(async () => {
+    await db.delete();
+  });
+
+  it("renders initial serialized DSL (new format, no 'mindmap')", () => {
     render(
       <MindProvider initialState={makeState()}>
         <TextEditor />
@@ -63,46 +77,30 @@ describe("TextEditor", () => {
     );
     const ta = screen.getByTestId("text-editor-textarea") as HTMLTextAreaElement;
     expect(ta.value).not.toContain("mindmap");
-    expect(ta.value).toContain("* Root");
-    expect(ta.value).toContain("* Child");
+    expect(ta.value).toContain("# Root");
+    expect(ta.value).toContain("- [ ] Child");
   });
 
-  it("does not show preview pane (removed)", () => {
+  it("renders save-state indicator", () => {
     render(
       <MindProvider initialState={makeState()}>
         <TextEditor />
       </MindProvider>,
     );
-    expect(screen.queryByTestId("text-editor-preview")).toBeNull();
-    expect(screen.queryByTestId("text-editor-error")).toBeNull();
+    expect(screen.getByTestId("text-editor-save-state")).toBeTruthy();
   });
 
-  it("applies parsed DSL on apply click and confirms", async () => {
-    vi.spyOn(window, "confirm").mockReturnValue(true);
-    await db.boards.put({ id: "b1", name: "Root", createdAt: 0, updatedAt: 0 });
+  it("does NOT render apply button", () => {
     render(
       <MindProvider initialState={makeState()}>
-        <Capture />
         <TextEditor />
       </MindProvider>,
     );
-    const ta = screen.getByTestId("text-editor-textarea") as HTMLTextAreaElement;
-    act(() => {
-      fireEvent.change(ta, {
-        target: { value: "mindmap\n  * NewRoot\n    * NewChild\n" },
-      });
-    });
-    act(() => {
-      fireEvent.click(screen.getByTestId("text-editor-apply"));
-    });
-    await waitFor(() => {
-      expect(captured!.nodes.root.text).toBe("NewRoot");
-    });
-    expect(captured!.boards[0].name).toBe("NewRoot");
+    expect(screen.queryByTestId("text-editor-apply")).toBeNull();
   });
 
-  it("does not apply when confirm is cancelled", () => {
-    vi.spyOn(window, "confirm").mockReturnValue(false);
+  it("typing → after 1000ms SET_NODES dispatched", async () => {
+    vi.useFakeTimers();
     render(
       <MindProvider initialState={makeState()}>
         <Capture />
@@ -111,69 +109,72 @@ describe("TextEditor", () => {
     );
     const ta = screen.getByTestId("text-editor-textarea") as HTMLTextAreaElement;
     act(() => {
-      fireEvent.change(ta, {
-        target: { value: "mindmap\n  * Replaced\n" },
-      });
+      fireEvent.change(ta, { target: { value: "# Root\n- [ ] Changed\n" } });
     });
-    act(() => {
-      fireEvent.click(screen.getByTestId("text-editor-apply"));
+    const beforeNode = Object.values(captured!.nodes).find((n) => n.text === "Child");
+    expect(beforeNode).toBeTruthy();
+    await act(async () => {
+      vi.advanceTimersByTime(1100);
     });
-    expect(captured!.nodes.root.text).toBe("Root");
+    const afterNode = Object.values(captured!.nodes).find((n) => n.text === "Changed");
+    expect(afterNode).toBeTruthy();
+    expect(afterNode!.parentId).toBe("root");
+    vi.useRealTimers();
   });
 
-  it("resets textarea to current DSL on reset click", () => {
+  it("invalid line → '未保存' with error tooltip", () => {
+    render(
+      <MindProvider initialState={makeState()}>
+        <Capture />
+        <TextEditor />
+      </MindProvider>,
+    );
+    act(() => {
+      fireEvent.change(screen.getByTestId("text-editor-textarea"), {
+        target: { value: "garbage line\n" },
+      });
+    });
+    const pill = screen.getByTestId("text-editor-save-state");
+    expect(pill.textContent).toContain("未保存");
+    expect(pill.getAttribute("title")).toBeTruthy();
+  });
+
+  it("fixing invalid → after debounce '保存済み'", async () => {
+    vi.useFakeTimers();
+    render(
+      <MindProvider initialState={makeState()}>
+        <Capture />
+        <TextEditor />
+      </MindProvider>,
+    );
+    const ta = screen.getByTestId("text-editor-textarea") as HTMLTextAreaElement;
+    act(() => {
+      fireEvent.change(ta, { target: { value: "garbage\n" } });
+    });
+    act(() => {
+      fireEvent.change(ta, { target: { value: "# Root\n- [ ] Fixed\n" } });
+    });
+    await act(async () => {
+      vi.advanceTimersByTime(1100);
+    });
+    expect(screen.getByTestId("text-editor-save-state").textContent).toContain("保存済み");
+    vi.useRealTimers();
+  });
+
+  it("リセット reverts textarea to serialized DSL", () => {
     render(
       <MindProvider initialState={makeState()}>
         <TextEditor />
       </MindProvider>,
     );
     const ta = screen.getByTestId("text-editor-textarea") as HTMLTextAreaElement;
+    const initial = ta.value;
     act(() => {
       fireEvent.change(ta, { target: { value: "garbage" } });
     });
     act(() => {
       fireEvent.click(screen.getByTestId("text-editor-reset"));
     });
-    expect(ta.value).toContain("* Root");
-  });
-
-  it("applies on Cmd+Enter (metaKey)", async () => {
-    vi.spyOn(window, "confirm").mockReturnValue(true);
-    render(
-      <MindProvider initialState={makeState()}>
-        <Capture />
-        <TextEditor />
-      </MindProvider>,
-    );
-    const ta = screen.getByTestId("text-editor-textarea") as HTMLTextAreaElement;
-    act(() => {
-      fireEvent.change(ta, { target: { value: "mindmap\n  * CmdRoot\n" } });
-    });
-    act(() => {
-      fireEvent.keyDown(window, { key: "Enter", metaKey: true });
-    });
-    await waitFor(() => {
-      expect(captured!.nodes.root.text).toBe("CmdRoot");
-    });
-  });
-
-  it("applies on Ctrl+Enter (ctrlKey)", async () => {
-    vi.spyOn(window, "confirm").mockReturnValue(true);
-    render(
-      <MindProvider initialState={makeState()}>
-        <Capture />
-        <TextEditor />
-      </MindProvider>,
-    );
-    const ta = screen.getByTestId("text-editor-textarea") as HTMLTextAreaElement;
-    act(() => {
-      fireEvent.change(ta, { target: { value: "mindmap\n  * CtrlRoot\n" } });
-    });
-    act(() => {
-      fireEvent.keyDown(window, { key: "Enter", ctrlKey: true });
-    });
-    await waitFor(() => {
-      expect(captured!.nodes.root.text).toBe("CtrlRoot");
-    });
+    expect(ta.value).toBe(initial);
   });
 });

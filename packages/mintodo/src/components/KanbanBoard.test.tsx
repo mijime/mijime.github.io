@@ -24,8 +24,11 @@ function node(
     priority: "medium",
     categoryColor: "slate",
     dueDate: "",
+    startDate: "",
     status: opts.status,
     children: [],
+    estimate: null,
+    workLogs: [],
     x: 0,
     y: 0,
   };

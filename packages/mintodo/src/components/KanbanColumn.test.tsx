@@ -19,8 +19,11 @@ function node(
     priority: "medium",
     categoryColor: "slate",
     dueDate: "",
+    startDate: "",
     status: opts.status ?? "inbox",
     children: opts.children ?? [],
+    estimate: null,
+    workLogs: [],
     x: 0,
     y: 0,
   };
@@ -110,7 +113,7 @@ describe("KanbanColumn", () => {
     expect(screen.getByTestId("kanban-column-count-wip").textContent).toBe("1");
   });
 
-  it("shows a parent instead of its leaves when every leaf descendant is completed", () => {
+  it("shows both parent and leaves when every leaf descendant is completed", () => {
     const root = node({
       id: "root",
       boardId: "b",
@@ -131,8 +134,8 @@ describe("KanbanColumn", () => {
     const b = node({ id: "b", boardId: "b", parentId: "p", status: "done", completed: true });
     renderColumn("done", [root, p, a, b]);
     expect(screen.getByTestId("kanban-card-p")).toBeTruthy();
-    expect(screen.queryByTestId("kanban-card-a")).toBeNull();
-    expect(screen.queryByTestId("kanban-card-b")).toBeNull();
-    expect(screen.getByTestId("kanban-column-count-done").textContent).toBe("1");
+    expect(screen.getByTestId("kanban-card-a")).toBeTruthy();
+    expect(screen.getByTestId("kanban-card-b")).toBeTruthy();
+    expect(screen.getByTestId("kanban-column-count-done").textContent).toBe("3");
   });
 });

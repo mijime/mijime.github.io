@@ -20,9 +20,12 @@ function makeNode(id: string, parentId: string | null, opts: Partial<MindNode> =
     dueDate: "",
     status: "inbox",
     children: opts.children ?? [],
+    estimate: null,
+    workLogs: [],
     x: opts.x ?? 0,
     y: opts.y ?? 0,
     ...opts,
+    startDate: opts.startDate ?? "",
   };
 }
 
@@ -87,6 +90,47 @@ describe("EditModal", () => {
       '[data-testid="edit-modal-textarea"]',
     ) as HTMLTextAreaElement;
     expect(ta.value).toBe("");
+  });
+
+  it("renders the parent breadcrumb of the edited node in edit mode", () => {
+    const { container } = setup({ modal: { kind: "edit", nodeId: "a" } });
+    const title = container.querySelector('[data-testid="edit-modal-title"]') as HTMLElement;
+    expect(title.textContent).toContain("Root");
+    expect(title.textContent).not.toContain("Task A");
+    expect(title.getAttribute("title")).toBe("Root");
+  });
+
+  it("renders the parent's breadcrumb + ' + 新規' in edit-new mode", () => {
+    const { container } = setup({ modal: { kind: "edit-new", parentId: "a" } });
+    const title = container.querySelector('[data-testid="edit-modal-title"]') as HTMLElement;
+    expect(title.textContent).toBe("Root / Task A + 新規");
+    expect(title.getAttribute("title")).toBe("Root / Task A + 新規");
+  });
+
+  it("renders the board root text + ' + 新規' when adding under the root", () => {
+    const { container } = setup({ modal: { kind: "edit-new", parentId: "root" } });
+    const title = container.querySelector('[data-testid="edit-modal-title"]') as HTMLElement;
+    expect(title.textContent).toBe("Root + 新規");
+  });
+
+  it("shows parent breadcrumb on a 4-level chain (no truncation at 3-level parent)", () => {
+    const deepState: State = {
+      ...makeState(),
+      nodes: {
+        root: makeNode("root", null, { isRoot: true, text: "R", children: ["a"] }),
+        a: makeNode("a", "root", { text: "A", children: ["b"] }),
+        b: makeNode("b", "a", { text: "B", children: ["c"] }),
+        c: makeNode("c", "b", { text: "C" }),
+      },
+      modal: { kind: "edit", nodeId: "c" },
+    };
+    const { container } = render(
+      <MindProvider initialState={deepState}>
+        <EditModal />
+      </MindProvider>,
+    );
+    const title = container.querySelector('[data-testid="edit-modal-title"]') as HTMLElement;
+    expect(title.textContent).toBe("R / A / B");
   });
 
   it("updates the node on save in edit mode", () => {
@@ -190,14 +234,11 @@ describe("EditModal", () => {
     const deleteBtn = document.querySelector(
       '[data-testid="edit-modal-delete"]',
     ) as HTMLButtonElement;
-    const originalConfirm = window.confirm;
-    window.confirm = vi.fn(() => true);
     act(() => {
       fireEvent.click(deleteBtn);
     });
     expect(capturedState!.nodes.a).toBeUndefined();
     expect(capturedState!.modal).toBeNull();
-    window.confirm = originalConfirm;
   });
 
   it("Cmd+Enter in textarea saves in edit mode", () => {
@@ -252,6 +293,79 @@ describe("EditModal", () => {
   });
 });
 
+describe("EditModal — estimate field", () => {
+  it("renders estimate input with data-testid when 属性 is expanded", () => {
+    const { container } = setup({ modal: { kind: "edit", nodeId: "a" } });
+    act(() => {
+      fireEvent.click(container.querySelector('[data-testid="edit-modal-attr-toggle"]')!);
+    });
+    expect(container.querySelector('[data-testid="edit-modal-estimate"]')).toBeTruthy();
+  });
+  it("changing estimate to 8 saves it", () => {
+    setup({ modal: { kind: "edit", nodeId: "a" } });
+    const toggle = document.querySelector('[data-testid="edit-modal-attr-toggle"]')!;
+    act(() => {
+      fireEvent.click(toggle);
+    });
+    act(() => {
+      fireEvent.change(document.querySelector('[data-testid="edit-modal-estimate"]')!, {
+        target: { value: "8" },
+      });
+    });
+    act(() => {
+      fireEvent.click(document.querySelector('[data-testid="edit-modal-save"]')!);
+    });
+    expect(capturedState!.nodes.a.estimate).toBe(8);
+  });
+  it("clearing estimate saves as null", () => {
+    setup({
+      nodes: {
+        root: makeNode("root", null, { isRoot: true, text: "Root", children: ["a"] }),
+        a: makeNode("a", "root", { text: "A", estimate: 8 }),
+      },
+      modal: { kind: "edit", nodeId: "a" },
+    });
+    const toggle = document.querySelector('[data-testid="edit-modal-attr-toggle"]')!;
+    act(() => {
+      fireEvent.click(toggle);
+    });
+    act(() => {
+      fireEvent.change(document.querySelector('[data-testid="edit-modal-estimate"]')!, {
+        target: { value: "" },
+      });
+    });
+    act(() => {
+      fireEvent.click(document.querySelector('[data-testid="edit-modal-save"]')!);
+    });
+    expect(capturedState!.nodes.a.estimate).toBeNull();
+  });
+});
+
+describe("EditModal — parentBreadcrumb", () => {
+  it("edit mode shows parent breadcrumb (Root, not Root / Task A)", () => {
+    const { container } = setup({ modal: { kind: "edit", nodeId: "a" } });
+    expect(container.querySelector('[data-testid="edit-modal-title"]')!.textContent).toBe("Root");
+  });
+  it("edit-new mode shows parent breadcrumb + ' + 新規'", () => {
+    const { container } = setup({ modal: { kind: "edit-new", parentId: "root" } });
+    expect(container.querySelector('[data-testid="edit-modal-title"]')!.textContent).toBe(
+      "Root + 新規",
+    );
+  });
+});
+
+describe("EditModal — delete without confirm", () => {
+  it("削除 deletes unconditionally (no window.confirm)", () => {
+    setup({ modal: { kind: "edit", nodeId: "a" } });
+    const confirmSpy = vi.spyOn(window, "confirm");
+    act(() => {
+      fireEvent.click(document.querySelector('[data-testid="edit-modal-delete"]')!);
+    });
+    expect(capturedState!.nodes.a).toBeUndefined();
+    expect(confirmSpy).not.toHaveBeenCalled();
+  });
+});
+
 const ROOT: MindNode = makeNode("root", null, { isRoot: true, text: "Root", children: [] });
 
 function renderEditFor(node: MindNode) {
@@ -281,8 +395,11 @@ describe("EditModal — status picker", () => {
       priority: "medium",
       categoryColor: "slate",
       dueDate: "",
+      startDate: "",
       status: "inbox",
       children: [],
+      estimate: null,
+      workLogs: [],
       x: 0,
       y: 0,
     };
@@ -310,8 +427,11 @@ describe("EditModal — status picker", () => {
       priority: "medium",
       categoryColor: "slate",
       dueDate: "",
+      startDate: "",
       status: "inbox",
       children: [],
+      estimate: null,
+      workLogs: [],
       x: 0,
       y: 0,
     };

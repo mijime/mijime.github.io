@@ -1,4 +1,4 @@
-import { FileText, LayoutGrid, Network } from "lucide-react";
+import { Calendar, FileText, LayoutGrid, Network } from "lucide-react";
 import { useMindStore } from "../hooks/use-mind-store";
 import type { ViewMode } from "../types";
 
@@ -6,6 +6,7 @@ const OPTIONS: { value: ViewMode; label: string; Icon: typeof Network }[] = [
   { value: "mindmap", label: "mindmap", Icon: Network },
   { value: "kanban", label: "kanban", Icon: LayoutGrid },
   { value: "text", label: "text", Icon: FileText },
+  { value: "gantt", label: "gantt", Icon: Calendar },
 ];
 
 export function ViewModeToggle() {

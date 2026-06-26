@@ -16,9 +16,12 @@ function makeNode(opts: Partial<MindNode> = {}): MindNode {
     dueDate: opts.dueDate ?? "",
     status: opts.status ?? "inbox",
     children: [],
+    estimate: null,
+    workLogs: [],
     x: 0,
     y: 0,
     ...opts,
+    startDate: opts.startDate ?? "",
   };
 }
 

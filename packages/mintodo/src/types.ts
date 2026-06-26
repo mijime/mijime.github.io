@@ -6,7 +6,7 @@ export type TaskStatus = "inbox" | "wip" | "review" | "done";
 
 export const TASK_STATUSES: readonly TaskStatus[] = ["inbox", "wip", "review", "done"] as const;
 
-export type ViewMode = "mindmap" | "kanban" | "text";
+export type ViewMode = "mindmap" | "kanban" | "text" | "gantt";
 
 export interface Board {
   id: string;
@@ -26,8 +26,11 @@ export interface MindNode {
   priority: Priority;
   categoryColor: CategoryColor;
   dueDate: string;
+  startDate: string;
   status: TaskStatus;
   children: string[];
+  estimate: number | null;
+  workLogs: WorkLogEntry[];
   x: number;
   y: number;
 }
@@ -43,7 +46,14 @@ export type Modal =
   | { kind: "help" }
   | { kind: "board-name"; mode: "create" | "rename"; boardId?: string; initialName?: string }
   | { kind: "board-delete"; boardId: string; boardName: string }
+  | { kind: "work-log"; nodeId: string }
   | null;
+
+export interface WorkLogEntry {
+  id: string;
+  timestamp: number;
+  text: string;
+}
 
 export interface SaveData {
   version: 2;

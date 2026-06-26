@@ -33,13 +33,15 @@ export function KanbanColumn({ status }: Props) {
   const { dispatch, state } = useMindStore();
   const { setNodeRef, isOver } = useDroppable({ id: status });
 
+  const q = state.searchQuery.toLowerCase();
   const cards = Object.values(state.nodes).filter(
     (n) =>
       n.boardId === state.currentBoardId &&
       n.status === status &&
       !isParentCollapsed(state, n.id) &&
       isKanbanVisible(state.nodes, n.id) &&
-      !(state.hideCompleted && n.completed && !n.isRoot),
+      !(state.hideCompleted && n.completed && !n.isRoot) &&
+      (state.searchQuery === "" || n.text.toLowerCase().includes(q)),
   );
 
   return (
