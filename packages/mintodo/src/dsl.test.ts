@@ -359,3 +359,134 @@ describe("parseInlineDSL", () => {
     expect(parseInlineDSL("task @estimate:0").estimate).toBeNull();
   });
 });
+
+describe("realistic boards", () => {
+	const samples = {
+		"personal project with worklog history": `# 2026 Q2 個人プロジェクト
+
+- [-] メインプロジェクト
+  - [x] 要件定義 @priority:high @due:2026-04-15
+    - 2026-04-01 09:30: クライアントMTG実施
+    - 2026-04-03 14:00: ドラフトv0.1 共有
+    - 2026-04-10 11:00: フィードバック反映v0.2
+    - 2026-04-15 18:30: 最終版FIX @done
+  - [-] 設計フェーズ @priority:high
+    - [x] アーキテクチャ図
+      - 2026-04-20 10:00: PlantUMLで作成
+    - [-] DB スキーマ @priority:medium
+      - 2026-04-25 16:00: レビュー待ち
+  - [ ] 実装フェーズ
+    - [ ] バックエンド
+    - [ ] フロントエンド
+  - [ ] リリース準備
+- [x] 個人タスク
+  - [x] 健康診断 @due:2026-05-10
+    - 2026-05-08 09:00: 受診完了
+`,
+		"gantt-friendly board with estimates": `# Web アプリ再構築
+
+- [-] Phase 1: MVP
+  - [-] 認証機能 @estimate:16
+    - [ ] OAuth 統合
+      - Google
+      - GitHub
+    - [x] メール/パスワード @estimate:4
+      - 2026-06-01 10:00: 実装完了
+      - 2026-06-02 15:30: テスト通過
+  - [-] データモデル @estimate:8
+    - [x] Prisma スキーマ
+      - 2026-05-28 14:00: 完成
+  - [ ] API エンドポイント @estimate:24
+- [-] Phase 2: ベータリリース
+  - [ ] パフォーマンス改善 @estimate:12 @priority:high
+  - [ ] E2E テスト @estimate:16
+- [ ] Phase 3: GA
+`,
+		"reading notes (worklog-heavy)": `# 読書メモ
+
+- [-] 技術書
+  - [x] Domain Modeling Made Functional
+    - 2026-05-01 22:30: 第1章読了。型駆動設計の基本
+    - 2026-05-03 23:15: 第3章読了。集約の境界の話
+    - 2026-05-08 21:00: 読了。めちゃくちゃ良かった
+  - [-] Designing Data-Intensive Applications @priority:high
+    - 2026-05-10 19:00: 第1章 概要
+    - 2026-05-12 20:30: 第2章 データモデル
+    - 2026-05-15 22:00: 第3章 ストレージエンジン
+    - [ ] 第5章 レプリケーション
+    - [ ] 第7章 トランザクション
+  - [ ] Team Topologies
+- [x] 論文
+  - [x] The Chubby Lock Service
+    - 2026-04-22 11:00: 要約作成
+    - 2026-04-25 16:00: 社内勉強会で発表
+`,
+		"edge cases (status glyphs + colors + deep nesting)": `# Edge cases @priority:high
+
+- [ ] wip の特殊グリフ
+  - [-] 進行中タスク @status:wip
+  - [|] レビュー待ち @status:review
+  - [x] 完了タスク @done
+- [x] 複数属性の組み合わせ @priority:high @due:2026-12-31 @estimate:8 @color:emerald
+- [-] 色違いのタスク
+  - [ ] 通常 @color:slate
+  - [ ] 緊急 @color:rose @priority:high
+  - [ ] アイデア @color:sky
+  - [ ] 財務 @color:emerald
+- [-] 深いネスト
+  - [-] レベル1
+    - [-] レベル2
+      - [-] レベル3
+        - [-] レベル4
+          - [-] レベル5
+            - [-] レベル6
+              - [ ] レベル7 (leaf)
+                - 2026-06-26 10:00: もう限界
+`,
+	} as const;
+
+	type SampleKey = keyof typeof samples;
+	const expectedNodeCount: Record<SampleKey, number> = {
+		"personal project with worklog history": 11,
+		"gantt-friendly board with estimates": 11,
+		"reading notes (worklog-heavy)": 8,
+		"edge cases (status glyphs + colors + deep nesting)": 18,
+	};
+
+	for (const [name, src] of Object.entries(samples)) {
+		it(`parses: ${name}`, () => {
+			const r = parseDSL(src, "b1");
+			expect(r.ok).toBe(true);
+			if (!r.ok) return;
+			const nonRoot = Object.values(r.nodes).filter((n) => !n.isRoot);
+			expect(nonRoot).toHaveLength(expectedNodeCount[name as SampleKey]);
+		});
+
+		it(`round-trips: ${name}`, () => {
+			const r1 = parseDSL(src, "b1");
+			expect(r1.ok).toBe(true);
+			if (!r1.ok) return;
+			const serialized = serializeDSL(r1.nodes);
+			const r2 = parseDSL(serialized, "b1");
+			expect(r2.ok).toBe(true);
+			if (!r2.ok) return;
+			const c1 = Object.values(r1.nodes).filter((n) => !n.isRoot).length;
+			const c2 = Object.values(r2.nodes).filter((n) => !n.isRoot).length;
+			expect(c2).toBe(c1);
+			const text1 = Object.values(r1.nodes)
+				.filter((n) => !n.isRoot)
+				.map((n) => n.text)
+				.toSorted();
+			const text2 = Object.values(r2.nodes)
+				.filter((n) => !n.isRoot)
+				.map((n) => n.text)
+				.toSorted();
+			expect(text2).toEqual(text1);
+			const r3 = parseDSL(serializeDSL(r2.nodes), "b1");
+			expect(r3.ok).toBe(true);
+			if (!r3.ok) return;
+			const c3 = Object.values(r3.nodes).filter((n) => !n.isRoot).length;
+			expect(c3).toBe(c1);
+		});
+	}
+});
