@@ -421,6 +421,7 @@ describe("reducer - CREATE_CHILD", () => {
       categoryColor: "sky",
       dueDate: "2026-07-01",
       completed: false,
+      estimate: null,
       status: "inbox",
     });
     expect(next.nodes.n1.text).toBe("my task");
@@ -447,6 +448,7 @@ describe("reducer - CREATE_CHILD", () => {
       categoryColor: "slate",
       dueDate: "",
       completed: false,
+      estimate: null,
       status: "inbox",
     });
     expect(next.nodes.root.children).toContain("n1");
@@ -467,6 +469,7 @@ describe("reducer - CREATE_CHILD", () => {
       categoryColor: "slate",
       dueDate: "",
       completed: false,
+      estimate: null,
       status: "inbox",
     });
     expect(next.selectedNodeId).toBe("n1");
@@ -489,6 +492,7 @@ describe("reducer - CREATE_CHILD", () => {
       categoryColor: "slate",
       dueDate: "",
       completed: false,
+      estimate: null,
       status: "inbox",
     });
     expect(next.layoutVersion).toBe(before + 1);
@@ -761,6 +765,7 @@ describe("reducer — new fields (estimate, workLogs)", () => {
       categoryColor: "slate",
       dueDate: "",
       completed: false,
+      estimate: null,
       status: "inbox",
     });
     expect(next.nodes.n1.estimate).toBeNull();
@@ -778,7 +783,11 @@ describe("reducer — ADD_WORK_LOG", () => {
   });
 
   it("does NOT trigger a layout recompute (layoutVersion unchanged)", () => {
-    const s = { ...createInitialState(), layoutVersion: 5, nodes: { n: makeNode("n", "b-a", { workLogs: [] }) } };
+    const s = {
+      ...createInitialState(),
+      layoutVersion: 5,
+      nodes: { n: makeNode("n", "b-a", { workLogs: [] }) },
+    };
     const entry: WorkLogEntry = { id: "wl-2", timestamp: 2000, text: "Did Y" };
     const next = reducer(s, { type: "ADD_WORK_LOG", nodeId: "n", entry });
     expect(next.layoutVersion).toBe(5);
@@ -796,14 +805,22 @@ describe("reducer — DELETE_WORK_LOG", () => {
   it("removes the entry by id and leaves others intact", () => {
     const e1: WorkLogEntry = { id: "wl-1", timestamp: 1000, text: "X" };
     const e2: WorkLogEntry = { id: "wl-2", timestamp: 2000, text: "Y" };
-    const s = { ...createInitialState(), nodes: { n: makeNode("n", "b-a", { workLogs: [e1, e2] }) } };
+    const s = {
+      ...createInitialState(),
+      nodes: { n: makeNode("n", "b-a", { workLogs: [e1, e2] }) },
+    };
     const next = reducer(s, { type: "DELETE_WORK_LOG", nodeId: "n", entryId: "wl-1" });
     expect(next.nodes.n.workLogs).toHaveLength(1);
     expect(next.nodes.n.workLogs[0]).toEqual(e2);
   });
 
   it("is a no-op when entryId is not found", () => {
-    const s = { ...createInitialState(), nodes: { n: makeNode("n", "b-a", { workLogs: [{ id: "wl-1", timestamp: 1000, text: "X" }] }) } };
+    const s = {
+      ...createInitialState(),
+      nodes: {
+        n: makeNode("n", "b-a", { workLogs: [{ id: "wl-1", timestamp: 1000, text: "X" }] }),
+      },
+    };
     const next = reducer(s, { type: "DELETE_WORK_LOG", nodeId: "n", entryId: "missing" });
     expect(next.nodes.n.workLogs).toHaveLength(1);
   });

@@ -91,11 +91,12 @@ describe("EditModal", () => {
     expect(ta.value).toBe("");
   });
 
-  it("renders the breadcrumb of the edited node in edit mode", () => {
+  it("renders the parent breadcrumb of the edited node in edit mode", () => {
     const { container } = setup({ modal: { kind: "edit", nodeId: "a" } });
     const title = container.querySelector('[data-testid="edit-modal-title"]') as HTMLElement;
-    expect(title.textContent).toContain("Root / Task A");
-    expect(title.getAttribute("title")).toBe("Root / Task A");
+    expect(title.textContent).toContain("Root");
+    expect(title.textContent).not.toContain("Task A");
+    expect(title.getAttribute("title")).toBe("Root");
   });
 
   it("renders the parent's breadcrumb + ' + 新規' in edit-new mode", () => {
@@ -111,7 +112,7 @@ describe("EditModal", () => {
     expect(title.textContent).toBe("Root + 新規");
   });
 
-  it("truncates the breadcrumb to '… / last / last' on a 4-level chain in edit mode", () => {
+  it("shows parent breadcrumb on a 4-level chain (no truncation at 3-level parent)", () => {
     const deepState: State = {
       ...makeState(),
       nodes: {
@@ -128,7 +129,7 @@ describe("EditModal", () => {
       </MindProvider>,
     );
     const title = container.querySelector('[data-testid="edit-modal-title"]') as HTMLElement;
-    expect(title.textContent).toBe("… / B / C");
+    expect(title.textContent).toBe("R / A / B");
   });
 
   it("updates the node on save in edit mode", () => {
@@ -232,14 +233,11 @@ describe("EditModal", () => {
     const deleteBtn = document.querySelector(
       '[data-testid="edit-modal-delete"]',
     ) as HTMLButtonElement;
-    const originalConfirm = window.confirm;
-    window.confirm = vi.fn(() => true);
     act(() => {
       fireEvent.click(deleteBtn);
     });
     expect(capturedState!.nodes.a).toBeUndefined();
     expect(capturedState!.modal).toBeNull();
-    window.confirm = originalConfirm;
   });
 
   it("Cmd+Enter in textarea saves in edit mode", () => {
@@ -291,6 +289,79 @@ describe("EditModal", () => {
     // Verify 属性 section is collapsed (date input not visible)
     const reopenedDateInput = document.querySelector('input[type="date"]');
     expect(reopenedDateInput).toBeNull();
+  });
+});
+
+describe("EditModal — estimate field", () => {
+  it("renders estimate input with data-testid when 属性 is expanded", () => {
+    const { container } = setup({ modal: { kind: "edit", nodeId: "a" } });
+    act(() => {
+      fireEvent.click(container.querySelector('[data-testid="edit-modal-attr-toggle"]')!);
+    });
+    expect(container.querySelector('[data-testid="edit-modal-estimate"]')).toBeTruthy();
+  });
+  it("changing estimate to 8 saves it", () => {
+    setup({ modal: { kind: "edit", nodeId: "a" } });
+    const toggle = document.querySelector('[data-testid="edit-modal-attr-toggle"]')!;
+    act(() => {
+      fireEvent.click(toggle);
+    });
+    act(() => {
+      fireEvent.change(document.querySelector('[data-testid="edit-modal-estimate"]')!, {
+        target: { value: "8" },
+      });
+    });
+    act(() => {
+      fireEvent.click(document.querySelector('[data-testid="edit-modal-save"]')!);
+    });
+    expect(capturedState!.nodes.a.estimate).toBe(8);
+  });
+  it("clearing estimate saves as null", () => {
+    setup({
+      nodes: {
+        root: makeNode("root", null, { isRoot: true, text: "Root", children: ["a"] }),
+        a: makeNode("a", "root", { text: "A", estimate: 8 }),
+      },
+      modal: { kind: "edit", nodeId: "a" },
+    });
+    const toggle = document.querySelector('[data-testid="edit-modal-attr-toggle"]')!;
+    act(() => {
+      fireEvent.click(toggle);
+    });
+    act(() => {
+      fireEvent.change(document.querySelector('[data-testid="edit-modal-estimate"]')!, {
+        target: { value: "" },
+      });
+    });
+    act(() => {
+      fireEvent.click(document.querySelector('[data-testid="edit-modal-save"]')!);
+    });
+    expect(capturedState!.nodes.a.estimate).toBeNull();
+  });
+});
+
+describe("EditModal — parentBreadcrumb", () => {
+  it("edit mode shows parent breadcrumb (Root, not Root / Task A)", () => {
+    const { container } = setup({ modal: { kind: "edit", nodeId: "a" } });
+    expect(container.querySelector('[data-testid="edit-modal-title"]')!.textContent).toBe("Root");
+  });
+  it("edit-new mode shows parent breadcrumb + ' + 新規'", () => {
+    const { container } = setup({ modal: { kind: "edit-new", parentId: "root" } });
+    expect(container.querySelector('[data-testid="edit-modal-title"]')!.textContent).toBe(
+      "Root + 新規",
+    );
+  });
+});
+
+describe("EditModal — delete without confirm", () => {
+  it("削除 deletes unconditionally (no window.confirm)", () => {
+    setup({ modal: { kind: "edit", nodeId: "a" } });
+    const confirmSpy = vi.spyOn(window, "confirm");
+    act(() => {
+      fireEvent.click(document.querySelector('[data-testid="edit-modal-delete"]')!);
+    });
+    expect(capturedState!.nodes.a).toBeUndefined();
+    expect(confirmSpy).not.toHaveBeenCalled();
   });
 });
 

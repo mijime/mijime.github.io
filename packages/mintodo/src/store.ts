@@ -62,6 +62,7 @@ export type Action =
       dueDate: string;
       completed: boolean;
       status: TaskStatus;
+      estimate: number | null;
     }
   | { type: "UPDATE_NODE"; id: string; patch: Partial<MindNode> }
   | { type: "ADD_WORK_LOG"; nodeId: string; entry: WorkLogEntry }
@@ -250,7 +251,7 @@ export function reducer(state: State, action: Action): State {
         boardId: parent.boardId,
         categoryColor: action.categoryColor,
         children: [],
-        estimate: null,
+        estimate: action.estimate,
         workLogs: [],
         collapsed: false,
         completed: action.completed,
@@ -414,7 +415,10 @@ export function reducer(state: State, action: Action): State {
       if (!node) return state;
       return {
         ...state,
-        nodes: { ...state.nodes, [action.nodeId]: { ...node, workLogs: [...node.workLogs, action.entry] } },
+        nodes: {
+          ...state.nodes,
+          [action.nodeId]: { ...node, workLogs: [...node.workLogs, action.entry] },
+        },
       };
     }
     case "DELETE_WORK_LOG": {
@@ -422,7 +426,13 @@ export function reducer(state: State, action: Action): State {
       if (!node) return state;
       return {
         ...state,
-        nodes: { ...state.nodes, [action.nodeId]: { ...node, workLogs: node.workLogs.filter((e) => e.id !== action.entryId) } },
+        nodes: {
+          ...state.nodes,
+          [action.nodeId]: {
+            ...node,
+            workLogs: node.workLogs.filter((e) => e.id !== action.entryId),
+          },
+        },
       };
     }
     default: {
