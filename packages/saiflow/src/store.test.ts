@@ -44,6 +44,20 @@ describe("reducer", () => {
     expect(next.rows).toEqual(rows);
   });
 
+  it("SET_SCENARIOS updates scenarios and resets index", () => {
+    const state = { ...initialState(), activeScenarioIndex: 2 };
+    const scenarios = [{ name: "A", events: [] }, { name: "B", events: [] }];
+    const next = reducer(state, { type: "SET_SCENARIOS", scenarios });
+    expect(next.scenarios).toEqual(scenarios);
+    expect(next.activeScenarioIndex).toBe(0);
+  });
+
+  it("SET_ACTIVE_SCENARIO updates activeScenarioIndex", () => {
+    const state = initialState();
+    const next = reducer(state, { type: "SET_ACTIVE_SCENARIO", index: 1 });
+    expect(next.activeScenarioIndex).toBe(1);
+  });
+
   it("returns state unchanged for unknown action", () => {
     const state = initialState();
     const next = reducer(state, { type: "UNKNOWN" } as unknown as Action);

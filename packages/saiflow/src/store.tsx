@@ -1,5 +1,5 @@
 import { createContext, useContext, useReducer, type Dispatch } from "react";
-import type { ParseError, SimulationConfig, YearRow } from "./types";
+import type { ParseError, Scenario, SimulationConfig, YearRow } from "./types";
 
 export interface State {
   dslText: string;
@@ -8,6 +8,8 @@ export interface State {
   parsed: { config: SimulationConfig } | { errors: ParseError[] } | null;
   rows: YearRow[] | null;
   activeTab: "dsl" | "gui";
+  scenarios: Scenario[];
+  activeScenarioIndex: number;
 }
 
 export type Action =
@@ -16,7 +18,9 @@ export type Action =
   | { type: "SET_YEARS"; years: number }
   | { type: "SET_TAB"; tab: "dsl" | "gui" }
   | { type: "SET_PARSED"; parsed: State["parsed"] }
-  | { type: "SET_ROWS"; rows: YearRow[] | null };
+  | { type: "SET_ROWS"; rows: YearRow[] | null }
+  | { type: "SET_SCENARIOS"; scenarios: Scenario[] }
+  | { type: "SET_ACTIVE_SCENARIO"; index: number };
 
 export function initialState(): State {
   return {
@@ -47,6 +51,8 @@ export function initialState(): State {
     parsed: null,
     rows: null,
     activeTab: "dsl",
+    scenarios: [],
+    activeScenarioIndex: 0,
   };
 }
 
@@ -64,6 +70,10 @@ export function reducer(state: State, action: Action): State {
       return { ...state, parsed: action.parsed };
     case "SET_ROWS":
       return { ...state, rows: action.rows };
+    case "SET_SCENARIOS":
+      return { ...state, scenarios: action.scenarios, activeScenarioIndex: 0 };
+    case "SET_ACTIVE_SCENARIO":
+      return { ...state, activeScenarioIndex: action.index };
     default:
       return state;
   }

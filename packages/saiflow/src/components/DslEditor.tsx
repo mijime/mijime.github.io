@@ -19,28 +19,33 @@ export function DslEditor() {
       dispatch({ type: "SET_PARSED", parsed: { errors: result.errors } });
       dispatch({ type: "SET_ROWS", rows: null });
     } else if (result.scenarios.length > 0) {
-      const scenario = result.scenarios[0];
-      dispatch({
-        type: "SET_PARSED",
-        parsed: {
-          config: {
-            currentAge: state.currentAge,
-            simulationYears: state.simulationYears,
-            scenario,
-          },
-        },
-      });
-      const rows = simulate({
-        currentAge: state.currentAge,
-        simulationYears: state.simulationYears,
-        scenario,
-      });
-      dispatch({ type: "SET_ROWS", rows });
+      dispatch({ type: "SET_SCENARIOS", scenarios: result.scenarios });
     } else {
       dispatch({ type: "SET_PARSED", parsed: null });
       dispatch({ type: "SET_ROWS", rows: null });
     }
-  }, [state.dslText, state.currentAge, state.simulationYears, dispatch]);
+  }, [state.dslText, dispatch]);
+
+  useEffect(() => {
+    const scenario = state.scenarios[state.activeScenarioIndex];
+    if (!scenario) return;
+    dispatch({
+      type: "SET_PARSED",
+      parsed: {
+        config: {
+          currentAge: state.currentAge,
+          simulationYears: state.simulationYears,
+          scenario,
+        },
+      },
+    });
+    const rows = simulate({
+      currentAge: state.currentAge,
+      simulationYears: state.simulationYears,
+      scenario,
+    });
+    dispatch({ type: "SET_ROWS", rows });
+  }, [state.scenarios, state.activeScenarioIndex, state.currentAge, state.simulationYears, dispatch]);
 
   const handleChange = (text: string) => {
     if (timerRef.current) clearTimeout(timerRef.current);
