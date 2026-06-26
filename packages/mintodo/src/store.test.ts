@@ -21,6 +21,7 @@ function makeNode(id: string, boardId: string, opts: Partial<MindNode> = {}): Mi
     x: 0,
     y: 0,
     ...opts,
+    startDate: opts.startDate ?? "",
   };
 }
 

@@ -42,6 +42,7 @@ export async function createBoard(name: string): Promise<{ board: Board; rootId:
     priority: "medium",
     categoryColor: "slate",
     dueDate: "",
+    startDate: "",
     status: "inbox",
     children: [],
     estimate: null,

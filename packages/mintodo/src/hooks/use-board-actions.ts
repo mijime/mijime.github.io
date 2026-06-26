@@ -25,6 +25,7 @@ function makeRootNode(boardId: string, name: string) {
       priority: "medium" as const,
       categoryColor: "slate" as const,
       dueDate: "",
+      startDate: "",
       status: "inbox" as const,
       children: [],
       estimate: null,
