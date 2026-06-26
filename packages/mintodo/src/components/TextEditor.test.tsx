@@ -108,13 +108,16 @@ describe("TextEditor auto-save", () => {
 		);
 		const ta = screen.getByTestId("text-editor-textarea") as HTMLTextAreaElement;
 		act(() => {
-			fireEvent.change(ta, { target: { value: "# Root\n  - [ ] Changed\n" } });
+			fireEvent.change(ta, { target: { value: "# Root\n- [ ] Changed\n" } });
 		});
-		expect(captured!.nodes.n1.text).toBe("Child");
+		const beforeNode = Object.values(captured!.nodes).find((n) => n.text === "Child");
+		expect(beforeNode).toBeTruthy();
 		await act(async () => {
 			vi.advanceTimersByTime(1100);
 		});
-		expect(captured!.nodes.n1.text).toBe("Changed");
+		const afterNode = Object.values(captured!.nodes).find((n) => n.text === "Changed");
+		expect(afterNode).toBeTruthy();
+		expect(afterNode!.parentId).toBe("root");
 		vi.useRealTimers();
 	});
 
@@ -148,7 +151,7 @@ describe("TextEditor auto-save", () => {
 			fireEvent.change(ta, { target: { value: "garbage\n" } });
 		});
 		act(() => {
-			fireEvent.change(ta, { target: { value: "# Root\n  - [ ] Fixed\n" } });
+			fireEvent.change(ta, { target: { value: "# Root\n- [ ] Fixed\n" } });
 		});
 		await act(async () => {
 			vi.advanceTimersByTime(1100);
