@@ -11,6 +11,7 @@ import { EmptyState } from "./components/EmptyState";
 import { HelpModal } from "./components/HelpModal";
 import { StatsPanel } from "./components/StatsPanel";
 import { Toolbar } from "./components/Toolbar";
+import { WorkLogModal } from "./components/WorkLogModal";
 import { ZoomControls } from "./components/ZoomControls";
 import { useCenterOnNewNode } from "./hooks/use-center-on-new-node";
 import { useKeyboard } from "./hooks/use-keyboard";
@@ -83,6 +84,7 @@ function Shell() {
       </div>
       <EditModal />
       <HelpModal />
+      <WorkLogModal />
       <BoardNameDialog />
       <BoardDeleteDialog />
     </div>
