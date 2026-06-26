@@ -4,7 +4,7 @@ import { ChartTooltip } from "./ChartTooltip";
 
 function niceStep(max: number): number {
   const raw = max / 4;
-  const exp = Math.pow(10, Math.floor(Math.log10(raw)));
+  const exp = 10 ** Math.floor(Math.log10(raw));
   const mant = raw / exp;
   return exp * (mant <= 1.5 ? 1 : mant <= 3 ? 2 : mant <= 7 ? 5 : 10);
 }
