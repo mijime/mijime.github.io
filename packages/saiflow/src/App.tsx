@@ -20,12 +20,12 @@ function RightPanel() {
             className={`px-2 py-0.5 text-xs rounded ${view === v ? "bg-(--terra) text-white" : "text-(--ink) opacity-50"}`}
             onClick={() => setView(v)}
           >
-            {v === "table" ? "収支表" : v === "line" ? "資産推移" : "収支比較"}
+            {v === "table" ? "収支表" : (v === "line" ? "資産推移" : "収支比較")}
           </button>
         ))}
       </div>
       <div className="flex-1 overflow-hidden">
-        {view === "table" ? <ResultTable /> : view === "line" ? <LineChart /> : <BarChart />}
+        {view === "table" ? <ResultTable /> : (view === "line" ? <LineChart /> : <BarChart />)}
       </div>
     </div>
   );

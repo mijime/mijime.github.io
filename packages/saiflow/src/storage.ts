@@ -47,7 +47,7 @@ async function loadScenario(id: number): Promise<Scenario | null> {
 }
 
 async function listScenarios(): Promise<Scenario[]> {
-  return db.scenarios.orderBy("updatedAt").reverse().toArray();
+  return db.scenarios.orderBy("updatedAt").toReversed().toArray();
 }
 
 export { db, saveScenario, loadScenario, listScenarios };

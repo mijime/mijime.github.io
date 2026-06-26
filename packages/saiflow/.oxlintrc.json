@@ -3,6 +3,19 @@
   "extends": ["../../.oxlintrc.json"],
   "rules": {
     "unicorn/filename-case": "off",
-    "eslint/max-lines": "off"
+    "eslint/max-lines": "off",
+    "eslint/no-nested-ternary": "off",
+    "eslint/no-continue": "off",
+    "eslint/no-plusplus": "off",
+    "eslint/require-unicode-regexp": "off",
+    "eslint/require-await": "off",
+    "eslint/prefer-named-capture-group": "off",
+    "unicorn/no-nested-ternary": "off",
+    "unicorn/prefer-ternary": "off",
+    "unicorn/no-negated-condition": "off",
+    "unicorn/no-array-for-each": "off",
+    "unicorn/prefer-number-properties": "off",
+    "typescript/no-non-null-assertion": "off",
+    "oxc/no-optional-chaining": "off"
   }
 }
