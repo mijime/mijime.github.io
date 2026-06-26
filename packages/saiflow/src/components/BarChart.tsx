@@ -40,8 +40,13 @@ export function BarChart() {
   const incomeTickStep = niceStep(maxIncome);
   const expenseTickStep = niceStep(maxExpense);
 
+  const netY = (net: number) => (net >= 0 ? incomeY(net) : expenseY(-net));
+
   const incomePoints = rows.map((r, i) => `${x(i)},${incomeY(r.totalIncome)}`).join(" ");
   const expensePoints = rows.map((r, i) => `${x(i)},${expenseY(r.totalExpense)}`).join(" ");
+  const netPoints = rows
+    .map((r, i) => `${x(i)},${netY(r.totalIncome - r.totalExpense)}`)
+    .join(" ");
 
   const xTickInterval = Math.max(1, Math.floor(rows.length / 10));
 
@@ -143,11 +148,21 @@ export function BarChart() {
           strokeWidth={1.5}
         />
 
+        {/* Net trend line */}
+        <polyline
+          points={netPoints}
+          fill="none"
+          stroke="#3b82f6"
+          strokeWidth={1.5}
+          strokeDasharray="4,3"
+        />
+
         {/* Data dots */}
         {rows.map((r, i) => (
           <g key={`dot${i}`}>
             <circle cx={x(i)} cy={incomeY(r.totalIncome)} r={2.5} fill="rgba(72, 187, 120, 1)" />
             <circle cx={x(i)} cy={expenseY(r.totalExpense)} r={2.5} fill="rgba(252, 129, 129, 1)" />
+            <circle cx={x(i)} cy={netY(r.totalIncome - r.totalExpense)} r={2.5} fill="#3b82f6" />
           </g>
         ))}
 
@@ -197,6 +212,12 @@ export function BarChart() {
             <rect x={0} y={-10} width={14} height={10} rx={2} fill="rgba(252, 129, 129, 0.7)" />
             <text x={18} y={0} fill="var(--ink)" opacity={0.7} fontSize={11}>
               支出
+            </text>
+          </g>
+          <g transform="translate(120, 0)">
+            <line x1={0} y1={-5} x2={14} y2={-5} stroke="#3b82f6" strokeWidth={1.5} strokeDasharray="3,2" />
+            <text x={18} y={0} fill="var(--ink)" opacity={0.7} fontSize={11}>
+              収支
             </text>
           </g>
         </g>
