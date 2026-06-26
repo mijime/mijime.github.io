@@ -203,7 +203,7 @@ export function reducer(state: State, action: Action): State {
       return { ...state, modal: action.modal };
     }
     case "SET_NODES": {
-      const {root} = action.nodes;
+      const { root } = action.nodes;
       const nextBoards =
         root && state.currentBoardId
           ? state.boards.map((b) =>
@@ -212,10 +212,7 @@ export function reducer(state: State, action: Action): State {
                 : b,
             )
           : state.boards;
-      return withRadialLayout(
-        { ...state, nodes: action.nodes, boards: nextBoards },
-        action.nodes,
-      );
+      return withRadialLayout({ ...state, nodes: action.nodes, boards: nextBoards }, action.nodes);
     }
     case "SET_DRAGGING": {
       return { ...state, draggingNodeId: action.id };

@@ -54,19 +54,16 @@ export function Canvas() {
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }));
 
-  const visibleNodes = useMemo(
-    () => {
-      const q = state.searchQuery.toLowerCase();
-      return Object.values(state.nodes).filter((n) => {
-        if (state.currentBoardId && n.boardId !== state.currentBoardId) return false;
-        if (isParentCollapsed(state, n.id)) return false;
-        if (state.hideCompleted && n.completed && !n.isRoot) return false;
-        if (state.searchQuery !== "" && !n.text.toLowerCase().includes(q)) return false;
-        return true;
-      });
-    },
-    [state.nodes, state.currentBoardId, state.hideCompleted, state.searchQuery],
-  );
+  const visibleNodes = useMemo(() => {
+    const q = state.searchQuery.toLowerCase();
+    return Object.values(state.nodes).filter((n) => {
+      if (state.currentBoardId && n.boardId !== state.currentBoardId) return false;
+      if (isParentCollapsed(state, n.id)) return false;
+      if (state.hideCompleted && n.completed && !n.isRoot) return false;
+      if (state.searchQuery !== "" && !n.text.toLowerCase().includes(q)) return false;
+      return true;
+    });
+  }, [state.nodes, state.currentBoardId, state.hideCompleted, state.searchQuery]);
 
   function handleDragStart(event: { active: { id: string | number } }) {
     const id = String(event.active.id);

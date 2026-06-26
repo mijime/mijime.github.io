@@ -32,7 +32,10 @@ export function KanbanCard({ node }: Props) {
       }}
     >
       <div className="flex items-center justify-between">
-        <span className="text-[10px] overflow-hidden text-ellipsis whitespace-nowrap text-left [direction:rtl]" title={breadcrumb}>
+        <span
+          className="text-[10px] overflow-hidden text-ellipsis whitespace-nowrap text-left [direction:rtl]"
+          title={breadcrumb}
+        >
           {breadcrumb}
         </span>
         <div className="flex items-center gap-1 shrink-0">
