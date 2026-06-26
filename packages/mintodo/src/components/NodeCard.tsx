@@ -1,4 +1,4 @@
-import { ChevronDown, ChevronUp, EllipsisVertical, Plus } from "lucide-react";
+import { ChevronDown, ChevronUp, EllipsisVertical, ListOrdered, Plus } from "lucide-react";
 import { useDraggable, useDroppable } from "@dnd-kit/core";
 import { useMindStore } from "../hooks/use-mind-store";
 import { isDescendant } from "../store";
@@ -80,9 +80,7 @@ export function NodeCard({ node }: Props) {
       {...attributes}
       {...listeners}
       onClick={() => {
-        if (isSelected) {
-          dispatch({ modal: { kind: "edit", nodeId: node.id }, type: "OPEN_MODAL" });
-        } else {
+        if (!isSelected) {
           dispatch({ id: node.id, type: "SELECT" });
         }
       }}
@@ -128,6 +126,18 @@ export function NodeCard({ node }: Props) {
             }}
           >
             <EllipsisVertical size={12} />
+          </button>
+          <button
+            type="button"
+            data-testid={`worklog-button-${node.id}`}
+            className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1 rounded-md transition"
+            onClick={(e) => {
+              e.stopPropagation();
+              dispatch({ modal: { kind: "work-log", nodeId: node.id }, type: "OPEN_MODAL" });
+            }}
+            title="作業履歴"
+          >
+            <ListOrdered size={12} />
           </button>
         </div>
       </div>

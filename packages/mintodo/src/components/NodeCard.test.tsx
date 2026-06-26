@@ -239,14 +239,30 @@ describe("NodeCard selection", () => {
     expect(capturedState!.modal).toBeNull();
   });
 
-  it("clicking an already-selected node opens the edit modal", () => {
+  it("clicking an already-selected node does NOT open the edit modal", () => {
     const { container } = setup({ selectedNodeId: "a" });
     const childEl = container.querySelector('[data-node-id="a"]') as HTMLElement;
     act(() => {
       fireEvent.click(childEl);
     });
     expect(capturedState!.selectedNodeId).toBe("a");
-    expect(capturedState!.modal).toEqual({ kind: "edit", nodeId: "a" });
+    expect(capturedState!.modal).toBeNull();
+  });
+
+  it("work-log button opens work-log modal", () => {
+    const { container } = setup({ selectedNodeId: "a" });
+    act(() => {
+      fireEvent.click(container.querySelector('[data-testid="worklog-button-a"]')!);
+    });
+    expect(capturedState!.modal).toEqual({ kind: "work-log", nodeId: "a" });
+  });
+
+  it("clicking work-log button does not change selection", () => {
+    const { container } = setup();
+    act(() => {
+      fireEvent.click(container.querySelector('[data-testid="worklog-button-a"]')!);
+    });
+    expect(capturedState!.selectedNodeId).toBe("");
   });
 
   it("clicking another node while one is selected switches selection without opening the modal", () => {
