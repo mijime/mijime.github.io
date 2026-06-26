@@ -1,11 +1,14 @@
 import { createContext, useContext, useReducer, type Dispatch } from "react";
-import type { ParseError, Scenario, YearRow } from "./types";
+import type { ParseError, SimulationConfig, YearRow } from "./types";
 
 export interface State {
   dslText: string;
   currentAge: number;
   simulationYears: number;
-  parsed: { config: { currentAge: number; simulationYears: number; scenario: Scenario } } | { errors: ParseError[] } | null;
+  parsed:
+    | { config: SimulationConfig }
+    | { errors: ParseError[] }
+    | null;
   rows: YearRow[] | null;
   activeTab: "dsl" | "gui";
 }

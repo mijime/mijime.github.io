@@ -12,8 +12,10 @@ export function parseDSL(text: string): SqlResult {
     const line = raw.trim();
     if (line.length === 0) continue;
 
+    if (line.startsWith("#") && !line.startsWith("# ")) continue;
+
     if (line.startsWith("# ")) {
-      if (currentEvents.length > 0 || scenarios.length > 0) {
+      if (currentName !== "デフォルト" || currentEvents.length > 0) {
         scenarios.push({ name: currentName, events: currentEvents });
       }
       currentName = line.slice(2).trim();
@@ -24,7 +26,10 @@ export function parseDSL(text: string): SqlResult {
     const lineNum = i + 1;
     const parts = line.split(",");
     if (parts.length < 4) {
-      errors.push({ line: lineNum, message: `"イベント名,開始年,終了年,操作..." 形式である必要があります` });
+      errors.push({
+        line: lineNum,
+        message: `"イベント名,開始年,終了年,操作..." 形式である必要があります`,
+      });
       continue;
     }
     const name = parts[0].trim();

@@ -100,10 +100,20 @@ describe("parseDSL", () => {
   });
 
   it("ignores empty lines and comment-only lines", () => {
-    const text = "# テスト\n\n# comment\n現金,0,0,現金+1000\n";
+    const text = "# テスト\n\n#comment\n現金,0,0,現金+1000\n";
     const result = parseDSL(text);
     expect(result.errors).toHaveLength(0);
     expect(result.scenarios[0].events).toHaveLength(1);
+  });
+
+  it("skips #comment lines without space", () => {
+    const text =
+      "# 現状維持\n現金,0,0,現金+1000\n#comment\n# 別\n投資,0,0,NISA+500\n";
+    const result = parseDSL(text);
+    expect(result.errors).toEqual([]);
+    expect(result.scenarios).toHaveLength(2);
+    expect(result.scenarios[0].events).toHaveLength(1);
+    expect(result.scenarios[1].events).toHaveLength(1);
   });
 
   it("parses negative float values", () => {
