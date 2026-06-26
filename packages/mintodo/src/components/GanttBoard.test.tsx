@@ -86,7 +86,7 @@ describe("GanttBoard", () => {
       </MindProvider>,
     );
     // EffectiveEstimate("a") = effectiveEstimate("c") = 4 (no implicit overhead)
-    expect(screen.getByTestId("gantt-row-a").textContent).toMatch(/4h/);
+    expect(screen.getByTestId("gantt-row-a").textContent).toMatch(/4h/u);
   });
 
   it("shows explicit estimate for non-leaf with @estimate (not sched.estimateH)", () => {
@@ -104,7 +104,7 @@ describe("GanttBoard", () => {
         <GanttBoard />
       </MindProvider>,
     );
-    expect(screen.getByTestId("gantt-row-a").textContent).toMatch(/20h/);
+    expect(screen.getByTestId("gantt-row-a").textContent).toMatch(/20h/u);
   });
 
   it("shows overflow badge when non-leaf planned estimate < computed span", () => {
@@ -122,7 +122,7 @@ describe("GanttBoard", () => {
       </MindProvider>,
     );
     // A is non-leaf with plannedEstimate=4 but computed span = child C's 8h → overflow
-    expect(screen.getByTestId("gantt-row-a").textContent).toMatch(/超過/);
+    expect(screen.getByTestId("gantt-row-a").textContent).toMatch(/超過/u);
   });
 
   it("does NOT show overflow badge when non-leaf planned estimate >= computed span", () => {

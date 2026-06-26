@@ -9,8 +9,7 @@ export function buildBreadcrumb(nodes: Record<string, MindNode>, targetId: strin
     cur = nodes[cur.parentId];
     if (!cur) break;
   }
-  if (path.length <= 3) return path.join(" / ");
-  return `… / ${path.slice(-2).join(" / ")}`;
+  return path.join(" / ");
 }
 
 export function parentBreadcrumb(nodes: Record<string, MindNode>, id: string): string {

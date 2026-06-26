@@ -1,7 +1,7 @@
 import { useDraggable } from "@dnd-kit/core";
 import { ListOrdered, Pencil } from "lucide-react";
 import { useMindStore } from "../hooks/use-mind-store";
-import { buildBreadcrumb } from "../lib/breadcrumb";
+import { parentBreadcrumb } from "../lib/breadcrumb";
 import type { MindNode } from "../types";
 import { TaskCard } from "./TaskCard";
 
@@ -11,7 +11,7 @@ interface Props {
 
 export function KanbanCard({ node }: Props) {
   const { dispatch, state } = useMindStore();
-  const breadcrumb = buildBreadcrumb(state.nodes, node.id);
+  const breadcrumb = parentBreadcrumb(state.nodes, node.id);
 
   const { setNodeRef, attributes, listeners, isDragging } = useDraggable({ id: node.id });
 
@@ -32,7 +32,7 @@ export function KanbanCard({ node }: Props) {
       }}
     >
       <div className="flex items-center justify-between">
-        <span className="text-[10px] truncate" title={breadcrumb}>
+        <span className="text-[10px] overflow-hidden text-ellipsis whitespace-nowrap text-left [direction:rtl]" title={breadcrumb}>
           {breadcrumb}
         </span>
         <div className="flex items-center gap-1 shrink-0">

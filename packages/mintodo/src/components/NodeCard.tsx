@@ -1,9 +1,10 @@
-import { ChevronDown, ChevronUp, EllipsisVertical, ListOrdered, Plus } from "lucide-react";
+import { ChevronDown, ChevronUp, ListOrdered, Pencil, Plus } from "lucide-react";
 import { useDraggable, useDroppable } from "@dnd-kit/core";
 import { useMindStore } from "../hooks/use-mind-store";
 import { isDescendant } from "../store";
 import type { MindNode } from "../types";
 import { categoryBorderColor } from "../lib/badges";
+import { parentBreadcrumb } from "../lib/breadcrumb";
 import { TaskCard } from "./TaskCard";
 
 interface Props {
@@ -13,7 +14,9 @@ interface Props {
 export function NodeCard({ node }: Props) {
   const { dispatch, state } = useMindStore();
   const isSelected = state.selectedNodeId === node.id;
-  const isMatch = state.searchQuery === "" || node.text.toLowerCase().includes(state.searchQuery);
+  const q = state.searchQuery.toLowerCase();
+  const isMatch = state.searchQuery === "" || node.text.toLowerCase().includes(q);
+  const breadcrumb = parentBreadcrumb(state.nodes, node.id);
 
   const {
     setNodeRef: dragRef,
@@ -84,7 +87,7 @@ export function NodeCard({ node }: Props) {
           dispatch({ id: node.id, type: "SELECT" });
         }
       }}
-      className={`absolute -translate-x-1/2 -translate-y-1/2 px-4 py-3 rounded border-l-4 flex flex-col gap-1.5 min-w-[220px] max-w-[320px] ${isSelected ? "node-selected" : ""} ${isMatch ? "" : "opacity-30"} ${isRingVisible ? "ring-2 ring-sky-400" : ""}`}
+      className={`absolute -translate-x-1/2 -translate-y-1/2 px-4 py-3 rounded border-l-4 flex flex-col gap-2 min-w-[220px] max-w-[320px] ${isSelected ? "node-selected" : ""} ${isMatch ? "" : "opacity-30"} ${isRingVisible ? "ring-2 ring-sky-400" : ""}`}
       style={{
         left: node.x,
         top: node.y,
@@ -99,10 +102,10 @@ export function NodeCard({ node }: Props) {
         touchAction: "none",
       }}
     >
-      <div className="flex items-start justify-between w-full gap-2">
-        <div className="flex-1 min-w-0">
-          <TaskCard node={node} />
-        </div>
+      <div className="flex items-center justify-between">
+        <span className="text-[10px] text-slate-400 overflow-hidden text-ellipsis whitespace-nowrap text-left [direction:rtl]" title={breadcrumb}>
+          {breadcrumb}
+        </span>
         <div className="flex items-center gap-1 shrink-0">
           {node.children.length > 0 && (
             <button
@@ -112,6 +115,7 @@ export function NodeCard({ node }: Props) {
                 e.stopPropagation();
                 dispatch({ id: node.id, type: "TOGGLE_COLLAPSE" });
               }}
+              onPointerDown={(e) => e.stopPropagation()}
             >
               {node.collapsed ? <ChevronDown size={12} /> : <ChevronUp size={12} />}
             </button>
@@ -124,8 +128,9 @@ export function NodeCard({ node }: Props) {
               e.stopPropagation();
               dispatch({ modal: { kind: "edit", nodeId: node.id }, type: "OPEN_MODAL" });
             }}
+            onPointerDown={(e) => e.stopPropagation()}
           >
-            <EllipsisVertical size={12} />
+            <Pencil size={12} />
           </button>
           <button
             type="button"
@@ -135,12 +140,14 @@ export function NodeCard({ node }: Props) {
               e.stopPropagation();
               dispatch({ modal: { kind: "work-log", nodeId: node.id }, type: "OPEN_MODAL" });
             }}
+            onPointerDown={(e) => e.stopPropagation()}
             title="作業履歴"
           >
             <ListOrdered size={12} />
           </button>
         </div>
       </div>
+      <TaskCard node={node} />
     </div>
   );
 }

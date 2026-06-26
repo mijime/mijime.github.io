@@ -102,9 +102,14 @@ export function GanttBoard() {
     return m;
   }, [schedules]);
   const allRows = root ? dfs(nodes, root.id) : [];
-  const rows = state.hideCompleted
+  const q = state.searchQuery.toLowerCase();
+  const rowsFiltered = state.hideCompleted
     ? allRows.filter(({ node }) => !isCompletedSelfOrAncestor(nodes, node.id))
     : allRows;
+  const rows =
+    state.searchQuery === ""
+      ? rowsFiltered
+      : rowsFiltered.filter(({ node }) => node.text.toLowerCase().includes(q));
   const lastSchedule = schedules.at(-1);
   const totalWidth = Math.max(lastSchedule ? toPxFromOrigin(lastSchedule.end, originDate) : 0, 320);
 

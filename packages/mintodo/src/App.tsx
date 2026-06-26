@@ -28,7 +28,8 @@ function Shell() {
 
   useEffect(() => {
     const onCreate = (e: Event) => {
-      const { detail } = e as CustomEvent<{ name: string }>;
+      const { detail } = e as CustomEvent<{ name: string; mode: string }>;
+      if (detail.mode !== "create") return;
       // eslint-disable-next-line no-console
       actions.createBoard(detail.name).catch((err) => console.error(err));
     };

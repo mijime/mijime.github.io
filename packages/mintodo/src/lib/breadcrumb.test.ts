@@ -52,17 +52,17 @@ describe("buildBreadcrumb", () => {
     expect(buildBreadcrumb(nodes, "b")).toBe("R / A / B");
   });
 
-  it("truncates to '… / last / last' when 4 levels deep", () => {
+  it("returns full path when 4 levels deep (no JS truncation; CSS handles ellipsis)", () => {
     const nodes = {
       root: n("root", null, { isRoot: true, text: "R", children: ["a"] }),
       a: n("a", "root", { text: "A", children: ["b"] }),
       b: n("b", "a", { text: "B", children: ["c"] }),
       c: n("c", "b", { text: "C" }),
     };
-    expect(buildBreadcrumb(nodes, "c")).toBe("… / B / C");
+    expect(buildBreadcrumb(nodes, "c")).toBe("R / A / B / C");
   });
 
-  it("truncates to '… / last / last' when 5+ levels deep (only last two shown)", () => {
+  it("returns full path when 5+ levels deep (no JS truncation; CSS handles ellipsis)", () => {
     const nodes = {
       root: n("root", null, { isRoot: true, text: "R", children: ["a"] }),
       a: n("a", "root", { text: "A", children: ["b"] }),
@@ -70,7 +70,7 @@ describe("buildBreadcrumb", () => {
       c: n("c", "b", { text: "C", children: ["d"] }),
       d: n("d", "c", { text: "D" }),
     };
-    expect(buildBreadcrumb(nodes, "d")).toBe("… / C / D");
+    expect(buildBreadcrumb(nodes, "d")).toBe("R / A / B / C / D");
   });
 
   it("returns the collected prefix when the parent chain is broken mid-walk", () => {
