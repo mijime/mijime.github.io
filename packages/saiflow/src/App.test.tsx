@@ -13,4 +13,11 @@ describe("App", () => {
     expect(screen.getByRole("button", { name: "DSL" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "GUI" })).toBeInTheDocument();
   });
+
+  it("renders view toggle buttons", () => {
+    render(<App />);
+    expect(screen.getByRole("button", { name: "表" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "折れ線" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "収支" })).toBeInTheDocument();
+  });
 });
