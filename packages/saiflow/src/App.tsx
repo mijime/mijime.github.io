@@ -3,12 +3,11 @@ import { SaiflowProvider } from "./store";
 import { ProfileBar } from "./components/ProfileBar";
 import { EditorPanel } from "./components/EditorPanel";
 import { ResultTable } from "./components/ResultTable";
-import { LineChart } from "./components/LineChart";
 import { BarChart } from "./components/BarChart";
 import { AreaChartView } from "./components/AreaChartView";
 import { PieChartView } from "./components/PieChartView";
 
-type ViewMode = "table" | "line" | "bar" | "area" | "pie";
+type ViewMode = "table" | "area" | "bar" | "pie";
 
 function RightPanel() {
   const [view, setView] = useState<ViewMode>("table");
@@ -16,7 +15,7 @@ function RightPanel() {
   return (
     <div className="flex flex-col h-full">
       <div className="flex items-center gap-1 px-2 py-1 border-b border-(--border)">
-        {(["table", "line", "bar", "area", "pie"] as ViewMode[]).map((v) => (
+        {(["table", "area", "bar", "pie"] as ViewMode[]).map((v) => (
           <button
             key={v}
             className={`px-2 py-0.5 text-xs rounded ${view === v ? "bg-(--terra) text-white" : "text-(--ink) opacity-50"}`}
@@ -24,25 +23,21 @@ function RightPanel() {
           >
             {v === "table"
               ? "収支表"
-              : v === "line"
+              : v === "area"
                 ? "資産推移"
                 : v === "bar"
                   ? "収支比較"
-                  : v === "area"
-                    ? "資産構成"
-                    : "最終配分"}
+                  : "資産配分"}
           </button>
         ))}
       </div>
       <div className="flex-1 overflow-hidden">
         {view === "table" ? (
           <ResultTable />
-        ) : view === "line" ? (
-          <LineChart />
-        ) : view === "bar" ? (
-          <BarChart />
         ) : view === "area" ? (
           <AreaChartView />
+        ) : view === "bar" ? (
+          <BarChart />
         ) : (
           <PieChartView />
         )}
