@@ -97,7 +97,9 @@ export function LineChart() {
             height={plotH}
             fill="transparent"
             onMouseEnter={(e) => setHover({ i, mx: e.clientX, my: e.clientY })}
-            onMouseMove={(e) => setHover((h) => (h ? { ...h, mx: e.clientX, my: e.clientY } : null))}
+            onMouseMove={(e) =>
+              setHover((h) => (h ? { ...h, mx: e.clientX, my: e.clientY } : null))
+            }
             onMouseLeave={() => setHover(null)}
           />
         ))}

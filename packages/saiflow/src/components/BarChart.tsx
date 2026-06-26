@@ -161,7 +161,9 @@ export function BarChart() {
             height={height - padding.top - padding.bottom}
             fill="transparent"
             onMouseEnter={(e) => setHover({ i, mx: e.clientX, my: e.clientY })}
-            onMouseMove={(e) => setHover((h) => (h ? { ...h, mx: e.clientX, my: e.clientY } : null))}
+            onMouseMove={(e) =>
+              setHover((h) => (h ? { ...h, mx: e.clientX, my: e.clientY } : null))
+            }
             onMouseLeave={() => setHover(null)}
           />
         ))}
@@ -211,7 +213,9 @@ export function BarChart() {
                   { label: "支出", value: rows[hover.i].totalExpense.toLocaleString() },
                   {
                     label: "収支",
-                    value: (rows[hover.i].totalIncome - rows[hover.i].totalExpense).toLocaleString(),
+                    value: (
+                      rows[hover.i].totalIncome - rows[hover.i].totalExpense
+                    ).toLocaleString(),
                   },
                 ],
               }
