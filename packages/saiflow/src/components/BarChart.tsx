@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { useSaiflowState } from "../store";
 import { ChartTooltip } from "./ChartTooltip";
 
