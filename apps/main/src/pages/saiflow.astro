@@ -1,0 +1,9 @@
+---
+import { App as SaiflowApp } from "@mijime/saiflow";
+import BaseLayout from "../layouts/base-layout.astro";
+import "@mijime/saiflow/index.css";
+---
+
+<BaseLayout title="saiflow">
+  <SaiflowApp client:only="react" />
+</BaseLayout>
