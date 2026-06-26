@@ -1,5 +1,18 @@
 import { useSaiflowState } from "../store";
 
+function niceStep(max: number): number {
+  const raw = max / 4;
+  const exp = Math.pow(10, Math.floor(Math.log10(raw)));
+  const mant = raw / exp;
+  return exp * (mant <= 1.5 ? 1 : mant <= 3 ? 2 : mant <= 7 ? 5 : 10);
+}
+
+function ticks(max: number, step: number): number[] {
+  const result: number[] = [];
+  for (let v = 0; v <= max; v += step) result.push(Math.round(v));
+  return result;
+}
+
 export function BarChart() {
   const state = useSaiflowState();
   const { rows } = state;
@@ -11,20 +24,20 @@ export function BarChart() {
   const midY = height / 2;
   const plotH = (height - padding.top - padding.bottom) / 2;
 
-  const maxIncome = Math.max(...rows.map((r) => r.totalIncome), 0) * 1.05 || 1;
-  const maxExpense = Math.max(...rows.map((r) => r.totalExpense), 0) * 1.05 || 1;
-  const maxVal = Math.max(maxIncome, maxExpense);
+  const maxIncome = Math.max(...rows.map((r) => r.totalIncome), 0) * 1.1 || 1;
+  const maxExpense = Math.max(...rows.map((r) => r.totalExpense), 0) * 1.1 || 1;
 
   const step = (width - padding.left - padding.right) / rows.length;
   const barW = Math.max(2, step * 0.65);
   const x = (i: number) => padding.left + i * step + step / 2;
-  const incomeY = (v: number) => midY - (v / maxVal) * plotH;
-  const expenseH = (v: number) => (v / maxVal) * plotH;
+  const incomeY = (v: number) => midY - (v / maxIncome) * plotH;
+  const expenseY = (v: number) => midY + (v / maxExpense) * plotH;
 
-  const tickStep = maxVal / 4;
+  const incomeTickStep = niceStep(maxIncome);
+  const expenseTickStep = niceStep(maxExpense);
 
   const incomePoints = rows.map((r, i) => `${x(i)},${incomeY(r.totalIncome)}`).join(" ");
-  const expensePoints = rows.map((r, i) => `${x(i)},${midY + expenseH(r.totalExpense)}`).join(" ");
+  const expensePoints = rows.map((r, i) => `${x(i)},${expenseY(r.totalExpense)}`).join(" ");
 
   const xTickInterval = Math.max(1, Math.floor(rows.length / 10));
 
@@ -40,24 +53,22 @@ export function BarChart() {
           stroke="rgba(128,128,128,0.3)"
         />
 
-        {/* Y axis ticks (income side) */}
-        {[0, tickStep, tickStep * 2, tickStep * 3, tickStep * 4].map((v) => (
+        {/* Y axis ticks (income) */}
+        {ticks(maxIncome, incomeTickStep).map((v) => (
           <g key={`i${v}`}>
-            <line
-              x1={padding.left}
-              y1={incomeY(v)!}
-              x2={width - padding.right}
-              y2={incomeY(v)!}
-              stroke="rgba(128,128,128,0.08)"
-            />
-            <text
-              x={padding.left - 6}
-              y={incomeY(v)! + 4}
-              textAnchor="end"
-              fill="var(--ink)"
-              opacity={0.5}
-            >
-              {Math.round(v)}
+            <line x1={padding.left} y1={incomeY(v)} x2={width - padding.right} y2={incomeY(v)} stroke="rgba(128,128,128,0.08)" />
+            <text x={padding.left - 6} y={incomeY(v) + 4} textAnchor="end" fill="var(--ink)" opacity={0.5}>
+              {v}
+            </text>
+          </g>
+        ))}
+
+        {/* Y axis ticks (expense) */}
+        {ticks(maxExpense, expenseTickStep).map((v) => (
+          <g key={`e${v}`}>
+            <line x1={padding.left} y1={expenseY(v)} x2={width - padding.right} y2={expenseY(v)} stroke="rgba(128,128,128,0.08)" />
+            <text x={padding.left - 6} y={expenseY(v) + 4} textAnchor="end" fill="var(--ink)" opacity={0.5}>
+              {v}
             </text>
           </g>
         ))}
@@ -67,9 +78,9 @@ export function BarChart() {
           <rect
             key={`ib${i}`}
             x={x(i) - barW / 2}
-            y={incomeY(r.totalIncome)!}
+            y={incomeY(r.totalIncome)}
             width={barW}
-            height={midY - incomeY(r.totalIncome)!}
+            height={midY - incomeY(r.totalIncome)}
             rx={3}
             fill="rgba(72, 187, 120, 0.6)"
           />
@@ -82,7 +93,7 @@ export function BarChart() {
             x={x(i) - barW / 2}
             y={midY}
             width={barW}
-            height={expenseH(r.totalExpense)}
+            height={expenseY(r.totalExpense) - midY}
             rx={3}
             fill="rgba(252, 129, 129, 0.6)"
           />
@@ -107,8 +118,8 @@ export function BarChart() {
         {/* Data dots */}
         {rows.map((r, i) => (
           <g key={`dot${i}`}>
-            <circle cx={x(i)} cy={incomeY(r.totalIncome)!} r={2.5} fill="rgba(72, 187, 120, 1)" />
-            <circle cx={x(i)} cy={midY + expenseH(r.totalExpense)} r={2.5} fill="rgba(252, 129, 129, 1)" />
+            <circle cx={x(i)} cy={incomeY(r.totalIncome)} r={2.5} fill="rgba(72, 187, 120, 1)" />
+            <circle cx={x(i)} cy={expenseY(r.totalExpense)} r={2.5} fill="rgba(252, 129, 129, 1)" />
           </g>
         ))}
 
