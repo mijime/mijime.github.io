@@ -5,10 +5,7 @@ export interface State {
   dslText: string;
   currentAge: number;
   simulationYears: number;
-  parsed:
-    | { config: SimulationConfig }
-    | { errors: ParseError[] }
-    | null;
+  parsed: { config: SimulationConfig } | { errors: ParseError[] } | null;
   rows: YearRow[] | null;
   activeTab: "dsl" | "gui";
 }
@@ -23,7 +20,28 @@ export type Action =
 
 export function initialState(): State {
   return {
-    dslText: "",
+    dslText: [
+      "# 現状維持",
+      "現金,0,0,現金+1000",
+      "年収(夫),0,20,現金+500",
+      "年収(妻),0,21,現金+300",
+      "生活費,0,,現金-300",
+      "住居費,0,0,現金-120",
+      "住居費,1,,現金-130",
+      "教育費(子供1),2,20,現金-50",
+      "教育費(子供2),2,20,現金-50",
+      "資産運用,0,,現金*1.01",
+      "",
+      "# 早期リタイア",
+      "現金,0,0,現金+1000",
+      "年収(夫),0,15,現金+500",
+      "年収(妻),0,15,現金+300",
+      "生活費,0,,現金-300",
+      "住居費,0,,現金-120",
+      "教育費(子供1),2,20,現金-50",
+      "教育費(子供2),2,20,現金-50",
+      "副業,16,,現金+100",
+    ].join("\n"),
     currentAge: 39,
     simulationYears: 50,
     parsed: null,
