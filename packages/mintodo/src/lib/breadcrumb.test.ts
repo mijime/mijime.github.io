@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { MindNode } from "../types";
-import { buildBreadcrumb } from "./breadcrumb";
+import { buildBreadcrumb, parentBreadcrumb } from "./breadcrumb";
 
 function n(id: string, parentId: string | null, opts: Partial<MindNode> = {}): MindNode {
   return {
@@ -76,4 +76,18 @@ describe("buildBreadcrumb", () => {
     const nodes = { a: n("a", "missing-parent", { text: "A" }) };
     expect(buildBreadcrumb(nodes, "a")).toBe("A");
   });
+});
+
+describe("parentBreadcrumb", () => {
+  it("depth-1 node → parent breadcrumb (Root)", () => {
+    const nodes = {
+      root: n("root", null, { isRoot: true, text: "Root", children: ["a"] }),
+      a: n("a", "root", { text: "Child" }),
+    };
+    expect(parentBreadcrumb(nodes, "a")).toBe("Root");
+  });
+  it("root → root's own text", () => {
+    expect(parentBreadcrumb({ root: n("root", null, { isRoot: true, text: "My Board" }) }, "root")).toBe("My Board");
+  });
+  it("missing id → ''", () => expect(parentBreadcrumb({}, "missing")).toBe(""));
 });
