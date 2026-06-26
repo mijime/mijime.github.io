@@ -363,95 +363,153 @@ describe("parseInlineDSL", () => {
 
 describe("realistic boards", () => {
   const samples = {
-    "personal project with worklog history": `# 2026 Q2 個人プロジェクト
+    "01 personal project with worklog history": `# 2026 Q2 個人プロジェクト
 
-- [-] メインプロジェクト
-  - [x] 要件定義 @priority:high @due:2026-04-15
+- [-] メインプロジェクト @status:wip
+  - [x] 要件定義 @priority:high @due:2026-04-15 @done
     - 2026-04-01 09:30: クライアントMTG実施
     - 2026-04-03 14:00: ドラフトv0.1 共有
     - 2026-04-10 11:00: フィードバック反映v0.2
     - 2026-04-15 18:30: 最終版FIX @done
-  - [-] 設計フェーズ @priority:high
-    - [x] アーキテクチャ図
+  - [-] 設計フェーズ @priority:high @status:wip
+    - [x] アーキテクチャ図 @done
       - 2026-04-20 10:00: PlantUMLで作成
-    - [-] DB スキーマ @priority:medium
+    - [-] DB スキーマ @status:wip
       - 2026-04-25 16:00: レビュー待ち
-  - [ ] 実装フェーズ
-    - [ ] バックエンド
-    - [ ] フロントエンド
-  - [ ] リリース準備
-- [x] 個人タスク
-  - [x] 健康診断 @due:2026-05-10
+  - [-] 実装フェーズ @priority:medium @status:wip
+    - [ ] バックエンド @estimate:16
+    - [ ] フロントエンド @estimate:24
+  - [ ] リリース準備 @priority:low @due:2026-06-30
+- [x] 個人タスク @done @color:emerald
+  - [x] 健康診断 @due:2026-05-10 @done
     - 2026-05-08 09:00: 受診完了
+- [ ] 学習 @priority:medium @color:sky
+  - [ ] Rust 入門
+  - [ ] システム設計読書会
 `,
-    "gantt-friendly board with estimates": `# Web アプリ再構築
+    "03 reading notes (worklog-heavy)": `# 読書メモ
 
-- [-] Phase 1: MVP
-  - [-] 認証機能 @estimate:16
-    - [ ] OAuth 統合
-      - Google
-      - GitHub
-    - [x] メール/パスワード @estimate:4
-      - 2026-06-01 10:00: 実装完了
-      - 2026-06-02 15:30: テスト通過
-  - [-] データモデル @estimate:8
-    - [x] Prisma スキーマ
-      - 2026-05-28 14:00: 完成
-  - [ ] API エンドポイント @estimate:24
-- [-] Phase 2: ベータリリース
-  - [ ] パフォーマンス改善 @estimate:12 @priority:high
-  - [ ] E2E テスト @estimate:16
-- [ ] Phase 3: GA
-`,
-    "reading notes (worklog-heavy)": `# 読書メモ
-
-- [-] 技術書
-  - [x] Domain Modeling Made Functional
+- [-] 技術書 @status:wip
+  - [x] Domain Modeling Made Functional @done
     - 2026-05-01 22:30: 第1章読了。型駆動設計の基本
     - 2026-05-03 23:15: 第3章読了。集約の境界の話
     - 2026-05-08 21:00: 読了。めちゃくちゃ良かった
-  - [-] Designing Data-Intensive Applications @priority:high
+  - [-] Designing Data-Intensive Applications @priority:high @status:wip
     - 2026-05-10 19:00: 第1章 概要
     - 2026-05-12 20:30: 第2章 データモデル
     - 2026-05-15 22:00: 第3章 ストレージエンジン
     - [ ] 第5章 レプリケーション
     - [ ] 第7章 トランザクション
   - [ ] Team Topologies
-- [x] 論文
-  - [x] The Chubby Lock Service
+  - [-] A Philosophy of Software Design @status:wip
+    - 読み始め
+    - 第3章まで読了。深いモジュールの考え方が刺さった
+- [x] 論文 @done
+  - [x] The Chubby Lock Service @done
     - 2026-04-22 11:00: 要約作成
     - 2026-04-25 16:00: 社内勉強会で発表
+  - [x] MapReduce @done
+- [ ] 動画
+  - [ ] Rust の面白い動画
 `,
-    "edge cases (status glyphs + colors + deep nesting)": `# Edge cases @priority:high
+    "04 edge cases (glyphs + colors + deep nesting)": `# Edge cases @priority:high
 
+- [ ] 特殊文字を含むテキスト
+  - [ ] [角括弧] と @at と #hash を含むタスク
+  - [ ] 絵文字入りタスク
 - [ ] wip の特殊グリフ
   - [-] 進行中タスク @status:wip
   - [|] レビュー待ち @status:review
   - [x] 完了タスク @done
-- [x] 複数属性の組み合わせ @priority:high @due:2026-12-31 @estimate:8 @color:emerald
-- [-] 色違いのタスク
+- [x] 複数属性の組み合わせ @priority:high @color:emerald @due:2026-12-31 @estimate:8 @done
+- [-] 色違いのタスク @status:wip
   - [ ] 通常 @color:slate
-  - [ ] 緊急 @color:rose @priority:high
+  - [ ] 緊急 @priority:high @color:rose
   - [ ] アイデア @color:sky
   - [ ] 財務 @color:emerald
-- [-] 深いネスト
-  - [-] レベル1
-    - [-] レベル2
-      - [-] レベル3
-        - [-] レベル4
-          - [-] レベル5
-            - [-] レベル6
+- [ ] 優先度バリエーション
+  - [ ] 高優先 @priority:high
+  - [ ] 中優先 @priority:medium
+  - [ ] 低優先 @priority:low
+- [-] 深いネスト @status:wip
+  - [-] レベル1 @status:wip
+    - [-] レベル2 @status:wip
+      - [-] レベル3 @status:wip
+        - [-] レベル4 @status:wip
+          - [-] レベル5 @status:wip
+            - [-] レベル6 @status:wip
               - [ ] レベル7 (leaf)
                 - 2026-06-26 10:00: もう限界
+`,
+    "05 gantt sample with @start dates": `# Web アプリ再構築 @start:2026-06-26
+
+- [x] Phase 1: MVP @start:2026-06-26 @due:2026-07-31 @done
+  - [x] 認証機能 @estimate:16 @start:2026-06-26 @due:2026-07-10 @done
+    - [x] OAuth 統合 @done
+    - [x] メール/パスワード @estimate:4 @done
+  - [x] データモデル @estimate:8 @start:2026-07-01 @done
+    - [x] Prisma スキーマ @done
+  - [x] API エンドポイント @estimate:24 @start:2026-07-05 @done
+- [x] Phase 2: ベータリリース @start:2026-08-01 @due:2026-09-30 @done
+  - [x] パフォーマンス改善 @priority:high @estimate:4 @done
+  - [x] E2E テスト @estimate:16 @done
+- [-] Phase 3: GA @start:2026-10-01 @status:wip
+  - [ ] ドキュメント整備 @estimate:8
+  - [ ] リリースノート作成 @estimate:4
+    - [ ] 英語版 @estimate:4
+    - [ ] 日本語版
+  - [-] 本番デプロイ @status:wip @start:2026-11-01
+    - [ ] ステージング検証 @estimate:8
+    - [ ] 本番リリース @estimate:4
+  - [ ] 振り返り
+`,
+    "06 kanban workflow": `# 今週のタスク
+
+- [ ] Inbox @color:slate
+  - [ ] API リファレンスの更新
+  - [ ] 顧客からの問い合わせ対応
+- [-] WIP @status:wip @color:sky
+  - [-] ダッシュボード改修 @status:wip @priority:high
+    - [ ] グラフコンポーネント @estimate:8
+    - [ ] フィルター機能 @estimate:4
+  - [-] バグ修正: ログイン @status:wip @priority:high @due:2026-07-01
+- [|] Review @status:review @color:emerald
+  - [|] 新規登録フロー @status:review @estimate:6
+  - [|] パスワードリセット @status:review @estimate:4
+- [x] Done @done @color:rose
+  - [x] CI/CD パイプライン改善 @done
+    - 2026-06-25 14:00: GitHub Actions 移行完了
+  - [x] 不要コード削除 @done
+`,
+    "07 minimal board": `# 買い物リスト
+
+- [ ] 牛乳
+- [ ] パン
+- [x] 卵 @done
+`,
+    "08 inline DSL catalog": `# 属性サンプル
+
+- [ ] 優先度:高 @priority:high
+- [ ] 優先度:中 @priority:medium
+- [ ] 優先度:低 @priority:low
+- [ ] カラー:スレート @color:slate
+- [ ] カラー:空 @color:sky
+- [ ] カラー:エメラルド @color:emerald
+- [ ] カラー:バラ @color:rose
+- [ ] 期限・見積もり @due:2026-12-31 @estimate:16 @start:2026-06-01
+- [x] 全属性盛り @priority:high @color:rose @due:2026-12-31 @start:2026-06-01 @estimate:8 @done
 `,
   } as const;
 
   type SampleKey = keyof typeof samples;
   const expectedNodeCount: Record<SampleKey, number> = {
-    "personal project with worklog history": 11,
-    "gantt-friendly board with estimates": 11,
-    "reading notes (worklog-heavy)": 8,
-    "edge cases (status glyphs + colors + deep nesting)": 18,
+    "01 personal project with worklog history": 14,
+    "03 reading notes (worklog-heavy)": 12,
+    "04 edge cases (glyphs + colors + deep nesting)": 25,
+    "05 gantt sample with @start dates": 19,
+    "06 kanban workflow": 14,
+    "07 minimal board": 3,
+    "08 inline DSL catalog": 9,
   };
 
   for (const [name, src] of Object.entries(samples)) {

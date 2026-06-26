@@ -1,6 +1,6 @@
 # 個人ナレッジベース (worklog だらけ)
 
-# (parse: 8 nodes, roundtrip: OK)
+# (parse: 12 nodes, roundtrip: OK)
 
 # 読書メモ
 
@@ -16,7 +16,13 @@
     - [ ] 第5章 レプリケーション
     - [ ] 第7章 トランザクション
   - [ ] Team Topologies
+  - [-] A Philosophy of Software Design @status:wip
+    - 読み始め
+    - 第3章まで読了。深いモジュールの考え方が刺さった
 - [x] 論文 @done
   - [x] The Chubby Lock Service @done
     - 2026-04-22 11:00: 要約作成
     - 2026-04-25 16:00: 社内勉強会で発表
+  - [x] MapReduce @done
+- [ ] 動画
+  - [ ] Rust の面白い動画

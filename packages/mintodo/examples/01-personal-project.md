@@ -1,6 +1,6 @@
 # シンプルなタスク階層 + 進捗メモ
 
-# (parse: 11 nodes, roundtrip: OK)
+# (parse: 15 nodes, roundtrip: OK)
 
 # 2026 Q2 個人プロジェクト
 
@@ -15,10 +15,13 @@
       - 2026-04-20 10:00: PlantUMLで作成
     - [-] DB スキーマ @status:wip
       - 2026-04-25 16:00: レビュー待ち
-  - [ ] 実装フェーズ
-    - [ ] バックエンド
-    - [ ] フロントエンド
-  - [ ] リリース準備
-- [x] 個人タスク @done
+  - [-] 実装フェーズ @priority:medium @status:wip
+    - [ ] バックエンド @estimate:16
+    - [ ] フロントエンド @estimate:24
+  - [ ] リリース準備 @priority:low @due:2026-06-30
+- [x] 個人タスク @done @color:emerald
   - [x] 健康診断 @due:2026-05-10 @done
     - 2026-05-08 09:00: 受診完了
+- [ ] 学習 @priority:medium @color:sky
+  - [ ] Rust 入門
+  - [ ] システム設計読書会
