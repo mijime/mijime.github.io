@@ -21,6 +21,34 @@ export function countDescendants(
   return { total, completed };
 }
 
+export function sortByDfs(nodes: Record<string, MindNode>): string[] {
+  const visited = new Set<string>();
+  const result: string[] = [];
+
+  const roots = Object.values(nodes).filter(
+    (n) => n.isRoot || !n.parentId || !nodes[n.parentId],
+  );
+
+  function visit(id: string): void {
+    if (visited.has(id)) return;
+    visited.add(id);
+    result.push(id);
+    const node = nodes[id];
+    if (!node) return;
+    for (const cid of node.children) {
+      if (!visited.has(cid)) visit(cid);
+    }
+  }
+
+  for (const root of roots) visit(root.id);
+
+  for (const id of Object.keys(nodes)) {
+    if (!visited.has(id)) visit(id);
+  }
+
+  return result;
+}
+
 export function isKanbanVisible(nodes: Record<string, MindNode>, id: string): boolean {
   const node = nodes[id];
   if (!node) return false;

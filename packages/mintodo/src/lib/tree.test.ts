@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { MindNode } from "../types";
-import { countDescendants, isKanbanVisible } from "./tree";
+import { countDescendants, isKanbanVisible, sortByDfs } from "./tree";
 
 function n(id: string, opts: Partial<MindNode> = {}): MindNode {
   return {
@@ -90,5 +90,47 @@ describe("isKanbanVisible", () => {
       a: n("a", { parentId: "g", completed: true }),
     };
     expect(isKanbanVisible(nodes, "a")).toBe(true);
+  });
+});
+
+describe("sortByDfs", () => {
+  it("returns empty array for empty nodes", () => {
+    expect(sortByDfs({})).toEqual([]);
+  });
+
+  it("returns ids in DFS order following children arrays", () => {
+    const nodes: Record<string, MindNode> = {
+      root: n("root", { children: ["a", "b"] }),
+      a: n("a", { parentId: "root", children: ["c"] }),
+      b: n("b", { parentId: "root" }),
+      c: n("c", { parentId: "a" }),
+    };
+    expect(sortByDfs(nodes)).toEqual(["root", "a", "c", "b"]);
+  });
+
+  it("follows children order for siblings", () => {
+    const nodes: Record<string, MindNode> = {
+      root: n("root", { children: ["b", "a"] }),
+      b: n("b", { parentId: "root" }),
+      a: n("a", { parentId: "root" }),
+    };
+    expect(sortByDfs(nodes)).toEqual(["root", "b", "a"]);
+  });
+
+  it("handles nodes that reference missing parents (orphan)", () => {
+    const nodes: Record<string, MindNode> = {
+      orphan: n("orphan", { parentId: "nonexistent" }),
+    };
+    expect(sortByDfs(nodes)).toEqual(["orphan"]);
+  });
+
+  it("handles circular references gracefully", () => {
+    const nodes: Record<string, MindNode> = {
+      a: n("a", { children: ["b"], parentId: null }),
+      b: n("b", { parentId: "a", children: ["a"] }),
+    };
+    const result = sortByDfs(nodes);
+    expect(result).toContain("a");
+    expect(result).toContain("b");
   });
 });
