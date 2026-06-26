@@ -1,17 +1,16 @@
 import type { SimulationConfig, YearRow } from "./types";
 
 export function simulate(config: SimulationConfig): YearRow[] {
-  const { currentAge, simulationYears, initialAssets, events } = config;
+  const { currentAge, simulationYears, scenario } = config;
   const balances: Record<string, number> = {};
-  for (const a of initialAssets) {
-    balances[a.name] = a.value;
-  }
 
   const rows: YearRow[] = [];
 
   for (let year = 0; year < simulationYears; year++) {
-    const active = events.filter(
-      (e) => e.startYear <= year && (e.endYear === null || year < e.startYear + e.endYear),
+    const active = scenario.events.filter(
+      (e) =>
+        e.startYear <= year &&
+        (e.endYear === null || year <= e.endYear),
     );
 
     let totalIncome = 0;

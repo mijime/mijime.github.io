@@ -7,8 +7,12 @@ describe("simulate", () => {
     const cfg: SimulationConfig = {
       currentAge: 39,
       simulationYears: 3,
-      initialAssets: [{ name: "現金", value: 1000 }],
-      events: [],
+      scenario: {
+        name: "test",
+        events: [
+          { name: "現金", startYear: 0, endYear: 0, ops: [{ asset: "現金", op: "+", value: 1000 }] },
+        ],
+      },
     };
     const rows = simulate(cfg);
     expect(rows).toHaveLength(3);
@@ -21,8 +25,12 @@ describe("simulate", () => {
     const cfg: SimulationConfig = {
       currentAge: 39,
       simulationYears: 2,
-      initialAssets: [{ name: "現金", value: 1000 }],
-      events: [],
+      scenario: {
+        name: "test",
+        events: [
+          { name: "現金", startYear: 0, endYear: 0, ops: [{ asset: "現金", op: "+", value: 1000 }] },
+        ],
+      },
     };
     const rows = simulate(cfg);
     expect(rows[0].balances["現金"]).toBe(1000);
@@ -33,32 +41,35 @@ describe("simulate", () => {
     const cfg: SimulationConfig = {
       currentAge: 39,
       simulationYears: 1,
-      initialAssets: [{ name: "現金", value: 1000 }],
-      events: [
-        {
-          name: "収入",
-          startYear: 0,
-          endYear: 1,
-          ops: [{ asset: "現金", op: "+", value: 500 }],
-        },
-        {
-          name: "支出",
-          startYear: 0,
-          endYear: 1,
-          ops: [{ asset: "現金", op: "-", value: 200 }],
-        },
-        {
-          name: "運用",
-          startYear: 0,
-          endYear: 1,
-          ops: [{ asset: "現金", op: "*", value: 1.03 }],
-        },
-      ],
+      scenario: {
+        name: "test",
+        events: [
+          { name: "現金", startYear: 0, endYear: 0, ops: [{ asset: "現金", op: "+", value: 1000 }] },
+          {
+            name: "収入",
+            startYear: 0,
+            endYear: 0,
+            ops: [{ asset: "現金", op: "+", value: 500 }],
+          },
+          {
+            name: "支出",
+            startYear: 0,
+            endYear: 0,
+            ops: [{ asset: "現金", op: "-", value: 200 }],
+          },
+          {
+            name: "運用",
+            startYear: 0,
+            endYear: 0,
+            ops: [{ asset: "現金", op: "*", value: 1.03 }],
+          },
+        ],
+      },
     };
     const rows = simulate(cfg);
     // 1000 + 500 - 200 = 1300, then *1.03 = 1339
     expect(rows[0].balances["現金"]).toBeCloseTo(1339, 0);
-    expect(rows[0].totalIncome).toBe(500);
+    expect(rows[0].totalIncome).toBe(1500);
     expect(rows[0].totalExpense).toBe(200);
   });
 
@@ -66,21 +77,24 @@ describe("simulate", () => {
     const cfg: SimulationConfig = {
       currentAge: 39,
       simulationYears: 1,
-      initialAssets: [{ name: "現金", value: 100 }],
-      events: [
-        {
-          name: "大支出",
-          startYear: 0,
-          endYear: 1,
-          ops: [{ asset: "現金", op: "-", value: 500 }],
-        },
-        {
-          name: "運用",
-          startYear: 0,
-          endYear: 1,
-          ops: [{ asset: "現金", op: "*", value: 1.03 }],
-        },
-      ],
+      scenario: {
+        name: "test",
+        events: [
+          { name: "現金", startYear: 0, endYear: 0, ops: [{ asset: "現金", op: "+", value: 100 }] },
+          {
+            name: "大支出",
+            startYear: 0,
+            endYear: 0,
+            ops: [{ asset: "現金", op: "-", value: 500 }],
+          },
+          {
+            name: "運用",
+            startYear: 0,
+            endYear: 0,
+            ops: [{ asset: "現金", op: "*", value: 1.03 }],
+          },
+        ],
+      },
     };
     const rows = simulate(cfg);
     expect(rows[0].balances["現金"]).toBe(-400);
@@ -90,15 +104,17 @@ describe("simulate", () => {
     const cfg: SimulationConfig = {
       currentAge: 39,
       simulationYears: 5,
-      initialAssets: [{ name: "現金", value: 0 }],
-      events: [
-        {
-          name: "収入",
-          startYear: 0,
-          endYear: 3,
-          ops: [{ asset: "現金", op: "+", value: 100 }],
-        },
-      ],
+      scenario: {
+        name: "test",
+        events: [
+          {
+            name: "収入",
+            startYear: 0,
+            endYear: 2,
+            ops: [{ asset: "現金", op: "+", value: 100 }],
+          },
+        ],
+      },
     };
     const rows = simulate(cfg);
     // Years 0,1,2 should have income, years 3,4 should not
@@ -113,15 +129,17 @@ describe("simulate", () => {
     const cfg: SimulationConfig = {
       currentAge: 39,
       simulationYears: 3,
-      initialAssets: [{ name: "現金", value: 0 }],
-      events: [
-        {
-          name: "生活費",
-          startYear: 0,
-          endYear: null,
-          ops: [{ asset: "現金", op: "-", value: 100 }],
-        },
-      ],
+      scenario: {
+        name: "test",
+        events: [
+          {
+            name: "生活費",
+            startYear: 0,
+            endYear: null,
+            ops: [{ asset: "現金", op: "-", value: 100 }],
+          },
+        ],
+      },
     };
     const rows = simulate(cfg);
     expect(rows[0].totalExpense).toBe(100);
@@ -133,27 +151,28 @@ describe("simulate", () => {
     const cfg: SimulationConfig = {
       currentAge: 39,
       simulationYears: 1,
-      initialAssets: [
-        { name: "現金", value: 1000 },
-        { name: "NISA", value: 500 },
-      ],
-      events: [
-        {
-          name: "積立",
-          startYear: 0,
-          endYear: 1,
-          ops: [
-            { asset: "現金", op: "-", value: 100 },
-            { asset: "NISA", op: "+", value: 100 },
-          ],
-        },
-        {
-          name: "NISA運用",
-          startYear: 0,
-          endYear: 1,
-          ops: [{ asset: "NISA", op: "*", value: 1.05 }],
-        },
-      ],
+      scenario: {
+        name: "test",
+        events: [
+          { name: "現金", startYear: 0, endYear: 0, ops: [{ asset: "現金", op: "+", value: 1000 }] },
+          { name: "NISA", startYear: 0, endYear: 0, ops: [{ asset: "NISA", op: "+", value: 500 }] },
+          {
+            name: "積立",
+            startYear: 0,
+            endYear: 0,
+            ops: [
+              { asset: "現金", op: "-", value: 100 },
+              { asset: "NISA", op: "+", value: 100 },
+            ],
+          },
+          {
+            name: "NISA運用",
+            startYear: 0,
+            endYear: 0,
+            ops: [{ asset: "NISA", op: "*", value: 1.05 }],
+          },
+        ],
+      },
     };
     const rows = simulate(cfg);
     expect(rows[0].balances["現金"]).toBe(900);
@@ -165,11 +184,13 @@ describe("simulate", () => {
     const cfg: SimulationConfig = {
       currentAge: 39,
       simulationYears: 1,
-      initialAssets: [
-        { name: "現金", value: 1000 },
-        { name: "NISA", value: 500 },
-      ],
-      events: [],
+      scenario: {
+        name: "test",
+        events: [
+          { name: "現金", startYear: 0, endYear: 0, ops: [{ asset: "現金", op: "+", value: 1000 }] },
+          { name: "NISA", startYear: 0, endYear: 0, ops: [{ asset: "NISA", op: "+", value: 500 }] },
+        ],
+      },
     };
     const rows = simulate(cfg);
     expect(rows[0].totalAssets).toBe(1500);

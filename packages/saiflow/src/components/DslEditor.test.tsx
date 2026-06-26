@@ -6,20 +6,20 @@ import { SaiflowProvider } from "../store";
 describe("DslEditor", () => {
   it("renders textarea with dslText from state", () => {
     render(
-      <SaiflowProvider state={{ dslText: "# 初期設定\n現金:1000\n" }}>
+      <SaiflowProvider state={{ dslText: "# 現状維持\n現金,0,0,現金+1000\n" }}>
         <DslEditor />
       </SaiflowProvider>,
     );
     const textarea = screen.getByRole("textbox");
     expect(textarea).toBeInTheDocument();
-    expect(textarea.textContent).toBe("# 初期設定\n現金:1000\n");
+    expect(textarea.textContent).toBe("# 現状維持\n現金,0,0,現金+1000\n");
   });
 
   it("shows parse errors when present", () => {
     render(
       <SaiflowProvider
         state={{
-          dslText: "# 初期設定\nbad",
+          dslText: "# テスト\nbad",
         }}
       >
         <DslEditor />
@@ -32,13 +32,17 @@ describe("DslEditor", () => {
     render(
       <SaiflowProvider
         state={{
-          dslText: "# 初期設定\n現金:1000\n",
+          dslText: "# 現状維持\n現金,0,0,現金+1000\n",
           parsed: {
             config: {
               currentAge: 39,
               simulationYears: 50,
-              initialAssets: [{ name: "現金", value: 1000 }],
-              events: [],
+              scenario: {
+                name: "現状維持",
+                events: [
+                  { name: "現金", startYear: 0, endYear: 0, ops: [{ asset: "現金", op: "+", value: 1000 }] },
+                ],
+              },
             },
           },
         }}

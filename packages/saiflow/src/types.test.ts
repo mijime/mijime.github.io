@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import type { AssetOp, Event, SimulationConfig, YearRow } from "./types";
+import type { AssetOp, Event, Scenario, SimulationConfig, SqlResult, YearRow } from "./types";
 
 describe("types", () => {
   it("AssetOp allows + - * ops", () => {
@@ -17,14 +17,34 @@ describe("types", () => {
     expect(ev.endYear).toBeNull();
   });
 
-  it("SimulationConfig holds events and initial assets", () => {
+  it("SimulationConfig holds scenario", () => {
     const cfg: SimulationConfig = {
       currentAge: 39,
       simulationYears: 50,
-      initialAssets: [{ name: "現金", value: 1000 }],
-      events: [],
+      scenario: {
+        name: "test",
+        events: [],
+      },
     };
     expect(cfg.currentAge).toBe(39);
+    expect(cfg.scenario.name).toBe("test");
+  });
+
+  it("Scenario has name and events", () => {
+    const s: Scenario = {
+      name: "現状維持",
+      events: [],
+    };
+    expect(s.name).toBe("現状維持");
+  });
+
+  it("SqlResult holds scenarios and errors", () => {
+    const r: SqlResult = {
+      scenarios: [],
+      errors: [],
+    };
+    expect(r.scenarios).toHaveLength(0);
+    expect(r.errors).toHaveLength(0);
   });
 
   it("YearRow has balances snapshot", () => {

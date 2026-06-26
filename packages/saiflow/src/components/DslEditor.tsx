@@ -15,17 +15,30 @@ export function DslEditor() {
       return;
     }
     const result = parseDSL(state.dslText);
-    if ("errors" in result) {
-      dispatch({ type: "SET_PARSED", parsed: result });
+    if (result.errors.length > 0) {
+      dispatch({ type: "SET_PARSED", parsed: { errors: result.errors } });
       dispatch({ type: "SET_ROWS", rows: null });
-    } else {
-      dispatch({ type: "SET_PARSED", parsed: result });
+    } else if (result.scenarios.length > 0) {
+      const scenario = result.scenarios[0];
+      dispatch({
+        type: "SET_PARSED",
+        parsed: {
+          config: {
+            currentAge: state.currentAge,
+            simulationYears: state.simulationYears,
+            scenario,
+          },
+        },
+      });
       const rows = simulate({
-        ...result.config,
         currentAge: state.currentAge,
         simulationYears: state.simulationYears,
+        scenario,
       });
       dispatch({ type: "SET_ROWS", rows });
+    } else {
+      dispatch({ type: "SET_PARSED", parsed: null });
+      dispatch({ type: "SET_ROWS", rows: null });
     }
   }, [state.dslText, state.currentAge, state.simulationYears, dispatch]);
 
@@ -50,7 +63,7 @@ export function DslEditor() {
       <textarea
         className="flex-1 w-full p-2 font-mono text-sm bg-(--paper) text-(--ink) resize-none outline-none"
         defaultValue={state.dslText}
-        placeholder={`# 初期設定\n現金:1000\n\n# イベント\n年収(夫),0,25,現金+500\n生活費,0,,現金-250`}
+        placeholder={`# 現状維持\n現金,0,0,現金+1000\n年収(夫),0,25,現金+500\n生活費,0,,現金-250`}
         onInput={(e) => handleChange(e.currentTarget.value)}
         spellCheck={false}
       />

@@ -2,114 +2,137 @@ import { describe, it, expect } from "vitest";
 import { parseDSL } from "./parser";
 
 describe("parseDSL", () => {
-  it("parses initial assets", () => {
-    const text = "# 初期設定\n現金:1000\nNISA:500\n";
+  it("parses scenario from # header", () => {
+    const text = "# 現状維持\n現金,0,0,現金+1000\n";
     const result = parseDSL(text);
-    if ("errors" in result) throw new Error("expected config");
-    expect(result.config.initialAssets).toEqual([
-      { name: "現金", value: 1000 },
-      { name: "NISA", value: 500 },
-    ]);
+    expect(result.errors).toHaveLength(0);
+    expect(result.scenarios).toHaveLength(1);
+    expect(result.scenarios[0].name).toBe("現状維持");
+    expect(result.scenarios[0].events).toHaveLength(1);
+  });
+
+  it("parses default scenario name when no header", () => {
+    const text = "現金,0,0,現金+1000\n";
+    const result = parseDSL(text);
+    expect(result.errors).toHaveLength(0);
+    expect(result.scenarios).toHaveLength(1);
+    expect(result.scenarios[0].name).toBe("デフォルト");
   });
 
   it("parses events with single op", () => {
-    const text = "# イベント\n年収(夫),0,25,現金+500\n";
+    const text = "# テスト\n年収(夫),6,12,現金+500\n";
     const result = parseDSL(text);
-    if ("errors" in result) throw new Error("expected config");
-    expect(result.config.events).toHaveLength(1);
-    expect(result.config.events[0]).toEqual({
+    expect(result.errors).toHaveLength(0);
+    expect(result.scenarios[0].events).toHaveLength(1);
+    expect(result.scenarios[0].events[0]).toEqual({
       name: "年収(夫)",
-      startYear: 0,
-      endYear: 25,
+      startYear: 6,
+      endYear: 12,
       ops: [{ asset: "現金", op: "+", value: 500 }],
     });
   });
 
   it("parses events with multiple ops", () => {
-    const text = "# イベント\nNISA積立,0,20,現金-60,NISA+60\n";
+    const text = "# テスト\nNISA積立,0,20,現金-60,NISA+60\n";
     const result = parseDSL(text);
-    if ("errors" in result) throw new Error("expected config");
-    expect(result.config.events[0].ops).toEqual([
+    expect(result.errors).toHaveLength(0);
+    expect(result.scenarios[0].events[0].ops).toEqual([
       { asset: "現金", op: "-", value: 60 },
       { asset: "NISA", op: "+", value: 60 },
     ]);
   });
 
   it("parses event with empty endYear as null", () => {
-    const text = "# イベント\n生活費,0,,現金-250\n";
+    const text = "# テスト\n生活費,0,,現金-250\n";
     const result = parseDSL(text);
-    if ("errors" in result) throw new Error("expected config");
-    expect(result.config.events[0].endYear).toBeNull();
+    expect(result.errors).toHaveLength(0);
+    expect(result.scenarios[0].events[0].endYear).toBeNull();
   });
 
   it("parses * op", () => {
-    const text = "# イベント\nNISA運用,0,,NISA*1.03\n";
+    const text = "# テスト\nNISA運用,0,,NISA*1.03\n";
     const result = parseDSL(text);
-    if ("errors" in result) throw new Error("expected config");
-    expect(result.config.events[0].ops[0]).toEqual({
+    expect(result.errors).toHaveLength(0);
+    expect(result.scenarios[0].events[0].ops[0]).toEqual({
       asset: "NISA",
       op: "*",
       value: 1.03,
     });
   });
 
-  it("parses full DSL with both sections", () => {
+  it("parses multiple scenarios", () => {
     const text = [
-      "# 初期設定",
-      "現金:1000",
-      "NISA:500",
-      "",
-      "# イベント",
+      "# 現状維持",
+      "現金,0,0,現金+1000",
       "年収(夫),0,25,現金+500",
-      "生活費,0,,現金-250",
-      "NISA運用,0,,NISA*1.03",
+      "",
+      "# 早期リタイア",
+      "現金,0,0,現金+1000",
+      "年収(夫),0,15,現金+500",
+      "生活費,16,,現金-200",
     ].join("\n");
     const result = parseDSL(text);
-    if ("errors" in result) throw new Error("expected config");
-    expect(result.config.initialAssets).toHaveLength(2);
-    expect(result.config.events).toHaveLength(3);
+    expect(result.errors).toHaveLength(0);
+    expect(result.scenarios).toHaveLength(2);
+    expect(result.scenarios[0].name).toBe("現状維持");
+    expect(result.scenarios[0].events).toHaveLength(2);
+    expect(result.scenarios[1].name).toBe("早期リタイア");
+    expect(result.scenarios[1].events).toHaveLength(3);
   });
 
-  it("returns errors for invalid asset line", () => {
-    const text = "# 初期設定\ninvalid line\n";
+  it("returns errors for invalid event with too few fields", () => {
+    const text = "# テスト\nname,0\n";
     const result = parseDSL(text);
-    if ("config" in result) throw new Error("expected errors");
     expect(result.errors).toHaveLength(1);
     expect(result.errors[0].line).toBe(2);
   });
 
-  it("returns errors for invalid event with too few fields", () => {
-    const text = "# イベント\nname,0\n";
+  it("returns errors for invalid year", () => {
+    const text = "# テスト\nname,a,b,現金+100\n";
     const result = parseDSL(text);
-    if ("config" in result) throw new Error("expected errors");
     expect(result.errors).toHaveLength(1);
   });
 
-  it("ignores empty lines and comment lines", () => {
-    const text = "# 初期設定\n\n# comment\n現金:1000\n";
+  it("returns errors for unparseable op", () => {
+    const text = "# テスト\nname,0,0,invalid\n";
     const result = parseDSL(text);
-    if ("errors" in result) throw new Error("expected config");
-    expect(result.config.initialAssets).toHaveLength(1);
+    expect(result.errors).toHaveLength(1);
+  });
+
+  it("ignores empty lines and comment-only lines", () => {
+    const text = "# テスト\n\n# comment\n現金,0,0,現金+1000\n";
+    const result = parseDSL(text);
+    expect(result.errors).toHaveLength(0);
+    expect(result.scenarios[0].events).toHaveLength(1);
   });
 
   it("parses negative float values", () => {
-    const text = "# イベント\ntest,0,1,現金-3.5\n";
+    const text = "# テスト\ntest,0,0,現金-3.5\n";
     const result = parseDSL(text);
-    if ("errors" in result) throw new Error("expected config");
-    expect(result.config.events[0].ops[0].value).toBe(3.5);
+    expect(result.errors).toHaveLength(0);
+    expect(result.scenarios[0].events[0].ops[0].value).toBe(3.5);
   });
 
   it("parses event with zero-value op", () => {
-    const text = "# イベント\ntest,0,1,現金+0\n";
+    const text = "# テスト\ntest,0,0,現金+0\n";
     const result = parseDSL(text);
-    if ("errors" in result) throw new Error("expected config");
-    expect(result.config.events[0].ops[0].value).toBe(0);
+    expect(result.errors).toHaveLength(0);
+    expect(result.scenarios[0].events[0].ops[0].value).toBe(0);
   });
 
   it("trims whitespace from lines", () => {
-    const text = "# 初期設定\n  現金:1000  \n";
+    const text = "# テスト\n  現金,0,0,現金+1000  \n";
     const result = parseDSL(text);
-    if ("errors" in result) throw new Error("expected config");
-    expect(result.config.initialAssets).toHaveLength(1);
+    expect(result.errors).toHaveLength(0);
+    expect(result.scenarios[0].events).toHaveLength(1);
+  });
+
+  it("handles scenario with no events", () => {
+    const text = "# 空のシナリオ\n";
+    const result = parseDSL(text);
+    expect(result.errors).toHaveLength(0);
+    expect(result.scenarios).toHaveLength(1);
+    expect(result.scenarios[0].name).toBe("空のシナリオ");
+    expect(result.scenarios[0].events).toHaveLength(0);
   });
 });

@@ -13,16 +13,25 @@ export interface Event {
   ops: AssetOp[];
 }
 
+export interface Scenario {
+  name: string;
+  events: Event[];
+}
+
 export interface SimulationConfig {
   currentAge: number;
   simulationYears: number;
-  initialAssets: { name: AssetName; value: number }[];
-  events: Event[];
+  scenario: Scenario;
 }
 
 export interface ParseError {
   line: number;
   message: string;
+}
+
+export interface SqlResult {
+  scenarios: Scenario[];
+  errors: ParseError[];
 }
 
 export interface YearRow {
