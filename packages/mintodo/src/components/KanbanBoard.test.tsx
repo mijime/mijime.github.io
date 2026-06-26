@@ -67,4 +67,18 @@ describe("KanbanBoard", () => {
     expect(screen.getByTestId("kanban-column-count-inbox").textContent).toBe("0");
     expect(screen.getByTestId("kanban-column-count-review").textContent).toBe("0");
   });
+
+  it("renders cards in DFS order matching children array order", () => {
+    const root = node({ id: "root", boardId: "b", parentId: null, isRoot: true, status: "inbox" });
+    const b = node({ id: "b", boardId: "b", parentId: "root", status: "inbox" });
+    const a = node({ id: "a", boardId: "b", parentId: "root", status: "inbox" });
+    root.children = ["b", "a"];
+    a.parentId = "root";
+    b.parentId = "root";
+    renderBoard([root, b, a]);
+    const inboxCol = screen.getByTestId("kanban-column-inbox");
+    const cards = inboxCol.querySelectorAll("[data-node-id]");
+    const cardIds = [...cards].map((c) => (c as HTMLElement).dataset.nodeId);
+    expect(cardIds.indexOf("b")).toBeLessThan(cardIds.indexOf("a"));
+  });
 });
