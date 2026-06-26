@@ -1,6 +1,6 @@
 import "fake-indexeddb/auto";
-import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { act, fireEvent, render, screen } from "@testing-library/react";
+import { beforeEach, afterEach, describe, expect, it, vi } from "vitest";
 import { db } from "../db";
 import { TextEditor } from "./TextEditor";
 import { MindProvider, useMindStore } from "../hooks/use-mind-store";
@@ -8,175 +8,169 @@ import type { MindNode } from "../types";
 import type { State } from "../store";
 
 function makeNode(over: Partial<MindNode> = {}): MindNode {
-  return {
-    id: "n1",
-    boardId: "b1",
-    text: "Child",
-    parentId: "root",
-    isRoot: false,
-    completed: false,
-    collapsed: false,
-    priority: "medium",
-    categoryColor: "slate",
-    dueDate: "",
-    status: "inbox",
-    children: [],
-    estimate: null,
-    workLogs: [],
-    x: 0,
-    y: 0,
-    ...over,
-  };
+	return {
+		id: "n1",
+		boardId: "b1",
+		text: "Child",
+		parentId: "root",
+		isRoot: false,
+		completed: false,
+		collapsed: false,
+		priority: "medium",
+		categoryColor: "slate",
+		dueDate: "",
+		status: "inbox",
+		children: [],
+		x: 0,
+		y: 0,
+		estimate: null,
+		workLogs: [],
+		...over,
+	};
 }
 
 function makeState(over: Partial<State> = {}): State {
-  return {
-    boards: [{ id: "b1", name: "Root", createdAt: 0, updatedAt: 0 }],
-    currentBoardId: "b1",
-    draggingNodeId: null,
-    drawerOpen: false,
-    hideCompleted: false,
-    layoutVersion: 0,
-    modal: null,
-    viewMode: "text",
-    searchQuery: "",
-    selectedNodeId: "",
-    view: { pan: { x: 0, y: 0 }, zoom: 1 },
-    nodes: {
-      root: makeNode({ id: "root", isRoot: true, text: "", children: ["n1"] }),
-      n1: makeNode(),
-    },
-    ...over,
-  };
+	return {
+		boards: [{ id: "b1", name: "Root", createdAt: 0, updatedAt: 0 }],
+		currentBoardId: "b1",
+		draggingNodeId: null,
+		drawerOpen: false,
+		hideCompleted: false,
+		layoutVersion: 0,
+		modal: null,
+		viewMode: "text",
+		searchQuery: "",
+		selectedNodeId: "",
+		view: { pan: { x: 0, y: 0 }, zoom: 1 },
+		nodes: {
+			root: makeNode({ id: "root", isRoot: true, text: "Root", children: ["n1"] }),
+			n1: makeNode(),
+		},
+		...over,
+	};
 }
 
 let captured: State | null = null;
 function Capture() {
-  captured = useMindStore().state;
-  return null;
+	captured = useMindStore().state;
+	return null;
 }
 
-describe("TextEditor", () => {
-  it("renders the serialized DSL on mount (new Markdown format)", () => {
-    render(
-      <MindProvider initialState={makeState()}>
-        <TextEditor />
-      </MindProvider>,
-    );
-    const ta = screen.getByTestId("text-editor-textarea") as HTMLTextAreaElement;
-    expect(ta.value).toContain("- [ ] Child");
-  });
+describe("TextEditor auto-save", () => {
+	beforeEach(async () => {
+		await db.open();
+		await db.boards.clear();
+		await db.nodes.clear();
+		await db.meta.clear();
+		await db.boards.put({ id: "b1", name: "Root", createdAt: 0, updatedAt: 0 });
+	});
+	afterEach(async () => {
+		await db.delete();
+	});
 
-  it("does not show preview pane (removed)", () => {
-    render(
-      <MindProvider initialState={makeState()}>
-        <TextEditor />
-      </MindProvider>,
-    );
-    expect(screen.queryByTestId("text-editor-preview")).toBeNull();
-    expect(screen.queryByTestId("text-editor-error")).toBeNull();
-  });
+	it("renders initial serialized DSL (new format, no 'mindmap')", () => {
+		render(
+			<MindProvider initialState={makeState()}>
+				<TextEditor />
+			</MindProvider>,
+		);
+		const ta = screen.getByTestId("text-editor-textarea") as HTMLTextAreaElement;
+		expect(ta.value).not.toContain("mindmap");
+		expect(ta.value).toContain("# Root");
+		expect(ta.value).toContain("- [ ] Child");
+	});
 
-  it("applies parsed DSL on apply click and confirms", async () => {
-    vi.spyOn(window, "confirm").mockReturnValue(true);
-    await db.boards.put({ id: "b1", name: "Root", createdAt: 0, updatedAt: 0 });
-    render(
-      <MindProvider initialState={makeState()}>
-        <Capture />
-        <TextEditor />
-      </MindProvider>,
-    );
-    const ta = screen.getByTestId("text-editor-textarea") as HTMLTextAreaElement;
-    act(() => {
-      fireEvent.change(ta, {
-        target: { value: "# NewRoot\n  - [ ] NewChild\n" },
-      });
-    });
-    act(() => {
-      fireEvent.click(screen.getByTestId("text-editor-apply"));
-    });
-    await waitFor(() => {
-      const newRoot = Object.values(captured!.nodes).find((n) => n.text === "NewRoot");
-      expect(newRoot).toBeTruthy();
-    });
-  });
+	it("renders save-state indicator", () => {
+		render(
+			<MindProvider initialState={makeState()}>
+				<TextEditor />
+			</MindProvider>,
+		);
+		expect(screen.getByTestId("text-editor-save-state")).toBeTruthy();
+	});
 
-  it("does not apply when confirm is cancelled", () => {
-    vi.spyOn(window, "confirm").mockReturnValue(false);
-    render(
-      <MindProvider initialState={makeState()}>
-        <Capture />
-        <TextEditor />
-      </MindProvider>,
-    );
-    const ta = screen.getByTestId("text-editor-textarea") as HTMLTextAreaElement;
-    act(() => {
-      fireEvent.change(ta, {
-        target: { value: "# Replaced\n" },
-      });
-    });
-    act(() => {
-      fireEvent.click(screen.getByTestId("text-editor-apply"));
-    });
-    const root = Object.values(captured!.nodes).find((n) => n.text === "Child");
-    expect(root).toBeTruthy();
-  });
+	it("does NOT render apply button", () => {
+		render(
+			<MindProvider initialState={makeState()}>
+				<TextEditor />
+			</MindProvider>,
+		);
+		expect(screen.queryByTestId("text-editor-apply")).toBeNull();
+	});
 
-  it("resets textarea to current DSL on reset click", () => {
-    render(
-      <MindProvider initialState={makeState()}>
-        <TextEditor />
-      </MindProvider>,
-    );
-    const ta = screen.getByTestId("text-editor-textarea") as HTMLTextAreaElement;
-    act(() => {
-      fireEvent.change(ta, { target: { value: "garbage" } });
-    });
-    act(() => {
-      fireEvent.click(screen.getByTestId("text-editor-reset"));
-    });
-    expect(ta.value).toContain("- [ ] Child");
-  });
+	it("typing → after 1000ms SET_NODES dispatched", async () => {
+		vi.useFakeTimers();
+		render(
+			<MindProvider initialState={makeState()}>
+				<Capture />
+				<TextEditor />
+			</MindProvider>,
+		);
+		const ta = screen.getByTestId("text-editor-textarea") as HTMLTextAreaElement;
+		act(() => {
+			fireEvent.change(ta, { target: { value: "# Root\n  - [ ] Changed\n" } });
+		});
+		expect(captured!.nodes.n1.text).toBe("Child");
+		await act(async () => {
+			vi.advanceTimersByTime(1100);
+		});
+		expect(captured!.nodes.n1.text).toBe("Changed");
+		vi.useRealTimers();
+	});
 
-  it("applies on Cmd+Enter (metaKey)", async () => {
-    vi.spyOn(window, "confirm").mockReturnValue(true);
-    render(
-      <MindProvider initialState={makeState()}>
-        <Capture />
-        <TextEditor />
-      </MindProvider>,
-    );
-    const ta = screen.getByTestId("text-editor-textarea") as HTMLTextAreaElement;
-    act(() => {
-      fireEvent.change(ta, { target: { value: "# CmdRoot\n" } });
-    });
-    act(() => {
-      fireEvent.keyDown(window, { key: "Enter", metaKey: true });
-    });
-    await waitFor(() => {
-      const root = Object.values(captured!.nodes).find((n) => n.text === "CmdRoot");
-      expect(root).toBeTruthy();
-    });
-  });
+	it("invalid line → '未保存' with error tooltip", () => {
+		render(
+			<MindProvider initialState={makeState()}>
+				<Capture />
+				<TextEditor />
+			</MindProvider>,
+		);
+		act(() => {
+			fireEvent.change(screen.getByTestId("text-editor-textarea"), {
+				target: { value: "garbage line\n" },
+			});
+		});
+		const pill = screen.getByTestId("text-editor-save-state");
+		expect(pill.textContent).toContain("未保存");
+		expect(pill.getAttribute("title")).toBeTruthy();
+	});
 
-  it("applies on Ctrl+Enter (ctrlKey)", async () => {
-    vi.spyOn(window, "confirm").mockReturnValue(true);
-    render(
-      <MindProvider initialState={makeState()}>
-        <Capture />
-        <TextEditor />
-      </MindProvider>,
-    );
-    const ta = screen.getByTestId("text-editor-textarea") as HTMLTextAreaElement;
-    act(() => {
-      fireEvent.change(ta, { target: { value: "# CtrlRoot\n" } });
-    });
-    act(() => {
-      fireEvent.keyDown(window, { key: "Enter", ctrlKey: true });
-    });
-    await waitFor(() => {
-      const root = Object.values(captured!.nodes).find((n) => n.text === "CtrlRoot");
-      expect(root).toBeTruthy();
-    });
-  });
+	it("fixing invalid → after debounce '保存済み'", async () => {
+		vi.useFakeTimers();
+		render(
+			<MindProvider initialState={makeState()}>
+				<Capture />
+				<TextEditor />
+			</MindProvider>,
+		);
+		const ta = screen.getByTestId("text-editor-textarea") as HTMLTextAreaElement;
+		act(() => {
+			fireEvent.change(ta, { target: { value: "garbage\n" } });
+		});
+		act(() => {
+			fireEvent.change(ta, { target: { value: "# Root\n  - [ ] Fixed\n" } });
+		});
+		await act(async () => {
+			vi.advanceTimersByTime(1100);
+		});
+		expect(screen.getByTestId("text-editor-save-state").textContent).toContain("保存済み");
+		vi.useRealTimers();
+	});
+
+	it("リセット reverts textarea to serialized DSL", () => {
+		render(
+			<MindProvider initialState={makeState()}>
+				<TextEditor />
+			</MindProvider>,
+		);
+		const ta = screen.getByTestId("text-editor-textarea") as HTMLTextAreaElement;
+		const initial = ta.value;
+		act(() => {
+			fireEvent.change(ta, { target: { value: "garbage" } });
+		});
+		act(() => {
+			fireEvent.click(screen.getByTestId("text-editor-reset"));
+		});
+		expect(ta.value).toBe(initial);
+	});
 });

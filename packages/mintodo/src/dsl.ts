@@ -454,9 +454,11 @@ export function serializeDSL(nodes: Record<string, MindNode>): string {
   const out: string[] = [];
   const explicitRoot = Object.values(nodes).find((n) => n.isRoot);
   if (explicitRoot) {
-    for (const cid of explicitRoot.children) {
-      const child = nodes[cid];
-      if (child) out.push(serializeNode(child, nodes, 0));
+    if (explicitRoot.children.length > 0) {
+      out.push(serializeNode(explicitRoot, nodes, 0));
+    } else {
+      const attrStr = buildAttrSuffix(explicitRoot);
+      out.push(`# ${explicitRoot.text}${attrStr}`);
     }
   } else {
     const rootChildren = Object.values(nodes).filter((n) => n.parentId === IMPLICIT_ROOT_ID);
