@@ -1,5 +1,6 @@
 import { useSaiflowDispatch, useSaiflowState } from "../store";
 import { DslEditor } from "./DslEditor";
+import { GuiEditor } from "./GuiEditor";
 
 export function EditorPanel() {
   const state = useSaiflowState();
@@ -38,11 +39,7 @@ export function EditorPanel() {
           </select>
         )}
       </div>
-      {state.activeTab === "dsl" ? (
-        <DslEditor />
-      ) : (
-        <div className="p-4 text-sm text-(--ink) opacity-50">準備中</div>
-      )}
+      {state.activeTab === "dsl" ? <DslEditor /> : <GuiEditor />}
     </div>
   );
 }

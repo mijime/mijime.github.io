@@ -44,9 +44,7 @@ export function BarChart() {
 
   const incomePoints = rows.map((r, i) => `${x(i)},${incomeY(r.totalIncome)}`).join(" ");
   const expensePoints = rows.map((r, i) => `${x(i)},${expenseY(r.totalExpense)}`).join(" ");
-  const netPoints = rows
-    .map((r, i) => `${x(i)},${netY(r.totalIncome - r.totalExpense)}`)
-    .join(" ");
+  const netPoints = rows.map((r, i) => `${x(i)},${netY(r.totalIncome - r.totalExpense)}`).join(" ");
 
   const xTickInterval = Math.max(1, Math.floor(rows.length / 10));
 
@@ -215,7 +213,15 @@ export function BarChart() {
             </text>
           </g>
           <g transform="translate(120, 0)">
-            <line x1={0} y1={-5} x2={14} y2={-5} stroke="#3b82f6" strokeWidth={1.5} strokeDasharray="3,2" />
+            <line
+              x1={0}
+              y1={-5}
+              x2={14}
+              y2={-5}
+              stroke="#3b82f6"
+              strokeWidth={1.5}
+              strokeDasharray="3,2"
+            />
             <text x={18} y={0} fill="var(--ink)" opacity={0.7} fontSize={11}>
               収支
             </text>
