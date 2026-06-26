@@ -24,6 +24,7 @@ function makeNode(id: string, over: Partial<MindNode> = {}): MindNode {
     x: 0,
     y: 0,
     ...over,
+    startDate: over.startDate ?? "",
   };
 }
 

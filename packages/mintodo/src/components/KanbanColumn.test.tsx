@@ -19,6 +19,7 @@ function node(
     priority: "medium",
     categoryColor: "slate",
     dueDate: "",
+    startDate: "",
     status: opts.status ?? "inbox",
     children: opts.children ?? [],
     estimate: null,

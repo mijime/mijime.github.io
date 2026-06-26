@@ -21,6 +21,7 @@ function n(id: string, opts: Partial<MindNode> = {}): MindNode {
     x: 0,
     y: 0,
     ...opts,
+    startDate: opts.startDate ?? "",
   };
 }
 

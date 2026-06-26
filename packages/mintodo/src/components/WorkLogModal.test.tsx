@@ -24,6 +24,7 @@ function makeNode(id: string, parentId: string | null, opts: Partial<MindNode> =
     estimate: null,
     workLogs: opts.workLogs ?? [],
     ...opts,
+    startDate: opts.startDate ?? "",
   };
 }
 
@@ -86,8 +87,8 @@ describe("WorkLogModal", () => {
       </MindProvider>,
     );
     const entries = container.querySelectorAll(
-		'[data-testid^="worklog-modal-entry-"]',
-	) as NodeListOf<HTMLElement>;
+      '[data-testid^="worklog-modal-entry-"]',
+    ) as NodeListOf<HTMLElement>;
     expect(entries).toHaveLength(2);
     expect(entries[0].dataset.testid).toBe("worklog-modal-entry-wl2");
     expect(entries[1].dataset.testid).toBe("worklog-modal-entry-wl1");

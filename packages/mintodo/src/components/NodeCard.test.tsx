@@ -32,6 +32,7 @@ function makeNode(id: string, parentId: string | null, opts: Partial<MindNode> =
     x: opts.x ?? 0,
     y: opts.y ?? 0,
     ...opts,
+    startDate: opts.startDate ?? "",
   };
 }
 

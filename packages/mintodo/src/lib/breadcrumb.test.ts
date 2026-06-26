@@ -21,6 +21,7 @@ function n(id: string, parentId: string | null, opts: Partial<MindNode> = {}): M
     x: 0,
     y: 0,
     ...opts,
+    startDate: opts.startDate ?? "",
   };
 }
 
@@ -87,7 +88,9 @@ describe("parentBreadcrumb", () => {
     expect(parentBreadcrumb(nodes, "a")).toBe("Root");
   });
   it("root → root's own text", () => {
-    expect(parentBreadcrumb({ root: n("root", null, { isRoot: true, text: "My Board" }) }, "root")).toBe("My Board");
+    expect(
+      parentBreadcrumb({ root: n("root", null, { isRoot: true, text: "My Board" }) }, "root"),
+    ).toBe("My Board");
   });
   it("missing id → ''", () => expect(parentBreadcrumb({}, "missing")).toBe(""));
 });
