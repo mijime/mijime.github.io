@@ -2,83 +2,98 @@ import type { MindNode } from "../types";
 import { effectiveEstimate } from "./estimate";
 
 export interface Schedule {
-	id: string;
-	start: Date;
-	end: Date;
-	depth: number;
-	estimateH: number;
+  id: string;
+  start: Date;
+  end: Date;
+  depth: number;
+  estimateH: number;
+  isLeaf: boolean;
+  plannedEstimateH?: number;
+  plannedDue?: Date;
 }
 
-const DEFAULT_HOURS_PER_DAY = 8;
-const WORK_START_HOUR = 9;
-
-function hoursUsedInDay(
-	date: Date,
-	hoursPerDay: number,
-	workStartHour: number,
-): number {
-	const curHour = date.getHours() + date.getMinutes() / 60;
-	if (curHour < workStartHour) return 0;
-	if (curHour >= workStartHour + hoursPerDay) return hoursPerDay;
-	return curHour - workStartHour;
+export function addHours(date: Date, hours: number): Date {
+  return new Date(date.getTime() + hours * 3_600_000);
 }
 
-export function addHours(
-	date: Date,
-	hours: number,
-	hoursPerDay = DEFAULT_HOURS_PER_DAY,
-	skipWeekends = true,
-): Date {
-	if (hours <= 0) return new Date(date);
-	const cur = new Date(date);
-	if (cur.getHours() < WORK_START_HOUR) {
-		cur.setHours(WORK_START_HOUR, 0, 0, 0);
-	}
-	let remaining = hours;
-	while (remaining > 0) {
-		if (skipWeekends && (cur.getDay() === 0 || cur.getDay() === 6)) {
-			cur.setDate(cur.getDate() + 1);
-			cur.setHours(WORK_START_HOUR, 0, 0, 0);
-			continue;
-		}
-		const usedToday = hoursUsedInDay(cur, hoursPerDay, WORK_START_HOUR);
-		const capToday = hoursPerDay - usedToday;
-		if (capToday <= 0) {
-			cur.setDate(cur.getDate() + 1);
-			cur.setHours(WORK_START_HOUR, 0, 0, 0);
-			continue;
-		}
-		const consume = Math.min(remaining, capToday);
-		cur.setTime(cur.getTime() + consume * 3_600_000);
-		remaining -= consume;
-		if (remaining > 0) {
-			cur.setDate(cur.getDate() + 1);
-			cur.setHours(WORK_START_HOUR, 0, 0, 0);
-		}
-	}
-	return cur;
-}
+/**
+ * 階層スケジュール計算 (24h 連続, 土日区別なし):
+ * - @start を持つノードはその日付を局所的な原点とし、子孫もその原点で配置
+ * - @start を持たないノードは origin(default epoch)を起点とする
+ * - @start を持つノードのスパンは兄弟のカーソルを進めない(独立配置)
+ */
+export function scheduleNodes(nodes: Record<string, MindNode>, origin?: Date): Schedule[] {
+  const root = Object.values(nodes).find((n) => n.isRoot);
+  if (!root) return [];
+  const result: Schedule[] = [];
 
-export function scheduleNodes(
-	nodes: Record<string, MindNode>,
-	startDate: Date,
-	hoursPerDay = DEFAULT_HOURS_PER_DAY,
-	skipWeekends = true,
-): Schedule[] {
-	const root = Object.values(nodes).find((n) => n.isRoot);
-	if (!root) return [];
-	const result: Schedule[] = [];
-	let cursor = new Date(startDate);
-	const walk = (id: string, depth: number): void => {
-		const node = nodes[id];
-		if (!node) return;
-		const est = effectiveEstimate(nodes, id);
-		const start = new Date(cursor);
-		const end = addHours(start, est, hoursPerDay, skipWeekends);
-		result.push({ id, start, end, depth, estimateH: est });
-		cursor = end;
-		for (const cid of node.children) walk(cid, depth + 1);
-	};
-	walk(root.id, 0);
-	return result;
+  const isLeaf = (id: string) => (nodes[id]?.children.length ?? 0) === 0;
+
+  const defaultOrigin = origin === undefined ? new Date(0) : new Date(origin);
+
+  function walk(
+    id: string,
+    depth: number,
+    cursor: Date,
+    ancestorCompleted = false,
+  ): { start: Date; end: Date; nextCursor: Date } {
+    const node = nodes[id];
+    if (!node) return { start: cursor, end: cursor, nextCursor: cursor };
+
+    const hasLocalOrigin = Boolean(node.startDate);
+    const inputCursor = new Date(cursor);
+    const originCursor = hasLocalOrigin ? new Date(`${node.startDate}T00:00:00`) : cursor;
+
+    const isCompleted = node.completed || ancestorCompleted;
+
+    if (isLeaf(id)) {
+      const est = isCompleted ? 0 : effectiveEstimate(nodes, id);
+      const start = new Date(originCursor);
+      const end = addHours(start, est);
+      result.push({
+        id,
+        start,
+        end,
+        depth,
+        estimateH: est,
+        isLeaf: true,
+        plannedEstimateH: node.estimate ?? undefined,
+        plannedDue: node.dueDate ? new Date(`${node.dueDate}T00:00:00`) : undefined,
+      });
+      const rawNextCursor = isCompleted ? inputCursor : new Date(end);
+      return { start, end, nextCursor: hasLocalOrigin ? inputCursor : rawNextCursor };
+    }
+
+    let minStart: Date | null = null;
+    let maxEnd: Date | null = null;
+    let childCursor = new Date(originCursor);
+
+    for (const cid of node.children) {
+      const span = walk(cid, depth + 1, childCursor, isCompleted);
+      childCursor = span.nextCursor;
+      if (!minStart || span.start < minStart) minStart = span.start;
+      if (!maxEnd || span.end > maxEnd) maxEnd = span.end;
+    }
+    const spanStart = minStart ?? originCursor;
+    const spanEnd = maxEnd ?? originCursor;
+    const computedH = (spanEnd.getTime() - spanStart.getTime()) / 3_600_000;
+    result.push({
+      id,
+      start: spanStart,
+      end: spanEnd,
+      depth,
+      estimateH: computedH,
+      isLeaf: false,
+      plannedEstimateH: node.estimate ?? undefined,
+      plannedDue: node.dueDate ? new Date(`${node.dueDate}T00:00:00`) : undefined,
+    });
+    return {
+      start: spanStart,
+      end: spanEnd,
+      nextCursor: hasLocalOrigin ? inputCursor : childCursor,
+    };
+  }
+
+  walk(root.id, 0, new Date(defaultOrigin));
+  return result;
 }
