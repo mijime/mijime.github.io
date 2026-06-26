@@ -45,7 +45,13 @@ export function DslEditor() {
       scenario,
     });
     dispatch({ type: "SET_ROWS", rows });
-  }, [state.scenarios, state.activeScenarioIndex, state.currentAge, state.simulationYears, dispatch]);
+  }, [
+    state.scenarios,
+    state.activeScenarioIndex,
+    state.currentAge,
+    state.simulationYears,
+    dispatch,
+  ]);
 
   const handleChange = (text: string) => {
     if (timerRef.current) clearTimeout(timerRef.current);

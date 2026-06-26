@@ -8,9 +8,7 @@ export function simulate(config: SimulationConfig): YearRow[] {
 
   for (let year = 0; year < simulationYears; year++) {
     const active = scenario.events.filter(
-      (e) =>
-        e.startYear <= year &&
-        (e.endYear === null || year <= e.endYear),
+      (e) => e.startYear <= year && (e.endYear === null || year <= e.endYear),
     );
 
     let totalIncome = 0;

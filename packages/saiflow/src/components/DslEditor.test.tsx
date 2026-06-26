@@ -40,7 +40,12 @@ describe("DslEditor", () => {
               scenario: {
                 name: "現状維持",
                 events: [
-                  { name: "現金", startYear: 0, endYear: 0, ops: [{ asset: "現金", op: "+", value: 1000 }] },
+                  {
+                    name: "現金",
+                    startYear: 0,
+                    endYear: 0,
+                    ops: [{ asset: "現金", op: "+", value: 1000 }],
+                  },
                 ],
               },
             },

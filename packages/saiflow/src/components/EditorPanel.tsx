@@ -26,7 +26,9 @@ export function EditorPanel() {
           <select
             className="ml-auto mr-2 px-1 py-0.5 text-xs bg-(--paper) text-(--ink) border border-(--border) rounded"
             value={state.activeScenarioIndex}
-            onChange={(e) => dispatch({ type: "SET_ACTIVE_SCENARIO", index: Number(e.target.value) })}
+            onChange={(e) =>
+              dispatch({ type: "SET_ACTIVE_SCENARIO", index: Number(e.target.value) })
+            }
           >
             {state.scenarios.map((s, i) => (
               <option key={i} value={i}>

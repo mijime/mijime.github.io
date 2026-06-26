@@ -10,7 +10,12 @@ describe("simulate", () => {
       scenario: {
         name: "test",
         events: [
-          { name: "現金", startYear: 0, endYear: 0, ops: [{ asset: "現金", op: "+", value: 1000 }] },
+          {
+            name: "現金",
+            startYear: 0,
+            endYear: 0,
+            ops: [{ asset: "現金", op: "+", value: 1000 }],
+          },
         ],
       },
     };
@@ -28,7 +33,12 @@ describe("simulate", () => {
       scenario: {
         name: "test",
         events: [
-          { name: "現金", startYear: 0, endYear: 0, ops: [{ asset: "現金", op: "+", value: 1000 }] },
+          {
+            name: "現金",
+            startYear: 0,
+            endYear: 0,
+            ops: [{ asset: "現金", op: "+", value: 1000 }],
+          },
         ],
       },
     };
@@ -44,7 +54,12 @@ describe("simulate", () => {
       scenario: {
         name: "test",
         events: [
-          { name: "現金", startYear: 0, endYear: 0, ops: [{ asset: "現金", op: "+", value: 1000 }] },
+          {
+            name: "現金",
+            startYear: 0,
+            endYear: 0,
+            ops: [{ asset: "現金", op: "+", value: 1000 }],
+          },
           {
             name: "収入",
             startYear: 0,
@@ -154,7 +169,12 @@ describe("simulate", () => {
       scenario: {
         name: "test",
         events: [
-          { name: "現金", startYear: 0, endYear: 0, ops: [{ asset: "現金", op: "+", value: 1000 }] },
+          {
+            name: "現金",
+            startYear: 0,
+            endYear: 0,
+            ops: [{ asset: "現金", op: "+", value: 1000 }],
+          },
           { name: "NISA", startYear: 0, endYear: 0, ops: [{ asset: "NISA", op: "+", value: 500 }] },
           {
             name: "積立",
@@ -187,7 +207,12 @@ describe("simulate", () => {
       scenario: {
         name: "test",
         events: [
-          { name: "現金", startYear: 0, endYear: 0, ops: [{ asset: "現金", op: "+", value: 1000 }] },
+          {
+            name: "現金",
+            startYear: 0,
+            endYear: 0,
+            ops: [{ asset: "現金", op: "+", value: 1000 }],
+          },
           { name: "NISA", startYear: 0, endYear: 0, ops: [{ asset: "NISA", op: "+", value: 500 }] },
         ],
       },

@@ -107,8 +107,7 @@ describe("parseDSL", () => {
   });
 
   it("skips #comment lines without space", () => {
-    const text =
-      "# 現状維持\n現金,0,0,現金+1000\n#comment\n# 別\n投資,0,0,NISA+500\n";
+    const text = "# 現状維持\n現金,0,0,現金+1000\n#comment\n# 別\n投資,0,0,NISA+500\n";
     const result = parseDSL(text);
     expect(result.errors).toEqual([]);
     expect(result.scenarios).toHaveLength(2);

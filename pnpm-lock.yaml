@@ -25,6 +25,9 @@ importers:
       '@mijime/mintodo':
         specifier: workspace:*
         version: link:../../packages/mintodo
+      '@mijime/saiflow':
+        specifier: workspace:*
+        version: link:../../packages/saiflow
       '@mijime/theme':
         specifier: workspace:*
         version: link:../../packages/theme
