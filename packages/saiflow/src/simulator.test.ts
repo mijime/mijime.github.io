@@ -88,7 +88,7 @@ describe("simulate", () => {
     expect(rows[0].totalExpense).toBe(200);
   });
 
-  it("does not apply * to negative balances", () => {
+  it("applies * to negative balances", () => {
     const cfg: SimulationConfig = {
       currentAge: 39,
       simulationYears: 1,
@@ -112,7 +112,8 @@ describe("simulate", () => {
       },
     };
     const rows = simulate(cfg);
-    expect(rows[0].balances["現金"]).toBe(-400);
+    // -400 * 1.03 = -412
+    expect(rows[0].balances["現金"]).toBeCloseTo(-412, 0);
   });
 
   it("handles event with endYear correctly", () => {

@@ -37,7 +37,7 @@ export function simulate(config: SimulationConfig): YearRow[] {
       for (const op of e.ops) {
         if (op.op !== "*") continue;
         const current = balances[op.asset] ?? 0;
-        if (current > 0) {
+        if (current !== 0) {
           const gain = current * (op.value - 1);
           balances[op.asset] = current + gain;
           operations.push({ eventName: e.name, op });
