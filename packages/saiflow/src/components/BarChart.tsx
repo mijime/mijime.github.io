@@ -1,4 +1,6 @@
+import React, { useState } from "react";
 import { useSaiflowState } from "../store";
+import { ChartTooltip } from "./ChartTooltip";
 
 function niceStep(max: number): number {
   const raw = max / 4;
@@ -17,6 +19,8 @@ export function BarChart() {
   const state = useSaiflowState();
   const { rows } = state;
   if (!rows || rows.length === 0) return null;
+
+  const [hover, setHover] = React.useState<{ i: number; mx: number; my: number } | null>(null);
 
   const padding = { top: 24, right: 24, bottom: 40, left: 56 };
   const width = Math.max(600, rows.length * 14 + padding.left + padding.right);
@@ -42,7 +46,7 @@ export function BarChart() {
   const xTickInterval = Math.max(1, Math.floor(rows.length / 10));
 
   return (
-    <div className="h-full overflow-auto">
+    <div className="h-full overflow-auto relative">
       <svg width={width} height={height} className="font-sans text-xs">
         {/* 0 line */}
         <line
@@ -147,6 +151,21 @@ export function BarChart() {
           </g>
         ))}
 
+        {/* Hover bands */}
+        {rows.map((_, i) => (
+          <rect
+            key={`hb${i}`}
+            x={x(i) - step / 2}
+            y={padding.top}
+            width={step}
+            height={height - padding.top - padding.bottom}
+            fill="transparent"
+            onMouseEnter={(e) => setHover({ i, mx: e.clientX, my: e.clientY })}
+            onMouseMove={(e) => setHover((h) => (h ? { ...h, mx: e.clientX, my: e.clientY } : null))}
+            onMouseLeave={() => setHover(null)}
+          />
+        ))}
+
         {/* X axis labels */}
         {rows.map((r, i) => {
           if (i % xTickInterval !== 0 && i !== rows.length - 1) return null;
@@ -180,6 +199,25 @@ export function BarChart() {
           </g>
         </g>
       </svg>
+      <ChartTooltip
+        data={
+          hover
+            ? {
+                x: hover.mx,
+                y: hover.my,
+                lines: [
+                  { label: "年齢", value: String(rows[hover.i].age) },
+                  { label: "収入", value: rows[hover.i].totalIncome.toLocaleString() },
+                  { label: "支出", value: rows[hover.i].totalExpense.toLocaleString() },
+                  {
+                    label: "収支",
+                    value: (rows[hover.i].totalIncome - rows[hover.i].totalExpense).toLocaleString(),
+                  },
+                ],
+              }
+            : null
+        }
+      />
     </div>
   );
 }

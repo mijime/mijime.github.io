@@ -1,4 +1,6 @@
+import React, { useState } from "react";
 import { useSaiflowState } from "../store";
+import { ChartTooltip } from "./ChartTooltip";
 
 const COLORS = [
   "rgba(99, 179, 237, 1)",
@@ -13,6 +15,8 @@ export function LineChart() {
   const state = useSaiflowState();
   const { rows } = state;
   if (!rows || rows.length === 0) return null;
+
+  const [hover, setHover] = React.useState<{ i: number; mx: number; my: number } | null>(null);
 
   const assetNames = [...new Set(rows.flatMap((r) => Object.keys(r.balances)))];
   const padding = { top: 24, right: 24, bottom: 40, left: 56 };
@@ -31,7 +35,8 @@ export function LineChart() {
 
   const plotW = width - padding.left - padding.right;
   const plotH = height - padding.top - padding.bottom;
-  const x = (i: number) => padding.left + (i / (rows.length - 1 || 1)) * plotW;
+  const step = plotW / (rows.length - 1 || 1);
+  const x = (i: number) => padding.left + i * step;
   const y = (v: number) => padding.top + plotH - ((v - minVal) / range) * plotH;
 
   const y0 = y(0);
@@ -45,7 +50,7 @@ export function LineChart() {
   }
 
   return (
-    <div className="h-full overflow-auto">
+    <div className="h-full overflow-auto relative">
       <svg width={width} height={height} className="font-sans text-xs">
         {/* 0 line */}
         <line
@@ -81,6 +86,21 @@ export function LineChart() {
             </g>
           );
         })}
+
+        {/* Hover bands */}
+        {rows.map((_, i) => (
+          <rect
+            key={`hb${i}`}
+            x={x(i) - step / 2}
+            y={padding.top}
+            width={step}
+            height={plotH}
+            fill="transparent"
+            onMouseEnter={(e) => setHover({ i, mx: e.clientX, my: e.clientY })}
+            onMouseMove={(e) => setHover((h) => (h ? { ...h, mx: e.clientX, my: e.clientY } : null))}
+            onMouseLeave={() => setHover(null)}
+          />
+        ))}
 
         {/* X axis labels */}
         {xTicks.map((i) => (
@@ -160,6 +180,25 @@ export function LineChart() {
           ))}
         </g>
       </svg>
+      <ChartTooltip
+        data={
+          hover
+            ? {
+                x: hover.mx,
+                y: hover.my,
+                lines: [
+                  { label: "年齢", value: String(rows[hover.i].age) },
+                  ...assetNames.map((n, ai) => ({
+                    label: n,
+                    value: ((rows[hover.i].balances[n] ?? 0) as number).toLocaleString(),
+                    color: COLORS[ai % COLORS.length],
+                  })),
+                  { label: "総資産", value: rows[hover.i].totalAssets.toLocaleString() },
+                ],
+              }
+            : null
+        }
+      />
     </div>
   );
 }
