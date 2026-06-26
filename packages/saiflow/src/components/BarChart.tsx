@@ -1,69 +1,30 @@
-import { Bar } from "react-chartjs-2";
-import type { TooltipItem } from "chart.js";
+import { BarChart as RBarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import { useSaiflowState } from "../store";
-import "../chart-setup";
 
 export function BarChart() {
   const state = useSaiflowState();
   const { rows } = state;
   if (!rows || rows.length === 0) return null;
 
-  const data = {
-    labels: rows.map((r) => r.age),
-    datasets: [
-      {
-        label: "収入",
-        data: rows.map((r) => r.totalIncome),
-        backgroundColor: "rgba(72, 187, 120, 0.6)",
-        hoverBackgroundColor: "rgba(72, 187, 120, 0.8)",
-        borderRadius: 4,
-        borderSkipped: false,
-      },
-      {
-        label: "支出",
-        data: rows.map((r) => -r.totalExpense),
-        backgroundColor: "rgba(252, 129, 129, 0.6)",
-        hoverBackgroundColor: "rgba(252, 129, 129, 0.8)",
-        borderRadius: 4,
-        borderSkipped: false,
-      },
-    ],
-  };
-
-  const options = {
-    responsive: true,
-    maintainAspectRatio: false,
-    animation: { duration: 500 },
-    interaction: { intersect: false, mode: "index" as const },
-    plugins: {
-      legend: {
-        position: "top" as const,
-        labels: { usePointStyle: true, padding: 16, font: { size: 12 } },
-      },
-      tooltip: {
-        callbacks: {
-          label: (ctx: TooltipItem<"bar">) => {
-            const v = Number(ctx.raw) || 0;
-            if (ctx.datasetIndex === 1) return `支出: ${Math.abs(v)}`;
-            return `収入: ${v}`;
-          },
-        },
-      },
-    },
-    scales: {
-      x: { stacked: true, grid: { display: false } },
-      y: {
-        stacked: true,
-        beginAtZero: true,
-        grid: { color: "rgba(128,128,128,0.1)" },
-        border: { display: false },
-      },
-    },
-  };
+  const chartData = rows.map((r) => ({
+    age: r.age,
+    収入: r.totalIncome,
+    支出: r.totalExpense,
+  }));
 
   return (
     <div className="h-full p-4">
-      <Bar data={data} options={options} />
+      <ResponsiveContainer width="100%" height="100%">
+        <RBarChart data={chartData}>
+          <CartesianGrid strokeDasharray="3 3" stroke="rgba(128,128,128,0.15)" />
+          <XAxis dataKey="age" tick={{ fontSize: 12 }} stroke="var(--ink)" opacity={0.5} />
+          <YAxis tick={{ fontSize: 12 }} stroke="var(--ink)" opacity={0.5} tickFormatter={(v: number) => Math.round(v).toString()} />
+          <Tooltip />
+          <Legend />
+          <Bar dataKey="収入" fill="rgba(72, 187, 120, 0.7)" radius={[3, 3, 0, 0]} />
+          <Bar dataKey="支出" fill="rgba(252, 129, 129, 0.7)" radius={[3, 3, 0, 0]} />
+        </RBarChart>
+      </ResponsiveContainer>
     </div>
   );
 }

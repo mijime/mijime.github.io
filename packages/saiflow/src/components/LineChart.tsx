@@ -1,14 +1,8 @@
-import { Line } from "react-chartjs-2";
+import { LineChart as RLineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import { useSaiflowState } from "../store";
-import "../chart-setup";
 
 const COLORS = [
-  { border: "rgba(99, 179, 237, 1)", bg: "rgba(99, 179, 237, 0.15)" },
-  { border: "rgba(252, 129, 129, 1)", bg: "rgba(252, 129, 129, 0.15)" },
-  { border: "rgba(72, 187, 120, 1)", bg: "rgba(72, 187, 120, 0.15)" },
-  { border: "rgba(246, 173, 85, 1)", bg: "rgba(246, 173, 85, 0.15)" },
-  { border: "rgba(159, 122, 234, 1)", bg: "rgba(159, 122, 234, 0.15)" },
-  { border: "rgba(237, 100, 166, 1)", bg: "rgba(237, 100, 166, 0.15)" },
+  "#63b3ed", "#fc8181", "#48bb78", "#f6ad55", "#9f7aea", "#ed64a6",
 ];
 
 export function LineChart() {
@@ -17,58 +11,44 @@ export function LineChart() {
   if (!rows || rows.length === 0) return null;
 
   const assetNames = Object.keys(rows[0].balances);
-
-  const data = {
-    labels: rows.map((r) => r.age),
-    datasets: [
-      ...assetNames.map((name, i) => ({
-        label: name,
-        data: rows.map((r) => r.balances[name] ?? 0),
-        borderColor: COLORS[i % COLORS.length].border,
-        backgroundColor: COLORS[i % COLORS.length].bg,
-        borderWidth: 2,
-        pointRadius: 2,
-        pointHoverRadius: 6,
-        tension: 0.4,
-        fill: true,
-      })),
-      {
-        label: "総資産",
-        data: rows.map((r) => r.totalAssets),
-        borderColor: "rgba(100,100,100,0.8)",
-        borderDash: [6, 3],
-        borderWidth: 2,
-        pointRadius: 0,
-        tension: 0.4,
-        fill: false,
-      },
-    ],
-  };
-
-  const options = {
-    responsive: true,
-    maintainAspectRatio: false,
-    animation: { duration: 600 },
-    interaction: { intersect: false, mode: "index" as const },
-    plugins: {
-      legend: {
-        position: "top" as const,
-        labels: { usePointStyle: true, padding: 16, font: { size: 12 } },
-      },
-    },
-    scales: {
-      x: { grid: { display: false } },
-      y: {
-        beginAtZero: true,
-        grid: { color: "rgba(128,128,128,0.1)" },
-        border: { display: false },
-      },
-    },
-  };
+  const chartData = rows.map((r) => ({
+    age: r.age,
+    totalAssets: r.totalAssets,
+    ...Object.fromEntries(assetNames.map((n) => [n, r.balances[n] ?? 0])),
+  }));
 
   return (
     <div className="h-full p-4">
-      <Line data={data} options={options} />
+      <ResponsiveContainer width="100%" height="100%">
+        <RLineChart data={chartData}>
+          <CartesianGrid strokeDasharray="3 3" stroke="rgba(128,128,128,0.15)" />
+          <XAxis dataKey="age" tick={{ fontSize: 12 }} stroke="var(--ink)" opacity={0.5} />
+          <YAxis tick={{ fontSize: 12 }} stroke="var(--ink)" opacity={0.5} tickFormatter={(v: number) => Math.round(v).toLocaleString()} />
+          <Tooltip />
+          <Legend />
+          {assetNames.map((name, i) => (
+            <Line
+              key={name}
+              type="monotone"
+              dataKey={name}
+              stroke={COLORS[i % COLORS.length]}
+              strokeWidth={2}
+              dot={false}
+              activeDot={{ r: 4 }}
+            />
+          ))}
+          <Line
+            type="monotone"
+            dataKey="totalAssets"
+            name="総資産"
+            stroke="var(--ink)"
+            strokeWidth={2}
+            strokeDasharray="6 3"
+            dot={false}
+            activeDot={{ r: 4 }}
+          />
+        </RLineChart>
+      </ResponsiveContainer>
     </div>
   );
 }
