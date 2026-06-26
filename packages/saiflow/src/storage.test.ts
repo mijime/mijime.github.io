@@ -18,7 +18,7 @@ describe("storage", () => {
     expect(list).toHaveLength(1);
     expect(list[0].name).toBe("test");
 
-    const loaded = await loadScenario(list[0].id);
+    const loaded = await loadScenario(list[0].id!);
     expect(loaded).not.toBeNull();
     expect(loaded!.dslText).toBe("# 初期設定\n現金:1000\n");
   });
@@ -38,7 +38,7 @@ describe("storage", () => {
       currentAge: 39,
       simulationYears: 50,
     });
-    const loaded = await loadScenario(list[0].id);
+    const loaded = await loadScenario(list[0].id!);
     expect(loaded!.dslText).toBe("new");
   });
 

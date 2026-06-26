@@ -6,7 +6,7 @@ import { simulate } from "../simulator";
 export function DslEditor() {
   const state = useSaiflowState();
   const dispatch = useSaiflowDispatch();
-  const timerRef = useRef<ReturnType<typeof setTimeout>>();
+  const timerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   useEffect(() => {
     if (state.dslText.trim().length === 0) {

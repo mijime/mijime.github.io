@@ -9,7 +9,7 @@ interface Scenario {
   updatedAt: Date;
 }
 
-const db = new Dexie("saiflow") as Dexie & { scenarios: EntityTable<Scenario> };
+const db = new Dexie("saiflow") as Dexie & { scenarios: EntityTable<Scenario, "id"> };
 
 db.version(1).stores({
   scenarios: "++id, name, updatedAt",

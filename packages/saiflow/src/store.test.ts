@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { reducer, initialState, type State, type Action } from "./store";
+import { reducer, initialState, type Action } from "./store";
 
 describe("reducer", () => {
   it("SET_DSL updates dslText", () => {
