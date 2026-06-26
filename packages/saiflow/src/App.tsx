@@ -5,9 +5,8 @@ import { EditorPanel } from "./components/EditorPanel";
 import { ResultTable } from "./components/ResultTable";
 import { BarChart } from "./components/BarChart";
 import { LineChart } from "./components/LineChart";
-import { PieChartView } from "./components/PieChartView";
 
-type ViewMode = "table" | "line" | "bar" | "pie";
+type ViewMode = "table" | "line" | "bar";
 
 function RightPanel() {
   const [view, setView] = useState<ViewMode>("table");
@@ -15,19 +14,13 @@ function RightPanel() {
   return (
     <div className="flex flex-col h-full">
       <div className="flex items-center gap-1 px-2 py-1 border-b border-(--border)">
-        {(["table", "line", "bar", "pie"] as ViewMode[]).map((v) => (
+        {(["table", "line", "bar"] as ViewMode[]).map((v) => (
           <button
             key={v}
             className={`px-2 py-0.5 text-xs rounded ${view === v ? "bg-(--terra) text-white" : "text-(--ink) opacity-50"}`}
             onClick={() => setView(v)}
           >
-            {v === "table"
-              ? "収支表"
-              : v === "line"
-                ? "資産推移"
-                : v === "bar"
-                  ? "収支比較"
-                  : "資産配分"}
+            {v === "table" ? "収支表" : v === "line" ? "資産推移" : "収支比較"}
           </button>
         ))}
       </div>
@@ -36,10 +29,8 @@ function RightPanel() {
           <ResultTable />
         ) : view === "line" ? (
           <LineChart />
-        ) : view === "bar" ? (
-          <BarChart />
         ) : (
-          <PieChartView />
+          <BarChart />
         )}
       </div>
     </div>

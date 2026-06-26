@@ -56,8 +56,20 @@ export function BarChart() {
         {/* Y axis ticks (income) */}
         {ticks(maxIncome, incomeTickStep).map((v) => (
           <g key={`i${v}`}>
-            <line x1={padding.left} y1={incomeY(v)} x2={width - padding.right} y2={incomeY(v)} stroke="rgba(128,128,128,0.08)" />
-            <text x={padding.left - 6} y={incomeY(v) + 4} textAnchor="end" fill="var(--ink)" opacity={0.5}>
+            <line
+              x1={padding.left}
+              y1={incomeY(v)}
+              x2={width - padding.right}
+              y2={incomeY(v)}
+              stroke="rgba(128,128,128,0.08)"
+            />
+            <text
+              x={padding.left - 6}
+              y={incomeY(v) + 4}
+              textAnchor="end"
+              fill="var(--ink)"
+              opacity={0.5}
+            >
               {v}
             </text>
           </g>
@@ -66,8 +78,20 @@ export function BarChart() {
         {/* Y axis ticks (expense) */}
         {ticks(maxExpense, expenseTickStep).map((v) => (
           <g key={`e${v}`}>
-            <line x1={padding.left} y1={expenseY(v)} x2={width - padding.right} y2={expenseY(v)} stroke="rgba(128,128,128,0.08)" />
-            <text x={padding.left - 6} y={expenseY(v) + 4} textAnchor="end" fill="var(--ink)" opacity={0.5}>
+            <line
+              x1={padding.left}
+              y1={expenseY(v)}
+              x2={width - padding.right}
+              y2={expenseY(v)}
+              stroke="rgba(128,128,128,0.08)"
+            />
+            <text
+              x={padding.left - 6}
+              y={expenseY(v) + 4}
+              textAnchor="end"
+              fill="var(--ink)"
+              opacity={0.5}
+            >
               {v}
             </text>
           </g>
