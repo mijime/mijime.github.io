@@ -3,6 +3,7 @@ import { BoardDeleteDialog } from "./components/BoardDeleteDialog";
 import { BoardNameDialog } from "./components/BoardNameDialog";
 import { BoardSidebar } from "./components/BoardSidebar";
 import { Canvas } from "./components/Canvas";
+import { GanttBoard } from "./components/GanttBoard";
 import { KanbanBoard } from "./components/KanbanBoard";
 import { TextEditor } from "./components/TextEditor";
 import { EditModal } from "./components/EditModal";
@@ -66,6 +67,8 @@ function Shell() {
           {showCanvas ? (
             state.viewMode === "kanban" ? (
               <KanbanBoard />
+            ) : state.viewMode === "gantt" ? (
+              <GanttBoard />
             ) : state.viewMode === "text" ? (
               <TextEditor />
             ) : (

@@ -43,4 +43,9 @@ describe("ViewModeToggle", () => {
     });
     expect(screen.getByTestId("vm").textContent).toBe("kanban");
   });
+
+  it("renders a gantt view mode button", () => {
+    renderToggle();
+    expect(screen.getByTestId("view-mode-gantt")).toBeTruthy();
+  });
 });
