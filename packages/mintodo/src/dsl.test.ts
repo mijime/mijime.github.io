@@ -349,6 +349,55 @@ describe("serializeDSL — indented-text DSL", () => {
     if (!r2.ok) return;
     expect(r2.nodes.root.text).toBe("マイボード");
   });
+
+  it("does not emit @status: in serialized output", () => {
+    const nodes: Record<string, MindNode> = {
+      root: rootNode("Root"),
+      a: { ...rootNode(), id: "a", parentId: "root", text: "WIP", status: "wip", children: [] },
+      b: {
+        ...rootNode(),
+        id: "b",
+        parentId: "root",
+        text: "Review",
+        status: "review",
+        children: [],
+      },
+    };
+    const out = serializeDSL(nodes);
+    expect(out).not.toContain("@status:");
+  });
+
+  it("does not emit @done in serialized output", () => {
+    const nodes: Record<string, MindNode> = {
+      root: rootNode("Root"),
+      a: {
+        ...rootNode(),
+        id: "a",
+        parentId: "root",
+        text: "Done",
+        status: "done",
+        completed: true,
+        children: [],
+      },
+    };
+    const out = serializeDSL(nodes);
+    expect(out).not.toContain("@done");
+  });
+
+  it("status round-trips through checkbox glyph only", () => {
+    const src = "- [ ] inbox\n- [-] wip\n- [|] review\n- [x] done\n";
+    const r1 = parseDSL(src, "b1");
+    expect(r1.ok).toBe(true);
+    if (!r1.ok) return;
+    const serialized = serializeDSL(r1.nodes);
+    const r2 = parseDSL(serialized, "b1");
+    expect(r2.ok).toBe(true);
+    if (!r2.ok) return;
+    expect(findNode(r2.nodes, "inbox").status).toBe("inbox");
+    expect(findNode(r2.nodes, "wip").status).toBe("wip");
+    expect(findNode(r2.nodes, "review").status).toBe("review");
+    expect(findNode(r2.nodes, "done").status).toBe("done");
+  });
 });
 
 describe("parseInlineDSL", () => {

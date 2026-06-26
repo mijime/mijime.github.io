@@ -349,10 +349,9 @@ function buildAttrSuffix(node: MindNode): string {
   if (node.priority !== "medium") attrs.push(`@priority:${node.priority}`);
   if (node.categoryColor !== "slate") attrs.push(`@color:${node.categoryColor}`);
   if (node.dueDate) attrs.push(`@due:${node.dueDate}`);
-  if (node.status !== "inbox" && node.status !== "done") attrs.push(`@status:${node.status}`);
   if (node.estimate !== null && node.estimate > 0) attrs.push(`@estimate:${node.estimate}`);
   if (node.startDate) attrs.push(`@start:${node.startDate}`);
-  if (node.completed && node.status === "done") attrs.push("@done");
+
   return attrs.length > 0 ? ` ${attrs.join(" ")}` : "";
 }
 
