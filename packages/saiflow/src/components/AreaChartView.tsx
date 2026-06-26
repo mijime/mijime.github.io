@@ -17,7 +17,7 @@ export function AreaChartView() {
   const { rows } = state;
   if (!rows || rows.length === 0) return null;
 
-  const assetNames = Object.keys(rows[0].balances);
+  const assetNames = [...new Set(rows.flatMap((r) => Object.keys(r.balances)))];
   const chartData = rows.map((r) =>
     Object.fromEntries([["age", r.age], ...assetNames.map((n) => [n, r.balances[n] ?? 0])]),
   );

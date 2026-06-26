@@ -6,7 +6,7 @@ export function ResultTable() {
 
   if (!rows || rows.length === 0) return null;
 
-  const assetNames = Object.keys(rows[0].balances);
+  const assetNames = [...new Set(rows.flatMap((r) => Object.keys(r.balances)))];
 
   return (
     <div className="h-full overflow-auto">
