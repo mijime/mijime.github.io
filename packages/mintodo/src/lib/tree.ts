@@ -25,9 +25,7 @@ export function sortByDfs(nodes: Record<string, MindNode>): string[] {
   const visited = new Set<string>();
   const result: string[] = [];
 
-  const roots = Object.values(nodes).filter(
-    (n) => n.isRoot || !n.parentId || !nodes[n.parentId],
-  );
+  const roots = Object.values(nodes).filter((n) => n.isRoot || !n.parentId || !nodes[n.parentId]);
 
   function visit(id: string): void {
     if (visited.has(id)) return;
