@@ -10,6 +10,7 @@ export interface State {
   activeTab: "dsl" | "gui";
   scenarios: Scenario[];
   activeScenarioIndex: number;
+  sidebarOpen: boolean;
 }
 
 export type Action =
@@ -20,7 +21,8 @@ export type Action =
   | { type: "SET_PARSED"; parsed: State["parsed"] }
   | { type: "SET_ROWS"; rows: YearRow[] | null }
   | { type: "SET_SCENARIOS"; scenarios: Scenario[] }
-  | { type: "SET_ACTIVE_SCENARIO"; index: number };
+  | { type: "SET_ACTIVE_SCENARIO"; index: number }
+  | { type: "TOGGLE_SIDEBAR" };
 
 export function initialState(): State {
   return {
@@ -86,6 +88,7 @@ export function initialState(): State {
     activeTab: "dsl",
     scenarios: [],
     activeScenarioIndex: 0,
+    sidebarOpen: true,
   };
 }
 
@@ -114,6 +117,9 @@ export function reducer(state: State, action: Action): State {
     }
     case "SET_ACTIVE_SCENARIO": {
       return { ...state, activeScenarioIndex: action.index };
+    }
+    case "TOGGLE_SIDEBAR": {
+      return { ...state, sidebarOpen: !state.sidebarOpen };
     }
     default: {
       return state;

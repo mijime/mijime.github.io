@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { SaiflowProvider } from "./store";
+import { SaiflowProvider, useSaiflowDispatch, useSaiflowState } from "./store";
 import { ProfileBar } from "./components/ProfileBar";
 import { EditorPanel } from "./components/EditorPanel";
 import { ResultTable } from "./components/ResultTable";
@@ -31,20 +31,39 @@ function RightPanel() {
   );
 }
 
-export function App() {
+function MainLayout() {
+  const state = useSaiflowState();
+  const dispatch = useSaiflowDispatch();
+
   return (
-    <SaiflowProvider>
-      <div className="h-full flex flex-col">
-        <ProfileBar />
-        <div className="flex-1 overflow-hidden flex">
+    <div className="h-full flex flex-col">
+      <ProfileBar />
+      <div className="flex-1 overflow-hidden flex">
+        {state.sidebarOpen && (
           <div className="w-96 flex-shrink-0 border-r border-(--border)">
             <EditorPanel />
           </div>
-          <div className="flex-1">
-            <RightPanel />
-          </div>
+        )}
+        {!state.sidebarOpen && (
+          <button
+            className="flex-shrink-0 px-1 border-r border-(--border) text-(--ink) opacity-50 hover:opacity-100 text-xs"
+            onClick={() => dispatch({ type: "TOGGLE_SIDEBAR" })}
+          >
+            ▸
+          </button>
+        )}
+        <div className="flex-1">
+          <RightPanel />
         </div>
       </div>
+    </div>
+  );
+}
+
+export function App() {
+  return (
+    <SaiflowProvider>
+      <MainLayout />
     </SaiflowProvider>
   );
 }

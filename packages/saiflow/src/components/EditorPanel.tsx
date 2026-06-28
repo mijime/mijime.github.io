@@ -23,21 +23,29 @@ export function EditorPanel() {
             GUI
           </button>
         </div>
-        {state.scenarios.length > 1 && (
-          <select
-            className="ml-auto mr-2 px-1 py-0.5 text-xs bg-(--paper) text-(--ink) border border-(--border) rounded"
-            value={state.activeScenarioIndex}
-            onChange={(e) =>
-              dispatch({ type: "SET_ACTIVE_SCENARIO", index: Number(e.target.value) })
-            }
+        <div className="ml-auto flex items-center gap-1">
+          {state.scenarios.length > 1 && (
+            <select
+              className="px-1 py-0.5 text-xs bg-(--paper) text-(--ink) border border-(--border) rounded"
+              value={state.activeScenarioIndex}
+              onChange={(e) =>
+                dispatch({ type: "SET_ACTIVE_SCENARIO", index: Number(e.target.value) })
+              }
+            >
+              {state.scenarios.map((s, i) => (
+                <option key={i} value={i}>
+                  {s.name}
+                </option>
+              ))}
+            </select>
+          )}
+          <button
+            className="px-2 py-1 text-sm opacity-50 hover:opacity-100"
+            onClick={() => dispatch({ type: "TOGGLE_SIDEBAR" })}
           >
-            {state.scenarios.map((s, i) => (
-              <option key={i} value={i}>
-                {s.name}
-              </option>
-            ))}
-          </select>
-        )}
+            ×
+          </button>
+        </div>
       </div>
       {state.activeTab === "dsl" ? <DslEditor /> : <GuiEditor />}
     </div>

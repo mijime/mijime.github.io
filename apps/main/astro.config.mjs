@@ -6,6 +6,7 @@ import tailwindcss from "@tailwindcss/vite";
 import { defineConfig } from "astro/config";
 
 export default defineConfig({
+  server: { host: "0.0.0.0" },
   integrations: [
     react(),
     mdx(),

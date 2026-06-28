@@ -10,7 +10,7 @@ describe("ProfileBar", () => {
         <ProfileBar />
       </SaiflowProvider>,
     );
-    expect(screen.getByLabelText("現在年齢")).toBeInTheDocument();
+    expect(screen.getByLabelText("年齢")).toBeInTheDocument();
   });
 
   it("renders simulationYears input", () => {
@@ -19,7 +19,7 @@ describe("ProfileBar", () => {
         <ProfileBar />
       </SaiflowProvider>,
     );
-    expect(screen.getByLabelText("シミュレーション年数")).toBeInTheDocument();
+    expect(screen.getByLabelText("期間年")).toBeInTheDocument();
   });
 
   it("shows current values from state", () => {
@@ -28,9 +28,9 @@ describe("ProfileBar", () => {
         <ProfileBar />
       </SaiflowProvider>,
     );
-    const ageInput = screen.getByLabelText("現在年齢") as HTMLInputElement;
+    const ageInput = screen.getByLabelText("年齢") as HTMLInputElement;
     expect(ageInput.value).toBe("40");
-    const yearsInput = screen.getByLabelText("シミュレーション年数") as HTMLInputElement;
+    const yearsInput = screen.getByLabelText("期間年") as HTMLInputElement;
     expect(yearsInput.value).toBe("60");
   });
 });
