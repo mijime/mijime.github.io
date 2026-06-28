@@ -5,8 +5,9 @@ export function scenariosToDsl(scenarios: Scenario[]): string {
     .map((s) => {
       const lines = s.events.map((e) => {
         const opsStr = e.ops.map((op) => `${op.asset}${op.op}${op.value}`).join(",");
+        const groupCol = e.group ?? "";
         const endYear = e.endYear ?? "";
-        const parts = [e.name, String(e.startYear), endYear];
+        const parts = [groupCol, e.name, String(e.startYear), endYear];
         if (opsStr) parts.push(opsStr);
         return parts.join(",");
       });
