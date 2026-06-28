@@ -640,30 +640,36 @@ function ChildForm({
     const events: Event[] = [];
     const add = (label: string, start: number, end: number | null, cost: number) => {
       if (cost > 0) {
+        const yrStart = birthYear + start;
+        const yrEnd = end === null ? null : birthYear + end;
+        if (yrEnd !== null && yrEnd < 0) return;
         events.push({
           name: `教育費${label}(${childName})`,
           group: "子供",
-          startYear: birthYear + start,
-          endYear: end === null ? null : birthYear + end,
+          startYear: Math.max(0, yrStart),
+          endYear: yrEnd,
           ops: [{ asset: "現金", op: "-" as const, value: cost }],
         });
       }
     };
     if (livingMonthly > 0) {
-      events.push({
-        name: `生活費(${childName})`,
-        group: "子供",
-        startYear: birthYear,
-        endYear: birthYear + 17,
-        ops: [{ asset: "現金", op: "-" as const, value: livingMonthly * 12 }],
-      });
+      const livingEnd = birthYear + 17;
+      if (livingEnd >= 0) {
+        events.push({
+          name: `生活費(${childName})`,
+          group: "子供",
+          startYear: Math.max(0, birthYear),
+          endYear: livingEnd,
+          ops: [{ asset: "現金", op: "-" as const, value: livingMonthly * 12 }],
+        });
+      }
     }
     const offsets: [string, number, number | null][] = [
-      ["幼稚園", 0, 2],
-      ["小学校", 3, 8],
-      ["中学校", 9, 11],
-      ["高校", 12, 14],
-      ["大学", 15, 18],
+      ["幼稚園", 3, 5],
+      ["小学校", 6, 11],
+      ["中学校", 12, 14],
+      ["高校", 15, 17],
+      ["大学", 18, 21],
     ];
     for (const [stage, start, end] of offsets) {
       const type = schools[stage];
@@ -690,7 +696,7 @@ function ChildForm({
       <div className="flex gap-1.5 items-center">
         <label className="text-[11px] opacity-40 shrink-0 w-14">誕生</label>
         <YearInput value={birthYear} onChange={setBirthYear} currentAge={currentAge} />
-        <span className="text-[11px] opacity-30">後</span>
+        <span className="text-[11px] opacity-30">{birthYear >= 0 ? "後" : "前"}</span>
       </div>
       <div className="flex gap-1.5 items-center">
         <label className="text-[11px] opacity-40 shrink-0 w-14">生活費</label>
