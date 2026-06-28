@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState } from "react";
-import { SaiflowProvider, useSaiflowDispatch, useSaiflowState } from "./store";
+import { SaiflowProvider, useSaiflowDispatch, useSaiflowState, type State } from "./store";
 import { ProfileBar } from "./components/ProfileBar";
 import { EditorPanel } from "./components/EditorPanel";
 import { ResultTable } from "./components/ResultTable";
 import { BarChart } from "./components/BarChart";
 import { LineChart } from "./components/LineChart";
+import { parseDSL } from "./parser";
 import { listScenarios, saveScenario } from "./storage";
 
 type ViewMode = "table" | "line" | "bar";
@@ -38,24 +39,13 @@ function useAutoSave() {
   const timerRef = useRef<ReturnType<typeof setTimeout>>(null);
   const stateRef = useRef(state);
   stateRef.current = state;
-  const loadedRef = useRef(false);
+  const isFirstRender = useRef(true);
 
   useEffect(() => {
-    listScenarios().then((scenarios) => {
-      if (scenarios.length > 0) {
-        const [s] = scenarios;
-        dispatch({ type: "SET_DSL", text: s.dslText });
-        dispatch({ type: "SET_AGE", age: s.currentAge });
-        dispatch({ type: "SET_YEARS", years: s.simulationYears });
-        dispatch({ type: "SET_SCENARIO_ID", id: s.id! });
-        dispatch({ type: "SET_SCENARIO_NAME", name: s.name });
-      }
-      loadedRef.current = true;
-    });
-  }, [dispatch]);
-
-  useEffect(() => {
-    if (!loadedRef.current) return;
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
     if (timerRef.current) clearTimeout(timerRef.current);
     timerRef.current = setTimeout(() => {
       const { scenarioId, scenarioName, dslText, currentAge, simulationYears } = stateRef.current;
@@ -109,8 +99,31 @@ function MainLayout() {
 }
 
 export function App() {
+  const [initState, setInitState] = useState<Partial<State> | null>(null);
+
+  useEffect(() => {
+    listScenarios().then((scenarios) => {
+      if (scenarios.length > 0) {
+        const [s] = scenarios;
+        const result = parseDSL(s.dslText);
+        setInitState({
+          dslText: s.dslText,
+          currentAge: s.currentAge,
+          simulationYears: s.simulationYears,
+          scenarioId: s.id!,
+          scenarioName: s.name,
+          scenarios: result.scenarios.length > 0 ? result.scenarios : undefined,
+        });
+      } else {
+        setInitState({});
+      }
+    });
+  }, []);
+
+  if (initState === null) return null;
+
   return (
-    <SaiflowProvider>
+    <SaiflowProvider state={initState}>
       <MainLayout />
     </SaiflowProvider>
   );
