@@ -391,12 +391,20 @@ function InitialForm({
       });
     }
     if (annualIncome > 0) {
+      const incomeEndYear = retirementYear > 0 ? retirementYear : null;
       events.push({
         name: "年収",
         group: "初期設定",
         startYear: 0,
-        endYear: retirementYear > 0 ? retirementYear : null,
+        endYear: incomeEndYear,
         ops: [{ asset: "現金", op: "+" as const, value: annualIncome }],
+      });
+      events.push({
+        name: "税金",
+        group: "初期設定",
+        startYear: 0,
+        endYear: incomeEndYear,
+        ops: [{ asset: "現金", op: "-" as const, value: Math.round(annualIncome * 0.2) }],
       });
     }
     if (livingMonthly > 0) {
