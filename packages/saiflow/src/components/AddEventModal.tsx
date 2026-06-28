@@ -199,7 +199,10 @@ function MortgageForm({
         name: "借入返済",
         startYear,
         endYear: startYear + years - 1,
-        ops: [{ asset: "借入", op: "+" as const, value: annualPayment }],
+        ops: [
+          { asset: "現金", op: "-" as const, value: annualPayment },
+          { asset: "借入", op: "+" as const, value: annualPayment },
+        ],
       });
       events.push({
         name: "借入金利",
@@ -612,6 +615,7 @@ function ChildForm({
     高校: null,
     大学: null,
   });
+  const [livingMonthly, setLivingMonthly] = useState(0);
 
   const handleSave = () => {
     if (!childName.trim()) return;
@@ -626,6 +630,14 @@ function ChildForm({
         });
       }
     };
+    if (livingMonthly > 0) {
+      events.push({
+        name: `生活費(${childName})`,
+        startYear: birthYear,
+        endYear: birthYear + 17,
+        ops: [{ asset: "現金", op: "-" as const, value: livingMonthly * 12 }],
+      });
+    }
     const offsets: [string, number, number | null][] = [
       ["幼稚園", 0, 2],
       ["小学校", 3, 8],
@@ -659,6 +671,17 @@ function ChildForm({
         <label className="text-[11px] opacity-40 shrink-0 w-14">誕生</label>
         <YearInput value={birthYear} onChange={setBirthYear} currentAge={currentAge} />
         <span className="text-[11px] opacity-30">後</span>
+      </div>
+      <div className="flex gap-1.5 items-center">
+        <label className="text-[11px] opacity-40 shrink-0 w-14">生活費</label>
+        <input
+          type="number"
+          className="w-20 px-1.5 py-0.5 text-xs bg-(--paper) text-(--ink) border border-(--border) rounded tabular-nums outline-none focus:border-(--terra)"
+          value={livingMonthly || ""}
+          onChange={(e) => setLivingMonthly(Number(e.target.value))}
+        />
+        <span className="text-[11px] opacity-30">万/月</span>
+        <span className="text-[10px] opacity-25">〜18歳</span>
       </div>
       <div className="border-t border-(--border) pt-2 space-y-2">
         {(["幼稚園", "小学校", "中学校", "高校", "大学"] as const).map((stage) => {
