@@ -32,6 +32,7 @@ export function GuiEditor() {
   const dispatch = useSaiflowDispatch();
   const [scenarios, setScenarios] = useState<Scenario[]>([]);
   const [expandedIdx, setExpandedIdx] = useState<number | null>(null);
+  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
   const [modalOpen, setModalOpen] = useState(false);
   const timerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
   const stateRef = useRef(state);
@@ -135,6 +136,54 @@ export function GuiEditor() {
 
   const { events } = scenario;
 
+  const renderGroupHeader = (groupName: string, count: number, indices: number[]) => {
+    const isExpanded = expandedGroups.has(groupName);
+    const toggle = () => {
+      setExpandedGroups((prev) => {
+        const next = new Set(prev);
+        if (next.has(groupName)) next.delete(groupName);
+        else next.add(groupName);
+        return next;
+      });
+    };
+    const handleDeleteGroup = () => {
+      if (confirm(`「${groupName}」グループの全 ${count} 件のイベントを削除しますか？`)) {
+        update((prev) =>
+          prev.map((s, i) =>
+            i === state.activeScenarioIndex
+              ? {
+                  ...s,
+                  events: s.events.filter((_, j) => !indices.includes(j)),
+                }
+              : s,
+          ),
+        );
+        setExpandedIdx(null);
+      }
+    };
+    return (
+      <div className="flex items-center border-b border-(--border) bg-(--grid)/30">
+        <button
+          className="flex-1 flex items-center gap-2 px-3 py-2 text-left text-xs hover:bg-(--mid)/20 transition-colors"
+          onClick={toggle}
+        >
+          <span className="opacity-30 w-3 shrink-0 text-[10px]">
+            {isExpanded ? "▼" : "▶"}
+          </span>
+          <span className="font-medium opacity-60">{groupName}</span>
+          <span className="opacity-30 tabular-nums">({count})</span>
+        </button>
+        <button
+          className="px-2 py-1 text-xs text-red-400/50 hover:text-red-400 transition-colors shrink-0"
+          onClick={handleDeleteGroup}
+          title="グループを削除"
+        >
+          🗑
+        </button>
+      </div>
+    );
+  };
+
   return (
     <div className="flex flex-col h-full">
       <div className="px-3 py-2 border-b border-(--border)">
@@ -193,78 +242,112 @@ export function GuiEditor() {
             <p className="text-xs text-(--ink) opacity-30">イベントがありません</p>
           </div>
         ) : (
-          events.map((event, idx) => {
-            const prim = primaryOp(event.ops);
-            const borderClass = prim ? OP_BORDER[prim.op] : "border-l-transparent";
-            const isExpanded = expandedIdx === idx;
+          (() => {
+            const groups = new Map<string, number[]>();
+            const groupOrder: string[] = [];
+            const ungroupedIndices: number[] = [];
+
+            events.forEach((event, idx) => {
+              if (event.group) {
+                if (!groups.has(event.group)) {
+                  groups.set(event.group, []);
+                  groupOrder.push(event.group);
+                }
+                groups.get(event.group)!.push(idx);
+              } else {
+                ungroupedIndices.push(idx);
+              }
+            });
+
+            const renderEvent = (evt: Event, idx: number) => {
+              const prim = primaryOp(evt.ops);
+              const borderClass = prim ? OP_BORDER[prim.op] : "border-l-transparent";
+              const isExpanded = expandedIdx === idx;
+
+              return (
+                <div
+                  key={idx}
+                  className={`border-l-2 ${borderClass} border-b border-(--border) ${
+                    isExpanded ? "bg-(--grid)/50" : ""
+                  }`}
+                >
+                  <button
+                    className="w-full px-3 py-2 text-left text-xs flex items-center gap-2 hover:bg-(--mid)/20 transition-colors"
+                    onClick={() => setExpandedIdx(isExpanded ? null : idx)}
+                  >
+                    <span className="opacity-30 w-3 shrink-0 text-[10px]">
+                      {isExpanded ? "▼" : "▶"}
+                    </span>
+                    <span className="flex-1 min-w-0 truncate font-medium">
+                      {evt.name || <span className="opacity-25 italic">名称なし</span>}
+                    </span>
+                    <span className="opacity-50 shrink-0 tabular-nums text-[11px]">
+                      {evt.startYear}年{evt.endYear === null ? " →" : ` → ${evt.endYear}年`}
+                    </span>
+                    {evt.ops.length > 0 && (
+                      <span className="flex gap-0.5 shrink-0 max-w-[120px] overflow-hidden">
+                        {evt.ops.slice(0, 3).map((op, i) => (
+                          <span
+                            key={i}
+                            className={`px-1 py-px rounded text-[10px] tabular-nums leading-snug truncate ${OP_COLORS[op.op]}`}
+                          >
+                            {op.asset}&nbsp;{op.op}&nbsp;{fmt(op.value)}
+                          </span>
+                        ))}
+                        {evt.ops.length > 3 && (
+                          <span className="text-[10px] opacity-30 shrink-0 self-center">
+                            +{evt.ops.length - 3}
+                          </span>
+                        )}
+                      </span>
+                    )}
+                  </button>
+
+                  {isExpanded && (
+                    <EventForm
+                      event={evt}
+                      currentAge={state.currentAge}
+                      onChange={(e) =>
+                        update((prev) =>
+                          prev.map((s, i) =>
+                            i === state.activeScenarioIndex
+                              ? { ...s, events: s.events.map((ev, j) => (j === idx ? e : ev)) }
+                              : s,
+                          ),
+                        )
+                      }
+                      onDelete={() => {
+                        update((prev) =>
+                          prev.map((s, i) =>
+                            i === state.activeScenarioIndex
+                              ? { ...s, events: s.events.filter((_, j) => j !== idx) }
+                              : s,
+                          ),
+                        );
+                        setExpandedIdx(null);
+                      }}
+                    />
+                  )}
+                </div>
+              );
+            };
 
             return (
-              <div
-                key={idx}
-                className={`border-l-2 ${borderClass} border-b border-(--border) ${
-                  isExpanded ? "bg-(--grid)/50" : ""
-                }`}
-              >
-                <button
-                  className="w-full px-3 py-2 text-left text-xs flex items-center gap-2 hover:bg-(--mid)/20 transition-colors"
-                  onClick={() => setExpandedIdx(isExpanded ? null : idx)}
-                >
-                  <span className="opacity-30 w-3 shrink-0 text-[10px]">
-                    {isExpanded ? "▼" : "▶"}
-                  </span>
-                  <span className="flex-1 min-w-0 truncate font-medium">
-                    {event.name || <span className="opacity-25 italic">名称なし</span>}
-                  </span>
-                  <span className="opacity-50 shrink-0 tabular-nums text-[11px]">
-                    {event.startYear}年{event.endYear === null ? " →" : ` → ${event.endYear}年`}
-                  </span>
-                  {event.ops.length > 0 && (
-                    <span className="flex gap-0.5 shrink-0 max-w-[120px] overflow-hidden">
-                      {event.ops.slice(0, 3).map((op, i) => (
-                        <span
-                          key={i}
-                          className={`px-1 py-px rounded text-[10px] tabular-nums leading-snug truncate ${OP_COLORS[op.op]}`}
-                        >
-                          {op.asset}&nbsp;{op.op}&nbsp;{fmt(op.value)}
-                        </span>
-                      ))}
-                      {event.ops.length > 3 && (
-                        <span className="text-[10px] opacity-30 shrink-0 self-center">
-                          +{event.ops.length - 3}
-                        </span>
-                      )}
-                    </span>
-                  )}
-                </button>
-
-                {isExpanded && (
-                  <EventForm
-                    event={event}
-                    currentAge={state.currentAge}
-                    onChange={(e) =>
-                      update((prev) =>
-                        prev.map((s, i) =>
-                          i === state.activeScenarioIndex
-                            ? { ...s, events: s.events.map((ev, j) => (j === idx ? e : ev)) }
-                            : s,
-                        ),
-                      )
-                    }
-                    onDelete={() => {
-                      update((prev) =>
-                        prev.map((s, i) =>
-                          i === state.activeScenarioIndex
-                            ? { ...s, events: s.events.filter((_, j) => j !== idx) }
-                            : s,
-                        ),
-                      );
-                      setExpandedIdx(null);
-                    }}
-                  />
-                )}
-              </div>
+              <>
+                {groupOrder.map((groupName) => {
+                  const indices = groups.get(groupName)!;
+                  return (
+                    <div key={groupName}>
+                      {renderGroupHeader(groupName, indices.length, indices)}
+                      {expandedGroups.has(groupName) &&
+                        indices.map((idx) => renderEvent(events[idx], idx))}
+                    </div>
+                  );
+                })}
+                {ungroupedIndices.map((idx) => renderEvent(events[idx], idx))}
+              </>
             );
-          })
+          })()
         )}
       </div>
 
