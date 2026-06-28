@@ -7,7 +7,7 @@ export function ProfileBar() {
   return (
     <div className="flex gap-4 p-2 border-b border-(--border)">
       <label className="flex items-center gap-1 text-sm">
-        現在年齢
+        年齢
         <input
           type="number"
           className="w-16 px-1 py-0.5 border border-(--border) bg-(--paper) text-(--ink) rounded"
@@ -19,7 +19,7 @@ export function ProfileBar() {
         />
       </label>
       <label className="flex items-center gap-1 text-sm">
-        シミュレーション年数
+        期間
         <input
           type="number"
           className="w-16 px-1 py-0.5 border border-(--border) bg-(--paper) text-(--ink) rounded"
@@ -29,6 +29,7 @@ export function ProfileBar() {
             if (v > 0 && v <= 100) dispatch({ type: "SET_YEARS", years: v });
           }}
         />
+        <span className="text-xs opacity-50">年</span>
       </label>
     </div>
   );

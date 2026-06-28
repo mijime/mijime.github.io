@@ -32,34 +32,57 @@ export function parseDSL(text: string): SqlResult {
       });
       continue;
     }
-    const name = parts[0].trim();
-    const startYear = Number(parts[1].trim());
-    const endYearStr = parts[2].trim();
-    const endYear = endYearStr.length === 0 ? null : Number(endYearStr);
 
-    if (isNaN(startYear) || (endYear !== null && isNaN(endYear))) {
+    const parsed = parseEventLine(parts);
+    if (!parsed) {
       errors.push({ line: lineNum, message: "年は数値である必要があります" });
       continue;
     }
+    const { name, group, startYear, endYear, opsStart } = parsed;
 
     const ops: AssetOp[] = [];
-    for (let j = 3; j < parts.length; j++) {
+    for (let j = opsStart; j < parts.length; j++) {
       const opStr = parts[j].trim();
-      const parsed = parseOp(opStr);
-      if (!parsed) {
+      const op = parseOp(opStr);
+      if (!op) {
         errors.push({ line: lineNum, message: `"${opStr}" を解析できません` });
         continue;
       }
-      ops.push(parsed);
+      ops.push(op);
     }
 
-    currentEvents.push({ name, startYear, endYear, ops });
+    currentEvents.push({ name, group, startYear, endYear, ops });
   }
 
   // Push last scenario
   scenarios.push({ name: currentName, events: currentEvents });
 
   return { scenarios, errors };
+}
+
+function parseEventLine(parts: string[]): {
+  group: string | undefined;
+  name: string;
+  startYear: number;
+  endYear: number | null;
+  opsStart: number;
+} | null {
+  const isOldFormat = !isNaN(Number(parts[1].trim()));
+
+  const group: string | undefined = isOldFormat
+    ? undefined
+    : (parts[0].trim() || undefined);
+  const name: string = isOldFormat ? parts[0].trim() : parts[1].trim();
+  const startYear = Number((isOldFormat ? parts[1] : parts[2]).trim());
+  const endYearStr = (isOldFormat ? parts[2] : parts[3]).trim();
+  const endYear: number | null = endYearStr.length === 0 ? null : Number(endYearStr);
+  const opsStart: number = isOldFormat ? 3 : 4;
+
+  if (isNaN(startYear) || (endYear !== null && isNaN(endYear))) {
+    return null;
+  }
+
+  return { group, name, startYear, endYear, opsStart };
 }
 
 function parseOp(str: string): AssetOp | null {

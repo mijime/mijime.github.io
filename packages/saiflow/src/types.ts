@@ -8,6 +8,7 @@ export interface AssetOp {
 
 export interface Event {
   name: string;
+  group?: string;
   startYear: number;
   endYear: number | null;
   ops: AssetOp[];

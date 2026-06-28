@@ -30,12 +30,12 @@ function calcMortgage(principal: number, annualRate: number, years: number) {
   };
 }
 
-type Pattern = "simple" | "mortgage" | "assets" | "invest" | "child";
+type Pattern = "simple" | "mortgage" | "initial" | "invest" | "child";
 
 const PATTERNS: { id: Pattern; label: string; desc: string }[] = [
   { id: "simple", label: "シンプル", desc: "自由にイベントを定義" },
   { id: "mortgage", label: "住宅ローン", desc: "借入・返済・金利を自動生成" },
-  { id: "assets", label: "初期資産", desc: "開始時の資産残高を設定" },
+  { id: "initial", label: "初期設定", desc: "初期現金・年収・生活費・住居費" },
   { id: "invest", label: "投資", desc: "積立＋運用を自動生成" },
   { id: "child", label: "子供", desc: "教育費をライフステージ別に生成" },
 ];
@@ -50,7 +50,7 @@ const PATTERN_FORM: Record<
 > = {
   simple: SimpleForm,
   mortgage: MortgageForm,
-  assets: AssetsForm,
+  initial: InitialForm,
   invest: InvestForm,
   child: ChildForm,
 };
@@ -183,6 +183,7 @@ function MortgageForm({
     if (downPayment > 0) {
       events.push({
         name: "頭金",
+        group: "住宅ローン",
         startYear,
         endYear: startYear,
         ops: [{ asset: "現金", op: "-" as const, value: downPayment }],
@@ -191,18 +192,24 @@ function MortgageForm({
     if (loanAmount > 0) {
       events.push({
         name: "借入実行",
+        group: "住宅ローン",
         startYear,
         endYear: startYear,
         ops: [{ asset: "借入", op: "-" as const, value: loanAmount }],
       });
       events.push({
         name: "借入返済",
+        group: "住宅ローン",
         startYear,
         endYear: startYear + years - 1,
-        ops: [{ asset: "借入", op: "+" as const, value: annualPayment }],
+        ops: [
+          { asset: "現金", op: "-" as const, value: annualPayment },
+          { asset: "借入", op: "+" as const, value: annualPayment },
+        ],
       });
       events.push({
         name: "借入金利",
+        group: "住宅ローン",
         startYear,
         endYear: startYear + years - 1,
         ops: [{ asset: "借入", op: "*" as const, value: multiplier }],
@@ -356,7 +363,7 @@ function YearInput({
   );
 }
 
-function AssetsForm({
+function InitialForm({
   currentAge,
   onSave,
   onClose,
@@ -365,45 +372,104 @@ function AssetsForm({
   onSave: (events: Event[]) => void;
   onClose: () => void;
 }) {
-  const [asset, setAsset] = useState("");
-  const [amount, setAmount] = useState(0);
-  const [startYear, setStartYear] = useState(0);
+  const [initialCash, setInitialCash] = useState(0);
+  const [annualIncome, setAnnualIncome] = useState(0);
+  const [livingMonthly, setLivingMonthly] = useState(0);
+  const [housingMonthly, setHousingMonthly] = useState(0);
+
+  const retirementYear = Math.max(0, 65 - currentAge);
 
   const handleSave = () => {
-    if (!asset.trim() || amount <= 0) return;
-    onSave([
-      {
-        name: `初期${asset}`,
-        startYear,
-        endYear: startYear,
-        ops: [{ asset: asset.trim(), op: "+" as const, value: amount }],
-      },
-    ]);
+    const events: Event[] = [];
+    if (initialCash > 0) {
+      events.push({
+        name: "初期現金",
+        group: "初期設定",
+        startYear: 0,
+        endYear: 0,
+        ops: [{ asset: "現金", op: "+" as const, value: initialCash }],
+      });
+    }
+    if (annualIncome > 0) {
+      const incomeEndYear = retirementYear > 0 ? retirementYear : null;
+      events.push({
+        name: "年収",
+        group: "初期設定",
+        startYear: 0,
+        endYear: incomeEndYear,
+        ops: [{ asset: "現金", op: "+" as const, value: annualIncome }],
+      });
+      events.push({
+        name: "税金",
+        group: "初期設定",
+        startYear: 0,
+        endYear: incomeEndYear,
+        ops: [{ asset: "現金", op: "-" as const, value: Math.round(annualIncome * 0.2) }],
+      });
+    }
+    if (livingMonthly > 0) {
+      events.push({
+        name: "生活費",
+        group: "初期設定",
+        startYear: 0,
+        endYear: null,
+        ops: [{ asset: "現金", op: "-" as const, value: livingMonthly * 12 }],
+      });
+    }
+    if (housingMonthly > 0) {
+      events.push({
+        name: "住居費",
+        group: "初期設定",
+        startYear: 0,
+        endYear: null,
+        ops: [{ asset: "現金", op: "-" as const, value: housingMonthly * 12 }],
+      });
+    }
+    if (events.length === 0) return;
+    onSave(events);
   };
 
   return (
     <div className="space-y-3">
       <div className="flex gap-1.5 items-center">
-        <label className="text-[11px] opacity-40 shrink-0 w-14">資産名</label>
-        <input
-          className="flex-1 px-1.5 py-0.5 text-xs bg-(--paper) text-(--ink) border border-(--border) rounded outline-none focus:border-(--terra)"
-          placeholder="現金"
-          value={asset}
-          onChange={(e) => setAsset(e.target.value)}
-        />
-      </div>
-      <div className="flex gap-1.5 items-center">
-        <label className="text-[11px] opacity-40 shrink-0 w-14">初期金額</label>
+        <label className="text-[11px] opacity-40 shrink-0 w-14">初期現金</label>
         <input
           type="number"
           className="flex-1 px-1.5 py-0.5 text-xs bg-(--paper) text-(--ink) border border-(--border) rounded tabular-nums outline-none focus:border-(--terra)"
-          value={amount || ""}
-          onChange={(e) => setAmount(Number(e.target.value))}
+          value={initialCash || ""}
+          onChange={(e) => setInitialCash(Number(e.target.value))}
         />
       </div>
       <div className="flex gap-1.5 items-center">
-        <label className="text-[11px] opacity-40 shrink-0 w-14">開始</label>
-        <YearInput value={startYear} onChange={setStartYear} currentAge={currentAge} />
+        <label className="text-[11px] opacity-40 shrink-0 w-14">年収</label>
+        <input
+          type="number"
+          className="flex-1 px-1.5 py-0.5 text-xs bg-(--paper) text-(--ink) border border-(--border) rounded tabular-nums outline-none focus:border-(--terra)"
+          value={annualIncome || ""}
+          onChange={(e) => setAnnualIncome(Number(e.target.value))}
+        />
+        <span className="text-[11px] opacity-30">/年</span>
+        <span className="text-[10px] opacity-25">〜65歳</span>
+      </div>
+      <div className="flex gap-1.5 items-center">
+        <label className="text-[11px] opacity-40 shrink-0 w-14">生活費</label>
+        <input
+          type="number"
+          className="flex-1 px-1.5 py-0.5 text-xs bg-(--paper) text-(--ink) border border-(--border) rounded tabular-nums outline-none focus:border-(--terra)"
+          value={livingMonthly || ""}
+          onChange={(e) => setLivingMonthly(Number(e.target.value))}
+        />
+        <span className="text-[11px] opacity-30">/月</span>
+      </div>
+      <div className="flex gap-1.5 items-center">
+        <label className="text-[11px] opacity-40 shrink-0 w-14">住居費</label>
+        <input
+          type="number"
+          className="flex-1 px-1.5 py-0.5 text-xs bg-(--paper) text-(--ink) border border-(--border) rounded tabular-nums outline-none focus:border-(--terra)"
+          value={housingMonthly || ""}
+          onChange={(e) => setHousingMonthly(Number(e.target.value))}
+        />
+        <span className="text-[11px] opacity-30">/月</span>
       </div>
       <div className="flex gap-2 justify-end pt-2">
         <button
@@ -414,7 +480,7 @@ function AssetsForm({
         </button>
         <button
           className="px-3 py-1 text-xs bg-(--terra) text-white rounded disabled:opacity-30"
-          disabled={!asset.trim() || amount <= 0}
+          disabled={initialCash <= 0 && annualIncome <= 0 && livingMonthly <= 0 && housingMonthly <= 0}
           onClick={handleSave}
         >
           保存
@@ -447,6 +513,7 @@ function InvestForm({
     const events: Event[] = [
       {
         name: `${name}積立`,
+        group: "投資",
         startYear,
         endYear,
         ops: [
@@ -456,6 +523,7 @@ function InvestForm({
       },
       {
         name: `${name}運用`,
+        group: "投資",
         startYear,
         endYear: null,
         ops: [{ asset: name, op: "*" as const, value: multiplier }],
@@ -534,6 +602,19 @@ function InvestForm({
   );
 }
 
+type SchoolType = "public" | "private" | null;
+
+const SCHOOL_PRESETS: Record<
+  string,
+  { period: string; public: number; private: number }
+> = {
+  幼稚園: { period: "3年", public: 0, private: 50 },
+  小学校: { period: "6年", public: 10, private: 100 },
+  中学校: { period: "3年", public: 15, private: 100 },
+  高校: { period: "3年", public: 15, private: 80 },
+  大学: { period: "4年", public: 60, private: 120 },
+};
+
 function ChildForm({
   currentAge,
   onSave,
@@ -545,11 +626,14 @@ function ChildForm({
 }) {
   const [childName, setChildName] = useState("子");
   const [birthYear, setBirthYear] = useState(2);
-  const [kindergarten, setKindergarten] = useState(0);
-  const [elementary, setElementary] = useState(0);
-  const [juniorHigh, setJuniorHigh] = useState(0);
-  const [highSchool, setHighSchool] = useState(0);
-  const [university, setUniversity] = useState(0);
+  const [schools, setSchools] = useState<Record<string, SchoolType>>({
+    幼稚園: null,
+    小学校: null,
+    中学校: null,
+    高校: null,
+    大学: null,
+  });
+  const [livingMonthly, setLivingMonthly] = useState(0);
 
   const handleSave = () => {
     if (!childName.trim()) return;
@@ -557,18 +641,37 @@ function ChildForm({
     const add = (label: string, start: number, end: number | null, cost: number) => {
       if (cost > 0) {
         events.push({
-          name: `${label}(${childName})`,
+          name: `教育費${label}(${childName})`,
+          group: "子供",
           startYear: birthYear + start,
           endYear: end === null ? null : birthYear + end,
           ops: [{ asset: "現金", op: "-" as const, value: cost }],
         });
       }
     };
-    add("教育費幼稚園", 0, 2, kindergarten);
-    add("教育費小学校", 3, 8, elementary);
-    add("教育費中学校", 9, 11, juniorHigh);
-    add("教育費高校", 12, 14, highSchool);
-    add("教育費大学", 15, 18, university);
+    if (livingMonthly > 0) {
+      events.push({
+        name: `生活費(${childName})`,
+        group: "子供",
+        startYear: birthYear,
+        endYear: birthYear + 17,
+        ops: [{ asset: "現金", op: "-" as const, value: livingMonthly * 12 }],
+      });
+    }
+    const offsets: [string, number, number | null][] = [
+      ["幼稚園", 0, 2],
+      ["小学校", 3, 8],
+      ["中学校", 9, 11],
+      ["高校", 12, 14],
+      ["大学", 15, 18],
+    ];
+    for (const [stage, start, end] of offsets) {
+      const type = schools[stage];
+      if (type) {
+        const cost = SCHOOL_PRESETS[stage][type];
+        add(stage, start, end, cost);
+      }
+    }
     if (events.length === 0) return;
     onSave(events);
   };
@@ -589,28 +692,50 @@ function ChildForm({
         <YearInput value={birthYear} onChange={setBirthYear} currentAge={currentAge} />
         <span className="text-[11px] opacity-30">後</span>
       </div>
+      <div className="flex gap-1.5 items-center">
+        <label className="text-[11px] opacity-40 shrink-0 w-14">生活費</label>
+        <input
+          type="number"
+          className="w-20 px-1.5 py-0.5 text-xs bg-(--paper) text-(--ink) border border-(--border) rounded tabular-nums outline-none focus:border-(--terra)"
+          value={livingMonthly || ""}
+          onChange={(e) => setLivingMonthly(Number(e.target.value))}
+        />
+        <span className="text-[11px] opacity-30">万/月</span>
+        <span className="text-[10px] opacity-25">〜18歳</span>
+      </div>
       <div className="border-t border-(--border) pt-2 space-y-2">
-        {(
-          [
-            ["幼稚園", kindergarten, setKindergarten, "3年間"],
-            ["小学校", elementary, setElementary, "6年間"],
-            ["中学校", juniorHigh, setJuniorHigh, "3年間"],
-            ["高校", highSchool, setHighSchool, "3年間"],
-            ["大学", university, setUniversity, "4年間"],
-          ] as const
-        ).map(([label, value, setter, period]) => (
-          <div key={label} className="flex gap-1.5 items-center">
-            <label className="text-[11px] opacity-40 shrink-0 w-14">{label}</label>
-            <input
-              type="number"
-              className="w-20 px-1.5 py-0.5 text-xs bg-(--paper) text-(--ink) border border-(--border) rounded tabular-nums outline-none focus:border-(--terra)"
-              placeholder="年額"
-              value={value || ""}
-              onChange={(e) => setter(Number(e.target.value))}
-            />
-            <span className="text-[10px] opacity-30">{period}</span>
-          </div>
-        ))}
+        {(["幼稚園", "小学校", "中学校", "高校", "大学"] as const).map((stage) => {
+          const type = schools[stage];
+          const preset = SCHOOL_PRESETS[stage];
+          return (
+            <div key={stage} className="flex items-center gap-1">
+              <span className="text-[11px] opacity-40 shrink-0 w-14">{stage}</span>
+              <div className="flex border border-(--border) rounded overflow-hidden text-[10px]">
+                <button
+                  className={`px-2 py-0.5 ${type === "public" ? "bg-(--terra) text-white" : "opacity-40"}`}
+                  onClick={() =>
+                    setSchools((s) => ({ ...s, [stage]: s[stage] === "public" ? null : "public" }))
+                  }
+                >
+                  公立
+                </button>
+                <button
+                  className={`px-2 py-0.5 border-l border-(--border) ${type === "private" ? "bg-(--terra) text-white" : "opacity-40"}`}
+                  onClick={() =>
+                    setSchools((s) => ({ ...s, [stage]: s[stage] === "private" ? null : "private" }))
+                  }
+                >
+                  私立
+                </button>
+              </div>
+              {type && (
+                <span className="text-[10px] opacity-30 ml-1 tabular-nums">
+                  {preset[type]}万/年（{preset.period}）
+                </span>
+              )}
+            </div>
+          );
+        })}
       </div>
       <div className="flex gap-2 justify-end pt-2">
         <button
@@ -658,6 +783,16 @@ export function EventForm({
           placeholder="イベント名"
           value={event.name}
           onChange={(e) => onChange({ ...event, name: e.target.value })}
+        />
+      </div>
+
+      <div className="flex gap-1.5 items-center">
+        <label className="text-[11px] opacity-40 shrink-0">グループ</label>
+        <input
+          className="flex-1 min-w-0 px-1.5 py-0.5 text-xs bg-(--paper) text-(--ink) border border-(--border) rounded outline-none focus:border-(--terra)"
+          placeholder="(なし)"
+          value={event.group ?? ""}
+          onChange={(e) => onChange({ ...event, group: e.target.value || undefined })}
         />
       </div>
 

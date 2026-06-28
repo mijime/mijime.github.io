@@ -144,4 +144,45 @@ describe("parseDSL", () => {
     expect(result.scenarios[0].name).toBe("空のシナリオ");
     expect(result.scenarios[0].events).toHaveLength(0);
   });
+
+  it("parses new format with group column", () => {
+    const text = "# 現状維持\n住宅ローン,借入,0,35,現金-100\n";
+    const result = parseDSL(text);
+    expect(result.errors).toHaveLength(0);
+    expect(result.scenarios[0].events[0]).toEqual({
+      name: "借入",
+      group: "住宅ローン",
+      startYear: 0,
+      endYear: 35,
+      ops: [{ asset: "現金", op: "-", value: 100 }],
+    });
+  });
+
+  it("parses new format with empty group", () => {
+    const text = "# 現状維持\n,初期現金,0,0,現金+1000\n";
+    const result = parseDSL(text);
+    expect(result.errors).toHaveLength(0);
+    expect(result.scenarios[0].events[0]).toEqual({
+      name: "初期現金",
+      group: undefined,
+      startYear: 0,
+      endYear: 0,
+      ops: [{ asset: "現金", op: "+", value: 1000 }],
+    });
+  });
+
+  it("parses old format (no group column) as backward compat", () => {
+    const text = "# 現状維持\n年収,0,25,現金+500\n";
+    const result = parseDSL(text);
+    expect(result.errors).toHaveLength(0);
+    expect(result.scenarios[0].events[0].group).toBeUndefined();
+    expect(result.scenarios[0].events[0].name).toBe("年収");
+  });
+
+  it("parses new format with null endYear", () => {
+    const text = "# テスト\n初期設定,生活費,0,,現金-250\n";
+    const result = parseDSL(text);
+    expect(result.errors).toHaveLength(0);
+    expect(result.scenarios[0].events[0].endYear).toBeNull();
+  });
 });

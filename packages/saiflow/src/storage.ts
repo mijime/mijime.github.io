@@ -21,7 +21,7 @@ async function saveScenario(opts: {
   dslText: string;
   currentAge: number;
   simulationYears: number;
-}): Promise<void> {
+}): Promise<number> {
   if (opts.id !== undefined) {
     await db.scenarios.update(opts.id, {
       name: opts.name,
@@ -30,15 +30,16 @@ async function saveScenario(opts: {
       simulationYears: opts.simulationYears,
       updatedAt: new Date(),
     });
-  } else {
-    await db.scenarios.add({
-      name: opts.name,
-      dslText: opts.dslText,
-      currentAge: opts.currentAge,
-      simulationYears: opts.simulationYears,
-      updatedAt: new Date(),
-    });
+    return opts.id;
   }
+  const id = await db.scenarios.add({
+    name: opts.name,
+    dslText: opts.dslText,
+    currentAge: opts.currentAge,
+    simulationYears: opts.simulationYears,
+    updatedAt: new Date(),
+  });
+  return id as number;
 }
 
 async function loadScenario(id: number): Promise<Scenario | null> {
@@ -55,5 +56,9 @@ async function listScenarios(): Promise<Scenario[]> {
   return reversed;
 }
 
-export { db, saveScenario, loadScenario, listScenarios };
+async function deleteScenario(id: number): Promise<void> {
+  await db.scenarios.delete(id);
+}
+
+export { db, saveScenario, loadScenario, listScenarios, deleteScenario };
 export type { Scenario };

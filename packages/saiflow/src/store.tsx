@@ -10,6 +10,9 @@ export interface State {
   activeTab: "dsl" | "gui";
   scenarios: Scenario[];
   activeScenarioIndex: number;
+  sidebarOpen: boolean;
+  scenarioId: number | null;
+  scenarioName: string;
 }
 
 export type Action =
@@ -20,72 +23,24 @@ export type Action =
   | { type: "SET_PARSED"; parsed: State["parsed"] }
   | { type: "SET_ROWS"; rows: YearRow[] | null }
   | { type: "SET_SCENARIOS"; scenarios: Scenario[] }
-  | { type: "SET_ACTIVE_SCENARIO"; index: number };
+  | { type: "SET_ACTIVE_SCENARIO"; index: number }
+  | { type: "TOGGLE_SIDEBAR" }
+  | { type: "SET_SCENARIO_ID"; id: number | null }
+  | { type: "SET_SCENARIO_NAME"; name: string };
 
 export function initialState(): State {
   return {
-    dslText: [
-      "# 現状維持",
-      "初期現金,0,0,現金+1000",
-      "年収(夫),0,20,現金+500",
-      "年収(妻),0,21,現金+300",
-      "生活費,0,,現金-168",
-      "住居費,0,0,現金-120",
-      "頭金,1,1,現金-800",
-      "借入実行,1,1,借入-3200",
-      "借入返済,1,35,借入+156",
-      "借入金利,1,35,借入*1.02",
-      "住居費,1,,現金-30",
-      "受験料(子1小),4,4,現金-10",
-      "教育費(子1幼稚園),2,4,現金-30",
-      "教育費(子1小学校),5,10,現金-20",
-      "教育費(子1中学校),11,13,現金-30",
-      "受験料(子1高),13,13,現金-10",
-      "教育費(子1高校),14,16,現金-40",
-      "受験料(子1大),16,16,現金-30",
-      "教育費(子1大学),17,20,現金-120",
-      "受験料(子2小),4,4,現金-10",
-      "教育費(子2幼稚園),2,4,現金-30",
-      "教育費(子2小学校),5,10,現金-20",
-      "教育費(子2中学校),11,13,現金-30",
-      "受験料(子2高),13,13,現金-10",
-      "教育費(子2高校),14,16,現金-40",
-      "受験料(子2大),16,16,現金-30",
-      "教育費(子2大学),17,20,現金-120",
-      "NISA積立,0,20,現金-40,NISA+40",
-      "iDeCo積立,0,20,現金-28,iDeCo+28",
-      "NISA運用,0,,NISA*1.03",
-      "iDeCo運用,0,,iDeCo*1.03",
-      "現金利息,0,,現金*1.01",
-      "",
-      "# 早期リタイア",
-      "初期現金,0,0,現金+1000",
-      "年収(夫),0,15,現金+500",
-      "年収(妻),0,15,現金+300",
-      "生活費,0,,現金-168",
-      "住居費,0,,現金-120",
-      "教育費(子1幼稚園),2,4,現金-50",
-      "教育費(子1小学校),5,10,現金-40",
-      "教育費(子1中学校),11,13,現金-60",
-      "教育費(子1高校),14,16,現金-80",
-      "教育費(子1大学),17,20,現金-200",
-      "教育費(子2幼稚園),2,4,現金-50",
-      "教育費(子2小学校),5,10,現金-40",
-      "教育費(子2中学校),11,13,現金-60",
-      "教育費(子2高校),14,16,現金-80",
-      "教育費(子2大学),17,20,現金-200",
-      "副業,16,,現金+100",
-      "NISA積立,0,15,現金-40,NISA+40",
-      "NISA運用,0,,NISA*1.05",
-      "現金利息,0,,現金*1.01",
-    ].join("\n"),
+    dslText: "",
     currentAge: 39,
     simulationYears: 50,
     parsed: null,
     rows: null,
-    activeTab: "dsl",
+    activeTab: "gui",
     scenarios: [],
     activeScenarioIndex: 0,
+    sidebarOpen: true,
+    scenarioId: null,
+    scenarioName: "新規シナリオ",
   };
 }
 
@@ -114,6 +69,15 @@ export function reducer(state: State, action: Action): State {
     }
     case "SET_ACTIVE_SCENARIO": {
       return { ...state, activeScenarioIndex: action.index };
+    }
+    case "TOGGLE_SIDEBAR": {
+      return { ...state, sidebarOpen: !state.sidebarOpen };
+    }
+    case "SET_SCENARIO_ID": {
+      return { ...state, scenarioId: action.id };
+    }
+    case "SET_SCENARIO_NAME": {
+      return { ...state, scenarioName: action.name };
     }
     default: {
       return state;
