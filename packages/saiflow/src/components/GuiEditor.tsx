@@ -146,6 +146,27 @@ export function GuiEditor() {
         return next;
       });
     };
+    const handleAddToGroup = () => {
+      const newEvent: Event = { name: "", group: groupName, startYear: 0, endYear: null, ops: [] };
+      const lastIdx = indices.length > 0 ? Math.max(...indices) : -1;
+      const insertAt = lastIdx + 1;
+      update((prev) =>
+        prev.map((s, i) =>
+          i === state.activeScenarioIndex
+            ? {
+                ...s,
+                events: [
+                  ...s.events.slice(0, insertAt),
+                  newEvent,
+                  ...s.events.slice(insertAt),
+                ],
+              }
+            : s,
+        ),
+      );
+      setExpandedGroups((prev) => new Set(prev).add(groupName));
+      setExpandedIdx(insertAt);
+    };
     const handleDeleteGroup = () => {
       if (confirm(`「${groupName}」グループの全 ${count} 件のイベントを削除しますか？`)) {
         update((prev) =>
@@ -172,6 +193,13 @@ export function GuiEditor() {
           </span>
           <span className="font-medium opacity-60">{groupName}</span>
           <span className="opacity-30 tabular-nums">({count})</span>
+        </button>
+        <button
+          className="px-2 py-1 text-xs opacity-30 hover:opacity-100 transition-colors shrink-0"
+          onClick={handleAddToGroup}
+          title="このグループにイベントを追加"
+        >
+          +
         </button>
         <button
           className="px-2 py-1 text-xs text-red-400/50 hover:text-red-400 transition-colors shrink-0"
