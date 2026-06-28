@@ -32,10 +32,31 @@ export function parseDSL(text: string): SqlResult {
       });
       continue;
     }
-    const name = parts[0].trim();
-    const startYear = Number(parts[1].trim());
-    const endYearStr = parts[2].trim();
-    const endYear = endYearStr.length === 0 ? null : Number(endYearStr);
+
+    const isOldFormat = !isNaN(Number(parts[1].trim()));
+    let group: string | undefined;
+    let name: string;
+    let startYear: number;
+    let endYear: number | null;
+    let endYearStr: string;
+    let opsStart: number;
+
+    if (isOldFormat) {
+      group = undefined;
+      name = parts[0].trim();
+      startYear = Number(parts[1].trim());
+      endYearStr = parts[2].trim();
+      endYear = endYearStr.length === 0 ? null : Number(endYearStr);
+      opsStart = 3;
+    } else {
+      const groupStr = parts[0].trim();
+      group = groupStr.length > 0 ? groupStr : undefined;
+      name = parts[1].trim();
+      startYear = Number(parts[2].trim());
+      endYearStr = parts[3].trim();
+      endYear = endYearStr.length === 0 ? null : Number(endYearStr);
+      opsStart = 4;
+    }
 
     if (isNaN(startYear) || (endYear !== null && isNaN(endYear))) {
       errors.push({ line: lineNum, message: "年は数値である必要があります" });
@@ -43,7 +64,7 @@ export function parseDSL(text: string): SqlResult {
     }
 
     const ops: AssetOp[] = [];
-    for (let j = 3; j < parts.length; j++) {
+    for (let j = opsStart; j < parts.length; j++) {
       const opStr = parts[j].trim();
       const parsed = parseOp(opStr);
       if (!parsed) {
@@ -53,7 +74,7 @@ export function parseDSL(text: string): SqlResult {
       ops.push(parsed);
     }
 
-    currentEvents.push({ name, startYear, endYear, ops });
+    currentEvents.push({ name, group, startYear, endYear, ops });
   }
 
   // Push last scenario
