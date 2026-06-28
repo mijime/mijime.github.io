@@ -168,6 +168,7 @@ export function GuiEditor() {
       setExpandedIdx(insertAt);
     };
     const handleDeleteGroup = () => {
+      // eslint-disable-next-line no-alert
       if (confirm(`「${groupName}」グループの全 ${count} 件のイベントを削除しますか？`)) {
         update((prev) =>
           prev.map((s, i) =>

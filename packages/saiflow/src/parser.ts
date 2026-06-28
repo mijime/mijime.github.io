@@ -33,45 +33,22 @@ export function parseDSL(text: string): SqlResult {
       continue;
     }
 
-    const isOldFormat = !isNaN(Number(parts[1].trim()));
-    let group: string | undefined;
-    let name: string;
-    let startYear: number;
-    let endYear: number | null;
-    let endYearStr: string;
-    let opsStart: number;
-
-    if (isOldFormat) {
-      group = undefined;
-      name = parts[0].trim();
-      startYear = Number(parts[1].trim());
-      endYearStr = parts[2].trim();
-      endYear = endYearStr.length === 0 ? null : Number(endYearStr);
-      opsStart = 3;
-    } else {
-      const groupStr = parts[0].trim();
-      group = groupStr.length > 0 ? groupStr : undefined;
-      name = parts[1].trim();
-      startYear = Number(parts[2].trim());
-      endYearStr = parts[3].trim();
-      endYear = endYearStr.length === 0 ? null : Number(endYearStr);
-      opsStart = 4;
-    }
-
-    if (isNaN(startYear) || (endYear !== null && isNaN(endYear))) {
+    const parsed = parseEventLine(parts);
+    if (!parsed) {
       errors.push({ line: lineNum, message: "年は数値である必要があります" });
       continue;
     }
+    const { name, group, startYear, endYear, opsStart } = parsed;
 
     const ops: AssetOp[] = [];
     for (let j = opsStart; j < parts.length; j++) {
       const opStr = parts[j].trim();
-      const parsed = parseOp(opStr);
-      if (!parsed) {
+      const op = parseOp(opStr);
+      if (!op) {
         errors.push({ line: lineNum, message: `"${opStr}" を解析できません` });
         continue;
       }
-      ops.push(parsed);
+      ops.push(op);
     }
 
     currentEvents.push({ name, group, startYear, endYear, ops });
@@ -81,6 +58,31 @@ export function parseDSL(text: string): SqlResult {
   scenarios.push({ name: currentName, events: currentEvents });
 
   return { scenarios, errors };
+}
+
+function parseEventLine(parts: string[]): {
+  group: string | undefined;
+  name: string;
+  startYear: number;
+  endYear: number | null;
+  opsStart: number;
+} | null {
+  const isOldFormat = !isNaN(Number(parts[1].trim()));
+
+  const group: string | undefined = isOldFormat
+    ? undefined
+    : (parts[0].trim() || undefined);
+  const name: string = isOldFormat ? parts[0].trim() : parts[1].trim();
+  const startYear = Number((isOldFormat ? parts[1] : parts[2]).trim());
+  const endYearStr = (isOldFormat ? parts[2] : parts[3]).trim();
+  const endYear: number | null = endYearStr.length === 0 ? null : Number(endYearStr);
+  const opsStart: number = isOldFormat ? 3 : 4;
+
+  if (isNaN(startYear) || (endYear !== null && isNaN(endYear))) {
+    return null;
+  }
+
+  return { group, name, startYear, endYear, opsStart };
 }
 
 function parseOp(str: string): AssetOp | null {
