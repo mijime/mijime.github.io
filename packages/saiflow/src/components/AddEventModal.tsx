@@ -183,6 +183,7 @@ function MortgageForm({
     if (downPayment > 0) {
       events.push({
         name: "頭金",
+        group: "住宅ローン",
         startYear,
         endYear: startYear,
         ops: [{ asset: "現金", op: "-" as const, value: downPayment }],
@@ -191,12 +192,14 @@ function MortgageForm({
     if (loanAmount > 0) {
       events.push({
         name: "借入実行",
+        group: "住宅ローン",
         startYear,
         endYear: startYear,
         ops: [{ asset: "借入", op: "-" as const, value: loanAmount }],
       });
       events.push({
         name: "借入返済",
+        group: "住宅ローン",
         startYear,
         endYear: startYear + years - 1,
         ops: [
@@ -206,6 +209,7 @@ function MortgageForm({
       });
       events.push({
         name: "借入金利",
+        group: "住宅ローン",
         startYear,
         endYear: startYear + years - 1,
         ops: [{ asset: "借入", op: "*" as const, value: multiplier }],
@@ -380,6 +384,7 @@ function InitialForm({
     if (initialCash > 0) {
       events.push({
         name: "初期現金",
+        group: "初期設定",
         startYear: 0,
         endYear: 0,
         ops: [{ asset: "現金", op: "+" as const, value: initialCash }],
@@ -388,6 +393,7 @@ function InitialForm({
     if (annualIncome > 0) {
       events.push({
         name: "年収",
+        group: "初期設定",
         startYear: 0,
         endYear: retirementYear > 0 ? retirementYear : null,
         ops: [{ asset: "現金", op: "+" as const, value: annualIncome }],
@@ -396,6 +402,7 @@ function InitialForm({
     if (livingMonthly > 0) {
       events.push({
         name: "生活費",
+        group: "初期設定",
         startYear: 0,
         endYear: null,
         ops: [{ asset: "現金", op: "-" as const, value: livingMonthly * 12 }],
@@ -404,6 +411,7 @@ function InitialForm({
     if (housingMonthly > 0) {
       events.push({
         name: "住居費",
+        group: "初期設定",
         startYear: 0,
         endYear: null,
         ops: [{ asset: "現金", op: "-" as const, value: housingMonthly * 12 }],
@@ -497,6 +505,7 @@ function InvestForm({
     const events: Event[] = [
       {
         name: `${name}積立`,
+        group: "投資",
         startYear,
         endYear,
         ops: [
@@ -506,6 +515,7 @@ function InvestForm({
       },
       {
         name: `${name}運用`,
+        group: "投資",
         startYear,
         endYear: null,
         ops: [{ asset: name, op: "*" as const, value: multiplier }],
@@ -624,6 +634,7 @@ function ChildForm({
       if (cost > 0) {
         events.push({
           name: `教育費${label}(${childName})`,
+          group: "子供",
           startYear: birthYear + start,
           endYear: end === null ? null : birthYear + end,
           ops: [{ asset: "現金", op: "-" as const, value: cost }],
@@ -633,6 +644,7 @@ function ChildForm({
     if (livingMonthly > 0) {
       events.push({
         name: `生活費(${childName})`,
+        group: "子供",
         startYear: birthYear,
         endYear: birthYear + 17,
         ops: [{ asset: "現金", op: "-" as const, value: livingMonthly * 12 }],
@@ -763,6 +775,16 @@ export function EventForm({
           placeholder="イベント名"
           value={event.name}
           onChange={(e) => onChange({ ...event, name: e.target.value })}
+        />
+      </div>
+
+      <div className="flex gap-1.5 items-center">
+        <label className="text-[11px] opacity-40 shrink-0">グループ</label>
+        <input
+          className="flex-1 min-w-0 px-1.5 py-0.5 text-xs bg-(--paper) text-(--ink) border border-(--border) rounded outline-none focus:border-(--terra)"
+          placeholder="(なし)"
+          value={event.group ?? ""}
+          onChange={(e) => onChange({ ...event, group: e.target.value || undefined })}
         />
       </div>
 
