@@ -2,7 +2,7 @@ import React from "react";
 import { useSaiflowState } from "../store";
 import { ChartTooltip } from "./ChartTooltip";
 
-function logTicks(max: number): number[] {
+export function logTicks(max: number): number[] {
   const ticks: number[] = [];
   for (let i = 0; i <= Math.floor(Math.log10(max + 1)); i++) {
     const v = 10 ** i;

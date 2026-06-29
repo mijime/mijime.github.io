@@ -1,15 +1,7 @@
 import { describe, it, expect } from "vitest";
+import { logTicks } from "./BarChart";
 
 describe("logTicks", () => {
-  function logTicks(max: number): number[] {
-    const ticks: number[] = [];
-    for (let i = 0; i <= Math.floor(Math.log10(max + 1)); i++) {
-      const v = 10 ** i;
-      if (v <= max) ticks.push(v);
-    }
-    return ticks;
-  }
-
   it("returns [1] for max=1", () => {
     expect(logTicks(1)).toEqual([1]);
   });
