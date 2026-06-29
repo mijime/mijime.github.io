@@ -34,6 +34,8 @@ export function GuiEditor() {
   const [expandedIdx, setExpandedIdx] = useState<number | null>(null);
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
   const [modalOpen, setModalOpen] = useState(false);
+  const [editingGroup, setEditingGroup] = useState<string | null>(null);
+  const [editValue, setEditValue] = useState("");
   const timerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
   const stateRef = useRef(state);
   stateRef.current = state;
@@ -138,6 +140,41 @@ export function GuiEditor() {
 
   const renderGroupHeader = (groupName: string, count: number, indices: number[]) => {
     const isExpanded = expandedGroups.has(groupName);
+    const isEditing = editingGroup === groupName;
+
+    const startEdit = () => {
+      setEditValue(groupName);
+      setEditingGroup(groupName);
+    };
+
+    const commitRename = () => {
+      const newName = editValue.trim();
+      update((prev) =>
+        prev.map((s, i) =>
+          i === state.activeScenarioIndex
+            ? {
+                ...s,
+                events: s.events.map((ev) =>
+                  ev.group === groupName
+                    ? { ...ev, group: newName || undefined }
+                    : ev,
+                ),
+              }
+            : s,
+        ),
+      );
+      setEditingGroup(null);
+    };
+
+    const cancelRename = () => {
+      setEditingGroup(null);
+    };
+
+    const handleKeyDown = (e: React.KeyboardEvent) => {
+      if (e.key === "Enter") commitRename();
+      if (e.key === "Escape") cancelRename();
+    };
+
     const toggle = () => {
       setExpandedGroups((prev) => {
         const next = new Set(prev);
@@ -146,6 +183,7 @@ export function GuiEditor() {
         return next;
       });
     };
+
     const handleAddToGroup = () => {
       const newEvent: Event = { name: "", group: groupName, startYear: 0, endYear: null, ops: [] };
       const lastIdx = indices.length > 0 ? Math.max(...indices) : -1;
@@ -167,6 +205,7 @@ export function GuiEditor() {
       setExpandedGroups((prev) => new Set(prev).add(groupName));
       setExpandedIdx(insertAt);
     };
+
     const handleDeleteGroup = () => {
       // eslint-disable-next-line no-alert
       if (confirm(`「${groupName}」グループの全 ${count} 件のイベントを削除しますか？`)) {
@@ -183,6 +222,7 @@ export function GuiEditor() {
         setExpandedIdx(null);
       }
     };
+
     return (
       <div className="flex items-center border-b border-(--border) bg-(--grid)/30">
         <button
@@ -192,7 +232,28 @@ export function GuiEditor() {
           <span className="opacity-30 w-3 shrink-0 text-[10px]">
             {isExpanded ? "▼" : "▶"}
           </span>
-          <span className="font-medium opacity-60">{groupName}</span>
+          {isEditing ? (
+            <input
+              className="flex-1 min-w-0 px-1 py-0.5 text-xs bg-(--paper) text-(--ink) border border-(--border) rounded outline-none focus:border-(--terra)"
+              value={editValue}
+              onChange={(e) => setEditValue(e.target.value)}
+              onBlur={commitRename}
+              onKeyDown={handleKeyDown}
+              autoFocus
+              onClick={(e) => e.stopPropagation()}
+              onDoubleClick={(e) => e.stopPropagation()}
+            />
+          ) : (
+            <span
+              className="font-medium opacity-60"
+              onDoubleClick={(e) => {
+                e.stopPropagation();
+                startEdit();
+              }}
+            >
+              {groupName}
+            </span>
+          )}
           <span className="opacity-30 tabular-nums">({count})</span>
         </button>
         <button
