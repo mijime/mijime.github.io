@@ -4,19 +4,19 @@ import { AddEventModal } from "./AddEventModal";
 import { SaiflowProvider } from "../store";
 import type { Event } from "../types";
 
-describe("ChildForm birth year input", () => {
-  const renderModal = () => {
-    const onSave = vi.fn();
-    const onClose = vi.fn();
-    render(
-      <SaiflowProvider state={{ currentAge: 39 }}>
-        <AddEventModal currentAge={39} onSave={onSave} onClose={onClose} />
-      </SaiflowProvider>,
-    );
-    fireEvent.click(screen.getByText("子供"));
-    return { onSave, onClose };
-  };
+const renderModal = () => {
+  const onSave = vi.fn();
+  const onClose = vi.fn();
+  render(
+    <SaiflowProvider state={{ currentAge: 39 }}>
+      <AddEventModal currentAge={39} onSave={onSave} onClose={onClose} />
+    </SaiflowProvider>,
+  );
+  fireEvent.click(screen.getByText("子供"));
+  return { onSave, onClose };
+};
 
+describe("ChildForm birth year input", () => {
   it('shows birth year input with "年数" mode by default', () => {
     renderModal();
     const inputs = screen.getAllByRole("spinbutton");
@@ -46,7 +46,7 @@ describe("ChildForm birth year input", () => {
 
     fireEvent.click(screen.getByText("保存"));
     expect(onSave).toHaveBeenCalledTimes(1);
-    const events = onSave.mock.calls[0][0];
+    const [[events]] = onSave.mock.calls;
     expect(events.length).toBeGreaterThan(0);
     const livingEvent = events.find((e: Event) => e.name.startsWith("生活費"));
     expect(livingEvent.startYear).toBe(0);
@@ -63,7 +63,7 @@ describe("ChildForm birth year input", () => {
     fireEvent.change(nameInput, { target: { value: "花子" } });
 
     fireEvent.click(screen.getByText("保存"));
-    const events = onSave.mock.calls[0][0];
+    const [[events]] = onSave.mock.calls;
     const livingEvent = events.find((e: Event) => e.name.startsWith("生活費"));
     expect(livingEvent.startYear).toBe(3);
   });

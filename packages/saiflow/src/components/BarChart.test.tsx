@@ -27,26 +27,26 @@ describe("logTicks", () => {
   });
 
   it("returns [1, 10, 100, 1000, 10000] for max=10000", () => {
-    expect(logTicks(10000)).toEqual([1, 10, 100, 1000, 10000]);
+    expect(logTicks(10_000)).toEqual([1, 10, 100, 1000, 10_000]);
   });
 });
 
-describe("log scale", () => {
-  function logScale(v: number, max: number): number {
-    return Math.log10(v + 1) / Math.log10(max + 1);
-  }
+function logScale(v: number, max: number): number {
+  return Math.log10(v + 1) / Math.log10(max + 1);
+}
 
+describe("log scale", () => {
   it("logScale(0, max) returns 0", () => {
-    expect(logScale(0, 100000)).toBe(0);
+    expect(logScale(0, 100_000)).toBe(0);
   });
 
   it("logScale(max, max) returns 1", () => {
-    expect(logScale(100000, 100000)).toBeCloseTo(1);
+    expect(logScale(100_000, 100_000)).toBeCloseTo(1);
   });
 
   it("logScale maps small values non-linearly", () => {
-    const s10 = logScale(10, 100000);
-    const s100 = logScale(100, 100000);
+    const s10 = logScale(10, 100_000);
+    const s100 = logScale(100, 100_000);
     // 100 should be further from 10 than in linear scale
     expect(s100 / s10).toBeGreaterThan(1);
   });
