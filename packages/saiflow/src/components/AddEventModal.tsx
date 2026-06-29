@@ -616,7 +616,7 @@ const SCHOOL_PRESETS: Record<
 };
 
 function ChildForm({
-  currentAge,
+  currentAge: _currentAge,
   onSave,
   onClose,
 }: {
@@ -626,6 +626,8 @@ function ChildForm({
 }) {
   const [childName, setChildName] = useState("子");
   const [birthYear, setBirthYear] = useState(2);
+  const [yearMode, setYearMode] = useState<"offset" | "age">("offset");
+  const [childCurrentAge, setChildCurrentAge] = useState(0);
   const [schools, setSchools] = useState<Record<string, SchoolType>>({
     幼稚園: null,
     小学校: null,
@@ -695,8 +697,41 @@ function ChildForm({
       </div>
       <div className="flex gap-1.5 items-center">
         <label className="text-[11px] opacity-40 shrink-0 w-14">誕生</label>
-        <YearInput value={birthYear} onChange={setBirthYear} currentAge={currentAge} />
-        <span className="text-[11px] opacity-30">{birthYear >= 0 ? "後" : "前"}</span>
+        <select
+          className="text-[11px] bg-(--paper) text-(--ink) border border-(--border) rounded px-1 py-0.5 outline-none cursor-pointer"
+          value={yearMode}
+          onChange={(e) => {
+            const mode = e.target.value as "offset" | "age";
+            setYearMode(mode);
+            if (mode === "age") {
+              const age = Math.max(0, -birthYear);
+              setChildCurrentAge(age);
+              setBirthYear(-age);
+            } else {
+              setBirthYear(-childCurrentAge);
+            }
+          }}
+        >
+          <option value="offset">年数</option>
+          <option value="age">年齢</option>
+        </select>
+        <input
+          type="number"
+          className="w-16 px-1.5 py-0.5 text-xs bg-(--paper) text-(--ink) border border-(--border) rounded tabular-nums outline-none focus:border-(--terra)"
+          value={yearMode === "age" ? childCurrentAge : birthYear}
+          onChange={(e) => {
+            const v = Number(e.target.value) || 0;
+            if (yearMode === "age") {
+              setChildCurrentAge(v);
+              setBirthYear(-v);
+            } else {
+              setBirthYear(v);
+            }
+          }}
+        />
+        <span className="text-[11px] opacity-30">
+          {yearMode === "age" ? "歳" : birthYear >= 0 ? "年後" : "年前"}
+        </span>
       </div>
       <div className="flex gap-1.5 items-center">
         <label className="text-[11px] opacity-40 shrink-0 w-14">生活費</label>
