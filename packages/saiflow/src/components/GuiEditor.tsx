@@ -118,6 +118,11 @@ export function GuiEditor() {
     dispatch({ type: "SET_ROWS", rows });
   }, [state.currentAge, state.simulationYears, state.activeScenarioIndex]);
 
+  useEffect(() => {
+    setEditingGroup(null);
+    setEditValue("");
+  }, [state.activeScenarioIndex]);
+
   const scenario = scenarios[state.activeScenarioIndex];
   if (!scenario) {
     return (
@@ -171,8 +176,14 @@ export function GuiEditor() {
     };
 
     const handleKeyDown = (e: React.KeyboardEvent) => {
-      if (e.key === "Enter") commitRename();
-      if (e.key === "Escape") cancelRename();
+      if (e.key === "Enter") {
+        e.preventDefault();
+        commitRename();
+      }
+      if (e.key === "Escape") {
+        e.preventDefault();
+        cancelRename();
+      }
     };
 
     const toggle = () => {
