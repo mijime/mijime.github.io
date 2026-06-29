@@ -2,17 +2,13 @@ import React from "react";
 import { useSaiflowState } from "../store";
 import { ChartTooltip } from "./ChartTooltip";
 
-function niceStep(max: number): number {
-  const raw = max / 4;
-  const exp = 10 ** Math.floor(Math.log10(raw));
-  const mant = raw / exp;
-  return exp * (mant <= 1.5 ? 1 : mant <= 3 ? 2 : mant <= 7 ? 5 : 10);
-}
-
-function ticks(max: number, step: number): number[] {
-  const result: number[] = [];
-  for (let v = 0; v <= max; v += step) result.push(Math.round(v));
-  return result;
+function logTicks(max: number): number[] {
+  const ticks: number[] = [];
+  for (let i = 0; i <= Math.floor(Math.log10(max + 1)); i++) {
+    const v = 10 ** i;
+    if (v <= max) ticks.push(v);
+  }
+  return ticks;
 }
 
 export function BarChart() {
@@ -28,17 +24,19 @@ export function BarChart() {
   const midY = height / 2;
   const plotH = (height - padding.top - padding.bottom) / 2;
 
-  const maxIncome = Math.max(...rows.map((r) => r.totalIncome), 0) * 1.1 || 1;
-  const maxExpense = Math.max(...rows.map((r) => r.totalExpense), 0) * 1.1 || 1;
+  const maxVal = Math.max(
+    Math.max(...rows.map((r) => r.totalIncome), 0),
+    Math.max(...rows.map((r) => r.totalExpense), 0),
+  ) * 1.05 || 1;
 
   const step = (width - padding.left - padding.right) / rows.length;
   const barW = Math.max(2, step * 0.65);
   const x = (i: number) => padding.left + i * step + step / 2;
-  const incomeY = (v: number) => midY - (v / maxIncome) * plotH;
-  const expenseY = (v: number) => midY + (v / maxExpense) * plotH;
+  const scale = (v: number) => Math.log10(v + 1) / Math.log10(maxVal + 1);
+  const incomeY = (v: number) => midY - scale(v) * plotH;
+  const expenseY = (v: number) => midY + scale(v) * plotH;
 
-  const incomeTickStep = niceStep(maxIncome);
-  const expenseTickStep = niceStep(maxExpense);
+  const yTicks = logTicks(maxVal);
 
   const netY = (net: number) => (net >= 0 ? incomeY(net) : expenseY(-net));
 
@@ -60,14 +58,21 @@ export function BarChart() {
           stroke="rgba(128,128,128,0.3)"
         />
 
-        {/* Y axis ticks (income) */}
-        {ticks(maxIncome, incomeTickStep).map((v) => (
-          <g key={`i${v}`}>
+        {/* Y axis ticks (shared log scale) */}
+        {yTicks.map((v) => (
+          <g key={`t${v}`}>
             <line
               x1={padding.left}
               y1={incomeY(v)}
               x2={width - padding.right}
               y2={incomeY(v)}
+              stroke="rgba(128,128,128,0.08)"
+            />
+            <line
+              x1={padding.left}
+              y1={expenseY(v)}
+              x2={width - padding.right}
+              y2={expenseY(v)}
               stroke="rgba(128,128,128,0.08)"
             />
             <text
@@ -79,19 +84,6 @@ export function BarChart() {
             >
               {v}
             </text>
-          </g>
-        ))}
-
-        {/* Y axis ticks (expense) */}
-        {ticks(maxExpense, expenseTickStep).map((v) => (
-          <g key={`e${v}`}>
-            <line
-              x1={padding.left}
-              y1={expenseY(v)}
-              x2={width - padding.right}
-              y2={expenseY(v)}
-              stroke="rgba(128,128,128,0.08)"
-            />
             <text
               x={padding.left - 6}
               y={expenseY(v) + 4}
