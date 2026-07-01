@@ -1,5 +1,9 @@
 import type { SimulationConfig, YearRow } from "./types";
 
+function gkey(g?: string): string {
+  return g ?? "(未分類)";
+}
+
 export function simulate(config: SimulationConfig): YearRow[] {
   const { currentAge, simulationYears, scenario } = config;
   const balances: Record<string, number> = {};
@@ -13,6 +17,8 @@ export function simulate(config: SimulationConfig): YearRow[] {
 
     let totalIncome = 0;
     let totalExpense = 0;
+    const groupIncome: Record<string, number> = {};
+    const groupExpense: Record<string, number> = {};
     const operations: YearRow["operations"] = [];
 
     for (const e of active) {
@@ -21,6 +27,8 @@ export function simulate(config: SimulationConfig): YearRow[] {
         balances[op.asset] = (balances[op.asset] ?? 0) + op.value;
         operations.push({ eventName: e.name, op });
         totalIncome += op.value;
+        const g = gkey(e.group);
+        groupIncome[g] = (groupIncome[g] ?? 0) + op.value;
       }
     }
 
@@ -30,6 +38,8 @@ export function simulate(config: SimulationConfig): YearRow[] {
         balances[op.asset] = (balances[op.asset] ?? 0) - op.value;
         operations.push({ eventName: e.name, op });
         totalExpense += op.value;
+        const g = gkey(e.group);
+        groupExpense[g] = (groupExpense[g] ?? 0) + op.value;
       }
     }
 
@@ -54,6 +64,8 @@ export function simulate(config: SimulationConfig): YearRow[] {
       totalIncome,
       totalExpense,
       totalAssets,
+      groupIncome,
+      groupExpense,
     });
   }
 

@@ -42,4 +42,6 @@ export interface YearRow {
   totalIncome: number;
   totalExpense: number;
   totalAssets: number;
+  groupIncome: Record<string, number>;
+  groupExpense: Record<string, number>;
 }
