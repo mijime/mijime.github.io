@@ -67,7 +67,7 @@ const HOURS_PER_DAY = 8;
 function toPxFromOrigin(date: Date, origin: Date): number {
   const realHours = (date.getTime() - origin.getTime()) / 3_600_000;
   const calDays = Math.floor(realHours / 24);
-  const intraHours = realHours - calDays * 24;
+  const intraHours = Math.min(realHours - calDays * 24, HOURS_PER_DAY);
   return calDays * HOURS_PER_DAY * PIXELS_PER_HOUR + intraHours * PIXELS_PER_HOUR;
 }
 
@@ -240,9 +240,9 @@ export function GanttBoard() {
           {rows.map(({ node }) => {
             const sched = scheduleById.get(node.id);
             if (!sched) return null;
-            const hourWidth = (sched.end.getTime() - sched.start.getTime()) / 3_600_000;
             const left = toPxFromOrigin(sched.start, originDate);
-            const width = Math.max(hourWidth * PIXELS_PER_HOUR, 2);
+            const right = toPxFromOrigin(sched.end, originDate);
+            const width = Math.max(right - left, 2);
             const isLeaf = node.children.length === 0;
             return (
               <div
@@ -291,10 +291,9 @@ export function GanttBoard() {
                       const childSched = scheduleById.get(cid);
                       const childNode = nodes[cid];
                       if (!childSched || !childNode) return null;
-                      const childHourWidth =
-                        (childSched.end.getTime() - childSched.start.getTime()) / 3_600_000;
                       const childLeft = toPxFromOrigin(childSched.start, originDate);
-                      const childWidth = Math.max(childHourWidth * PIXELS_PER_HOUR, 2);
+                      const childRight = toPxFromOrigin(childSched.end, originDate);
+                      const childWidth = Math.max(childRight - childLeft, 2);
                       return (
                         <div
                           key={cid}

@@ -32,7 +32,9 @@ export function KanbanBoard() {
   const { dispatch, state } = useMindStore();
   const [activeId, setActiveId] = useState<string | null>(null);
 
-  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }));
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 8, delay: 200 } }),
+  );
 
   function handleDragStart(event: { active: { id: string | number } }) {
     const id = String(event.active.id);

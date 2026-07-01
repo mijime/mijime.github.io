@@ -23,7 +23,7 @@ export function KanbanCard({ node }: Props) {
     borderColor: "var(--border)",
     color: "var(--ink)",
     opacity: isDragging ? 0.4 : 1,
-    touchAction: "none",
+    touchAction: "manipulation",
     transform: CSS.Translate.toString(transform),
     transition,
   };
@@ -63,6 +63,7 @@ export function KanbanCard({ node }: Props) {
           <button
             type="button"
             data-testid={`kanban-card-worklog-${node.id}`}
+            className="relative"
             onClick={(e) => {
               e.stopPropagation();
               dispatch({
@@ -74,6 +75,11 @@ export function KanbanCard({ node }: Props) {
             title="作業履歴"
           >
             <ListOrdered size={12} />
+            {node.workLogs.length > 0 && (
+              <span className="absolute -top-0.5 -right-0.5 bg-slate-500 text-white text-[8px] font-bold rounded-full min-w-[14px] h-[14px] flex items-center justify-center px-0.5 leading-none">
+                {node.workLogs.length}
+              </span>
+            )}
           </button>
         </div>
       </div>

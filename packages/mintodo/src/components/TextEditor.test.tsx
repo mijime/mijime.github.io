@@ -43,6 +43,9 @@ function makeState(over: Partial<State> = {}): State {
     searchQuery: "",
     selectedNodeId: "",
     view: { pan: { x: 0, y: 0 }, zoom: 1 },
+    past: [],
+    future: [],
+
     nodes: {
       root: makeNode({ id: "root", isRoot: true, text: "Root", children: ["n1"] }),
       n1: makeNode(),

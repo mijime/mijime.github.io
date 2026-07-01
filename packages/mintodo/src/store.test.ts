@@ -862,3 +862,96 @@ describe("reducer — REORDER_CHILDREN", () => {
     expect(next).toBe(s);
   });
 });
+
+describe("reducer — UNDO / REDO", () => {
+  it("UNDO restores state before an undoable action", () => {
+    const s = {
+      ...createInitialState(),
+      nodes: { root: makeNode("root", "b-a", { isRoot: true, children: [] }) },
+    };
+    const next = reducer(s, { newId: "n1", parentId: "root", type: "ADD_CHILD" });
+    expect(next.past.length).toBe(1);
+    expect(next.future.length).toBe(0);
+    const undone = reducer(next, { type: "UNDO" });
+    expect(undone.past.length).toBe(0);
+    expect(undone.future.length).toBe(1);
+    expect(undone.nodes.n1).toBeUndefined();
+    expect(undone.nodes.root.children).toEqual([]);
+  });
+
+  it("REDO re-applies the undone action", () => {
+    const s = {
+      ...createInitialState(),
+      nodes: { root: makeNode("root", "b-a", { isRoot: true, children: [] }) },
+    };
+    const next = reducer(s, { newId: "n1", parentId: "root", type: "ADD_CHILD" });
+    const undone = reducer(next, { type: "UNDO" });
+    const redone = reducer(undone, { type: "REDO" });
+    expect(redone.future.length).toBe(0);
+    expect(redone.past.length).toBe(1);
+    expect(redone.nodes.n1).toBeDefined();
+  });
+
+  it("new action after UNDO clears the future stack", () => {
+    const s = {
+      ...createInitialState(),
+      nodes: { root: makeNode("root", "b-a", { isRoot: true, children: [] }) },
+    };
+    const s1 = reducer(s, { newId: "n1", parentId: "root", type: "ADD_CHILD" });
+    const s2 = reducer(s1, { type: "UNDO" });
+    expect(s2.future.length).toBe(1);
+    const s3 = reducer(s2, { newId: "n2", parentId: "root", type: "ADD_CHILD" });
+    expect(s3.future.length).toBe(0);
+    expect(s3.nodes.n2).toBeDefined();
+  });
+
+  it("UNDO on empty past is a no-op", () => {
+    const s = createInitialState();
+    const next = reducer(s, { type: "UNDO" });
+    expect(next).toBe(s);
+  });
+
+  it("REDO on empty future is a no-op", () => {
+    const s = createInitialState();
+    const next = reducer(s, { type: "REDO" });
+    expect(next).toBe(s);
+  });
+
+  it("non-undoable action does not create undo entry", () => {
+    const s = createInitialState();
+    const next = reducer(s, { id: "n1", type: "SELECT" });
+    expect(next.past.length).toBe(0);
+  });
+
+  it("UPDATE_NODE creates undo entry", () => {
+    const s = {
+      ...createInitialState(),
+      nodes: { root: makeNode("root", "b-a", { isRoot: true, children: [] }) },
+    };
+    const updated = reducer(s, {
+      id: "root",
+      patch: { dueDate: "2026-07-01" },
+      type: "UPDATE_NODE",
+    });
+    expect(updated.past.length).toBe(1);
+    const undone = reducer(updated, { type: "UNDO" });
+    expect(undone.nodes.root.dueDate).toBe("");
+  });
+
+  it("DELETE_NODE creates undo entry and restores the deleted node", () => {
+    const s = {
+      ...createInitialState(),
+      nodes: {
+        root: makeNode("root", "b-a", { isRoot: true, children: ["a"] }),
+        a: makeNode("a", "b-a", { parentId: "root", children: ["b"] }),
+        b: makeNode("b", "b-a", { parentId: "a" }),
+      },
+    };
+    const deleted = reducer(s, { id: "a", type: "DELETE_NODE" });
+    expect(deleted.nodes.a).toBeUndefined();
+    const undone = reducer(deleted, { type: "UNDO" });
+    expect(undone.nodes.a).toBeDefined();
+    expect(undone.nodes.b).toBeDefined();
+    expect(undone.nodes.root.children).toContain("a");
+  });
+});
