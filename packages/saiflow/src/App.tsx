@@ -3,32 +3,55 @@ import { SaiflowProvider, useSaiflowDispatch, useSaiflowState, type State } from
 import { ProfileBar } from "./components/ProfileBar";
 import { EditorPanel } from "./components/EditorPanel";
 import { ResultTable } from "./components/ResultTable";
+import { CategoryTable } from "./components/CategoryTable";
+import { CategoryChart } from "./components/CategoryChart";
+import { CashflowTable } from "./components/CashflowTable";
 import { BarChart } from "./components/BarChart";
 import { LineChart } from "./components/LineChart";
-import { CashflowTable } from "./components/CashflowTable";
 import { parseDSL } from "./parser";
 import { listScenarios, saveScenario } from "./storage";
 
-type ViewMode = "table" | "cashflow" | "line" | "bar";
+type ViewMode = "table" | "category" | "category-chart" | "cashflow" | "line" | "bar";
 
 function RightPanel() {
   const [view, setView] = useState<ViewMode>("table");
 
   return (
     <div className="flex flex-col h-full">
-      <div className="flex items-center gap-1 px-2 py-1 border-b border-(--border)">
-        {(["table", "cashflow", "line", "bar"] as ViewMode[]).map((v) => (
+      <div className="flex items-center gap-1 px-2 py-1 border-b border-(--border) flex-wrap">
+        {(
+          [
+            ["table", "収支表"],
+            ["category", "内訳表"],
+            ["category-chart", "内訳グラフ"],
+            ["cashflow", "CF表"],
+            ["line", "資産推移"],
+            ["bar", "収支比較"],
+          ] as [ViewMode, string][]
+        ).map(([v, label]) => (
           <button
             key={v}
             className={`px-2 py-0.5 text-xs rounded ${view === v ? "bg-(--terra) text-white" : "text-(--ink) opacity-50"}`}
             onClick={() => setView(v)}
           >
-            {v === "table" ? "収支表" : v === "cashflow" ? "CF表" : v === "line" ? "資産推移" : "収支比較"}
+            {label}
           </button>
         ))}
       </div>
       <div className="flex-1 overflow-hidden">
-        {view === "table" ? <ResultTable /> : view === "cashflow" ? <CashflowTable /> : view === "line" ? <LineChart /> : <BarChart />}
+        {view === "table" ? (
+          <ResultTable />
+        ) : view === "category" ? (
+          <CategoryTable />
+        ) : view === "category-chart" ? (
+          <CategoryChart />
+        ) : view === "cashflow" ? (
+          <CashflowTable />
+        ) : view === "line" ? (
+          <LineChart />
+        ) : (
+          <BarChart />
+        )}
       </div>
     </div>
   );

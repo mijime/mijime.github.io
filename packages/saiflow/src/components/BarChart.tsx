@@ -2,6 +2,15 @@ import React, { type JSX } from "react";
 import { useSaiflowState } from "../store";
 import { ChartTooltip } from "./ChartTooltip";
 
+export function logTicks(max: number): number[] {
+  const ticks: number[] = [];
+  for (let i = 0; i <= Math.floor(Math.log10(max + 1)); i++) {
+    const v = 10 ** i;
+    if (v <= max) ticks.push(v);
+  }
+  return ticks;
+}
+
 const GROUP_COLORS = [
   "rgba(99, 179, 237, 0.7)",
   "rgba(252, 129, 129, 0.7)",
