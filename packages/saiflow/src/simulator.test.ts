@@ -221,4 +221,72 @@ describe("simulate", () => {
     const rows = simulate(cfg);
     expect(rows[0].totalAssets).toBe(1500);
   });
+
+  it("aggregates income and expense per group", () => {
+    const cfg: SimulationConfig = {
+      currentAge: 39,
+      simulationYears: 2,
+      scenario: {
+        name: "test",
+        events: [
+          {
+            name: "給料",
+            group: "給与",
+            startYear: 0,
+            endYear: 1,
+            ops: [{ asset: "現金", op: "+", value: 500 }],
+          },
+          {
+            name: "ボーナス",
+            group: "給与",
+            startYear: 0,
+            endYear: 0,
+            ops: [{ asset: "現金", op: "+", value: 100 }],
+          },
+          {
+            name: "家賃",
+            group: "住宅",
+            startYear: 0,
+            endYear: null,
+            ops: [{ asset: "現金", op: "-", value: 120 }],
+          },
+          {
+            name: "その他",
+            startYear: 0,
+            endYear: null,
+            ops: [{ asset: "現金", op: "-", value: 50 }],
+          },
+        ],
+      },
+    };
+    const rows = simulate(cfg);
+    // Year 0: income 給与=600, expense 住宅=120, (未分類)=50
+    expect(rows[0].groupIncome["給与"]).toBe(600);
+    expect(rows[0].groupExpense["住宅"]).toBe(120);
+    expect(rows[0].groupExpense["(未分類)"]).toBe(50);
+    // Year 1: income 給与=500, expense 住宅=120, (未分類)=50
+    expect(rows[1].groupIncome["給与"]).toBe(500);
+    expect(rows[1].groupExpense["住宅"]).toBe(120);
+    expect(rows[1].groupExpense["(未分類)"]).toBe(50);
+  });
+
+  it("handles events without a group under (未分類)", () => {
+    const cfg: SimulationConfig = {
+      currentAge: 39,
+      simulationYears: 1,
+      scenario: {
+        name: "test",
+        events: [
+          {
+            name: "雑収入",
+            startYear: 0,
+            endYear: 0,
+            ops: [{ asset: "現金", op: "+", value: 100 }],
+          },
+        ],
+      },
+    };
+    const rows = simulate(cfg);
+    expect(rows[0].groupIncome["(未分類)"]).toBe(100);
+  });
 });

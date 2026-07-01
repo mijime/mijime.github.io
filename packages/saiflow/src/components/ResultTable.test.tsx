@@ -25,6 +25,8 @@ describe("ResultTable", () => {
               totalIncome: 500,
               totalExpense: 200,
               totalAssets: 1000,
+              groupIncome: {},
+              groupExpense: {},
             },
             {
               age: 41,
@@ -33,6 +35,8 @@ describe("ResultTable", () => {
               totalIncome: 500,
               totalExpense: 200,
               totalAssets: 1300,
+              groupIncome: {},
+              groupExpense: {},
             },
           ],
         }}
@@ -57,6 +61,8 @@ describe("ResultTable", () => {
               totalIncome: 0,
               totalExpense: 0,
               totalAssets: 1500,
+              groupIncome: {},
+              groupExpense: {},
             },
           ],
         }}
@@ -80,6 +86,8 @@ describe("ResultTable", () => {
               totalIncome: 0,
               totalExpense: 500,
               totalAssets: -500,
+              groupIncome: {},
+              groupExpense: {},
             },
           ],
         }}

@@ -55,6 +55,8 @@ describe("types", () => {
       totalIncome: 500,
       totalExpense: 250,
       totalAssets: 800,
+      groupIncome: {},
+      groupExpense: {},
     };
     expect(row.balances["現金"]).toBe(800);
   });
