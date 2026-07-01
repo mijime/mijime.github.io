@@ -1,3 +1,9 @@
+pre-commit:
+  commands:
+    format:
+      run: mise run format
+      stage_fixed: true
+
 pre-push:
   commands:
     check:
