@@ -126,7 +126,7 @@ export function BarChart() {
               fill="var(--ink)"
               opacity={0.5}
             >
-              {v}
+              {v.toLocaleString()}
             </text>
             <text
               x={padding.left - 6}
@@ -135,7 +135,7 @@ export function BarChart() {
               fill="var(--ink)"
               opacity={0.5}
             >
-              {v}
+              {v.toLocaleString()}
             </text>
           </g>
         ))}
@@ -298,6 +298,14 @@ export function BarChart() {
                   {
                     label: "年齢",
                     value: String(rows[hover.i].age),
+                  },
+                  {
+                    label: "収入",
+                    value: rows[hover.i].totalIncome.toLocaleString(),
+                  },
+                  {
+                    label: "支出",
+                    value: rows[hover.i].totalExpense.toLocaleString(),
                   },
                   ...groups
                     .map((g, gi) => [
