@@ -304,19 +304,18 @@ export function BarChart() {
                     label: "支出",
                     value: rows[hover.i].totalExpense.toLocaleString(),
                   },
-                  ...groups
-                    .flatMap((g, gi) => [
-                      {
-                        label: `${g} 収入`,
-                        value: (rows[hover.i].groupIncome[g] ?? 0).toLocaleString(),
-                        color: GROUP_STROKE_COLORS[gi % GROUP_STROKE_COLORS.length],
-                      },
-                      {
-                        label: `${g} 支出`,
-                        value: (rows[hover.i].groupExpense[g] ?? 0).toLocaleString(),
-                        color: GROUP_STROKE_COLORS[gi % GROUP_STROKE_COLORS.length],
-                      },
-                    ]),
+                  ...groups.flatMap((g, gi) => [
+                    {
+                      label: `${g} 収入`,
+                      value: (rows[hover.i].groupIncome[g] ?? 0).toLocaleString(),
+                      color: GROUP_STROKE_COLORS[gi % GROUP_STROKE_COLORS.length],
+                    },
+                    {
+                      label: `${g} 支出`,
+                      value: (rows[hover.i].groupExpense[g] ?? 0).toLocaleString(),
+                      color: GROUP_STROKE_COLORS[gi % GROUP_STROKE_COLORS.length],
+                    },
+                  ]),
                   {
                     label: "収支",
                     value: (
