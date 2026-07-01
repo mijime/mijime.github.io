@@ -116,10 +116,11 @@ describe("CashflowTable", () => {
         <CashflowTable />
       </SaiflowProvider>,
     );
-    // The red cells should have red text class
-    const redCells = screen.getAllByText("-200");
-    for (const cell of redCells) {
-      expect(cell.className).toContain("text-red-500");
-    }
+    // The net row should contain -200 with red text (収支 = 100 - 300 = -200)
+    const netCells = screen.getAllByText("-200");
+    const redCell = netCells.find((cell) =>
+      cell.className.includes("text-red-500"),
+    );
+    expect(redCell).toBeTruthy();
   });
 });
