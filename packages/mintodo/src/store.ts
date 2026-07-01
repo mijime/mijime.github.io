@@ -12,6 +12,8 @@ import type {
 import { nextStatus } from "./lib/status-cycle";
 import { applyRadialLayout } from "./layout/radial";
 
+export type StateSnapshot = Omit<State, "past" | "future">;
+
 export interface State {
   boards: Board[];
   currentBoardId: string | null;
@@ -25,6 +27,8 @@ export interface State {
   searchQuery: string;
   selectedNodeId: string;
   view: View;
+  past: StateSnapshot[];
+  future: StateSnapshot[];
 }
 
 export type Action =
@@ -33,6 +37,7 @@ export type Action =
   | { type: "DELETE_BOARD"; id: string; nextBoardId: string | null }
   | { type: "DELETE_NODE"; id: string }
   | { type: "OPEN_MODAL"; modal: Modal }
+  | { type: "REDO" }
   | { type: "REPARENT"; id: string; newParentId: string }
   | { type: "REORDER_CHILDREN"; nodeId: string; targetId: string }
   | { type: "RENAME_BOARD"; id: string; name: string }
@@ -52,6 +57,7 @@ export type Action =
   | { type: "TOGGLE_HIDE_COMPLETED" }
   | { type: "SET_STATUS"; id: string; status: TaskStatus }
   | { type: "SET_VIEW_MODE"; viewMode: ViewMode }
+  | { type: "UNDO" }
   | { type: "DELETE_COMPLETED" }
   | {
       type: "CREATE_CHILD";
@@ -83,7 +89,61 @@ export function createInitialState(): State {
     searchQuery: "",
     selectedNodeId: "",
     view: { pan: { x: 0, y: 0 }, zoom: 1 },
+    past: [],
+    future: [],
   };
+}
+
+const UNDOABLE_ACTIONS = new Set<Action["type"]>([
+  "ADD_BOARD",
+  "ADD_CHILD",
+  "CREATE_CHILD",
+  "DELETE_BOARD",
+  "DELETE_COMPLETED",
+  "DELETE_NODE",
+  "DELETE_WORK_LOG",
+  "ADD_WORK_LOG",
+  "RENAME_BOARD",
+  "REORDER_CHILDREN",
+  "REPARENT",
+  "RESET",
+  "SET_NODES",
+  "SET_STATUS",
+  "TOGGLE_COLLAPSE",
+  "TOGGLE_COMPLETE",
+  "UPDATE_NODE",
+]);
+
+function isUndoableAction(type: Action["type"]): boolean {
+  return UNDOABLE_ACTIONS.has(type);
+}
+
+function snapshotState(state: State): StateSnapshot {
+  return {
+    boards: state.boards,
+    currentBoardId: state.currentBoardId,
+    draggingNodeId: state.draggingNodeId,
+    drawerOpen: state.drawerOpen,
+    hideCompleted: state.hideCompleted,
+    layoutVersion: state.layoutVersion,
+    modal: state.modal,
+    viewMode: state.viewMode,
+    nodes: state.nodes,
+    searchQuery: state.searchQuery,
+    selectedNodeId: state.selectedNodeId,
+    view: state.view,
+  };
+}
+
+function pushUndo(state: State, nextState: State): State {
+  if (nextState === state) return state;
+  const snapshot = snapshotState(state);
+  const maxHistory = 50;
+  const past =
+    state.past.length >= maxHistory
+      ? [...state.past.slice(-(maxHistory - 1)), snapshot]
+      : [...state.past, snapshot];
+  return { ...nextState, past, future: [] };
 }
 
 function withRadialLayout(state: State, nodes: Record<string, MindNode>): State {
@@ -103,7 +163,7 @@ export function isDescendant(
   return false;
 }
 
-export function reducer(state: State, action: Action): State {
+function applyAction(state: State, action: Action): State {
   switch (action.type) {
     case "SET_BOARDS": {
       return { ...state, boards: action.boards };
@@ -305,7 +365,7 @@ export function reducer(state: State, action: Action): State {
       const target = state.nodes[action.id];
       if (!target) return state;
       const next: TaskStatus = target.completed ? "inbox" : nextStatus(target.status);
-      return reducer(state, { id: action.id, status: next, type: "SET_STATUS" });
+      return applyAction(state, { id: action.id, status: next, type: "SET_STATUS" });
     }
     case "TOGGLE_COLLAPSE": {
       const node = state.nodes[action.id];
@@ -469,6 +529,42 @@ export function reducer(state: State, action: Action): State {
     }
     default: {
       return state;
+    }
+  }
+}
+
+export function reducer(state: State, action: Action): State {
+  switch (action.type) {
+    case "UNDO": {
+      if (state.past.length === 0) return state;
+      const snapshot = state.past.at(-1);
+      const newPast = state.past.slice(0, -1);
+      const newFuture = [snapshotState(state), ...state.future];
+      return {
+        ...state,
+        ...snapshot,
+        past: newPast,
+        future: newFuture,
+      };
+    }
+    case "REDO": {
+      if (state.future.length === 0) return state;
+      const [snapshot] = state.future;
+      const newFuture = state.future.slice(1);
+      const newPast = [...state.past, snapshotState(state)];
+      return {
+        ...state,
+        ...snapshot,
+        past: newPast,
+        future: newFuture,
+      };
+    }
+    default: {
+      const next = applyAction(state, action);
+      if (isUndoableAction(action.type)) {
+        return pushUndo(state, next);
+      }
+      return next;
     }
   }
 }

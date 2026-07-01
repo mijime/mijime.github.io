@@ -138,7 +138,7 @@ export function NodeCard({ node }: Props) {
           <button
             type="button"
             data-testid={`worklog-button-${node.id}`}
-            className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1 rounded-md transition"
+            className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1 rounded-md transition relative"
             onClick={(e) => {
               e.stopPropagation();
               dispatch({ modal: { kind: "work-log", nodeId: node.id }, type: "OPEN_MODAL" });
@@ -147,6 +147,11 @@ export function NodeCard({ node }: Props) {
             title="作業履歴"
           >
             <ListOrdered size={12} />
+            {node.workLogs.length > 0 && (
+              <span className="absolute -top-0.5 -right-0.5 bg-slate-500 text-white text-[8px] font-bold rounded-full min-w-[14px] h-[14px] flex items-center justify-center px-0.5 leading-none">
+                {node.workLogs.length}
+              </span>
+            )}
           </button>
         </div>
       </div>

@@ -20,6 +20,12 @@ export function useKeyboard(): void {
         }
         return;
       }
+      if ((e.key === "z" || e.key === "Z") && (e.ctrlKey || e.metaKey)) {
+        e.preventDefault();
+        dispatch({ type: e.shiftKey ? "REDO" : "UNDO" });
+        return;
+      }
+
       if (state.modal) return;
       if (isEditableTarget(e.target)) return;
 
