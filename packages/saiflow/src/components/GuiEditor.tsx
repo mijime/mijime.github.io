@@ -369,6 +369,7 @@ export function GuiEditor() {
                     <EventForm
                       event={evt}
                       currentAge={state.currentAge}
+                      defaultYearMode="age"
                       onChange={(e) =>
                         update((prev) =>
                           prev.map((s, i) =>

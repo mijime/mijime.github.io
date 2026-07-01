@@ -97,7 +97,8 @@ export function runSimulation(
     parsed: { config: { currentAge, simulationYears, scenario } },
   });
   const rows = simulate({ currentAge, simulationYears, scenario });
-  dispatch({ type: "SET_ROWS", rows });
+  const displayRows = rows.filter((r) => r.age >= currentAge);
+  dispatch({ type: "SET_ROWS", rows: displayRows });
 }
 
 const StateCtx = createContext<State | null>(null);

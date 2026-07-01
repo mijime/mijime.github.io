@@ -175,6 +175,7 @@ function MortgageForm({
   const [years, setYears] = useState(35);
   const [startAge, setStartAge] = useState(currentAge);
   const [yearMode, setYearMode] = useState<"offset" | "age">("offset");
+  const [propertyTaxRate, setPropertyTaxRate] = useState(1.4);
 
   const toDisplay = (v: number) => (yearMode === "age" ? v : v - currentAge);
   const fromDisplay = (v: number) => (yearMode === "age" ? v : v + currentAge);
@@ -220,6 +221,16 @@ function MortgageForm({
         startAge,
         endAge: startAge + years - 1,
         ops: [{ asset: "借入", op: "*" as const, value: multiplier }],
+      });
+    }
+    const propertyTax = Math.round((propertyPrice * propertyTaxRate) / 100);
+    if (propertyTax > 0) {
+      events.push({
+        name: "税金(固定資産税)",
+        group: "住宅ローン",
+        startAge,
+        endAge: null,
+        ops: [{ asset: "現金", op: "-" as const, value: propertyTax }],
       });
     }
     onSave(events);
@@ -318,6 +329,23 @@ function MortgageForm({
         </div>
       )}
 
+      <div className="flex gap-1.5 items-center">
+        <label className="text-[11px] opacity-40 shrink-0 w-14">固定資産税</label>
+        <input
+          type="number"
+          className="w-16 px-1.5 py-0.5 text-xs bg-(--paper) text-(--ink) border border-(--border) rounded tabular-nums outline-none focus:border-(--terra)"
+          value={propertyTaxRate}
+          step="0.1"
+          onChange={(e) => setPropertyTaxRate(Number(e.target.value))}
+        />
+        <span className="text-[11px] opacity-30">%</span>
+        {propertyPrice > 0 && (
+          <span className="text-[10px] opacity-30 tabular-nums ml-1">
+            ¥{fmt(Math.round((propertyPrice * propertyTaxRate) / 100))}/年
+          </span>
+        )}
+      </div>
+
       <FormActions onClose={onClose} onSave={handleSave} saveDisabled={propertyPrice <= 0} />
     </div>
   );
@@ -378,8 +406,8 @@ function InitialForm({
       events.push({
         name: "貯金",
         group: "初期設定",
-        startAge: currentAge,
-        endAge: currentAge,
+        startAge: 0,
+        endAge: 0,
         ops: [{ asset: "現金", op: "+" as const, value: initialCash }],
       });
     }
@@ -489,8 +517,11 @@ function InvestForm({
   const [annualReturn, setAnnualReturn] = useState(3);
   const [startAge, setStartAge] = useState(currentAge);
   const [endAge, setEndAge] = useState<number | null>(currentAge + 20);
+  const [withdrawMonthly, setWithdrawMonthly] = useState(0);
+  const [withdrawStartAge, setWithdrawStartAge] = useState(currentAge + 30);
 
   const annualAmount = monthlyAmount * 12;
+  const annualWithdraw = withdrawMonthly * 12;
   const multiplier = 1 + annualReturn / 100;
 
   const handleSave = () => {
@@ -514,6 +545,18 @@ function InvestForm({
         ops: [{ asset: name, op: "*" as const, value: multiplier }],
       },
     ];
+    if (withdrawMonthly > 0) {
+      events.push({
+        name: `${name}(切り崩し)`,
+        group: `投資(${name})`,
+        startAge: withdrawStartAge,
+        endAge: null,
+        ops: [
+          { asset: "現金", op: "+" as const, value: annualWithdraw },
+          { asset: name, op: "-" as const, value: annualWithdraw },
+        ],
+      });
+    }
     onSave(events);
   };
 
@@ -567,6 +610,30 @@ function InvestForm({
         >
           指定なし
         </button>
+      </div>
+      <div className="border-t border-(--border) pt-3 space-y-3">
+        <p className="text-[11px] opacity-40">切り崩し</p>
+        <div className="flex gap-1.5 items-center">
+          <label className="text-[11px] opacity-40 shrink-0 w-14">月額</label>
+          <input
+            type="number"
+            className="flex-1 px-1.5 py-0.5 text-xs bg-(--paper) text-(--ink) border border-(--border) rounded tabular-nums outline-none focus:border-(--terra)"
+            value={withdrawMonthly || ""}
+            onChange={(e) => setWithdrawMonthly(Number(e.target.value))}
+          />
+        </div>
+        <div className="flex justify-between text-[11px] px-1">
+          <span className="opacity-40">年間受取額</span>
+          <span className="tabular-nums">¥{fmt(annualWithdraw)}</span>
+        </div>
+        <div className="flex gap-1.5 items-center">
+          <label className="text-[11px] opacity-40 shrink-0 w-14">開始</label>
+          <YearInput
+            value={withdrawStartAge}
+            onChange={setWithdrawStartAge}
+            currentAge={currentAge}
+          />
+        </div>
       </div>
       <FormActions
         onClose={onClose}
@@ -750,14 +817,16 @@ export function EventForm({
   onDelete,
   currentAge,
   hideDelete,
+  defaultYearMode,
 }: {
   event: Event;
   onChange: (e: Event) => void;
   onDelete: () => void;
   currentAge: number;
   hideDelete?: boolean;
+  defaultYearMode?: "offset" | "age";
 }) {
-  const [yearMode, setYearMode] = useState<"offset" | "age">("offset");
+  const [yearMode, setYearMode] = useState<"offset" | "age">(defaultYearMode ?? "offset");
 
   const toDisplay = (v: number) => (yearMode === "age" ? v : v - currentAge);
   const fromDisplay = (v: number) => (yearMode === "age" ? v : v + currentAge);
