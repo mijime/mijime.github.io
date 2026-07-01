@@ -6,6 +6,8 @@ export function simulate(config: SimulationConfig): YearRow[] {
 
   const rows: YearRow[] = [];
 
+  const gkey = (g?: string) => g ?? "(未分類)";
+
   for (let year = 0; year < simulationYears; year++) {
     const active = scenario.events.filter(
       (e) => e.startYear <= year && (e.endYear === null || year <= e.endYear),
@@ -16,8 +18,6 @@ export function simulate(config: SimulationConfig): YearRow[] {
     const groupIncome: Record<string, number> = {};
     const groupExpense: Record<string, number> = {};
     const operations: YearRow["operations"] = [];
-
-    const gkey = (g?: string) => g ?? "(未分類)";
 
     for (const e of active) {
       for (const op of e.ops) {
