@@ -1,15 +1,55 @@
 import { useSaiflowState } from "../store";
 
-export function ResultTable() {
+function downloadCsv(rows: ReturnType<typeof useCsvData>) {
+  if (!rows) return;
+  const header = ["年齢", "収入計", "支出計", "収支", ...rows.assetNames, "総資産"];
+  const lines = [header.join(",")];
+  for (const r of rows.data) {
+    const net = r.totalIncome - r.totalExpense;
+    const row = [
+      r.age,
+      r.totalIncome,
+      r.totalExpense,
+      net,
+      ...rows.assetNames.map((a) => r.balances[a] ?? 0),
+      r.totalAssets,
+    ];
+    lines.push(row.join(","));
+  }
+  const blob = new Blob([lines.join("\n")], { type: "text/csv" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "saiflow.csv";
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function useCsvData() {
   const state = useSaiflowState();
   const { rows } = state;
-
   if (!rows || rows.length === 0) return null;
-
   const assetNames = [...new Set(rows.flatMap((r) => Object.keys(r.balances)))];
+  return { data: rows, assetNames };
+}
+
+export function ResultTable() {
+  const csvData = useCsvData();
+
+  if (!csvData) return null;
+
+  const { data: rows, assetNames } = csvData;
 
   return (
     <div className="h-full overflow-auto">
+      <div className="flex justify-end px-2 py-1">
+        <button
+          className="text-xs text-(--ink) opacity-40 hover:opacity-100 transition-opacity"
+          onClick={() => downloadCsv(csvData)}
+        >
+          CSVダウンロード
+        </button>
+      </div>
       <table className="w-full border-collapse text-sm">
         <thead className="sticky top-0 bg-(--toolbar-bg)">
           <tr>

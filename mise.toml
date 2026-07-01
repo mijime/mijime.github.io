@@ -1,7 +1,7 @@
 [tools]
 node = "22"
 lefthook = "latest"
-pnpm = "latest"
+"npm:pnpm" = "latest"
 
 [tasks."format:pnpm"]
 run = "pnpm run format"
