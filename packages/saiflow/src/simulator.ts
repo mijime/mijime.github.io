@@ -1,12 +1,14 @@
 import type { SimulationConfig, YearRow } from "./types";
 
+function gkey(g?: string): string {
+  return g ?? "(未分類)";
+}
+
 export function simulate(config: SimulationConfig): YearRow[] {
   const { currentAge, simulationYears, scenario } = config;
   const balances: Record<string, number> = {};
 
   const rows: YearRow[] = [];
-
-  const gkey = (g?: string) => g ?? "(未分類)";
 
   for (let year = 0; year < simulationYears; year++) {
     const active = scenario.events.filter(
