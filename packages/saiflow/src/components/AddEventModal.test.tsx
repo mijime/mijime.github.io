@@ -52,7 +52,7 @@ describe("ChildForm birth year input", () => {
     expect(livingEvent.startYear).toBe(0);
   });
 
-  it('offset mode still works: birthYear=3 sets startYear correctly', () => {
+  it("offset mode still works: birthYear=3 sets startYear correctly", () => {
     const { onSave } = renderModal();
     const inputs = screen.getAllByRole("spinbutton");
     // First spinbutton is birth year, second is living monthly

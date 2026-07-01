@@ -69,9 +69,7 @@ function parseEventLine(parts: string[]): {
 } | null {
   const isOldFormat = !isNaN(Number(parts[1].trim()));
 
-  const group: string | undefined = isOldFormat
-    ? undefined
-    : (parts[0].trim() || undefined);
+  const group: string | undefined = isOldFormat ? undefined : parts[0].trim() || undefined;
   const name: string = isOldFormat ? parts[0].trim() : parts[1].trim();
   const startYear = Number((isOldFormat ? parts[1] : parts[2]).trim());
   const endYearStr = (isOldFormat ? parts[2] : parts[3]).trim();

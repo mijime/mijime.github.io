@@ -160,9 +160,7 @@ export function GuiEditor() {
             ? {
                 ...s,
                 events: s.events.map((ev) =>
-                  ev.group === groupName
-                    ? { ...ev, group: newName || undefined }
-                    : ev,
+                  ev.group === groupName ? { ...ev, group: newName || undefined } : ev,
                 ),
               }
             : s,
@@ -204,11 +202,7 @@ export function GuiEditor() {
           i === state.activeScenarioIndex
             ? {
                 ...s,
-                events: [
-                  ...s.events.slice(0, insertAt),
-                  newEvent,
-                  ...s.events.slice(insertAt),
-                ],
+                events: [...s.events.slice(0, insertAt), newEvent, ...s.events.slice(insertAt)],
               }
             : s,
         ),
@@ -240,9 +234,7 @@ export function GuiEditor() {
           className="flex-1 flex items-center gap-2 px-3 py-2 text-left text-xs hover:bg-(--mid)/20 transition-colors"
           onClick={toggle}
         >
-          <span className="opacity-30 w-3 shrink-0 text-[10px]">
-            {isExpanded ? "▼" : "▶"}
-          </span>
+          <span className="opacity-30 w-3 shrink-0 text-[10px]">{isExpanded ? "▼" : "▶"}</span>
           {isEditing ? (
             <input
               className="flex-1 min-w-0 px-1 py-0.5 text-xs bg-(--paper) text-(--ink) border border-(--border) rounded outline-none focus:border-(--terra)"

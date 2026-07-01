@@ -17,12 +17,10 @@ export function CashflowTable() {
       for (const g of Object.keys(row.groupIncome)) set.add(g);
       for (const g of Object.keys(row.groupExpense)) set.add(g);
     }
-    return [...set].sort();
+    return [...set].toSorted();
   }, [rows]);
 
-  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(
-    new Set(groups),
-  );
+  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set(groups));
 
   useEffect(() => {
     setExpandedGroups(new Set(groups));
@@ -60,10 +58,7 @@ export function CashflowTable() {
             <span aria-hidden="true">{expanded ? "▼" : "▶"}</span> {group}
           </td>
           {rows.map((_, i) => (
-            <td
-              key={i}
-              className="px-2 py-0.5 text-right border-b border-(--border)"
-            />
+            <td key={i} className="px-2 py-0.5 text-right border-b border-(--border)" />
           ))}
         </tr>,
       );
@@ -104,10 +99,7 @@ export function CashflowTable() {
           収入合計
         </td>
         {rows.map((row, i) => (
-          <td
-            key={i}
-            className="px-2 py-0.5 text-right border-b border-(--border)"
-          >
+          <td key={i} className="px-2 py-0.5 text-right border-b border-(--border)">
             {fmt(row.totalIncome)}
           </td>
         ))}
@@ -117,10 +109,7 @@ export function CashflowTable() {
           支出合計
         </td>
         {rows.map((row, i) => (
-          <td
-            key={i}
-            className="px-2 py-0.5 text-right border-b border-(--border)"
-          >
+          <td key={i} className="px-2 py-0.5 text-right border-b border-(--border)">
             {fmt(row.totalExpense)}
           </td>
         ))}

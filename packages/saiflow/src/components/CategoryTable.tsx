@@ -9,9 +9,7 @@ export function CategoryTable() {
 
   const { allCategories, breakdowns } = computeCategories(rows);
 
-  const denseCats = allCategories.filter((cat) =>
-    breakdowns.some((b) => b.net[cat] !== 0),
-  );
+  const denseCats = allCategories.filter((cat) => breakdowns.some((b) => b.net[cat] !== 0));
 
   return (
     <div className="h-full overflow-auto">
@@ -42,7 +40,10 @@ export function CategoryTable() {
                   const v = b.net[cat] ?? 0;
                   if (v === 0) {
                     return (
-                      <td key={cat} className="px-2 py-0.5 text-right border-b border-(--border) opacity-30">
+                      <td
+                        key={cat}
+                        className="px-2 py-0.5 text-right border-b border-(--border) opacity-30"
+                      >
                         0
                       </td>
                     );

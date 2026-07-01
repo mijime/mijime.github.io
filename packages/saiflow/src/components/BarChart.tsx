@@ -54,13 +54,10 @@ export function BarChart() {
     for (const g of Object.keys(row.groupIncome)) groupSet.add(g);
     for (const g of Object.keys(row.groupExpense)) groupSet.add(g);
   }
-  const groups = [...groupSet].sort();
+  const groups = [...groupSet].toSorted();
 
   const padding = { top: 24, right: 24, bottom: 40, left: 56 };
-  const width = Math.max(
-    600,
-    rows.length * 14 + padding.left + padding.right,
-  );
+  const width = Math.max(600, rows.length * 14 + padding.left + padding.right);
   const height = 340;
   const midY = height / 2;
   const plotH = (height - padding.top - padding.bottom) / 2;
@@ -79,12 +76,11 @@ export function BarChart() {
   // Linear ticks
   const tickCount = 5;
   const tickStep = maxVal / tickCount;
-  const yTicks = Array.from({ length: tickCount + 1 }, (_, i) =>
-    Math.round(tickStep * i),
-  ).filter((v) => v <= maxVal);
+  const yTicks = Array.from({ length: tickCount + 1 }, (_, i) => Math.round(tickStep * i)).filter(
+    (v) => v <= maxVal,
+  );
 
-  const netScale = (v: number) =>
-    Math.max(-plotH, Math.min(plotH, (v / maxVal) * plotH));
+  const netScale = (v: number) => Math.max(-plotH, Math.min(plotH, (v / maxVal) * plotH));
 
   const netPoints = rows
     .map((r, i) => {
@@ -97,11 +93,7 @@ export function BarChart() {
 
   return (
     <div className="h-full overflow-auto relative">
-      <svg
-        width={width}
-        height={height}
-        className="font-sans text-xs"
-      >
+      <svg width={width} height={height} className="font-sans text-xs">
         {/* 0 line */}
         <line
           x1={padding.left}
@@ -230,13 +222,9 @@ export function BarChart() {
             width={step}
             height={height - padding.top - padding.bottom}
             fill="transparent"
-            onMouseEnter={(e) =>
-              setHover({ i, mx: e.clientX, my: e.clientY })
-            }
+            onMouseEnter={(e) => setHover({ i, mx: e.clientX, my: e.clientY })}
             onMouseMove={(e) =>
-              setHover((h) =>
-                h ? { ...h, mx: e.clientX, my: e.clientY } : null,
-              )
+              setHover((h) => (h ? { ...h, mx: e.clientX, my: e.clientY } : null))
             }
             onMouseLeave={() => setHover(null)}
           />
@@ -317,28 +305,22 @@ export function BarChart() {
                     value: rows[hover.i].totalExpense.toLocaleString(),
                   },
                   ...groups
-                    .map((g, gi) => [
+                    .flatMap((g, gi) => [
                       {
                         label: `${g} 収入`,
-                        value: (
-                          rows[hover.i].groupIncome[g] ?? 0
-                        ).toLocaleString(),
+                        value: (rows[hover.i].groupIncome[g] ?? 0).toLocaleString(),
                         color: GROUP_STROKE_COLORS[gi % GROUP_STROKE_COLORS.length],
                       },
                       {
                         label: `${g} 支出`,
-                        value: (
-                          rows[hover.i].groupExpense[g] ?? 0
-                        ).toLocaleString(),
+                        value: (rows[hover.i].groupExpense[g] ?? 0).toLocaleString(),
                         color: GROUP_STROKE_COLORS[gi % GROUP_STROKE_COLORS.length],
                       },
-                    ])
-                    .flat(),
+                    ]),
                   {
                     label: "収支",
                     value: (
-                      rows[hover.i].totalIncome -
-                      rows[hover.i].totalExpense
+                      rows[hover.i].totalIncome - rows[hover.i].totalExpense
                     ).toLocaleString(),
                   },
                 ],

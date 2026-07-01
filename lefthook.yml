@@ -1,9 +1,6 @@
-pre-commit:
-  commands:
-    format:
-      run: mise run format
-
 pre-push:
   commands:
-    ci:
-      run: mise run ci
+    check:
+      run: mise run check
+    test:
+      run: mise run test

@@ -38,7 +38,16 @@ describe("reducer", () => {
   it("SET_ROWS updates rows", () => {
     const state = initialState();
     const rows = [
-      { age: 40, operations: [], balances: {}, totalIncome: 0, totalExpense: 0, totalAssets: 0, groupIncome: {}, groupExpense: {} },
+      {
+        age: 40,
+        operations: [],
+        balances: {},
+        totalIncome: 0,
+        totalExpense: 0,
+        totalAssets: 0,
+        groupIncome: {},
+        groupExpense: {},
+      },
     ];
     const next = reducer(state, { type: "SET_ROWS", rows });
     expect(next.rows).toEqual(rows);

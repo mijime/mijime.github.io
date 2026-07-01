@@ -480,7 +480,9 @@ function InitialForm({
         </button>
         <button
           className="px-3 py-1 text-xs bg-(--terra) text-white rounded disabled:opacity-30"
-          disabled={initialCash <= 0 && annualIncome <= 0 && livingMonthly <= 0 && housingMonthly <= 0}
+          disabled={
+            initialCash <= 0 && annualIncome <= 0 && livingMonthly <= 0 && housingMonthly <= 0
+          }
           onClick={handleSave}
         >
           保存
@@ -604,10 +606,7 @@ function InvestForm({
 
 type SchoolType = "public" | "private" | null;
 
-const SCHOOL_PRESETS: Record<
-  string,
-  { period: string; public: number; private: number }
-> = {
+const SCHOOL_PRESETS: Record<string, { period: string; public: number; private: number }> = {
   幼稚園: { period: "3年", public: 0, private: 50 },
   小学校: { period: "6年", public: 10, private: 100 },
   中学校: { period: "3年", public: 15, private: 100 },
@@ -749,7 +748,10 @@ function ChildForm({
                 <button
                   className={`px-2 py-0.5 border-l border-(--border) ${type === "private" ? "bg-(--terra) text-white" : "opacity-40"}`}
                   onClick={() =>
-                    setSchools((s) => ({ ...s, [stage]: s[stage] === "private" ? null : "private" }))
+                    setSchools((s) => ({
+                      ...s,
+                      [stage]: s[stage] === "private" ? null : "private",
+                    }))
                   }
                 >
                   私立

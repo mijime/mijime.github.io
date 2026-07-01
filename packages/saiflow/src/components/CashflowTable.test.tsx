@@ -25,8 +25,8 @@ describe("CashflowTable", () => {
               totalIncome: 500,
               totalExpense: 200,
               totalAssets: 800,
-              groupIncome: { "給与": 500 },
-              groupExpense: { "生活費": 200 },
+              groupIncome: { 給与: 500 },
+              groupExpense: { 生活費: 200 },
             },
           ],
         }}
@@ -78,7 +78,7 @@ describe("CashflowTable", () => {
               totalIncome: 100,
               totalExpense: 0,
               totalAssets: 100,
-              groupIncome: { "給与": 100 },
+              groupIncome: { 給与: 100 },
               groupExpense: {},
             },
           ],
@@ -107,8 +107,8 @@ describe("CashflowTable", () => {
               totalIncome: 100,
               totalExpense: 300,
               totalAssets: -200,
-              groupIncome: { "給与": 100 },
-              groupExpense: { "生活費": 300 },
+              groupIncome: { 給与: 100 },
+              groupExpense: { 生活費: 300 },
             },
           ],
         }}
@@ -118,9 +118,7 @@ describe("CashflowTable", () => {
     );
     // The net row should contain -200 with red text (収支 = 100 - 300 = -200)
     const netCells = screen.getAllByText("-200");
-    const redCell = netCells.find((cell) =>
-      cell.className.includes("text-red-500"),
-    );
+    const redCell = netCells.find((cell) => cell.className.includes("text-red-500"));
     expect(redCell).toBeTruthy();
   });
 });

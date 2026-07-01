@@ -25,8 +25,8 @@ describe("BarChart", () => {
               totalIncome: 500,
               totalExpense: 200,
               totalAssets: 800,
-              groupIncome: { "給与": 500 },
-              groupExpense: { "生活費": 200 },
+              groupIncome: { 給与: 500 },
+              groupExpense: { 生活費: 200 },
             },
           ],
         }}
@@ -50,8 +50,8 @@ describe("BarChart", () => {
               totalIncome: 500,
               totalExpense: 200,
               totalAssets: 800,
-              groupIncome: { "給与": 300, "副業": 200 },
-              groupExpense: { "生活費": 150, "光熱費": 50 },
+              groupIncome: { 給与: 300, 副業: 200 },
+              groupExpense: { 生活費: 150, 光熱費: 50 },
             },
           ],
         }}
