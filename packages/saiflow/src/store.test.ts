@@ -53,7 +53,7 @@ describe("reducer", () => {
     expect(next.rows).toEqual(rows);
   });
 
-  it("SET_SCENARIOS updates scenarios and resets index", () => {
+  it("SET_SCENARIOS updates scenarios preserving index", () => {
     const state = { ...initialState(), activeScenarioIndex: 2 };
     const scenarios = [
       { name: "A", events: [] },
@@ -61,7 +61,7 @@ describe("reducer", () => {
     ];
     const next = reducer(state, { type: "SET_SCENARIOS", scenarios });
     expect(next.scenarios).toEqual(scenarios);
-    expect(next.activeScenarioIndex).toBe(0);
+    expect(next.activeScenarioIndex).toBe(2);
   });
 
   it("SET_ACTIVE_SCENARIO updates activeScenarioIndex", () => {

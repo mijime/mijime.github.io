@@ -12,7 +12,8 @@ export function simulate(config: SimulationConfig): YearRow[] {
 
   for (let year = 0; year < simulationYears; year++) {
     const active = scenario.events.filter(
-      (e) => e.startYear <= year && (e.endYear === null || year <= e.endYear),
+      (e) =>
+        e.startAge - currentAge <= year && (e.endAge === null || year <= e.endAge - currentAge),
     );
 
     let totalIncome = 0;

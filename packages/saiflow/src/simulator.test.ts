@@ -12,8 +12,8 @@ describe("simulate", () => {
         events: [
           {
             name: "現金",
-            startYear: 0,
-            endYear: 0,
+            startAge: 39,
+            endAge: 39,
             ops: [{ asset: "現金", op: "+", value: 1000 }],
           },
         ],
@@ -35,8 +35,8 @@ describe("simulate", () => {
         events: [
           {
             name: "現金",
-            startYear: 0,
-            endYear: 0,
+            startAge: 39,
+            endAge: 39,
             ops: [{ asset: "現金", op: "+", value: 1000 }],
           },
         ],
@@ -56,26 +56,26 @@ describe("simulate", () => {
         events: [
           {
             name: "現金",
-            startYear: 0,
-            endYear: 0,
+            startAge: 39,
+            endAge: 39,
             ops: [{ asset: "現金", op: "+", value: 1000 }],
           },
           {
             name: "収入",
-            startYear: 0,
-            endYear: 0,
+            startAge: 39,
+            endAge: 39,
             ops: [{ asset: "現金", op: "+", value: 500 }],
           },
           {
             name: "支出",
-            startYear: 0,
-            endYear: 0,
+            startAge: 39,
+            endAge: 39,
             ops: [{ asset: "現金", op: "-", value: 200 }],
           },
           {
             name: "運用",
-            startYear: 0,
-            endYear: 0,
+            startAge: 39,
+            endAge: 39,
             ops: [{ asset: "現金", op: "*", value: 1.03 }],
           },
         ],
@@ -95,17 +95,17 @@ describe("simulate", () => {
       scenario: {
         name: "test",
         events: [
-          { name: "現金", startYear: 0, endYear: 0, ops: [{ asset: "現金", op: "+", value: 100 }] },
+          { name: "現金", startAge: 39, endAge: 39, ops: [{ asset: "現金", op: "+", value: 100 }] },
           {
             name: "大支出",
-            startYear: 0,
-            endYear: 0,
+            startAge: 39,
+            endAge: 39,
             ops: [{ asset: "現金", op: "-", value: 500 }],
           },
           {
             name: "運用",
-            startYear: 0,
-            endYear: 0,
+            startAge: 39,
+            endAge: 39,
             ops: [{ asset: "現金", op: "*", value: 1.03 }],
           },
         ],
@@ -116,7 +116,7 @@ describe("simulate", () => {
     expect(rows[0].balances["現金"]).toBeCloseTo(-412, 0);
   });
 
-  it("handles event with endYear correctly", () => {
+  it("handles event with endAge correctly", () => {
     const cfg: SimulationConfig = {
       currentAge: 39,
       simulationYears: 5,
@@ -125,8 +125,8 @@ describe("simulate", () => {
         events: [
           {
             name: "収入",
-            startYear: 0,
-            endYear: 2,
+            startAge: 39,
+            endAge: 41,
             ops: [{ asset: "現金", op: "+", value: 100 }],
           },
         ],
@@ -141,7 +141,7 @@ describe("simulate", () => {
     expect(rows[4].totalIncome).toBe(0);
   });
 
-  it("handles null endYear as persistent", () => {
+  it("handles null endAge as persistent", () => {
     const cfg: SimulationConfig = {
       currentAge: 39,
       simulationYears: 3,
@@ -150,8 +150,8 @@ describe("simulate", () => {
         events: [
           {
             name: "生活費",
-            startYear: 0,
-            endYear: null,
+            startAge: 39,
+            endAge: null,
             ops: [{ asset: "現金", op: "-", value: 100 }],
           },
         ],
@@ -172,15 +172,15 @@ describe("simulate", () => {
         events: [
           {
             name: "現金",
-            startYear: 0,
-            endYear: 0,
+            startAge: 39,
+            endAge: 39,
             ops: [{ asset: "現金", op: "+", value: 1000 }],
           },
-          { name: "NISA", startYear: 0, endYear: 0, ops: [{ asset: "NISA", op: "+", value: 500 }] },
+          { name: "NISA", startAge: 39, endAge: 39, ops: [{ asset: "NISA", op: "+", value: 500 }] },
           {
             name: "積立",
-            startYear: 0,
-            endYear: 0,
+            startAge: 39,
+            endAge: 39,
             ops: [
               { asset: "現金", op: "-", value: 100 },
               { asset: "NISA", op: "+", value: 100 },
@@ -188,8 +188,8 @@ describe("simulate", () => {
           },
           {
             name: "NISA運用",
-            startYear: 0,
-            endYear: 0,
+            startAge: 39,
+            endAge: 39,
             ops: [{ asset: "NISA", op: "*", value: 1.05 }],
           },
         ],
@@ -210,11 +210,11 @@ describe("simulate", () => {
         events: [
           {
             name: "現金",
-            startYear: 0,
-            endYear: 0,
+            startAge: 39,
+            endAge: 39,
             ops: [{ asset: "現金", op: "+", value: 1000 }],
           },
-          { name: "NISA", startYear: 0, endYear: 0, ops: [{ asset: "NISA", op: "+", value: 500 }] },
+          { name: "NISA", startAge: 39, endAge: 39, ops: [{ asset: "NISA", op: "+", value: 500 }] },
         ],
       },
     };
@@ -232,28 +232,28 @@ describe("simulate", () => {
           {
             name: "給料",
             group: "給与",
-            startYear: 0,
-            endYear: 1,
+            startAge: 39,
+            endAge: 40,
             ops: [{ asset: "現金", op: "+", value: 500 }],
           },
           {
             name: "ボーナス",
             group: "給与",
-            startYear: 0,
-            endYear: 0,
+            startAge: 39,
+            endAge: 39,
             ops: [{ asset: "現金", op: "+", value: 100 }],
           },
           {
             name: "家賃",
             group: "住宅",
-            startYear: 0,
-            endYear: null,
+            startAge: 39,
+            endAge: null,
             ops: [{ asset: "現金", op: "-", value: 120 }],
           },
           {
             name: "その他",
-            startYear: 0,
-            endYear: null,
+            startAge: 39,
+            endAge: null,
             ops: [{ asset: "現金", op: "-", value: 50 }],
           },
         ],
@@ -279,8 +279,8 @@ describe("simulate", () => {
         events: [
           {
             name: "雑収入",
-            startYear: 0,
-            endYear: 0,
+            startAge: 39,
+            endAge: 39,
             ops: [{ asset: "現金", op: "+", value: 100 }],
           },
         ],

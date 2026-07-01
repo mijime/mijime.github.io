@@ -16,7 +16,7 @@ const renderModal = () => {
   return { onSave, onClose };
 };
 
-describe("ChildForm birth year input", () => {
+describe("ChildForm birth age input", () => {
   it('shows birth year input with "年数" mode by default', () => {
     renderModal();
     const inputs = screen.getAllByRole("spinbutton");
@@ -24,20 +24,19 @@ describe("ChildForm birth year input", () => {
     expect(birthInput).toBeTruthy();
   });
 
-  it('switches to "年齢" mode and shows child age (0 by default)', () => {
+  it('switches to "年齢" mode and shows child age (currentAge+2 by default)', () => {
     renderModal();
     fireEvent.change(screen.getByDisplayValue("年数"), { target: { value: "age" } });
     const inputs = screen.getAllByRole("spinbutton");
-    const birthInput = inputs.find((el) => (el as HTMLInputElement).value === "0");
+    const birthInput = inputs.find((el) => (el as HTMLInputElement).value === "41");
     expect(birthInput).toBeTruthy();
   });
 
-  it("entering child age 5 sets birthYear = -5", () => {
+  it("entering child age 5 sets birthAge = 5", () => {
     const { onSave } = renderModal();
     fireEvent.change(screen.getByDisplayValue("年数"), { target: { value: "age" } });
 
     const inputs = screen.getAllByRole("spinbutton");
-    // First spinbutton is birth year, second is living monthly
     fireEvent.change(inputs[0]!, { target: { value: "5" } });
     fireEvent.change(inputs[1]!, { target: { value: "5" } });
 
@@ -49,13 +48,12 @@ describe("ChildForm birth year input", () => {
     const [[events]] = onSave.mock.calls;
     expect(events.length).toBeGreaterThan(0);
     const livingEvent = events.find((e: Event) => e.name.startsWith("生活費"));
-    expect(livingEvent.startYear).toBe(0);
+    expect(livingEvent.startAge).toBe(5);
   });
 
-  it("offset mode still works: birthYear=3 sets startYear correctly", () => {
+  it("offset mode: entering 3 years from now sets startAge to currentAge+3", () => {
     const { onSave } = renderModal();
     const inputs = screen.getAllByRole("spinbutton");
-    // First spinbutton is birth year, second is living monthly
     fireEvent.change(inputs[0]!, { target: { value: "3" } });
     fireEvent.change(inputs[1]!, { target: { value: "3" } });
 
@@ -65,20 +63,17 @@ describe("ChildForm birth year input", () => {
     fireEvent.click(screen.getByText("保存"));
     const [[events]] = onSave.mock.calls;
     const livingEvent = events.find((e: Event) => e.name.startsWith("生活費"));
-    expect(livingEvent.startYear).toBe(3);
+    expect(livingEvent.startAge).toBe(42);
   });
 
-  it("mode round-trip preserves birthYear data: offset→age→offset", () => {
+  it("mode round-trip preserves birthAge data: offset→age→offset", () => {
     renderModal();
-    // Start with birthYear=2 in offset mode
     const spinbuttons = screen.getAllByRole("spinbutton");
     expect((spinbuttons[0] as HTMLInputElement).value).toBe("2");
 
-    // Switch to age mode — should show 0 (birthYear=2 → age=max(0,-2)=0)
     fireEvent.change(screen.getByDisplayValue("年数"), { target: { value: "age" } });
-    expect((spinbuttons[0] as HTMLInputElement).value).toBe("0");
+    expect((spinbuttons[0] as HTMLInputElement).value).toBe("41");
 
-    // Switch back to offset mode — birthYear should still be 2 (preserved)
     fireEvent.change(screen.getByDisplayValue("年齢"), { target: { value: "offset" } });
     expect((spinbuttons[0] as HTMLInputElement).value).toBe("2");
   });

@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import { useSaiflowState } from "../store";
 import { computeCategories, type CategoryBreakdown, categoryName } from "../categories";
 import type { YearRow } from "../types";
+import { fmt } from "../utils";
 
 function adjustedTotals(ops: YearRow["operations"]): { income: number; expense: number } {
   const byEvent = new Map<string, { inc: number; exp: number }>();
@@ -31,13 +32,12 @@ function perAssetIncExp(ops: YearRow["operations"]): Map<string, { inc: number; 
   return map;
 }
 
-function fmt(n: number): string {
-  return Math.round(n).toLocaleString("ja-JP");
+function fmtRounded(n: number): string {
+  return fmt(Math.round(n));
 }
-
 function fmtDelta(d: number): string {
   if (d === 0) return "±0";
-  return d > 0 ? `+${fmt(d)}` : fmt(d);
+  return d > 0 ? `+${fmtRounded(d)}` : fmtRounded(d);
 }
 
 function downloadCsv(
@@ -189,21 +189,21 @@ export function SummaryTable() {
                       key={cat}
                       className={`px-2 py-0.5 text-right border-b border-(--border) tabular-nums ${neg ? "text-red-500" : ""}`}
                     >
-                      {fmt(Math.abs(display))}
+                      {fmtRounded(Math.abs(display))}
                       {transfer && <span className="ml-0.5 text-[10px] opacity-40">振替</span>}
                     </td>
                   );
                 })}
                 <td className="px-2 py-0.5 text-right border-b border-(--border) tabular-nums">
-                  {fmt(adj.income)}
+                  {fmtRounded(adj.income)}
                 </td>
                 <td className="px-2 py-0.5 text-right border-b border-(--border) tabular-nums">
-                  {fmt(adj.expense)}
+                  {fmtRounded(adj.expense)}
                 </td>
                 <td
                   className={`px-2 py-0.5 text-right border-b border-(--border) tabular-nums ${netNegative ? "text-red-500" : ""}`}
                 >
-                  {fmt(Math.abs(net))}
+                  {fmtRounded(Math.abs(net))}
                 </td>
                 {assetNames.map((name) => {
                   const v = row.balances[name] ?? 0;
@@ -216,7 +216,7 @@ export function SummaryTable() {
                       key={name}
                       className={`px-2 py-0.5 text-right border-b border-(--border) tabular-nums ${neg ? "text-red-500" : ""}`}
                     >
-                      {fmt(v)}
+                      {fmtRounded(v)}
                       {i > 0 && (
                         <span
                           className={`ml-1 text-[10px] ${delta > 0 ? "text-green-600" : delta < 0 ? "text-red-400" : "opacity-30"}`}
@@ -226,9 +226,13 @@ export function SummaryTable() {
                       )}
                       {ie && (ie.inc > 0 || ie.exp > 0) && (
                         <div className="text-[10px] leading-tight opacity-70">
-                          {ie.inc > 0 && <span className="text-green-600">+{fmt(ie.inc)}</span>}
+                          {ie.inc > 0 && (
+                            <span className="text-green-600">+{fmtRounded(ie.inc)}</span>
+                          )}
                           {ie.inc > 0 && ie.exp > 0 && " "}
-                          {ie.exp > 0 && <span className="text-red-400">-{fmt(ie.exp)}</span>}
+                          {ie.exp > 0 && (
+                            <span className="text-red-400">-{fmtRounded(ie.exp)}</span>
+                          )}
                         </div>
                       )}
                     </td>
@@ -237,7 +241,7 @@ export function SummaryTable() {
                 <td
                   className={`px-2 py-0.5 text-right border-b border-(--border) tabular-nums ${row.totalAssets < 0 ? "text-red-500" : ""}`}
                 >
-                  {fmt(row.totalAssets)}
+                  {fmtRounded(row.totalAssets)}
                   {i > 0 && (
                     <span
                       className={`ml-1 text-[10px] ${row.totalAssets - rows[i - 1].totalAssets > 0 ? "text-green-600" : row.totalAssets - rows[i - 1].totalAssets < 0 ? "text-red-400" : "opacity-30"}`}

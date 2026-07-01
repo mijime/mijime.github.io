@@ -1,5 +1,6 @@
 import { createContext, useContext, useReducer, type Dispatch } from "react";
 import type { ParseError, Scenario, SimulationConfig, YearRow } from "./types";
+import { simulate } from "./simulator";
 
 export interface State {
   dslText: string;
@@ -31,7 +32,7 @@ export type Action =
 export function initialState(): State {
   return {
     dslText: "",
-    currentAge: 39,
+    currentAge: 35,
     simulationYears: 50,
     parsed: null,
     rows: null,
@@ -65,7 +66,7 @@ export function reducer(state: State, action: Action): State {
       return { ...state, rows: action.rows };
     }
     case "SET_SCENARIOS": {
-      return { ...state, scenarios: action.scenarios, activeScenarioIndex: 0 };
+      return { ...state, scenarios: action.scenarios };
     }
     case "SET_ACTIVE_SCENARIO": {
       return { ...state, activeScenarioIndex: action.index };
@@ -83,6 +84,20 @@ export function reducer(state: State, action: Action): State {
       return state;
     }
   }
+}
+
+export function runSimulation(
+  dispatch: Dispatch<Action>,
+  currentAge: number,
+  simulationYears: number,
+  scenario: Scenario,
+) {
+  dispatch({
+    type: "SET_PARSED",
+    parsed: { config: { currentAge, simulationYears, scenario } },
+  });
+  const rows = simulate({ currentAge, simulationYears, scenario });
+  dispatch({ type: "SET_ROWS", rows });
 }
 
 const StateCtx = createContext<State | null>(null);
