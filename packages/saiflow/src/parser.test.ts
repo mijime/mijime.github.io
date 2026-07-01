@@ -26,8 +26,8 @@ describe("parseDSL", () => {
     expect(result.scenarios[0].events).toHaveLength(1);
     expect(result.scenarios[0].events[0]).toEqual({
       name: "年収(夫)",
-      startYear: 6,
-      endYear: 12,
+      startAge: 6,
+      endAge: 12,
       ops: [{ asset: "現金", op: "+", value: 500 }],
     });
   });
@@ -42,11 +42,11 @@ describe("parseDSL", () => {
     ]);
   });
 
-  it("parses event with empty endYear as null", () => {
+  it("parses event with empty endAge as null", () => {
     const text = "# テスト\n生活費,0,,現金-250\n";
     const result = parseDSL(text);
     expect(result.errors).toHaveLength(0);
-    expect(result.scenarios[0].events[0].endYear).toBeNull();
+    expect(result.scenarios[0].events[0].endAge).toBeNull();
   });
 
   it("parses * op", () => {
@@ -152,8 +152,8 @@ describe("parseDSL", () => {
     expect(result.scenarios[0].events[0]).toEqual({
       name: "借入",
       group: "住宅ローン",
-      startYear: 0,
-      endYear: 35,
+      startAge: 0,
+      endAge: 35,
       ops: [{ asset: "現金", op: "-", value: 100 }],
     });
   });
@@ -165,8 +165,8 @@ describe("parseDSL", () => {
     expect(result.scenarios[0].events[0]).toEqual({
       name: "初期現金",
       group: undefined,
-      startYear: 0,
-      endYear: 0,
+      startAge: 0,
+      endAge: 0,
       ops: [{ asset: "現金", op: "+", value: 1000 }],
     });
   });
@@ -179,10 +179,10 @@ describe("parseDSL", () => {
     expect(result.scenarios[0].events[0].name).toBe("年収");
   });
 
-  it("parses new format with null endYear", () => {
+  it("parses new format with null endAge", () => {
     const text = "# テスト\n初期設定,生活費,0,,現金-250\n";
     const result = parseDSL(text);
     expect(result.errors).toHaveLength(0);
-    expect(result.scenarios[0].events[0].endYear).toBeNull();
+    expect(result.scenarios[0].events[0].endAge).toBeNull();
   });
 });

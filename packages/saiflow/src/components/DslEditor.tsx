@@ -1,7 +1,6 @@
 import { useEffect, useRef } from "react";
-import { useSaiflowDispatch, useSaiflowState } from "../store";
+import { runSimulation, useSaiflowDispatch, useSaiflowState } from "../store";
 import { parseDSL } from "../parser";
-import { simulate } from "../simulator";
 
 export function DslEditor() {
   const state = useSaiflowState();
@@ -20,6 +19,7 @@ export function DslEditor() {
       dispatch({ type: "SET_ROWS", rows: null });
     } else if (result.scenarios.length > 0) {
       dispatch({ type: "SET_SCENARIOS", scenarios: result.scenarios });
+      dispatch({ type: "SET_ACTIVE_SCENARIO", index: 0 });
     } else {
       dispatch({ type: "SET_PARSED", parsed: null });
       dispatch({ type: "SET_ROWS", rows: null });
@@ -29,22 +29,7 @@ export function DslEditor() {
   useEffect(() => {
     const scenario = state.scenarios[state.activeScenarioIndex];
     if (!scenario) return;
-    dispatch({
-      type: "SET_PARSED",
-      parsed: {
-        config: {
-          currentAge: state.currentAge,
-          simulationYears: state.simulationYears,
-          scenario,
-        },
-      },
-    });
-    const rows = simulate({
-      currentAge: state.currentAge,
-      simulationYears: state.simulationYears,
-      scenario,
-    });
-    dispatch({ type: "SET_ROWS", rows });
+    runSimulation(dispatch, state.currentAge, state.simulationYears, scenario);
   }, [
     state.scenarios,
     state.activeScenarioIndex,

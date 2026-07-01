@@ -26,9 +26,7 @@ export function CategoryChart() {
 
   const { allCategories, breakdowns } = computeCategories(rows);
 
-  const denseCats = allCategories.filter((cat) =>
-    breakdowns.some((b) => b.net[cat] !== 0),
-  );
+  const denseCats = allCategories.filter((cat) => breakdowns.some((b) => b.net[cat] !== 0));
 
   const catColors = new Map<string, string>();
   denseCats.forEach((cat, i) => {
@@ -216,7 +214,15 @@ export function CategoryChart() {
             const ly = row * 16;
             return (
               <g key={cat} transform={`translate(${lx}, ${ly})`}>
-                <rect x={0} y={-10} width={14} height={10} rx={2} fill={catColors.get(cat)!} opacity={0.75} />
+                <rect
+                  x={0}
+                  y={-10}
+                  width={14}
+                  height={10}
+                  rx={2}
+                  fill={catColors.get(cat)!}
+                  opacity={0.75}
+                />
                 <text x={18} y={0} fill="var(--ink)" opacity={0.7} fontSize={11}>
                   {cat}
                 </text>

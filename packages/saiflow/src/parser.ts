@@ -38,7 +38,7 @@ export function parseDSL(text: string): SqlResult {
       errors.push({ line: lineNum, message: "年は数値である必要があります" });
       continue;
     }
-    const { name, group, startYear, endYear, opsStart } = parsed;
+    const { name, group, startAge, endAge, opsStart } = parsed;
 
     const ops: AssetOp[] = [];
     for (let j = opsStart; j < parts.length; j++) {
@@ -51,7 +51,7 @@ export function parseDSL(text: string): SqlResult {
       ops.push(op);
     }
 
-    currentEvents.push({ name, group, startYear, endYear, ops });
+    currentEvents.push({ name, group, startAge, endAge, ops });
   }
 
   // Push last scenario
@@ -63,26 +63,24 @@ export function parseDSL(text: string): SqlResult {
 function parseEventLine(parts: string[]): {
   group: string | undefined;
   name: string;
-  startYear: number;
-  endYear: number | null;
+  startAge: number;
+  endAge: number | null;
   opsStart: number;
 } | null {
   const isOldFormat = !isNaN(Number(parts[1].trim()));
 
-  const group: string | undefined = isOldFormat
-    ? undefined
-    : (parts[0].trim() || undefined);
+  const group: string | undefined = isOldFormat ? undefined : parts[0].trim() || undefined;
   const name: string = isOldFormat ? parts[0].trim() : parts[1].trim();
-  const startYear = Number((isOldFormat ? parts[1] : parts[2]).trim());
-  const endYearStr = (isOldFormat ? parts[2] : parts[3]).trim();
-  const endYear: number | null = endYearStr.length === 0 ? null : Number(endYearStr);
+  const startAge = Number((isOldFormat ? parts[1] : parts[2]).trim());
+  const endAgeStr = (isOldFormat ? parts[2] : parts[3]).trim();
+  const endAge: number | null = endAgeStr.length === 0 ? null : Number(endAgeStr);
   const opsStart: number = isOldFormat ? 3 : 4;
 
-  if (isNaN(startYear) || (endYear !== null && isNaN(endYear))) {
+  if (isNaN(startAge) || (endAge !== null && isNaN(endAge))) {
     return null;
   }
 
-  return { group, name, startYear, endYear, opsStart };
+  return { group, name, startAge, endAge, opsStart };
 }
 
 function parseOp(str: string): AssetOp | null {

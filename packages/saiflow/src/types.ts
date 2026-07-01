@@ -9,8 +9,8 @@ export interface AssetOp {
 export interface Event {
   name: string;
   group?: string;
-  startYear: number;
-  endYear: number | null;
+  startAge: number;
+  endAge: number | null;
   ops: AssetOp[];
 }
 

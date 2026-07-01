@@ -15,7 +15,8 @@
   },
   "scripts": {
     "test": "vitest run --passWithNoTests",
-    "check": "pnpm run check:tsgo && pnpm run check:oxlint && pnpm run check:astro",
+    "check": "pnpm run check:format && pnpm run check:tsgo && pnpm run check:oxlint && pnpm run check:astro",
+    "check:format": "oxfmt --check",
     "check:tsgo": "tsgo --noEmit",
     "check:oxlint": "oxlint --format=github --fix",
     "check:astro": "astro-check",

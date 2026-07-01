@@ -9,7 +9,8 @@
   },
   "scripts": {
     "test": "vitest run",
-    "check": "pnpm run check:tsgo && pnpm run check:oxlint",
+    "check": "pnpm run check:format && pnpm run check:tsgo && pnpm run check:oxlint",
+    "check:format": "oxfmt --check",
     "check:tsgo": "tsgo --noEmit",
     "check:oxlint": "oxlint --format=github --fix",
     "format": "pnpm run format:oxfmt",

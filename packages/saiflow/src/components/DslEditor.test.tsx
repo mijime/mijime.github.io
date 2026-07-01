@@ -42,8 +42,8 @@ describe("DslEditor", () => {
                 events: [
                   {
                     name: "現金",
-                    startYear: 0,
-                    endYear: 0,
+                    startAge: 0,
+                    endAge: 0,
                     ops: [{ asset: "現金", op: "+", value: 1000 }],
                   },
                 ],

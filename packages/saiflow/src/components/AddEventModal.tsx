@@ -1,15 +1,35 @@
 import { useState } from "react";
 import type { AssetOp, Event } from "../types";
+import { fmt } from "../utils";
+import { OP_COLORS } from "../constants";
 
-function fmt(n: number): string {
-  return n.toLocaleString("ja-JP");
+function FormActions({
+  onClose,
+  onSave,
+  saveDisabled,
+}: {
+  onClose: () => void;
+  onSave: () => void;
+  saveDisabled?: boolean;
+}) {
+  return (
+    <div className="flex gap-2 justify-end pt-2">
+      <button
+        className="px-3 py-1 text-xs opacity-40 hover:opacity-100 border border-(--border) rounded"
+        onClick={onClose}
+      >
+        キャンセル
+      </button>
+      <button
+        className="px-3 py-1 text-xs bg-(--terra) text-white rounded disabled:opacity-30"
+        disabled={saveDisabled}
+        onClick={onSave}
+      >
+        保存
+      </button>
+    </div>
+  );
 }
-
-const OP_COLORS: Record<string, string> = {
-  "+": "bg-green-500/10 text-green-700 dark:text-green-400",
-  "-": "bg-red-500/10 text-red-600 dark:text-red-400",
-  "*": "bg-blue-500/10 text-blue-700 dark:text-blue-400",
-};
 
 function calcMortgage(principal: number, annualRate: number, years: number) {
   if (principal <= 0 || annualRate < 0 || years <= 0) return null;
@@ -121,8 +141,8 @@ function SimpleForm({
 }) {
   const [event, setEvent] = useState<Event>({
     name: "",
-    startYear: 0,
-    endYear: null,
+    startAge: currentAge,
+    endAge: null,
     ops: [],
   });
 
@@ -135,20 +155,7 @@ function SimpleForm({
         onDelete={onClose}
         hideDelete
       />
-      <div className="flex gap-2 justify-end pt-2">
-        <button
-          className="px-3 py-1 text-xs opacity-40 hover:opacity-100 border border-(--border) rounded"
-          onClick={onClose}
-        >
-          キャンセル
-        </button>
-        <button
-          className="px-3 py-1 text-xs bg-(--terra) text-white rounded"
-          onClick={() => onSave([event])}
-        >
-          保存
-        </button>
-      </div>
+      <FormActions onClose={onClose} onSave={() => onSave([event])} />
     </div>
   );
 }
@@ -166,11 +173,12 @@ function MortgageForm({
   const [downPayment, setDownPayment] = useState(0);
   const [interestRate, setInterestRate] = useState(2);
   const [years, setYears] = useState(35);
-  const [startYear, setStartYear] = useState(0);
+  const [startAge, setStartAge] = useState(currentAge);
   const [yearMode, setYearMode] = useState<"offset" | "age">("offset");
+  const [propertyTaxRate, setPropertyTaxRate] = useState(1.4);
 
-  const toDisplay = (v: number) => (yearMode === "age" ? v + currentAge : v);
-  const fromDisplay = (v: number) => (yearMode === "age" ? v - currentAge : v);
+  const toDisplay = (v: number) => (yearMode === "age" ? v : v - currentAge);
+  const fromDisplay = (v: number) => (yearMode === "age" ? v : v + currentAge);
 
   const loanAmount = Math.max(0, propertyPrice - downPayment);
   const result = calcMortgage(loanAmount, interestRate, years);
@@ -182,26 +190,26 @@ function MortgageForm({
     const events: Event[] = [];
     if (downPayment > 0) {
       events.push({
-        name: "頭金",
+        name: "住居費(頭金)",
         group: "住宅ローン",
-        startYear,
-        endYear: startYear,
+        startAge,
+        endAge: startAge,
         ops: [{ asset: "現金", op: "-" as const, value: downPayment }],
       });
     }
     if (loanAmount > 0) {
       events.push({
-        name: "借入実行",
+        name: "住居費(実行)",
         group: "住宅ローン",
-        startYear,
-        endYear: startYear,
+        startAge,
+        endAge: startAge,
         ops: [{ asset: "借入", op: "-" as const, value: loanAmount }],
       });
       events.push({
-        name: "借入返済",
+        name: "住居費(返済)",
         group: "住宅ローン",
-        startYear,
-        endYear: startYear + years - 1,
+        startAge,
+        endAge: startAge + years - 1,
         ops: [
           { asset: "現金", op: "-" as const, value: annualPayment },
           { asset: "借入", op: "+" as const, value: annualPayment },
@@ -210,9 +218,19 @@ function MortgageForm({
       events.push({
         name: "借入金利",
         group: "住宅ローン",
-        startYear,
-        endYear: startYear + years - 1,
+        startAge,
+        endAge: startAge + years - 1,
         ops: [{ asset: "借入", op: "*" as const, value: multiplier }],
+      });
+    }
+    const propertyTax = Math.round((propertyPrice * propertyTaxRate) / 100);
+    if (propertyTax > 0) {
+      events.push({
+        name: "税金(固定資産税)",
+        group: "住宅ローン",
+        startAge,
+        endAge: null,
+        ops: [{ asset: "現金", op: "-" as const, value: propertyTax }],
       });
     }
     onSave(events);
@@ -289,8 +307,8 @@ function MortgageForm({
         <input
           type="number"
           className="w-16 px-1.5 py-0.5 text-xs bg-(--paper) text-(--ink) border border-(--border) rounded tabular-nums outline-none focus:border-(--terra)"
-          value={toDisplay(startYear)}
-          onChange={(e) => setStartYear(fromDisplay(Number(e.target.value) || 0))}
+          value={toDisplay(startAge)}
+          onChange={(e) => setStartAge(fromDisplay(Number(e.target.value) || 0))}
         />
       </div>
 
@@ -311,21 +329,24 @@ function MortgageForm({
         </div>
       )}
 
-      <div className="flex gap-2 justify-end pt-2">
-        <button
-          className="px-3 py-1 text-xs opacity-40 hover:opacity-100 border border-(--border) rounded"
-          onClick={onClose}
-        >
-          キャンセル
-        </button>
-        <button
-          className="px-3 py-1 text-xs bg-(--terra) text-white rounded disabled:opacity-30"
-          disabled={propertyPrice <= 0}
-          onClick={handleSave}
-        >
-          保存
-        </button>
+      <div className="flex gap-1.5 items-center">
+        <label className="text-[11px] opacity-40 shrink-0 w-14">固定資産税</label>
+        <input
+          type="number"
+          className="w-16 px-1.5 py-0.5 text-xs bg-(--paper) text-(--ink) border border-(--border) rounded tabular-nums outline-none focus:border-(--terra)"
+          value={propertyTaxRate}
+          step="0.1"
+          onChange={(e) => setPropertyTaxRate(Number(e.target.value))}
+        />
+        <span className="text-[11px] opacity-30">%</span>
+        {propertyPrice > 0 && (
+          <span className="text-[10px] opacity-30 tabular-nums ml-1">
+            ¥{fmt(Math.round((propertyPrice * propertyTaxRate) / 100))}/年
+          </span>
+        )}
       </div>
+
+      <FormActions onClose={onClose} onSave={handleSave} saveDisabled={propertyPrice <= 0} />
     </div>
   );
 }
@@ -340,7 +361,7 @@ function YearInput({
   currentAge: number;
 }) {
   const [mode, setMode] = useState<"offset" | "age">("offset");
-  const display = mode === "age" ? value + currentAge : value;
+  const display = mode === "age" ? value : value - currentAge;
   return (
     <div className="flex gap-1 items-center">
       <select
@@ -356,7 +377,7 @@ function YearInput({
         className="w-16 px-1.5 py-0.5 text-xs bg-(--paper) text-(--ink) border border-(--border) rounded tabular-nums outline-none focus:border-(--terra)"
         value={display}
         onChange={(e) =>
-          onChange(mode === "age" ? Number(e.target.value) - currentAge : Number(e.target.value))
+          onChange(mode === "age" ? Number(e.target.value) : Number(e.target.value) + currentAge)
         }
       />
     </div>
@@ -377,33 +398,33 @@ function InitialForm({
   const [livingMonthly, setLivingMonthly] = useState(0);
   const [housingMonthly, setHousingMonthly] = useState(0);
 
-  const retirementYear = Math.max(0, 65 - currentAge);
+  const retirementAge = 65;
 
   const handleSave = () => {
     const events: Event[] = [];
     if (initialCash > 0) {
       events.push({
-        name: "初期現金",
+        name: "貯金",
         group: "初期設定",
-        startYear: 0,
-        endYear: 0,
+        startAge: 0,
+        endAge: 0,
         ops: [{ asset: "現金", op: "+" as const, value: initialCash }],
       });
     }
     if (annualIncome > 0) {
-      const incomeEndYear = retirementYear > 0 ? retirementYear : null;
+      const incomeEndAge = retirementAge > currentAge ? retirementAge : null;
       events.push({
         name: "年収",
         group: "初期設定",
-        startYear: 0,
-        endYear: incomeEndYear,
+        startAge: currentAge,
+        endAge: incomeEndAge,
         ops: [{ asset: "現金", op: "+" as const, value: annualIncome }],
       });
       events.push({
         name: "税金",
         group: "初期設定",
-        startYear: 0,
-        endYear: incomeEndYear,
+        startAge: currentAge,
+        endAge: incomeEndAge,
         ops: [{ asset: "現金", op: "-" as const, value: Math.round(annualIncome * 0.2) }],
       });
     }
@@ -411,8 +432,8 @@ function InitialForm({
       events.push({
         name: "生活費",
         group: "初期設定",
-        startYear: 0,
-        endYear: null,
+        startAge: currentAge,
+        endAge: null,
         ops: [{ asset: "現金", op: "-" as const, value: livingMonthly * 12 }],
       });
     }
@@ -420,8 +441,8 @@ function InitialForm({
       events.push({
         name: "住居費",
         group: "初期設定",
-        startYear: 0,
-        endYear: null,
+        startAge: currentAge,
+        endAge: null,
         ops: [{ asset: "現金", op: "-" as const, value: housingMonthly * 12 }],
       });
     }
@@ -471,21 +492,13 @@ function InitialForm({
         />
         <span className="text-[11px] opacity-30">/月</span>
       </div>
-      <div className="flex gap-2 justify-end pt-2">
-        <button
-          className="px-3 py-1 text-xs opacity-40 hover:opacity-100 border border-(--border) rounded"
-          onClick={onClose}
-        >
-          キャンセル
-        </button>
-        <button
-          className="px-3 py-1 text-xs bg-(--terra) text-white rounded disabled:opacity-30"
-          disabled={initialCash <= 0 && annualIncome <= 0 && livingMonthly <= 0 && housingMonthly <= 0}
-          onClick={handleSave}
-        >
-          保存
-        </button>
-      </div>
+      <FormActions
+        onClose={onClose}
+        onSave={handleSave}
+        saveDisabled={
+          initialCash <= 0 && annualIncome <= 0 && livingMonthly <= 0 && housingMonthly <= 0
+        }
+      />
     </div>
   );
 }
@@ -502,33 +515,48 @@ function InvestForm({
   const [name, setName] = useState("");
   const [monthlyAmount, setMonthlyAmount] = useState(0);
   const [annualReturn, setAnnualReturn] = useState(3);
-  const [startYear, setStartYear] = useState(0);
-  const [endYear, setEndYear] = useState<number | null>(20);
+  const [startAge, setStartAge] = useState(currentAge);
+  const [endAge, setEndAge] = useState<number | null>(currentAge + 20);
+  const [withdrawMonthly, setWithdrawMonthly] = useState(0);
+  const [withdrawStartAge, setWithdrawStartAge] = useState(currentAge + 30);
 
   const annualAmount = monthlyAmount * 12;
+  const annualWithdraw = withdrawMonthly * 12;
   const multiplier = 1 + annualReturn / 100;
 
   const handleSave = () => {
     if (!name.trim() || monthlyAmount <= 0) return;
     const events: Event[] = [
       {
-        name: `${name}積立`,
-        group: "投資",
-        startYear,
-        endYear,
+        name: `${name}(積立)`,
+        group: `投資(${name})`,
+        startAge,
+        endAge,
         ops: [
           { asset: "現金", op: "-" as const, value: annualAmount },
           { asset: name, op: "+" as const, value: annualAmount },
         ],
       },
       {
-        name: `${name}運用`,
-        group: "投資",
-        startYear,
-        endYear: null,
+        name: `${name}(運用)`,
+        group: `投資(${name})`,
+        startAge,
+        endAge: null,
         ops: [{ asset: name, op: "*" as const, value: multiplier }],
       },
     ];
+    if (withdrawMonthly > 0) {
+      events.push({
+        name: `${name}(切り崩し)`,
+        group: `投資(${name})`,
+        startAge: withdrawStartAge,
+        endAge: null,
+        ops: [
+          { asset: "現金", op: "+" as const, value: annualWithdraw },
+          { asset: name, op: "-" as const, value: annualWithdraw },
+        ],
+      });
+    }
     onSave(events);
   };
 
@@ -570,44 +598,55 @@ function InvestForm({
       <div className="flex gap-1.5 items-center">
         <label className="text-[11px] opacity-40 shrink-0 w-14">積立期間</label>
         <span className="text-[11px] opacity-30">開始</span>
-        <YearInput value={startYear} onChange={setStartYear} currentAge={currentAge} />
+        <YearInput value={startAge} onChange={setStartAge} currentAge={currentAge} />
       </div>
       <div className="flex gap-1.5 items-center">
         <label className="text-[11px] opacity-40 shrink-0 w-14" />
         <span className="text-[11px] opacity-30">終了</span>
-        <YearInput value={endYear ?? 0} onChange={(v) => setEndYear(v)} currentAge={currentAge} />
+        <YearInput value={endAge ?? 0} onChange={(v) => setEndAge(v)} currentAge={currentAge} />
         <button
           className="text-[10px] opacity-30 hover:opacity-100"
-          onClick={() => setEndYear(null)}
+          onClick={() => setEndAge(null)}
         >
           指定なし
         </button>
       </div>
-      <div className="flex gap-2 justify-end pt-2">
-        <button
-          className="px-3 py-1 text-xs opacity-40 hover:opacity-100 border border-(--border) rounded"
-          onClick={onClose}
-        >
-          キャンセル
-        </button>
-        <button
-          className="px-3 py-1 text-xs bg-(--terra) text-white rounded disabled:opacity-30"
-          disabled={!name.trim() || monthlyAmount <= 0}
-          onClick={handleSave}
-        >
-          保存
-        </button>
+      <div className="border-t border-(--border) pt-3 space-y-3">
+        <p className="text-[11px] opacity-40">切り崩し</p>
+        <div className="flex gap-1.5 items-center">
+          <label className="text-[11px] opacity-40 shrink-0 w-14">月額</label>
+          <input
+            type="number"
+            className="flex-1 px-1.5 py-0.5 text-xs bg-(--paper) text-(--ink) border border-(--border) rounded tabular-nums outline-none focus:border-(--terra)"
+            value={withdrawMonthly || ""}
+            onChange={(e) => setWithdrawMonthly(Number(e.target.value))}
+          />
+        </div>
+        <div className="flex justify-between text-[11px] px-1">
+          <span className="opacity-40">年間受取額</span>
+          <span className="tabular-nums">¥{fmt(annualWithdraw)}</span>
+        </div>
+        <div className="flex gap-1.5 items-center">
+          <label className="text-[11px] opacity-40 shrink-0 w-14">開始</label>
+          <YearInput
+            value={withdrawStartAge}
+            onChange={setWithdrawStartAge}
+            currentAge={currentAge}
+          />
+        </div>
       </div>
+      <FormActions
+        onClose={onClose}
+        onSave={handleSave}
+        saveDisabled={!name.trim() || monthlyAmount <= 0}
+      />
     </div>
   );
 }
 
 type SchoolType = "public" | "private" | null;
 
-const SCHOOL_PRESETS: Record<
-  string,
-  { period: string; public: number; private: number }
-> = {
+const SCHOOL_PRESETS: Record<string, { period: string; public: number; private: number }> = {
   幼稚園: { period: "3年", public: 0, private: 50 },
   小学校: { period: "6年", public: 10, private: 100 },
   中学校: { period: "3年", public: 15, private: 100 },
@@ -625,7 +664,7 @@ function ChildForm({
   onClose: () => void;
 }) {
   const [childName, setChildName] = useState("子");
-  const [birthYear, setBirthYear] = useState(2);
+  const [birthAge, setBirthAge] = useState(_currentAge + 2);
   const [yearMode, setYearMode] = useState<"offset" | "age">("offset");
   const [schools, setSchools] = useState<Record<string, SchoolType>>({
     幼稚園: null,
@@ -641,26 +680,26 @@ function ChildForm({
     const events: Event[] = [];
     const add = (label: string, start: number, end: number | null, cost: number) => {
       if (cost > 0) {
-        const yrStart = birthYear + start;
-        const yrEnd = end === null ? null : birthYear + end;
+        const yrStart = birthAge + start;
+        const yrEnd = end === null ? null : birthAge + end;
         if (yrEnd !== null && yrEnd < 0) return;
         events.push({
-          name: `教育費${label}(${childName})`,
-          group: "子供",
-          startYear: Math.max(0, yrStart),
-          endYear: yrEnd,
+          name: `教育費(${childName} ${label})`,
+          group: `子供(${childName})`,
+          startAge: Math.max(0, yrStart),
+          endAge: yrEnd,
           ops: [{ asset: "現金", op: "-" as const, value: cost }],
         });
       }
     };
     if (livingMonthly > 0) {
-      const livingEnd = birthYear + 17;
+      const livingEnd = birthAge + 17;
       if (livingEnd >= 0) {
         events.push({
           name: `生活費(${childName})`,
-          group: "子供",
-          startYear: Math.max(0, birthYear),
-          endYear: livingEnd,
+          group: `子供(${childName})`,
+          startAge: Math.max(0, birthAge),
+          endAge: livingEnd,
           ops: [{ asset: "現金", op: "-" as const, value: livingMonthly * 12 }],
         });
       }
@@ -709,14 +748,14 @@ function ChildForm({
         <input
           type="number"
           className="w-16 px-1.5 py-0.5 text-xs bg-(--paper) text-(--ink) border border-(--border) rounded tabular-nums outline-none focus:border-(--terra)"
-          value={yearMode === "age" ? Math.max(0, -birthYear) : birthYear}
+          value={yearMode === "age" ? birthAge : birthAge - _currentAge}
           onChange={(e) => {
             const v = Number(e.target.value) || 0;
-            setBirthYear(yearMode === "age" ? -v : v);
+            setBirthAge(yearMode === "age" ? v : v + _currentAge);
           }}
         />
         <span className="text-[11px] opacity-30">
-          {yearMode === "age" ? "歳" : birthYear >= 0 ? "年後" : "年前"}
+          {yearMode === "age" ? "歳" : birthAge >= _currentAge ? "年後" : "年前"}
         </span>
       </div>
       <div className="flex gap-1.5 items-center">
@@ -749,7 +788,10 @@ function ChildForm({
                 <button
                   className={`px-2 py-0.5 border-l border-(--border) ${type === "private" ? "bg-(--terra) text-white" : "opacity-40"}`}
                   onClick={() =>
-                    setSchools((s) => ({ ...s, [stage]: s[stage] === "private" ? null : "private" }))
+                    setSchools((s) => ({
+                      ...s,
+                      [stage]: s[stage] === "private" ? null : "private",
+                    }))
                   }
                 >
                   私立
@@ -764,21 +806,7 @@ function ChildForm({
           );
         })}
       </div>
-      <div className="flex gap-2 justify-end pt-2">
-        <button
-          className="px-3 py-1 text-xs opacity-40 hover:opacity-100 border border-(--border) rounded"
-          onClick={onClose}
-        >
-          キャンセル
-        </button>
-        <button
-          className="px-3 py-1 text-xs bg-(--terra) text-white rounded disabled:opacity-30"
-          disabled={!childName.trim()}
-          onClick={handleSave}
-        >
-          保存
-        </button>
-      </div>
+      <FormActions onClose={onClose} onSave={handleSave} saveDisabled={!childName.trim()} />
     </div>
   );
 }
@@ -789,17 +817,19 @@ export function EventForm({
   onDelete,
   currentAge,
   hideDelete,
+  defaultYearMode,
 }: {
   event: Event;
   onChange: (e: Event) => void;
   onDelete: () => void;
   currentAge: number;
   hideDelete?: boolean;
+  defaultYearMode?: "offset" | "age";
 }) {
-  const [yearMode, setYearMode] = useState<"offset" | "age">("offset");
+  const [yearMode, setYearMode] = useState<"offset" | "age">(defaultYearMode ?? "offset");
 
-  const toDisplay = (v: number) => (yearMode === "age" ? v + currentAge : v);
-  const fromDisplay = (v: number) => (yearMode === "age" ? v - currentAge : v);
+  const toDisplay = (v: number) => (yearMode === "age" ? v : v - currentAge);
+  const fromDisplay = (v: number) => (yearMode === "age" ? v : v + currentAge);
 
   return (
     <div className="px-3 pb-3 space-y-2">
@@ -836,9 +866,9 @@ export function EventForm({
         <input
           type="number"
           className="w-14 px-1.5 py-0.5 text-xs bg-(--paper) text-(--ink) border border-(--border) rounded tabular-nums outline-none focus:border-(--terra)"
-          value={toDisplay(event.startYear)}
+          value={toDisplay(event.startAge)}
           onChange={(e) =>
-            onChange({ ...event, startYear: fromDisplay(Number(e.target.value) || 0) })
+            onChange({ ...event, startAge: fromDisplay(Number(e.target.value) || 0) })
           }
         />
         <span className="text-[11px] opacity-30">→</span>
@@ -846,16 +876,16 @@ export function EventForm({
           type="number"
           className="w-14 px-1.5 py-0.5 text-xs bg-(--paper) text-(--ink) border border-(--border) rounded tabular-nums outline-none focus:border-(--terra)"
           placeholder={yearMode === "age" ? "年齢" : "終了"}
-          value={event.endYear === null ? "" : toDisplay(event.endYear)}
+          value={event.endAge === null ? "" : toDisplay(event.endAge)}
           onChange={(e) => {
             const v = e.target.value;
             onChange({
               ...event,
-              endYear: v === "" ? null : fromDisplay(Number(v) || 0),
+              endAge: v === "" ? null : fromDisplay(Number(v) || 0),
             });
           }}
         />
-        {event.endYear !== null && event.endYear < event.startYear && (
+        {event.endAge !== null && event.endAge < event.startAge && (
           <span className="text-[10px] text-red-400">終了 &lt; 開始</span>
         )}
       </div>

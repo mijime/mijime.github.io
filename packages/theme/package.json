@@ -8,7 +8,8 @@
     "./useDarkMode": "./src/use-dark-mode.ts"
   },
   "scripts": {
-    "check": "pnpm run check:oxlint",
+    "check": "pnpm run check:format && pnpm run check:oxlint",
+    "check:format": "oxfmt --check",
     "check:oxlint": "oxlint --format=github --fix",
     "format": "pnpm run format:oxfmt",
     "format:oxfmt": "oxfmt"

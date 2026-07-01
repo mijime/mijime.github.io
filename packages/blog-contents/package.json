@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "check": "pnpm run check:textlint",
+    "check": "pnpm run check:format && pnpm run check:textlint",
+    "check:format": "oxfmt --check",
     "check:textlint": "textlint 'contents/**/*.md'",
     "format": "pnpm run format:oxfmt && pnpm run format:tags",
     "format:oxfmt": "oxfmt",

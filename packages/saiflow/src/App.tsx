@@ -2,16 +2,14 @@ import { useEffect, useRef, useState } from "react";
 import { SaiflowProvider, useSaiflowDispatch, useSaiflowState, type State } from "./store";
 import { ProfileBar } from "./components/ProfileBar";
 import { EditorPanel } from "./components/EditorPanel";
-import { ResultTable } from "./components/ResultTable";
-import { CategoryTable } from "./components/CategoryTable";
+import { SummaryTable } from "./components/SummaryTable";
 import { CategoryChart } from "./components/CategoryChart";
-import { CashflowTable } from "./components/CashflowTable";
 import { BarChart } from "./components/BarChart";
 import { LineChart } from "./components/LineChart";
 import { parseDSL } from "./parser";
 import { listScenarios, saveScenario } from "./storage";
 
-type ViewMode = "table" | "category" | "category-chart" | "cashflow" | "line" | "bar";
+type ViewMode = "table" | "category-chart" | "line" | "bar";
 
 function RightPanel() {
   const [view, setView] = useState<ViewMode>("table");
@@ -22,9 +20,7 @@ function RightPanel() {
         {(
           [
             ["table", "収支表"],
-            ["category", "内訳表"],
             ["category-chart", "内訳グラフ"],
-            ["cashflow", "CF表"],
             ["line", "資産推移"],
             ["bar", "収支比較"],
           ] as [ViewMode, string][]
@@ -40,13 +36,9 @@ function RightPanel() {
       </div>
       <div className="flex-1 overflow-hidden">
         {view === "table" ? (
-          <ResultTable />
-        ) : view === "category" ? (
-          <CategoryTable />
+          <SummaryTable />
         ) : view === "category-chart" ? (
           <CategoryChart />
-        ) : view === "cashflow" ? (
-          <CashflowTable />
         ) : view === "line" ? (
           <LineChart />
         ) : (

@@ -7,14 +7,14 @@ describe("types", () => {
     expect(op.op).toBe("+");
   });
 
-  it("Event with null endYear persists", () => {
+  it("Event with null endAge persists", () => {
     const ev: Event = {
       name: "生活費",
-      startYear: 0,
-      endYear: null,
+      startAge: 0,
+      endAge: null,
       ops: [{ asset: "現金", op: "-", value: 250 }],
     };
-    expect(ev.endYear).toBeNull();
+    expect(ev.endAge).toBeNull();
   });
 
   it("SimulationConfig holds scenario", () => {

@@ -8,11 +8,19 @@ export function simulate(config: SimulationConfig): YearRow[] {
   const { currentAge, simulationYears, scenario } = config;
   const balances: Record<string, number> = {};
 
+  const simStartAge =
+    scenario.events.length > 0
+      ? Math.min(currentAge, ...scenario.events.map((e) => e.startAge))
+      : currentAge;
+  const simEndAge = currentAge + simulationYears - 1;
+  const totalYears = simEndAge - simStartAge + 1;
+
   const rows: YearRow[] = [];
 
-  for (let year = 0; year < simulationYears; year++) {
+  for (let year = 0; year < totalYears; year++) {
+    const age = simStartAge + year;
     const active = scenario.events.filter(
-      (e) => e.startYear <= year && (e.endYear === null || year <= e.endYear),
+      (e) => e.startAge <= age && (e.endAge === null || age <= e.endAge),
     );
 
     let totalIncome = 0;
@@ -58,7 +66,7 @@ export function simulate(config: SimulationConfig): YearRow[] {
     const totalAssets = Object.values(balances).reduce((a, b) => a + b, 0);
 
     rows.push({
-      age: currentAge + year,
+      age,
       operations,
       balances: { ...balances },
       totalIncome,

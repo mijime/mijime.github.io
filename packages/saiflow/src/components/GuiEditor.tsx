@@ -1,30 +1,15 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useSaiflowDispatch, useSaiflowState } from "../store";
+import { runSimulation, useSaiflowDispatch, useSaiflowState } from "../store";
 import { scenariosToDsl } from "../dslgen";
-import { simulate } from "../simulator";
 import { AddEventModal, EventForm } from "./AddEventModal";
 import type { AssetOp, Event, Scenario } from "../types";
-
-const OP_COLORS: Record<string, string> = {
-  "+": "bg-green-500/10 text-green-700 dark:text-green-400",
-  "-": "bg-red-500/10 text-red-600 dark:text-red-400",
-  "*": "bg-blue-500/10 text-blue-700 dark:text-blue-400",
-};
-
-const OP_BORDER: Record<string, string> = {
-  "+": "border-l-green-500/40",
-  "-": "border-l-red-500/40",
-  "*": "border-l-blue-500/40",
-};
+import { fmt } from "../utils";
+import { OP_COLORS, OP_BORDER } from "../constants";
 
 function primaryOp(ops: AssetOp[]): AssetOp | null {
   const minus = ops.find((o) => o.op === "-");
   if (minus) return minus;
   return ops[0] ?? null;
-}
-
-function fmt(n: number): string {
-  return n.toLocaleString("ja-JP");
 }
 
 export function GuiEditor() {
@@ -59,18 +44,7 @@ export function GuiEditor() {
         dispatch({ type: "SET_ACTIVE_SCENARIO", index: idx });
         const scenario = s[idx];
         if (scenario) {
-          dispatch({
-            type: "SET_PARSED",
-            parsed: {
-              config: { currentAge: st.currentAge, simulationYears: st.simulationYears, scenario },
-            },
-          });
-          const rows = simulate({
-            currentAge: st.currentAge,
-            simulationYears: st.simulationYears,
-            scenario,
-          });
-          dispatch({ type: "SET_ROWS", rows });
+          runSimulation(dispatch, st.currentAge, st.simulationYears, scenario);
         }
       }, 300);
     },
@@ -104,19 +78,8 @@ export function GuiEditor() {
   useEffect(() => {
     const scenario = scenarios[state.activeScenarioIndex];
     if (!scenario) return;
-    dispatch({
-      type: "SET_PARSED",
-      parsed: {
-        config: { currentAge: state.currentAge, simulationYears: state.simulationYears, scenario },
-      },
-    });
-    const rows = simulate({
-      currentAge: state.currentAge,
-      simulationYears: state.simulationYears,
-      scenario,
-    });
-    dispatch({ type: "SET_ROWS", rows });
-  }, [state.currentAge, state.simulationYears, state.activeScenarioIndex]);
+    runSimulation(dispatch, state.currentAge, state.simulationYears, scenario);
+  }, [state.currentAge, state.simulationYears, state.activeScenarioIndex, scenarios, dispatch]);
 
   useEffect(() => {
     setEditingGroup(null);
@@ -160,9 +123,7 @@ export function GuiEditor() {
             ? {
                 ...s,
                 events: s.events.map((ev) =>
-                  ev.group === groupName
-                    ? { ...ev, group: newName || undefined }
-                    : ev,
+                  ev.group === groupName ? { ...ev, group: newName || undefined } : ev,
                 ),
               }
             : s,
@@ -196,7 +157,13 @@ export function GuiEditor() {
     };
 
     const handleAddToGroup = () => {
-      const newEvent: Event = { name: "", group: groupName, startYear: 0, endYear: null, ops: [] };
+      const newEvent: Event = {
+        name: "",
+        group: groupName,
+        startAge: state.currentAge,
+        endAge: null,
+        ops: [],
+      };
       const lastIdx = indices.length > 0 ? Math.max(...indices) : -1;
       const insertAt = lastIdx + 1;
       update((prev) =>
@@ -204,11 +171,7 @@ export function GuiEditor() {
           i === state.activeScenarioIndex
             ? {
                 ...s,
-                events: [
-                  ...s.events.slice(0, insertAt),
-                  newEvent,
-                  ...s.events.slice(insertAt),
-                ],
+                events: [...s.events.slice(0, insertAt), newEvent, ...s.events.slice(insertAt)],
               }
             : s,
         ),
@@ -240,9 +203,7 @@ export function GuiEditor() {
           className="flex-1 flex items-center gap-2 px-3 py-2 text-left text-xs hover:bg-(--mid)/20 transition-colors"
           onClick={toggle}
         >
-          <span className="opacity-30 w-3 shrink-0 text-[10px]">
-            {isExpanded ? "▼" : "▶"}
-          </span>
+          <span className="opacity-30 w-3 shrink-0 text-[10px]">{isExpanded ? "▼" : "▶"}</span>
           {isEditing ? (
             <input
               className="flex-1 min-w-0 px-1 py-0.5 text-xs bg-(--paper) text-(--ink) border border-(--border) rounded outline-none focus:border-(--terra)"
@@ -383,7 +344,7 @@ export function GuiEditor() {
                       {evt.name || <span className="opacity-25 italic">名称なし</span>}
                     </span>
                     <span className="opacity-50 shrink-0 tabular-nums text-[11px]">
-                      {evt.startYear}年{evt.endYear === null ? " →" : ` → ${evt.endYear}年`}
+                      {evt.startAge}歳{evt.endAge === null ? " →" : ` → ${evt.endAge}歳`}
                     </span>
                     {evt.ops.length > 0 && (
                       <span className="flex gap-0.5 shrink-0 max-w-[120px] overflow-hidden">
@@ -408,6 +369,7 @@ export function GuiEditor() {
                     <EventForm
                       event={evt}
                       currentAge={state.currentAge}
+                      defaultYearMode="age"
                       onChange={(e) =>
                         update((prev) =>
                           prev.map((s, i) =>
