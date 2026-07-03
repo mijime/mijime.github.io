@@ -51,13 +51,12 @@ interface FloorPlan {
 
 ## 永続化 / 共有
 
-- SaveData version 2。v1 読み込み時に `cell.wall.top → hWalls`、`cell.wall.left → vWalls` へ変換(欠落なしの単純写像)。
-- 共有 URL は DSL テキスト経由なので構文互換により旧 URL もそのまま読める。
+- SaveData version 2。旧データの移行は不要(利用者なし)。v1 は読み込み失敗として扱ってよい。
 
 ## 影響範囲
 
 - 書き直し: `types.ts`, `store.ts`, `input/wall-logic.ts`, `input/hit-test.ts`, `components/hooks/use-pointer-handlers.ts`, `draw/draw-walls.ts`
-- 追従: `floor/dsl.ts`, `floor/room-detection.ts`, `floor/clipboard-logic.ts`, `floor/share.ts`, `storage.ts`(v1→v2 移行), `draw/export.ts`, 3D プレビューの壁参照
+- 追従: `floor/dsl.ts`, `floor/room-detection.ts`, `floor/clipboard-logic.ts`, `floor/share.ts`, `storage.ts`, `draw/export.ts`, 3D プレビューの壁参照
 - テスト: 既存 vitest を新構造で書き直し。回転の恒等プロパティテストを追加。
 
 ## 対象外
