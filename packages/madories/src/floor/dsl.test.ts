@@ -132,4 +132,20 @@ describe("round-trip", () => {
     expect(getWall(back, { kind: "v", x: 4, y: 2 })).toBe("solid");
     expect(getWall(back, { kind: "h", x: 1, y: 4 })).toBe("window_full");
   });
+
+  it("applies place with rotate 90 to pattern walls", () => {
+    const text = [
+      "size 6 6",
+      'name "t"',
+      "pattern p",
+      "  floor (0,0)-(1,0) wood",
+      "  wall (0,0)-(1,0) top solid",
+      "end",
+      "place p at (1,1) rotate 90",
+    ].join("\n");
+    const floor = dslToFloor(text);
+    // pattern bbox maxY=0; CW90: top wall h(0,0)-(1,0) → v edges at local x=1,y=0..1 → global v(2,1),(2,2)
+    expect(getWall(floor, { kind: "v", x: 2, y: 1 })).toBe("solid");
+    expect(getWall(floor, { kind: "v", x: 2, y: 2 })).toBe("solid");
+  });
 });

@@ -225,34 +225,24 @@ export function floorToDsl(floor: FloorPlan): string {
       lines.push(`  floor ${coord} ${floorType}`);
     }
 
-    // Emit walls from the collected edges
-    const wallRuns: WallRun[] = [];
+    // Pack pattern walls using run-length encoding
+    const patternMaxX = Math.max(...roomCells.map((c) => c.lx), -1);
+    const patternMaxY = Math.max(...roomCells.map((c) => c.ly), -1);
+    const patternHWalls = createHWalls(patternMaxX + 1, patternMaxY + 1);
+    const patternVWalls = createVWalls(patternMaxX + 1, patternMaxY + 1);
+
     for (const [key, wallType] of roomEdges) {
       const [kind, xStr, yStr] = key.split(":");
       const x = Number.parseInt(xStr, 10);
       const y = Number.parseInt(yStr, 10);
-      const edge: EdgeRef = { kind: kind as "h" | "v", x, y };
-
-      if (edge.kind === "h") {
-        wallRuns.push({
-          side: "top",
-          wallType,
-          x1: x,
-          x2: x,
-          y1: y,
-          y2: y,
-        });
+      if (kind === "h") {
+        patternHWalls[hIndex(patternMaxX + 1, x, y)] = wallType;
       } else {
-        wallRuns.push({
-          side: "left",
-          wallType,
-          x1: x,
-          x2: x,
-          y1: y,
-          y2: y,
-        });
+        patternVWalls[vIndex(patternMaxX + 1, x, y)] = wallType;
       }
     }
+
+    const wallRuns = packWallRuns(patternHWalls, patternVWalls, patternMaxX + 1, patternMaxY + 1);
 
     for (const { x1, y1, x2, y2, side, wallType } of wallRuns) {
       const coord = x1 === x2 && y1 === y2 ? `(${x1},${y1})` : `(${x1},${y1})-(${x2},${y2})`;
