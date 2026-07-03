@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { copyRegion, normalizeSelection, pasteOriginIndex } from "./clipboard-logic";
 import { createFloorPlan } from "../store";
 import { setWallsPure } from "./walls";
-import type { Cell, FloorPlan } from "../types";
+import type { Cell, FloorPlan, WallType } from "../types";
 
 function emptyCell(): Cell {
   return { floorType: null, item: null };
@@ -23,8 +23,8 @@ function makeFloor(
     id: "test",
     name: "test",
     width,
-    hWalls: Array(width * (height + 1)).fill("none"),
-    vWalls: Array((width + 1) * height).fill("none"),
+    hWalls: Array.from({ length: width * (height + 1) }, () => "none" as WallType),
+    vWalls: Array.from({ length: (width + 1) * height }, () => "none" as WallType),
   };
 }
 

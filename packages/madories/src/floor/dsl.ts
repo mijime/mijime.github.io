@@ -694,10 +694,8 @@ export function dslToFloor(text: string): FloorPlan {
       if (x >= 0 && x < width && y >= 0 && y <= height) {
         hWalls[hIndex(width, x, y)] = wallType;
       }
-    } else {
-      if (x >= 0 && x <= width && y >= 0 && y < height) {
-        vWalls[vIndex(width, x, y)] = wallType;
-      }
+    } else if (x >= 0 && x <= width && y >= 0 && y < height) {
+      vWalls[vIndex(width, x, y)] = wallType;
     }
   }
 

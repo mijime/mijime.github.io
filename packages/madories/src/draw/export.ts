@@ -29,17 +29,16 @@ export const MM_PER_CELL = 910;
 export function computeFloorScores(floor: FloorPlan): { storage: number; windows: number } {
   let storage = 0;
   let windows = 0;
-  for (let i = 0; i < floor.cells.length; i++) {
-    const c = floor.cells[i];
+  for (const c of floor.cells) {
     if (c.item) {
       storage += ITEM_DEF_MAP.get(c.item.type)?.storageScore ?? 0;
     }
   }
-  for (let i = 0; i < floor.hWalls.length; i++) {
-    windows += WALL_WINDOW_SCORE[floor.hWalls[i]] ?? 0;
+  for (const wall of floor.hWalls) {
+    windows += WALL_WINDOW_SCORE[wall] ?? 0;
   }
-  for (let i = 0; i < floor.vWalls.length; i++) {
-    windows += WALL_WINDOW_SCORE[floor.vWalls[i]] ?? 0;
+  for (const wall of floor.vWalls) {
+    windows += WALL_WINDOW_SCORE[wall] ?? 0;
   }
   return { storage, windows };
 }

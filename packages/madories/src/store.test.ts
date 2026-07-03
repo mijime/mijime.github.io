@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { createBuilding, createFloorPlan, reducer } from "./store";
 import { getWall } from "./floor/walls";
+import type { FloorPlan } from "./types";
+
+const count = (f: FloorPlan) => [...f.hWalls, ...f.vWalls].filter((w) => w !== "none").length;
 
 describe("createFloorPlan", () => {
   it("creates correct cell count", () => {
@@ -59,8 +62,6 @@ describe("ROTATE_FLOOR", () => {
       wallType: "solid",
     });
     const rotated = reducer(withWalls, { floorId, type: "ROTATE_FLOOR" });
-    const count = (f: (typeof rotated.floors)[0]) =>
-      [...f.hWalls, ...f.vWalls].filter((w) => w !== "none").length;
     expect(count(rotated.floors[0])).toBe(2);
   });
 });
