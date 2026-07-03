@@ -144,7 +144,7 @@ describe("round-trip", () => {
       "place p at (1,1) rotate 90",
     ].join("\n");
     const floor = dslToFloor(text);
-    // pattern bbox maxY=0; CW90: top wall h(0,0)-(1,0) → v edges at local x=1,y=0..1 → global v(2,1),(2,2)
+    // Pattern bbox maxY=0; CW90: top wall h(0,0)-(1,0) → v edges at local x=1,y=0..1 → global v(2,1),(2,2)
     expect(getWall(floor, { kind: "v", x: 2, y: 1 })).toBe("solid");
     expect(getWall(floor, { kind: "v", x: 2, y: 2 })).toBe("solid");
   });

@@ -9,8 +9,8 @@ describe("room-detection", () => {
     let floor = createFloorPlan("test", 6, 6);
 
     // Enclose cells (1,1) to (2,2) with walls on all 4 sides
-    // hWalls: y*width + x (width=6 means 6*(6+1)=42 elements)
-    // vWalls: y*(width+1) + x ((6+1)*6=42 elements)
+    // HWalls: y*width + x (width=6 means 6*(6+1)=42 elements)
+    // VWalls: y*(width+1) + x ((6+1)*6=42 elements)
     // Horizontal walls above room: (1,1), (2,1)
     // Horizontal walls below room: (1,3), (2,3)
     // Vertical walls left of room: (1,1), (1,2)

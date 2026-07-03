@@ -56,13 +56,13 @@ export function rotateFloorCW90(floor: FloorPlan): FloorPlan {
   }
   const hWalls = createHWalls(nw, nh);
   const vWalls = createVWalls(nw, nh);
-  // v エッジ (x, y..y+1) → h エッジ ((h-1-y, x)..(h-y, x))
+  // V エッジ (x, y..y+1) → h エッジ ((h-1-y, x)..(h-y, x))
   for (let y = 0; y < height; y++) {
     for (let x = 0; x <= width; x++) {
       hWalls[hIndex(nw, height - 1 - y, x)] = floor.vWalls[vIndex(width, x, y)];
     }
   }
-  // h エッジ (x..x+1, y) → v エッジ ((h-y, x)..(h-y, x+1))
+  // H エッジ (x..x+1, y) → v エッジ ((h-y, x)..(h-y, x+1))
   for (let y = 0; y <= height; y++) {
     for (let x = 0; x < width; x++) {
       vWalls[vIndex(nw, height - y, x)] = floor.hWalls[hIndex(width, x, y)];
