@@ -1,13 +1,13 @@
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { MeshStandardMaterial } from "three";
 import { MATERIALS, type MaterialKey } from "./config";
 import type { Box3D } from "./scene-model";
 
 export function useSharedMaterials(darkMode: boolean): Map<MaterialKey, MeshStandardMaterial> {
-  return useMemo(() => {
-    const map = new Map<MaterialKey, MeshStandardMaterial>();
+  const map = useMemo(() => {
+    const m = new Map<MaterialKey, MeshStandardMaterial>();
     for (const [key, def] of Object.entries(MATERIALS)) {
-      map.set(
+      m.set(
         key as MaterialKey,
         new MeshStandardMaterial({
           color: darkMode ? def.dark : def.light,
@@ -18,8 +18,18 @@ export function useSharedMaterials(darkMode: boolean): Map<MaterialKey, MeshStan
         }),
       );
     }
-    return map;
+    return m;
   }, [darkMode]);
+
+  // Dispose old GPU resources when materials are replaced or unmounted
+  useEffect(
+    () => () => {
+      for (const material of map.values()) material.dispose();
+    },
+    [map],
+  );
+
+  return map;
 }
 
 interface BoxListProps {
