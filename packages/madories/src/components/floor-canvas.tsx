@@ -1,6 +1,6 @@
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react";
 import { exportFloorPng } from "../draw/export";
-import type { CopiedRegion, FloorPlan, FloorType, WallType } from "../types";
+import type { CopiedRegion, EdgeRef, FloorPlan, FloorType, WallType } from "../types";
 import { useCanvasDraw } from "./hooks/use-canvas-draw";
 import { usePointerHandlers } from "./hooks/use-pointer-handlers";
 import type { ToolMode } from "./tool-mode";
@@ -71,7 +71,7 @@ interface Props {
   cellSize: number;
   darkMode: boolean;
   tool: ToolMode;
-  onSetWall: (cellIndex: number, edge: "top" | "left", wallType: WallType) => void;
+  onSetWalls: (edges: EdgeRef[], wallType: WallType) => void;
   onSetFloorType: (cellIndex: number, floorType: FloorType | null) => void;
   onFillRoom: (cellIndex: number) => void;
   onPlaceItem: (cellIndex: number) => void;
@@ -141,7 +141,7 @@ export const FloorCanvas = forwardRef<FloorCanvasHandle, Props>((props, ref) => 
     onRotateItem: props.onRotateItem,
     onSelectionChange: setSelectionState,
     onSetFloorType: props.onSetFloorType,
-    onSetWall: props.onSetWall,
+    onSetWalls: props.onSetWalls,
     onUndo: props.onUndo,
     redraw,
     selectedItemCell,

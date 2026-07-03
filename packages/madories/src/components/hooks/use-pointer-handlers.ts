@@ -1,9 +1,9 @@
 import { useEffect, useRef } from "react";
 import { GestureHandler } from "../../input/gesture-handler";
 import { copyRegion, normalizeSelection, pasteOriginIndex } from "../../floor/clipboard-logic";
-import { resolveWallSegments } from "../../input/wall-logic";
+import { snapVertex, resolveEdges, nearestEdge } from "../../input/wall-snap";
 import { resolveItemAction } from "../../input/item-logic";
-import type { CopiedRegion, FloorPlan, FloorType, WallType } from "../../types";
+import type { CopiedRegion, EdgeRef, FloorPlan, FloorType, WallType } from "../../types";
 import type { ToolMode } from "../tool-mode";
 import type { SelectionRef, ViewRef } from "./types";
 
@@ -14,7 +14,7 @@ interface Props {
   tool: ToolMode;
   viewRef: ViewRef;
   selectionRef: SelectionRef;
-  onSetWall: (cellIndex: number, edge: "top" | "left", wallType: WallType) => void;
+  onSetWalls: (edges: EdgeRef[], wallType: WallType) => void;
   onSetFloorType: (cellIndex: number, floorType: FloorType | null) => void;
   onFillRoom: (cellIndex: number) => void;
   onPlaceItem: (cellIndex: number) => void;
@@ -25,7 +25,7 @@ interface Props {
   onEraseCell: (cellIndex: number) => void;
   onLongPressRoom?: (cellIndex: number, clientX: number, clientY: number) => void;
   onUndo?: () => void;
-  redraw: (ghost?: { mx: number; my: number; fromIdx: number }) => void;
+  redraw: (ghost?: { mx: number; my: number; fromIdx: number }, wallPreview?: EdgeRef[]) => void;
   setSelectedItemCell: (idx: number | null) => void;
   selectedItemCell: number | null;
   onSelectionChange?: (sel: { x1: number; y1: number; x2: number; y2: number } | null) => void;
@@ -48,7 +48,7 @@ export function usePointerHandlers(props: Props): {
     tool,
     viewRef,
     selectionRef,
-    onSetWall,
+    onSetWalls,
     onSetFloorType,
     onFillRoom,
     onPlaceItem,
@@ -71,11 +71,8 @@ export function usePointerHandlers(props: Props): {
   const floorRef = useRef(floor);
   floorRef.current = floor;
 
-  const lastWallHitRef = useRef<string | null>(null);
-  const wallDragStartPos = useRef<{ mx: number; my: number } | null>(null);
-  const wallDragEdgeLock = useRef<"top" | "left" | null>(null);
-  const wallDragLastPos = useRef<{ mx: number; my: number } | null>(null);
-  const wallStopTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const wallStartVertexRef = useRef<{ vx: number; vy: number } | null>(null);
+  const wallPreviewRef = useRef<EdgeRef[]>([]);
   const dragStartRef = useRef<number | null>(null);
   const dragMovedRef = useRef(false);
   const selectionStartRef = useRef<{ x: number; y: number } | null>(null);
@@ -179,9 +176,6 @@ export function usePointerHandlers(props: Props): {
 
   useEffect(
     () => () => {
-      if (wallStopTimerRef.current) {
-        clearTimeout(wallStopTimerRef.current);
-      }
       if (longPressTimerRef.current) {
         clearTimeout(longPressTimerRef.current);
       }
@@ -227,36 +221,6 @@ export function usePointerHandlers(props: Props): {
     onRotateItem(idx);
   }
 
-  function applyWallSegment(
-    hit: { cx: number; cy: number; edge: "top" | "left" },
-    wallType: WallType,
-  ) {
-    const idx = hit.cy * floor.width + hit.cx;
-    if (idx < 0 || idx >= floor.cells.length) {
-      return;
-    }
-    const key = `${idx}:${hit.edge}`;
-    if (key === lastWallHitRef.current) {
-      return;
-    }
-    lastWallHitRef.current = key;
-    onSetWall(idx, hit.edge, wallType);
-  }
-
-  function applyWallHit(mx: number, my: number, wallType: WallType) {
-    const segments = resolveWallSegments(
-      mx,
-      my,
-      cellSize,
-      wallDragEdgeLock.current,
-      wallDragStartPos.current,
-      wallDragLastPos.current,
-    );
-    for (const seg of segments) {
-      applyWallSegment(seg, wallType);
-    }
-  }
-
   function handlePointerDown(e: React.PointerEvent<HTMLCanvasElement>) {
     e.currentTarget.setPointerCapture(e.pointerId);
     activePointerCountRef.current += 1;
@@ -267,9 +231,8 @@ export function usePointerHandlers(props: Props): {
     });
     if (activePointerCountRef.current >= 2) {
       // Cancel single-finger actions on second touch (enables pinch)
-      wallDragStartPos.current = null;
-      wallDragLastPos.current = null;
-      wallDragEdgeLock.current = null;
+      wallStartVertexRef.current = null;
+      wallPreviewRef.current = [];
       dragStartRef.current = null;
       selectionStartRef.current = null;
       if (longPressTimerRef.current) {
@@ -302,10 +265,8 @@ export function usePointerHandlers(props: Props): {
     }
 
     if (tool.kind === "wall") {
-      lastWallHitRef.current = null;
-      wallDragStartPos.current = { mx, my };
-      wallDragLastPos.current = { mx, my };
-      wallDragEdgeLock.current = null;
+      wallStartVertexRef.current = snapVertex(mx, my, cellSize, floor.width, floor.height);
+      wallPreviewRef.current = [];
       startLongPress(e.clientX, e.clientY);
       return;
     }
@@ -412,20 +373,20 @@ export function usePointerHandlers(props: Props): {
     }
 
     if (tool.kind === "wall") {
-      const wasDrag = wallDragEdgeLock.current !== null;
-      lastWallHitRef.current = null;
-      wallDragStartPos.current = null;
-      wallDragLastPos.current = null;
-      wallDragEdgeLock.current = null;
-      if (wallStopTimerRef.current) {
-        clearTimeout(wallStopTimerRef.current);
-      }
-      if (!wasDrag) {
+      const start = wallStartVertexRef.current;
+      wallStartVertexRef.current = null;
+      const edges = wallPreviewRef.current;
+      wallPreviewRef.current = [];
+      if (edges.length > 0) {
+        onSetWalls(edges, tool.wallType);
+      } else if (start) {
         const { mx, my } = getCanvasPos(e.clientX, e.clientY);
-        for (const seg of resolveWallSegments(mx, my, cellSize, null, null, null)) {
-          applyWallSegment(seg, "none");
+        const edge = nearestEdge(mx, my, cellSize, floor.width, floor.height);
+        if (edge) {
+          onSetWalls([edge], "none");
         }
       }
+      redraw();
       return;
     }
 
@@ -458,10 +419,7 @@ export function usePointerHandlers(props: Props): {
     if (tool.kind === "item") {
       const action = resolveItemAction({
         dragMoved: dragMovedRef.current,
-        endCell:
-          idx === null
-            ? { floorType: null, item: null, wall: { left: "none", top: "none" } }
-            : floor.cells[idx],
+        endCell: idx === null ? undefined : floor.cells[idx],
         endIdx: idx,
         startIdx: start,
         toolItemType: tool.itemType,
@@ -554,32 +512,14 @@ export function usePointerHandlers(props: Props): {
       return;
     }
 
-    if (tool.kind === "wall" && wallDragStartPos.current) {
-      if (!wallDragEdgeLock.current) {
-        const dx = Math.abs(mx - wallDragStartPos.current.mx);
-        const dy = Math.abs(my - wallDragStartPos.current.my);
-        if (dx > 12 || dy > 12) {
-          wallDragEdgeLock.current = dx > dy ? "top" : "left";
-          if (longPressTimerRef.current) {
-            clearTimeout(longPressTimerRef.current);
-            longPressTimerRef.current = null;
-          }
-        }
+    if (tool.kind === "wall" && wallStartVertexRef.current && e.buttons === 1) {
+      const end = snapVertex(mx, my, cellSize, floor.width, floor.height);
+      wallPreviewRef.current = resolveEdges(wallStartVertexRef.current, end);
+      if (wallPreviewRef.current.length > 0 && longPressTimerRef.current) {
+        clearTimeout(longPressTimerRef.current);
+        longPressTimerRef.current = null;
       }
-
-      if (wallDragEdgeLock.current) {
-        applyWallHit(mx, my, tool.wallType);
-      }
-      wallDragLastPos.current = { mx, my };
-
-      if (wallStopTimerRef.current) {
-        clearTimeout(wallStopTimerRef.current);
-      }
-      wallStopTimerRef.current = setTimeout(() => {
-        wallDragEdgeLock.current = null;
-        wallDragStartPos.current = wallDragLastPos.current;
-        lastWallHitRef.current = null;
-      }, 300);
+      redraw(undefined, wallPreviewRef.current);
       return;
     }
 
@@ -608,6 +548,9 @@ export function usePointerHandlers(props: Props): {
       clearTimeout(longPressTimerRef.current);
       longPressTimerRef.current = null;
     }
+    wallStartVertexRef.current = null;
+    wallPreviewRef.current = [];
+    redraw();
   }
 
   function copySelection() {

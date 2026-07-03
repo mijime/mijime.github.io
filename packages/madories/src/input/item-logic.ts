@@ -6,10 +6,16 @@ export function resolveItemAction(args: {
   startIdx: number | null;
   endIdx: number | null;
   dragMoved: boolean;
-  endCell: Cell;
+  endCell?: Cell;
   toolItemType: ItemType;
 }): ItemAction {
-  const { startIdx, endIdx, dragMoved, endCell, toolItemType } = args;
+  const {
+    startIdx,
+    endIdx,
+    dragMoved,
+    endCell = { floorType: null, item: null },
+    toolItemType,
+  } = args;
   if (startIdx === null || endIdx === null) {
     return "none";
   }
