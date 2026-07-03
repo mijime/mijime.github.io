@@ -1,8 +1,18 @@
 import { v4 as uuidv4 } from "uuid";
-import type { Cell, FloorPlan, FloorType, ItemType, WallType } from "../types";
+import type { Cell, EdgeRef, FloorPlan, FloorType, ItemType, WallType } from "../types";
 import { detectRooms } from "./room-detection";
+import { hIndex, vIndex, createHWalls, createVWalls, getWall } from "./walls";
 
 const WALL_TYPES: WallType[] = ["none", "solid", "solid_thin", "window_full", "window_center"];
+
+type Side = "top" | "left" | "right" | "bottom";
+
+function sideToEdge(x: number, y: number, side: Side): EdgeRef {
+  if (side === "top") return { kind: "h", x, y };
+  if (side === "bottom") return { kind: "h", x, y: y + 1 };
+  if (side === "left") return { kind: "v", x, y };
+  return { kind: "v", x: x + 1, y };
+}
 
 // --- floor rectangle packing ---
 
@@ -78,56 +88,65 @@ interface WallRun {
   y1: number;
   x2: number;
   y2: number;
-  edge: "top" | "left";
+  side: Side;
   wallType: WallType;
 }
 
-function packWallRuns(cells: Cell[], width: number, height: number): WallRun[] {
+function packWallRuns(
+  hWalls: WallType[],
+  vWalls: WallType[],
+  width: number,
+  height: number,
+): WallRun[] {
   const runs: WallRun[] = [];
 
-  // Horizontal runs: top walls along rows (same y, increasing x)
-  for (let y = 0; y < height; y++) {
+  // Horizontal runs: h walls along rows
+  for (let y = 0; y <= height; y++) {
     let x = 0;
     while (x < width) {
-      const wt = cells[y * width + x].wall.top;
+      const wt = hWalls[hIndex(width, x, y)];
       if (wt === "none") {
         x++;
         continue;
       }
       let end = x + 1;
-      while (end < width && cells[y * width + end].wall.top === wt) {
+      while (end < width && hWalls[hIndex(width, end, y)] === wt) {
         end++;
       }
+      const side = y === height ? "bottom" : "top";
+      const coordY = y === height ? y - 1 : y;
       runs.push({
-        edge: "top",
+        side,
         wallType: wt,
         x1: x,
         x2: end - 1,
-        y1: y,
-        y2: y,
+        y1: coordY,
+        y2: coordY,
       });
       x = end;
     }
   }
 
-  // Vertical runs: left walls along columns (same x, increasing y)
-  for (let x = 0; x < width; x++) {
+  // Vertical runs: v walls along columns
+  for (let x = 0; x <= width; x++) {
     let y = 0;
     while (y < height) {
-      const wt = cells[y * width + x].wall.left;
+      const wt = vWalls[vIndex(width, x, y)];
       if (wt === "none") {
         y++;
         continue;
       }
       let end = y + 1;
-      while (end < height && cells[end * width + x].wall.left === wt) {
+      while (end < height && vWalls[vIndex(width, x, end)] === wt) {
         end++;
       }
+      const side = x === width ? "right" : "left";
+      const coordX = x === width ? x - 1 : x;
       runs.push({
-        edge: "left",
+        side,
         wallType: wt,
-        x1: x,
-        x2: x,
+        x1: coordX,
+        x2: coordX,
         y1: y,
         y2: end - 1,
       });
@@ -141,7 +160,7 @@ function packWallRuns(cells: Cell[], width: number, height: number): WallRun[] {
 // --- export ---
 
 export function floorToDsl(floor: FloorPlan): string {
-  const { width, height, cells, name } = floor;
+  const { width, height, cells, name, hWalls, vWalls } = floor;
   const lines: string[] = [];
 
   lines.push(`size ${width} ${height}`);
@@ -181,45 +200,63 @@ export function floorToDsl(floor: FloorPlan): string {
       return { idx, lx: gx - minX, ly: gy - minY };
     });
 
-    // Build a virtual grid for room cells + their right/bottom neighbors (for boundary walls)
-    const lw = Math.max(...roomCells.map((c) => c.lx)) + 2;
-    const lh = Math.max(...roomCells.map((c) => c.ly)) + 2;
-    const virtualCells: Cell[] = Array.from({ length: lw * lh }, () => ({
-      floorType: null,
-      item: null,
-      wall: { left: "none", top: "none" },
-    }));
-    const roomIdxSet = new Set(roomCells.map((c) => c.idx));
-    for (const { idx, lx, ly } of roomCells) {
-      const c = cells[idx];
-      virtualCells[ly * lw + lx] = {
-        floorType: c.floorType,
-        item: c.item,
-        wall: { ...c.wall },
-      };
-      // Pull in right neighbor's left wall if that neighbor is outside the room
-      const rightIdx = idx + 1;
-      const gx = idx % width;
-      if (gx + 1 < width && !roomIdxSet.has(rightIdx)) {
-        const rv = virtualCells[ly * lw + lx + 1];
-        rv.wall = { ...rv.wall, left: cells[rightIdx].wall.left };
-      }
-      // Pull in bottom neighbor's top wall if that neighbor is outside the room
-      const bottomIdx = idx + width;
-      if (idx + width < width * height && !roomIdxSet.has(bottomIdx)) {
-        const bv = virtualCells[(ly + 1) * lw + lx];
-        bv.wall = { ...bv.wall, top: cells[bottomIdx].wall.top };
+    // Collect edges for this room
+    const roomEdges = new Map<string, WallType>();
+    for (const { lx, ly } of roomCells) {
+      for (const side of ["top", "left", "right", "bottom"] as Side[]) {
+        const edge = sideToEdge(lx, ly, side);
+        const gx = lx + minX;
+        const gy = ly + minY;
+        const globalEdge = sideToEdge(gx, gy, side);
+        const wallType = getWall(floor, globalEdge);
+        if (wallType !== "none") {
+          const key = `${edge.kind}:${edge.x}:${edge.y}`;
+          roomEdges.set(key, wallType);
+        }
       }
     }
 
-    for (const { x1, y1, x2, y2, floorType } of packFloorRects(virtualCells, lw, lh)) {
+    for (const { x1, y1, x2, y2, floorType } of packFloorRects(
+      roomCells.map((rc) => cells[rc.idx]),
+      Math.max(...roomCells.map((c) => c.lx)) + 1,
+      Math.max(...roomCells.map((c) => c.ly)) + 1,
+    )) {
       const coord = x1 === x2 && y1 === y2 ? `(${x1},${y1})` : `(${x1},${y1})-(${x2},${y2})`;
       lines.push(`  floor ${coord} ${floorType}`);
     }
 
-    for (const { x1, y1, x2, y2, edge, wallType } of packWallRuns(virtualCells, lw, lh)) {
+    // Emit walls from the collected edges
+    const wallRuns: WallRun[] = [];
+    for (const [key, wallType] of roomEdges) {
+      const [kind, xStr, yStr] = key.split(":");
+      const x = Number.parseInt(xStr, 10);
+      const y = Number.parseInt(yStr, 10);
+      const edge: EdgeRef = { kind: kind as "h" | "v", x, y };
+
+      if (edge.kind === "h") {
+        wallRuns.push({
+          side: "top",
+          wallType,
+          x1: x,
+          x2: x,
+          y1: y,
+          y2: y,
+        });
+      } else {
+        wallRuns.push({
+          side: "left",
+          wallType,
+          x1: x,
+          x2: x,
+          y1: y,
+          y2: y,
+        });
+      }
+    }
+
+    for (const { x1, y1, x2, y2, side, wallType } of wallRuns) {
       const coord = x1 === x2 && y1 === y2 ? `(${x1},${y1})` : `(${x1},${y1})-(${x2},${y2})`;
-      lines.push(`  wall ${coord} ${edge} ${wallType}`);
+      lines.push(`  wall ${coord} ${side} ${wallType}`);
     }
 
     for (const { lx, ly, idx } of roomCells) {
@@ -234,24 +271,42 @@ export function floorToDsl(floor: FloorPlan): string {
     lines.push(`place ${patternName} at (${minX},${minY})`);
   }
 
-  // Walls not belonging to any room cell
-  const nonRoomCells = cells.map((c, idx) =>
-    inRoom.has(idx)
-      ? {
-          ...c,
-          floorType: null,
-          item: null,
-          wall: { left: "none" as WallType, top: "none" as WallType },
-        }
-      : c,
-  );
+  // Walls not belonging to any room cell - use run-length encoding
+  const nonRoomHWalls = createHWalls(width, height);
+  const nonRoomVWalls = createVWalls(width, height);
 
-  for (const { x1, y1, x2, y2, edge, wallType } of packWallRuns(nonRoomCells, width, height)) {
-    const coord = x1 === x2 && y1 === y2 ? `(${x1},${y1})` : `(${x1},${y1})-(${x2},${y2})`;
-    lines.push(`wall ${coord} ${edge} ${wallType}`);
+  for (let y = 0; y <= height; y++) {
+    for (let x = 0; x < width; x++) {
+      const idx = y < height ? y * width + x : -1;
+      if (idx < 0 || !inRoom.has(idx)) {
+        nonRoomHWalls[hIndex(width, x, y)] = hWalls[hIndex(width, x, y)];
+      }
+    }
+  }
+  for (let x = 0; x <= width; x++) {
+    for (let y = 0; y < height; y++) {
+      const idx = y * width + x;
+      if (x >= width || !inRoom.has(idx)) {
+        nonRoomVWalls[vIndex(width, x, y)] = vWalls[vIndex(width, x, y)];
+      }
+    }
   }
 
-  for (const { x1, y1, x2, y2, floorType } of packFloorRects(nonRoomCells, width, height)) {
+  for (const { x1, y1, x2, y2, side, wallType } of packWallRuns(
+    nonRoomHWalls,
+    nonRoomVWalls,
+    width,
+    height,
+  )) {
+    const coord = x1 === x2 && y1 === y2 ? `(${x1},${y1})` : `(${x1},${y1})-(${x2},${y2})`;
+    lines.push(`wall ${coord} ${side} ${wallType}`);
+  }
+
+  for (const { x1, y1, x2, y2, floorType } of packFloorRects(
+    cells.map((c, idx) => (inRoom.has(idx) ? { ...c, floorType: null } : c)),
+    width,
+    height,
+  )) {
     const coord = x1 === x2 && y1 === y2 ? `(${x1},${y1})` : `(${x1},${y1})-(${x2},${y2})`;
     lines.push(`floor ${coord} ${floorType}`);
   }
@@ -279,34 +334,55 @@ interface PatternCell {
   y: number;
   floorType?: FloorType;
   item?: { type: ItemType; rotation: 0 | 90 | 180 | 270 };
-  wallTop?: WallType;
-  wallLeft?: WallType;
 }
 
-function rotatePatternCW90(cells: PatternCell[], _maxX: number, maxY: number): PatternCell[] {
-  return cells.map(({ x, y, floorType, item, wallTop, wallLeft }) => {
+interface PatternWall {
+  edge: EdgeRef;
+  type: WallType;
+}
+
+function rotateEdgeCW90(e: EdgeRef, maxY: number): EdgeRef {
+  return e.kind === "h"
+    ? { kind: "v", x: maxY + 1 - e.y, y: e.x }
+    : { kind: "h", x: maxY - e.y, y: e.x };
+}
+
+function rotatePatternCW90(
+  cells: PatternCell[],
+  walls: PatternWall[],
+  _maxX: number,
+  maxY: number,
+): { cells: PatternCell[]; walls: PatternWall[] } {
+  const newCells = cells.map(({ x, y, floorType, item }) => {
     const nx = maxY - y;
     const ny = x;
     const newItem = item
       ? { ...item, rotation: ((item.rotation + 90) % 360) as 0 | 90 | 180 | 270 }
       : undefined;
-    // CW90: top→left of (nx,ny), left→top of (nx,ny) but on the prev column boundary
-    // Top wall at (x,y) becomes left wall at (nx+1, ny) — handled by caller shifting
-    // Left wall at (x,y) becomes top wall at (nx, ny)
-    return { floorType, item: newItem, wallLeft: wallTop, wallTop: wallLeft, x: nx, y: ny };
+    return { floorType, item: newItem, x: nx, y: ny };
   });
+
+  const newWalls = walls.map(({ edge, type }) => ({
+    edge: rotateEdgeCW90(edge, maxY),
+    type,
+  }));
+
+  return { cells: newCells, walls: newWalls };
 }
 
 function applyPatternCells(
   patternCells: PatternCell[],
+  patternWalls: PatternWall[],
   rotate: 0 | 90 | 180 | 270,
   ox: number,
   oy: number,
   cellOverrides: Map<number, Partial<Cell>>,
+  edgeWalls: Map<string, WallType>,
   width: number,
   height: number,
 ): void {
   let cells = patternCells;
+  let walls = patternWalls;
 
   // Compute bounding box for rotation pivot
   let maxX = 0;
@@ -322,29 +398,41 @@ function applyPatternCells(
 
   const steps = rotate / 90;
   for (let i = 0; i < steps; i++) {
-    cells = rotatePatternCW90(cells, maxX, maxY);
+    const rotated = rotatePatternCW90(cells, walls, maxX, maxY);
+    cells = rotated.cells;
+    walls = rotated.walls;
     // After rotation new maxX=maxY, maxY=maxX
     const tmp = maxX;
     maxX = maxY;
     maxY = tmp;
   }
 
-  for (const { x, y, floorType, item, wallTop, wallLeft } of cells) {
+  for (const { x, y, floorType, item } of cells) {
     const fx = x + ox;
     const fy = y + oy;
     if (fx >= 0 && fy >= 0 && fx < width && fy < height) {
       const idx = fy * width + fx;
       const cur = cellOverrides.get(idx) ?? {};
-      const wall = cur.wall ?? { left: "none", top: "none" };
       cellOverrides.set(idx, {
         ...cur,
         ...(floorType === undefined ? {} : { floorType }),
         ...(item === undefined ? {} : { item }),
-        wall: {
-          left: wallLeft ?? wall.left,
-          top: wallTop ?? wall.top,
-        },
       });
+    }
+  }
+
+  for (const { edge, type } of walls) {
+    const fx = edge.x + ox;
+    const fy = edge.y + oy;
+
+    const valid =
+      edge.kind === "h"
+        ? fx >= 0 && fx < width && fy >= 0 && fy <= height
+        : fx >= 0 && fx <= width && fy >= 0 && fy < height;
+
+    if (valid) {
+      const key = `${edge.kind}:${fx}:${fy}`;
+      edgeWalls.set(key, type);
     }
   }
 }
@@ -361,32 +449,6 @@ function parseCoordBlocks(coordsStr: string): { x1: number; y1: number; x2: numb
     const y2 = cm.groups!.y2 === undefined ? y1 : Number.parseInt(cm.groups!.y2, 10);
     return [{ x1, x2, y1, y2 }];
   });
-}
-
-function upsertPatternWall(
-  patternCells: PatternCell[],
-  x1: number,
-  x2: number,
-  fy: number,
-  edge: "top" | "left",
-  wallType: WallType,
-): void {
-  for (let fx = x1; fx <= x2; fx++) {
-    const existing = patternCells.find((c) => c.x === fx && c.y === fy);
-    if (existing) {
-      if (edge === "top") {
-        existing.wallTop = wallType;
-      } else {
-        existing.wallLeft = wallType;
-      }
-    } else {
-      patternCells.push({
-        x: fx,
-        y: fy,
-        ...(edge === "top" ? { wallTop: wallType } : { wallLeft: wallType }),
-      });
-    }
-  }
 }
 
 function upsertPatternFloor(
@@ -412,22 +474,28 @@ export function dslToFloor(text: string): FloorPlan {
   let name = "Floor";
 
   const cellOverrides = new Map<number, Partial<Cell>>();
-  const patterns = new Map<string, PatternCell[]>();
+  const edgeWalls = new Map<string, WallType>();
+  const patterns = new Map<string, { cells: PatternCell[]; walls: PatternWall[] }>();
 
   function getCell(idx: number): Partial<Cell> {
     return cellOverrides.get(idx) ?? {};
   }
 
-  function applyWall(coordsStr: string, edge: "top" | "left", wallType: WallType) {
+  function applyWall(coordsStr: string, side: Side, wallType: WallType) {
     for (const { x1, y1, x2, y2 } of parseCoordBlocks(coordsStr)) {
-      for (let fy = y1; fy <= y2 && fy < height; fy++) {
-        for (let fx = x1; fx <= x2 && fx < width; fx++) {
-          const idx = fy * width + fx;
-          const cur = getCell(idx);
-          cellOverrides.set(idx, {
-            ...cur,
-            wall: { ...(cur.wall ?? { left: "none", top: "none" }), [edge]: wallType },
-          });
+      for (let fy = y1; fy <= y2; fy++) {
+        for (let fx = x1; fx <= x2; fx++) {
+          const edge = sideToEdge(fx, fy, side);
+
+          const valid =
+            edge.kind === "h"
+              ? edge.x >= 0 && edge.x < width && edge.y >= 0 && edge.y <= height
+              : edge.x >= 0 && edge.x <= width && edge.y >= 0 && edge.y < height;
+
+          if (valid) {
+            const key = `${edge.kind}:${edge.x}:${edge.y}`;
+            edgeWalls.set(key, wallType);
+          }
         }
       }
     }
@@ -455,17 +523,23 @@ export function dslToFloor(text: string): FloorPlan {
     if (patternDefMatch) {
       const patternName = patternDefMatch.groups!.name;
       const patternCells: PatternCell[] = [];
+      const patternWalls: PatternWall[] = [];
       i++;
       while (i < lines.length && lines[i] !== "end") {
         const pl = lines[i];
-        const wm = pl.match(/^wall\s+(?<coords>[\d(),&-]+)\s+(?<edge>top|left)\s+(?<type>\S+)$/u);
+        const wm = pl.match(
+          /^wall\s+(?<coords>[\d(),&-]+)\s+(?<side>top|left|right|bottom)\s+(?<type>\S+)$/u,
+        );
         if (wm) {
-          const edge = wm.groups!.edge as "top" | "left";
+          const side = wm.groups!.side as Side;
           const wallType = wm.groups!.type as WallType;
           if (WALL_TYPES.includes(wallType)) {
             for (const { x1, y1, x2, y2 } of parseCoordBlocks(wm.groups!.coords)) {
               for (let fy = y1; fy <= y2; fy++) {
-                upsertPatternWall(patternCells, x1, x2, fy, edge, wallType);
+                for (let fx = x1; fx <= x2; fx++) {
+                  const edge = sideToEdge(fx, fy, side);
+                  patternWalls.push({ edge, type: wallType });
+                }
               }
             }
           }
@@ -500,7 +574,7 @@ export function dslToFloor(text: string): FloorPlan {
         }
         i++;
       }
-      patterns.set(patternName, patternCells);
+      patterns.set(patternName, { cells: patternCells, walls: patternWalls });
     }
     i++;
   }
@@ -537,15 +611,14 @@ export function dslToFloor(text: string): FloorPlan {
       continue;
     }
 
-    // Wall (x1,y1)[-(x2,y2)][&...] top|left wallType
     const wallMatch = line.match(
-      /^wall\s+(?<coords>[\d(),&-]+)\s+(?<edge>top|left)\s+(?<type>\S+)$/u,
+      /^wall\s+(?<coords>[\d(),&-]+)\s+(?<side>top|left|right|bottom)\s+(?<type>\S+)$/u,
     );
     if (wallMatch) {
-      const edge = wallMatch.groups!.edge as "top" | "left";
+      const side = wallMatch.groups!.side as Side;
       const wallType = wallMatch.groups!.type as WallType;
       if (WALL_TYPES.includes(wallType)) {
-        applyWall(wallMatch.groups!.coords, edge, wallType);
+        applyWall(wallMatch.groups!.coords, side, wallType);
       }
       continue;
     }
@@ -590,23 +663,53 @@ export function dslToFloor(text: string): FloorPlan {
         | 90
         | 180
         | 270;
-      const patternCells = patterns.get(patternName);
-      if (patternCells) {
-        applyPatternCells(patternCells, rotate, ox, oy, cellOverrides, width, height);
+      const pattern = patterns.get(patternName);
+      if (pattern) {
+        applyPatternCells(
+          pattern.cells,
+          pattern.walls,
+          rotate,
+          ox,
+          oy,
+          cellOverrides,
+          edgeWalls,
+          width,
+          height,
+        );
       }
       continue;
     }
   }
 
+  // Build cells and walls
   const cells: Cell[] = [];
   for (let j = 0; j < width * height; j++) {
     const override = cellOverrides.get(j) ?? {};
     cells.push({
       floorType: override.floorType ?? null,
       item: override.item ?? null,
-      wall: override.wall ?? { left: "none", top: "none" },
     });
   }
 
-  return { cells, height, id: uuidv4(), name, width };
+  // Create hWalls and vWalls from edgeWalls
+  const hWalls = createHWalls(width, height);
+  const vWalls = createVWalls(width, height);
+
+  for (const [key, wallType] of edgeWalls) {
+    const [kind, xStr, yStr] = key.split(":");
+    const x = Number.parseInt(xStr, 10);
+    const y = Number.parseInt(yStr, 10);
+
+    if (kind === "h") {
+      if (x >= 0 && x < width && y >= 0 && y <= height) {
+        hWalls[hIndex(width, x, y)] = wallType;
+      }
+    } else {
+      if (x >= 0 && x <= width && y >= 0 && y < height) {
+        vWalls[vIndex(width, x, y)] = wallType;
+      }
+    }
+  }
+
+  return { cells, height, id: uuidv4(), name, width, hWalls, vWalls };
 }
