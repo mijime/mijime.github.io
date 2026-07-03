@@ -79,7 +79,7 @@ interface WallRun {
 function collectWallRuns(floor: FloorPlan): WallRun[] {
   const runs: WallRun[] = [];
   // Top壁 (hWalls): 行 y=0..height ごとにx方向へマージ
-  for (let y = 0; y < floor.height; y++) {
+  for (let y = 0; y <= floor.height; y++) {
     let current: WallRun | null = null;
     for (let x = 0; x < floor.width; x++) {
       const t = floor.hWalls[hIndex(floor.width, x, y)];
@@ -94,7 +94,7 @@ function collectWallRuns(floor: FloorPlan): WallRun[] {
     }
   }
   // Left壁 (vWalls): 列 x=0..width ごとにz方向へマージ
-  for (let x = 0; x < floor.width; x++) {
+  for (let x = 0; x <= floor.width; x++) {
     let current: WallRun | null = null;
     for (let y = 0; y < floor.height; y++) {
       const t = floor.vWalls[vIndex(floor.width, x, y)];

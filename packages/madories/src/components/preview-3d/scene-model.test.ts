@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { createFloorPlan } from "../../store";
-import { hIndex } from "../../floor/walls";
+import { hIndex, vIndex } from "../../floor/walls";
 import { CELL_CM, CM_TO_M } from "./config";
 import { buildSceneModel } from "./scene-model";
 
@@ -86,5 +86,16 @@ describe("buildSceneModel", () => {
       expect(box.position[2] + box.size[2] / 2).toBeLessThanOrEqual(CELL_M / 2 + 1e-6);
       expect(box.position[2] - box.size[2] / 2).toBeGreaterThanOrEqual(-CELL_M / 2 - 1e-6);
     }
+  });
+
+  it("includes boundary walls (bottom and right edges)", () => {
+    const floor = createFloorPlan("test", 2, 2);
+    // Bottom boundary wall (y=height)
+    floor.hWalls[hIndex(floor.width, 0, floor.height)] = "solid";
+    // Right boundary wall (x=width)
+    floor.vWalls[vIndex(floor.width, floor.width, 0)] = "solid";
+    const model = buildSceneModel(floor);
+    // Both walls should produce boxes: 1 hWall + 1 vWall
+    expect(model.walls).toHaveLength(2);
   });
 });
