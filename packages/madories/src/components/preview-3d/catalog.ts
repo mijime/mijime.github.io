@@ -128,13 +128,13 @@ export const ITEM_CATALOG: Record<ItemType, ItemSpec> = {
     ],
   },
   desk: {
-    footprint: { d: 65, w: 125 },
+    footprint: { d: 125, w: 65 },
     parts: [
-      { materialKey: "wood_light", offset: [0, 68, 0], size: [120, 4, 60] },
-      { materialKey: "wood", offset: [-55, 0, -25], size: [5, 68, 5] },
-      { materialKey: "wood", offset: [55, 0, -25], size: [5, 68, 5] },
-      { materialKey: "wood", offset: [-55, 0, 25], size: [5, 68, 5] },
-      { materialKey: "wood", offset: [55, 0, 25], size: [5, 68, 5] },
+      { materialKey: "wood_light", offset: [0, 68, 0], size: [60, 4, 120] },
+      { materialKey: "wood", offset: [-25, 0, -55], size: [5, 68, 5] },
+      { materialKey: "wood", offset: [-25, 0, 55], size: [5, 68, 5] },
+      { materialKey: "wood", offset: [25, 0, -55], size: [5, 68, 5] },
+      { materialKey: "wood", offset: [25, 0, 55], size: [5, 68, 5] },
     ],
   },
   desk_small: {

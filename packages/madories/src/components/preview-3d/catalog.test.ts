@@ -31,6 +31,17 @@ describe("catalog", () => {
     }
   });
 
+  it("matches footprint aspect orientation to grid def orientation", () => {
+    for (const def of ITEM_DEFS) {
+      const spec = ITEM_CATALOG[def.type];
+      if (def.w < def.h) {
+        expect(spec.footprint.w, def.type).toBeLessThanOrEqual(spec.footprint.d);
+      } else if (def.w > def.h) {
+        expect(spec.footprint.w, def.type).toBeGreaterThanOrEqual(spec.footprint.d);
+      }
+    }
+  });
+
   it("falls back for unknown types", () => {
     const spec = getItemSpec("chair");
     expect(spec.parts.length).toBeGreaterThan(0);
