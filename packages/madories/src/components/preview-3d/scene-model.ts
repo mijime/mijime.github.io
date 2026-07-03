@@ -1,5 +1,6 @@
 import { ITEM_DEF_MAP } from "../../items";
 import type { FloorPlan, Item, WallType } from "../../types";
+import { hIndex, vIndex } from "../../floor/walls";
 import { getItemSpec, type Part } from "./catalog";
 import {
   CELL_CM,
@@ -77,11 +78,11 @@ interface WallRun {
 
 function collectWallRuns(floor: FloorPlan): WallRun[] {
   const runs: WallRun[] = [];
-  // Top壁: 行ごとにx方向へマージ
+  // Top壁 (hWalls): 行 y=0..height ごとにx方向へマージ
   for (let y = 0; y < floor.height; y++) {
     let current: WallRun | null = null;
     for (let x = 0; x < floor.width; x++) {
-      const t = floor.cells[y * floor.width + x].wall.top;
+      const t = floor.hWalls[hIndex(floor.width, x, y)];
       if (t === "none") {
         current = null;
       } else if (current && current.wallType === t && current.end === x) {
@@ -92,11 +93,11 @@ function collectWallRuns(floor: FloorPlan): WallRun[] {
       }
     }
   }
-  // Left壁: 列ごとにz方向へマージ
+  // Left壁 (vWalls): 列 x=0..width ごとにz方向へマージ
   for (let x = 0; x < floor.width; x++) {
     let current: WallRun | null = null;
     for (let y = 0; y < floor.height; y++) {
-      const t = floor.cells[y * floor.width + x].wall.left;
+      const t = floor.vWalls[vIndex(floor.width, x, y)];
       if (t === "none") {
         current = null;
       } else if (current && current.wallType === t && current.end === y) {

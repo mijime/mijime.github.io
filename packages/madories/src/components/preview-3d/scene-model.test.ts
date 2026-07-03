@@ -1,25 +1,15 @@
 import { describe, expect, it } from "vitest";
-import type { Cell, FloorPlan } from "../../types";
+import { createFloorPlan } from "../../store";
+import { hIndex } from "../../floor/walls";
 import { CELL_CM, CM_TO_M } from "./config";
 import { buildSceneModel } from "./scene-model";
-
-function emptyCell(): Cell {
-  return { floorType: null, item: null, wall: { left: "none", top: "none" } };
-}
-
-function makeFloor(width: number, height: number, mutate?: (cells: Cell[]) => void): FloorPlan {
-  const cells = Array.from({ length: width * height }, emptyCell);
-  mutate?.(cells);
-  return { cells, height, id: "f1", name: "test", width };
-}
 
 const CELL_M = CELL_CM * CM_TO_M;
 
 describe("buildSceneModel", () => {
   it("generates one floor box per non-null cell, top surface at y=0", () => {
-    const floor = makeFloor(2, 1, (cells) => {
-      cells[0].floorType = "wood";
-    });
+    const floor = createFloorPlan("test", 2, 1);
+    floor.cells[0].floorType = "wood";
     const model = buildSceneModel(floor);
     expect(model.floors).toHaveLength(1);
     const box = model.floors[0];
@@ -31,17 +21,16 @@ describe("buildSceneModel", () => {
   });
 
   it("computes bounds from grid size", () => {
-    const model = buildSceneModel(makeFloor(3, 2));
+    const model = buildSceneModel(createFloorPlan("test", 3, 2));
     expect(model.bounds.width).toBeCloseTo(3 * CELL_M);
     expect(model.bounds.depth).toBeCloseTo(2 * CELL_M);
   });
 
   it("merges consecutive solid walls in a row into one box", () => {
-    const floor = makeFloor(3, 1, (cells) => {
-      cells[0].wall.top = "solid";
-      cells[1].wall.top = "solid";
-      cells[2].wall.top = "solid";
-    });
+    const floor = createFloorPlan("test", 3, 1);
+    floor.hWalls[hIndex(3, 0, 0)] = "solid";
+    floor.hWalls[hIndex(3, 1, 0)] = "solid";
+    floor.hWalls[hIndex(3, 2, 0)] = "solid";
     const model = buildSceneModel(floor);
     expect(model.walls).toHaveLength(1);
     // 3セル分 + 両端厚さ/2延長
@@ -50,18 +39,16 @@ describe("buildSceneModel", () => {
   });
 
   it("does not merge walls of different types", () => {
-    const floor = makeFloor(2, 1, (cells) => {
-      cells[0].wall.top = "solid";
-      cells[1].wall.top = "solid_thin";
-    });
+    const floor = createFloorPlan("test", 2, 1);
+    floor.hWalls[hIndex(2, 0, 0)] = "solid";
+    floor.hWalls[hIndex(2, 1, 0)] = "solid_thin";
     const model = buildSceneModel(floor);
     expect(model.walls).toHaveLength(2);
   });
 
   it("splits window_center into wall/glass/wall vertically", () => {
-    const floor = makeFloor(1, 1, (cells) => {
-      cells[0].wall.top = "window_center";
-    });
+    const floor = createFloorPlan("test", 1, 1);
+    floor.hWalls[hIndex(1, 0, 0)] = "window_center";
     const model = buildSceneModel(floor);
     expect(model.walls).toHaveLength(3);
     // eslint-disable-next-line unicorn/no-array-sort -- toSorted requires ES2023 lib not configured in this project
@@ -74,20 +61,17 @@ describe("buildSceneModel", () => {
   });
 
   it("renders a multi-cell item exactly once", () => {
-    const floor = makeFloor(1, 2, (cells) => {
-      // Bed_single は w=1,h=2 の2セル占有。両セルに同じitemが入っている状態
-      cells[0].item = { rotation: 0, type: "bed_single" };
-      cells[1].item = { rotation: 0, type: "bed_single" };
-    });
+    const floor = createFloorPlan("test", 1, 2);
+    floor.cells[0].item = { rotation: 0, type: "bed_single" };
+    floor.cells[1].item = { rotation: 0, type: "bed_single" };
     const model = buildSceneModel(floor);
     // Bed_singleのパーツ数 = 3(フレーム+マットレス+枕)
     expect(model.items).toHaveLength(3);
   });
 
   it("swaps footprint axes when rotated 90 degrees", () => {
-    const floor = makeFloor(2, 2, (cells) => {
-      cells[0].item = { rotation: 90, type: "bathtub" };
-    });
+    const floor = createFloorPlan("test", 2, 2);
+    floor.cells[0].item = { rotation: 90, type: "bathtub" };
     const model = buildSceneModel(floor);
     const tub = model.items[0];
     // Bathtub本体 75x160(d) → 90度回転でx方向が160側になる
@@ -95,10 +79,8 @@ describe("buildSceneModel", () => {
   });
 
   it("clamps oversized footprints into the occupied cells keeping height", () => {
-    const floor = makeFloor(1, 1, (cells) => {
-      // Washbasin_large は h=2 だが1x1グリッドに置く → 占有可能は1セルのみ、d=165cm > 91cm
-      cells[0].item = { rotation: 0, type: "washbasin_large" };
-    });
+    const floor = createFloorPlan("test", 1, 1);
+    floor.cells[0].item = { rotation: 0, type: "washbasin_large" };
     const model = buildSceneModel(floor);
     for (const box of model.items) {
       expect(box.position[2] + box.size[2] / 2).toBeLessThanOrEqual(CELL_M / 2 + 1e-6);
