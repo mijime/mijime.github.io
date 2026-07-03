@@ -1,5 +1,6 @@
 import type { FloorPlan, ItemType, WallType } from "../types";
 import { WALL_WINDOW_SCORE } from "../types";
+import { hIndex, vIndex } from "../floor/walls";
 import { FLOOR_TYPES, floorTypeToColor } from "../components/tool-mode";
 import {
   ITEM_DEF_MAP,
@@ -28,13 +29,17 @@ export const MM_PER_CELL = 910;
 export function computeFloorScores(floor: FloorPlan): { storage: number; windows: number } {
   let storage = 0;
   let windows = 0;
-  for (const c of floor.cells) {
+  for (let i = 0; i < floor.cells.length; i++) {
+    const c = floor.cells[i];
     if (c.item) {
       storage += ITEM_DEF_MAP.get(c.item.type)?.storageScore ?? 0;
     }
-    for (const w of [c.wall.top, c.wall.left]) {
-      windows += WALL_WINDOW_SCORE[w] ?? 0;
-    }
+  }
+  for (let i = 0; i < floor.hWalls.length; i++) {
+    windows += WALL_WINDOW_SCORE[floor.hWalls[i]] ?? 0;
+  }
+  for (let i = 0; i < floor.vWalls.length; i++) {
+    windows += WALL_WINDOW_SCORE[floor.vWalls[i]] ?? 0;
   }
   return { storage, windows };
 }
@@ -55,11 +60,25 @@ export function computeBounds(
   for (let y = y1; y <= y2; y++) {
     for (let x = x1; x <= x2; x++) {
       const cell = floor.cells[y * floor.width + x];
-      const used =
-        cell.floorType !== null ||
-        cell.wall.top !== "none" ||
-        cell.wall.left !== "none" ||
-        cell.item !== null;
+      let used = cell.floorType !== null || cell.item !== null;
+      if (!used && x >= 0 && x < floor.width && y >= 0 && y < floor.height) {
+        // Check top edge
+        if (floor.hWalls[hIndex(floor.width, x, y)] !== "none") {
+          used = true;
+        }
+        // Check bottom edge
+        else if (floor.hWalls[hIndex(floor.width, x, y + 1)] !== "none") {
+          used = true;
+        }
+        // Check left edge
+        else if (floor.vWalls[vIndex(floor.width, x, y)] !== "none") {
+          used = true;
+        }
+        // Check right edge
+        else if (floor.vWalls[vIndex(floor.width, x + 1, y)] !== "none") {
+          used = true;
+        }
+      }
       if (used) {
         if (x < minX) {
           minX = x;
@@ -92,9 +111,8 @@ export function computeWallDimensions(floor: FloorPlan, cellSize: number) {
     maxWallY = -Infinity;
 
   for (let y = 0; y < floor.height; y++) {
-    for (let x = 0; x < floor.width; x++) {
-      const cell = floor.cells[y * floor.width + x];
-      if (cell.wall.left !== "none") {
+    for (let x = 0; x <= floor.width; x++) {
+      if (floor.vWalls[vIndex(floor.width, x, y)] !== "none") {
         if (x < minWallX) {
           minWallX = x;
         }
@@ -102,7 +120,11 @@ export function computeWallDimensions(floor: FloorPlan, cellSize: number) {
           maxWallX = x;
         }
       }
-      if (cell.wall.top !== "none") {
+    }
+  }
+  for (let y = 0; y <= floor.height; y++) {
+    for (let x = 0; x < floor.width; x++) {
+      if (floor.hWalls[hIndex(floor.width, x, y)] !== "none") {
         if (y < minWallY) {
           minWallY = y;
         }
@@ -325,11 +347,17 @@ export function exportAllFloorsPng(floors: FloorPlan[], cellSize: number): void 
           usedItemTypes.push(rep);
         }
       }
-      for (const wt of [c.wall.top, c.wall.left] as WallType[]) {
-        if (wt !== "none" && !seenWallTypes.has(wt)) {
-          seenWallTypes.add(wt);
-          usedWallTypes.push(wt);
-        }
+    }
+    for (const wt of r.floor.hWalls) {
+      if (wt !== "none" && !seenWallTypes.has(wt)) {
+        seenWallTypes.add(wt);
+        usedWallTypes.push(wt);
+      }
+    }
+    for (const wt of r.floor.vWalls) {
+      if (wt !== "none" && !seenWallTypes.has(wt)) {
+        seenWallTypes.add(wt);
+        usedWallTypes.push(wt);
       }
     }
   }

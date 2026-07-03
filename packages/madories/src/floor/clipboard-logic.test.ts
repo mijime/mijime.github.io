@@ -1,9 +1,11 @@
 import { describe, expect, it } from "vitest";
 import { copyRegion, normalizeSelection, pasteOriginIndex } from "./clipboard-logic";
+import { createFloorPlan } from "../store";
+import { setWallsPure } from "./walls";
 import type { Cell, FloorPlan } from "../types";
 
 function emptyCell(): Cell {
-  return { floorType: null, item: null, wall: { left: "none", top: "none" } };
+  return { floorType: null, item: null };
 }
 
 function makeFloor(
@@ -15,7 +17,15 @@ function makeFloor(
     ...emptyCell(),
     ...overrides[i],
   }));
-  return { cells, height, id: "test", name: "test", width };
+  return {
+    cells,
+    height,
+    id: "test",
+    name: "test",
+    width,
+    hWalls: Array(width * (height + 1)).fill("none"),
+    vWalls: Array((width + 1) * height).fill("none"),
+  };
 }
 
 describe("normalizeSelection", () => {
@@ -77,6 +87,14 @@ describe("copyRegion", () => {
     });
     const result = copyRegion(floor, { x1: 0, x2: 1, y1: 0, y2: 1 });
     expect(result!.cells.map((c) => c.floorType)).toEqual(["wood", "water", "tatami", "wood"]);
+  });
+
+  it("copies boundary walls of the region", () => {
+    let floor = createFloorPlan("t", 5, 5);
+    floor = setWallsPure(floor, [{ kind: "h", x: 1, y: 3 }], "solid"); // (1,2)セルの下辺
+    const region = copyRegion(floor, { x1: 1, y1: 1, x2: 2, y2: 2 })!;
+    expect(region).not.toBeNull();
+    expect(region.hWalls[1]).toBe("solid");
   });
 });
 

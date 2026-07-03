@@ -1,5 +1,6 @@
 import { computeBounds } from "../draw/export";
-import type { CopiedRegion, FloorPlan } from "../types";
+import { hIndex, vIndex } from "./walls";
+import type { CopiedRegion, FloorPlan, WallType } from "../types";
 
 export function normalizeSelection(sel: { x1: number; y1: number; x2: number; y2: number }) {
   return {
@@ -28,7 +29,19 @@ export function copyRegion(
       cells.push(floor.cells[cy * floor.width + cx]);
     }
   }
-  return { cells, height, width };
+  const hWalls: WallType[] = [];
+  for (let cy = minY; cy <= maxY + 1; cy++) {
+    for (let cx = minX; cx <= maxX; cx++) {
+      hWalls.push(floor.hWalls[hIndex(floor.width, cx, cy)]);
+    }
+  }
+  const vWalls: WallType[] = [];
+  for (let cy = minY; cy <= maxY; cy++) {
+    for (let cx = minX; cx <= maxX + 1; cx++) {
+      vWalls.push(floor.vWalls[vIndex(floor.width, cx, cy)]);
+    }
+  }
+  return { cells, height, width, hWalls, vWalls };
 }
 
 export function pasteOriginIndex(
