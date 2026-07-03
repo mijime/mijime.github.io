@@ -44,35 +44,13 @@ function isBlocked(
   fromIdx: number,
   dir: "top" | "left" | "bottom" | "right",
 ): boolean {
-  const { width, cells } = floor;
+  const { width, height, hWalls, vWalls } = floor;
   const x = fromIdx % width;
   const y = Math.floor(fromIdx / width);
-
-  if (dir === "top") {
-    if (y === 0) {
-      return true;
-    }
-    return cells[fromIdx].wall.top !== "none";
-  }
-  if (dir === "left") {
-    if (x === 0) {
-      return true;
-    }
-    return cells[fromIdx].wall.left !== "none";
-  }
-  if (dir === "bottom") {
-    const ny = y + 1;
-    if (ny >= floor.height) {
-      return true;
-    }
-    return cells[ny * width + x].wall.top !== "none";
-  }
-  // Right
-  const nx = x + 1;
-  if (nx >= width) {
-    return true;
-  }
-  return cells[y * width + nx].wall.left !== "none";
+  if (dir === "top") return y === 0 || hWalls[y * width + x] !== "none";
+  if (dir === "bottom") return y + 1 >= height || hWalls[(y + 1) * width + x] !== "none";
+  if (dir === "left") return x === 0 || vWalls[y * (width + 1) + x] !== "none";
+  return x + 1 >= width || vWalls[y * (width + 1) + x + 1] !== "none";
 }
 
 export function detectRooms(floor: FloorPlan): Room[] {
