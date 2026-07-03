@@ -31,13 +31,15 @@ function stairsParts(): Part[] {
 }
 
 export const ITEM_CATALOG: Record<ItemType, ItemSpec> = {
+  // 2Dアイコンの閉扉位置(rotation=0で左端)に合わせ、セル左端の壁面上に置く
   door: {
     footprint: { d: 91, w: 91 },
-    parts: [{ materialKey: "wood", offset: [0, 0, 0], size: [80, 200, 6] }],
+    parts: [{ materialKey: "wood", offset: [-42.5, 0, 0], size: [6, 200, 80] }],
   },
+  // 引き戸の2Dアイコンはrotation=0で上端に水平なので、セル上端に置く
   door_slide: {
     footprint: { d: 91, w: 91 },
-    parts: [{ materialKey: "wood_light", offset: [0, 0, 0], size: [85, 200, 4] }],
+    parts: [{ materialKey: "wood_light", offset: [0, 0, -43.5], size: [85, 200, 4] }],
   },
   stairs: { footprint: { d: 182, w: 91 }, parts: stairsParts() },
   toilet: {
@@ -146,7 +148,7 @@ export const ITEM_CATALOG: Record<ItemType, ItemSpec> = {
     parts: [
       { materialKey: "wood", offset: [0, 0, 0], size: [8, 42, 8] },
       { materialKey: "fabric", offset: [0, 42, 0], size: [44, 8, 44] },
-      { materialKey: "fabric_dark", offset: [0, 50, -20], size: [44, 45, 6] },
+      { materialKey: "fabric_dark", offset: [0, 50, 20], size: [44, 45, 6] },
     ],
   },
   car: {

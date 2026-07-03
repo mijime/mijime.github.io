@@ -88,6 +88,43 @@ describe("buildSceneModel", () => {
     }
   });
 
+  it("faces chair back toward +z at rotation 0, matching 2D icon", () => {
+    const floor = createFloorPlan("test", 1, 1);
+    floor.cells[0].item = { rotation: 0, type: "chair" };
+    const model = buildSceneModel(floor);
+    const back = model.items.find((b) => b.materialKey === "fabric_dark")!;
+    expect(back.position[2]).toBeGreaterThan(0);
+  });
+
+  it("rotates clockwise like the 2D canvas (chair back moves to -x at 90deg)", () => {
+    const floor = createFloorPlan("test", 1, 1);
+    floor.cells[0].item = { rotation: 90, type: "chair" };
+    const model = buildSceneModel(floor);
+    const back = model.items.find((b) => b.materialKey === "fabric_dark")!;
+    expect(back.position[0]).toBeLessThan(0);
+    expect(back.position[2]).toBeCloseTo(0);
+  });
+
+  it("places door panel at the left cell edge at rotation 0", () => {
+    const floor = createFloorPlan("test", 1, 1);
+    floor.cells[0].item = { rotation: 0, type: "door" };
+    const model = buildSceneModel(floor);
+    const panel = model.items[0];
+    // 2Dアイコンの閉扉位置(左端)に合わせ、パネル外面がセル左端 x=-CELL_M/2 に接する
+    expect(panel.position[0] - panel.size[0] / 2).toBeCloseTo(-CELL_M / 2);
+    expect(panel.size[0]).toBeLessThan(panel.size[2]);
+  });
+
+  it("places sliding door panel at the top cell edge at rotation 0", () => {
+    const floor = createFloorPlan("test", 1, 1);
+    floor.cells[0].item = { rotation: 0, type: "door_slide" };
+    const model = buildSceneModel(floor);
+    const panel = model.items[0];
+    // 2Dアイコン(上端レール)に合わせ、パネル外面がセル上端 z=-CELL_M/2 に接する
+    expect(panel.position[2] - panel.size[2] / 2).toBeCloseTo(-CELL_M / 2);
+    expect(panel.size[2]).toBeLessThan(panel.size[0]);
+  });
+
   it("includes boundary walls (bottom and right edges)", () => {
     const floor = createFloorPlan("test", 2, 2);
     // Bottom boundary wall (y=height)

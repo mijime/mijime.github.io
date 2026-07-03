@@ -187,14 +187,15 @@ function rotatePart(part: Part, rotation: Item["rotation"]): Part {
     case 0: {
       return part;
     }
+    // 2Dのctx.rotate(時計回り)と一致させる: 90度で (x,z)→(-z,x)
     case 90: {
-      return { materialKey: part.materialKey, offset: [oz, oy, -ox], size: [d, h, w] };
+      return { materialKey: part.materialKey, offset: [-oz, oy, ox], size: [d, h, w] };
     }
     case 180: {
       return { materialKey: part.materialKey, offset: [-ox, oy, -oz], size: [w, h, d] };
     }
     case 270: {
-      return { materialKey: part.materialKey, offset: [-oz, oy, ox], size: [d, h, w] };
+      return { materialKey: part.materialKey, offset: [oz, oy, -ox], size: [d, h, w] };
     }
   }
 }
