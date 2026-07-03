@@ -8,6 +8,7 @@ import {
 import { Canvas } from "@react-three/fiber";
 import { useMemo } from "react";
 import type { FloorPlan } from "../../types";
+import { CAMERA, LIGHTING } from "./config";
 import { BoxList, useSharedMaterials } from "./meshes";
 import { buildSceneModel } from "./scene-model";
 
@@ -21,8 +22,9 @@ export function FloorPlanScene({ floor, darkMode }: Props) {
   const materials = useSharedMaterials(darkMode);
 
   const maxDim = Math.max(model.bounds.width, model.bounds.depth);
-  const camDist = maxDim * 1.1;
+  const camDist = maxDim * CAMERA.distanceFactor;
   const bg = darkMode ? "#1a1a1a" : "#eceae6";
+  const [dirX, dirY, dirZ] = LIGHTING.directional.positionFactor;
 
   return (
     <Canvas
@@ -30,52 +32,66 @@ export function FloorPlanScene({ floor, darkMode }: Props) {
       style={{ background: bg, inset: 0, position: "absolute", touchAction: "none" }}
       gl={{ alpha: false, antialias: true }}
     >
-      <PerspectiveCamera makeDefault fov={45} position={[0, camDist, camDist]} />
+      <PerspectiveCamera makeDefault fov={CAMERA.fov} position={[0, camDist, camDist]} />
       <OrbitControls
         makeDefault
         enablePan={false}
-        minPolarAngle={0.1}
-        maxPolarAngle={Math.PI / 2 - 0.15}
-        minDistance={maxDim * 0.3}
-        maxDistance={maxDim * 2.5}
+        minPolarAngle={CAMERA.minPolarAngle}
+        maxPolarAngle={CAMERA.maxPolarAngle}
+        minDistance={maxDim * CAMERA.minDistanceFactor}
+        maxDistance={maxDim * CAMERA.maxDistanceFactor}
         enableDamping
         dampingFactor={0.1}
       />
-      <ambientLight intensity={darkMode ? 0.3 : 0.45} />
+      <ambientLight
+        intensity={darkMode ? LIGHTING.ambientIntensity.dark : LIGHTING.ambientIntensity.light}
+      />
       <directionalLight
         castShadow
-        position={[maxDim * 0.6, maxDim * 1.2, maxDim * 0.4]}
-        intensity={darkMode ? 1.2 : 1.6}
-        shadow-mapSize={[2048, 2048]}
+        position={[maxDim * dirX, maxDim * dirY, maxDim * dirZ]}
+        intensity={
+          darkMode ? LIGHTING.directional.intensity.dark : LIGHTING.directional.intensity.light
+        }
+        shadow-mapSize={LIGHTING.directional.shadowMapSize}
         shadow-camera-left={-maxDim}
         shadow-camera-right={maxDim}
         shadow-camera-top={maxDim}
         shadow-camera-bottom={-maxDim}
-        shadow-camera-far={maxDim * 4}
-        shadow-bias={-0.0002}
+        shadow-camera-far={maxDim * LIGHTING.directional.shadowCameraFarFactor}
+        shadow-bias={LIGHTING.directional.shadowBias}
       />
       {/* CDNプリセットは使わずLightformerで環境反射を作る(オフライン要件) */}
       <Environment resolution={64}>
         <Lightformer
-          intensity={darkMode ? 0.5 : 1}
-          position={[0, 5, 0]}
-          scale={[10, 10, 1]}
+          intensity={
+            darkMode
+              ? LIGHTING.lightformers[0].intensity.dark
+              : LIGHTING.lightformers[0].intensity.light
+          }
+          position={LIGHTING.lightformers[0].position}
+          scale={LIGHTING.lightformers[0].scale}
           rotation-x={Math.PI / 2}
         />
         <Lightformer
-          intensity={darkMode ? 0.2 : 0.5}
-          position={[-5, 1, -1]}
-          scale={[10, 2, 1]}
+          intensity={
+            darkMode
+              ? LIGHTING.lightformers[1].intensity.dark
+              : LIGHTING.lightformers[1].intensity.light
+          }
+          position={LIGHTING.lightformers[1].position}
+          scale={LIGHTING.lightformers[1].scale}
           rotation-y={Math.PI / 2}
         />
       </Environment>
       <ContactShadows
-        position={[0, -0.051, 0]}
-        opacity={darkMode ? 0.5 : 0.35}
-        scale={maxDim * 1.6}
-        blur={2}
-        far={3}
-        resolution={512}
+        position={[0, LIGHTING.contactShadows.y, 0]}
+        opacity={
+          darkMode ? LIGHTING.contactShadows.opacity.dark : LIGHTING.contactShadows.opacity.light
+        }
+        scale={maxDim * LIGHTING.contactShadows.scaleFactor}
+        blur={LIGHTING.contactShadows.blur}
+        far={LIGHTING.contactShadows.far}
+        resolution={LIGHTING.contactShadows.resolution}
       />
       <BoxList boxes={model.floors} materials={materials} receiveShadow />
       <BoxList boxes={model.walls} materials={materials} castShadow receiveShadow />

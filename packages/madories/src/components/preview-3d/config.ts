@@ -67,6 +67,48 @@ export const MATERIALS: Record<MaterialKey, MaterialDef> = {
   fallback: { light: "#999999", dark: "#666666", metalness: 0, roughness: 0.8 },
 };
 
+export const CAMERA = {
+  fov: 45,
+  distanceFactor: 1.1,
+  minDistanceFactor: 0.3,
+  maxDistanceFactor: 2.5,
+  minPolarAngle: 0.1,
+  maxPolarAngle: Math.PI / 2 - 0.15,
+};
+
+export const LIGHTING = {
+  ambientIntensity: { dark: 0.3, light: 0.45 },
+  directional: {
+    intensity: { dark: 1.2, light: 1.6 },
+    positionFactor: [0.6, 1.2, 0.4] as [number, number, number],
+    shadowMapSize: [2048, 2048] as [number, number],
+    shadowCameraFarFactor: 4,
+    shadowBias: -0.0002,
+  },
+  lightformers: [
+    {
+      intensity: { dark: 0.5, light: 1 },
+      position: [0, 5, 0] as [number, number, number],
+      scale: [10, 10, 1] as [number, number, number],
+      rotationAxis: "x" as const,
+    },
+    {
+      intensity: { dark: 0.2, light: 0.5 },
+      position: [-5, 1, -1] as [number, number, number],
+      scale: [10, 2, 1] as [number, number, number],
+      rotationAxis: "y" as const,
+    },
+  ],
+  contactShadows: {
+    y: -0.051,
+    opacity: { dark: 0.5, light: 0.35 },
+    scaleFactor: 1.6,
+    blur: 2,
+    far: 3,
+    resolution: 512,
+  },
+};
+
 export const FLOOR_MATERIAL_KEYS: Record<FloorType, MaterialKey> = {
   wood: "floor_wood",
   water: "floor_water",
