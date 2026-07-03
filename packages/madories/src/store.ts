@@ -1,7 +1,23 @@
 import { v4 as uuidv4 } from "uuid";
-import { createHWalls, createVWalls } from "./floor/walls";
+import {
+  createHWalls,
+  createVWalls,
+  hIndex,
+  vIndex,
+  setWallsPure,
+  rotateFloorCW90,
+} from "./floor/walls";
 import { detectRooms } from "./floor/room-detection";
-import type { Building, Cell, CopiedRegion, FloorPlan, FloorType, Item, WallType } from "./types";
+import type {
+  Building,
+  Cell,
+  CopiedRegion,
+  EdgeRef,
+  FloorPlan,
+  FloorType,
+  Item,
+  WallType,
+} from "./types";
 
 function createCell(): Cell {
   return { floorType: null, item: null };
@@ -28,10 +44,9 @@ export function createBuilding(): Building {
 
 type Action =
   | {
-      type: "SET_WALL";
+      type: "SET_WALLS";
       floorId: string;
-      cellIndex: number;
-      edge: "top" | "left";
+      edges: EdgeRef[];
       wallType: WallType;
     }
   | {
@@ -84,12 +99,9 @@ function updateCell(floor: FloorPlan, cellIndex: number, fn: (c: Cell) => Cell):
 
 export function reducer(state: Building, action: Action): Building {
   switch (action.type) {
-    case "SET_WALL": {
+    case "SET_WALLS": {
       return updateFloor(state, action.floorId, (floor) =>
-        updateCell(floor, action.cellIndex, (cell) => ({
-          ...cell,
-          wall: { ...cell.wall, [action.edge]: action.wallType },
-        })),
+        setWallsPure(floor, action.edges, action.wallType),
       );
     }
 
@@ -156,6 +168,8 @@ export function reducer(state: Building, action: Action): Building {
       return updateFloor(state, action.floorId, (floor) => ({
         ...floor,
         cells: Array.from({ length: floor.width * floor.height }, createCell),
+        hWalls: createHWalls(floor.width, floor.height),
+        vWalls: createVWalls(floor.width, floor.height),
       }));
     }
 
@@ -208,28 +222,74 @@ export function reducer(state: Building, action: Action): Building {
             };
           }
         }
-        return { ...floor, cells };
+
+        const hWalls = [...floor.hWalls];
+        const vWalls = [...floor.vWalls];
+        for (let ry = 0; ry <= action.region.height; ry++) {
+          for (let rx = 0; rx < action.region.width; rx++) {
+            const tx = ox + rx;
+            const ty = oy + ry;
+            if (tx < floor.width && ty <= floor.height) {
+              const w = action.region.hWalls[ry * action.region.width + rx];
+              if (w !== "none") hWalls[hIndex(floor.width, tx, ty)] = w;
+            }
+          }
+        }
+        for (let ry = 0; ry < action.region.height; ry++) {
+          for (let rx = 0; rx <= action.region.width; rx++) {
+            const tx = ox + rx;
+            const ty = oy + ry;
+            if (tx <= floor.width && ty < floor.height) {
+              const w = action.region.vWalls[ry * (action.region.width + 1) + rx];
+              if (w !== "none") vWalls[vIndex(floor.width, tx, ty)] = w;
+            }
+          }
+        }
+        return { ...floor, cells, hWalls, vWalls };
       });
     }
 
     case "ERASE_REGION": {
-      return updateFloor(state, action.floorId, (floor) => ({
-        ...floor,
-        cells: floor.cells.map((cell, i) => {
+      return updateFloor(state, action.floorId, (floor) => {
+        const cells = floor.cells.map((cell, i) => {
           const x = i % floor.width;
           const y = Math.floor(i / floor.width);
           if (x < action.x1 || x > action.x2 || y < action.y1 || y > action.y2) {
             return cell;
           }
           return createCell();
-        }),
-      }));
+        });
+
+        const edges: EdgeRef[] = [];
+        for (let y = action.y1; y <= action.y2; y++) {
+          for (let x = action.x1; x <= action.x2; x++) {
+            edges.push({ kind: "h", x, y });
+            edges.push({ kind: "h", x, y: y + 1 });
+            edges.push({ kind: "v", x, y });
+            edges.push({ kind: "v", x: x + 1, y });
+          }
+        }
+
+        return setWallsPure({ ...floor, cells }, edges, "none");
+      });
     }
 
     case "ERASE_CELL": {
-      return updateFloor(state, action.floorId, (floor) =>
-        updateCell(floor, action.cellIndex, () => createCell()),
-      );
+      return updateFloor(state, action.floorId, (floor) => {
+        const x = action.cellIndex % floor.width;
+        const y = Math.floor(action.cellIndex / floor.width);
+        const cleared = setWallsPure(
+          floor,
+          [
+            { kind: "h", x, y },
+            { kind: "h", x, y: y + 1 },
+            { kind: "v", x, y },
+            { kind: "v", x: x + 1, y },
+          ],
+          "none",
+        );
+        return updateCell(cleared, action.cellIndex, () => createCell());
+      });
     }
 
     case "FILL_ROOM": {
@@ -250,58 +310,7 @@ export function reducer(state: Building, action: Action): Building {
     }
 
     case "ROTATE_FLOOR": {
-      return updateFloor(state, action.floorId, (floor) => {
-        const { width, height, cells } = floor;
-        // CW 90°: (x,y) → (nx=height-1-y, ny=x); newWidth=height, newHeight=width
-        const newWidth = height;
-        const newHeight = width;
-        const newCells: Cell[] = Array.from({ length: newWidth * newHeight }, createCell);
-
-        // First pass: copy floorType and item
-        for (let y = 0; y < height; y++) {
-          for (let x = 0; x < width; x++) {
-            const src = cells[y * width + x];
-            const nx = height - 1 - y;
-            const ny = x;
-            newCells[ny * newWidth + nx] = {
-              ...newCells[ny * newWidth + nx],
-              floorType: src.floorType,
-              item: src.item
-                ? { ...src.item, rotation: ((src.item.rotation + 90) % 360) as 0 | 90 | 180 | 270 }
-                : null,
-            };
-          }
-        }
-
-        // Second pass: rotate walls.
-        // Src.wall.left (x-boundary at x, between x-1 and x) →
-        //   After CW90, this vertical line becomes horizontal line → top of new (nx, ny)
-        // Src.wall.top (y-boundary at y, between y-1 and y) →
-        //   After CW90, this horizontal line becomes vertical line → left of new (nx+1, ny)
-        for (let y = 0; y < height; y++) {
-          for (let x = 0; x < width; x++) {
-            const src = cells[y * width + x];
-            const nx = height - 1 - y;
-            const ny = x;
-
-            if (src.wall.left !== "none") {
-              newCells[ny * newWidth + nx] = {
-                ...newCells[ny * newWidth + nx],
-                wall: { ...newCells[ny * newWidth + nx].wall, top: src.wall.left },
-              };
-            }
-
-            if (src.wall.top !== "none" && nx + 1 < newWidth) {
-              newCells[ny * newWidth + (nx + 1)] = {
-                ...newCells[ny * newWidth + (nx + 1)],
-                wall: { ...newCells[ny * newWidth + (nx + 1)].wall, left: src.wall.top },
-              };
-            }
-          }
-        }
-
-        return { ...floor, cells: newCells, height: newHeight, width: newWidth };
-      });
+      return updateFloor(state, action.floorId, (floor) => rotateFloorCW90(floor));
     }
 
     default: {
