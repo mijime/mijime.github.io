@@ -14,11 +14,6 @@ export type FloorType =
   | "exterior-concrete"
   | "exterior-grass";
 
-export interface WallFlags {
-  top: WallType;
-  left: WallType;
-}
-
 export type ItemType =
   | "chair"
   | "desk"
@@ -49,9 +44,14 @@ export interface Item {
 }
 
 export interface Cell {
-  wall: WallFlags;
   floorType: FloorType | null;
   item: Item | null;
+}
+
+export interface EdgeRef {
+  kind: "h" | "v";
+  x: number;
+  y: number;
 }
 
 export interface FloorPlan {
@@ -60,6 +60,8 @@ export interface FloorPlan {
   width: number;
   height: number;
   cells: Cell[];
+  hWalls: WallType[];
+  vWalls: WallType[];
 }
 
 export interface Building {
@@ -68,7 +70,7 @@ export interface Building {
 }
 
 export interface SaveData {
-  version: 1;
+  version: 2;
   building: Building;
   activeFloorId: string;
 }
@@ -77,4 +79,6 @@ export interface CopiedRegion {
   width: number;
   height: number;
   cells: Cell[];
+  hWalls: WallType[];
+  vWalls: WallType[];
 }

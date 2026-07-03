@@ -1,21 +1,20 @@
 import { v4 as uuidv4 } from "uuid";
+import { createHWalls, createVWalls } from "./floor/walls";
 import { detectRooms } from "./floor/room-detection";
 import type { Building, Cell, CopiedRegion, FloorPlan, FloorType, Item, WallType } from "./types";
 
 function createCell(): Cell {
-  return {
-    floorType: null,
-    item: null,
-    wall: { left: "none", top: "none" },
-  };
+  return { floorType: null, item: null };
 }
 
 export function createFloorPlan(name: string, width = 20, height = 20): FloorPlan {
   return {
     cells: Array.from({ length: width * height }, createCell),
+    hWalls: createHWalls(width, height),
     height,
     id: uuidv4(),
     name,
+    vWalls: createVWalls(width, height),
     width,
   };
 }
