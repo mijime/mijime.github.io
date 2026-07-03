@@ -3,11 +3,11 @@ import { resolveItemAction } from "./item-logic";
 import type { Cell } from "../types";
 
 function emptyCell(): Cell {
-  return { floorType: null, item: null, wall: { left: "none", top: "none" } };
+  return { floorType: null, item: null };
 }
 
 function cellWithItem(type: "chair" | "desk"): Cell {
-  return { floorType: null, item: { rotation: 0, type }, wall: { left: "none", top: "none" } };
+  return { floorType: null, item: { rotation: 0, type } };
 }
 
 describe("resolveItemAction - item tool", () => {

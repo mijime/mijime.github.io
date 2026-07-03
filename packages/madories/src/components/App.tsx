@@ -4,7 +4,7 @@ import { computeFloorScores, exportAllFloorsPng } from "../draw/export";
 import { buildShareUrl, encodeFloors, mergeFloors } from "../floor/share";
 import { loadFromFile, loadFromStorage, saveToFile, saveToStorage } from "../storage";
 import { createBuilding, reducer } from "../store";
-import type { CopiedRegion, ItemType } from "../types";
+import type { CopiedRegion, EdgeRef, ItemType } from "../types";
 import { useAppInit } from "../hooks/use-app-init";
 import { useHistory } from "../hooks/use-history";
 import type { AppState } from "../hooks/use-history";
@@ -175,12 +175,11 @@ export function App() {
                 cellSize={building.cellSize}
                 darkMode={dark}
                 tool={tool}
-                onSetWall={(cellIndex, edge, wallType) => {
+                onSetWalls={(edges: EdgeRef[], wallType) => {
                   dispatch({
-                    cellIndex,
-                    edge,
+                    edges,
                     floorId: floor.id,
-                    type: "SET_WALL",
+                    type: "SET_WALLS",
                     wallType,
                   });
                 }}

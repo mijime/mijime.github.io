@@ -2,14 +2,14 @@ import { useCallback, useEffect, useRef } from "react";
 import { drawGrid } from "../../draw/draw-grid";
 import { getItemDrawOffset } from "../../draw/draw-items";
 import { drawVoidCells } from "../../draw/draw-void";
-import { drawWalls } from "../../draw/draw-walls";
+import { drawWalls, drawWallPreview } from "../../draw/draw-walls";
 import { computeWallDimensions, fmtMm } from "../../draw/export";
 import { clearIconCache, getCachedIcon } from "../../draw/icons/cache";
 import { drawTatamiCells } from "../../draw/draw-tatami";
 import { normalizeSelection } from "../../floor/clipboard-logic";
 import { detectRooms, drawRoomLabels } from "../../floor/room-detection";
 import { ITEM_DEF_MAP } from "../../items";
-import type { FloorPlan, Item } from "../../types";
+import type { EdgeRef, FloorPlan, Item } from "../../types";
 import { floorTypeToColor } from "../tool-mode";
 import type { ToolMode } from "../tool-mode";
 import type { SelectionRef, ViewRef } from "./types";
@@ -135,7 +135,7 @@ function drawItemAtCached(
 }
 
 export function useCanvasDraw(props: Props): {
-  redraw: (ghost?: { mx: number; my: number; fromIdx: number }) => void;
+  redraw: (ghost?: { mx: number; my: number; fromIdx: number }, wallPreview?: EdgeRef[]) => void;
 } {
   const {
     staticCanvasRef,
@@ -221,7 +221,10 @@ export function useCanvasDraw(props: Props): {
     ctx.restore();
   }
 
-  function drawDynamic(ghost?: { mx: number; my: number; fromIdx: number }) {
+  function drawDynamic(
+    ghost?: { mx: number; my: number; fromIdx: number },
+    wallPreview?: EdgeRef[],
+  ) {
     const canvas = dynamicCanvasRef.current;
     if (!canvas) {
       return;
@@ -280,6 +283,10 @@ export function useCanvasDraw(props: Props): {
       drawOverlay(ctx, floor, cellSize, wallDimRef.current);
     }
 
+    if (wallPreview && wallPreview.length > 0) {
+      drawWallPreview(ctx, wallPreview, cellSize, "rgba(37, 99, 235, 0.7)");
+    }
+
     ctx.restore();
 
     // Tsubo count (bottom-right, screen-fixed)
@@ -305,9 +312,9 @@ export function useCanvasDraw(props: Props): {
 
   // Biome-ignore lint/correctness/useExhaustiveDependencies: drawStatic/drawDynamic intentionally captured by closure; redraw stabilized on floor/cellSize
   const redraw = useCallback(
-    (ghost?: { mx: number; my: number; fromIdx: number }) => {
+    (ghost?: { mx: number; my: number; fromIdx: number }, wallPreview?: EdgeRef[]) => {
       drawStatic();
-      drawDynamic(ghost);
+      drawDynamic(ghost, wallPreview);
 
       // Debounced overlay: clear on any change, draw after 5s of inactivity
       wallDimRef.current = undefined;

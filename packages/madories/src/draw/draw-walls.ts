@@ -1,4 +1,4 @@
-import type { FloorPlan, WallType } from "../types";
+import type { EdgeRef, FloorPlan, WallType } from "../types";
 
 export function drawWalls(
   ctx: CanvasRenderingContext2D,
@@ -6,12 +6,23 @@ export function drawWalls(
   cellSize: number,
   colors: { ink: string; windowBlue: string },
 ): void {
-  const { width, height, cells } = floor;
-  for (let y = 0; y < height; y++) {
+  const { width, height, hWalls, vWalls } = floor;
+  for (let y = 0; y <= height; y++) {
     for (let x = 0; x < width; x++) {
-      const cell = cells[y * width + x];
-      drawEdge(ctx, cell.wall.top, x * cellSize, y * cellSize, true, cellSize, colors);
-      drawEdge(ctx, cell.wall.left, x * cellSize, y * cellSize, false, cellSize, colors);
+      drawEdge(ctx, hWalls[y * width + x], x * cellSize, y * cellSize, true, cellSize, colors);
+    }
+  }
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x <= width; x++) {
+      drawEdge(
+        ctx,
+        vWalls[y * (width + 1) + x],
+        x * cellSize,
+        y * cellSize,
+        false,
+        cellSize,
+        colors,
+      );
     }
   }
 }
@@ -96,4 +107,26 @@ function drawEdge(
       break;
     }
   }
+}
+
+export function drawWallPreview(
+  ctx: CanvasRenderingContext2D,
+  edges: EdgeRef[],
+  cellSize: number,
+  color: string,
+): void {
+  ctx.save();
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 4;
+  ctx.lineCap = "round";
+  for (const e of edges) {
+    ctx.beginPath();
+    ctx.moveTo(e.x * cellSize, e.y * cellSize);
+    ctx.lineTo(
+      (e.x + (e.kind === "h" ? 1 : 0)) * cellSize,
+      (e.y + (e.kind === "v" ? 1 : 0)) * cellSize,
+    );
+    ctx.stroke();
+  }
+  ctx.restore();
 }

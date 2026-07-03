@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { createBuilding, createFloorPlan, reducer } from "./store";
+import { getWall } from "./floor/walls";
+import type { FloorPlan } from "./types";
+
+const count = (f: FloorPlan) => [...f.hWalls, ...f.vWalls].filter((w) => w !== "none").length;
 
 describe("createFloorPlan", () => {
   it("creates correct cell count", () => {
@@ -7,11 +11,9 @@ describe("createFloorPlan", () => {
     expect(fp.cells.length).toBe(12);
   });
 
-  it("all cells start with no walls and null floorType", () => {
+  it("all cells start with null floorType and null item", () => {
     const fp = createFloorPlan("1F", 2, 2);
     for (const cell of fp.cells) {
-      expect(cell.wall.top).toBe("none");
-      expect(cell.wall.left).toBe("none");
       expect(cell.floorType).toBeNull();
       expect(cell.item).toBeNull();
     }
@@ -27,33 +29,44 @@ describe("createBuilding", () => {
   });
 });
 
-describe("reducer", () => {
-  it("setWall sets wall type directly", () => {
-    const building = createBuilding();
-    const floorId = building.floors[0].id;
-    const next = reducer(building, {
-      cellIndex: 0,
-      edge: "top",
+describe("SET_WALLS", () => {
+  it("sets multiple edges in one action", () => {
+    const b = createBuilding();
+    const floorId = b.floors[0].id;
+    const next = reducer(b, {
+      edges: [
+        { kind: "h", x: 0, y: 0 },
+        { kind: "h", x: 1, y: 0 },
+        { kind: "v", x: 20, y: 5 },
+      ],
       floorId,
-      type: "SET_WALL",
+      type: "SET_WALLS",
       wallType: "solid",
     });
-    expect(next.floors[0].cells[0].wall.top).toBe("solid");
+    expect(getWall(next.floors[0], { kind: "h", x: 1, y: 0 })).toBe("solid");
+    expect(getWall(next.floors[0], { kind: "v", x: 20, y: 5 })).toBe("solid");
   });
+});
 
-  it("setWall can set window directly", () => {
-    const building = createBuilding();
-    const floorId = building.floors[0].id;
-    const next = reducer(building, {
-      cellIndex: 0,
-      edge: "top",
+describe("ROTATE_FLOOR", () => {
+  it("keeps wall count across rotation", () => {
+    const b = createBuilding();
+    const floorId = b.floors[0].id;
+    const withWalls = reducer(b, {
+      edges: [
+        { kind: "h", x: 3, y: 0 },
+        { kind: "v", x: 0, y: 3 },
+      ],
       floorId,
-      type: "SET_WALL",
-      wallType: "window_full",
+      type: "SET_WALLS",
+      wallType: "solid",
     });
-    expect(next.floors[0].cells[0].wall.top).toBe("window_full");
+    const rotated = reducer(withWalls, { floorId, type: "ROTATE_FLOOR" });
+    expect(count(rotated.floors[0])).toBe(2);
   });
+});
 
+describe("reducer", () => {
   it("setFloorType updates single cell", () => {
     const building = createBuilding();
     const floorId = building.floors[0].id;

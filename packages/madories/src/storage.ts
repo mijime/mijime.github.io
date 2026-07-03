@@ -1,7 +1,7 @@
 import type { Building, SaveData } from "./types";
 
 export function saveToFile(building: Building, activeFloorId: string): void {
-  const data: SaveData = { activeFloorId, building, version: 1 };
+  const data: SaveData = { activeFloorId, building, version: 2 };
   const blob = new Blob([JSON.stringify(data, undefined, 2)], {
     type: "application/json",
   });
@@ -28,7 +28,7 @@ export function loadFromFile(): Promise<SaveData | null> {
       reader.onload = () => {
         try {
           const data = JSON.parse(reader.result as string) as SaveData;
-          if (data.version !== 1) {
+          if (data.version !== 2) {
             resolve(null);
             return;
           }
@@ -46,7 +46,7 @@ export function loadFromFile(): Promise<SaveData | null> {
 const KEY = "madories_plan";
 
 export function saveToStorage(building: Building, activeFloorId: string): void {
-  const data: SaveData = { activeFloorId, building, version: 1 };
+  const data: SaveData = { activeFloorId, building, version: 2 };
   localStorage.setItem(KEY, JSON.stringify(data));
 }
 
@@ -57,25 +57,8 @@ export function loadFromStorage(): SaveData | null {
       return null;
     }
     const data = JSON.parse(raw) as SaveData;
-    if (data.version !== 1) {
+    if (data.version !== 2) {
       return null;
-    }
-    // Migrate removed wall types to solid
-    for (const floor of data.building.floors) {
-      for (const cell of floor.cells) {
-        if (
-          (cell.wall.top as string) === "door_open" ||
-          (cell.wall.top as string) === "door_slide"
-        ) {
-          cell.wall.top = "solid";
-        }
-        if (
-          (cell.wall.left as string) === "door_open" ||
-          (cell.wall.left as string) === "door_slide"
-        ) {
-          cell.wall.left = "solid";
-        }
-      }
     }
     return data;
   } catch {
