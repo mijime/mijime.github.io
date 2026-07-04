@@ -5,6 +5,7 @@ import { isDescendant } from "../store";
 import type { MindNode } from "../types";
 import { categoryBorderColor } from "../lib/badges";
 import { parentBreadcrumb } from "../lib/breadcrumb";
+import { countHiddenDescendants } from "../lib/tree";
 import { TaskCard } from "./TaskCard";
 
 interface Props {
@@ -113,6 +114,7 @@ export function NodeCard({ node }: Props) {
           {node.children.length > 0 && (
             <button
               type="button"
+              data-testid={`collapse-${node.id}`}
               className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1 rounded-md transition"
               onClick={(e) => {
                 e.stopPropagation();
@@ -120,7 +122,13 @@ export function NodeCard({ node }: Props) {
               }}
               onPointerDown={(e) => e.stopPropagation()}
             >
-              {node.collapsed ? <ChevronDown size={12} /> : <ChevronUp size={12} />}
+              {node.collapsed ? (
+                <span className="flex items-center gap-0.5 text-[10px] font-semibold text-slate-500">
+                  <ChevronDown size={12} />+{countHiddenDescendants(state.nodes, node.id)}
+                </span>
+              ) : (
+                <ChevronUp size={12} />
+              )}
             </button>
           )}
           <button

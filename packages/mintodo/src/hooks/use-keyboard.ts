@@ -74,6 +74,14 @@ export function useKeyboard(): void {
           }
           break;
         }
+        case "c":
+        case "C": {
+          if (active.children.length > 0) {
+            e.preventDefault();
+            dispatch({ id: state.selectedNodeId, type: "TOGGLE_COLLAPSE" });
+          }
+          break;
+        }
         case "ArrowUp":
         case "ArrowLeft": {
           e.preventDefault();

@@ -707,3 +707,195 @@ describe("multi-line text end-to-end", () => {
     expect(textSpan.textContent).toBe(multiline);
   });
 });
+
+describe("collapse +N badge and c-key toggle", () => {
+  beforeEach(async () => {
+    await db.open();
+    await db.boards.clear();
+    await db.nodes.clear();
+    await db.meta.clear();
+  });
+
+  afterEach(async () => {
+    await db.delete();
+  });
+
+  async function createBoardWithHierarchy(): Promise<void> {
+    fireEvent.click(screen.getByText("+ 新規ボード作成"));
+    const input = screen.getByPlaceholderText("例: メインプロジェクト") as HTMLInputElement;
+    fireEvent.change(input, { target: { value: "Test" } });
+    await act(() => {
+      fireEvent.click(screen.getByText("作成"));
+    });
+    await act(async () => {
+      await flush(300);
+    });
+
+    // Add parent node
+    const addBtn = document.querySelector('[data-testid="add-child-root"]') as HTMLElement;
+    await act(() => {
+      fireEvent.click(addBtn);
+    });
+    const ta1 = document.querySelector(
+      '[data-testid="edit-modal-textarea"]',
+    ) as HTMLTextAreaElement;
+    await act(() => {
+      fireEvent.change(ta1, { target: { value: "parent" } });
+    });
+    await act(() => {
+      fireEvent.click(
+        document.querySelector('[data-testid="edit-modal-save"]') as HTMLButtonElement,
+      );
+    });
+    await act(async () => {
+      await flush(300);
+    });
+
+    // Get parent node ID from DB and add 2 children
+    const nodes = await db.nodes.toArray();
+    const parentNode = nodes.find((n) => n.text === "parent");
+    if (!parentNode) return;
+
+    // Add child1 by selecting parent and clicking Tab
+    await act(() => {
+      const parentCard = document.querySelector(`[data-node-id="${parentNode.id}"]`) as HTMLElement;
+      if (parentCard) fireEvent.click(parentCard);
+    });
+    await act(async () => {
+      await flush(100);
+    });
+    await act(() => {
+      fireEvent.keyDown(document, { key: "Tab" });
+    });
+    await act(async () => {
+      await flush(100);
+    });
+    const ta2 = document.querySelector(
+      '[data-testid="edit-modal-textarea"]',
+    ) as HTMLTextAreaElement;
+    if (ta2) {
+      await act(() => {
+        fireEvent.change(ta2, { target: { value: "child1" } });
+      });
+      await act(() => {
+        fireEvent.click(
+          document.querySelector('[data-testid="edit-modal-save"]') as HTMLButtonElement,
+        );
+      });
+      await act(async () => {
+        await flush(300);
+      });
+    }
+
+    // Add child2
+    await act(() => {
+      const parentCard2 = document.querySelector(
+        `[data-node-id="${parentNode.id}"]`,
+      ) as HTMLElement;
+      if (parentCard2) fireEvent.click(parentCard2);
+    });
+    await act(async () => {
+      await flush(100);
+    });
+    await act(() => {
+      fireEvent.keyDown(document, { key: "Tab" });
+    });
+    await act(async () => {
+      await flush(100);
+    });
+    const ta3 = document.querySelector(
+      '[data-testid="edit-modal-textarea"]',
+    ) as HTMLTextAreaElement;
+    if (ta3) {
+      await act(() => {
+        fireEvent.change(ta3, { target: { value: "child2" } });
+      });
+      await act(() => {
+        fireEvent.click(
+          document.querySelector('[data-testid="edit-modal-save"]') as HTMLButtonElement,
+        );
+      });
+      await act(async () => {
+        await flush(300);
+      });
+    }
+  }
+
+  it("shows +N badge with hidden descendant count when collapsed", async () => {
+    render(<App />);
+    await act(async () => {
+      await flush(100);
+    });
+    await createBoardWithHierarchy();
+
+    const nodes = await db.nodes.toArray();
+    const parentNode = nodes.find((n) => n.text === "parent");
+    expect(parentNode).toBeTruthy();
+
+    // Select parent and find collapse button
+    await act(() => {
+      const parentCard = document.querySelector(
+        `[data-node-id="${parentNode!.id}"]`,
+      ) as HTMLElement;
+      if (parentCard) fireEvent.click(parentCard);
+    });
+    await act(async () => {
+      await flush(100);
+    });
+
+    const collapseBtn = document.querySelector(
+      `[data-testid="collapse-${parentNode!.id}"]`,
+    ) as HTMLElement;
+    expect(collapseBtn).toBeTruthy();
+
+    await act(() => {
+      if (collapseBtn) fireEvent.click(collapseBtn);
+    });
+    await act(async () => {
+      await flush(100);
+    });
+
+    expect(screen.getByText("+2")).toBeTruthy();
+  });
+
+  it("toggles collapse on selected node with the c key", async () => {
+    render(<App />);
+    await act(async () => {
+      await flush(100);
+    });
+    await createBoardWithHierarchy();
+
+    const nodes = await db.nodes.toArray();
+    const parentNode = nodes.find((n) => n.text === "parent");
+    expect(parentNode).toBeTruthy();
+
+    // Select parent
+    await act(() => {
+      const parentCard = document.querySelector(
+        `[data-node-id="${parentNode!.id}"]`,
+      ) as HTMLElement;
+      if (parentCard) fireEvent.click(parentCard);
+    });
+    await act(async () => {
+      await flush(100);
+    });
+
+    // Press c to collapse
+    await act(() => {
+      fireEvent.keyDown(document, { key: "c" });
+    });
+    await act(async () => {
+      await flush(100);
+    });
+    expect(screen.getByText("+2")).toBeTruthy();
+
+    // Press c again to expand
+    await act(() => {
+      fireEvent.keyDown(document, { key: "c" });
+    });
+    await act(async () => {
+      await flush(100);
+    });
+    expect(screen.queryByText("+2")).toBeNull();
+  });
+});
