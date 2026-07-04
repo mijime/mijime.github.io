@@ -1,17 +1,20 @@
 import { useEffect, useRef } from "react";
 import { useMindStore } from "./use-mind-store";
+import { EDGE_INSET } from "../components/ConnectionLines";
 
 const TWEEN_DURATION = 300;
 const EASING = "cubic-bezier(0.25, 1, 0.5, 1)";
 const MIN_CURVE_SPREAD = 60;
 
-function pathD(sx: number, sy: number, ex: number, ey: number): string {
+function pathD(psx: number, psy: number, pex: number, pey: number): string {
+  const sx = psx + EDGE_INSET;
+  const ex = pex - EDGE_INSET;
   const horizontalDist = ex - sx;
   const halfDist = Math.max(Math.abs(horizontalDist) / 2, MIN_CURVE_SPREAD);
   const sign = horizontalDist >= 0 ? 1 : -1;
   const c1x = sx + sign * halfDist;
   const c2x = ex - sign * halfDist;
-  return `M ${sx} ${sy} C ${c1x} ${sy}, ${c2x} ${ey}, ${ex} ${ey}`;
+  return `M ${sx} ${psy} C ${c1x} ${psy}, ${c2x} ${pey}, ${ex} ${pey}`;
 }
 
 interface Pos {
