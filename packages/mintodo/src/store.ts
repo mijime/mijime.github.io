@@ -29,11 +29,13 @@ export interface State {
   view: View;
   past: StateSnapshot[];
   future: StateSnapshot[];
+  inlineEdit: { nodeId: string; isNew: boolean } | null;
 }
 
 export type Action =
   | { type: "ADD_BOARD"; board: Board; initialNodes: Record<string, MindNode> }
   | { type: "ADD_CHILD"; newId: string; parentId: string }
+  | { type: "ADD_CHILD_INLINE"; newId: string; parentId: string }
   | { type: "DELETE_BOARD"; id: string; nextBoardId: string | null }
   | { type: "DELETE_NODE"; id: string }
   | { type: "OPEN_MODAL"; modal: Modal }
@@ -51,6 +53,9 @@ export type Action =
   | { type: "SET_VIEW"; view: View }
   | { type: "SET_DRAWER"; open: boolean }
   | { type: "SNAP_BACK"; id: string }
+  | { type: "START_INLINE_EDIT"; nodeId: string }
+  | { type: "COMMIT_INLINE_EDIT"; text: string }
+  | { type: "CANCEL_INLINE_EDIT" }
   | { type: "TOGGLE_COLLAPSE"; id: string }
   | { type: "TOGGLE_COMPLETE"; id: string }
   | { type: "TOGGLE_DRAWER" }
@@ -91,12 +96,14 @@ export function createInitialState(): State {
     view: { pan: { x: 0, y: 0 }, zoom: 1 },
     past: [],
     future: [],
+    inlineEdit: null,
   };
 }
 
 const UNDOABLE_ACTIONS = new Set<Action["type"]>([
   "ADD_BOARD",
   "ADD_CHILD",
+  "ADD_CHILD_INLINE",
   "CREATE_CHILD",
   "DELETE_BOARD",
   "DELETE_COMPLETED",
@@ -112,6 +119,7 @@ const UNDOABLE_ACTIONS = new Set<Action["type"]>([
   "TOGGLE_COLLAPSE",
   "TOGGLE_COMPLETE",
   "UPDATE_NODE",
+  "COMMIT_INLINE_EDIT",
 ]);
 
 function isUndoableAction(type: Action["type"]): boolean {
@@ -132,6 +140,7 @@ function snapshotState(state: State): StateSnapshot {
     searchQuery: state.searchQuery,
     selectedNodeId: state.selectedNodeId,
     view: state.view,
+    inlineEdit: state.inlineEdit,
   };
 }
 
@@ -315,6 +324,43 @@ function applyAction(state: State, action: Action): State {
         nextNodes,
       );
     }
+    case "ADD_CHILD_INLINE": {
+      const parent = state.nodes[action.parentId];
+      if (!parent) return state;
+      const newNode: MindNode = {
+        id: action.newId,
+        boardId: parent.boardId,
+        categoryColor: parent.categoryColor,
+        children: [],
+        estimate: null,
+        workLogs: [],
+        collapsed: false,
+        completed: false,
+        dueDate: "",
+        startDate: "",
+        status: "inbox",
+        isRoot: false,
+        parentId: parent.id,
+        priority: "medium",
+        text: "",
+        x: 0,
+        y: 0,
+      };
+      const nextNodes: Record<string, MindNode> = {
+        ...state.nodes,
+        [action.newId]: newNode,
+        [parent.id]: { ...parent, collapsed: false, children: [...parent.children, action.newId] },
+      };
+      return withTreeLayout(
+        {
+          ...state,
+          nodes: nextNodes,
+          selectedNodeId: action.newId,
+          inlineEdit: { nodeId: action.newId, isNew: true },
+        },
+        nextNodes,
+      );
+    }
     case "CREATE_CHILD": {
       const parent = state.nodes[action.parentId];
       if (!parent) return state;
@@ -372,6 +418,46 @@ function applyAction(state: State, action: Action): State {
       if (!node) return state;
       const nextNodes = { ...state.nodes, [action.id]: { ...node, collapsed: !node.collapsed } };
       return withTreeLayout({ ...state, nodes: nextNodes }, nextNodes);
+    }
+    case "START_INLINE_EDIT": {
+      if (!state.nodes[action.nodeId]) return state;
+      return {
+        ...state,
+        inlineEdit: { nodeId: action.nodeId, isNew: false },
+        selectedNodeId: action.nodeId,
+      };
+    }
+    case "COMMIT_INLINE_EDIT": {
+      const edit = state.inlineEdit;
+      if (!edit) return state;
+      const node = state.nodes[edit.nodeId];
+      if (!node) return { ...state, inlineEdit: null };
+      const text = action.text.trim();
+      if (text === "") {
+        if (edit.isNew) {
+          return applyAction(
+            { ...state, inlineEdit: null },
+            { id: edit.nodeId, type: "DELETE_NODE" },
+          );
+        }
+        return { ...state, inlineEdit: null };
+      }
+      return {
+        ...state,
+        inlineEdit: null,
+        nodes: { ...state.nodes, [edit.nodeId]: { ...node, text } },
+      };
+    }
+    case "CANCEL_INLINE_EDIT": {
+      const edit = state.inlineEdit;
+      if (!edit) return state;
+      if (edit.isNew) {
+        return applyAction(
+          { ...state, inlineEdit: null },
+          { id: edit.nodeId, type: "DELETE_NODE" },
+        );
+      }
+      return { ...state, inlineEdit: null };
     }
     case "DELETE_NODE": {
       const node = state.nodes[action.id];

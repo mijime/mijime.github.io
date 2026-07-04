@@ -51,6 +51,7 @@ function makeState(): State {
     view: { pan: { x: 0, y: 0 }, zoom: 1 },
     past: [],
     future: [],
+    inlineEdit: null,
     nodes: {
       root: makeNode("root", null, { isRoot: true, children: ["a"] }),
       a: makeNode("a", "root", { x: 0, y: -340, children: ["a1"] }),

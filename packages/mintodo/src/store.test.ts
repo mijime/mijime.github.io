@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { createInitialState, isDescendant, reducer } from "./store";
+import { createInitialState, isDescendant, reducer, type State } from "./store";
 import type { Board, MindNode, WorkLogEntry } from "./types";
 
 function makeNode(id: string, boardId: string, opts: Partial<MindNode> = {}): MindNode {
@@ -953,5 +953,74 @@ describe("reducer — UNDO / REDO", () => {
     expect(undone.nodes.a).toBeDefined();
     expect(undone.nodes.b).toBeDefined();
     expect(undone.nodes.root.children).toContain("a");
+  });
+});
+
+function seedRootState(): State {
+  return {
+    ...createInitialState(),
+    boards: [boardA],
+    currentBoardId: "b-a",
+    selectedNodeId: "root",
+    nodes: { root: makeNode("root", "b-a", { isRoot: true }) },
+  };
+}
+
+describe("inline editing", () => {
+  it("ADD_CHILD_INLINE creates empty child and enters inline edit", () => {
+    let s = seedRootState();
+    s = reducer(s, { type: "ADD_CHILD_INLINE", newId: "n1", parentId: "root" });
+    expect(s.nodes["n1"].text).toBe("");
+    expect(s.selectedNodeId).toBe("n1");
+    expect(s.inlineEdit).toEqual({ nodeId: "n1", isNew: true });
+  });
+
+  it("ADD_CHILD_INLINE expands a collapsed parent", () => {
+    let s = seedRootState();
+    s = reducer(s, { type: "ADD_CHILD_INLINE", newId: "n1", parentId: "root" });
+    s = reducer(s, { text: "a", type: "COMMIT_INLINE_EDIT" });
+    s = reducer(s, { id: "n1", type: "TOGGLE_COLLAPSE" });
+    s = reducer(s, { type: "ADD_CHILD_INLINE", newId: "n2", parentId: "n1" });
+    expect(s.nodes["n1"].collapsed).toBe(false);
+  });
+
+  it("COMMIT_INLINE_EDIT sets trimmed text and clears inlineEdit", () => {
+    let s = seedRootState();
+    s = reducer(s, { type: "ADD_CHILD_INLINE", newId: "n1", parentId: "root" });
+    s = reducer(s, { text: "  buy milk  ", type: "COMMIT_INLINE_EDIT" });
+    expect(s.nodes["n1"].text).toBe("buy milk");
+    expect(s.inlineEdit).toBeNull();
+  });
+
+  it("COMMIT_INLINE_EDIT with empty text deletes a new node", () => {
+    let s = seedRootState();
+    s = reducer(s, { type: "ADD_CHILD_INLINE", newId: "n1", parentId: "root" });
+    s = reducer(s, { text: "   ", type: "COMMIT_INLINE_EDIT" });
+    expect(s.nodes["n1"]).toBeUndefined();
+    expect(s.selectedNodeId).toBe("root");
+  });
+
+  it("COMMIT_INLINE_EDIT with empty text keeps an existing node's text", () => {
+    let s = seedRootState();
+    s = reducer(s, { type: "ADD_CHILD_INLINE", newId: "n1", parentId: "root" });
+    s = reducer(s, { text: "keep", type: "COMMIT_INLINE_EDIT" });
+    s = reducer(s, { nodeId: "n1", type: "START_INLINE_EDIT" });
+    s = reducer(s, { text: "", type: "COMMIT_INLINE_EDIT" });
+    expect(s.nodes["n1"].text).toBe("keep");
+    expect(s.inlineEdit).toBeNull();
+  });
+
+  it("CANCEL_INLINE_EDIT deletes a new node but keeps an existing one", () => {
+    let s = seedRootState();
+    s = reducer(s, { type: "ADD_CHILD_INLINE", newId: "n1", parentId: "root" });
+    s = reducer(s, { type: "CANCEL_INLINE_EDIT" });
+    expect(s.nodes["n1"]).toBeUndefined();
+
+    s = reducer(s, { type: "ADD_CHILD_INLINE", newId: "n2", parentId: "root" });
+    s = reducer(s, { text: "kept", type: "COMMIT_INLINE_EDIT" });
+    s = reducer(s, { nodeId: "n2", type: "START_INLINE_EDIT" });
+    s = reducer(s, { type: "CANCEL_INLINE_EDIT" });
+    expect(s.nodes["n2"].text).toBe("kept");
+    expect(s.inlineEdit).toBeNull();
   });
 });

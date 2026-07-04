@@ -45,6 +45,7 @@ function makeState(over: Partial<State> = {}): State {
     view: { pan: { x: 0, y: 0 }, zoom: 1 },
     past: [],
     future: [],
+    inlineEdit: null,
 
     nodes: {
       root: makeNode({ id: "root", isRoot: true, text: "Root", children: ["n1"] }),
