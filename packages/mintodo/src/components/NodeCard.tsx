@@ -107,6 +107,9 @@ export function NodeCard({ node }: Props) {
   const borderColor = categoryBorderColor(node.categoryColor);
   const priBorder = node.priority === "high";
 
+  const isInvalidTarget =
+    draggedId !== null && draggedId !== node.id && isDescendant(state.nodes, draggedId, node.id);
+
   return (
     <div
       ref={setNodeRef}
@@ -134,7 +137,7 @@ export function NodeCard({ node }: Props) {
         borderBottom: "1px solid var(--border)",
         borderLeft: `4px solid ${borderColor}`,
         boxShadow: priBorder ? "0 0 0 1px var(--terra)" : undefined,
-        opacity: isDragging ? 0.4 : 1,
+        opacity: isDragging ? 0.4 : isInvalidTarget ? 0.3 : 1,
         touchAction: "none",
       }}
     >

@@ -1389,3 +1389,131 @@ describe("arrow navigation (horizontal tree)", () => {
     expect(document.querySelector(`#node-dom-${nodeA!.id}`)?.className).toContain("node-selected");
   });
 });
+
+describe("drag feedback — dim invalid drop targets", () => {
+  beforeEach(async () => {
+    await db.open();
+    await db.boards.clear();
+    await db.nodes.clear();
+    await db.meta.clear();
+  });
+
+  afterEach(async () => {
+    await db.delete();
+  });
+
+  it("dims descendants of dragged node (opacity 0.3) while dragging", async () => {
+    render(<App />);
+    await act(async () => {
+      await flush(100);
+    });
+
+    fireEvent.click(screen.getByText("+ 新規ボード作成"));
+    const input = screen.getByPlaceholderText("例: メインプロジェクト") as HTMLInputElement;
+    fireEvent.change(input, { target: { value: "Test" } });
+    await act(() => {
+      fireEvent.click(screen.getByText("作成"));
+    });
+    await act(async () => {
+      await flush(300);
+    });
+
+    const addBtn = document.querySelector('[data-testid="add-child-root"]') as HTMLElement;
+    await act(() => {
+      fireEvent.click(addBtn);
+    });
+    await act(async () => {
+      await flush(100);
+    });
+
+    const ta1 = await screen.findByTestId("inline-edit-input");
+    await act(() => {
+      fireEvent.change(ta1, { target: { value: "parent" } });
+    });
+    await act(() => {
+      fireEvent.keyDown(ta1, { key: "Enter" });
+    });
+    await act(async () => {
+      await flush(300);
+    });
+
+    const nodes = await db.nodes.toArray();
+    const parentNode = nodes.find((n) => n.text === "parent");
+    expect(parentNode).toBeTruthy();
+
+    await act(() => {
+      const parentCard = document.querySelector(
+        `[data-node-id="${parentNode!.id}"]`,
+      ) as HTMLElement;
+      if (parentCard) fireEvent.click(parentCard);
+    });
+    await act(async () => {
+      await flush(100);
+    });
+
+    await act(() => {
+      fireEvent.keyDown(document, { key: "Tab" });
+    });
+    await act(async () => {
+      await flush(100);
+    });
+
+    const ta2 = await screen.findByTestId("inline-edit-input");
+    await act(() => {
+      fireEvent.change(ta2, { target: { value: "child" } });
+    });
+    await act(() => {
+      fireEvent.keyDown(ta2, { key: "Enter" });
+    });
+    await act(async () => {
+      await flush(300);
+    });
+
+    const updatedNodes = await db.nodes.toArray();
+    const childNode = updatedNodes.find((n) => n.text === "child");
+    expect(childNode).toBeTruthy();
+
+    const parentCard = document.querySelector(`[data-node-id="${parentNode!.id}"]`) as HTMLElement;
+    const childCard = document.querySelector(`[data-node-id="${childNode!.id}"]`) as HTMLElement;
+    expect(parentCard.style.opacity).toBe("1");
+    expect(childCard.style.opacity).toBe("1");
+
+    // Start drag on parent: simulate pointer down and move to trigger dnd-kit
+    const srcRect = parentCard.getBoundingClientRect();
+    const fromX = srcRect.left + srcRect.width / 2;
+    const fromY = srcRect.top + srcRect.height / 2;
+    const doc = parentCard.ownerDocument;
+
+    await act(async () => {
+      fireEvent.pointerDown(parentCard, {
+        pointerId: 1,
+        pointerType: "mouse",
+        isPrimary: true,
+        button: 0,
+        buttons: 1,
+        clientX: fromX,
+        clientY: fromY,
+      });
+    });
+    await act(async () => {
+      doc.dispatchEvent(
+        new PointerEvent("pointermove", {
+          pointerId: 1,
+          pointerType: "mouse",
+          isPrimary: true,
+          clientX: fromX + 10,
+          clientY: fromY + 10,
+          buttons: 1,
+          bubbles: true,
+          cancelable: true,
+        }),
+      );
+    });
+    await act(async () => {
+      await flush(50);
+    });
+
+    // Child should now be dimmed (opacity 0.3) because it's a descendant of the dragged node
+    expect(childCard.style.opacity).toBe("0.3");
+  });
+});
