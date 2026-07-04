@@ -90,31 +90,28 @@ export function useKeyboard(): void {
           }
           break;
         }
-        case "ArrowUp":
         case "ArrowLeft": {
           e.preventDefault();
-          if (active.isRoot) return;
-          const parent = state.nodes[active.parentId!];
-          if (!parent) return;
-          const idx = parent.children.indexOf(state.selectedNodeId);
-          if (idx > 0) {
-            dispatch({ id: parent.children[idx - 1], type: "SELECT" });
-          } else {
-            dispatch({ id: parent.id, type: "SELECT" });
-          }
+          if (active.parentId) dispatch({ id: active.parentId, type: "SELECT" });
           break;
         }
-        case "ArrowDown":
         case "ArrowRight": {
           e.preventDefault();
           if (active.children.length > 0 && !active.collapsed) {
             dispatch({ id: active.children[0], type: "SELECT" });
-          } else if (!active.isRoot && active.parentId) {
-            const parent = state.nodes[active.parentId];
-            const idx = parent?.children.indexOf(state.selectedNodeId) ?? -1;
-            if (parent && idx >= 0 && idx < parent.children.length - 1) {
-              dispatch({ id: parent.children[idx + 1], type: "SELECT" });
-            }
+          }
+          break;
+        }
+        case "ArrowUp":
+        case "ArrowDown": {
+          e.preventDefault();
+          if (active.isRoot || !active.parentId) break;
+          const parent = state.nodes[active.parentId];
+          if (!parent) break;
+          const idx = parent.children.indexOf(state.selectedNodeId);
+          const nextIdx = e.key === "ArrowUp" ? idx - 1 : idx + 1;
+          if (nextIdx >= 0 && nextIdx < parent.children.length) {
+            dispatch({ id: parent.children[nextIdx], type: "SELECT" });
           }
           break;
         }

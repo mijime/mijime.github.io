@@ -1203,3 +1203,189 @@ describe("inline editing UI", () => {
     expect(rootNode?.completed).toBeFalsy();
   });
 });
+
+describe("arrow navigation (horizontal tree)", () => {
+  beforeEach(async () => {
+    await db.open();
+    await db.boards.clear();
+    await db.nodes.clear();
+    await db.meta.clear();
+  });
+
+  afterEach(async () => {
+    await db.delete();
+  });
+
+  async function createBoardWithArrowStructure(): Promise<void> {
+    fireEvent.click(screen.getByText("+ 新規ボード作成"));
+    const input = screen.getByPlaceholderText("例: メインプロジェクト") as HTMLInputElement;
+    fireEvent.change(input, { target: { value: "Test" } });
+    await act(() => {
+      fireEvent.click(screen.getByText("作成"));
+    });
+    await act(async () => {
+      await flush(300);
+    });
+
+    // Add node "a" as child of root
+    const addBtn = document.querySelector('[data-testid="add-child-root"]') as HTMLElement;
+    await act(() => {
+      fireEvent.click(addBtn);
+    });
+    await act(async () => {
+      await flush(100);
+    });
+
+    const ta1 = await screen.findByTestId("inline-edit-input");
+    await act(() => {
+      fireEvent.change(ta1, { target: { value: "a" } });
+    });
+    await act(() => {
+      fireEvent.keyDown(ta1, { key: "Enter" });
+    });
+    await act(async () => {
+      await flush(300);
+    });
+
+    // Add node "b" as sibling of "a"
+    const addBtn2 = document.querySelector('[data-testid="add-child-root"]') as HTMLElement;
+    await act(() => {
+      fireEvent.click(addBtn2);
+    });
+    await act(async () => {
+      await flush(100);
+    });
+
+    const ta2 = await screen.findByTestId("inline-edit-input");
+    await act(() => {
+      fireEvent.change(ta2, { target: { value: "b" } });
+    });
+    await act(() => {
+      fireEvent.keyDown(ta2, { key: "Enter" });
+    });
+    await act(async () => {
+      await flush(300);
+    });
+
+    // Add node "a1" as child of "a"
+    const nodes = await db.nodes.toArray();
+    const nodeA = nodes.find((n) => n.text === "a");
+    if (nodeA) {
+      await act(() => {
+        const aCard = document.querySelector(`[data-node-id="${nodeA.id}"]`) as HTMLElement;
+        if (aCard) fireEvent.click(aCard);
+      });
+      await act(async () => {
+        await flush(100);
+      });
+
+      await act(() => {
+        fireEvent.keyDown(document, { key: "Tab" });
+      });
+      await act(async () => {
+        await flush(100);
+      });
+
+      const ta3 = await screen.findByTestId("inline-edit-input");
+      await act(() => {
+        fireEvent.change(ta3, { target: { value: "a1" } });
+      });
+      await act(() => {
+        fireEvent.keyDown(ta3, { key: "Enter" });
+      });
+      await act(async () => {
+        await flush(300);
+      });
+    }
+  }
+
+  it("Right selects first child, Left selects parent", async () => {
+    render(<App />);
+    await act(async () => {
+      await flush(100);
+    });
+    await createBoardWithArrowStructure();
+
+    const nodes = await db.nodes.toArray();
+    const nodeA = nodes.find((n) => n.text === "a");
+    const nodeA1 = nodes.find((n) => n.text === "a1");
+    expect(nodeA).toBeTruthy();
+    expect(nodeA1).toBeTruthy();
+
+    // Select "a"
+    await act(() => {
+      const aCard = document.querySelector(`[data-node-id="${nodeA!.id}"]`) as HTMLElement;
+      if (aCard) fireEvent.click(aCard);
+    });
+    await act(async () => {
+      await flush(100);
+    });
+
+    expect(document.querySelector(`#node-dom-${nodeA!.id}`)?.className).toContain("node-selected");
+
+    // Press Right to select first child "a1"
+    await act(() => {
+      fireEvent.keyDown(window, { key: "ArrowRight" });
+    });
+    await act(async () => {
+      await flush(50);
+    });
+
+    expect(document.querySelector(`#node-dom-${nodeA1!.id}`)?.className).toContain("node-selected");
+
+    // Press Left to select parent "a"
+    await act(() => {
+      fireEvent.keyDown(window, { key: "ArrowLeft" });
+    });
+    await act(async () => {
+      await flush(50);
+    });
+
+    expect(document.querySelector(`#node-dom-${nodeA!.id}`)?.className).toContain("node-selected");
+  });
+
+  it("Down/Up move between siblings", async () => {
+    render(<App />);
+    await act(async () => {
+      await flush(100);
+    });
+    await createBoardWithArrowStructure();
+
+    const nodes = await db.nodes.toArray();
+    const nodeA = nodes.find((n) => n.text === "a");
+    const nodeB = nodes.find((n) => n.text === "b");
+    expect(nodeA).toBeTruthy();
+    expect(nodeB).toBeTruthy();
+
+    // Select "a"
+    await act(() => {
+      const aCard = document.querySelector(`[data-node-id="${nodeA!.id}"]`) as HTMLElement;
+      if (aCard) fireEvent.click(aCard);
+    });
+    await act(async () => {
+      await flush(100);
+    });
+
+    expect(document.querySelector(`#node-dom-${nodeA!.id}`)?.className).toContain("node-selected");
+
+    // Press Down to select sibling "b"
+    await act(() => {
+      fireEvent.keyDown(window, { key: "ArrowDown" });
+    });
+    await act(async () => {
+      await flush(50);
+    });
+
+    expect(document.querySelector(`#node-dom-${nodeB!.id}`)?.className).toContain("node-selected");
+
+    // Press Up to select sibling "a"
+    await act(() => {
+      fireEvent.keyDown(window, { key: "ArrowUp" });
+    });
+    await act(async () => {
+      await flush(50);
+    });
+
+    expect(document.querySelector(`#node-dom-${nodeA!.id}`)?.className).toContain("node-selected");
+  });
+});
