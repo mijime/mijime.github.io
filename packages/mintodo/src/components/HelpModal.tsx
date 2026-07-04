@@ -7,6 +7,8 @@ const SHORTCUTS: { desc: string; key: string }[] = [
   { desc: "名前変更", key: "F2" },
   { desc: "折りたたみトグル", key: "C" },
   { desc: "詳細編集", key: "E" },
+  { desc: "完了状態の切り替え", key: "Space" },
+  { desc: "タスクを削除", key: "Delete" },
   { desc: "ツリー移動", key: "← → ↑ ↓" },
 ];
 
