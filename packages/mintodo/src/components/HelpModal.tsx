@@ -2,12 +2,12 @@ import { Keyboard } from "lucide-react";
 import { useMindStore } from "../hooks/use-mind-store";
 
 const SHORTCUTS: { desc: string; key: string }[] = [
-  { desc: "子ノードを追加", key: "Tab" },
-  { desc: "同じ階層（兄弟）を追加", key: "Enter" },
-  { desc: "ノードを編集", key: "E" },
-  { desc: "タスクを削除", key: "Delete" },
-  { desc: "完了状態の切り替え", key: "Space" },
-  { desc: "選択の移動", key: "↑ ↓ ← →" },
+  { desc: "子をインライン追加", key: "Tab" },
+  { desc: "兄弟をインライン追加", key: "Enter" },
+  { desc: "名前変更", key: "F2" },
+  { desc: "折りたたみトグル", key: "C" },
+  { desc: "詳細編集", key: "E" },
+  { desc: "ツリー移動", key: "← → ↑ ↓" },
 ];
 
 export function HelpModal() {
