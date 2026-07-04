@@ -187,9 +187,9 @@ describe("modal-based edit end-to-end", () => {
     expect(child!.text).toBe("買い物");
     expect(child!.priority).toBe("high");
 
-    // Camera centered on new node (y-pan ≈ 240 at zoom=1)
+    // Camera centered on new node (x-pan ≈ 360 at zoom=1)
     const container = document.querySelector(".transform-container") as HTMLElement;
-    expect(container.style.transform).toMatch(/translate\(.*?240px\)/u);
+    expect(container.style.transform).toMatch(/translate\([^)]*360px/u);
   });
 
   it("saving the create modal with empty text and no DSL closes the modal and does not create a node", async () => {
@@ -400,9 +400,9 @@ describe("centering on new node", () => {
       await flush(500);
     });
 
-    // The new child is placed at (≈0, -240) by the radial layout (RING=240, single child above root).
-    // ComputeCenterOnNode returns pan ≈ (0, 240) at zoom=1. (x may be ~1e-14 due to FP precision)
-    expect(container.style.transform).toMatch(/translate\(.*?240px\)/u);
+    // The new child is placed at (360, 0) by the tree layout (one depth level right, single child centered vertically).
+    // ComputeCenterOnNode returns pan ≈ (-360, 0) at zoom=1. (x may be ~1e-14 due to FP precision)
+    expect(container.style.transform).toMatch(/translate\([^)]*360px/u);
   });
 });
 

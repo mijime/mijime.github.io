@@ -304,8 +304,8 @@ describe("reducer - ADD_CHILD", () => {
     expect(next.nodes["n-new"].boardId).toBe("b-a");
     expect(next.nodes["n-new"].isRoot).toBe(false);
     expect(next.nodes.root.children).toContain("n-new");
-    expect(next.nodes["n-new"].x).toBeCloseTo(0);
-    expect(next.nodes["n-new"].y).toBe(-240);
+    expect(next.nodes["n-new"].x).toBe(360);
+    expect(next.nodes["n-new"].y).toBe(0);
     expect(next.layoutVersion).toBe(before + 1);
   });
 });
@@ -497,8 +497,8 @@ describe("reducer - CREATE_CHILD", () => {
       status: "inbox",
     });
     expect(next.layoutVersion).toBe(before + 1);
-    expect(next.nodes.n1.x).toBeCloseTo(0);
-    expect(next.nodes.n1.y).toBe(-240);
+    expect(next.nodes.n1.x).toBe(360);
+    expect(next.nodes.n1.y).toBe(0);
   });
 });
 
@@ -638,8 +638,8 @@ describe("reducer - SNAP_BACK", () => {
     };
     const next = reducer(s, { id: "a", type: "SNAP_BACK" });
     expect(next.layoutVersion).toBe(6);
-    expect(next.nodes.a.x).toBeCloseTo(0);
-    expect(next.nodes.a.y).toBe(-240);
+    expect(next.nodes.a.x).toBe(360);
+    expect(next.nodes.a.y).toBe(0);
   });
 });
 
