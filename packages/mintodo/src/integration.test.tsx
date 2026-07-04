@@ -135,7 +135,7 @@ describe("modal-based edit end-to-end", () => {
     });
   }
 
-  it("clicking the root + button opens the create modal", async () => {
+  it("clicking the root + button opens an inline input", async () => {
     render(<App />);
     await act(async () => {
       await flush(100);
@@ -147,13 +147,15 @@ describe("modal-based edit end-to-end", () => {
     await act(() => {
       fireEvent.click(addBtn);
     });
-    const modal = document.querySelector('[data-testid="edit-modal"]');
-    expect(modal).toBeTruthy();
-    const ta = modal!.querySelector("textarea") as HTMLTextAreaElement;
-    expect(ta.value).toBe("");
+    await act(async () => {
+      await flush(100);
+    });
+    const input = await screen.findByTestId("inline-edit-input");
+    expect(input).toBeTruthy();
+    expect((input as HTMLInputElement).value).toBe("");
   });
 
-  it("saving the create modal with DSL creates a node and centers the camera", async () => {
+  it("entering text in inline input creates a node and centers the camera", async () => {
     render(<App />);
     await act(async () => {
       await flush(100);
@@ -164,35 +166,35 @@ describe("modal-based edit end-to-end", () => {
     await act(() => {
       fireEvent.click(addBtn);
     });
-    const ta = document.querySelector('[data-testid="edit-modal-textarea"]') as HTMLTextAreaElement;
+    await act(async () => {
+      await flush(100);
+    });
+    const ta = await screen.findByTestId("inline-edit-input");
     await act(() => {
-      fireEvent.change(ta, { target: { value: "買い物 @priority:high" } });
+      fireEvent.change(ta, { target: { value: "my task" } });
     });
     await act(() => {
-      fireEvent.click(
-        document.querySelector('[data-testid="edit-modal-save"]') as HTMLButtonElement,
-      );
+      fireEvent.keyDown(ta, { key: "Enter" });
     });
     await act(async () => {
       await flush(500);
     });
 
-    // Modal should be gone
-    expect(document.querySelector('[data-testid="edit-modal"]')).toBeNull();
+    // Inline input should be gone
+    expect(screen.queryByTestId("inline-edit-input")).toBeNull();
 
     // Node created in DB
     const nodes = await db.nodes.toArray();
     const child = nodes.find((n) => !n.isRoot);
     expect(child).toBeTruthy();
-    expect(child!.text).toBe("買い物");
-    expect(child!.priority).toBe("high");
+    expect(child!.text).toBe("my task");
 
     // Camera centered on new node (x-pan ≈ 360 at zoom=1)
     const container = document.querySelector(".transform-container") as HTMLElement;
     expect(container.style.transform).toMatch(/translate\([^)]*360px/u);
   });
 
-  it("saving the create modal with empty text and no DSL closes the modal and does not create a node", async () => {
+  it("committing inline input with empty text does not create a node", async () => {
     render(<App />);
     await act(async () => {
       await flush(100);
@@ -203,21 +205,23 @@ describe("modal-based edit end-to-end", () => {
     await act(() => {
       fireEvent.click(addBtn);
     });
+    await act(async () => {
+      await flush(100);
+    });
+    const input = await screen.findByTestId("inline-edit-input");
     await act(() => {
-      fireEvent.click(
-        document.querySelector('[data-testid="edit-modal-save"]') as HTMLButtonElement,
-      );
+      fireEvent.keyDown(input, { key: "Enter" });
     });
     await act(async () => {
       await flush(500);
     });
 
-    expect(document.querySelector('[data-testid="edit-modal"]')).toBeNull();
+    expect(screen.queryByTestId("inline-edit-input")).toBeNull();
     const nodes = await db.nodes.toArray();
     expect(nodes.filter((n) => !n.isRoot)).toHaveLength(0);
   });
 
-  it("canceling the create modal does not create a node", async () => {
+  it("canceling inline input via Escape does not create a node", async () => {
     render(<App />);
     await act(async () => {
       await flush(100);
@@ -228,20 +232,21 @@ describe("modal-based edit end-to-end", () => {
     await act(() => {
       fireEvent.click(addBtn);
     });
-    const ta = document.querySelector('[data-testid="edit-modal-textarea"]') as HTMLTextAreaElement;
+    await act(async () => {
+      await flush(100);
+    });
+    const input = await screen.findByTestId("inline-edit-input");
     await act(() => {
-      fireEvent.change(ta, { target: { value: "some text" } });
+      fireEvent.change(input, { target: { value: "some text" } });
     });
     await act(() => {
-      fireEvent.click(
-        document.querySelector('[data-testid="edit-modal-cancel"]') as HTMLButtonElement,
-      );
+      fireEvent.keyDown(input, { key: "Escape" });
     });
     await act(async () => {
       await flush(500);
     });
 
-    expect(document.querySelector('[data-testid="edit-modal"]')).toBeNull();
+    expect(screen.queryByTestId("inline-edit-input")).toBeNull();
     const nodes = await db.nodes.toArray();
     expect(nodes.filter((n) => !n.isRoot)).toHaveLength(0);
   });
@@ -253,19 +258,20 @@ describe("modal-based edit end-to-end", () => {
     });
     await createBoard("Test");
 
-    // Add a child via the modal
+    // Add a child via inline input
     const addBtn = document.querySelector('[data-testid="add-child-root"]') as HTMLElement;
     await act(() => {
       fireEvent.click(addBtn);
     });
-    const ta = document.querySelector('[data-testid="edit-modal-textarea"]') as HTMLTextAreaElement;
+    await act(async () => {
+      await flush(100);
+    });
+    const input = await screen.findByTestId("inline-edit-input");
     await act(() => {
-      fireEvent.change(ta, { target: { value: "my task" } });
+      fireEvent.change(input, { target: { value: "my task" } });
     });
     await act(() => {
-      fireEvent.click(
-        document.querySelector('[data-testid="edit-modal-save"]') as HTMLButtonElement,
-      );
+      fireEvent.keyDown(input, { key: "Enter" });
     });
     await act(async () => {
       await flush(500);
@@ -294,21 +300,20 @@ describe("modal-based edit end-to-end", () => {
     });
     await createBoard("Test");
 
-    // Add a child
+    // Add a child via inline input
     const addBtn = document.querySelector('[data-testid="add-child-root"]') as HTMLElement;
     await act(() => {
       fireEvent.click(addBtn);
     });
-    const ta1 = document.querySelector(
-      '[data-testid="edit-modal-textarea"]',
-    ) as HTMLTextAreaElement;
+    await act(async () => {
+      await flush(100);
+    });
+    const input = await screen.findByTestId("inline-edit-input");
     await act(() => {
-      fireEvent.change(ta1, { target: { value: "initial" } });
+      fireEvent.change(input, { target: { value: "initial" } });
     });
     await act(() => {
-      fireEvent.click(
-        document.querySelector('[data-testid="edit-modal-save"]') as HTMLButtonElement,
-      );
+      fireEvent.keyDown(input, { key: "Enter" });
     });
     await act(async () => {
       await flush(500);
@@ -362,8 +367,8 @@ describe("centering on new node", () => {
 
     // Create a board
     fireEvent.click(screen.getByText("+ 新規ボード作成"));
-    const input = screen.getByPlaceholderText("例: メインプロジェクト") as HTMLInputElement;
-    fireEvent.change(input, { target: { value: "Test" } });
+    const boardInput = screen.getByPlaceholderText("例: メインプロジェクト") as HTMLInputElement;
+    fireEvent.change(boardInput, { target: { value: "Test" } });
     await act(() => {
       fireEvent.click(screen.getByText("作成"));
     });
@@ -376,7 +381,7 @@ describe("centering on new node", () => {
     expect(container).toBeTruthy();
     expect(container.style.transform).toMatch(/translate\(.*?0px\)/u);
 
-    // Click the root's + button (data-testid="add-child-root") to open the create modal
+    // Click the root's + button (data-testid="add-child-root") to open inline input
     const addBtn = document.querySelector('[data-testid="add-child-root"]') as HTMLElement;
     expect(addBtn).toBeTruthy();
     await act(async () => {
@@ -386,15 +391,13 @@ describe("centering on new node", () => {
       await flush(100);
     });
 
-    // Type text and click save
-    const ta = document.querySelector('[data-testid="edit-modal-textarea"]') as HTMLTextAreaElement;
+    // Type text and press Enter
+    const input = await screen.findByTestId("inline-edit-input");
     await act(() => {
-      fireEvent.change(ta, { target: { value: "my task" } });
+      fireEvent.change(input, { target: { value: "my task" } });
     });
     await act(() => {
-      fireEvent.click(
-        document.querySelector('[data-testid="edit-modal-save"]') as HTMLButtonElement,
-      );
+      fireEvent.keyDown(input, { key: "Enter" });
     });
     await act(async () => {
       await flush(500);
@@ -497,14 +500,15 @@ describe("kanban view end-to-end", () => {
     await act(() => {
       fireEvent.click(addBtn);
     });
-    const ta = document.querySelector('[data-testid="edit-modal-textarea"]') as HTMLTextAreaElement;
+    await act(async () => {
+      await flush(100);
+    });
+    const input = await screen.findByTestId("inline-edit-input");
     await act(() => {
-      fireEvent.change(ta, { target: { value: "drag me" } });
+      fireEvent.change(input, { target: { value: "drag me" } });
     });
     await act(() => {
-      fireEvent.click(
-        document.querySelector('[data-testid="edit-modal-save"]') as HTMLButtonElement,
-      );
+      fireEvent.keyDown(input, { key: "Enter" });
     });
     await act(async () => {
       await flush(500);
@@ -671,9 +675,9 @@ describe("multi-line text end-to-end", () => {
       await act(() => {
         fireEvent.click(screen.getByText("+ 新規ボード作成"));
       });
-      const input = screen.getByPlaceholderText("例: メインプロジェクト") as HTMLInputElement;
+      const boardInput = screen.getByPlaceholderText("例: メインプロジェクト") as HTMLInputElement;
       await act(() => {
-        fireEvent.change(input, { target: { value: "Multi" } });
+        fireEvent.change(boardInput, { target: { value: "Multi" } });
       });
       await act(() => {
         fireEvent.click(screen.getByText("作成"));
@@ -687,13 +691,34 @@ describe("multi-line text end-to-end", () => {
       fireEvent.click(screen.getByTestId("add-child-root"));
     });
     await act(async () => {
-      await flush(50);
+      await flush(100);
     });
 
     const multiline = "first\nsecond\nthird line is a bit longer to force wrap";
-    const textarea = screen.getByTestId("edit-modal-textarea") as HTMLTextAreaElement;
+    const inlineInput = await screen.findByTestId("inline-edit-input");
+    // Create a simple single-line task via inline input
     await act(() => {
-      fireEvent.change(textarea, { target: { value: multiline } });
+      fireEvent.change(inlineInput, { target: { value: "simple task" } });
+    });
+    await act(() => {
+      fireEvent.keyDown(inlineInput, { key: "Enter" });
+    });
+    await act(async () => {
+      await flush(300);
+    });
+
+    // Now edit it via modal to add multiline text
+    const ellipsisBtns = document.querySelectorAll('[data-testid="ellipsis"]');
+    await act(() => {
+      fireEvent.click(ellipsisBtns[0]);
+    });
+    await act(async () => {
+      await flush(100);
+    });
+
+    const ta = document.querySelector('[data-testid="edit-modal-textarea"]') as HTMLTextAreaElement;
+    await act(() => {
+      fireEvent.change(ta, { target: { value: multiline } });
     });
     await act(() => {
       fireEvent.click(screen.getByText("保存"));
@@ -731,21 +756,26 @@ describe("collapse +N badge and c-key toggle", () => {
       await flush(300);
     });
 
-    // Add parent node
+    // Get root node
+    const nodes1 = await db.nodes.toArray();
+    const root = nodes1.find((n) => n.isRoot);
+    if (!root) return;
+
+    // Add parent node via root + button
     const addBtn = document.querySelector('[data-testid="add-child-root"]') as HTMLElement;
     await act(() => {
       fireEvent.click(addBtn);
     });
-    const ta1 = document.querySelector(
-      '[data-testid="edit-modal-textarea"]',
-    ) as HTMLTextAreaElement;
+    await act(async () => {
+      await flush(100);
+    });
+
+    const ta1 = await screen.findByTestId("inline-edit-input");
     await act(() => {
       fireEvent.change(ta1, { target: { value: "parent" } });
     });
     await act(() => {
-      fireEvent.click(
-        document.querySelector('[data-testid="edit-modal-save"]') as HTMLButtonElement,
-      );
+      fireEvent.keyDown(ta1, { key: "Enter" });
     });
     await act(async () => {
       await flush(300);
@@ -770,22 +800,16 @@ describe("collapse +N badge and c-key toggle", () => {
     await act(async () => {
       await flush(100);
     });
-    const ta2 = document.querySelector(
-      '[data-testid="edit-modal-textarea"]',
-    ) as HTMLTextAreaElement;
-    if (ta2) {
-      await act(() => {
-        fireEvent.change(ta2, { target: { value: "child1" } });
-      });
-      await act(() => {
-        fireEvent.click(
-          document.querySelector('[data-testid="edit-modal-save"]') as HTMLButtonElement,
-        );
-      });
-      await act(async () => {
-        await flush(300);
-      });
-    }
+    const ta2 = await screen.findByTestId("inline-edit-input");
+    await act(() => {
+      fireEvent.change(ta2, { target: { value: "child1" } });
+    });
+    await act(() => {
+      fireEvent.keyDown(ta2, { key: "Enter" });
+    });
+    await act(async () => {
+      await flush(300);
+    });
 
     // Add child2
     await act(() => {
@@ -803,22 +827,16 @@ describe("collapse +N badge and c-key toggle", () => {
     await act(async () => {
       await flush(100);
     });
-    const ta3 = document.querySelector(
-      '[data-testid="edit-modal-textarea"]',
-    ) as HTMLTextAreaElement;
-    if (ta3) {
-      await act(() => {
-        fireEvent.change(ta3, { target: { value: "child2" } });
-      });
-      await act(() => {
-        fireEvent.click(
-          document.querySelector('[data-testid="edit-modal-save"]') as HTMLButtonElement,
-        );
-      });
-      await act(async () => {
-        await flush(300);
-      });
-    }
+    const ta3 = await screen.findByTestId("inline-edit-input");
+    await act(() => {
+      fireEvent.change(ta3, { target: { value: "child2" } });
+    });
+    await act(() => {
+      fireEvent.keyDown(ta3, { key: "Enter" });
+    });
+    await act(async () => {
+      await flush(300);
+    });
   }
 
   it("shows +N badge with hidden descendant count when collapsed", async () => {
@@ -897,5 +915,291 @@ describe("collapse +N badge and c-key toggle", () => {
       await flush(100);
     });
     expect(screen.queryByText("+2")).toBeNull();
+  });
+});
+
+describe("inline editing UI", () => {
+  beforeEach(async () => {
+    await db.open();
+    await db.boards.clear();
+    await db.nodes.clear();
+    await db.meta.clear();
+  });
+
+  afterEach(async () => {
+    await db.delete();
+  });
+
+  async function createBoardWithRoot() {
+    fireEvent.click(screen.getByText("+ 新規ボード作成"));
+    const input = screen.getByPlaceholderText("例: メインプロジェクト") as HTMLInputElement;
+    fireEvent.change(input, { target: { value: "Test" } });
+    await act(() => {
+      fireEvent.click(screen.getByText("作成"));
+    });
+    await act(async () => {
+      await flush(300);
+    });
+  }
+
+  it("Tab creates a child with an inline input; Enter commits", async () => {
+    render(<App />);
+    await act(async () => {
+      await flush(100);
+    });
+    await createBoardWithRoot();
+
+    // Get root node
+    const nodes = await db.nodes.toArray();
+    const root = nodes.find((n) => n.isRoot);
+    expect(root).toBeTruthy();
+
+    // Select root
+    await act(() => {
+      const rootCard = document.querySelector(`[data-node-id="${root!.id}"]`) as HTMLElement;
+      if (rootCard) fireEvent.click(rootCard);
+    });
+    await act(async () => {
+      await flush(100);
+    });
+
+    // Press Tab to create child inline
+    await act(() => {
+      fireEvent.keyDown(document, { key: "Tab" });
+    });
+    await act(async () => {
+      await flush(100);
+    });
+
+    const input = await screen.findByTestId("inline-edit-input");
+    expect(input).toBeTruthy();
+
+    // Type text and press Enter
+    await act(() => {
+      fireEvent.change(input, { target: { value: "new task" } });
+    });
+    await act(() => {
+      fireEvent.keyDown(input, { key: "Enter" });
+    });
+    await act(async () => {
+      await flush(300);
+    });
+
+    expect(screen.queryByTestId("inline-edit-input")).toBeNull();
+    expect(screen.getByText("new task")).toBeTruthy();
+  });
+
+  it("Escape cancels and removes the empty new node", async () => {
+    render(<App />);
+    await act(async () => {
+      await flush(100);
+    });
+    await createBoardWithRoot();
+
+    const nodes = await db.nodes.toArray();
+    const root = nodes.find((n) => n.isRoot);
+    expect(root).toBeTruthy();
+
+    await act(() => {
+      const rootCard = document.querySelector(`[data-node-id="${root!.id}"]`) as HTMLElement;
+      if (rootCard) fireEvent.click(rootCard);
+    });
+    await act(async () => {
+      await flush(100);
+    });
+
+    await act(() => {
+      fireEvent.keyDown(document, { key: "Tab" });
+    });
+    await act(async () => {
+      await flush(100);
+    });
+
+    const input = await screen.findByTestId("inline-edit-input");
+
+    await act(() => {
+      fireEvent.keyDown(input, { key: "Escape" });
+    });
+    await act(async () => {
+      await flush(300);
+    });
+
+    expect(screen.queryByTestId("inline-edit-input")).toBeNull();
+  });
+
+  it("Enter on a selected child creates a sibling inline", async () => {
+    render(<App />);
+    await act(async () => {
+      await flush(100);
+    });
+    await createBoardWithRoot();
+
+    // Add a child via root + button
+    const addBtn = document.querySelector('[data-testid="add-child-root"]') as HTMLElement;
+    await act(() => {
+      fireEvent.click(addBtn);
+    });
+    await act(async () => {
+      await flush(100);
+    });
+
+    const input = await screen.findByTestId("inline-edit-input");
+    await act(() => {
+      fireEvent.change(input, { target: { value: "childA" } });
+    });
+    await act(() => {
+      fireEvent.keyDown(input, { key: "Enter" });
+    });
+    await act(async () => {
+      await flush(300);
+    });
+
+    // Get childA and select it
+    const nodes = await db.nodes.toArray();
+    const childA = nodes.find((n) => n.text === "childA");
+    expect(childA).toBeTruthy();
+
+    await act(() => {
+      const childCard = document.querySelector(`[data-node-id="${childA!.id}"]`) as HTMLElement;
+      if (childCard) fireEvent.click(childCard);
+    });
+    await act(async () => {
+      await flush(100);
+    });
+
+    // Press Enter to create sibling
+    await act(() => {
+      fireEvent.keyDown(document, { key: "Enter" });
+    });
+    await act(async () => {
+      await flush(100);
+    });
+
+    const siblingInput = await screen.findByTestId("inline-edit-input");
+    await act(() => {
+      fireEvent.change(siblingInput, { target: { value: "sibling" } });
+    });
+    await act(() => {
+      fireEvent.keyDown(siblingInput, { key: "Enter" });
+    });
+    await act(async () => {
+      await flush(300);
+    });
+
+    expect(screen.getByText("sibling")).toBeTruthy();
+  });
+
+  it("F2 renames the selected node inline", async () => {
+    render(<App />);
+    await act(async () => {
+      await flush(100);
+    });
+    await createBoardWithRoot();
+
+    // Add a node to rename
+    const addBtn = document.querySelector('[data-testid="add-child-root"]') as HTMLElement;
+    await act(() => {
+      fireEvent.click(addBtn);
+    });
+    await act(async () => {
+      await flush(100);
+    });
+
+    const input = await screen.findByTestId("inline-edit-input");
+    await act(() => {
+      fireEvent.change(input, { target: { value: "old" } });
+    });
+    await act(() => {
+      fireEvent.keyDown(input, { key: "Enter" });
+    });
+    await act(async () => {
+      await flush(300);
+    });
+
+    // Select the node and press F2
+    const nodes = await db.nodes.toArray();
+    const node = nodes.find((n) => n.text === "old");
+    expect(node).toBeTruthy();
+
+    await act(() => {
+      const nodeCard = document.querySelector(`[data-node-id="${node!.id}"]`) as HTMLElement;
+      if (nodeCard) fireEvent.click(nodeCard);
+    });
+    await act(async () => {
+      await flush(100);
+    });
+
+    await act(() => {
+      fireEvent.keyDown(document, { key: "F2" });
+    });
+    await act(async () => {
+      await flush(100);
+    });
+
+    const editInput = await screen.findByTestId("inline-edit-input");
+    expect((editInput as HTMLInputElement).value).toBe("old");
+
+    await act(() => {
+      fireEvent.change(editInput, { target: { value: "renamed" } });
+    });
+    await act(() => {
+      fireEvent.keyDown(editInput, { key: "Enter" });
+    });
+    await act(async () => {
+      await flush(300);
+    });
+
+    expect(screen.getByText("renamed")).toBeTruthy();
+    expect(screen.queryByText("old")).toBeNull();
+  });
+
+  it("does not trigger global shortcuts while editing", async () => {
+    render(<App />);
+    await act(async () => {
+      await flush(100);
+    });
+    await createBoardWithRoot();
+
+    const nodes = await db.nodes.toArray();
+    const root = nodes.find((n) => n.isRoot);
+    expect(root).toBeTruthy();
+
+    await act(() => {
+      const rootCard = document.querySelector(`[data-node-id="${root!.id}"]`) as HTMLElement;
+      if (rootCard) fireEvent.click(rootCard);
+    });
+    await act(async () => {
+      await flush(100);
+    });
+
+    await act(() => {
+      fireEvent.keyDown(document, { key: "Tab" });
+    });
+    await act(async () => {
+      await flush(100);
+    });
+
+    const input = await screen.findByTestId("inline-edit-input");
+
+    // Type with spaces (space key should not trigger TOGGLE_COMPLETE)
+    await act(() => {
+      fireEvent.change(input, { target: { value: "a b" } });
+    });
+
+    // Verify the typed text is in the input
+    expect((input as HTMLInputElement).value).toBe("a b");
+
+    // Verify by pressing space key directly doesn't toggle anything
+    await act(() => {
+      fireEvent.keyDown(input, { key: " " });
+    });
+    await act(async () => {
+      await flush(100);
+    });
+
+    // Check that the node's completed state is unchanged (space didn't trigger TOGGLE_COMPLETE)
+    const dbNodes = await db.nodes.toArray();
+    const rootNode = dbNodes.find((n) => n.isRoot);
+    expect(rootNode?.completed).toBeFalsy();
   });
 });

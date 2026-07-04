@@ -1,5 +1,6 @@
 import { ChevronDown, ChevronUp, ListOrdered, Pencil, Plus } from "lucide-react";
 import { useDraggable, useDroppable } from "@dnd-kit/core";
+import { useState } from "react";
 import { useMindStore } from "../hooks/use-mind-store";
 import { isDescendant } from "../store";
 import type { MindNode } from "../types";
@@ -12,12 +13,34 @@ interface Props {
   node: MindNode;
 }
 
+function InlineEditInput({ initialText }: { initialText: string }) {
+  const { dispatch } = useMindStore();
+  const [value, setValue] = useState(initialText);
+  return (
+    <input
+      data-testid="inline-edit-input"
+      autoFocus
+      value={value}
+      onChange={(e) => setValue(e.target.value)}
+      onKeyDown={(e) => {
+        e.stopPropagation();
+        if (e.key === "Enter") dispatch({ text: value, type: "COMMIT_INLINE_EDIT" });
+        if (e.key === "Escape") dispatch({ type: "CANCEL_INLINE_EDIT" });
+      }}
+      onBlur={() => dispatch({ text: value, type: "COMMIT_INLINE_EDIT" })}
+      onPointerDown={(e) => e.stopPropagation()}
+      className="w-full bg-transparent text-sm font-medium outline-none border-b border-[var(--terra)]"
+    />
+  );
+}
+
 export function NodeCard({ node }: Props) {
   const { dispatch, state } = useMindStore();
   const isSelected = state.selectedNodeId === node.id;
   const q = state.searchQuery.toLowerCase();
   const isMatch = state.searchQuery === "" || node.text.toLowerCase().includes(q);
   const breadcrumb = parentBreadcrumb(state.nodes, node.id);
+  const isEditing = state.inlineEdit?.nodeId === node.id;
 
   const {
     setNodeRef: dragRef,
@@ -55,8 +78,16 @@ export function NodeCard({ node }: Props) {
           fontFamily: '"Crimson Pro", serif',
           fontWeight: 600,
         }}
+        onDoubleClick={(e) => {
+          e.stopPropagation();
+          dispatch({ nodeId: node.id, type: "START_INLINE_EDIT" });
+        }}
       >
-        <div className="flex-1 select-none pr-1 truncate">{node.text}</div>
+        {isEditing ? (
+          <InlineEditInput key={node.id} initialText={node.text} />
+        ) : (
+          <div className="flex-1 select-none pr-1 truncate">{node.text}</div>
+        )}
         <button
           type="button"
           data-testid="add-child-root"
@@ -64,7 +95,7 @@ export function NodeCard({ node }: Props) {
           style={{ background: "rgba(255,255,255,0.2)" }}
           onClick={(e) => {
             e.stopPropagation();
-            dispatch({ modal: { kind: "edit-new", parentId: node.id }, type: "OPEN_MODAL" });
+            dispatch({ newId: crypto.randomUUID(), parentId: node.id, type: "ADD_CHILD_INLINE" });
           }}
         >
           <Plus size={12} />
@@ -87,6 +118,10 @@ export function NodeCard({ node }: Props) {
         if (!isSelected) {
           dispatch({ id: node.id, type: "SELECT" });
         }
+      }}
+      onDoubleClick={(e) => {
+        e.stopPropagation();
+        dispatch({ nodeId: node.id, type: "START_INLINE_EDIT" });
       }}
       className={`absolute -translate-x-1/2 -translate-y-1/2 px-4 py-3 rounded border-l-4 flex flex-col gap-2 min-w-[220px] max-w-[320px] ${isSelected ? "node-selected" : ""} ${isMatch ? "" : "opacity-30"} ${isRingVisible ? "ring-2 ring-sky-400" : ""}`}
       style={{
@@ -163,7 +198,11 @@ export function NodeCard({ node }: Props) {
           </button>
         </div>
       </div>
-      <TaskCard node={node} />
+      {isEditing ? (
+        <InlineEditInput key={node.id} initialText={node.text} />
+      ) : (
+        <TaskCard node={node} />
+      )}
     </div>
   );
 }

@@ -32,12 +32,15 @@ describe("useKeyboard — delete without confirm", () => {
     await act(() => {
       fireEvent.click(addBtn);
     });
-    const ta = document.querySelector('[data-testid="edit-modal-textarea"]')!;
+    await act(async () => {
+      await flush(100);
+    });
+    const ta = await screen.findByTestId("inline-edit-input");
     await act(() => {
       fireEvent.change(ta, { target: { value: "delete me" } });
     });
     await act(() => {
-      fireEvent.click(document.querySelector('[data-testid="edit-modal-save"]')!);
+      fireEvent.keyDown(ta, { key: "Enter" });
     });
     await act(async () => {
       await flush(500);

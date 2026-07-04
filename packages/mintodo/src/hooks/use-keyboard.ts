@@ -27,6 +27,7 @@ export function useKeyboard(): void {
       }
 
       if (state.modal) return;
+      if (state.inlineEdit) return;
       if (isEditableTarget(e.target)) return;
 
       const active = state.nodes[state.selectedNodeId];
@@ -36,8 +37,9 @@ export function useKeyboard(): void {
         case "Tab": {
           e.preventDefault();
           dispatch({
-            modal: { kind: "edit-new", parentId: state.selectedNodeId },
-            type: "OPEN_MODAL",
+            newId: crypto.randomUUID(),
+            parentId: state.selectedNodeId,
+            type: "ADD_CHILD_INLINE",
           });
           break;
         }
@@ -45,10 +47,16 @@ export function useKeyboard(): void {
           if (!active.isRoot && active.parentId) {
             e.preventDefault();
             dispatch({
-              modal: { kind: "edit-new", parentId: active.parentId },
-              type: "OPEN_MODAL",
+              newId: crypto.randomUUID(),
+              parentId: active.parentId,
+              type: "ADD_CHILD_INLINE",
             });
           }
+          break;
+        }
+        case "F2": {
+          e.preventDefault();
+          dispatch({ nodeId: state.selectedNodeId, type: "START_INLINE_EDIT" });
           break;
         }
         case " ": {
