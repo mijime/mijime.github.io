@@ -6,15 +6,42 @@ const TWEEN_DURATION = 300;
 const EASING = "cubic-bezier(0.25, 1, 0.5, 1)";
 const MIN_CURVE_SPREAD = 60;
 
-function pathD(psx: number, psy: number, pex: number, pey: number): string {
-  const sx = psx + EDGE_INSET;
-  const ex = pex - EDGE_INSET;
-  const horizontalDist = ex - sx;
+function pathD(
+  psx: number,
+  psy: number,
+  pex: number,
+  pey: number,
+  options?: {
+    zoom?: number;
+    pan?: { x: number; y: number };
+    containerSize?: { width: number; height: number };
+  },
+): string {
+  const zoom = options?.zoom ?? 1;
+  const pan = options?.pan ?? { x: 0, y: 0 };
+  const containerSize = options?.containerSize ?? { width: 0, height: 0 };
+  const cx = containerSize.width / 2;
+  const cy = containerSize.height / 2;
+
+  const worldSx = psx + EDGE_INSET;
+  const worldEx = pex - EDGE_INSET;
+  const horizontalDist = worldEx - worldSx;
   const halfDist = Math.max(Math.abs(horizontalDist) / 2, MIN_CURVE_SPREAD);
   const sign = horizontalDist >= 0 ? 1 : -1;
-  const c1x = sx + sign * halfDist;
-  const c2x = ex - sign * halfDist;
-  return `M ${sx} ${psy} C ${c1x} ${psy}, ${c2x} ${pey}, ${ex} ${pey}`;
+
+  const worldC1x = worldSx + sign * halfDist;
+  const worldC2x = worldEx - sign * halfDist;
+
+  const sx = cx + worldSx * zoom + pan.x;
+  const sy = cy + psy * zoom + pan.y;
+  const ex = cx + worldEx * zoom + pan.x;
+  const ey = cy + pey * zoom + pan.y;
+  const c1x = cx + worldC1x * zoom + pan.x;
+  const c1y = cy + psy * zoom + pan.y;
+  const c2x = cx + worldC2x * zoom + pan.x;
+  const c2y = cy + pey * zoom + pan.y;
+
+  return `M ${sx} ${sy} C ${c1x} ${c1y}, ${c2x} ${c2y}, ${ex} ${ey}`;
 }
 
 interface Pos {
@@ -98,8 +125,26 @@ export function useTween(): void {
               { left: `${a.to.x}px`, top: `${a.to.y}px` },
             ]
           : [
-              { d: `path("${pathD(a.parent.x, a.parent.y, a.from.x, a.from.y)}")` },
-              { d: `path("${pathD(a.parent.x, a.parent.y, a.to.x, a.to.y)}")` },
+              {
+                d: `path("${pathD(a.parent.x, a.parent.y, a.from.x, a.from.y, {
+                  zoom: state.view.zoom,
+                  pan: state.view.pan,
+                  containerSize: {
+                    width: (a.el as SVGElement).ownerSVGElement?.clientWidth ?? 800,
+                    height: (a.el as SVGElement).ownerSVGElement?.clientHeight ?? 600,
+                  },
+                })}")`,
+              },
+              {
+                d: `path("${pathD(a.parent.x, a.parent.y, a.to.x, a.to.y, {
+                  zoom: state.view.zoom,
+                  pan: state.view.pan,
+                  containerSize: {
+                    width: (a.el as SVGElement).ownerSVGElement?.clientWidth ?? 800,
+                    height: (a.el as SVGElement).ownerSVGElement?.clientHeight ?? 600,
+                  },
+                })}")`,
+              },
             ];
       a.el.animate(keyframes as unknown as Keyframe[], {
         duration: TWEEN_DURATION,
