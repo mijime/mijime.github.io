@@ -103,11 +103,13 @@ describe("KanbanCard", () => {
     expect(card.textContent).toMatch(/Task/u);
   });
 
-  it("'+' button (inside TaskCard) opens edit-new modal with the card as parent", () => {
+  it("'+' button (inside TaskCard) opens edit-new modal with the card as parent in kanban", () => {
     const root = node({ id: "root", boardId: "b", parentId: null, isRoot: true });
     const n = node({ id: "n1", boardId: "b", parentId: "root" });
+    const state = makeState([root, n]);
+    state.viewMode = "kanban";
     render(
-      <MindProvider initialState={makeState([root, n])}>
+      <MindProvider initialState={state}>
         <Capture />
         <KanbanCard node={n} />
       </MindProvider>,

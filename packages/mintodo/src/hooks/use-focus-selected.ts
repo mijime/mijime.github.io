@@ -3,6 +3,25 @@ import { useMindStore } from "./use-mind-store";
 
 const MARGIN = 40;
 
+export function computeFocusPan(
+  rect: { width: number; height: number },
+  nodePos: { x: number; y: number },
+  view: { pan: { x: number; y: number }; zoom: number },
+  margin: number = MARGIN,
+): { x: number; y: number } | null {
+  if (rect.width === 0) return null;
+  const sx = rect.width / 2 + nodePos.x * view.zoom + view.pan.x;
+  const sy = rect.height / 2 + nodePos.y * view.zoom + view.pan.y;
+  let dx = 0;
+  let dy = 0;
+  if (sx < margin) dx = margin - sx;
+  else if (sx > rect.width - margin) dx = rect.width - margin - sx;
+  if (sy < margin) dy = margin - sy;
+  else if (sy > rect.height - margin) dy = rect.height - margin - sy;
+  if (dx === 0 && dy === 0) return null;
+  return { x: view.pan.x + dx, y: view.pan.y + dy };
+}
+
 export function useFocusSelected({
   containerRef,
 }: {
@@ -16,21 +35,11 @@ export function useFocusSelected({
     const node = state.nodes[selectedNodeId];
     if (!el || !node) return;
     const rect = el.getBoundingClientRect();
-    if (rect.width === 0) return;
-    const { view } = state;
-    // Node center in container coordinates (transform origin = container center)
-    const sx = rect.width / 2 + node.x * view.zoom + view.pan.x;
-    const sy = rect.height / 2 + node.y * view.zoom + view.pan.y;
-    let dx = 0;
-    let dy = 0;
-    if (sx < MARGIN) dx = MARGIN - sx;
-    else if (sx > rect.width - MARGIN) dx = rect.width - MARGIN - sx;
-    if (sy < MARGIN) dy = MARGIN - sy;
-    else if (sy > rect.height - MARGIN) dy = rect.height - MARGIN - sy;
-    if (dx !== 0 || dy !== 0) {
+    const newPan = computeFocusPan(rect, { x: node.x, y: node.y }, state.view);
+    if (newPan) {
       dispatch({
         type: "SET_VIEW",
-        view: { pan: { x: view.pan.x + dx, y: view.pan.y + dy }, zoom: view.zoom },
+        view: { pan: newPan, zoom: state.view.zoom },
       });
     }
     // Deliberately depends only on selection/layout changes, not view, to avoid feedback loops

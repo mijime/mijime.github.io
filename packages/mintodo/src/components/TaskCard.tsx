@@ -64,7 +64,15 @@ export function TaskCard({ node }: Props) {
           data-testid={`add-child-${node.id}`}
           onClick={(e) => {
             e.stopPropagation();
-            dispatch({ modal: { kind: "edit-new", parentId: node.id }, type: "OPEN_MODAL" });
+            if (state.viewMode === "mindmap") {
+              dispatch({
+                type: "ADD_CHILD_INLINE",
+                newId: crypto.randomUUID(),
+                parentId: node.id,
+              });
+            } else {
+              dispatch({ modal: { kind: "edit-new", parentId: node.id }, type: "OPEN_MODAL" });
+            }
           }}
           className="w-[18px] h-[18px] rounded text-[11px] font-semibold flex items-center justify-center shrink-0"
           style={{

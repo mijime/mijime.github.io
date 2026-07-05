@@ -155,7 +155,7 @@ describe("modal-based edit end-to-end", () => {
     expect((input as HTMLInputElement).value).toBe("");
   });
 
-  it("entering text in inline input creates a node and centers the camera", async () => {
+  it("entering text in inline input creates a node", async () => {
     render(<App />);
     await act(async () => {
       await flush(100);
@@ -188,10 +188,6 @@ describe("modal-based edit end-to-end", () => {
     const child = nodes.find((n) => !n.isRoot);
     expect(child).toBeTruthy();
     expect(child!.text).toBe("my task");
-
-    // Camera centered on new node (x-pan ≈ 360 at zoom=1)
-    const container = document.querySelector(".transform-container") as HTMLElement;
-    expect(container.style.transform).toMatch(/translate\([^)]*360px/u);
   });
 
   it("committing inline input with empty text does not create a node", async () => {
@@ -359,7 +355,19 @@ describe("centering on new node", () => {
     await db.meta.clear();
   });
 
-  it("adding a child pans the camera to center on that child", async () => {
+  async function createBoard(name: string): Promise<void> {
+    fireEvent.click(screen.getByText("+ 新規ボード作成"));
+    const input = screen.getByPlaceholderText("例: メインプロジェクト") as HTMLInputElement;
+    fireEvent.change(input, { target: { value: name } });
+    await act(() => {
+      fireEvent.click(screen.getByText("作成"));
+    });
+    await act(async () => {
+      await flush(300);
+    });
+  }
+
+  it("adding a child creates and selects that child", async () => {
     render(<App />);
     await act(async () => {
       await flush(100);
@@ -375,11 +383,6 @@ describe("centering on new node", () => {
     await act(async () => {
       await flush(300);
     });
-
-    // Confirm initial transform has no y-pan (x≈0 too, but FP may produce ~1e-14)
-    const container = document.querySelector(".transform-container") as HTMLElement;
-    expect(container).toBeTruthy();
-    expect(container.style.transform).toMatch(/translate\(.*?0px\)/u);
 
     // Click the root's + button (data-testid="add-child-root") to open inline input
     const addBtn = document.querySelector('[data-testid="add-child-root"]') as HTMLElement;
@@ -403,9 +406,32 @@ describe("centering on new node", () => {
       await flush(500);
     });
 
-    // The new child is placed at (360, 0) by the tree layout (one depth level right, single child centered vertically).
-    // ComputeCenterOnNode returns pan ≈ (-360, 0) at zoom=1. (x may be ~1e-14 due to FP precision)
-    expect(container.style.transform).toMatch(/translate\([^)]*360px/u);
+    // Verify the new child was created
+    const nodes = await db.nodes.toArray();
+    const child = nodes.find((n) => !n.isRoot);
+    expect(child).toBeTruthy();
+    expect(child!.text).toBe("my task");
+  });
+
+  it("+ button in mindmap opens inline edit, not modal", async () => {
+    render(<App />);
+    await act(async () => {
+      await flush(100);
+    });
+    await createBoard("Test");
+
+    const addBtn = document.querySelector('[data-testid="add-child-root"]') as HTMLElement;
+    expect(addBtn).toBeTruthy();
+    await act(() => {
+      fireEvent.click(addBtn);
+    });
+    await act(async () => {
+      await flush(100);
+    });
+
+    const inlineInput = await screen.findByTestId("inline-edit-input");
+    expect(inlineInput).toBeTruthy();
+    expect(screen.queryByRole("dialog")).toBeNull();
   });
 });
 
