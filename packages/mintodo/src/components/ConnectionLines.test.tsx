@@ -45,6 +45,7 @@ function makeState(): State {
     view: { pan: { x: 0, y: 0 }, zoom: 1 },
     past: [],
     future: [],
+    inlineEdit: null,
   };
 }
 
@@ -86,7 +87,7 @@ describe("ConnectionLines", () => {
     });
     const path = container.querySelector("path")!;
     const d = path.getAttribute("d");
-    expect(d).toBe("M 0 0 C 150 0, 150 0, 300 0");
+    expect(d).toBe("M 110 0 C 170 0, 130 0, 190 0");
   });
 
   it("uses a minimum horizontal spread so the curve is visible even for vertical connections", () => {
@@ -98,8 +99,8 @@ describe("ConnectionLines", () => {
     });
     const path = container.querySelector("path")!;
     const d = path.getAttribute("d");
-    // Without minimum spread this would be "M 0 0 C 0 0, 0 -340, 0 -340"
-    expect(d).toBe("M 0 0 C 60 0, -60 -340, 0 -340");
+    // Without minimum spread this would be "M 110 0 C 110 0, -110 -340, -110 -340"
+    expect(d).toBe("M 110 0 C 0 0, 0 -340, -110 -340");
   });
 
   it("path is symmetric for left-going connections", () => {
@@ -111,7 +112,7 @@ describe("ConnectionLines", () => {
     });
     const path = container.querySelector("path")!;
     const d = path.getAttribute("d");
-    expect(d).toBe("M 0 0 C -150 0, -150 0, -300 0");
+    expect(d).toBe("M 110 0 C -150 0, -150 0, -410 0");
   });
 
   it("does not render connection for child of collapsed parent", () => {

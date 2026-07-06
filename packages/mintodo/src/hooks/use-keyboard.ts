@@ -27,6 +27,7 @@ export function useKeyboard(): void {
       }
 
       if (state.modal) return;
+      if (state.inlineEdit) return;
       if (isEditableTarget(e.target)) return;
 
       const active = state.nodes[state.selectedNodeId];
@@ -36,8 +37,9 @@ export function useKeyboard(): void {
         case "Tab": {
           e.preventDefault();
           dispatch({
-            modal: { kind: "edit-new", parentId: state.selectedNodeId },
-            type: "OPEN_MODAL",
+            newId: crypto.randomUUID(),
+            parentId: state.selectedNodeId,
+            type: "ADD_CHILD_INLINE",
           });
           break;
         }
@@ -45,10 +47,16 @@ export function useKeyboard(): void {
           if (!active.isRoot && active.parentId) {
             e.preventDefault();
             dispatch({
-              modal: { kind: "edit-new", parentId: active.parentId },
-              type: "OPEN_MODAL",
+              newId: crypto.randomUUID(),
+              parentId: active.parentId,
+              type: "ADD_CHILD_INLINE",
             });
           }
+          break;
+        }
+        case "F2": {
+          e.preventDefault();
+          dispatch({ nodeId: state.selectedNodeId, type: "START_INLINE_EDIT" });
           break;
         }
         case " ": {
@@ -74,31 +82,36 @@ export function useKeyboard(): void {
           }
           break;
         }
-        case "ArrowUp":
-        case "ArrowLeft": {
-          e.preventDefault();
-          if (active.isRoot) return;
-          const parent = state.nodes[active.parentId!];
-          if (!parent) return;
-          const idx = parent.children.indexOf(state.selectedNodeId);
-          if (idx > 0) {
-            dispatch({ id: parent.children[idx - 1], type: "SELECT" });
-          } else {
-            dispatch({ id: parent.id, type: "SELECT" });
+        case "c":
+        case "C": {
+          if (active.children.length > 0) {
+            e.preventDefault();
+            dispatch({ id: state.selectedNodeId, type: "TOGGLE_COLLAPSE" });
           }
           break;
         }
-        case "ArrowDown":
+        case "ArrowLeft": {
+          e.preventDefault();
+          if (active.parentId) dispatch({ id: active.parentId, type: "SELECT" });
+          break;
+        }
         case "ArrowRight": {
           e.preventDefault();
           if (active.children.length > 0 && !active.collapsed) {
             dispatch({ id: active.children[0], type: "SELECT" });
-          } else if (!active.isRoot && active.parentId) {
-            const parent = state.nodes[active.parentId];
-            const idx = parent?.children.indexOf(state.selectedNodeId) ?? -1;
-            if (parent && idx >= 0 && idx < parent.children.length - 1) {
-              dispatch({ id: parent.children[idx + 1], type: "SELECT" });
-            }
+          }
+          break;
+        }
+        case "ArrowUp":
+        case "ArrowDown": {
+          e.preventDefault();
+          if (active.isRoot || !active.parentId) break;
+          const parent = state.nodes[active.parentId];
+          if (!parent) break;
+          const idx = parent.children.indexOf(state.selectedNodeId);
+          const nextIdx = e.key === "ArrowUp" ? idx - 1 : idx + 1;
+          if (nextIdx >= 0 && nextIdx < parent.children.length) {
+            dispatch({ id: parent.children[nextIdx], type: "SELECT" });
           }
           break;
         }

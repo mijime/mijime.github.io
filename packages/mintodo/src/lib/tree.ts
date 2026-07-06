@@ -55,3 +55,8 @@ export function isKanbanVisible(nodes: Record<string, MindNode>, id: string): bo
   const { total, completed } = countDescendants(nodes, id);
   return total > 0 && total === completed;
 }
+
+export function countHiddenDescendants(nodes: Record<string, MindNode>, id: string): number {
+  const { total } = countDescendants(nodes, id);
+  return total;
+}

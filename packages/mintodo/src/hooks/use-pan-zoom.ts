@@ -46,10 +46,29 @@ export function usePanZoom({ containerRef }: Options): void {
     function onWheel(e: WheelEvent) {
       e.preventDefault();
       const view = viewRef.current;
-      const factor = 1.1;
-      const next = e.deltaY < 0 ? view.zoom * factor : view.zoom / factor;
-      const zoom = Math.max(0.2, Math.min(3, next));
-      dispatch({ type: "SET_VIEW", view: { pan: view.pan, zoom } });
+      if (e.ctrlKey || e.metaKey) {
+        const rect = (el as HTMLDivElement).getBoundingClientRect();
+        // Mouse position relative to the transform origin (container center)
+        const mx = e.clientX - rect.left - rect.width / 2;
+        const my = e.clientY - rect.top - rect.height / 2;
+        const factor = Math.exp(-e.deltaY * 0.01);
+        const zoom = Math.max(0.2, Math.min(3, view.zoom * factor));
+        const scale = zoom / view.zoom;
+        dispatch({
+          type: "SET_VIEW",
+          view: {
+            pan: { x: mx - (mx - view.pan.x) * scale, y: my - (my - view.pan.y) * scale },
+            zoom,
+          },
+        });
+        return;
+      }
+      const dx = e.shiftKey ? e.deltaY + e.deltaX : e.deltaX;
+      const dy = e.shiftKey ? 0 : e.deltaY;
+      dispatch({
+        type: "SET_VIEW",
+        view: { pan: { x: view.pan.x - dx, y: view.pan.y - dy }, zoom: view.zoom },
+      });
     }
     function onTouchStart(e: TouchEvent) {
       if (e.target !== el) return;

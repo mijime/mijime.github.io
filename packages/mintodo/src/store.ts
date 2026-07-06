@@ -10,7 +10,7 @@ import type {
   WorkLogEntry,
 } from "./types";
 import { nextStatus } from "./lib/status-cycle";
-import { applyRadialLayout } from "./layout/radial";
+import { applyTreeLayout } from "./layout/tree";
 
 export type StateSnapshot = Omit<State, "past" | "future">;
 
@@ -29,11 +29,13 @@ export interface State {
   view: View;
   past: StateSnapshot[];
   future: StateSnapshot[];
+  inlineEdit: { nodeId: string; isNew: boolean } | null;
 }
 
 export type Action =
   | { type: "ADD_BOARD"; board: Board; initialNodes: Record<string, MindNode> }
   | { type: "ADD_CHILD"; newId: string; parentId: string }
+  | { type: "ADD_CHILD_INLINE"; newId: string; parentId: string }
   | { type: "DELETE_BOARD"; id: string; nextBoardId: string | null }
   | { type: "DELETE_NODE"; id: string }
   | { type: "OPEN_MODAL"; modal: Modal }
@@ -51,6 +53,9 @@ export type Action =
   | { type: "SET_VIEW"; view: View }
   | { type: "SET_DRAWER"; open: boolean }
   | { type: "SNAP_BACK"; id: string }
+  | { type: "START_INLINE_EDIT"; nodeId: string }
+  | { type: "COMMIT_INLINE_EDIT"; text: string }
+  | { type: "CANCEL_INLINE_EDIT" }
   | { type: "TOGGLE_COLLAPSE"; id: string }
   | { type: "TOGGLE_COMPLETE"; id: string }
   | { type: "TOGGLE_DRAWER" }
@@ -91,12 +96,14 @@ export function createInitialState(): State {
     view: { pan: { x: 0, y: 0 }, zoom: 1 },
     past: [],
     future: [],
+    inlineEdit: null,
   };
 }
 
 const UNDOABLE_ACTIONS = new Set<Action["type"]>([
   "ADD_BOARD",
   "ADD_CHILD",
+  "ADD_CHILD_INLINE",
   "CREATE_CHILD",
   "DELETE_BOARD",
   "DELETE_COMPLETED",
@@ -112,6 +119,7 @@ const UNDOABLE_ACTIONS = new Set<Action["type"]>([
   "TOGGLE_COLLAPSE",
   "TOGGLE_COMPLETE",
   "UPDATE_NODE",
+  "COMMIT_INLINE_EDIT",
 ]);
 
 function isUndoableAction(type: Action["type"]): boolean {
@@ -132,6 +140,7 @@ function snapshotState(state: State): StateSnapshot {
     searchQuery: state.searchQuery,
     selectedNodeId: state.selectedNodeId,
     view: state.view,
+    inlineEdit: state.inlineEdit,
   };
 }
 
@@ -146,8 +155,8 @@ function pushUndo(state: State, nextState: State): State {
   return { ...nextState, past, future: [] };
 }
 
-function withRadialLayout(state: State, nodes: Record<string, MindNode>): State {
-  return { ...state, nodes: applyRadialLayout({ nodes }), layoutVersion: state.layoutVersion + 1 };
+function withTreeLayout(state: State, nodes: Record<string, MindNode>): State {
+  return { ...state, nodes: applyTreeLayout({ nodes }), layoutVersion: state.layoutVersion + 1 };
 }
 
 export function isDescendant(
@@ -238,7 +247,7 @@ function applyAction(state: State, action: Action): State {
         x: 0,
         y: 0,
       };
-      return withRadialLayout(
+      return withTreeLayout(
         {
           ...state,
           nodes: { root },
@@ -273,7 +282,7 @@ function applyAction(state: State, action: Action): State {
                 : b,
             )
           : state.boards;
-      return withRadialLayout({ ...state, nodes: action.nodes, boards: nextBoards }, action.nodes);
+      return withTreeLayout({ ...state, nodes: action.nodes, boards: nextBoards }, action.nodes);
     }
     case "SET_DRAGGING": {
       return { ...state, draggingNodeId: action.id };
@@ -306,11 +315,48 @@ function applyAction(state: State, action: Action): State {
         [newId]: newNode,
         [parent.id]: { ...parent, children: [...parent.children, newId] },
       };
-      return withRadialLayout(
+      return withTreeLayout(
         {
           ...state,
           nodes: nextNodes,
           selectedNodeId: newId,
+        },
+        nextNodes,
+      );
+    }
+    case "ADD_CHILD_INLINE": {
+      const parent = state.nodes[action.parentId];
+      if (!parent) return state;
+      const newNode: MindNode = {
+        id: action.newId,
+        boardId: parent.boardId,
+        categoryColor: parent.categoryColor,
+        children: [],
+        estimate: null,
+        workLogs: [],
+        collapsed: false,
+        completed: false,
+        dueDate: "",
+        startDate: "",
+        status: "inbox",
+        isRoot: false,
+        parentId: parent.id,
+        priority: "medium",
+        text: "",
+        x: 0,
+        y: 0,
+      };
+      const nextNodes: Record<string, MindNode> = {
+        ...state.nodes,
+        [action.newId]: newNode,
+        [parent.id]: { ...parent, collapsed: false, children: [...parent.children, action.newId] },
+      };
+      return withTreeLayout(
+        {
+          ...state,
+          nodes: nextNodes,
+          selectedNodeId: action.newId,
+          inlineEdit: { nodeId: action.newId, isNew: true },
         },
         nextNodes,
       );
@@ -342,7 +388,7 @@ function applyAction(state: State, action: Action): State {
         [action.newId]: newNode,
         [parent.id]: { ...parent, children: [...parent.children, action.newId] },
       };
-      return withRadialLayout(
+      return withTreeLayout(
         { ...state, nodes: nextNodes, selectedNodeId: action.newId },
         nextNodes,
       );
@@ -371,7 +417,47 @@ function applyAction(state: State, action: Action): State {
       const node = state.nodes[action.id];
       if (!node) return state;
       const nextNodes = { ...state.nodes, [action.id]: { ...node, collapsed: !node.collapsed } };
-      return withRadialLayout({ ...state, nodes: nextNodes }, nextNodes);
+      return withTreeLayout({ ...state, nodes: nextNodes }, nextNodes);
+    }
+    case "START_INLINE_EDIT": {
+      if (!state.nodes[action.nodeId]) return state;
+      return {
+        ...state,
+        inlineEdit: { nodeId: action.nodeId, isNew: false },
+        selectedNodeId: action.nodeId,
+      };
+    }
+    case "COMMIT_INLINE_EDIT": {
+      const edit = state.inlineEdit;
+      if (!edit) return state;
+      const node = state.nodes[edit.nodeId];
+      if (!node) return { ...state, inlineEdit: null };
+      const text = action.text.trim();
+      if (text === "") {
+        if (edit.isNew) {
+          return applyAction(
+            { ...state, inlineEdit: null },
+            { id: edit.nodeId, type: "DELETE_NODE" },
+          );
+        }
+        return { ...state, inlineEdit: null };
+      }
+      return {
+        ...state,
+        inlineEdit: null,
+        nodes: { ...state.nodes, [edit.nodeId]: { ...node, text } },
+      };
+    }
+    case "CANCEL_INLINE_EDIT": {
+      const edit = state.inlineEdit;
+      if (!edit) return state;
+      if (edit.isNew) {
+        return applyAction(
+          { ...state, inlineEdit: null },
+          { id: edit.nodeId, type: "DELETE_NODE" },
+        );
+      }
+      return { ...state, inlineEdit: null };
     }
     case "DELETE_NODE": {
       const node = state.nodes[action.id];
@@ -393,7 +479,7 @@ function applyAction(state: State, action: Action): State {
         updated.set(parent.id, { ...parent, children: newChildren });
       }
       const nextNodes = Object.fromEntries(updated);
-      return withRadialLayout(
+      return withTreeLayout(
         {
           ...state,
           nodes: nextNodes,
@@ -407,10 +493,10 @@ function applyAction(state: State, action: Action): State {
       const node = state.nodes[action.id];
       const newParent = state.nodes[action.newParentId];
       if (!node || !newParent) return state;
-      if (node.isRoot || newParent.id === node.id) return withRadialLayout(state, state.nodes);
-      if (node.parentId === action.newParentId) return withRadialLayout(state, state.nodes);
+      if (node.isRoot || newParent.id === node.id) return withTreeLayout(state, state.nodes);
+      if (node.parentId === action.newParentId) return withTreeLayout(state, state.nodes);
       if (isDescendant(state.nodes, action.id, action.newParentId)) {
-        return withRadialLayout(state, state.nodes);
+        return withTreeLayout(state, state.nodes);
       }
       const oldParent = node.parentId ? state.nodes[node.parentId] : null;
       const nextNodes: Record<string, MindNode> = { ...state.nodes };
@@ -425,7 +511,7 @@ function applyAction(state: State, action: Action): State {
         ...newParent,
         children: [...newParent.children, action.id],
       };
-      return withRadialLayout(state, nextNodes);
+      return withTreeLayout(state, nextNodes);
     }
 
     case "SET_VIEW_MODE": {
@@ -452,7 +538,7 @@ function applyAction(state: State, action: Action): State {
     }
 
     case "SNAP_BACK": {
-      return withRadialLayout(state, state.nodes);
+      return withTreeLayout(state, state.nodes);
     }
     case "DELETE_COMPLETED": {
       const boardId = state.currentBoardId;
@@ -478,7 +564,7 @@ function applyAction(state: State, action: Action): State {
       }
       const nextNodes = Object.fromEntries(updated);
       const nextSelected = nextNodes[state.selectedNodeId] ? state.selectedNodeId : "root";
-      return withRadialLayout(
+      return withTreeLayout(
         { ...state, nodes: nextNodes, selectedNodeId: nextSelected },
         nextNodes,
       );

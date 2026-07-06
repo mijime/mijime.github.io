@@ -1,14 +1,37 @@
 import { ChevronDown, ChevronUp, ListOrdered, Pencil, Plus } from "lucide-react";
 import { useDraggable, useDroppable } from "@dnd-kit/core";
+import { useState } from "react";
 import { useMindStore } from "../hooks/use-mind-store";
 import { isDescendant } from "../store";
 import type { MindNode } from "../types";
 import { categoryBorderColor } from "../lib/badges";
 import { parentBreadcrumb } from "../lib/breadcrumb";
+import { countHiddenDescendants } from "../lib/tree";
 import { TaskCard } from "./TaskCard";
 
 interface Props {
   node: MindNode;
+}
+
+function InlineEditInput({ initialText }: { initialText: string }) {
+  const { dispatch } = useMindStore();
+  const [value, setValue] = useState(initialText);
+  return (
+    <input
+      data-testid="inline-edit-input"
+      autoFocus
+      value={value}
+      onChange={(e) => setValue(e.target.value)}
+      onKeyDown={(e) => {
+        e.stopPropagation();
+        if (e.key === "Enter") dispatch({ text: value, type: "COMMIT_INLINE_EDIT" });
+        if (e.key === "Escape") dispatch({ type: "CANCEL_INLINE_EDIT" });
+      }}
+      onBlur={() => dispatch({ text: value, type: "COMMIT_INLINE_EDIT" })}
+      onPointerDown={(e) => e.stopPropagation()}
+      className="w-full bg-transparent text-sm font-medium outline-none border-b border-[var(--terra)]"
+    />
+  );
 }
 
 export function NodeCard({ node }: Props) {
@@ -17,6 +40,7 @@ export function NodeCard({ node }: Props) {
   const q = state.searchQuery.toLowerCase();
   const isMatch = state.searchQuery === "" || node.text.toLowerCase().includes(q);
   const breadcrumb = parentBreadcrumb(state.nodes, node.id);
+  const isEditing = state.inlineEdit?.nodeId === node.id;
 
   const {
     setNodeRef: dragRef,
@@ -54,8 +78,16 @@ export function NodeCard({ node }: Props) {
           fontFamily: '"Crimson Pro", serif',
           fontWeight: 600,
         }}
+        onDoubleClick={(e) => {
+          e.stopPropagation();
+          dispatch({ nodeId: node.id, type: "START_INLINE_EDIT" });
+        }}
       >
-        <div className="flex-1 select-none pr-1 truncate">{node.text}</div>
+        {isEditing ? (
+          <InlineEditInput key={node.id} initialText={node.text} />
+        ) : (
+          <div className="flex-1 select-none pr-1 truncate">{node.text}</div>
+        )}
         <button
           type="button"
           data-testid="add-child-root"
@@ -63,7 +95,7 @@ export function NodeCard({ node }: Props) {
           style={{ background: "rgba(255,255,255,0.2)" }}
           onClick={(e) => {
             e.stopPropagation();
-            dispatch({ modal: { kind: "edit-new", parentId: node.id }, type: "OPEN_MODAL" });
+            dispatch({ newId: crypto.randomUUID(), parentId: node.id, type: "ADD_CHILD_INLINE" });
           }}
         >
           <Plus size={12} />
@@ -74,6 +106,9 @@ export function NodeCard({ node }: Props) {
 
   const borderColor = categoryBorderColor(node.categoryColor);
   const priBorder = node.priority === "high";
+
+  const isInvalidTarget =
+    draggedId !== null && draggedId !== node.id && isDescendant(state.nodes, draggedId, node.id);
 
   return (
     <div
@@ -87,6 +122,10 @@ export function NodeCard({ node }: Props) {
           dispatch({ id: node.id, type: "SELECT" });
         }
       }}
+      onDoubleClick={(e) => {
+        e.stopPropagation();
+        dispatch({ nodeId: node.id, type: "START_INLINE_EDIT" });
+      }}
       className={`absolute -translate-x-1/2 -translate-y-1/2 px-4 py-3 rounded border-l-4 flex flex-col gap-2 min-w-[220px] max-w-[320px] ${isSelected ? "node-selected" : ""} ${isMatch ? "" : "opacity-30"} ${isRingVisible ? "ring-2 ring-sky-400" : ""}`}
       style={{
         left: node.x,
@@ -98,7 +137,7 @@ export function NodeCard({ node }: Props) {
         borderBottom: "1px solid var(--border)",
         borderLeft: `4px solid ${borderColor}`,
         boxShadow: priBorder ? "0 0 0 1px var(--terra)" : undefined,
-        opacity: isDragging ? 0.4 : 1,
+        opacity: isDragging ? 0.4 : isInvalidTarget ? 0.3 : 1,
         touchAction: "none",
       }}
     >
@@ -113,6 +152,7 @@ export function NodeCard({ node }: Props) {
           {node.children.length > 0 && (
             <button
               type="button"
+              data-testid={`collapse-${node.id}`}
               className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1 rounded-md transition"
               onClick={(e) => {
                 e.stopPropagation();
@@ -120,7 +160,13 @@ export function NodeCard({ node }: Props) {
               }}
               onPointerDown={(e) => e.stopPropagation()}
             >
-              {node.collapsed ? <ChevronDown size={12} /> : <ChevronUp size={12} />}
+              {node.collapsed ? (
+                <span className="flex items-center gap-0.5 text-[10px] font-semibold text-slate-500">
+                  <ChevronDown size={12} />+{countHiddenDescendants(state.nodes, node.id)}
+                </span>
+              ) : (
+                <ChevronUp size={12} />
+              )}
             </button>
           )}
           <button
@@ -155,7 +201,11 @@ export function NodeCard({ node }: Props) {
           </button>
         </div>
       </div>
-      <TaskCard node={node} />
+      {isEditing ? (
+        <InlineEditInput key={node.id} initialText={node.text} />
+      ) : (
+        <TaskCard node={node} />
+      )}
     </div>
   );
 }

@@ -3,6 +3,8 @@ import { useMindStore } from "../hooks/use-mind-store";
 
 const MIN_CURVE_SPREAD = 60;
 
+export const EDGE_INSET = 110;
+
 function isParentCollapsed(state: ReturnType<typeof useMindStore>["state"], id: string): boolean {
   const node = state.nodes[id];
   if (!node) return true;
@@ -51,9 +53,9 @@ export function ConnectionLines({ containerRef }: Props) {
         if (state.hideCompleted && node.completed) return null;
         const parent = state.nodes[node.parentId!];
         if (!parent) return null;
-        const sx = cx + parent.x * state.view.zoom + state.view.pan.x;
+        const sx = cx + (parent.x + EDGE_INSET) * state.view.zoom + state.view.pan.x;
         const sy = cy + parent.y * state.view.zoom + state.view.pan.y;
-        const ex = cx + node.x * state.view.zoom + state.view.pan.x;
+        const ex = cx + (node.x - EDGE_INSET) * state.view.zoom + state.view.pan.x;
         const ey = cy + node.y * state.view.zoom + state.view.pan.y;
         const dx = ex - sx;
         const spread = Math.max(Math.abs(dx) * 0.5, MIN_CURVE_SPREAD);

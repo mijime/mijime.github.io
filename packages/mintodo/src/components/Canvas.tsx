@@ -3,6 +3,7 @@ import { DndContext, DragOverlay, PointerSensor, useSensor, useSensors } from "@
 import { useMindStore } from "../hooks/use-mind-store";
 import { usePanZoom } from "../hooks/use-pan-zoom";
 import { useTween } from "../hooks/use-tween";
+import { useFocusSelected } from "../hooks/use-focus-selected";
 import { isDescendant } from "../store";
 import { categoryBorderColor } from "../lib/badges";
 import { ConnectionLines } from "./ConnectionLines";
@@ -50,6 +51,7 @@ export function Canvas() {
   const [activeId, setActiveId] = useState<string | null>(null);
 
   usePanZoom({ containerRef });
+  useFocusSelected({ containerRef });
   useTween();
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }));

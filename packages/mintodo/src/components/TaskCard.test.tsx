@@ -43,6 +43,7 @@ function makeState(over: Partial<State> = {}): State {
     view: { pan: { x: 0, y: 0 }, zoom: 1 },
     past: [],
     future: [],
+    inlineEdit: null,
 
     nodes: { root: makeNode({ id: "root", isRoot: true }), n1: makeNode() },
     ...over,
@@ -68,9 +69,21 @@ describe("TaskCard", () => {
     expect(screen.getByTestId("task-status-n1").className).toContain("bg-sky-500");
   });
 
-  it("opens edit-new modal when add-child is clicked", () => {
+  it("dispatches ADD_CHILD_INLINE in mindmap mode", () => {
     render(
-      <MindProvider initialState={makeState()}>
+      <MindProvider initialState={makeState({ viewMode: "mindmap" })}>
+        <Capture />
+        <TaskCard node={makeNode()} />
+      </MindProvider>,
+    );
+    fireEvent.click(screen.getByTestId("add-child-n1"));
+    expect(captured!.inlineEdit).not.toBeNull();
+    expect(captured!.inlineEdit!.isNew).toBe(true);
+  });
+
+  it("opens edit-new modal in kanban mode", () => {
+    render(
+      <MindProvider initialState={makeState({ viewMode: "kanban" })}>
         <Capture />
         <TaskCard node={makeNode()} />
       </MindProvider>,
