@@ -163,8 +163,7 @@ export function floorToDsl(floor: FloorPlan): string {
   const { width, height, cells, name, hWalls, vWalls } = floor;
   const lines: string[] = [];
 
-  lines.push(`size ${width} ${height}`);
-  lines.push(`name "${name}"`);
+  lines.push(`size ${width} ${height}`, `name "${name}"`);
 
   // Detect rooms and emit each as a pattern block
   const rooms = detectRooms(floor);
@@ -257,8 +256,7 @@ export function floorToDsl(floor: FloorPlan): string {
       }
     }
 
-    lines.push("end");
-    lines.push(`place ${patternName} at (${minX},${minY})`);
+    lines.push("end", `place ${patternName} at (${minX},${minY})`);
   }
 
   // Walls not belonging to any room cell - use run-length encoding
