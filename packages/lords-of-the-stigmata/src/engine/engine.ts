@@ -83,6 +83,7 @@ export function startGame(
       relics: [],
       passed: false,
       faction: fk,
+      promoteCount: 0,
     };
     if (fk) {
       const def = FACTIONS[fk];

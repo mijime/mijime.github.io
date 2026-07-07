@@ -65,6 +65,7 @@ export interface Player {
   relics: RelicKey[];
   passed: boolean;
   faction: FactionKey | null;
+  promoteCount: number;
 }
 
 /** 盤上の国（配置されたコマを保持） */

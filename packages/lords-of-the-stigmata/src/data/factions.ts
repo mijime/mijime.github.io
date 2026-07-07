@@ -20,7 +20,7 @@ export interface FactionDef {
 export const FACTIONS: Record<FactionKey, FactionDef> = {
   senkyoshi: { ability: "feeWaiver", tracks: { mission: 2 }, doctrine: "fukyo" }, // 宣教師: 非隣接派遣の手数料免除
   shisai: { ability: "freeAcquire", tracks: { sacrament: 2 }, doctrine: "kyoka" }, // 司祭: 教義取得のトラック後退なし
-  junkyosha: { ability: "zealVp", tracks: { sacrifice: 2 }, doctrine: "kenshin" }, // 殉教者: 昇格ごとに+1VP
+  junkyosha: { ability: "zealVp", tracks: { sacrifice: 2 }, doctrine: "kenshin" }, // 殉教者: 2回に1回昇格で+1VP
   kenja: { ability: "sageIncome", tracks: { wisdom: 2 }, doctrine: "chishiki" }, // 賢者: 叡智4以上なら収入+1信徒
   kaitakusha: {
     ability: "baseIncome3",

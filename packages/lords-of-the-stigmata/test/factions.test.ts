@@ -44,11 +44,29 @@ describe("factions", () => {
     expect(e.S.players[0].tracks.wisdom).toBe(before.wisdom + 1);
   });
 
-  it("zealVp: promote grants +1 VP", () => {
+  it("zealVp: 1st promote does not grant +1 VP (count=1 is odd)", () => {
     const e = newGame(["junkyosha", "shisai", "senkyoshi"]);
     dispatch(e, { type: "chooseAction", action: { type: "promote" } });
-    // tile.promote はラウンド1タイルでないので 0、zealVp で 1
-    expect(e.S.players[0].vp).toBe(1);
+    // 1st promote (count=1, odd): tile.promote は 0、zealVp は 0 (only every 2nd)
+    expect(e.S.players[0].vp).toBe(0);
+  });
+
+  it("zealVp: 2nd promote grants +1 VP (count=2 is even)", () => {
+    const e = newGame(["junkyosha", "shisai", "senkyoshi"]);
+    const p = e.S.players[0];
+    p.act.ac = 6;
+    dispatch(e, { type: "chooseAction", action: { type: "promote" } });
+    // 1st promote (count=1, odd)
+    expect(p.vp).toBe(0);
+    expect(p.promoteCount).toBe(1);
+    // other players pass to get back to player 0's turn
+    dispatch(e, { type: "chooseAction", action: { type: "pass" } }); // p1
+    dispatch(e, { type: "chooseAction", action: { type: "pass" } }); // p2
+    // p0's turn again
+    dispatch(e, { type: "chooseAction", action: { type: "promote" } });
+    // 2nd promote (count=2, even): tile.promote は 0、zealVp で 1
+    expect(p.vp).toBe(1);
+    expect(p.promoteCount).toBe(2);
   });
 
   it("lightDeepen: deepen costs 2 followers instead of ac1+ap1", () => {

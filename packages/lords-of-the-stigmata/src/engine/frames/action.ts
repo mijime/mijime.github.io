@@ -153,10 +153,11 @@ export function stepExecAction(e: Engine, f: Frame): void {
         p.act.ac -= 2;
         p.act.ap += 1;
         advanceTrack(p.tracks, "sacrifice", 1);
+        p.promoteCount += 1;
         const tile = e.S.roundTiles[e.S.round - 1];
         const vp = scoreEvent(tile, "promote");
         gainVp(e, pi, vp, "tile");
-        if (p.faction === "junkyosha") gainVp(e, pi, 1, "faction");
+        if (p.faction === "junkyosha" && p.promoteCount % 2 === 0) gainVp(e, pi, 1, "faction");
         logEvent(e, "log.promote", { player: pi });
         fxEvent(e, { kind: "promote", pi });
         checkRelic(e, pi);
