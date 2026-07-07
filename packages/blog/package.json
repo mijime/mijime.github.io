@@ -27,11 +27,11 @@
     "@astrojs/check": "^0.9.9",
     "@duckdb/duckdb-wasm": "1.33.1-dev45.0",
     "@mijime/theme": "workspace:*",
-    "@shikijs/rehype": "^4.2.0",
+    "@shikijs/rehype": "^4.3.1",
     "lindera-js": "^0.1.4",
-    "lucide-react": "^1.17.0",
+    "lucide-react": "^1.23.0",
     "mdast": "^3.0.0",
-    "mermaid": "^11.15.0",
+    "mermaid": "^11.16.0",
     "rehype": "^13.0.2",
     "rehype-stringify": "^10.0.1",
     "remark": "^15.0.1",
@@ -46,14 +46,14 @@
     "@types/mdast": "^4.0.4",
     "@types/react": "^19.2.17",
     "@typescript/native-preview": "7.0.0-dev.20260604.1",
-    "astro": "^6.4.4",
+    "astro": "^6.4.8",
     "duckdb": "^1.4.4",
     "oxfmt": "^0.47.0",
-    "oxlint": "^1.68.0",
+    "oxlint": "^1.72.0",
     "remark-frontmatter": "^5.0.0",
     "remark-mdx-frontmatter": "^5.2.0",
-    "vite": "^8.0.16",
-    "vitest": "^3.2.6"
+    "vite": "^8.1.3",
+    "vitest": "^3.2.7"
   },
   "peerDependencies": {
     "astro": "^6.1.9"
