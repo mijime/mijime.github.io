@@ -91,7 +91,11 @@ export function scoreAction(e: Engine, pi: number, a: Action): number {
       // 収入エンジン: 序盤ほど盤上ポーンの価値が高い
       v += Math.max(0, 4 - S.round) * 0.5;
       // 手数料コストは減点
-      const feeWaived = isAdjacentToOwn(S.board, S.adj, pi, a.country) || p.faction === "senkyoshi";
+      const isSenkyoshi =
+        p.faction === "senkyoshi" && !isAdjacentToOwn(S.board, S.adj, pi, a.country);
+      const limit = S.players.length === 3 ? 1 : 2;
+      const feeWaived =
+        isAdjacentToOwn(S.board, S.adj, pi, a.country) || (isSenkyoshi && p.feeWaiverCount < limit);
       if (!feeWaived) v -= 1;
       // 残席1の国は競りの締めとして僅かに加点
       if (bc.pawns.length === capHelper(S, a.country) - 1) v += 0.5;

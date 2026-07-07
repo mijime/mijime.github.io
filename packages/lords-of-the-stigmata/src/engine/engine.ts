@@ -84,6 +84,7 @@ export function startGame(
       passed: false,
       faction: fk,
       promoteCount: 0,
+      feeWaiverCount: 0,
     };
     if (fk) {
       const def = FACTIONS[fk];

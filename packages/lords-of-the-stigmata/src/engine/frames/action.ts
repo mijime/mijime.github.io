@@ -123,7 +123,9 @@ export function stepExecAction(e: Engine, f: Frame): void {
           ret(e, false);
           return;
         }
-        const feeWaived = adjacent || p.faction === "senkyoshi";
+        const isSenkyoshi = p.faction === "senkyoshi" && !adjacent;
+        const limit = e.S.players.length === 3 ? 1 : 2;
+        const feeWaived = adjacent || (isSenkyoshi && p.feeWaiverCount < limit);
         const needAc = (act.pawn === "ac" ? 1 : 0) + (feeWaived ? 0 : 1);
         const needAp = act.pawn === "ap" ? 1 : 0;
         if (p.act.ac < needAc || p.act.ap < needAp) {
@@ -132,6 +134,7 @@ export function stepExecAction(e: Engine, f: Frame): void {
         }
         placePawn(e, pi, act.pawn, act.country);
         if (!feeWaived) p.act.ac--;
+        if (isSenkyoshi && feeWaived) p.feeWaiverCount++;
         const tile = e.S.roundTiles[e.S.round - 1];
         gainVp(e, pi, scoreEvent(tile, act.pawn === "ap" ? "dispatchAp" : "dispatchAc"), "tile");
         if (cohabitants(c, pi).length > 0) gainVp(e, pi, scoreEvent(tile, "cohabit"), "tile");

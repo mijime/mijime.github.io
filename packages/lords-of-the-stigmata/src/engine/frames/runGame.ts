@@ -35,6 +35,7 @@ export function stepRunGame(e: Engine, f: Frame): void {
       e.S.round++;
       for (let i = 0; i < PC(e.S); i++) {
         e.S.players[i].passed = false;
+        e.S.players[i].feeWaiverCount = 0;
       }
       if (e.S.firstPasser !== null) {
         const order = [];

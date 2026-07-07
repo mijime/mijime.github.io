@@ -66,6 +66,7 @@ export interface Player {
   passed: boolean;
   faction: FactionKey | null;
   promoteCount: number;
+  feeWaiverCount: number;
 }
 
 /** 盤上の国（配置されたコマを保持） */

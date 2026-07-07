@@ -10,10 +10,13 @@ export function legalActions(e: Engine, pi: number): Action[] {
   const S = e.S;
   const p = S.players[pi];
   const acts: Action[] = [];
+  const limit = S.players.length === 3 ? 1 : 2;
   for (const key of S.sel) {
     const bc = country(S, key);
     if (!hasSeat(bc, capHelper(S, key))) continue;
-    const feeWaived = isAdjacentToOwn(S.board, S.adj, pi, key) || p.faction === "senkyoshi";
+    const adjacent = isAdjacentToOwn(S.board, S.adj, pi, key);
+    const isSenkyoshi = p.faction === "senkyoshi" && !adjacent;
+    const feeWaived = adjacent || (isSenkyoshi && p.feeWaiverCount < limit);
     const fee = feeWaived ? 0 : 1;
     if (p.act.ac >= 1 + fee) acts.push({ type: "dispatch", pawn: "ac", country: key });
     if (p.act.ap >= 1 && p.act.ac >= fee) acts.push({ type: "dispatch", pawn: "ap", country: key });
