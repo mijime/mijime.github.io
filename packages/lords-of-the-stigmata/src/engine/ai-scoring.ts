@@ -35,6 +35,39 @@ function gainValue(
   return v;
 }
 
+/** Heuristic bonuses to amplify scoring in specific tactical situations */
+export function improvedBonus(e: Engine, pi: number, a: Action): number {
+  let bonus = 0;
+  const p = e.S.players[pi];
+  const faction = p.faction;
+
+  // Shisai early dispatch bonus
+  if (faction === "shisai" && a.type === "dispatch" && e.S.round <= 2) {
+    bonus += 2;
+  }
+
+  // Kenja surplus action cards bonus
+  if (faction === "kenja" && a.type === "dispatch" && p.act.ac >= 3) {
+    bonus += 4;
+  }
+
+  // Endgame bonuses (round 5+)
+  if (e.S.round >= 5) {
+    if (a.type === "dispatch" || a.type === "promote") {
+      bonus += 2;
+    }
+    if (
+      (a.type === "dispatch" && cdef(a.country).effect?.track) ||
+      (a.type === "acquire" && DOCTRINES[a.doc].lv1.track) ||
+      a.type === "promote"
+    ) {
+      bonus += 1.5;
+    }
+  }
+
+  return bonus;
+}
+
 /** アクションの決定論スコア。大きいほど良い。pass は 0。 */
 export function scoreAction(e: Engine, pi: number, a: Action): number {
   const S = e.S;
@@ -62,12 +95,12 @@ export function scoreAction(e: Engine, pi: number, a: Action): number {
       if (!feeWaived) v -= 1;
       // 残席1の国は競りの締めとして僅かに加点
       if (bc.pawns.length === capHelper(S, a.country) - 1) v += 0.5;
-      return v;
+      return v + improvedBonus(e, pi, a);
     }
     case "promote": {
       let v = scoreEvent(tile, "promote") * 2 + trackStepValue(e, pi, "sacrifice") + 1;
       if (p.faction === "junkyosha") v += 2;
-      return v;
+      return v + improvedBonus(e, pi, a);
     }
     case "acquire": {
       const def = DOCTRINES[a.doc];
@@ -76,7 +109,7 @@ export function scoreAction(e: Engine, pi: number, a: Action): number {
         trackStepValue(e, pi, def.track) +
         gainValue(e, pi, def.lv1);
       if (p.faction !== "shisai") v -= 1; // トラック後退コスト
-      return v;
+      return v + improvedBonus(e, pi, a);
     }
     case "deepen": {
       const def = DOCTRINES[a.doc];

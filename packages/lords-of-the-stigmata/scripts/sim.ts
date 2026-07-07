@@ -3,8 +3,6 @@ import { legalActions } from "../src/engine/ai.ts";
 import { scoreAction } from "../src/engine/ai-scoring.ts";
 import type { Action, Engine, FactionKey } from "../src/types.ts";
 import { FACTION_KEYS } from "../src/data/factions.ts";
-import { cdef } from "../src/engine/helpers.ts";
-import { DOCTRINES } from "../src/data/doctrines.ts";
 
 const SEL = ["A", "B", "C", "D", "E", "F", "G"];
 const POOL = ["honoo", "rashinban", "shokan", "seiyaku", "monsho", "izumi"];
@@ -39,63 +37,6 @@ const greedyBot: Bot = {
   },
 };
 
-const SHISAI_ACQUIRE_BONUS = 0;
-const SHISAI_DEEPEN_BONUS = 0;
-const SHISAI_EARLY_DISPATCH_BONUS = 2;
-const KENJA_WISDOM_BONUS = 0;
-const KENJA_SURPLUS_DISPATCH_BONUS = 4;
-const ENDGAME_MAJORITY_BONUS = 2;
-const ENDGAME_TRACK_BONUS = 1.5;
-
-function improvedBonus(e: Engine, pi: number, a: Action): number {
-  let bonus = 0;
-  const p = e.S.players[pi];
-  const faction = p.faction;
-
-  // Shisai bonuses
-  if (faction === "shisai") {
-    if (a.type === "acquire") {
-      bonus += SHISAI_ACQUIRE_BONUS;
-    }
-    if (a.type === "deepen") {
-      bonus += SHISAI_DEEPEN_BONUS;
-    }
-    if (a.type === "dispatch" && e.S.round <= 2) {
-      bonus += SHISAI_EARLY_DISPATCH_BONUS;
-    }
-  }
-
-  // Kenja bonuses
-  if (faction === "kenja" && p.tracks.wisdom < 4) {
-    if (a.type === "dispatch" && cdef(a.country).effect?.track === "wisdom") {
-      bonus += KENJA_WISDOM_BONUS;
-    }
-    if (a.type === "acquire" && DOCTRINES[a.doc].lv1.track === "wisdom") {
-      bonus += KENJA_WISDOM_BONUS;
-    }
-  }
-
-  if (faction === "kenja" && a.type === "dispatch" && p.act.ac >= 3) {
-    bonus += KENJA_SURPLUS_DISPATCH_BONUS;
-  }
-
-  // Endgame bonuses
-  if (e.S.round >= 5) {
-    if (a.type === "dispatch" || a.type === "promote") {
-      bonus += ENDGAME_MAJORITY_BONUS;
-    }
-    if (
-      (a.type === "dispatch" && cdef(a.country).effect?.track) ||
-      (a.type === "acquire" && DOCTRINES[a.doc].lv1.track) ||
-      a.type === "promote"
-    ) {
-      bonus += ENDGAME_TRACK_BONUS;
-    }
-  }
-
-  return bonus;
-}
-
 const improvedBot: Bot = {
   name: "improved",
   chooseAction(e: Engine, pi: number): Action {
@@ -103,12 +44,10 @@ const improvedBot: Bot = {
     let bestScore = 0;
     const allActions = legalActions(e, pi);
     for (const a of allActions) {
-      const base = scoreAction(e, pi, a);
-      const bonus = improvedBonus(e, pi, a);
-      const score = base + bonus;
-      if (score > bestScore) {
+      const s = scoreAction(e, pi, a);
+      if (s > bestScore) {
         best = a;
-        bestScore = score;
+        bestScore = s;
       }
     }
     return best;
