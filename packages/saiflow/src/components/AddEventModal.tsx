@@ -216,14 +216,14 @@ function MortgageForm({
             { asset: "借入", op: "+" as const, value: annualPayment },
           ],
         },
+        {
+          name: "借入金利",
+          group: "住宅ローン",
+          startAge,
+          endAge: startAge + years - 1,
+          ops: [{ asset: "借入", op: "*" as const, value: multiplier }],
+        },
       );
-      events.push({
-        name: "借入金利",
-        group: "住宅ローン",
-        startAge,
-        endAge: startAge + years - 1,
-        ops: [{ asset: "借入", op: "*" as const, value: multiplier }],
-      });
     }
     const propertyTax = Math.round((propertyPrice * propertyTaxRate) / 100);
     if (propertyTax > 0) {
