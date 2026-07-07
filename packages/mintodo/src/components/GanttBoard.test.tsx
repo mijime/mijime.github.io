@@ -387,8 +387,8 @@ describe("GanttBoard bar colors", () => {
     expect(segC.style.position).toBe("absolute");
     expect(segD.style.position).toBe("absolute");
     // SegC is first, segD is second — segC should start at 0, segD starts at width of segC
-    expect(Number.parseFloat(segC.style.left)).toBe(0);
-    expect(Number.parseFloat(segD.style.left)).toBeGreaterThan(0);
+    expect(Number(segC.style.left.replace("px", ""))).toBe(0);
+    expect(Number(segD.style.left.replace("px", ""))).toBeGreaterThan(0);
   });
 });
 

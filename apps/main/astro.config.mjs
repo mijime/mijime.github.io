@@ -1,9 +1,14 @@
-import path from "node:path";
-import mdx from "@astrojs/mdx";
-import react from "@astrojs/react";
-import { blogIntegration } from "@mijime/blog/integration";
-import tailwindcss from "@tailwindcss/vite";
-import { defineConfig } from "astro/config";
+import path from "node:path"
+import mdx from "@astrojs/mdx"
+import react from "@astrojs/react"
+import { blogIntegration } from "@mijime/blog/integration"
+import tailwindcss from "@tailwindcss/vite"
+import { defineConfig } from "astro/config"
+
+const blogContentsDir = path.join(
+  process.cwd(),
+  "../../packages/blog-contents/contents",
+)
 
 export default defineConfig({
   server: { host: "0.0.0.0" },
@@ -14,7 +19,7 @@ export default defineConfig({
       globalCss: "/src/styles/global.css",
       siteUrl: "https://mijime.github.io",
       siteName: "mijime",
-      contentsDir: path.join(process.cwd(), "../../packages/blog-contents/contents"),
+      contentsDir: blogContentsDir,
     }),
   ],
   markdown: {
@@ -33,4 +38,4 @@ export default defineConfig({
     },
   },
   output: "static",
-});
+})
