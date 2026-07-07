@@ -1,20 +1,19 @@
 import { z } from "zod";
 
+const tagsSchema = z.union([z.array(z.string()), z.string()]);
+
 export const blogSchema = z.object({
   Title: z.string(),
   Description: z.string().optional(),
-  Tags: z
-    .union([z.array(z.string()), z.string()])
-    .optional()
-    .transform((v) => {
-      if (!v) return undefined;
-      if (Array.isArray(v)) return v;
-      return v
-        .replaceAll(/[[\]'"]/gu, "")
-        .split(",")
-        .map((s) => s.trim())
-        .filter(Boolean);
-    }),
+  Tags: tagsSchema.optional().transform((v) => {
+    if (!v) return undefined;
+    if (Array.isArray(v)) return v;
+    return v
+      .replaceAll(/[[\]'"]/gu, "")
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean);
+  }),
   IsDraft: z.boolean().optional().default(false),
   CreatedAt: z.string().optional(),
   UpdatedAt: z.string().optional(),

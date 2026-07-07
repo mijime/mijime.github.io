@@ -1,0 +1,25 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["typescript", "unicorn", "oxc"],
+  "categories": {
+    "correctness": "error",
+    "suspicious": "warn",
+    "perf": "warn"
+  },
+  "rules": {
+    "unicorn/filename-case": "off",
+    "eslint/func-style": "off",
+    "eslint/id-length": "off",
+    "eslint/no-magic-numbers": "off",
+    "eslint/sort-keys": "off",
+    "eslint/sort-imports": "off",
+    "eslint/max-statements": "off",
+    "eslint/max-params": "off",
+    "eslint/capitalized-comments": "off",
+    "eslint/new-cap": "off",
+    "unicorn/no-null": "off"
+  },
+  "env": {
+    "builtin": true
+  }
+}

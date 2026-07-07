@@ -263,10 +263,12 @@ export function reducer(state: Building, action: Action): Building {
         const edges: EdgeRef[] = [];
         for (let y = action.y1; y <= action.y2; y++) {
           for (let x = action.x1; x <= action.x2; x++) {
-            edges.push({ kind: "h", x, y });
-            edges.push({ kind: "h", x, y: y + 1 });
-            edges.push({ kind: "v", x, y });
-            edges.push({ kind: "v", x: x + 1, y });
+            edges.push(
+              { kind: "h", x, y },
+              { kind: "h", x, y: y + 1 },
+              { kind: "v", x, y },
+              { kind: "v", x: x + 1, y },
+            );
           }
         }
 

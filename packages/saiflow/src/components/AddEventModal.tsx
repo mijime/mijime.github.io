@@ -198,30 +198,32 @@ function MortgageForm({
       });
     }
     if (loanAmount > 0) {
-      events.push({
-        name: "住居費(実行)",
-        group: "住宅ローン",
-        startAge,
-        endAge: startAge,
-        ops: [{ asset: "借入", op: "-" as const, value: loanAmount }],
-      });
-      events.push({
-        name: "住居費(返済)",
-        group: "住宅ローン",
-        startAge,
-        endAge: startAge + years - 1,
-        ops: [
-          { asset: "現金", op: "-" as const, value: annualPayment },
-          { asset: "借入", op: "+" as const, value: annualPayment },
-        ],
-      });
-      events.push({
-        name: "借入金利",
-        group: "住宅ローン",
-        startAge,
-        endAge: startAge + years - 1,
-        ops: [{ asset: "借入", op: "*" as const, value: multiplier }],
-      });
+      events.push(
+        {
+          name: "住居費(実行)",
+          group: "住宅ローン",
+          startAge,
+          endAge: startAge,
+          ops: [{ asset: "借入", op: "-" as const, value: loanAmount }],
+        },
+        {
+          name: "住居費(返済)",
+          group: "住宅ローン",
+          startAge,
+          endAge: startAge + years - 1,
+          ops: [
+            { asset: "現金", op: "-" as const, value: annualPayment },
+            { asset: "借入", op: "+" as const, value: annualPayment },
+          ],
+        },
+        {
+          name: "借入金利",
+          group: "住宅ローン",
+          startAge,
+          endAge: startAge + years - 1,
+          ops: [{ asset: "借入", op: "*" as const, value: multiplier }],
+        },
+      );
     }
     const propertyTax = Math.round((propertyPrice * propertyTaxRate) / 100);
     if (propertyTax > 0) {
@@ -413,20 +415,22 @@ function InitialForm({
     }
     if (annualIncome > 0) {
       const incomeEndAge = retirementAge > currentAge ? retirementAge : null;
-      events.push({
-        name: "年収",
-        group: "初期設定",
-        startAge: currentAge,
-        endAge: incomeEndAge,
-        ops: [{ asset: "現金", op: "+" as const, value: annualIncome }],
-      });
-      events.push({
-        name: "税金",
-        group: "初期設定",
-        startAge: currentAge,
-        endAge: incomeEndAge,
-        ops: [{ asset: "現金", op: "-" as const, value: Math.round(annualIncome * 0.2) }],
-      });
+      events.push(
+        {
+          name: "年収",
+          group: "初期設定",
+          startAge: currentAge,
+          endAge: incomeEndAge,
+          ops: [{ asset: "現金", op: "+" as const, value: annualIncome }],
+        },
+        {
+          name: "税金",
+          group: "初期設定",
+          startAge: currentAge,
+          endAge: incomeEndAge,
+          ops: [{ asset: "現金", op: "-" as const, value: Math.round(annualIncome * 0.2) }],
+        },
+      );
     }
     if (livingMonthly > 0) {
       events.push({

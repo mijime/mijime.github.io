@@ -163,8 +163,7 @@ export function floorToDsl(floor: FloorPlan): string {
   const { width, height, cells, name, hWalls, vWalls } = floor;
   const lines: string[] = [];
 
-  lines.push(`size ${width} ${height}`);
-  lines.push(`name "${name}"`);
+  lines.push(`size ${width} ${height}`, `name "${name}"`);
 
   // Detect rooms and emit each as a pattern block
   const rooms = detectRooms(floor);
@@ -233,8 +232,8 @@ export function floorToDsl(floor: FloorPlan): string {
 
     for (const [key, wallType] of roomEdges) {
       const [kind, xStr, yStr] = key.split(":");
-      const x = Number.parseInt(xStr, 10);
-      const y = Number.parseInt(yStr, 10);
+      const x = Math.trunc(Number(xStr));
+      const y = Math.trunc(Number(yStr));
       if (kind === "h") {
         patternHWalls[hIndex(patternMaxX + 1, x, y)] = wallType;
       } else {
@@ -257,8 +256,7 @@ export function floorToDsl(floor: FloorPlan): string {
       }
     }
 
-    lines.push("end");
-    lines.push(`place ${patternName} at (${minX},${minY})`);
+    lines.push("end", `place ${patternName} at (${minX},${minY})`);
   }
 
   // Walls not belonging to any room cell - use run-length encoding
@@ -433,10 +431,10 @@ function parseCoordBlocks(coordsStr: string): { x1: number; y1: number; x2: numb
     if (!cm) {
       return [];
     }
-    const x1 = Number.parseInt(cm.groups!.x1, 10);
-    const y1 = Number.parseInt(cm.groups!.y1, 10);
-    const x2 = cm.groups!.x2 === undefined ? x1 : Number.parseInt(cm.groups!.x2, 10);
-    const y2 = cm.groups!.y2 === undefined ? y1 : Number.parseInt(cm.groups!.y2, 10);
+    const x1 = Math.trunc(Number(cm.groups!.x1));
+    const y1 = Math.trunc(Number(cm.groups!.y1));
+    const x2 = cm.groups!.x2 === undefined ? x1 : Math.trunc(Number(cm.groups!.x2));
+    const y2 = cm.groups!.y2 === undefined ? y1 : Math.trunc(Number(cm.groups!.y2));
     return [{ x1, x2, y1, y2 }];
   });
 }
@@ -547,10 +545,10 @@ export function dslToFloor(text: string): FloorPlan {
           /^item\s+\((?<x>\d+),(?<y>\d+)\)\s+(?<type>\S+)(?:\s+(?<rot>0|90|180|270))?$/u,
         );
         if (im) {
-          const px = Number.parseInt(im.groups!.x, 10);
-          const py = Number.parseInt(im.groups!.y, 10);
+          const px = Math.trunc(Number(im.groups!.x));
+          const py = Math.trunc(Number(im.groups!.y));
           const type = im.groups!.type as ItemType;
-          const rotation = (im.groups!.rot ? Number.parseInt(im.groups!.rot, 10) : 0) as
+          const rotation = (im.groups!.rot ? Math.trunc(Number(im.groups!.rot)) : 0) as
             | 0
             | 90
             | 180
@@ -590,8 +588,8 @@ export function dslToFloor(text: string): FloorPlan {
 
     const sizeMatch = line.match(/^size\s+(?<w>\d+)\s+(?<h>\d+)$/u);
     if (sizeMatch) {
-      width = Number.parseInt(sizeMatch.groups!.w, 10);
-      height = Number.parseInt(sizeMatch.groups!.h, 10);
+      width = Math.trunc(Number(sizeMatch.groups!.w));
+      height = Math.trunc(Number(sizeMatch.groups!.h));
       continue;
     }
 
@@ -625,10 +623,10 @@ export function dslToFloor(text: string): FloorPlan {
       /^item\s+\((?<x>\d+),(?<y>\d+)\)\s+(?<type>\S+)(?:\s+(?<rot>0|90|180|270))?$/u,
     );
     if (itemMatch) {
-      const x = Number.parseInt(itemMatch.groups!.x, 10);
-      const y = Number.parseInt(itemMatch.groups!.y, 10);
+      const x = Math.trunc(Number(itemMatch.groups!.x));
+      const y = Math.trunc(Number(itemMatch.groups!.y));
       const type = itemMatch.groups!.type as ItemType;
-      const rotation = (itemMatch.groups!.rot ? Number.parseInt(itemMatch.groups!.rot, 10) : 0) as
+      const rotation = (itemMatch.groups!.rot ? Math.trunc(Number(itemMatch.groups!.rot)) : 0) as
         | 0
         | 90
         | 180
@@ -646,9 +644,9 @@ export function dslToFloor(text: string): FloorPlan {
     );
     if (placeMatch) {
       const patternName = placeMatch.groups!.name;
-      const ox = Number.parseInt(placeMatch.groups!.x, 10);
-      const oy = Number.parseInt(placeMatch.groups!.y, 10);
-      const rotate = (placeMatch.groups!.rot ? Number.parseInt(placeMatch.groups!.rot, 10) : 0) as
+      const ox = Math.trunc(Number(placeMatch.groups!.x));
+      const oy = Math.trunc(Number(placeMatch.groups!.y));
+      const rotate = (placeMatch.groups!.rot ? Math.trunc(Number(placeMatch.groups!.rot)) : 0) as
         | 0
         | 90
         | 180
@@ -687,8 +685,8 @@ export function dslToFloor(text: string): FloorPlan {
 
   for (const [key, wallType] of edgeWalls) {
     const [kind, xStr, yStr] = key.split(":");
-    const x = Number.parseInt(xStr, 10);
-    const y = Number.parseInt(yStr, 10);
+    const x = Math.trunc(Number(xStr));
+    const y = Math.trunc(Number(yStr));
 
     if (kind === "h") {
       if (x >= 0 && x < width && y >= 0 && y <= height) {
