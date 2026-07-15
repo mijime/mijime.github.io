@@ -19,6 +19,7 @@
     "@mijime/blog": "workspace:*",
     "@mijime/lords-of-the-stigmata": "workspace:*",
     "@mijime/madories": "workspace:*",
+    "@mijime/emolog": "workspace:*",
     "@mijime/mintodo": "workspace:*",
     "@mijime/saiflow": "workspace:*",
     "@mijime/theme": "workspace:*",
