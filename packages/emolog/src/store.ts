@@ -8,7 +8,7 @@ export interface ListDef {
   order: number;
 }
 
-const db = new Dexie("emolog") as Dexie & {
+export const db = new Dexie("emolog") as Dexie & {
   entries: Table<Entry, number>;
   lists: Table<ListDef, number>;
 };
