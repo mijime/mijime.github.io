@@ -1,8 +1,19 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { getEntriesByDateRange, addEntry, deleteEntry, updateEntryNote, getLists, addList, renameList, removeList, ensureDefaultList } from "./store";
+import {
+  getEntriesByDateRange,
+  addEntry,
+  deleteEntry,
+  updateEntryNote,
+  getLists,
+  addList,
+  renameList,
+  removeList,
+  ensureDefaultList,
+} from "./store";
 import { type Entry, today, formatTime } from "./types";
 import type { ListDef } from "./store";
 import { CalendarView } from "./CalendarView";
+import { SummaryView } from "./SummaryView";
 import "emoji-picker-element";
 
 const FAV_KEY = "emolog-favs";
@@ -53,7 +64,7 @@ export function App() {
   const [editNote, setEditNote] = useState("");
   const [showPicker, setShowPicker] = useState(false);
   const [favorites, setFavorites] = useState<string[]>(() => getTopFavorites());
-  const [viewMode, setViewMode] = useState<"timeline" | "calendar">("timeline");
+  const [viewMode, setViewMode] = useState<"timeline" | "calendar" | "summary">("timeline");
   const [selectedList, setSelectedList] = useState<string>("");
   const [lists, setLists] = useState<ListDef[]>([]);
   const [menuOpen, setMenuOpen] = useState<string | null>(null);
@@ -73,13 +84,16 @@ export function App() {
   // Load lists on mount
   useEffect(() => {
     setListError(null);
-    ensureDefaultList().then((defaultName) => {
-      setSelectedList(defaultName);
-      return getLists();
-    }).then(setLists).catch((err) => {
-      console.error('list loading error:', err);
-      setListError(err?.message || String(err));
-    });
+    ensureDefaultList()
+      .then((defaultName) => {
+        setSelectedList(defaultName);
+        return getLists();
+      })
+      .then(setLists)
+      .catch((err) => {
+        console.error("list loading error:", err);
+        setListError(err?.message || String(err));
+      });
   }, []);
 
   // Refresh lists after changes
@@ -193,6 +207,11 @@ export function App() {
     setFilterEmoji((prev) => (prev === emoji ? null : emoji));
   }
 
+  function handleSelectEmojiFromSummary(emoji: string) {
+    setFilterEmoji(emoji);
+    setViewMode("timeline");
+  }
+
   async function copyLog() {
     const dateGroups = groupByDate(entries);
     const dateKeys = Object.keys(dateGroups).sort();
@@ -239,7 +258,8 @@ export function App() {
       alert("最後のリストは削除できません");
       return;
     }
-    if (!window.confirm(`「${name}」を削除しますか？\nこのリストの記録は「リストなし」になります`)) return;
+    if (!window.confirm(`「${name}」を削除しますか？\nこのリストの記録は「リストなし」になります`))
+      return;
     await removeList(name);
     await refreshLists();
     if (selectedList === name) {
@@ -276,9 +296,7 @@ export function App() {
   }
 
   const isToday = selectedDate === todayStr;
-  const filteredEntries = filterEmoji
-    ? entries.filter((e) => e.emoji === filterEmoji)
-    : entries;
+  const filteredEntries = filterEmoji ? entries.filter((e) => e.emoji === filterEmoji) : entries;
   const groupedEntries = groupByDate(filteredEntries);
   const dateLabels = Object.keys(groupedEntries).sort();
   const hasAnyEntry = dateLabels.length > 0;
@@ -288,7 +306,9 @@ export function App() {
       {/* ── リストタブ ── */}
       <div className="emolog-lists">
         {listError ? (
-          <div className="emolog-list-placeholder" style={{color:'#e74c3c'}}>エラー: {listError}</div>
+          <div className="emolog-list-placeholder" style={{ color: "#e74c3c" }}>
+            エラー: {listError}
+          </div>
         ) : lists.length === 0 ? (
           <div className="emolog-list-placeholder">読み込み中…</div>
         ) : (
@@ -320,7 +340,10 @@ export function App() {
                     </button>
                   )}
                   {l.name === selectedList && renaming !== l.name && (
-                    <div className="emolog-list-menu-wrap" ref={menuOpen === l.name ? menuRef : undefined}>
+                    <div
+                      className="emolog-list-menu-wrap"
+                      ref={menuOpen === l.name ? menuRef : undefined}
+                    >
                       <button
                         className="emolog-list-menu-btn"
                         onClick={(e) => {
@@ -332,9 +355,7 @@ export function App() {
                       </button>
                       {menuOpen === l.name && (
                         <div className="emolog-list-menu">
-                          <button onClick={() => handleStartRename(l.name)}>
-                            ✏️ 名前を変更
-                          </button>
+                          <button onClick={() => handleStartRename(l.name)}>✏️ 名前を変更</button>
                           <button
                             className="emolog-list-menu-del"
                             onClick={() => handleRemoveList(l.name)}
@@ -372,15 +393,27 @@ export function App() {
               →
             </button>
           </>
-        ) : (
+        ) : viewMode === "calendar" ? (
           <span className="emolog-date-label">📅 カレンダー</span>
+        ) : (
+          <span className="emolog-date-label">📊 集計</span>
         )}
         <button
-          onClick={() => setViewMode((v) => (v === "timeline" ? "calendar" : "timeline"))}
-          className={`emolog-nav-btn emolog-view-toggle${viewMode === "calendar" ? " emolog-view-active" : ""}`}
-          title={viewMode === "timeline" ? "カレンダー表示" : "タイムラインに戻る"}
+          onClick={() =>
+            setViewMode((v) =>
+              v === "timeline" ? "calendar" : v === "calendar" ? "summary" : "timeline",
+            )
+          }
+          className={`emolog-nav-btn emolog-view-toggle${viewMode === "calendar" || viewMode === "summary" ? " emolog-view-active" : ""}`}
+          title={
+            viewMode === "timeline"
+              ? "カレンダー表示"
+              : viewMode === "calendar"
+                ? "集計表示"
+                : "タイムラインに戻る"
+          }
         >
-          {viewMode === "timeline" ? "📅" : "📋"}
+          {viewMode === "timeline" ? "📅" : viewMode === "calendar" ? "📊" : "📋"}
         </button>
         {viewMode === "timeline" && (
           <button onClick={copyLog} className="emolog-copy-btn" title="コピー">
@@ -391,6 +424,8 @@ export function App() {
 
       {viewMode === "calendar" ? (
         <CalendarView onSelectDate={handleSelectDate} todayStr={todayStr} list={selectedList} />
+      ) : viewMode === "summary" ? (
+        <SummaryView onSelectEmoji={handleSelectEmojiFromSummary} list={selectedList} />
       ) : (
         <>
           {/* ── フィルター表示 ── */}
@@ -445,12 +480,14 @@ export function App() {
                     <div key={entry.id} className="emolog-timeline-entry">
                       <span className="emolog-entry-time">{formatTime(entry.timestamp)}</span>
                       <span
-    className={`emolog-entry-emoji${filterEmoji === entry.emoji ? " emolog-emoji-filter-active" : ""}`}
-    onClick={() => handleFilterEmoji(entry.emoji)}
-    title={filterEmoji === entry.emoji ? "フィルター解除" : "この絵文字でフィルター"}
-  >
-    {entry.emoji}
-  </span>
+                        className={`emolog-entry-emoji${filterEmoji === entry.emoji ? " emolog-emoji-filter-active" : ""}`}
+                        onClick={() => handleFilterEmoji(entry.emoji)}
+                        title={
+                          filterEmoji === entry.emoji ? "フィルター解除" : "この絵文字でフィルター"
+                        }
+                      >
+                        {entry.emoji}
+                      </span>
                       {editingId === entry.id ? (
                         <input
                           ref={editInputRef}
