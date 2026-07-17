@@ -637,7 +637,9 @@
 
 .emolog-entry-emoji {
   cursor: pointer;
-  transition: transform 0.1s, background 0.15s;
+  transition:
+    transform 0.1s,
+    background 0.15s;
   border-radius: 6px;
   padding: 2px 4px;
 }

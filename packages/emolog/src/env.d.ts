@@ -4,8 +4,7 @@
 declare namespace React {
   namespace JSX {
     interface IntrinsicElements {
-      "emoji-picker": any
+      "emoji-picker": any;
     }
   }
 }
-
