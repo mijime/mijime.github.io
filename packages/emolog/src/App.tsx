@@ -31,7 +31,7 @@ function getFavMap(): Record<string, number> {
 function getTopFavorites(): string[] {
   const map = getFavMap();
   return Object.entries(map)
-    .sort(([, a], [, b]) => b - a)
+    .toSorted(([, a], [, b]) => b - a)
     .slice(0, MAX_FAV)
     .map(([emoji]) => emoji);
 }
@@ -114,7 +114,7 @@ export function App() {
     const el = pickerRef.current;
     if (!el) return;
     const handler = (e: Event) => {
-      const detail = (e as CustomEvent).detail;
+      const { detail } = e as CustomEvent;
       const emoji = detail.unicode || detail.emoji?.native || detail.emoji;
       if (emoji) {
         handleTap(emoji);
@@ -214,7 +214,7 @@ export function App() {
 
   async function copyLog() {
     const dateGroups = groupByDate(entries);
-    const dateKeys = Object.keys(dateGroups).sort();
+    const dateKeys = Object.keys(dateGroups).toSorted();
     if (dateKeys.length === 0) {
       await navigator.clipboard.writeText("📋 記録なし");
       return;
@@ -298,7 +298,7 @@ export function App() {
   const isToday = selectedDate === todayStr;
   const filteredEntries = filterEmoji ? entries.filter((e) => e.emoji === filterEmoji) : entries;
   const groupedEntries = groupByDate(filteredEntries);
-  const dateLabels = Object.keys(groupedEntries).sort();
+  const dateLabels = Object.keys(groupedEntries).toSorted();
   const hasAnyEntry = dateLabels.length > 0;
 
   return (
@@ -463,13 +463,7 @@ export function App() {
 
           {/* ── タイムライン ── */}
           <div className="emolog-timeline">
-            {!hasAnyEntry ? (
-              <p className="emolog-empty">
-                {selectedDate === todayStr
-                  ? "絵文字をタップして気持ちを記録しよう 👆"
-                  : "この期間の記録はありません"}
-              </p>
-            ) : (
+            {hasAnyEntry ? (
               dateLabels.map((date) => (
                 <div key={date} className="emolog-timeline-group">
                   <div className="emolog-timeline-date">
@@ -522,6 +516,12 @@ export function App() {
                   ))}
                 </div>
               ))
+            ) : (
+              <p className="emolog-empty">
+                {selectedDate === todayStr
+                  ? "絵文字をタップして気持ちを記録しよう 👆"
+                  : "この期間の記録はありません"}
+              </p>
             )}
           </div>
         </>

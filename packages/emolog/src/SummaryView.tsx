@@ -1,7 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { getEntriesByDateRange, getAllEntries } from "./store";
-import { computeSummary, getDateRangeForPeriod } from "./summary";
-import type { Period, SummaryStats } from "./summary";
+import { computeSummary, getDateRangeForPeriod, type Period, type SummaryStats } from "./summary";
 import type { Entry } from "./types";
 
 interface SummaryViewProps {

@@ -20,7 +20,7 @@ export function computeSummary(entries: Entry[]): SummaryStats {
       count,
       pct: total > 0 ? Math.round((count / total) * 1000) / 10 : 0,
     }))
-    .sort((a, b) => {
+    .toSorted((a, b) => {
       if (b.count !== a.count) return b.count - a.count;
       return a.emoji.localeCompare(b.emoji);
     });

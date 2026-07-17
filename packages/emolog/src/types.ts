@@ -1,10 +1,10 @@
 export interface Entry {
   id?: number;
   date: string; // YYYY-MM-DD
-  timestamp: number; // unix ms
+  timestamp: number; // Unix ms
   emoji: string;
-  note?: string; // optional one-line comment
-  list?: string; // list/category name
+  note?: string; // Optional one-line comment
+  list?: string; // List/category name
 }
 
 export function today(): string {

@@ -19,7 +19,7 @@ describe("SummaryView", () => {
     vi.restoreAllMocks();
   });
 
-  it("renders period selector with three buttons", async () => {
+  it("renders period selector with three buttons", () => {
     vi.spyOn(store, "getEntriesByDateRange").mockResolvedValue([]);
     render(<SummaryView onSelectEmoji={() => {}} />);
     expect(screen.getByText("7日")).toBeDefined();
@@ -58,7 +58,7 @@ describe("SummaryView", () => {
     expect(onSelect).toHaveBeenCalledWith("😊");
   });
 
-  it("switches period and calls different store method for all", async () => {
+  it("switches period and calls different store method for all", () => {
     const rangeSpy = vi.spyOn(store, "getEntriesByDateRange").mockResolvedValue([]);
     const allSpy = vi.spyOn(store, "getAllEntries").mockResolvedValue([]);
     render(<SummaryView onSelectEmoji={() => {}} />);

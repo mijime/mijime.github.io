@@ -34,7 +34,7 @@ function aggregateByDate(entries: Entry[]): Map<string, { emoji: string; count: 
   }
   const result = new Map<string, { emoji: string; count: number }>();
   for (const [date, data] of map) {
-    const sorted = Object.entries(data.counts).sort(([, a], [, b]) => b - a);
+    const sorted = Object.entries(data.counts).toSorted(([, a], [, b]) => b - a);
     result.set(date, { emoji: sorted[0][0], count: data.total });
   }
   return result;
@@ -70,7 +70,7 @@ export function CalendarView({ onSelectDate, todayStr, list }: CalendarViewProps
     cells.push(
       <button
         key={dateStr}
-        className={`emolog-cal-cell${isToday ? " emolog-cal-today" : ""}${!data ? " emolog-cal-empty-day" : ""}`}
+        className={`emolog-cal-cell${isToday ? " emolog-cal-today" : ""}${data ? "" : " emolog-cal-empty-day"}`}
         onClick={() => onSelectDate(dateStr)}
         title={`${dateStr}${data ? ` - ${data.count}件 / ${data.emoji}` : ""}`}
       >

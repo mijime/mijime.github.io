@@ -72,24 +72,24 @@ describe("getDateRangeForPeriod", () => {
 
   it("7d period ends today and starts 6 days before", () => {
     const range = getDateRangeForPeriod("7d");
-    expect(range).not.toBeNull();
+    if (!range) throw new Error("expected range");
     const today = new Date();
     const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
-    expect(range!.to).toBe(todayStr);
+    expect(range.to).toBe(todayStr);
 
     const expectedFrom = new Date(today);
     expectedFrom.setDate(expectedFrom.getDate() - 6);
     const fromStr = `${expectedFrom.getFullYear()}-${String(expectedFrom.getMonth() + 1).padStart(2, "0")}-${String(expectedFrom.getDate()).padStart(2, "0")}`;
-    expect(range!.from).toBe(fromStr);
+    expect(range.from).toBe(fromStr);
   });
 
   it("30d period starts 29 days before today", () => {
     const range = getDateRangeForPeriod("30d");
-    expect(range).not.toBeNull();
+    if (!range) throw new Error("expected range");
     const today = new Date();
     const expectedFrom = new Date(today);
     expectedFrom.setDate(expectedFrom.getDate() - 29);
     const fromStr = `${expectedFrom.getFullYear()}-${String(expectedFrom.getMonth() + 1).padStart(2, "0")}-${String(expectedFrom.getDate()).padStart(2, "0")}`;
-    expect(range!.from).toBe(fromStr);
+    expect(range.from).toBe(fromStr);
   });
 });
