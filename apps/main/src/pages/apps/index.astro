@@ -1,0 +1,166 @@
+---
+import BaseLayout from "../../layouts/base-layout.astro";
+
+const apps = [
+  { slug: "madories", desc: "floor plan editor", i: 0 },
+  { slug: "mintodo", desc: "mindmap todo", i: 1 },
+  { slug: "saiflow", desc: "life simulation", i: 2 },
+  { slug: "lords-of-the-stigmata", desc: "3D board game", i: 3 },
+  { slug: "emolog", desc: "emotion logger", i: 4 },
+];
+---
+
+<BaseLayout title="apps">
+  <div class="apps">
+    <div class="apps-rule apps-rule--top"></div>
+
+    <div class="apps-masthead">
+      <h1 class="apps-title">apps</h1>
+    </div>
+
+    <div class="apps-rule apps-rule--mid"></div>
+
+    <div class="apps-body">
+      <ul class="apps-list">
+        {apps.map((app) => (
+          <li class="apps-item" style={`--i:${app.i}`}>
+            <a href={`/apps/${app.slug}/`} class="apps-link">
+              <span class="apps-slug">{app.slug}</span>
+              <span class="apps-desc">{app.desc}</span>
+              <span class="apps-arrow">→</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+
+    <div class="apps-rule apps-rule--bottom"></div>
+
+    <footer class="apps-footer">
+      <a href="/" class="apps-back">← home</a>
+    </footer>
+  </div>
+</BaseLayout>
+
+<style>
+  .apps {
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  .apps-rule {
+    border: none;
+    border-top: 1px solid var(--border);
+  }
+  .apps-rule--top { margin-top: 48px; }
+  .apps-rule--mid { margin: 0; }
+  .apps-rule--bottom { margin-top: auto; }
+
+  .apps-masthead {
+    padding: 32px 0 28px;
+    animation: fadeUp 0.6s ease both;
+  }
+
+  .apps-title {
+    font-family: "Crimson Pro", serif;
+    font-size: clamp(48px, 10vw, 80px);
+    font-weight: 600;
+    line-height: 0.92;
+    letter-spacing: -0.03em;
+    color: var(--ink);
+    margin: 0;
+
+    &::after {
+      content: "";
+      display: block;
+      width: 3ch;
+      height: 3px;
+      background: var(--terra);
+      margin-top: 14px;
+    }
+  }
+
+  .apps-body {
+    padding: 40px 0;
+    animation: fadeUp 0.6s 0.1s ease both;
+  }
+
+  .apps-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .apps-item {
+    animation: fadeUp 0.5s calc(var(--i) * 0.08s + 0.2s) ease both;
+    border-bottom: 1px solid var(--grid);
+    &:first-child { border-top: 1px solid var(--grid); }
+  }
+
+  .apps-link {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 0;
+    color: var(--ink);
+    text-decoration: none;
+    transition: color 0.15s;
+
+    &:hover {
+      color: var(--terra);
+      .apps-arrow { transform: translateX(4px); }
+    }
+  }
+
+  .apps-slug {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+  }
+
+  .apps-desc {
+    font-size: 11px;
+    color: var(--mid);
+  }
+
+  .apps-arrow {
+    font-size: 14px;
+    color: var(--terra);
+    transition: transform 0.2s ease;
+    opacity: 0.6;
+  }
+
+  .apps-footer {
+    padding: 20px 0 32px;
+    animation: fadeUp 0.5s 0.5s ease both;
+  }
+
+  .apps-back {
+    font-size: 12px;
+    color: var(--mid);
+    text-decoration: none;
+    transition: color 0.15s;
+
+    &:hover { color: var(--terra); }
+  }
+
+  @keyframes fadeUp {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+</style>
