@@ -1,0 +1,9 @@
+---
+import { App as EmologApp } from "@mijime/emolog";
+import BaseLayout from "../../layouts/base-layout.astro";
+import "@mijime/emolog/index.css";
+---
+
+<BaseLayout title="emolog">
+  <EmologApp client:only="react" />
+</BaseLayout>

@@ -1,0 +1,23 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "extends": ["../../.oxlintrc.json"],
+  "rules": {
+    "eslint/max-lines": "off",
+    "eslint/complexity": "off",
+    "eslint/no-nested-ternary": "off",
+    "unicorn/no-nested-ternary": "off",
+    "eslint/no-plusplus": "off",
+    "eslint/no-continue": "off",
+    "eslint/no-alert": "off",
+    "eslint/no-console": "off",
+    "eslint/no-inline-comments": "off",
+    "unicorn/filename-case": "off",
+    "oxc/no-optional-chaining": "off",
+    "typescript/no-non-null-assertion": "off",
+    "eslint/require-await": "off",
+    "eslint/no-duplicate-imports": "off",
+    "unicorn/consistent-function-scoping": "off",
+    "unicorn/no-array-reduce": "off",
+    "typescript/no-explicit-any": "off"
+  }
+}
