@@ -1157,3 +1157,39 @@
   font-size: 12px;
   padding: 16px 0;
 }
+
+/* ── 分析タブ ── */
+.emolog-stats {
+  padding-top: 8px;
+}
+
+.emolog-stats-subtabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 16px;
+  justify-content: center;
+}
+
+.emolog-stats-subtab {
+  padding: 6px 20px;
+  font-size: 13px;
+  font-family: "IBM Plex Mono", monospace;
+  border: 1px solid var(--grid);
+  border-radius: 20px;
+  background: var(--surface);
+  color: var(--mid);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.emolog-stats-subtab:hover {
+  background: var(--hover);
+  color: var(--ink);
+}
+
+.emolog-stats-subtab-active {
+  background: var(--ink) !important;
+  color: var(--bg) !important;
+  border-color: var(--ink) !important;
+  font-weight: 600;
+}
