@@ -23,7 +23,7 @@ export interface ExportData {
   version: number;
 }
 
-interface ListDef {
+export interface ListDef {
   id?: number;
   name: string;
   color?: string;

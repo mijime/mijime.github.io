@@ -10,8 +10,7 @@ import {
   importAll,
   deleteAll,
 } from "./store";
-import { today, type ExportData } from "./types";
-import type { ListDef } from "./store";
+import { today, type ExportData, type ListDef } from "./types";
 import { TabBar, type Tab } from "./TabBar";
 import { RecordView } from "./RecordView";
 import { HistoryView } from "./HistoryView";
@@ -211,6 +210,7 @@ export function App() {
 
   async function handleDeleteAll() {
     await deleteAll();
+    localStorage.removeItem(FAV_KEY);
     await ensureDefaultList().then(setSelectedList);
     await refreshLists();
     refreshFavorites();

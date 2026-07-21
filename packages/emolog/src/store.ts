@@ -1,12 +1,5 @@
 import Dexie, { type Table } from "dexie";
-import type { Entry, ExportData } from "./types";
-
-export interface ListDef {
-  id?: number;
-  name: string;
-  color?: string;
-  order: number;
-}
+import type { Entry, ExportData, ListDef } from "./types";
 
 export const db = new Dexie("emolog") as Dexie & {
   entries: Table<Entry, number>;

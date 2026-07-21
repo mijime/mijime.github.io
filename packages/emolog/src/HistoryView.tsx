@@ -52,7 +52,7 @@ export function HistoryView({
   const [editingEmojiId, setEditingEmojiId] = useState<number | null>(null);
   const editInputRef = useRef<HTMLInputElement>(null);
   const deleteTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const scrollRef = useRef<HTMLDivElement>(null);
+  const historyRef = useRef<HTMLDivElement>(null);
 
   useEffect(
     () => () => {
@@ -147,9 +147,8 @@ export function HistoryView({
     setEditingEmojiId(null);
   }
 
-  // Scroll to load more
   useEffect(() => {
-    const el = scrollRef.current;
+    const el = historyRef.current?.closest(".emolog-content") as HTMLElement | null;
     if (!el) return;
     const onScroll = () => {
       if (el.scrollHeight - el.scrollTop - el.clientHeight < 200 && hasMore && !loading) {
@@ -182,7 +181,7 @@ export function HistoryView({
   }
 
   return (
-    <div className="emolog-history" ref={scrollRef}>
+    <div className="emolog-history" ref={historyRef}>
       {/* Filter bar */}
       <div className="emolog-history-toolbar">
         {filterEmoji && (
