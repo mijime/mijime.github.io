@@ -50,9 +50,16 @@ export function HistoryView({
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editNote, setEditNote] = useState("");
   const [editingEmojiId, setEditingEmojiId] = useState<number | null>(null);
-  const [, setDeletedEntry] = useState<Entry | null>(null);
   const editInputRef = useRef<HTMLInputElement>(null);
+  const deleteTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  useEffect(
+    () => () => {
+      if (deleteTimerRef.current) clearTimeout(deleteTimerRef.current);
+    },
+    [],
+  );
 
   const loadEntries = useCallback(
     async (toDate: string, append: boolean) => {
@@ -95,21 +102,25 @@ export function HistoryView({
 
   async function handleDelete(entry: Entry) {
     if (entry.id === null || entry.id === undefined) return;
-    setDeletedEntry(entry);
     setEntries((prev) => prev.filter((e) => e.id !== entry.id));
+    const timer = setTimeout(async () => {
+      await deleteEntry(entry.id!);
+    }, 3000);
+    deleteTimerRef.current = timer;
     onSnackBar("削除しました", {
       label: "取り消し",
-      onClick: async () => {
+      onClick: () => {
+        if (deleteTimerRef.current) {
+          clearTimeout(deleteTimerRef.current);
+          deleteTimerRef.current = null;
+        }
         setEntries((prev) => {
           const restored = [...prev, entry];
           restored.sort((a, b) => a.timestamp - b.timestamp);
           return restored;
         });
-        setDeletedEntry(null);
       },
     });
-    await deleteEntry(entry.id);
-    setDeletedEntry(null);
   }
 
   function handleStartEdit(entry: Entry) {
