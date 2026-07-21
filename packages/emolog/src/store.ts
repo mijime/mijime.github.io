@@ -69,6 +69,10 @@ export async function updateEntryNote(id: number, note: string): Promise<number>
   return db.entries.update(id, { note: note || undefined });
 }
 
+export async function updateEntryEmoji(id: number, emoji: string): Promise<number> {
+  return db.entries.update(id, { emoji });
+}
+
 // ── Lists ──
 
 export async function getLists(): Promise<ListDef[]> {

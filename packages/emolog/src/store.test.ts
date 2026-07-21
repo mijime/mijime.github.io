@@ -8,6 +8,7 @@ import {
   exportAll,
   importAll,
   deleteAll,
+  updateEntryEmoji,
   db,
 } from "./store";
 import type { Entry } from "./types";
@@ -115,5 +116,18 @@ describe("deleteAll", () => {
     await deleteAll();
     expect(await getAllEntries()).toEqual([]);
     expect(await getLists()).toEqual([]);
+  });
+});
+
+describe("updateEntryEmoji", () => {
+  beforeEach(async () => {
+    await db.entries.clear();
+  });
+
+  it("changes the emoji of an existing entry", async () => {
+    const id = await addEntry(makeEntry("😊", "2026-07-10"));
+    await updateEntryEmoji(id, "😡");
+    const all = await getAllEntries();
+    expect(all[0].emoji).toBe("😡");
   });
 });
