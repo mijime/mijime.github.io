@@ -1,5 +1,5 @@
 import Dexie, { type Table } from "dexie";
-import type { Entry } from "./types";
+import type { Entry, ExportData } from "./types";
 
 export interface ListDef {
   id?: number;
@@ -98,4 +98,25 @@ export async function ensureDefaultList(): Promise<string> {
     return "メイン";
   }
   return lists[0].name;
+}
+
+export async function exportAll(): Promise<ExportData> {
+  const [entries, lists] = await Promise.all([
+    db.entries.orderBy("timestamp").toArray(),
+    db.lists.orderBy("order").toArray(),
+  ]);
+  return { entries, lists, version: 1 };
+}
+
+export async function importAll(data: ExportData): Promise<void> {
+  if (data.entries.length > 0) {
+    await db.entries.bulkAdd(data.entries.map(({ id: _id, ...rest }: Entry) => rest));
+  }
+  if (data.lists.length > 0) {
+    await db.lists.bulkAdd(data.lists.map(({ id: _id, ...rest }) => rest));
+  }
+}
+
+export async function deleteAll(): Promise<void> {
+  await Promise.all([db.entries.clear(), db.lists.clear()]);
 }

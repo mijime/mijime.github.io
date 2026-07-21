@@ -16,3 +16,16 @@ export function formatTime(ts: number): string {
   const d = new Date(ts);
   return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
 }
+
+export interface ExportData {
+  entries: Entry[];
+  lists: ListDef[];
+  version: number;
+}
+
+interface ListDef {
+  id?: number;
+  name: string;
+  color?: string;
+  order: number;
+}
