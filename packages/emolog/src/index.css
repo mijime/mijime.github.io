@@ -735,3 +735,57 @@
     transform: translateX(-50%) translateY(0);
   }
 }
+
+/* ── 下部タブバー ── */
+.emolog-tabbar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  background: var(--surface);
+  border-top: 1px solid var(--grid);
+  z-index: 900;
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+.emolog-tabbar-btn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 8px 0 10px;
+  border: none;
+  background: none;
+  color: var(--mid);
+  cursor: pointer;
+  transition: color 0.15s;
+  font-family: "IBM Plex Mono", monospace;
+}
+
+.emolog-tabbar-active {
+  color: var(--terra);
+}
+
+.emolog-tabbar-icon {
+  font-size: 20px;
+  line-height: 1;
+}
+
+.emolog-tabbar-label {
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.emolog-tabbar-indicator {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 33.333%;
+  height: 2px;
+  background: var(--terra);
+  transition: transform 0.2s ease;
+  border-radius: 0 0 2px 2px;
+}
