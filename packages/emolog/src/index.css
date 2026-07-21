@@ -682,3 +682,56 @@
   background: var(--grid);
   color: var(--ink);
 }
+
+/* ── スナックバー ── */
+.emolog-snackbar {
+  position: fixed;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--ink);
+  color: var(--bg);
+  padding: 12px 20px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-family: "IBM Plex Mono", monospace;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+  animation: emoSnackIn 0.2s ease;
+}
+
+.emolog-snackbar-text {
+  white-space: nowrap;
+}
+
+.emolog-snackbar-action {
+  background: var(--terra);
+  border: none;
+  color: white;
+  padding: 4px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-family: "IBM Plex Mono", monospace;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: opacity 0.15s;
+}
+
+.emolog-snackbar-action:hover {
+  opacity: 0.85;
+}
+
+@keyframes emoSnackIn {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
