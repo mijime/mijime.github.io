@@ -2,16 +2,27 @@ import { useCallback, useEffect, useRef, useState, lazy, Suspense } from "react"
 import { useDarkMode } from "@mijime/theme/useDarkMode";
 import { computeFloorScores, exportAllFloorsPng } from "../draw/export";
 import { buildShareUrl, encodeFloors, mergeFloors } from "../floor/share";
-import { loadFromFile, loadFromStorage, saveToFile, saveToStorage } from "../storage";
-import { createBuilding, reducer } from "../store";
-import type { CopiedRegion, EdgeRef, ItemType } from "../types";
+import {
+  createPlan,
+  deletePlan,
+  getActivePlanId,
+  listPlans,
+  loadFromFile,
+  migrateFromLegacy,
+  putPlan,
+  replaceAllPlans,
+  saveToFile,
+  setActivePlanId,
+} from "../storage";
+import { reducer } from "../store";
+import type { CopiedRegion, EdgeRef, ItemType, Plan } from "../types";
 import { useAppInit } from "../hooks/use-app-init";
 import { useHistory } from "../hooks/use-history";
-import type { AppState } from "../hooks/use-history";
 import { DslPanel } from "./dsl-panel";
 import type { FloorCanvasHandle } from "./floor-canvas";
 import { FloorCanvas } from "./floor-canvas";
 import { FloorTabs } from "./floor-tabs";
+import { PlanTabs } from "./plan-tabs";
 import type { ToolMode } from "./tool-mode";
 import { FLOOR_TYPES, floorTypeToSwatchStyle } from "./tool-mode";
 import { ToolSheet } from "./tool-sheet";
@@ -41,21 +52,18 @@ function FloorStats({ floor }: { floor: FloorPlan }) {
   );
 }
 
-function init(): AppState {
-  const saved = loadFromStorage();
-  if (saved) {
-    return saved;
-  }
-  const building = createBuilding();
-  return { activeFloorId: building.floors[0].id, building };
-}
-
 export function App() {
-  const { current, dispatch, push, setActiveFloorId, canUndo, canRedo, undo, redo } =
-    useHistory(init());
+  const { canRedo, canUndo, current, dispatch, push, redo, reset, setActiveFloorId, undo } =
+    useHistory({
+      activeFloorId: "",
+      building: { cellSize: 32, floors: [] },
+    });
 
   useAppInit(push);
 
+  const [plans, setPlans] = useState<Plan[]>([]);
+  const [activePlanId, setActivePlanIdState] = useState<string | null>(null);
+  const [ready, setReady] = useState(false);
   const [viewMode, setViewMode] = useState<"2d" | "3d">("2d");
   const [tool, setTool] = useState<ToolMode>({ kind: "select" });
   const canvasRef = useRef<FloorCanvasHandle>(null);
@@ -67,10 +75,80 @@ export function App() {
 
   const { building, activeFloorId } = current;
 
+  // Load the plan collection from IndexedDB (with legacy migration) and bootstrap the active plan.
   useEffect(() => {
-    const id = setTimeout(() => saveToStorage(building, activeFloorId), 500);
+    let cancelled = false;
+    (async () => {
+      await migrateFromLegacy();
+      let list = await listPlans();
+      let activeId = await getActivePlanId();
+      if (list.length === 0) {
+        const plan = createPlan("プラン1");
+        await Promise.all([putPlan(plan), setActivePlanId(plan.id)]);
+        list = [plan];
+        activeId = plan.id;
+      } else if (!activeId || !list.some((p) => p.id === activeId)) {
+        activeId = list[0].id;
+        await setActivePlanId(activeId);
+      }
+      if (cancelled) {
+        return;
+      }
+      const target = list.find((p) => p.id === activeId)!;
+      reset({ activeFloorId: target.activeFloorId, building: target.building });
+      setPlans(list);
+      setActivePlanIdState(activeId);
+      setReady(true);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [reset]);
+
+  // Keep the edited building in sync with the active plan so switching preserves edits.
+  useEffect(() => {
+    if (!ready || !activePlanId) {
+      return;
+    }
+    setPlans((prev) =>
+      prev.some((p) => p.id === activePlanId)
+        ? prev.map((p) =>
+            p.id === activePlanId ? { ...p, activeFloorId, building, updatedAt: Date.now() } : p,
+          )
+        : prev,
+    );
+  }, [activeFloorId, activePlanId, building, ready]);
+
+  // Debounced persistence of just the active plan + active plan id.
+  useEffect(() => {
+    if (!ready || !activePlanId) {
+      return;
+    }
+    const activePlan = plans.find((p) => p.id === activePlanId);
+    if (!activePlan) {
+      return;
+    }
+    const id = setTimeout(() => {
+      putPlan(activePlan).catch(() => undefined);
+      setActivePlanId(activePlanId).catch(() => undefined);
+    }, 500);
     return () => clearTimeout(id);
-  }, [building, activeFloorId]);
+  }, [activePlanId, plans, ready]);
+
+  // Flush the current active plan immediately when leaving it, so a quick switch
+  // Doesn't drop the debounced save for the plan we're abandoning.
+  const flushActive = useCallback(() => {
+    const id = activePlanId;
+    if (!id) {
+      return;
+    }
+    const plan = plans.find((p) => p.id === id);
+    if (!plan) {
+      return;
+    }
+    putPlan(plan).catch(() => undefined);
+    setActivePlanId(id).catch(() => undefined);
+  }, [activePlanId, plans]);
 
   useEffect(() => {
     if (!toast) {
@@ -79,6 +157,61 @@ export function App() {
     const id = setTimeout(() => setToast(null), 2000);
     return () => clearTimeout(id);
   }, [toast]);
+
+  const switchPlan = useCallback(
+    (id: string) => {
+      const plan = plans.find((p) => p.id === id);
+      if (!plan || id === activePlanId) {
+        return;
+      }
+      flushActive();
+      reset({ activeFloorId: plan.activeFloorId, building: plan.building });
+      setActivePlanIdState(id);
+    },
+    [activePlanId, flushActive, plans, reset],
+  );
+
+  const handleAddPlan = useCallback(() => {
+    const used = new Set(plans.map((p) => p.name));
+    let n = 1;
+    while (used.has(`プラン${n}`)) {
+      n += 1;
+    }
+    const plan = createPlan(`プラン${n}`);
+    flushActive();
+    setPlans((prev) => [...prev, plan]);
+    reset({ activeFloorId: plan.activeFloorId, building: plan.building });
+    setActivePlanIdState(plan.id);
+  }, [flushActive, plans, reset]);
+
+  const handleRenamePlan = useCallback((id: string, name: string) => {
+    const trimmed = name.trim();
+    if (!trimmed) {
+      return;
+    }
+    setPlans((prev) => prev.map((p) => (p.id === id ? { ...p, name: trimmed } : p)));
+  }, []);
+
+  const handleRemovePlan = useCallback(
+    (id: string) => {
+      const next = plans.filter((p) => p.id !== id);
+      if (next.length === 0) {
+        const plan = createPlan("プラン1");
+        reset({ activeFloorId: plan.activeFloorId, building: plan.building });
+        setPlans([plan]);
+        setActivePlanIdState(plan.id);
+      } else {
+        setPlans(next);
+        if (id === activePlanId) {
+          const target = next[0];
+          reset({ activeFloorId: target.activeFloorId, building: target.building });
+          setActivePlanIdState(target.id);
+        }
+      }
+      deletePlan(id).catch(() => undefined);
+    },
+    [activePlanId, plans, reset],
+  );
 
   const handleShare = useCallback(() => {
     encodeFloors(building.floors).then((encoded) => {
@@ -98,8 +231,27 @@ export function App() {
   const floor = building.floors.find((f) => f.id === activeFloorId) ?? building.floors[0];
   const ghostFloors = building.floors.filter((f) => f.id !== activeFloorId);
 
+  if (!ready || !activePlanId || plans.length === 0) {
+    return (
+      <div
+        className="flex h-screen items-center justify-center"
+        style={{ background: "var(--paper)" }}
+      >
+        <span style={{ fontFamily: "IBM Plex Mono, monospace", fontSize: "13px" }}>Loading…</span>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col h-screen" style={{ background: "var(--paper)" }}>
+      <PlanTabs
+        plans={plans}
+        activePlanId={activePlanId}
+        onSelect={switchPlan}
+        onAdd={handleAddPlan}
+        onRename={handleRenamePlan}
+        onRemove={handleRemovePlan}
+      />
       <div className="flex items-center">
         <div className="flex-1">
           <FloorTabs
@@ -134,15 +286,26 @@ export function App() {
           onUndo={undo}
           onRedo={redo}
           onFitView={() => canvasRef.current?.fitToContainer()}
-          onSave={() => saveToFile(building, activeFloorId)}
+          onSave={() => saveToFile(plans, activePlanId)}
           onLoad={() => {
             loadFromFile().then((data) => {
-              if (data) {
-                push({
-                  activeFloorId: data.activeFloorId,
-                  building: data.building,
-                });
+              if (!data) {
+                return;
               }
+              let activeId = data.activePlanId;
+              if (!data.plans.some((p) => p.id === activeId)) {
+                activeId = data.plans[0]?.id;
+              }
+              if (!activeId) {
+                return;
+              }
+              const target = data.plans.find((p) => p.id === activeId)!;
+              reset({ activeFloorId: target.activeFloorId, building: target.building });
+              setPlans(data.plans);
+              setActivePlanIdState(activeId);
+              replaceAllPlans(data.plans).catch(() => undefined);
+              setActivePlanId(activeId).catch(() => undefined);
+              setToast("読み込みました");
             });
           }}
           onExportAll={() => exportAllFloorsPng(building.floors, building.cellSize)}

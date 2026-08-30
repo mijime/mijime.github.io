@@ -69,10 +69,18 @@ export interface Building {
   floors: FloorPlan[];
 }
 
-export interface SaveData {
-  version: 2;
+export interface Plan {
+  id: string;
+  name: string;
   building: Building;
   activeFloorId: string;
+  updatedAt: number;
+}
+
+export interface SaveData {
+  version: 3;
+  activePlanId: string;
+  plans: Plan[];
 }
 
 export interface CopiedRegion {

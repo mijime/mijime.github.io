@@ -20,6 +20,7 @@
     "@mijime/theme": "workspace:*",
     "@react-three/drei": "^10.7.7",
     "@react-three/fiber": "^9.6.1",
+    "dexie": "^4.4.4",
     "lucide-react": "^1.23.0",
     "three": "^0.169.0",
     "uuid": "^14.0.1"
@@ -31,6 +32,7 @@
     "@types/three": "^0.169.0",
     "@types/uuid": "^11.0.0",
     "@typescript/native-preview": "7.0.0-dev.20260604.1",
+    "fake-indexeddb": "^6.2.5",
     "oxfmt": "^0.46.0",
     "oxlint": "^1.72.0",
     "react": "^19.2.7",
