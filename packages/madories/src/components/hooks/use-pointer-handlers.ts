@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import { GestureHandler } from "../../input/gesture-handler";
 import { copyRegion, normalizeSelection, pasteOriginIndex } from "../../floor/clipboard-logic";
-import { snapVertex, resolveEdges, nearestEdge } from "../../input/wall-snap";
+import { resolveEdges, snapVertex } from "../../input/wall-snap";
 import { resolveItemAction } from "../../input/item-logic";
 import type { CopiedRegion, EdgeRef, FloorPlan, FloorType, WallType } from "../../types";
 import type { ToolMode } from "../tool-mode";
@@ -373,18 +373,11 @@ export function usePointerHandlers(props: Props): {
     }
 
     if (tool.kind === "wall") {
-      const start = wallStartVertexRef.current;
       wallStartVertexRef.current = null;
       const edges = wallPreviewRef.current;
       wallPreviewRef.current = [];
       if (edges.length > 0) {
         onSetWalls(edges, tool.wallType);
-      } else if (start) {
-        const { mx, my } = getCanvasPos(e.clientX, e.clientY);
-        const edge = nearestEdge(mx, my, cellSize, floor.width, floor.height);
-        if (edge) {
-          onSetWalls([edge], "none");
-        }
       }
       redraw();
       return;
