@@ -14,6 +14,12 @@ export function useHistory(initialState: AppState) {
   const [history, setHistory] = useState<AppState[]>([initialState]);
   const [historyIndex, setHistoryIndex] = useState(0);
 
+  const reset = useCallback((initial: AppState) => {
+    lastActionRef.current = null;
+    setHistory([initial]);
+    setHistoryIndex(0);
+  }, []);
+
   const current = history[historyIndex];
 
   const lastActionRef = useRef<{
@@ -103,5 +109,5 @@ export function useHistory(initialState: AppState) {
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [history.length]);
 
-  return { canRedo, canUndo, current, dispatch, push, redo, setActiveFloorId, undo };
+  return { canRedo, canUndo, current, dispatch, push, redo, reset, setActiveFloorId, undo };
 }
