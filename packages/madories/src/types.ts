@@ -46,6 +46,8 @@ export interface Item {
 export interface Cell {
   floorType: FloorType | null;
   item: Item | null;
+  /** Name assigned to the room this cell belongs to (e.g. "LDK", "トイレ"). */
+  roomName?: string;
 }
 
 export interface EdgeRef {

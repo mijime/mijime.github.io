@@ -15,6 +15,7 @@ import {
   setActivePlanId,
 } from "../storage";
 import { reducer } from "../store";
+import { detectRooms, ROOM_NAME_PRESETS } from "../floor/room-detection";
 import type { CopiedRegion, EdgeRef, ItemType, Plan } from "../types";
 import { useAppInit } from "../hooks/use-app-init";
 import { useHistory } from "../hooks/use-history";
@@ -70,6 +71,7 @@ export function App() {
   const [toast, setToast] = useState<string | null>(null);
   const [fallbackUrl, setFallbackUrl] = useState<string | null>(null);
   const [dslOpen, setDslOpen] = useState(false);
+  const [customRoomName, setCustomRoomName] = useState("");
   const [roomPicker, setRoomPicker] = useState<{ cellIndex: number; x: number; y: number } | null>(
     null,
   );
@@ -231,6 +233,39 @@ export function App() {
 
   const floor = building.floors.find((f) => f.id === activeFloorId) ?? building.floors[0];
   const ghostFloors = building.floors.filter((f) => f.id !== activeFloorId);
+
+  const pickerRoom = roomPicker
+    ? detectRooms(floor).find((r) => r.cells.includes(roomPicker.cellIndex))
+    : null;
+  const pickerRoomName = pickerRoom ? (floor.cells[pickerRoom.cells[0]]?.roomName ?? "") : "";
+
+  const applyRoomName = (name: string) => {
+    if (!roomPicker) {
+      return;
+    }
+    dispatch({
+      cellIndex: roomPicker.cellIndex,
+      floorId: floor.id,
+      roomName: name,
+      type: "SET_ROOM_NAME",
+    });
+    setCustomRoomName("");
+    setRoomPicker(null);
+  };
+
+  const clearRoomName = () => {
+    if (!roomPicker) {
+      return;
+    }
+    dispatch({
+      cellIndex: roomPicker.cellIndex,
+      floorId: floor.id,
+      roomName: null,
+      type: "SET_ROOM_NAME",
+    });
+    setCustomRoomName("");
+    setRoomPicker(null);
+  };
 
   if (!ready || !activePlanId || plans.length === 0) {
     return (
@@ -428,9 +463,13 @@ export function App() {
                 onEraseCell={(cellIndex) =>
                   dispatch({ cellIndex, floorId: floor.id, type: "ERASE_CELL" })
                 }
-                onLongPressRoom={(cellIndex, clientX, clientY) =>
-                  setRoomPicker({ cellIndex, x: clientX, y: clientY })
-                }
+                onLongPressRoom={(cellIndex, clientX, clientY) => {
+                  const room = detectRooms(floor).find((r) => r.cells.includes(cellIndex));
+                  const currentName =
+                    room?.cells[0] === undefined ? "" : (floor.cells[room.cells[0]].roomName ?? "");
+                  setCustomRoomName(currentName);
+                  setRoomPicker({ cellIndex, x: clientX, y: clientY });
+                }}
                 onUndo={undo}
               />
             ) : (
@@ -478,11 +517,13 @@ export function App() {
               display: "flex",
               flexDirection: "column",
               gap: "4px",
-              left: Math.min(roomPicker.x, window.innerWidth - 200),
+              left: Math.min(roomPicker.x, window.innerWidth - 210),
+              maxHeight: "min(70vh, 480px)",
+              overflowY: "auto",
               padding: "8px",
               position: "absolute",
-              top: Math.min(roomPicker.y, window.innerHeight - 300),
-              width: "180px",
+              top: Math.min(roomPicker.y, window.innerHeight - 360),
+              width: "200px",
             }}
             onClick={(e) => e.stopPropagation()}
           >
@@ -535,6 +576,100 @@ export function App() {
                 {entry.label}
               </button>
             ))}
+            <div
+              style={{
+                borderTop: "1px solid var(--border)",
+                display: "flex",
+                flexDirection: "column",
+                gap: "6px",
+                marginTop: "2px",
+                paddingTop: "6px",
+              }}
+            >
+              <div
+                style={{
+                  color: "var(--mid)",
+                  fontFamily: "IBM Plex Mono, monospace",
+                  fontSize: "10px",
+                  letterSpacing: "0.1em",
+                }}
+              >
+                部屋名{pickerRoomName ? `: ${pickerRoomName}` : ""}
+              </div>
+              <div style={{ display: "flex", gap: "4px" }}>
+                <input
+                  value={customRoomName}
+                  onChange={(e) => setCustomRoomName((e.target as HTMLInputElement).value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && customRoomName.trim()) {
+                      applyRoomName(customRoomName.trim());
+                    }
+                  }}
+                  placeholder="名前を入力"
+                  style={{
+                    background: "var(--paper)",
+                    border: "1px solid var(--border)",
+                    color: "var(--ink)",
+                    flex: 1,
+                    fontFamily: "IBM Plex Mono, monospace",
+                    fontSize: "11px",
+                    minWidth: 0,
+                    padding: "4px 6px",
+                  }}
+                />
+                <button
+                  onClick={() => customRoomName.trim() && applyRoomName(customRoomName.trim())}
+                  style={{
+                    background: pickerRoomName ? "var(--ink)" : "transparent",
+                    border: "1px solid var(--border)",
+                    borderRadius: "4px",
+                    color: pickerRoomName ? "var(--paper)" : "var(--ink)",
+                    cursor: "pointer",
+                    fontFamily: "IBM Plex Mono, monospace",
+                    fontSize: "11px",
+                    padding: "4px 8px",
+                  }}
+                >
+                  適用
+                </button>
+                {pickerRoomName && (
+                  <button
+                    onClick={clearRoomName}
+                    style={{
+                      background: "transparent",
+                      border: "1px solid var(--border)",
+                      borderRadius: "4px",
+                      color: "var(--terra)",
+                      cursor: "pointer",
+                      fontFamily: "IBM Plex Mono, monospace",
+                      fontSize: "11px",
+                    }}
+                  >
+                    解除
+                  </button>
+                )}
+              </div>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "4px" }}>
+                {ROOM_NAME_PRESETS.map((name) => (
+                  <button
+                    key={name}
+                    onClick={() => applyRoomName(name)}
+                    style={{
+                      background: pickerRoomName === name ? "var(--ink)" : "transparent",
+                      border: "1px solid var(--border)",
+                      borderRadius: "4px",
+                      color: pickerRoomName === name ? "var(--paper)" : "var(--ink)",
+                      cursor: "pointer",
+                      fontFamily: "IBM Plex Mono, monospace",
+                      fontSize: "11px",
+                      padding: "4px 8px",
+                    }}
+                  >
+                    {name}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       )}

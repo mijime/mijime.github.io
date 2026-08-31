@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { createBuilding, createFloorPlan, reducer } from "./store";
-import { getWall } from "./floor/walls";
-import type { FloorPlan } from "./types";
+import { getWall, setWallsPure } from "./floor/walls";
+import type { EdgeRef, FloorPlan } from "./types";
 
 const count = (f: FloorPlan) => [...f.hWalls, ...f.vWalls].filter((w) => w !== "none").length;
 
@@ -121,5 +121,133 @@ describe("reducer", () => {
       type: "RENAME_FLOOR",
     });
     expect(next.floors[0].name).toBe("地下");
+  });
+});
+
+// Helper: enclose the inclusive rectangle (x1,y1)-(x2,y2) with solid walls.
+function encloseRect(floor: FloorPlan, x1: number, y1: number, x2: number, y2: number): FloorPlan {
+  const edges: EdgeRef[] = [];
+  for (let x = x1; x <= x2; x++) {
+    edges.push({ kind: "h", x, y: y1 }, { kind: "h", x, y: y2 + 1 });
+  }
+  for (let y = y1; y <= y2; y++) {
+    edges.push({ kind: "v", x: x1, y }, { kind: "v", x: x2 + 1, y });
+  }
+  return setWallsPure(floor, edges, "solid");
+}
+
+// Helper: a building with cells (1,1)-(2,2) enclosed as a 4-cell room.
+function enclosedBuilding() {
+  const floor = encloseRect(createFloorPlan("test", 6, 6), 1, 1, 2, 2);
+  return { building: { cellSize: 32, floors: [floor] }, floor };
+}
+
+describe("SET_ROOM_NAME", () => {
+  it("stores the name on the room's top-left cell only", () => {
+    const { building, floor } = enclosedBuilding();
+    const next = reducer(building, {
+      cellIndex: 1 * 6 + 1,
+      floorId: floor.id,
+      roomName: "LDK",
+      type: "SET_ROOM_NAME",
+    });
+    const tl = 1 * 6 + 1; // Top-left cell (1,1) of the room
+    expect(next.floors[0].cells[tl].roomName).toBe("LDK");
+    for (const idx of [1 * 6 + 2, 2 * 6 + 1, 2 * 6 + 2]) {
+      expect(next.floors[0].cells[idx].roomName).toBeUndefined();
+    }
+  });
+
+  it("SET_ROOM_NAME with null clears the name", () => {
+    const { building, floor } = enclosedBuilding();
+    const named = reducer(building, {
+      cellIndex: 1 * 6 + 1,
+      floorId: floor.id,
+      roomName: "トイレ",
+      type: "SET_ROOM_NAME",
+    });
+    const cleared = reducer(named, {
+      cellIndex: 1 * 6 + 1,
+      floorId: floor.id,
+      roomName: null,
+      type: "SET_ROOM_NAME",
+    });
+    for (const cell of cleared.floors[0].cells) {
+      expect(cell.roomName).toBeUndefined();
+    }
+  });
+
+  it("deletes the name when its anchor cell is erased", () => {
+    // 8-cell room: x=1..4, y=1..2
+    const floor = encloseRect(createFloorPlan("test", 6, 6), 1, 1, 4, 2);
+    const named = reducer(
+      { cellSize: 32, floors: [floor] },
+      { cellIndex: 1 * 6 + 1, floorId: floor.id, roomName: "LDK", type: "SET_ROOM_NAME" },
+    );
+    const edited = reducer(named, {
+      cellIndex: 1 * 6 + 1,
+      floorId: floor.id,
+      type: "ERASE_CELL",
+    });
+    expect(edited.floors[0].cells[1 * 6 + 1].roomName).toBeUndefined();
+  });
+
+  it("keeps the name when walls change without moving the top-left anchor", () => {
+    // 8-cell room: x=1..4, y=1..2
+    const floor = encloseRect(createFloorPlan("test", 6, 6), 1, 1, 4, 2);
+    const named = reducer(
+      { cellSize: 32, floors: [floor] },
+      { cellIndex: 1 * 6 + 1, floorId: floor.id, roomName: "LDK", type: "SET_ROOM_NAME" },
+    );
+    // Redraw the bottom wall — the room's top-left (1,1) is unaffected.
+    const edited = reducer(named, {
+      edges: [
+        { kind: "h", x: 1, y: 3 },
+        { kind: "h", x: 2, y: 3 },
+        { kind: "h", x: 3, y: 3 },
+        { kind: "h", x: 4, y: 3 },
+      ],
+      floorId: floor.id,
+      type: "SET_WALLS",
+      wallType: "solid",
+    });
+    expect(edited.floors[0].cells[1 * 6 + 1].roomName).toBe("LDK");
+  });
+
+  it("leaves other rooms' names intact when one room is edited", () => {
+    const floor8 = createFloorPlan("test", 8, 6);
+    const twoRooms = encloseRect(encloseRect(floor8, 1, 1, 2, 2), 4, 1, 5, 2);
+    const building = { cellSize: 32, floors: [twoRooms] };
+    const a = 1 * 8 + 1; // Room A top-left (1,1)
+    const b = 1 * 8 + 4; // Room B top-left (4,1)
+    const namedA = reducer(building, {
+      cellIndex: a,
+      floorId: twoRooms.id,
+      roomName: "LDK",
+      type: "SET_ROOM_NAME",
+    });
+    const namedB = reducer(namedA, {
+      cellIndex: b,
+      floorId: twoRooms.id,
+      roomName: "トイレ",
+      type: "SET_ROOM_NAME",
+    });
+    // Draw an internal wall inside room A only.
+    const edited = reducer(namedB, {
+      edges: [
+        { kind: "v", x: 2, y: 1 },
+        { kind: "v", x: 2, y: 2 },
+      ],
+      floorId: twoRooms.id,
+      type: "SET_WALLS",
+      wallType: "solid",
+    });
+    for (let y = 1; y <= 2; y++) {
+      for (let x = 1; x <= 2; x++) {
+        expect(edited.floors[0].cells[y * 8 + x].roomName).toBeUndefined();
+      }
+    }
+    // B's top-left anchor keeps its name; other B cells are unnamed.
+    expect(edited.floors[0].cells[b].roomName).toBe("トイレ");
   });
 });

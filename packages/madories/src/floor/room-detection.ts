@@ -1,10 +1,43 @@
 import type { FloorPlan } from "../types";
 
-interface Room {
+export interface Room {
   cells: number[];
   tatami: number;
   simpleShape: boolean;
 }
+
+/** Top-left cell of a room: smallest row, then smallest column. */
+export function roomTopLeftCell(room: Room, width: number): number {
+  let tl = room.cells[0];
+  for (const idx of room.cells) {
+    const x = idx % width;
+    const y = Math.floor(idx / width);
+    const tlx = tl % width;
+    const tly = Math.floor(tl / width);
+    if (y < tly || (y === tly && x < tlx)) {
+      tl = idx;
+    }
+  }
+  return tl;
+}
+
+export const ROOM_NAME_PRESETS = [
+  "LDK",
+  "リビング",
+  "ダイニング",
+  "キッチン",
+  "トイレ",
+  "洗面",
+  "お風呂",
+  "寝室",
+  "子供部屋",
+  "書斎",
+  "和室",
+  "廊下",
+  "玄関",
+  "収納",
+  "納戸",
+];
 
 // Count polygon vertices by examining each grid corner shared by cells.
 // A corner (cx, cy) is a vertex if exactly 1 or 3 of its 4 neighboring cells are inside.
@@ -144,13 +177,24 @@ export function drawRoomLabels(
     if (!room.simpleShape && room.tatami < 14) {
       continue;
     }
-    const label = `${room.tatami}畳`;
+    const name = floor.cells[roomTopLeftCell(room, floor.width)]?.roomName;
 
     ctx.strokeStyle = outlineColor;
-    ctx.lineWidth = 3;
-    ctx.strokeText(label, cx, cy);
     ctx.fillStyle = inkColor;
-    ctx.fillText(label, cx, cy);
+    ctx.lineWidth = 3;
+
+    if (name) {
+      ctx.font = "bold 14px 'IBM Plex Mono', monospace";
+      ctx.strokeText(name, cx, cy - 7);
+      ctx.fillText(name, cx, cy - 7);
+      ctx.font = "bold 11px 'IBM Plex Mono', monospace";
+      ctx.strokeText(`${room.tatami}畳`, cx, cy + 8);
+      ctx.fillText(`${room.tatami}畳`, cx, cy + 8);
+    } else {
+      ctx.font = "bold 13px 'IBM Plex Mono', monospace";
+      ctx.strokeText(`${room.tatami}畳`, cx, cy);
+      ctx.fillText(`${room.tatami}畳`, cx, cy);
+    }
   }
 
   ctx.restore();

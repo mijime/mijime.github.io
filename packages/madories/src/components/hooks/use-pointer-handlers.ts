@@ -86,6 +86,7 @@ export function usePointerHandlers(props: Props): {
   onEraseRegionRef.current = props.onEraseRegion;
 
   const longPressTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const longPressTriggeredRef = useRef(false);
   const longPressDownClientRef = useRef<{ x: number; y: number } | null>(null);
   const twoFingerDownTimeRef = useRef<number | null>(null);
   const twoFingerDownClientRef = useRef<{ x: number; y: number } | null>(null);
@@ -310,6 +311,7 @@ export function usePointerHandlers(props: Props): {
       if (lidx === null) {
         return;
       }
+      longPressTriggeredRef.current = true;
       if (floor.cells[lidx].item) {
         onRotateItem(lidx);
       } else {
@@ -342,6 +344,17 @@ export function usePointerHandlers(props: Props): {
       twoFingerDownTimeRef.current = null;
     }
     if (activePointerCountRef.current >= 1) {
+      return;
+    }
+
+    // A completed long-press already performed its action (item rotation / room
+    // Picker); suppress the normal tap action on pointer-up (e.g. wall placement
+    // Or floor fill) that would otherwise also fire.
+    if (longPressTriggeredRef.current) {
+      longPressTriggeredRef.current = false;
+      selectionStartRef.current = null;
+      dragStartRef.current = null;
+      redraw();
       return;
     }
 

@@ -7,7 +7,7 @@ import {
   setWallsPure,
   rotateFloorCW90,
 } from "./floor/walls";
-import { detectRooms } from "./floor/room-detection";
+import { detectRooms, roomTopLeftCell } from "./floor/room-detection";
 import type {
   Building,
   Cell,
@@ -81,6 +81,7 @@ type Action =
     }
   | { type: "ERASE_CELL"; floorId: string; cellIndex: number }
   | { type: "FILL_ROOM"; floorId: string; cellIndex: number; floorType: FloorType }
+  | { type: "SET_ROOM_NAME"; floorId: string; cellIndex: number; roomName: string | null }
   | { type: "ROTATE_FLOOR"; floorId: string };
 
 function updateFloor(state: Building, floorId: string, fn: (f: FloorPlan) => FloorPlan): Building {
@@ -97,7 +98,7 @@ function updateCell(floor: FloorPlan, cellIndex: number, fn: (c: Cell) => Cell):
   };
 }
 
-export function reducer(state: Building, action: Action): Building {
+function reducerImpl(state: Building, action: Action): Building {
   switch (action.type) {
     case "SET_WALLS": {
       return updateFloor(state, action.floorId, (floor) =>
@@ -311,6 +312,21 @@ export function reducer(state: Building, action: Action): Building {
       });
     }
 
+    case "SET_ROOM_NAME": {
+      return updateFloor(state, action.floorId, (floor) => {
+        const rooms = detectRooms(floor);
+        const room = rooms.find((r) => r.cells.includes(action.cellIndex));
+        if (!room) {
+          return floor;
+        }
+        // The name lives on the room's top-left anchor cell only.
+        const tl = roomTopLeftCell(room, floor.width);
+        const cells = [...floor.cells];
+        cells[tl] = { ...cells[tl], roomName: action.roomName ?? undefined };
+        return { ...floor, cells };
+      });
+    }
+
     case "ROTATE_FLOOR": {
       return updateFloor(state, action.floorId, (floor) => rotateFloorCW90(floor));
     }
@@ -319,4 +335,67 @@ export function reducer(state: Building, action: Action): Building {
       return state;
     }
   }
+}
+
+// A room name lives on exactly one cell: the room's top-left anchor cell. It
+// Stays as long as that cell is still the top-left cell of a detected room;
+// Otherwise (walls redrawn so the anchor shifted, or the anchor cell erased)
+// It is dropped. Names therefore never leak onto other rooms.
+function reconcileNames(floor: FloorPlan): FloorPlan {
+  const rooms = detectRooms(floor);
+  const anchors = new Set<number>();
+  for (const room of rooms) {
+    anchors.add(roomTopLeftCell(room, floor.width));
+  }
+  let changed = false;
+  const cells = floor.cells.map((cell, idx) => {
+    if (cell.roomName === undefined || anchors.has(idx)) {
+      return cell;
+    }
+    changed = true;
+    return { ...cell, roomName: undefined };
+  });
+  return changed ? { ...floor, cells } : floor;
+}
+
+function clearAllNames(floor: FloorPlan): FloorPlan {
+  let changed = false;
+  const cells = floor.cells.map((cell) => {
+    if (cell.roomName === undefined) {
+      return cell;
+    }
+    changed = true;
+    return { ...cell, roomName: undefined };
+  });
+  return changed ? { ...floor, cells } : floor;
+}
+
+const NAME_AFFECTING_ACTIONS: Action["type"][] = [
+  "SET_ROOM_NAME",
+  "SET_WALLS",
+  "ERASE_CELL",
+  "ERASE_REGION",
+  "ROTATE_FLOOR",
+  "CLEAR_FLOOR",
+  "PASTE_REGION",
+];
+
+export function reducer(state: Building, action: Action): Building {
+  const next = reducerImpl(state, action);
+  if (!("floorId" in action)) {
+    return next;
+  }
+  const floor = next.floors.find((f) => f.id === action.floorId);
+  if (!floor || !NAME_AFFECTING_ACTIONS.includes(action.type)) {
+    return next;
+  }
+  // Rotating or clearing the floor reshapes every room → drop all names.
+  const reconciled =
+    action.type === "ROTATE_FLOOR" || action.type === "CLEAR_FLOOR"
+      ? clearAllNames(floor)
+      : reconcileNames(floor);
+  if (reconciled === floor) {
+    return next;
+  }
+  return { ...next, floors: next.floors.map((f) => (f.id === action.floorId ? reconciled : f)) };
 }
