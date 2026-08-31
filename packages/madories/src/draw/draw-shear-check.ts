@@ -1,5 +1,9 @@
 import type { FloorPlan } from "../types";
-import { detectShearWallRuns, detectStackedColumns } from "../floor/shear-walls";
+import {
+  detectLoadPathBreaks,
+  detectShearWallRuns,
+  detectStackedColumns,
+} from "../floor/shear-walls";
 import { computeQuadrantBalance } from "../floor/quadrant-balance";
 import { suggestWallRun, type WallSuggestion } from "../floor/wall-quantity";
 
@@ -19,6 +23,12 @@ const GOOD_RGB: [number, number, number] = [46, 160, 90]; // Green = balanced
 const DOT_OUTLINE = "rgba(255,255,255,0.85)";
 // Suggested shear-wall ghost.
 const SUGGEST_COLOR = "rgba(59,130,246,0.9)"; // Blue dashed line
+// Load-path-break markers: filled violet = an upper floor's wall is unsupported
+// Here (fix on this floor); amber outline = this floor's wall lacks support
+// On the floor below (fix downstairs).
+const FIX_HERE_FILL = "rgba(168,85,247,0.95)";
+const BREAK_OUTLINE = "rgba(255,255,255,0.9)";
+const FIX_BELOW_STROKE = "rgba(240,166,60,0.95)";
 
 export function dotColor(ratio: number): string {
   const t = Math.max(0, Math.min(1, ratio));
@@ -62,7 +72,7 @@ function drawGhostWall(
 export function drawShearCheck(
   ctx: CanvasRenderingContext2D,
   currentFloor: FloorPlan,
-  allFloors: FloorPlan[],
+  floors: FloorPlan[],
   cellSize: number,
 ): void {
   ctx.save();
@@ -79,7 +89,7 @@ export function drawShearCheck(
 
   // 通し柱 across the whole building.
   const radius = Math.max(3, cellSize * 0.22);
-  for (const c of detectStackedColumns(allFloors)) {
+  for (const c of detectStackedColumns(floors)) {
     ctx.fillStyle = COLUMN_FILL;
     ctx.beginPath();
     ctx.arc(c.x * cellSize, c.y * cellSize, radius, 0, Math.PI * 2);
@@ -89,9 +99,62 @@ export function drawShearCheck(
     ctx.stroke();
   }
 
+  drawLoadBreakMarkers(ctx, currentFloor, floors, cellSize);
+
   drawQuadrantOverlay(ctx, currentFloor, cellSize);
 
   ctx.restore();
+}
+
+// 荷重経路途切れ (load-path breaks): the inverse of 通し柱. Draw diamond markers
+// At vertices where a wall-run endpoint lacks a structural support directly
+// Below. Two cases are shown on the current floor:
+//  - break.floorIndex === activeIndex+1 : an UPPER floor's wall is unsupported
+//    HERE -> the fix is to add a wall/column on this floor (filled violet).
+//  - break.floorIndex === activeIndex    : THIS floor's wall is unsupported on
+//    The floor below -> the fix belongs downstairs (amber outline).
+function drawLoadBreakMarkers(
+  ctx: CanvasRenderingContext2D,
+  currentFloor: FloorPlan,
+  floors: FloorPlan[],
+  cellSize: number,
+): void {
+  const activeIndex = floors.findIndex((f) => f.id === currentFloor.id);
+  if (activeIndex === -1) {
+    return;
+  }
+  const size = Math.max(4, cellSize * 0.4);
+  for (const b of detectLoadPathBreaks(floors)) {
+    if (b.floorIndex === activeIndex + 1) {
+      drawBreakDiamond(ctx, b.x, b.y, size, cellSize, FIX_HERE_FILL, BREAK_OUTLINE);
+    } else if (b.floorIndex === activeIndex) {
+      drawBreakDiamond(ctx, b.x, b.y, size, cellSize, "transparent", FIX_BELOW_STROKE);
+    }
+  }
+}
+
+function drawBreakDiamond(
+  ctx: CanvasRenderingContext2D,
+  vx: number,
+  vy: number,
+  size: number,
+  cellSize: number,
+  fill: string,
+  stroke: string,
+): void {
+  const px = vx * cellSize;
+  const py = vy * cellSize;
+  ctx.beginPath();
+  ctx.moveTo(px, py - size);
+  ctx.lineTo(px + size, py);
+  ctx.lineTo(px, py + size);
+  ctx.lineTo(px - size, py);
+  ctx.closePath();
+  ctx.fillStyle = fill;
+  ctx.fill();
+  ctx.strokeStyle = stroke;
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
 }
 
 // 四分割法 overlay: centerlines, a status dot per quadrant (green when both

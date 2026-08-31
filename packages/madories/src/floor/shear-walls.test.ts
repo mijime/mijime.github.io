@@ -1,7 +1,12 @@
 import { describe, expect, it } from "vitest";
 import { createFloorPlan } from "../store";
 import { MM_PER_CELL } from "../units";
-import { detectShearWallRuns, detectStackedColumns, SHEAR_STABLE_MIN_CELLS } from "./shear-walls";
+import {
+  detectLoadPathBreaks,
+  detectShearWallRuns,
+  detectStackedColumns,
+  SHEAR_STABLE_MIN_CELLS,
+} from "./shear-walls";
 import { setWallsPure } from "./walls";
 
 function floor(w: number, h: number) {
@@ -165,5 +170,111 @@ describe("detectStackedColumns", () => {
     expect(stacked).toHaveLength(2);
     expect(stacked[0]).toEqual({ floors: 3, x: 0, y: 0 });
     expect(stacked[1]).toEqual({ floors: 3, x: 1, y: 0 });
+  });
+
+  it("counts a shared L-corner vertex once per floor (not per run)", () => {
+    const make = () => {
+      // Horizontal run ending at (2,1) and a single-cell vertical run ending at
+      // The SAME vertex (2,1): they share a corner column. The corner must be
+      // Counted once per floor, not once per run.
+      let f = floor(4, 4);
+      f = setWallsPure(
+        f,
+        [
+          { kind: "h", x: 0, y: 1 },
+          { kind: "h", x: 1, y: 1 },
+          { kind: "v", x: 2, y: 0 },
+        ],
+        "solid",
+      );
+      return f;
+    };
+    const stacked = detectStackedColumns([make(), make()]);
+    // Endpoints per floor: h-run left end (0,1), shared corner (2,1),
+    // V-run top (2,0) — the corner is shared but counted once.
+    expect(stacked).toHaveLength(3);
+    expect(stacked.find((c) => c.x === 2 && c.y === 1)).toEqual({ floors: 2, x: 2, y: 1 });
+  });
+});
+
+describe("detectLoadPathBreaks", () => {
+  it("flags an upper-floor run endpoint with no structural support on the floor below", () => {
+    const f1 = floor(4, 4); // Ground floor, horizontal wall at y=2
+    const a1 = setWallsPure(
+      f1,
+      [
+        { kind: "h", x: 0, y: 2 },
+        { kind: "h", x: 1, y: 2 },
+        { kind: "h", x: 2, y: 2 },
+      ],
+      "solid",
+    );
+    const f2 = floor(4, 4); // Upper floor, horizontal wall at y=0
+    const a2 = setWallsPure(
+      f2,
+      [
+        { kind: "h", x: 0, y: 0 },
+        { kind: "h", x: 1, y: 0 },
+        { kind: "h", x: 2, y: 0 },
+      ],
+      "solid",
+    );
+    // Ground floor (f1) itself is never checked; only f2's endpoints need support from f1.
+    const breaks = detectLoadPathBreaks([a1, a2]);
+    expect(breaks).toEqual(
+      expect.arrayContaining([
+        { floorIndex: 1, x: 0, y: 0 },
+        { floorIndex: 1, x: 3, y: 0 },
+      ]),
+    );
+    expect(breaks).toHaveLength(2);
+  });
+
+  it("reports no breaks when the upper wall stacks exactly over the lower wall", () => {
+    const make = () => {
+      let f = floor(4, 4);
+      f = setWallsPure(
+        f,
+        [
+          { kind: "h", x: 0, y: 1 },
+          { kind: "h", x: 1, y: 1 },
+          { kind: "h", x: 2, y: 1 },
+        ],
+        "solid",
+      );
+      return f;
+    };
+    expect(detectLoadPathBreaks([make(), make()])).toEqual([]);
+  });
+
+  it("flags only the endpoint with no match when the rest stack", () => {
+    const f1 = floor(5, 5); // Lower: wall y=1, x in [0,3) -> endpoints (0,1) & (3,1)
+    const a1 = setWallsPure(
+      f1,
+      [
+        { kind: "h", x: 0, y: 1 },
+        { kind: "h", x: 1, y: 1 },
+        { kind: "h", x: 2, y: 1 },
+      ],
+      "solid",
+    );
+    const f2 = floor(5, 5); // Upper: wall y=1, x in [0,4) -> endpoints (0,1) & (4,1)
+    const a2 = setWallsPure(
+      f2,
+      [
+        { kind: "h", x: 0, y: 1 },
+        { kind: "h", x: 1, y: 1 },
+        { kind: "h", x: 2, y: 1 },
+        { kind: "h", x: 3, y: 1 },
+      ],
+      "solid",
+    );
+    const breaks = detectLoadPathBreaks([a1, a2]);
+    expect(breaks).toEqual([{ floorIndex: 1, x: 4, y: 1 }]);
+  });
+
+  it("returns nothing for a single floor or an empty building", () => {
+    expect(detectLoadPathBreaks([floor(4, 4)])).toEqual([]);
+    expect(detectLoadPathBreaks([])).toEqual([]);
   });
 });

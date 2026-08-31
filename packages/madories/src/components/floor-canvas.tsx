@@ -72,6 +72,7 @@ interface Props {
   darkMode: boolean;
   tool: ToolMode;
   shearCheck: boolean;
+  floors: FloorPlan[];
   onSetWalls: (edges: EdgeRef[], wallType: WallType) => void;
   onSetFloorType: (cellIndex: number, floorType: FloorType | null) => void;
   onFillRoom: (cellIndex: number) => void;
@@ -86,7 +87,7 @@ interface Props {
 }
 
 export const FloorCanvas = forwardRef<FloorCanvasHandle, Props>((props, ref) => {
-  const { floor, ghostFloors, cellSize, darkMode, tool, shearCheck } = props;
+  const { floor, ghostFloors, cellSize, darkMode, tool, shearCheck, floors } = props;
   const [selectedItemCell, setSelectedItemCell] = useState<number | null>(null);
   const [selectionState, setSelectionState] = useState<{
     x1: number;
@@ -118,6 +119,7 @@ export const FloorCanvas = forwardRef<FloorCanvasHandle, Props>((props, ref) => 
     tool,
     viewRef,
     shearCheck,
+    floors,
   });
 
   const {

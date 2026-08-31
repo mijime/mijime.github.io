@@ -1,19 +1,28 @@
 import type { EdgeRef, FloorPlan } from "../types";
 import { computeQuadrantBalance } from "../floor/quadrant-balance";
 import { computeWallQuantity, suggestWallRun } from "../floor/wall-quantity";
+import { detectLoadPathBreaks } from "../floor/shear-walls";
 import { dotColor } from "../draw/draw-shear-check";
 
 interface Props {
   floor: FloorPlan;
+  /** All floors in bottom-up story order (building.floors) */
+  floors: FloorPlan[];
+  activeFloorId: string;
   onAddWalls: (edges: EdgeRef[]) => void;
   onClose: () => void;
 }
 
 const mono = { fontFamily: "IBM Plex Mono, monospace" };
 
-export function ShearDiagnostic({ floor, onAddWalls, onClose }: Props) {
+export function ShearDiagnostic({ floor, floors, activeFloorId, onAddWalls, onClose }: Props) {
   const balance = computeQuadrantBalance(floor);
   const qty = computeWallQuantity(floor);
+  const activeIndex = floors.findIndex((f) => f.id === activeFloorId);
+  const breaks = detectLoadPathBreaks(floors);
+  const breaksHere =
+    activeIndex !== -1 ? breaks.filter((b) => b.floorIndex === activeIndex + 1) : [];
+  const breaksBelow = activeIndex !== -1 ? breaks.filter((b) => b.floorIndex === activeIndex) : [];
 
   function Gauge({ label, have, need }: { label: string; have: number; need: number }) {
     const ok = have >= need;
@@ -166,6 +175,24 @@ export function ShearDiagnostic({ floor, onAddWalls, onClose }: Props) {
           );
         })}
       </div>
+
+      {floors.length >= 2 && (breaksHere.length > 0 || breaksBelow.length > 0) && (
+        <div
+          style={{
+            ...mono,
+            borderTop: "1px solid var(--border)",
+            color: "var(--terra)",
+            display: "flex",
+            flexDirection: "column",
+            fontSize: "10px",
+            gap: "2px",
+            paddingTop: "6px",
+          }}
+        >
+          {breaksHere.length > 0 && <span>▹ 上階の壁がこの階に未支持 ×{breaksHere.length}</span>}
+          {breaksBelow.length > 0 && <span>▹ この階の壁が下階に未支持 ×{breaksBelow.length}</span>}
+        </div>
+      )}
 
       <div style={{ ...mono, color: "var(--mid)", fontSize: "9px", lineHeight: 1.5 }}>
         簡易目安です。実際の構造・耐震計算は建築士/構造設計者に相談してください。

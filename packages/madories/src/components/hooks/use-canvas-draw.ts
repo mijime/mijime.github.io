@@ -20,6 +20,8 @@ interface Props {
   dynamicCanvasRef: React.RefObject<HTMLCanvasElement | null>;
   floor: FloorPlan;
   ghostFloors: FloorPlan[];
+  /** All floors in bottom-up story order (building.floors) — for cross-floor checks */
+  floors: FloorPlan[];
   cellSize: number;
   viewRef: ViewRef;
   selectionRef: SelectionRef;
@@ -144,6 +146,7 @@ export function useCanvasDraw(props: Props): {
     dynamicCanvasRef,
     floor,
     ghostFloors,
+    floors,
     cellSize,
     viewRef,
     selectionRef,
@@ -287,7 +290,7 @@ export function useCanvasDraw(props: Props): {
     }
 
     if (shearCheck) {
-      drawShearCheck(ctx, floor, [floor, ...ghostFloorsRef.current], cellSize);
+      drawShearCheck(ctx, floor, floors, cellSize);
     }
 
     if (wallPreview && wallPreview.length > 0) {

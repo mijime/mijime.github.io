@@ -410,6 +410,7 @@ export function App() {
                 darkMode={dark}
                 tool={tool}
                 shearCheck={shearCheck}
+                floors={building.floors}
                 onSetWalls={(edges: EdgeRef[], wallType) => {
                   dispatch({
                     edges,
@@ -523,6 +524,8 @@ export function App() {
         >
           <ShearDiagnostic
             floor={floor}
+            floors={building.floors}
+            activeFloorId={activeFloorId}
             onAddWalls={(edges) =>
               dispatch({ edges, floorId: floor.id, type: "SET_WALLS", wallType: "solid" })
             }
