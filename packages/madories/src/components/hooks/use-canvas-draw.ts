@@ -4,6 +4,7 @@ import { getItemDrawOffset } from "../../draw/draw-items";
 import { drawVoidCells } from "../../draw/draw-void";
 import { drawWalls, drawWallPreview } from "../../draw/draw-walls";
 import { computeWallDimensions, fmtMm } from "../../draw/export";
+import { drawShearCheck } from "../../draw/draw-shear-check";
 import { clearIconCache, getCachedIcon } from "../../draw/icons/cache";
 import { drawTatamiCells } from "../../draw/draw-tatami";
 import { normalizeSelection } from "../../floor/clipboard-logic";
@@ -25,6 +26,7 @@ interface Props {
   selectedItemCell: number | null;
   darkMode: boolean;
   tool: ToolMode;
+  shearCheck: boolean;
 }
 
 function cssVar(name: string): string {
@@ -147,6 +149,7 @@ export function useCanvasDraw(props: Props): {
     selectionRef,
     darkMode,
     tool,
+    shearCheck,
   } = props;
 
   const ghostFloorsRef = useRef<FloorPlan[]>(ghostFloors);
@@ -283,6 +286,10 @@ export function useCanvasDraw(props: Props): {
       drawOverlay(ctx, floor, cellSize, wallDimRef.current);
     }
 
+    if (shearCheck) {
+      drawShearCheck(ctx, floor, [floor, ...ghostFloorsRef.current], cellSize);
+    }
+
     if (wallPreview && wallPreview.length > 0) {
       drawWallPreview(ctx, wallPreview, cellSize, "rgba(37, 99, 235, 0.7)");
     }
@@ -326,7 +333,7 @@ export function useCanvasDraw(props: Props): {
         drawDynamic();
       }, 1000);
     },
-    [floor, cellSize, darkMode, tool],
+    [floor, cellSize, darkMode, tool, shearCheck],
   );
 
   useEffect(() => {

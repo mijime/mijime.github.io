@@ -28,6 +28,7 @@ import type { ToolMode } from "./tool-mode";
 import { FLOOR_TYPES, floorTypeToSwatchStyle } from "./tool-mode";
 import { ToolSheet } from "./tool-sheet";
 import type { FloorPlan } from "../types";
+import { ShearDiagnostic } from "./shear-diagnostic";
 
 const Preview3D = lazy(() => import("./preview-3d"));
 
@@ -75,6 +76,7 @@ export function App() {
   const [roomPicker, setRoomPicker] = useState<{ cellIndex: number; x: number; y: number } | null>(
     null,
   );
+  const [shearCheck, setShearCheck] = useState(false);
 
   const { building, activeFloorId } = current;
 
@@ -324,6 +326,23 @@ export function App() {
         >
           DSL
         </button>
+        <button
+          className="px-3 py-2 uppercase"
+          onClick={() => setShearCheck((s) => !s)}
+          style={{
+            color: shearCheck ? "var(--paper)" : "var(--mid)",
+            background: shearCheck ? "var(--terra)" : "transparent",
+            border: `1px solid ${shearCheck ? "var(--terra)" : "var(--border)"}`,
+            borderRadius: "6px",
+            fontFamily: "IBM Plex Mono, monospace",
+            fontSize: "10px",
+            letterSpacing: "0.1em",
+            marginRight: "8px",
+            whiteSpace: "nowrap",
+          }}
+        >
+          耐震壁
+        </button>
       </div>
       <div className="flex flex-1 overflow-hidden">
         <ToolSheet
@@ -390,6 +409,7 @@ export function App() {
                 cellSize={building.cellSize}
                 darkMode={dark}
                 tool={tool}
+                shearCheck={shearCheck}
                 onSetWalls={(edges: EdgeRef[], wallType) => {
                   dispatch({
                     edges,
@@ -496,6 +516,20 @@ export function App() {
           </div>
         </div>
       </div>
+      {shearCheck && (
+        <div
+          className="max-h-[calc(100vh-90px)] overflow-y-auto"
+          style={{ position: "fixed", right: "8px", top: "80px", zIndex: 55 }}
+        >
+          <ShearDiagnostic
+            floor={floor}
+            onAddWalls={(edges) =>
+              dispatch({ edges, floorId: floor.id, type: "SET_WALLS", wallType: "solid" })
+            }
+            onClose={() => setShearCheck(false)}
+          />
+        </div>
+      )}
       {roomPicker && (
         <div
           style={{

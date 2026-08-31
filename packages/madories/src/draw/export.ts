@@ -15,6 +15,7 @@ import { drawTatamiCells } from "./draw-tatami";
 import { drawVoidCells } from "./draw-void";
 import { drawWalls } from "./draw-walls";
 import { drawRoomLabels } from "../floor/room-detection";
+import { MM_PER_CELL } from "../units";
 
 const LABEL_HEIGHT = 24;
 const BG = "#F5F0E8";
@@ -23,9 +24,7 @@ const DIM_COLOR = "#5A4A3A";
 const GRID_COLOR = "rgba(90,74,58,0.25)"; // Same RGB as DIM_COLOR at 25% opacity
 const DIM_MARGIN = 28; // Px reserved for dimension rulers
 
-// 1 cell = 0.5 tatami = 910mm
-export const MM_PER_CELL = 910;
-
+// 1 cell = 0.5 tatami = 910mm (see ../units)
 export function computeFloorScores(floor: FloorPlan): { storage: number; windows: number } {
   let storage = 0;
   let windows = 0;
