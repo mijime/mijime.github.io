@@ -4,6 +4,7 @@ import type { ToolMode } from "./tool-mode";
 import { PrimaryToolTabs } from "./tool-sheet/primary-tool-tabs";
 import { SubPanels } from "./tool-sheet/sub-panels";
 import { ActionTabs } from "./tool-sheet/action-tabs";
+import { BottomSheet } from "./bottom-sheet";
 
 interface Props {
   tool: ToolMode;
@@ -121,35 +122,9 @@ export function ToolSheet(props: Props) {
         </span>
       </button>
 
-      {open && (
-        <div
-          className="md:hidden fixed inset-0 z-40"
-          style={{ background: "rgba(0,0,0,0.3)" }}
-          onClick={() => setOpen(false)}
-        />
-      )}
-
-      <div
-        className="md:hidden fixed bottom-0 left-0 right-0 z-50 rounded-t-2xl shadow-xl transition-transform duration-200"
-        style={{
-          background: "var(--toolbar)",
-          borderTop: "2px solid var(--border)",
-          maxHeight: "80vh",
-          transform: open ? "translateY(0)" : "translateY(100%)",
-        }}
-      >
-        <div style={{ display: "flex", justifyContent: "center", padding: "12px 0 4px" }}>
-          <div
-            style={{
-              background: "var(--border)",
-              borderRadius: "9999px",
-              height: "4px",
-              width: "40px",
-            }}
-          />
-        </div>
+      <BottomSheet open={open} onClose={() => setOpen(false)} maxHeight="80vh">
         <ToolPanelContent {...props} onClose={() => setOpen(false)} />
-      </div>
+      </BottomSheet>
     </>
   );
 }

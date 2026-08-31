@@ -2,12 +2,49 @@ import { Download, Upload } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { floorsToText, textToFloors } from "../floor/share";
 import type { FloorPlan } from "../types";
+import { BottomSheet } from "./bottom-sheet";
 
 interface Props {
   floors: FloorPlan[];
   onApplyFloors: (floors: FloorPlan[]) => void;
   open: boolean;
   onToggle: () => void;
+}
+
+function DslHeader({ onClose }: { onClose: () => void }) {
+  return (
+    <div
+      style={{
+        alignItems: "center",
+        display: "flex",
+        justifyContent: "space-between",
+      }}
+    >
+      <div
+        style={{
+          color: "var(--mid)",
+          fontSize: "9px",
+          letterSpacing: "0.15em",
+          textTransform: "uppercase",
+        }}
+      >
+        DSL
+      </div>
+      <button
+        onClick={onClose}
+        style={{
+          background: "transparent",
+          border: "none",
+          color: "var(--mid)",
+          cursor: "pointer",
+          fontSize: "13px",
+          padding: "0",
+        }}
+      >
+        ✕
+      </button>
+    </div>
+  );
 }
 
 export function DslPanel({ floors, onApplyFloors, open, onToggle }: Props) {
@@ -51,7 +88,6 @@ export function DslPanel({ floors, onApplyFloors, open, onToggle }: Props) {
     color: "var(--ink)",
     cursor: "pointer",
     display: "flex",
-    flex: 1,
     gap: "6px",
     justifyContent: "center",
     padding: "8px 8px",
@@ -82,10 +118,10 @@ export function DslPanel({ floors, onApplyFloors, open, onToggle }: Props) {
         </div>
       )}
       <div style={{ display: "flex", gap: "6px" }}>
-        <button onClick={handleExport} style={btnStyle}>
+        <button onClick={handleExport} className="flex-1 md:flex-none" style={btnStyle}>
           <Download size={14} /> export
         </button>
-        <button onClick={handleApply} style={btnStyle}>
+        <button onClick={handleApply} className="flex-1 md:flex-none" style={btnStyle}>
           <Upload size={14} /> apply
         </button>
       </div>
@@ -108,37 +144,7 @@ export function DslPanel({ floors, onApplyFloors, open, onToggle }: Props) {
               ...mono,
             }}
           >
-            <div
-              style={{
-                alignItems: "center",
-                display: "flex",
-                justifyContent: "space-between",
-              }}
-            >
-              <div
-                style={{
-                  color: "var(--mid)",
-                  fontSize: "9px",
-                  letterSpacing: "0.15em",
-                  textTransform: "uppercase",
-                }}
-              >
-                DSL
-              </div>
-              <button
-                onClick={onToggle}
-                style={{
-                  background: "transparent",
-                  border: "none",
-                  color: "var(--mid)",
-                  cursor: "pointer",
-                  fontSize: "11px",
-                  padding: "0",
-                }}
-              >
-                ✕
-              </button>
-            </div>
+            <DslHeader onClose={onToggle} />
             {editor}
           </div>
         ) : (
@@ -164,70 +170,18 @@ export function DslPanel({ floors, onApplyFloors, open, onToggle }: Props) {
         )}
       </div>
 
-      {/* Mobile: dimmed backdrop + bottom sheet */}
-      {open && (
+      {/* Mobile: bottom sheet */}
+      <BottomSheet open={open} onClose={onToggle} height="70vh" maxHeight="82vh">
         <div
-          className="md:hidden fixed inset-0 z-40"
-          style={{ background: "rgba(0,0,0,0.3)" }}
-          onClick={onToggle}
-        />
-      )}
-      {open && (
-        <div
-          className="md:hidden fixed bottom-0 left-0 right-0 z-50 flex flex-col rounded-t-2xl shadow-xl"
-          style={{
-            background: "var(--toolbar)",
-            borderTop: "2px solid var(--border)",
-            gap: "8px",
-            height: "70vh",
-            maxHeight: "82vh",
-            padding: "8px 12px calc(12px + env(safe-area-inset-bottom))",
-            ...mono,
-          }}
+          className="flex flex-1 flex-col gap-2"
+          style={{ padding: "4px 12px calc(12px + env(safe-area-inset-bottom))", ...mono }}
         >
-          <div style={{ display: "flex", justifyContent: "center", padding: "4px 0" }}>
-            <div
-              style={{
-                background: "var(--border)",
-                borderRadius: "9999px",
-                height: "4px",
-                width: "40px",
-              }}
-            />
+          <DslHeader onClose={onToggle} />
+          <div className="flex flex-1 flex-col" style={{ minHeight: 0 }}>
+            {editor}
           </div>
-          <div
-            style={{
-              alignItems: "center",
-              display: "flex",
-              justifyContent: "space-between",
-            }}
-          >
-            <div
-              style={{
-                color: "var(--mid)",
-                fontSize: "9px",
-                letterSpacing: "0.15em",
-                textTransform: "uppercase",
-              }}
-            >
-              DSL
-            </div>
-            <button
-              onClick={onToggle}
-              style={{
-                background: "transparent",
-                border: "none",
-                color: "var(--mid)",
-                cursor: "pointer",
-                fontSize: "13px",
-              }}
-            >
-              ✕
-            </button>
-          </div>
-          {editor}
         </div>
-      )}
+      </BottomSheet>
     </>
   );
 }

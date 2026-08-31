@@ -330,6 +330,7 @@ export function App() {
           onToggleViewMode={() => setViewMode((v) => (v === "2d" ? "3d" : "2d"))}
         />
         <DslPanel
+          key={activePlanId}
           floors={building.floors}
           onApplyFloors={(parsed) => {
             push({
