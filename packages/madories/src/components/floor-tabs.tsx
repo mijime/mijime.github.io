@@ -28,11 +28,11 @@ export function FloorTabs({ floors, activeFloorId, onSelect, onAdd, onRename, on
 
   return (
     <div
-      className="flex items-end gap-0 px-4 pt-3"
+      className="flex items-end gap-0 overflow-x-auto px-4 pt-3"
       style={{ background: "var(--toolbar-bg)", borderBottom: "2px solid var(--terra)" }}
     >
       {floors.map((floor) => (
-        <div key={floor.id} className="relative">
+        <div key={floor.id} className="relative" style={{ flexShrink: 0 }}>
           {editingId === floor.id ? (
             <input
               value={editingName}

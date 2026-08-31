@@ -69,6 +69,7 @@ export function App() {
   const canvasRef = useRef<FloorCanvasHandle>(null);
   const [toast, setToast] = useState<string | null>(null);
   const [fallbackUrl, setFallbackUrl] = useState<string | null>(null);
+  const [dslOpen, setDslOpen] = useState(false);
   const [roomPicker, setRoomPicker] = useState<{ cellIndex: number; x: number; y: number } | null>(
     null,
   );
@@ -253,7 +254,7 @@ export function App() {
         onRemove={handleRemovePlan}
       />
       <div className="flex items-center">
-        <div className="flex-1">
+        <div className="flex-1 min-w-0">
           <FloorTabs
             floors={building.floors}
             activeFloorId={activeFloorId}
@@ -275,6 +276,19 @@ export function App() {
             }}
           />
         </div>
+        <button
+          className="md:hidden px-3 py-2 uppercase"
+          onClick={() => setDslOpen(true)}
+          style={{
+            color: "var(--mid)",
+            fontFamily: "IBM Plex Mono, monospace",
+            fontSize: "10px",
+            letterSpacing: "0.1em",
+            whiteSpace: "nowrap",
+          }}
+        >
+          DSL
+        </button>
       </div>
       <div className="flex flex-1 overflow-hidden">
         <ToolSheet
@@ -316,6 +330,7 @@ export function App() {
           onToggleViewMode={() => setViewMode((v) => (v === "2d" ? "3d" : "2d"))}
         />
         <DslPanel
+          key={activePlanId}
           floors={building.floors}
           onApplyFloors={(parsed) => {
             push({
@@ -323,6 +338,8 @@ export function App() {
               building: { ...building, floors: mergeFloors(building.floors, parsed) },
             });
           }}
+          open={dslOpen}
+          onToggle={() => setDslOpen((o) => !o)}
         />
         <div
           className="flex-1 overflow-hidden relative flex flex-col"

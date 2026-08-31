@@ -28,7 +28,7 @@ export function PlanTabs({ plans, activePlanId, onSelect, onAdd, onRename, onRem
 
   return (
     <div
-      className="flex items-center gap-1 px-4 py-1.5"
+      className="flex items-center gap-1 overflow-x-auto px-4 py-1.5"
       style={{
         background: "var(--toolbar-bg)",
         borderBottom: "1px solid var(--border)",
@@ -46,7 +46,7 @@ export function PlanTabs({ plans, activePlanId, onSelect, onAdd, onRename, onRem
         PLAN
       </span>
       {plans.map((plan) => (
-        <div key={plan.id} className="flex items-center">
+        <div key={plan.id} className="flex items-center" style={{ flexShrink: 0 }}>
           {editingId === plan.id ? (
             <input
               autoFocus
