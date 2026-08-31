@@ -247,8 +247,32 @@ describe("detectLoadPathBreaks", () => {
     expect(detectLoadPathBreaks([make(), make()])).toEqual([]);
   });
 
-  it("flags only the endpoint with no match when the rest stack", () => {
-    const f1 = floor(5, 5); // Lower: wall y=1, x in [0,3) -> endpoints (0,1) & (3,1)
+  it("flags only the floating endpoint (others land on supported wall)", () => {
+    const f1 = floor(5, 5); // Lower: short wall y=1, x in [0,2) -> vertices (0,1) & (1,1)
+    const a1 = setWallsPure(
+      f1,
+      [
+        { kind: "h", x: 0, y: 1 },
+        { kind: "h", x: 1, y: 1 },
+      ],
+      "solid",
+    );
+    const f2 = floor(5, 5); // Upper: wall y=1, x in [0,4) -> vertices (0,1) & (3,1)
+    const a2 = setWallsPure(
+      f2,
+      [
+        { kind: "h", x: 0, y: 1 },
+        { kind: "h", x: 1, y: 1 },
+        { kind: "h", x: 2, y: 1 },
+      ],
+      "solid",
+    );
+    // (0,1) sits on the lower wall; (3,1) extends past it with no wall below.
+    expect(detectLoadPathBreaks([a1, a2])).toEqual([{ floorIndex: 1, x: 3, y: 1 }]);
+  });
+
+  it("does NOT flag a 2F wall end that lands over the middle of a 1F wall", () => {
+    const f1 = floor(5, 5); // Lower: wall y=1, x in [0,3) -> vertices (0,1) & (3,1)
     const a1 = setWallsPure(
       f1,
       [
@@ -258,19 +282,18 @@ describe("detectLoadPathBreaks", () => {
       ],
       "solid",
     );
-    const f2 = floor(5, 5); // Upper: wall y=1, x in [0,4) -> endpoints (0,1) & (4,1)
+    const f2 = floor(5, 5); // Upper: wall y=1, x in [1,3) -> 2F ends at (1,1) & (3,1)
     const a2 = setWallsPure(
       f2,
       [
-        { kind: "h", x: 0, y: 1 },
         { kind: "h", x: 1, y: 1 },
         { kind: "h", x: 2, y: 1 },
-        { kind: "h", x: 3, y: 1 },
       ],
       "solid",
     );
-    const breaks = detectLoadPathBreaks([a1, a2]);
-    expect(breaks).toEqual([{ floorIndex: 1, x: 4, y: 1 }]);
+    // Neither upper endpoint has a strict lower endpoint, but both sit on the
+    // 1F wall's line, so the relaxed rule treats them as supported.
+    expect(detectLoadPathBreaks([a1, a2])).toEqual([]);
   });
 
   it("returns nothing for a single floor or an empty building", () => {

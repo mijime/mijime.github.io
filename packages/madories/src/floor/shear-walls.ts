@@ -106,25 +106,34 @@ export interface StackedColumn {
 }
 
 /**
- * 通し柱 positions: vertices where a shear wall run terminates on >= 2 floors
- * at the same coordinate, so the load path runs floor to floor. Floors may
- * differ in size; coordinates are raw vertex coords in each floor's own space.
+ * 柱 (frame columns): every grid vertex where a structural wall run terminates.
+ * This is the explicit column model — walls need a column at each end, so in
+ * grid terms the run endpoints ARE the column locations (L/T junctions show up
+ * here because the joining run terminates at the crossing).
+ */
+export function detectStructuralColumnVertices(floor: FloorPlan): Array<[number, number]> {
+  const map = new Map<string, [number, number]>();
+  for (const run of detectShearWallRuns(floor)) {
+    map.set(`${run.startVertex[0]},${run.startVertex[1]}`, run.startVertex);
+    map.set(`${run.endVertex[0]},${run.endVertex[1]}`, run.endVertex);
+  }
+  const cols = [...map.values()];
+  cols.sort((a, b) => a[1] - b[1] || a[0] - b[0]);
+  return cols;
+}
+
+/**
+ * 通し柱 positions: columns (run-endpoint vertices) that appear on >= 2 floors
+ * at the same coordinate, so the vertical load path runs floor to floor.
  */
 export function detectStackedColumns(floors: FloorPlan[]): StackedColumn[] {
   const counts = new Map<string, { x: number; y: number; count: number }>();
   for (const floor of floors) {
-    const seen = new Set<string>();
-    for (const run of detectShearWallRuns(floor)) {
-      for (const [vx, vy] of [run.startVertex, run.endVertex]) {
-        const key = `${vx},${vy}`;
-        if (seen.has(key)) {
-          continue;
-        }
-        seen.add(key);
-        const entry = counts.get(key) ?? { count: 0, x: vx, y: vy };
-        entry.count += 1;
-        counts.set(key, entry);
-      }
+    for (const [vx, vy] of detectStructuralColumnVertices(floor)) {
+      const key = `${vx},${vy}`;
+      const entry = counts.get(key) ?? { count: 0, x: vx, y: vy };
+      entry.count += 1;
+      counts.set(key, entry);
     }
   }
   const stacked: StackedColumn[] = [];
@@ -142,29 +151,55 @@ export interface LoadPathBreak {
   x: number;
   y: number;
   /**
-   * Index of the UPPER floor whose wall-run endpoint lacks a structural
-   * support on the floor directly below it (floors must be ordered bottom-up,
-   * index 0 = ground floor, which is never checked).
+   * Index of the UPPER floor whose column (wall-run endpoint) lacks a
+   * structural support on the floor directly below it (floors must be ordered
+   * bottom-up, index 0 = ground floor, which is never checked).
    */
   floorIndex: number;
 }
 
-/** All grid vertices where a structural wall run terminates on this floor. */
-function runEndpointVertices(floor: FloorPlan): Set<string> {
-  const set = new Set<string>();
-  for (const run of detectShearWallRuns(floor)) {
-    for (const [vx, vy] of [run.startVertex, run.endVertex]) {
-      set.add(`${vx},${vy}`);
+/**
+ * True when the vertex (vx,vy) is ON a structural wall, i.e. any structural
+ * wall edge is incident to it — as that edge's endpoint OR mid-way along it.
+ * This is the *relaxed* support rule: an upper wall's end is fine as long as
+ * the floor below has a wall passing under/through that vertex (distributed
+ * backing), not only a strict run-endpoint match.
+ */
+function vertexOnStructuralWall(floor: FloorPlan, vx: number, vy: number): boolean {
+  const { width, height, hWalls, vWalls } = floor;
+  // Horizontal edges incident to (vx,vy): starting at (vx-1,vy) or (vx,vy).
+  for (const x of [vx - 1, vx]) {
+    if (
+      x >= 0 &&
+      x < width &&
+      vy >= 0 &&
+      vy <= height &&
+      isStructuralWall(hWalls[hIndex(width, x, vy)])
+    ) {
+      return true;
     }
   }
-  return set;
+  // Vertical edges incident: starting at (vx,vy-1) or (vx,vy).
+  for (const y of [vy - 1, vy]) {
+    if (
+      vx >= 0 &&
+      vx <= width &&
+      y >= 0 &&
+      y < height &&
+      isStructuralWall(vWalls[vIndex(width, vx, y)])
+    ) {
+      return true;
+    }
+  }
+  return false;
 }
 
 /**
- * 荷重経路途切れ: the inverse of 通し柱. A run endpoint on an upper floor must
- * transfer its lateral load down through a structural member at the same
- * vertex on the floor below. When the endpoint has no matching structural run
- * endpoint immediately below, the load path is interrupted.
+ * 荷重経路途切れ: the inverse of 通し柱. A column (wall-run endpoint) on an upper
+ * floor must transfer its lateral load down through a wall on the floor below.
+ * Using the relaxed support rule, a 2F end that lands over the middle of a 1F
+ * wall is supported; only a truly floating end (no structural wall anywhere
+ * under that vertex) is flagged.
  *
  * `floors` must be ordered bottom-up (index 0 = ground floor). The ground floor
  * rests on the foundation, which is not modeled, so it is never flagged.
@@ -175,12 +210,9 @@ export function detectLoadPathBreaks(floors: FloorPlan[]): LoadPathBreak[] {
   }
   const breaks: LoadPathBreak[] = [];
   for (let i = 1; i < floors.length; i++) {
-    const below = runEndpointVertices(floors[i - 1]);
-    for (const run of detectShearWallRuns(floors[i])) {
-      for (const [vx, vy] of [run.startVertex, run.endVertex]) {
-        if (below.has(`${vx},${vy}`)) {
-          continue;
-        }
+    const below = floors[i - 1];
+    for (const [vx, vy] of detectStructuralColumnVertices(floors[i])) {
+      if (!vertexOnStructuralWall(below, vx, vy)) {
         breaks.push({ floorIndex: i, x: vx, y: vy });
       }
     }
