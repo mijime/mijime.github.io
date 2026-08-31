@@ -6,6 +6,7 @@ import {
 } from "../floor/shear-walls";
 import { computeQuadrantBalance } from "../floor/quadrant-balance";
 import { suggestWallRun, type WallSuggestion } from "../floor/wall-quantity";
+import { computeEccentricity } from "../floor/structure-metrics";
 
 // Structural-wall run highlights (drawn over walls) and 通し柱 markers.
 // Colors are semantic and theme-independent: stable runs = strong red, marginal
@@ -29,6 +30,11 @@ const SUGGEST_COLOR = "rgba(59,130,246,0.9)"; // Blue dashed line
 const FIX_HERE_FILL = "rgba(168,85,247,0.95)";
 const BREAK_OUTLINE = "rgba(255,255,255,0.9)";
 const FIX_BELOW_STROKE = "rgba(240,166,60,0.95)";
+// 剛心 (rigidity center, blue cross) vs 重心 (mass center, white circle) markers.
+const RIGID_COLOR = "rgba(59,130,246,0.95)";
+const MASS_FILL = "rgba(255,255,255,0.95)";
+const MASS_OUTLINE = "rgba(70,58,70,0.9)";
+const ECC_LINE = "rgba(120,110,100,0.5)";
 
 export function dotColor(ratio: number): string {
   const t = Math.max(0, Math.min(1, ratio));
@@ -101,9 +107,58 @@ export function drawShearCheck(
 
   drawLoadBreakMarkers(ctx, currentFloor, floors, cellSize);
 
+  drawRigidCenterOverlay(ctx, currentFloor, cellSize);
+
   drawQuadrantOverlay(ctx, currentFloor, cellSize);
 
   ctx.restore();
+}
+
+// 偏心率 visual: dashed segment from 重心 (mass center, white circle) to 剛心
+// (rigidity center, blue cross). The longer the gap, the more torsion risk.
+function drawRigidCenterOverlay(
+  ctx: CanvasRenderingContext2D,
+  floor: FloorPlan,
+  cellSize: number,
+): void {
+  const ecc = computeEccentricity(floor);
+  if (!ecc) {
+    return;
+  }
+  const MM_PER_CELL = 910;
+  const gx = (ecc.gx / MM_PER_CELL) * cellSize;
+  const gy = (ecc.gy / MM_PER_CELL) * cellSize;
+  const rx = (ecc.rx / MM_PER_CELL) * cellSize;
+  const ry = (ecc.ry / MM_PER_CELL) * cellSize;
+
+  ctx.strokeStyle = ECC_LINE;
+  ctx.lineWidth = 1.5;
+  ctx.setLineDash([cellSize * 0.12, cellSize * 0.08]);
+  ctx.beginPath();
+  ctx.moveTo(gx, gy);
+  ctx.lineTo(rx, ry);
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  // 重心 — white circle.
+  ctx.fillStyle = MASS_FILL;
+  ctx.beginPath();
+  ctx.arc(gx, gy, Math.max(3, cellSize * 0.16), 0, Math.PI * 2);
+  ctx.fill();
+  ctx.strokeStyle = MASS_OUTLINE;
+  ctx.lineWidth = 1.2;
+  ctx.stroke();
+
+  // 剛心 — blue cross.
+  const arm = Math.max(4, cellSize * 0.28);
+  ctx.strokeStyle = RIGID_COLOR;
+  ctx.lineWidth = Math.max(1.5, cellSize * 0.06);
+  ctx.beginPath();
+  ctx.moveTo(rx - arm, ry);
+  ctx.lineTo(rx + arm, ry);
+  ctx.moveTo(rx, ry - arm);
+  ctx.lineTo(rx, ry + arm);
+  ctx.stroke();
 }
 
 // 荷重経路途切れ (load-path breaks): the inverse of 通し柱. Draw diamond markers

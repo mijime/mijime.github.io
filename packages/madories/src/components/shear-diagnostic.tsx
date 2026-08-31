@@ -2,6 +2,11 @@ import type { EdgeRef, FloorPlan } from "../types";
 import { computeQuadrantBalance } from "../floor/quadrant-balance";
 import { computeWallQuantity, suggestWallRun } from "../floor/wall-quantity";
 import { detectLoadPathBreaks } from "../floor/shear-walls";
+import {
+  computeBalanceRatio,
+  computeEccentricity,
+  computePerimeterContinuity,
+} from "../floor/structure-metrics";
 import { dotColor } from "../draw/draw-shear-check";
 
 interface Props {
@@ -21,8 +26,43 @@ export function ShearDiagnostic({ floor, floors, activeFloorId, onAddWalls, onCl
   const activeIndex = floors.findIndex((f) => f.id === activeFloorId);
   const breaks = detectLoadPathBreaks(floors);
   const breaksHere =
-    activeIndex !== -1 ? breaks.filter((b) => b.floorIndex === activeIndex + 1) : [];
-  const breaksBelow = activeIndex !== -1 ? breaks.filter((b) => b.floorIndex === activeIndex) : [];
+    activeIndex === -1 ? [] : breaks.filter((b) => b.floorIndex === activeIndex + 1);
+  const breaksBelow = activeIndex === -1 ? [] : breaks.filter((b) => b.floorIndex === activeIndex);
+  const balanceRatio = computeBalanceRatio(floor);
+  const ecc = computeEccentricity(floor);
+  const perim = computePerimeterContinuity(floor);
+
+  function MiniRow({
+    label,
+    ok,
+    value,
+  }: {
+    label: string;
+    ok: boolean | undefined;
+    value: string;
+  }) {
+    return (
+      <div style={{ alignItems: "center", display: "flex", gap: "6px" }}>
+        <span style={{ ...mono, color: "var(--mid)", fontSize: "10px", width: "58px" }}>
+          {label}
+        </span>
+        <span
+          style={{
+            ...mono,
+            color: ok ? "var(--ink)" : "var(--terra)",
+            fontSize: "10px",
+            flex: 1,
+            textAlign: "right",
+          }}
+        >
+          {value}
+        </span>
+        <span style={{ ...mono, color: ok ? "rgb(46,160,90)" : "var(--terra)", fontSize: "10px" }}>
+          {ok === undefined ? "—" : ok ? "OK" : "NG"}
+        </span>
+      </div>
+    );
+  }
 
   function Gauge({ label, have, need }: { label: string; have: number; need: number }) {
     const ok = have >= need;
@@ -174,6 +214,36 @@ export function ShearDiagnostic({ floor, floors, activeFloorId, onAddWalls, onCl
             </div>
           );
         })}
+      </div>
+
+      <div
+        style={{
+          borderTop: "1px solid var(--border)",
+          display: "flex",
+          flexDirection: "column",
+          gap: "6px",
+          paddingTop: "8px",
+        }}
+      >
+        <MiniRow
+          label="縦/横比"
+          ok={balanceRatio.ok}
+          value={
+            balanceRatio.h > 0 && balanceRatio.v > 0
+              ? `${Math.round(balanceRatio.ratio * 100)}%`
+              : "片方向のみ"
+          }
+        />
+        <MiniRow
+          label="偏心率"
+          ok={ecc?.ok}
+          value={ecc ? `eX${ecc.ex.toFixed(2)} eY${ecc.ey.toFixed(2)}` : "—"}
+        />
+        <MiniRow
+          label="外周耐力"
+          ok={perim?.ok}
+          value={perim ? `${Math.round(perim.ratio * 100)}%` : "—"}
+        />
       </div>
 
       {floors.length >= 2 && (breaksHere.length > 0 || breaksBelow.length > 0) && (
