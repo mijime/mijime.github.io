@@ -43,8 +43,8 @@ export interface StructuralReport {
 export function computeStructuralReport(floor: FloorPlan, floors: FloorPlan[]): StructuralReport {
   const floorIndex = floors.findIndex((f) => f.id === floor.id);
   const breaks = detectLoadPathBreaks(floors);
-  const breaksHere = floorIndex !== -1 ? breaks.filter((b) => b.floorIndex === floorIndex + 1) : [];
-  const breaksBelow = floorIndex !== -1 ? breaks.filter((b) => b.floorIndex === floorIndex) : [];
+  const breaksHere = floorIndex === -1 ? [] : breaks.filter((b) => b.floorIndex === floorIndex + 1);
+  const breaksBelow = floorIndex === -1 ? [] : breaks.filter((b) => b.floorIndex === floorIndex);
   return {
     balanceRatio: computeBalanceRatio(floor),
     breaksBelow,
