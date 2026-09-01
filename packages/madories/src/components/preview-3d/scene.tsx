@@ -5,8 +5,9 @@ import {
   OrbitControls,
   PerspectiveCamera,
 } from "@react-three/drei";
-import { Canvas } from "@react-three/fiber";
-import { useMemo } from "react";
+import { Canvas, useFrame, useThree } from "@react-three/fiber";
+import { useMemo, useRef } from "react";
+import * as THREE from "three";
 import type { FloorPlan } from "../../types";
 import { type CameraMode, CAMERA, LIGHTING } from "./config";
 import { BoxList, useSharedMaterials } from "./meshes";
@@ -21,6 +22,44 @@ interface Props {
   darkMode: boolean;
 }
 
+type OrbitHandle = React.ElementRef<typeof OrbitControls>;
+
+// 俯瞰モードのジョイスティックパン: OrbitControls の target とカメラを水平に動かす
+function OrbitPan({
+  controls,
+  move,
+  panSpeed,
+}: {
+  controls: React.RefObject<OrbitHandle | null>;
+  move: React.MutableRefObject<{ x: number; z: number }>;
+  panSpeed: number;
+}) {
+  const { camera } = useThree();
+  const right = useMemo(() => new THREE.Vector3(), []);
+  const fwd = useMemo(() => new THREE.Vector3(), []);
+  const delta = useMemo(() => new THREE.Vector3(), []);
+  useFrame((_, frameDelta) => {
+    const c = controls.current;
+    if (!c) return;
+    const { x, z } = move.current;
+    if (x === 0 && z === 0) return;
+    // カメラの右ベクトルと、水平投影した前方ベクトルで移動方向を作る
+    camera.getWorldDirection(fwd);
+    fwd.y = 0;
+    if (fwd.lengthSq() < 1e-6) return;
+    fwd.normalize();
+    right.set(fwd.z, 0, -fwd.x); // -Z前方からの右=+X方向
+    const step = panSpeed * frameDelta;
+    delta
+      .set(0, 0, 0)
+      .addScaledVector(fwd, z * step)
+      .addScaledVector(right, x * step);
+    camera.position.add(delta);
+    c.target.add(delta);
+  });
+  return null;
+}
+
 export function FloorPlanScene({ floors, cameraMode, move, darkMode }: Props) {
   // 全階を縦に積んだモデルを1回だけ構築
   const model = useMemo(() => buildBuildingScene(floors), [floors]);
@@ -30,6 +69,8 @@ export function FloorPlanScene({ floors, cameraMode, move, darkMode }: Props) {
   const camDist = maxDim * CAMERA.distanceFactor;
   const bg = darkMode ? "#1a1a1a" : "#eceae6";
   const [dirX, dirY, dirZ] = LIGHTING.directional.positionFactor;
+  const orbitRef = useRef<OrbitHandle>(null);
+  const panSpeed = maxDim * CAMERA.panSpeedFactor;
 
   return (
     <Canvas
@@ -39,16 +80,20 @@ export function FloorPlanScene({ floors, cameraMode, move, darkMode }: Props) {
     >
       <PerspectiveCamera makeDefault fov={CAMERA.fov} position={[0, camDist, camDist]} />
       {cameraMode === "orbit" ? (
-        <OrbitControls
-          makeDefault
-          enablePan={false}
-          minPolarAngle={CAMERA.minPolarAngle}
-          maxPolarAngle={CAMERA.maxPolarAngle}
-          minDistance={maxDim * CAMERA.minDistanceFactor}
-          maxDistance={maxDim * CAMERA.maxDistanceFactor}
-          enableDamping
-          dampingFactor={0.1}
-        />
+        <>
+          <OrbitControls
+            ref={orbitRef}
+            makeDefault
+            enablePan={false}
+            minPolarAngle={CAMERA.minPolarAngle}
+            maxPolarAngle={CAMERA.maxPolarAngle}
+            minDistance={maxDim * CAMERA.minDistanceFactor}
+            maxDistance={maxDim * CAMERA.maxDistanceFactor}
+            enableDamping
+            dampingFactor={0.1}
+          />
+          <OrbitPan controls={orbitRef} move={move} panSpeed={panSpeed} />
+        </>
       ) : (
         <WalkControls model={model} move={move} />
       )}

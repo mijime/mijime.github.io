@@ -75,6 +75,8 @@ export const CAMERA = {
   maxDistanceFactor: 2.5,
   minPolarAngle: 0.1,
   maxPolarAngle: Math.PI / 2 - 0.15,
+  // 俯瞰モードでジョイスティックによるパン移動量(m/秒・建物規模基準)
+  panSpeedFactor: 0.5,
 };
 
 // 一人称(ウォーキング)モード

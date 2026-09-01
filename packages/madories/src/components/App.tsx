@@ -509,7 +509,6 @@ export function App() {
                 />
                 {cameraMode === "walk" && (
                   <>
-                    <VirtualJoystick move={moveRef} />
                     {/* 一人称の照準ドット */}
                     <div
                       style={{
@@ -530,6 +529,7 @@ export function App() {
                     />
                   </>
                 )}
+                <VirtualJoystick move={moveRef} />
                 <div
                   className="flex gap-2 rounded-lg"
                   style={{
