@@ -183,12 +183,12 @@ function drawRigidCenterOverlay(
   ctx.stroke();
 }
 
-// 通りズレ (格下げ・ソフト) 表示: 上階壁端が下階と列が合ってない位置を、
-// 警告ではなく控えめなアンバー枠で提示する。実構造上は梁・床ダイアフラムで
-// 伝わるのでNGではない ＝ 塗り潰しは使わない。濃淡は軽いseverityのみ。
+// 通りズレ (格下げ・ソフト) 表示: 上階壁端が下階と列が合ってない位置を、警告では
+// なくアンバーの塗りダイヤで提示する。実構造上は梁・床ダイアフラムで伝わる
+// のでNGではないが、視認性のため中塗り＋濃めの枠。濃淡は軽いseverityのみ。
 function breakAlpha(length: number): number {
   const t = Math.min(1, Math.max(0, length / 2730));
-  return 0.22 + 0.28 * t; // 0.22 … 0.50 に留め、目立たない範囲で
+  return 0.45 + 0.45 * t; // 0.45 … 0.90 — visible but not a hard NG
 }
 
 function drawLoadBreakMarkers(
@@ -201,17 +201,18 @@ function drawLoadBreakMarkers(
   if (activeIndex === -1) {
     return;
   }
-  const size = Math.max(4, cellSize * 0.32);
+  const size = Math.max(5, cellSize * 0.36);
   for (const b of detectLoadPathBreaks(floors)) {
     if (b.floorIndex === activeIndex + 1 || b.floorIndex === activeIndex) {
+      const a = breakAlpha(b.length);
       drawBreakDiamond(
         ctx,
         b.x,
         b.y,
         size,
         cellSize,
-        "transparent",
-        `rgba(240,166,60,${breakAlpha(b.length).toFixed(2)})`,
+        `rgba(240,166,60,${(a * 0.75).toFixed(2)})`,
+        `rgba(190,120,30,${a.toFixed(2)})`,
       );
     }
   }
