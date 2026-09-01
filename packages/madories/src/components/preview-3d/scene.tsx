@@ -6,7 +6,7 @@ import {
   PerspectiveCamera,
 } from "@react-three/drei";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { useMemo, useRef } from "react";
+import { useMemo } from "react";
 import * as THREE from "three";
 import type { FloorPlan } from "../../types";
 import { type CameraMode, CAMERA, LIGHTING } from "./config";
@@ -22,25 +22,26 @@ interface Props {
   darkMode: boolean;
 }
 
-type OrbitHandle = React.ElementRef<typeof OrbitControls>;
+interface OrbitControlsLike {
+  target: THREE.Vector3;
+}
 
-// 俯瞰モードのジョイスティックパン: OrbitControls の target とカメラを水平に動かす
+// 俯瞰モードのジョイスティックパン: makeDefault で登録された OrbitControls(state.controls)を
+// 操作して target+カメラを水平に動かす。OrbitControls 自体は素の makeDefault のまま(refを握らない)。
 function OrbitPan({
-  controls,
   move,
   panSpeed,
 }: {
-  controls: React.RefObject<OrbitHandle | null>;
   move: React.MutableRefObject<{ x: number; z: number }>;
   panSpeed: number;
 }) {
   const { camera } = useThree();
+  const controls = useThree((s) => s.controls) as OrbitControlsLike | null;
   const right = useMemo(() => new THREE.Vector3(), []);
   const fwd = useMemo(() => new THREE.Vector3(), []);
   const delta = useMemo(() => new THREE.Vector3(), []);
   useFrame((_, frameDelta) => {
-    const c = controls.current;
-    if (!c) return;
+    if (!controls) return;
     const { x, z } = move.current;
     if (x === 0 && z === 0) return;
     // カメラの右ベクトルと、水平投影した前方ベクトルで移動方向を作る
@@ -55,7 +56,7 @@ function OrbitPan({
       .addScaledVector(fwd, z * step)
       .addScaledVector(right, x * step);
     camera.position.add(delta);
-    c.target.add(delta);
+    controls.target.add(delta);
   });
   return null;
 }
@@ -69,7 +70,6 @@ export function FloorPlanScene({ floors, cameraMode, move, darkMode }: Props) {
   const camDist = maxDim * CAMERA.distanceFactor;
   const bg = darkMode ? "#1a1a1a" : "#eceae6";
   const [dirX, dirY, dirZ] = LIGHTING.directional.positionFactor;
-  const orbitRef = useRef<OrbitHandle>(null);
   const panSpeed = maxDim * CAMERA.panSpeedFactor;
 
   return (
@@ -82,7 +82,6 @@ export function FloorPlanScene({ floors, cameraMode, move, darkMode }: Props) {
       {cameraMode === "orbit" ? (
         <>
           <OrbitControls
-            ref={orbitRef}
             makeDefault
             enablePan={false}
             minPolarAngle={CAMERA.minPolarAngle}
@@ -92,7 +91,7 @@ export function FloorPlanScene({ floors, cameraMode, move, darkMode }: Props) {
             enableDamping
             dampingFactor={0.1}
           />
-          <OrbitPan controls={orbitRef} move={move} panSpeed={panSpeed} />
+          <OrbitPan move={move} panSpeed={panSpeed} />
         </>
       ) : (
         <WalkControls model={model} move={move} />
