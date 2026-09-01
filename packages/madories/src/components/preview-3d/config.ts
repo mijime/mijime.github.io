@@ -52,7 +52,8 @@ export const MATERIALS: Record<MaterialKey, MaterialDef> = {
   floor_ext_concrete: { light: "#b0b0b0", dark: "#808080", metalness: 0, roughness: 0.9 },
   floor_ext_grass: { light: "#7cb87c", dark: "#5a8a5a", metalness: 0, roughness: 1 },
   wall: { light: "#f2efe9", dark: "#8f8b84", metalness: 0, roughness: 0.9 },
-  wall_thin: { light: "#e5e1d8", dark: "#7d7972", metalness: 0, roughness: 0.9 },
+  // 開口部(solid_thin)は開いているので半透明で表現
+  wall_thin: { light: "#e5e1d8", dark: "#7d7972", metalness: 0, opacity: 0.45, roughness: 0.9 },
   glass: { light: "#bfe3f0", dark: "#6fa9bd", metalness: 0.2, opacity: 0.35, roughness: 0.05 },
   wood: { light: "#a07048", dark: "#6b4a2e", metalness: 0, roughness: 0.6 },
   wood_light: { light: "#d4b896", dark: "#a08258", metalness: 0, roughness: 0.6 },
