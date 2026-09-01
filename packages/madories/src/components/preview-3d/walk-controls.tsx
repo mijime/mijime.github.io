@@ -11,6 +11,7 @@ interface Props {
   move: React.MutableRefObject<{ x: number; z: number }>;
 }
 
+const FWD = new THREE.Vector3();
 const STRAFE = new THREE.Vector3();
 
 /**
@@ -29,8 +30,7 @@ export function WalkControls({ model, move }: Props) {
       if (initial) {
         camera.position.set(initial.x, WALK.eyeHeightCm * CM_TO_M, initial.z);
         camera.rotation.order = "YXZ";
-        // ヨー固定: 常に-Z(建物正面)を見る。ピッチも水平にリセットしないと、
-        // 俯瞰(OrbitControls)が残した下向きが残って「真下」に見える
+        // 開始時は常に水平の正面(-Z)を向く。ドラッグで自由に視点を回せる
         camera.rotation.set(0, 0, 0);
       }
     },
@@ -58,11 +58,11 @@ function initialEye(model: SceneModel): { x: number; z: number } | null {
   return { x: sx / model.floors.length, z: sz / model.floors.length };
 }
 
-/** 視点回転: ポインタ/タッチドラッグでカメラのヨー・ピッチを直接回す */
+/** 視点回転: ポインタ/タッチドラッグでカメラの向き(ヨー・ピッチ)を回す */
 function PointerLook({ camera }: { camera: THREE.Camera }) {
   const { gl } = useThree();
   const el = gl.domElement;
-  const drag = useRef({ id: null as number | null, lastY: 0 });
+  const drag = useRef({ id: null as number | null, lastX: 0, lastY: 0 });
 
   useEffect(
     () => {
@@ -71,18 +71,20 @@ function PointerLook({ camera }: { camera: THREE.Camera }) {
         // マウスは左/右ボタン、またはタッチで開始
         if (e.pointerType === "touch" || e.buttons === 1 || e.buttons === 2) {
           drag.current.id = e.pointerId;
+          drag.current.lastX = e.clientX;
           drag.current.lastY = e.clientY;
         }
       };
       const onMove = (e: PointerEvent) => {
         if (drag.current.id !== e.pointerId) return;
+        const dx = e.clientX - drag.current.lastX;
         const dy = e.clientY - drag.current.lastY;
+        drag.current.lastX = e.clientX;
         drag.current.lastY = e.clientY;
-        // ヨー(rotation.y)は固定し、ただの上下(ピッチ)だけを見回す。
-        // 常に真正面(一つ目の向き)を見たまま歩く
+        // ドラッグでヨー(横)とピッチ(上下)の両方を回す
         const sens = e.pointerType === "touch" ? 0.01 : 0.0025;
+        camera.rotation.y -= dx * sens;
         camera.rotation.x -= dy * sens;
-        camera.rotation.y = 0;
         // 上下の見上げ/見下ろしを制限
         const maxPitch = 1.5;
         camera.rotation.x = Math.max(-maxPitch, Math.min(maxPitch, camera.rotation.x));
@@ -144,9 +146,15 @@ function WalkMove({
     const s = ks === 0 ? move.current.x : ks;
     if (f === 0 && s === 0) return;
 
-    // ヨー固定(=0): 前方は常に-Z、右は+X。衝突後に壁に沿って滑らせる
+    // ヨーに沿って水平移動(ピッチは無視)。衝突後に壁に沿って滑らせる
+    camera.getWorldDirection(FWD);
+    const yaw = Math.atan2(FWD.x, FWD.z);
+    const sin = Math.sin(yaw);
+    const cos = Math.cos(yaw);
     const step = WALK.moveSpeedMps * delta;
-    STRAFE.set(s, 0, -f).normalize().multiplyScalar(step);
+    STRAFE.set(sin * f + cos * s, 0, cos * f - sin * s)
+      .normalize()
+      .multiplyScalar(step);
     const crashed = resolveCollision(
       { x: camera.position.x, z: camera.position.z },
       STRAFE.x,
