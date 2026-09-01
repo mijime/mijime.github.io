@@ -316,36 +316,6 @@ export function App() {
             }}
           />
         </div>
-        <button
-          className="md:hidden px-3 py-2 uppercase"
-          onClick={() => setDslOpen(true)}
-          style={{
-            color: "var(--mid)",
-            fontFamily: "IBM Plex Mono, monospace",
-            fontSize: "10px",
-            letterSpacing: "0.1em",
-            whiteSpace: "nowrap",
-          }}
-        >
-          DSL
-        </button>
-        <button
-          className="px-3 py-2 uppercase"
-          onClick={() => setShearCheck((s) => !s)}
-          style={{
-            color: shearCheck ? "var(--paper)" : "var(--mid)",
-            background: shearCheck ? "var(--terra)" : "transparent",
-            border: `1px solid ${shearCheck ? "var(--terra)" : "var(--border)"}`,
-            borderRadius: "6px",
-            fontFamily: "IBM Plex Mono, monospace",
-            fontSize: "10px",
-            letterSpacing: "0.1em",
-            marginRight: "8px",
-            whiteSpace: "nowrap",
-          }}
-        >
-          耐震壁
-        </button>
       </div>
       <div className="flex flex-1 overflow-hidden">
         <ToolSheet
@@ -387,6 +357,9 @@ export function App() {
           onRotateFloor={() => dispatch({ floorId: floor.id, type: "ROTATE_FLOOR" })}
           viewMode={viewMode}
           onToggleViewMode={() => setViewMode((v) => (v === "2d" ? "3d" : "2d"))}
+          shearCheck={shearCheck}
+          onToggleShear={() => setShearCheck((s) => !s)}
+          onOpenDsl={() => setDslOpen(true)}
         />
         <DslPanel
           key={activePlanId}

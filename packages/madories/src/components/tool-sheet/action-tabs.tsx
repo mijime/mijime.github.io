@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import {
+  Activity,
+  Braces,
   Download,
   FolderOpen,
   Link,
@@ -13,7 +15,7 @@ import {
 } from "lucide-react";
 import { btnBase } from "./styles";
 
-type ActionTab = "edit" | "file" | "operation";
+type ActionTab = "edit" | "file" | "operation" | "inspect";
 
 interface ActionItem {
   disabled: boolean;
@@ -21,6 +23,8 @@ interface ActionItem {
   id: string;
   onClick: () => void;
   title: string;
+  /** When true the button renders as "on" (tinted) — e.g. an active mode toggle */
+  active?: boolean;
 }
 
 interface Props {
@@ -38,6 +42,9 @@ interface Props {
   onClose?: () => void;
   viewMode: "2d" | "3d";
   onToggleViewMode: () => void;
+  shearCheck: boolean;
+  onToggleShear: () => void;
+  onOpenDsl: () => void;
 }
 
 export function ActionTabs({
@@ -55,6 +62,9 @@ export function ActionTabs({
   onClose,
   viewMode,
   onToggleViewMode,
+  shearCheck,
+  onToggleShear,
+  onOpenDsl,
 }: Props) {
   const [activeTab, setActiveTab] = useState<ActionTab>("edit");
   const [clearPending, setClearPending] = useState(false);
@@ -140,10 +150,32 @@ export function ActionTabs({
     },
   ];
 
+  const inspectActions: ActionItem[] = [
+    {
+      disabled: false,
+      icon: <Activity size={14} />,
+      id: "diagnose",
+      onClick: onToggleShear,
+      title: shearCheck ? "診断OFF" : "診断ON",
+      active: shearCheck,
+    },
+    {
+      disabled: false,
+      icon: <Braces size={14} />,
+      id: "dsl",
+      onClick: () => {
+        onOpenDsl();
+        onClose?.();
+      },
+      title: "DSL",
+    },
+  ];
+
   const tabDefs: { key: ActionTab; label: string; actions: ActionItem[] }[] = [
     { key: "edit", label: "編集", actions: editActions },
     { key: "file", label: "ファイル", actions: fileActions },
     { key: "operation", label: "操作", actions: operationActions },
+    { key: "inspect", label: "検査", actions: inspectActions },
   ];
 
   const currentActions = tabDefs.find((t) => t.key === activeTab)?.actions ?? [];
@@ -170,17 +202,20 @@ export function ActionTabs({
         ))}
       </div>
       <div style={{ display: "flex", gap: "4px" }}>
-        {currentActions.map(({ icon, id, onClick, title, disabled }) => (
+        {currentActions.map(({ icon, id, onClick, title, disabled, active }) => (
           <button
             key={id}
             aria-label={title}
+            aria-pressed={active}
             title={title}
             disabled={disabled}
             onClick={onClick}
             style={{
               ...btnBase,
               alignItems: "center",
+              background: active ? "var(--terra)" : "transparent",
               borderRadius: "4px",
+              color: active ? "var(--paper)" : "var(--ink)",
               cursor: disabled ? "default" : "pointer",
               display: "flex",
               flex: 1,
