@@ -50,7 +50,7 @@ export function FloorPlanScene({ floors, cameraMode, move, darkMode }: Props) {
           dampingFactor={0.1}
         />
       ) : (
-        <WalkControls floors={floors} move={move} />
+        <WalkControls model={model} move={move} />
       )}
       <ambientLight
         intensity={darkMode ? LIGHTING.ambientIntensity.dark : LIGHTING.ambientIntensity.light}

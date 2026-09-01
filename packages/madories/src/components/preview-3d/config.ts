@@ -82,6 +82,7 @@ export const WALK = {
   eyeHeightCm: 160, // 目線の高さ(cm)
   moveSpeedMps: 1.8, // 移動速度(m/秒)
   initialOffsetFactor: 0.3, // 初期位置は最下階中央からやや手前に
+  playerRadiusM: 0.35, // 衝突判定のプレイヤー半径(m)
 };
 
 export type CameraMode = "orbit" | "walk";

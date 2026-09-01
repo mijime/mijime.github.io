@@ -507,7 +507,29 @@ export function App() {
                   cellSize={building.cellSize}
                   darkMode={dark}
                 />
-                {cameraMode === "walk" && <VirtualJoystick move={moveRef} />}
+                {cameraMode === "walk" && (
+                  <>
+                    <VirtualJoystick move={moveRef} />
+                    {/* 一人称の照準ドット */}
+                    <div
+                      style={{
+                        alignItems: "center",
+                        background: "rgba(255,255,255,0.9)",
+                        borderRadius: "50%",
+                        display: "flex",
+                        height: 6,
+                        justifyContent: "center",
+                        left: "50%",
+                        margin: "-3px 0 0 -3px",
+                        pointerEvents: "none",
+                        position: "absolute",
+                        top: "50%",
+                        width: 6,
+                        zIndex: 15,
+                      }}
+                    />
+                  </>
+                )}
                 <div
                   className="flex gap-2 rounded-lg"
                   style={{
