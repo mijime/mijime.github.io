@@ -36,6 +36,12 @@ describe("computeWallQuantity", () => {
     expect(q.haveHm).toBe(0);
     expect(q.haveVm).toBe(0);
   });
+
+  it("treats a floor with no structural wall as NG, not a vacuous OK", () => {
+    const q = computeWallQuantity(createFloorPlan("test", 6, 6));
+    expect(q.okH).toBe(false);
+    expect(q.okV).toBe(false);
+  });
 });
 
 describe("suggestWallRun", () => {

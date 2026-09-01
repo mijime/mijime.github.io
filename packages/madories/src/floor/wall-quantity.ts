@@ -22,7 +22,10 @@ export interface WallQuantity {
 export function computeWallQuantity(floor: FloorPlan): WallQuantity {
   const b = computeWallBounds(floor);
   if (!b) {
-    return { areaM2: 0, haveHm: 0, haveVm: 0, needM: 0, okH: true, okV: true };
+    // No wall at all: a floor with zero structural wall cannot brace anything.
+    // Treat as NG even though the (wall-derived) requirement is also zero —
+    // Otherwise an empty 2F reads as "OK" (vacuous 0>=0).
+    return { areaM2: 0, haveHm: 0, haveVm: 0, needM: 0, okH: false, okV: false };
   }
   const areaM2 = (b.maxX - b.minX) * (b.maxY - b.minY) * CELL_M2;
   const needM = areaM2 * NEED_PER_M2;
@@ -35,7 +38,10 @@ export function computeWallQuantity(floor: FloorPlan): WallQuantity {
       haveVm += run.length / 1000;
     }
   }
-  return { areaM2, haveHm, haveVm, needM, okH: haveHm >= needM, okV: haveVm >= needM };
+  // Have > 0 required too: a floor must actually brace, not just "not exceed".
+  const okH = haveHm > 0 && haveHm >= needM;
+  const okV = haveVm > 0 && haveVm >= needM;
+  return { areaM2, haveHm, haveVm, needM, okH, okV };
 }
 
 export interface InterFloorWallBalance {
