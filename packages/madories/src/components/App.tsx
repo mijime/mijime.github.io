@@ -490,7 +490,7 @@ export function App() {
                   </div>
                 }
               >
-                <Preview3D floor={floor} cellSize={building.cellSize} darkMode={dark} />
+                <Preview3D floors={building.floors} cellSize={building.cellSize} darkMode={dark} />
               </Suspense>
             )}
           </div>

@@ -10,15 +10,16 @@ import { useMemo } from "react";
 import type { FloorPlan } from "../../types";
 import { CAMERA, LIGHTING } from "./config";
 import { BoxList, useSharedMaterials } from "./meshes";
-import { buildSceneModel } from "./scene-model";
+import { buildBuildingScene } from "./scene-model";
 
 interface Props {
-  floor: FloorPlan;
+  floors: FloorPlan[];
   darkMode: boolean;
 }
 
-export function FloorPlanScene({ floor, darkMode }: Props) {
-  const model = useMemo(() => buildSceneModel(floor), [floor]);
+export function FloorPlanScene({ floors, darkMode }: Props) {
+  // 全階を縦に積んだモデルを1回だけ構築
+  const model = useMemo(() => buildBuildingScene(floors), [floors]);
   const materials = useSharedMaterials(darkMode);
 
   const maxDim = Math.max(model.bounds.width, model.bounds.depth);

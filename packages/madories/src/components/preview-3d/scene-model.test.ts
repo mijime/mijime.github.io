@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { createFloorPlan } from "../../store";
 import { hIndex, vIndex } from "../../floor/walls";
-import { CELL_CM, CM_TO_M } from "./config";
-import { buildSceneModel } from "./scene-model";
+import { CELL_CM, CM_TO_M, WALL_HEIGHT_CM } from "./config";
+import { buildBuildingScene, buildSceneModel } from "./scene-model";
 
 const CELL_M = CELL_CM * CM_TO_M;
 
@@ -134,5 +134,36 @@ describe("buildSceneModel", () => {
     const model = buildSceneModel(floor);
     // Both walls should produce boxes: 1 hWall + 1 vWall
     expect(model.walls).toHaveLength(2);
+  });
+
+  it("offsets a floor upward by yOffsetCm when stacking", () => {
+    const floor = createFloorPlan("test", 1, 1);
+    floor.cells[0].floorType = "wood";
+    const base = buildSceneModel(floor);
+    const up = buildSceneModel(floor, WALL_HEIGHT_CM);
+    // 2F床スラブ上面は1F壁天面(y=WALL_HEIGHT)に乗る
+    expect(up.floors[0].position[1] + up.floors[0].size[1] / 2).toBeCloseTo(
+      WALL_HEIGHT_CM * CM_TO_M,
+    );
+    // Xz平面の位置は変わらない
+    expect(up.floors[0].position[0]).toBeCloseTo(base.floors[0].position[0]);
+    expect(up.floors[0].position[2]).toBeCloseTo(base.floors[0].position[2]);
+  });
+
+  it("buildBuildingScene stacks all floors and merges bounds", () => {
+    const f1 = createFloorPlan("f1", 2, 1);
+    f1.cells[0].floorType = "wood"; // 1F床
+    const f2 = createFloorPlan("f2", 4, 2);
+    f2.cells[0].floorType = "wood"; // 2F床
+    const model = buildBuildingScene([f1, f2]);
+    // 全体boundsは最大階の平面サイズ(4x2)
+    expect(model.bounds.width).toBeCloseTo(4 * CELL_M);
+    expect(model.bounds.depth).toBeCloseTo(2 * CELL_M);
+    // 2枚分の床スラブがマージされている
+    expect(model.floors.length).toBe(2);
+    // 2F床スラブ上面は1F壁天面(y=WALL_HEIGHT)に乗る
+    const topFloor = model.floors.at(-1)!;
+    expect(topFloor.position[1] + topFloor.size[1] / 2).toBeCloseTo(WALL_HEIGHT_CM * CM_TO_M);
+    expect(topFloor.position[1]).toBeGreaterThan(model.floors[0].position[1]);
   });
 });
