@@ -45,10 +45,15 @@ export function WalkControls({ model, move }: Props) {
 }
 
 function initialEye(model: SceneModel): { x: number; z: number } | null {
-  // 1階の高さが見えているときはその床中心基準(最下部の床スラブ上面)
-  const floorBox = model.floors[0];
-  if (!floorBox) return null;
-  return { x: floorBox.position[0], z: floorBox.position[2] };
+  // 最下階の全床スラブの重心(建物内中央)に置く。floors[0]だけだと左上寄りのセルになり外側に見える
+  if (model.floors.length === 0) return null;
+  let sx = 0;
+  let sz = 0;
+  for (const f of model.floors) {
+    sx += f.position[0];
+    sz += f.position[2];
+  }
+  return { x: sx / model.floors.length, z: sz / model.floors.length };
 }
 
 /** 視点回転: ポインタ/タッチドラッグでカメラのヨー・ピッチを直接回す */
