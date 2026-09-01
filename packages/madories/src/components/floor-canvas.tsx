@@ -4,6 +4,7 @@ import type { CopiedRegion, EdgeRef, FloorPlan, FloorType, WallType } from "../t
 import { useCanvasDraw } from "./hooks/use-canvas-draw";
 import { usePointerHandlers } from "./hooks/use-pointer-handlers";
 import type { ToolMode } from "./tool-mode";
+import type { ShearLayerFlags } from "../draw/draw-shear-check";
 
 interface SelectionContextMenuProps {
   selectionState: { x1: number; y1: number; x2: number; y2: number };
@@ -73,6 +74,7 @@ interface Props {
   tool: ToolMode;
   shearCheck: boolean;
   floors: FloorPlan[];
+  shearLayers: ShearLayerFlags;
   onSetWalls: (edges: EdgeRef[], wallType: WallType) => void;
   onSetFloorType: (cellIndex: number, floorType: FloorType | null) => void;
   onFillRoom: (cellIndex: number) => void;
@@ -87,7 +89,7 @@ interface Props {
 }
 
 export const FloorCanvas = forwardRef<FloorCanvasHandle, Props>((props, ref) => {
-  const { floor, ghostFloors, cellSize, darkMode, tool, shearCheck, floors } = props;
+  const { floor, ghostFloors, cellSize, darkMode, tool, shearCheck, floors, shearLayers } = props;
   const [selectedItemCell, setSelectedItemCell] = useState<number | null>(null);
   const [selectionState, setSelectionState] = useState<{
     x1: number;
@@ -120,6 +122,7 @@ export const FloorCanvas = forwardRef<FloorCanvasHandle, Props>((props, ref) => 
     viewRef,
     shearCheck,
     floors,
+    shearLayers,
   });
 
   const {

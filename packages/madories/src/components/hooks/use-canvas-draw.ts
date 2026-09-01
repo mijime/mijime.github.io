@@ -4,7 +4,7 @@ import { getItemDrawOffset } from "../../draw/draw-items";
 import { drawVoidCells } from "../../draw/draw-void";
 import { drawWalls, drawWallPreview } from "../../draw/draw-walls";
 import { computeWallDimensions, fmtMm } from "../../draw/export";
-import { drawShearCheck } from "../../draw/draw-shear-check";
+import { drawShearCheck, type ShearLayerFlags } from "../../draw/draw-shear-check";
 import { clearIconCache, getCachedIcon } from "../../draw/icons/cache";
 import { drawTatamiCells } from "../../draw/draw-tatami";
 import { normalizeSelection } from "../../floor/clipboard-logic";
@@ -29,6 +29,7 @@ interface Props {
   darkMode: boolean;
   tool: ToolMode;
   shearCheck: boolean;
+  shearLayers: ShearLayerFlags;
 }
 
 function cssVar(name: string): string {
@@ -153,6 +154,7 @@ export function useCanvasDraw(props: Props): {
     darkMode,
     tool,
     shearCheck,
+    shearLayers,
   } = props;
 
   const ghostFloorsRef = useRef<FloorPlan[]>(ghostFloors);
@@ -290,7 +292,7 @@ export function useCanvasDraw(props: Props): {
     }
 
     if (shearCheck) {
-      drawShearCheck(ctx, floor, floors, cellSize);
+      drawShearCheck(ctx, floor, floors, cellSize, shearLayers);
     }
 
     if (wallPreview && wallPreview.length > 0) {

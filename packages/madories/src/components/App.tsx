@@ -29,6 +29,7 @@ import { FLOOR_TYPES, floorTypeToSwatchStyle } from "./tool-mode";
 import { ToolSheet } from "./tool-sheet";
 import type { FloorPlan } from "../types";
 import { ShearDiagnostic } from "./shear-diagnostic";
+import { ALL_SHEAR_LAYERS, type ShearLayerFlags } from "../draw/draw-shear-check";
 
 const Preview3D = lazy(() => import("./preview-3d"));
 
@@ -77,6 +78,7 @@ export function App() {
     null,
   );
   const [shearCheck, setShearCheck] = useState(false);
+  const [shearLayers, setShearLayers] = useState<ShearLayerFlags>(ALL_SHEAR_LAYERS);
 
   const { building, activeFloorId } = current;
 
@@ -411,6 +413,7 @@ export function App() {
                 tool={tool}
                 shearCheck={shearCheck}
                 floors={building.floors}
+                shearLayers={shearLayers}
                 onSetWalls={(edges: EdgeRef[], wallType) => {
                   dispatch({
                     edges,
@@ -526,6 +529,8 @@ export function App() {
             floor={floor}
             floors={building.floors}
             activeFloorId={activeFloorId}
+            layers={shearLayers}
+            onToggleLayer={(key) => setShearLayers((s) => ({ ...s, [key]: !s[key] }))}
             onAddWalls={(edges) =>
               dispatch({ edges, floorId: floor.id, type: "SET_WALLS", wallType: "solid" })
             }

@@ -70,41 +70,68 @@ function drawGhostWall(
   ctx.setLineDash([]);
 }
 
+export interface ShearLayerFlags {
+  runs: boolean;
+  columns: boolean;
+  quadrant: boolean;
+  breaks: boolean;
+  rigid: boolean;
+}
+
+export const ALL_SHEAR_LAYERS: ShearLayerFlags = {
+  breaks: true,
+  columns: true,
+  quadrant: true,
+  rigid: true,
+  runs: true,
+};
+
 export function drawShearCheck(
   ctx: CanvasRenderingContext2D,
   currentFloor: FloorPlan,
   floors: FloorPlan[],
   cellSize: number,
+  layers: ShearLayerFlags,
 ): void {
   ctx.save();
   ctx.lineCap = "round";
 
   // Runs on the current floor only (drawing every floor's would be cluttered).
-  for (const run of detectShearWallRuns(currentFloor)) {
-    ctx.strokeStyle = run.stable ? STABLE_COLOR : MARGINAL_COLOR;
-    ctx.lineWidth = run.stable ? Math.max(4, cellSize * 0.28) : Math.max(2, cellSize * 0.14);
-    ctx.beginPath();
-    drawWallRun(ctx, run.x, run.y, run.cells, run.kind, cellSize);
-    ctx.stroke();
+  if (layers.runs) {
+    for (const run of detectShearWallRuns(currentFloor)) {
+      ctx.strokeStyle = run.stable ? STABLE_COLOR : MARGINAL_COLOR;
+      ctx.lineWidth = run.stable ? Math.max(4, cellSize * 0.28) : Math.max(2, cellSize * 0.14);
+      ctx.beginPath();
+      drawWallRun(ctx, run.x, run.y, run.cells, run.kind, cellSize);
+      ctx.stroke();
+    }
   }
 
   // 通し柱 across the whole building.
-  const radius = Math.max(3, cellSize * 0.22);
-  for (const c of detectStackedColumns(floors)) {
-    ctx.fillStyle = COLUMN_FILL;
-    ctx.beginPath();
-    ctx.arc(c.x * cellSize, c.y * cellSize, radius, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.strokeStyle = STABLE_COLOR;
-    ctx.lineWidth = 1.5;
-    ctx.stroke();
+  if (layers.columns) {
+    const radius = Math.max(3, cellSize * 0.22);
+    for (const c of detectStackedColumns(floors)) {
+      ctx.fillStyle = COLUMN_FILL;
+      ctx.beginPath();
+      ctx.arc(c.x * cellSize, c.y * cellSize, radius, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = STABLE_COLOR;
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+    }
   }
 
-  drawLoadBreakMarkers(ctx, currentFloor, floors, cellSize);
+  if (layers.breaks) {
+    drawLoadBreakMarkers(ctx, currentFloor, floors, cellSize);
+  }
 
-  drawRigidCenterOverlay(ctx, currentFloor, cellSize);
+  if (layers.rigid) {
+    drawRigidCenterOverlay(ctx, currentFloor, cellSize);
+  }
 
-  drawQuadrantOverlay(ctx, currentFloor, cellSize);
+  if (layers.quadrant) {
+    drawQuadrantOverlay(ctx, currentFloor, cellSize);
+  }
 
   ctx.restore();
 }
@@ -265,14 +292,6 @@ function drawQuadrantOverlay(
     const note = missing ? `${q.name} ${missing}` : q.name;
     ctx.fillStyle = missing ? NG_COLOR : LABEL_COLOR;
     ctx.fillText(note, cx, cy + dotR + cellSize * 0.4);
-    // Measured wall length in metres, per direction.
-    ctx.font = `bold ${Math.max(10, cellSize * 0.34)}px 'IBM Plex Mono', monospace`;
-    ctx.fillText(
-      `横${(q.h / 1000).toFixed(1)}m 縦${(q.v / 1000).toFixed(1)}m`,
-      cx,
-      cy + dotR + cellSize * 0.85,
-    );
-    ctx.font = font;
   }
 
   // Dashed ghosts for missing directions (best place to add a wall).

@@ -11,20 +11,38 @@ import {
   computeEccentricity,
   computePerimeterContinuity,
 } from "../floor/structure-metrics";
-import { dotColor } from "../draw/draw-shear-check";
+import { dotColor, type ShearLayerFlags } from "../draw/draw-shear-check";
 
 interface Props {
   floor: FloorPlan;
   /** All floors in bottom-up story order (building.floors) */
   floors: FloorPlan[];
   activeFloorId: string;
+  layers: ShearLayerFlags;
+  onToggleLayer: (key: keyof ShearLayerFlags) => void;
   onAddWalls: (edges: EdgeRef[]) => void;
   onClose: () => void;
 }
 
 const mono = { fontFamily: "IBM Plex Mono, monospace" };
 
-export function ShearDiagnostic({ floor, floors, activeFloorId, onAddWalls, onClose }: Props) {
+const LAYER_OPTIONS: { key: keyof ShearLayerFlags; label: string }[] = [
+  { key: "runs", label: "耐力壁ラン" },
+  { key: "columns", label: "通し柱" },
+  { key: "quadrant", label: "四分割" },
+  { key: "breaks", label: "通りズレ" },
+  { key: "rigid", label: "剛心/重心" },
+];
+
+export function ShearDiagnostic({
+  floor,
+  floors,
+  activeFloorId,
+  layers,
+  onToggleLayer,
+  onAddWalls,
+  onClose,
+}: Props) {
   const balance = computeQuadrantBalance(floor);
   const qty = computeWallQuantity(floor);
   const activeIndex = floors.findIndex((f) => f.id === activeFloorId);
@@ -126,7 +144,7 @@ export function ShearDiagnostic({ floor, floors, activeFloorId, onAddWalls, onCl
             textTransform: "uppercase",
           }}
         >
-          構造バランス（四分割法・簡易）
+          耐震診断（簡易）
         </div>
         <button
           onClick={onClose}
@@ -142,6 +160,31 @@ export function ShearDiagnostic({ floor, floors, activeFloorId, onAddWalls, onCl
         >
           ✕
         </button>
+      </div>
+
+      <div
+        style={{
+          borderTop: "1px solid var(--border)",
+          display: "flex",
+          flexDirection: "column",
+          gap: "3px",
+          paddingTop: "6px",
+        }}
+      >
+        {LAYER_OPTIONS.map(({ key, label }) => (
+          <label
+            key={key}
+            style={{ alignItems: "center", cursor: "pointer", display: "flex", gap: "6px" }}
+          >
+            <input
+              type="checkbox"
+              checked={layers[key]}
+              onChange={() => onToggleLayer(key)}
+              style={{ accentColor: "var(--terra)" }}
+            />
+            <span style={{ ...mono, color: "var(--ink)", fontSize: "10px" }}>{label}</span>
+          </label>
+        ))}
       </div>
 
       <div
@@ -197,7 +240,7 @@ export function ShearDiagnostic({ floor, floors, activeFloorId, onAddWalls, onCl
                   flex: 1,
                 }}
               >
-                {missing ?? "OK"}
+                {missing ?? `横${(q.h / 1000).toFixed(1)}m 縦${(q.v / 1000).toFixed(1)}m`}
               </span>
               {suggestion && (
                 <button
