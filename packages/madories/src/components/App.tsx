@@ -33,6 +33,7 @@ import { ShearDiagnostic } from "./shear-diagnostic";
 import { ALL_SHEAR_LAYERS, type ShearLayerFlags } from "../draw/draw-shear-check";
 
 const Preview3D = lazy(() => import("./preview-3d"));
+import { VirtualJoystick } from "./preview-3d/virtual-joystick";
 
 function FloorStats({ floor }: { floor: FloorPlan }) {
   const { storage, windows } = computeFloorScores(floor);
@@ -70,6 +71,8 @@ export function App() {
   const [ready, setReady] = useState(false);
   const [viewMode, setViewMode] = useState<"2d" | "3d">("2d");
   const [cameraMode, setCameraMode] = useState<CameraMode>("orbit");
+  // ウォーキングの移動入力(仮想ジョイスティックとキーの合成先)
+  const moveRef = useRef({ x: 0, z: 0 });
   const [tool, setTool] = useState<ToolMode>({ kind: "select" });
   const canvasRef = useRef<FloorCanvasHandle>(null);
   const [toast, setToast] = useState<string | null>(null);
@@ -500,9 +503,11 @@ export function App() {
                 <Preview3D
                   floors={visibleFloors}
                   cameraMode={cameraMode}
+                  move={moveRef}
                   cellSize={building.cellSize}
                   darkMode={dark}
                 />
+                {cameraMode === "walk" && <VirtualJoystick move={moveRef} />}
                 <div
                   className="flex gap-2 rounded-lg"
                   style={{

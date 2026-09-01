@@ -16,10 +16,12 @@ import { WalkControls } from "./walk-controls";
 interface Props {
   floors: FloorPlan[];
   cameraMode: CameraMode;
+  // ウォーキング時に入力(キー/ジョイスティック合成)を渡す共有ref
+  move: React.MutableRefObject<{ x: number; z: number }>;
   darkMode: boolean;
 }
 
-export function FloorPlanScene({ floors, cameraMode, darkMode }: Props) {
+export function FloorPlanScene({ floors, cameraMode, move, darkMode }: Props) {
   // 全階を縦に積んだモデルを1回だけ構築
   const model = useMemo(() => buildBuildingScene(floors), [floors]);
   const materials = useSharedMaterials(darkMode);
@@ -48,7 +50,7 @@ export function FloorPlanScene({ floors, cameraMode, darkMode }: Props) {
           dampingFactor={0.1}
         />
       ) : (
-        <WalkControls floors={floors} />
+        <WalkControls floors={floors} move={move} />
       )}
       <ambientLight
         intensity={darkMode ? LIGHTING.ambientIntensity.dark : LIGHTING.ambientIntensity.light}
