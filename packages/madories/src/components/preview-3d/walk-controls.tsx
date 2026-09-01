@@ -78,40 +78,49 @@ function initialEye(model: SceneModel): { x: number; z: number } | null {
 function PointerLook({ camera }: { camera: THREE.Camera }) {
   const { gl } = useThree();
   const el = gl.domElement;
-  const drag = useRef({ id: null as number | null, lastX: 0, lastY: 0 });
+  const look = useRef({
+    id: null as number | null,
+    lastX: 0,
+    lastY: 0,
+    targetYaw: 0,
+    targetPitch: 0,
+  });
 
   useEffect(
     () => {
       camera.rotation.order = "YXZ";
+      look.current.targetYaw = camera.rotation.y;
+      look.current.targetPitch = camera.rotation.x;
       const down = (e: PointerEvent) => {
         // マウスは左/右ボタン、またはタッチで開始
         if (e.pointerType === "touch" || e.buttons === 1 || e.buttons === 2) {
-          drag.current.id = e.pointerId;
-          drag.current.lastX = e.clientX;
-          drag.current.lastY = e.clientY;
-          // ポインタをキャプチャ: キャンバス外へドラッグしても追従し続け、
-          // ドラッグ量に応じて回転が続く(俯瞰のOrbitControlsと同じ振る舞い)
+          look.current.id = e.pointerId;
+          look.current.lastX = e.clientX;
+          look.current.lastY = e.clientY;
+          // ポインタをキャプチャして、キャンバス外へドラッグしても追従し続ける
           el.setPointerCapture?.(e.pointerId);
         }
       };
       const onMove = (e: PointerEvent) => {
-        if (drag.current.id !== e.pointerId) return;
-        const dx = e.clientX - drag.current.lastX;
-        const dy = e.clientY - drag.current.lastY;
-        drag.current.lastX = e.clientX;
-        drag.current.lastY = e.clientY;
-        // ドラッグのデルタを直接カメラへ反映(俯瞰のOrbitControlsと同じ即応)
-        // 感度は俯瞰の視点回転と同等以上の量になるよう設定
+        if (look.current.id !== e.pointerId) return;
+        const dx = e.clientX - look.current.lastX;
+        const dy = e.clientY - look.current.lastY;
+        look.current.lastX = e.clientX;
+        look.current.lastY = e.clientY;
+        // カメラには直接書かず、目標角度だけ積む(useFrame のダンピング補間で滑らかに追従)
         const sens = e.pointerType === "touch" ? 0.012 : 0.006;
-        camera.rotation.y -= dx * sens;
-        camera.rotation.x -= dy * sens;
+        look.current.targetYaw -= dx * sens;
+        look.current.targetPitch -= dy * sens;
         // 上下の見上げ/見下ろしを制限
         const maxPitch = 1.5;
-        camera.rotation.x = Math.max(-maxPitch, Math.min(maxPitch, camera.rotation.x));
+        look.current.targetPitch = Math.max(
+          -maxPitch,
+          Math.min(maxPitch, look.current.targetPitch),
+        );
       };
       const up = (e: PointerEvent) => {
-        if (drag.current.id === e.pointerId) {
-          drag.current.id = null;
+        if (look.current.id === e.pointerId) {
+          look.current.id = null;
           el.releasePointerCapture?.(e.pointerId);
         }
       };
@@ -130,7 +139,25 @@ function PointerLook({ camera }: { camera: THREE.Camera }) {
     [el],
   );
 
+  // ダンピング補間: 現在の回転を目標へ滑らかに寄せる。係数が大きいほど即応
+  useFrame((_, delta) => {
+    const k = 1 - Math.exp(-WALK.lookDamping * delta);
+    camera.rotation.y = smoothAngle(camera.rotation.y, look.current.targetYaw, k);
+    camera.rotation.x = lerpAngle(camera.rotation.x, look.current.targetPitch, k);
+  });
+
   return null;
+}
+
+// 角度を最短経路で補間(±πを跨ぐジャンプを防ぐ)
+function smoothAngle(from: number, to: number, k: number): number {
+  let d = to - from;
+  while (d > Math.PI) d -= Math.PI * 2;
+  while (d < -Math.PI) d += Math.PI * 2;
+  return from + d * k;
+}
+function lerpAngle(from: number, to: number, k: number): number {
+  return from + (to - from) * k;
 }
 
 /** 移動: キー/ジョイスティックの合成で水平移動し、本壁に衝突したら停止 */
