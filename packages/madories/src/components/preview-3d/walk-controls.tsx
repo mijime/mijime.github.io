@@ -1,3 +1,4 @@
+import { PointerLockControls } from "@react-three/drei";
 import { useFrame, useThree } from "@react-three/fiber";
 import { useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
@@ -14,15 +15,22 @@ interface Props {
 const FWD = new THREE.Vector3();
 const STRAFE = new THREE.Vector3();
 
+/** タッチ操作が可能か(pointer lockはマウスのみなので、タッチではドラッグ方式に切替) */
+export function isTouchPointer(): boolean {
+  if (typeof navigator === "undefined") return false;
+  return navigator.maxTouchPoints > 0;
+}
+
 /**
  * 一人称(ウォーキング)モード。
- * ドラッグ(マウス/タッチ共通)で視点回転、移動はキー(WASD/矢印)と
- * 仮想ジョイスティックの合成。本壁(solid/glass)との衝突判定あり。
- * 目線高さは保ち、水平移動のみ。
+ * - デスクトップ: PointerLockControls(既存機能)でマウスの移動デルタによる視点回転
+ * - タッチ: PointerLockAPIが使えないためドラッグで視点回転+仮想ジョイスティックで移動
+ * 移動・壁衝突は共通。目線高さは保ち、水平移動のみ。
  */
 export function WalkControls({ model, move }: Props) {
-  const { camera } = useThree();
+  const { camera, gl } = useThree();
   const initial = useMemo(() => initialEye(model), [model]);
+  const touch = useMemo(() => isTouchPointer(), []);
 
   // 初期位置: 最下階の目線高さ、平面中央から少し手前
   useEffect(
@@ -30,7 +38,7 @@ export function WalkControls({ model, move }: Props) {
       if (initial) {
         camera.position.set(initial.x, WALK.eyeHeightCm * CM_TO_M, initial.z);
         camera.rotation.order = "YXZ";
-        // 開始時は常に水平の正面(-Z)を向く。ドラッグで自由に視点を回せる
+        // 開始時は常に水平の正面(-Z)を向く
         camera.rotation.set(0, 0, 0);
       }
     },
@@ -40,7 +48,16 @@ export function WalkControls({ model, move }: Props) {
 
   return (
     <>
-      <PointerLook camera={camera} />
+      {touch ? (
+        <PointerLook camera={camera} />
+      ) : (
+        <PointerLockControls
+          camera={camera}
+          makeDefault
+          domElement={gl.domElement}
+          pointerSpeed={WALK.pointerSpeed}
+        />
+      )}
       <WalkMove camera={camera} move={move} walls={model.walls} />
     </>
   );

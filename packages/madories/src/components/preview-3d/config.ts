@@ -85,6 +85,8 @@ export const WALK = {
   moveSpeedMps: 1.8, // 移動速度(m/秒)
   initialOffsetFactor: 0.3, // 初期位置は最下階中央からやや手前に
   playerRadiusM: 0.35, // 衝突判定のプレイヤー半径(m)
+  // 視点回転の感度(rad/px)。桁違いに大きくすると回りすぎる
+  pointerSpeed: 0.5,
 };
 
 export type CameraMode = "orbit" | "walk";
