@@ -72,6 +72,9 @@ function PointerLook({ camera }: { camera: THREE.Camera }) {
           drag.current.id = e.pointerId;
           drag.current.lastX = e.clientX;
           drag.current.lastY = e.clientY;
+          // ポインタをキャプチャ: キャンバス外へドラッグしても追従し続け、
+          // ドラッグ量に応じて回転が続く(俯瞰のOrbitControlsと同じ振る舞い)
+          el.setPointerCapture?.(e.pointerId);
         }
       };
       const onMove = (e: PointerEvent) => {
@@ -90,7 +93,10 @@ function PointerLook({ camera }: { camera: THREE.Camera }) {
         camera.rotation.x = Math.max(-maxPitch, Math.min(maxPitch, camera.rotation.x));
       };
       const up = (e: PointerEvent) => {
-        if (drag.current.id === e.pointerId) drag.current.id = null;
+        if (drag.current.id === e.pointerId) {
+          drag.current.id = null;
+          el.releasePointerCapture?.(e.pointerId);
+        }
       };
       el.addEventListener("pointerdown", down);
       el.addEventListener("pointermove", onMove);
