@@ -143,14 +143,11 @@ export function drawShearCheck(
   ctx.restore();
 }
 
-// 床支持スパン図: アクティブ階(＝上階)の床を、1F支持点までの距離で
-// 緑→赤に連続シェーディング。赤いほど梁スパンが長く構造的に重い。
-function spanColor(spanM: number): string {
-  const t = Math.min(1, Math.max(0, spanM / SUPPORT_SPAN_MAX_M));
-  const r = Math.round(46 + (217 - 46) * t);
-  const g = Math.round(160 + (58 - 160) * t);
-  const b = Math.round(90 + (45 - 90) * t);
-  return `rgba(${r},${g},${b},0.35)`;
+// 床支持: 閾値(3.6m)を超えた"ヤバい"床領域だけを、遠いほど濃い赤で描く。
+// 近さの赤の濃さは、閾値から2倍(7.2m)まで0→1にランプする。
+function spanAlpha(spanM: number): number {
+  const t = Math.min(1, Math.max(0, (spanM - SUPPORT_SPAN_MAX_M) / SUPPORT_SPAN_MAX_M));
+  return 0.2 + 0.5 * t; // 0.2 … 0.7 — 赤の強さ
 }
 
 function drawFloorSupport(
@@ -165,7 +162,10 @@ function drawFloorSupport(
     return;
   }
   for (const { spanM, x, y } of sup.cells) {
-    ctx.fillStyle = spanColor(spanM);
+    if (spanM <= SUPPORT_SPAN_MAX_M) {
+      continue; // 問題ない領域には何も描かない
+    }
+    ctx.fillStyle = `rgba(217,58,45,${spanAlpha(spanM).toFixed(2)})`;
     ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
   }
 }
