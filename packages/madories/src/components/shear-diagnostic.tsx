@@ -13,6 +13,7 @@ import {
   computePerimeterContinuity,
 } from "../floor/structure-metrics";
 import { dotColor, type ShearLayerFlags } from "../draw/draw-shear-check";
+import { computeFloorSupport, SUPPORT_SPAN_MAX_M } from "../floor/floor-support";
 
 interface Props {
   floor: FloorPlan;
@@ -35,6 +36,7 @@ const LAYER_OPTIONS: { key: keyof ShearLayerFlags; label: string }[] = [
   { key: "quadrant", label: "四分割" },
   { key: "breaks", label: "通りズレ" },
   { key: "rigid", label: "剛心/重心" },
+  { key: "support", label: "床支持" },
 ];
 
 export function ShearDiagnostic({
@@ -60,6 +62,7 @@ export function ShearDiagnostic({
   const ecc = computeEccentricity(floor);
   const perim = computePerimeterContinuity(floor);
   const interFloor = computeInterFloorWallBalance(floors).find((b) => b.lowerIndex === activeIndex);
+  const support = computeFloorSupport(floors).find((s) => s.floorIndex === activeIndex);
 
   function MiniRow({
     label,
@@ -370,6 +373,18 @@ export function ShearDiagnostic({
               </div>
             )}
           </div>
+
+          <MiniRow
+            label="床支持"
+            ok={support ? support.overCount === 0 : undefined}
+            value={
+              support
+                ? support.overCount > 0
+                  ? `>${SUPPORT_SPAN_MAX_M}m ×${support.overCount}（max ${support.maxSpanM.toFixed(1)}m）`
+                  : "OK"
+                : "—"
+            }
+          />
 
           {floors.length >= 2 && (breaksHere.length > 0 || breaksBelow.length > 0) && (
             <div

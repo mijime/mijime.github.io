@@ -7,6 +7,7 @@ import {
 import { computeQuadrantBalance } from "../floor/quadrant-balance";
 import { suggestWallRun, type WallSuggestion } from "../floor/wall-quantity";
 import { computeEccentricity } from "../floor/structure-metrics";
+import { computeFloorSupport, SUPPORT_SPAN_MAX_M } from "../floor/floor-support";
 
 // Structural-wall run highlights (drawn over walls) and 通し柱 markers.
 // Colors are semantic and theme-independent: stable runs = strong red, marginal
@@ -76,6 +77,7 @@ export interface ShearLayerFlags {
   quadrant: boolean;
   breaks: boolean;
   rigid: boolean;
+  support: boolean;
 }
 
 export const ALL_SHEAR_LAYERS: ShearLayerFlags = {
@@ -84,6 +86,7 @@ export const ALL_SHEAR_LAYERS: ShearLayerFlags = {
   quadrant: true,
   rigid: true,
   runs: true,
+  support: true,
 };
 
 export function drawShearCheck(
@@ -129,11 +132,42 @@ export function drawShearCheck(
     drawRigidCenterOverlay(ctx, currentFloor, cellSize);
   }
 
+  if (layers.support) {
+    drawFloorSupport(ctx, currentFloor, floors, cellSize);
+  }
+
   if (layers.quadrant) {
     drawQuadrantOverlay(ctx, currentFloor, cellSize);
   }
 
   ctx.restore();
+}
+
+// 床支持スパン図: アクティブ階(＝上階)の床を、1F支持点までの距離で
+// 緑→赤に連続シェーディング。赤いほど梁スパンが長く構造的に重い。
+function spanColor(spanM: number): string {
+  const t = Math.min(1, Math.max(0, spanM / SUPPORT_SPAN_MAX_M));
+  const r = Math.round(46 + (217 - 46) * t);
+  const g = Math.round(160 + (58 - 160) * t);
+  const b = Math.round(90 + (45 - 90) * t);
+  return `rgba(${r},${g},${b},0.35)`;
+}
+
+function drawFloorSupport(
+  ctx: CanvasRenderingContext2D,
+  currentFloor: FloorPlan,
+  floors: FloorPlan[],
+  cellSize: number,
+): void {
+  const activeIndex = floors.findIndex((f) => f.id === currentFloor.id);
+  const sup = computeFloorSupport(floors).find((s) => s.floorIndex === activeIndex);
+  if (!sup) {
+    return;
+  }
+  for (const { spanM, x, y } of sup.cells) {
+    ctx.fillStyle = spanColor(spanM);
+    ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
+  }
 }
 
 // 偏心率 visual: dashed segment from 重心 (mass center, white circle) to 剛心
