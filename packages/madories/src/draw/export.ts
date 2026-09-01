@@ -17,6 +17,14 @@ import { drawWalls } from "./draw-walls";
 import { drawRoomLabels } from "../floor/room-detection";
 import { MM_PER_CELL } from "../units";
 import { drawShearCheck, ALL_SHEAR_LAYERS, type ShearLayerFlags } from "./draw-shear-check";
+import { computeWallQuantity, computeInterFloorWallBalance } from "../floor/wall-quantity";
+import { computeQuadrantBalance } from "../floor/quadrant-balance";
+import {
+  computeBalanceRatio,
+  computeEccentricity,
+  computePerimeterContinuity,
+} from "../floor/structure-metrics";
+import { detectLoadPathBreaks } from "../floor/shear-walls";
 
 const LABEL_HEIGHT = 24;
 const BG = "#F5F0E8";
@@ -305,6 +313,44 @@ export function exportFloorPng(floor: FloorPlan, cellSize: number): void {
   }, "image/png");
 }
 
+export function diagnosticLine(floor: FloorPlan, index: number, floors: FloorPlan[]): string {
+  const qty = computeWallQuantity(floor);
+  const ratio = computeBalanceRatio(floor);
+  const ecc = computeEccentricity(floor);
+  const perim = computePerimeterContinuity(floor);
+  const quad = computeQuadrantBalance(floor);
+  const breaks = detectLoadPathBreaks(floors);
+  const breaksHere = breaks.filter((b) => b.floorIndex === index + 1).length;
+  const breaksBelow = breaks.filter((b) => b.floorIndex === index).length;
+  const inter = computeInterFloorWallBalance(floors).find((b) => b.lowerIndex === index);
+
+  const parts: string[] = [];
+  parts.push(
+    `壁 横${qty.haveHm.toFixed(1)}/${qty.needM.toFixed(1)}${qty.okH ? "✓" : "✗"}`,
+    `縦${qty.haveVm.toFixed(1)}/${qty.needM.toFixed(1)}${qty.okV ? "✓" : "✗"}`,
+  );
+  const quadNG = quad.quadrants.filter((q) => !q.ok).map((q) => q.name);
+  if (quadNG.length > 0) {
+    parts.push(`四分割NG[${quadNG.join("/")}]`);
+  }
+  parts.push(`比${Math.round(ratio.ratio * 100)}%${ratio.ok ? "✓" : "✗"}`);
+  if (ecc) {
+    parts.push(`偏率eX${ecc.ex.toFixed(2)}/eY${ecc.ey.toFixed(2)}${ecc.ok ? "✓" : "✗"}`);
+  }
+  if (perim) {
+    parts.push(`外周${Math.round(perim.ratio * 100)}%${perim.ok ? "✓" : "✗"}`);
+  }
+  if (inter && !inter.ok) {
+    const d: string[] = [];
+    if (inter.hDeficit > 0) d.push(`横不足${inter.hDeficit.toFixed(1)}m`);
+    if (inter.vDeficit > 0) d.push(`縦不足${inter.vDeficit.toFixed(1)}m`);
+    if (d.length > 0) parts.push(`上下壁量NG(${d.join("/")})`);
+  }
+  if (breaksHere > 0) parts.push(`通り上×${breaksHere}`);
+  if (breaksBelow > 0) parts.push(`通り下×${breaksBelow}`);
+  return `${floor.name}: ${parts.join("  ")}`;
+}
+
 export function exportAllFloorsPng(
   floors: FloorPlan[],
   cellSize: number,
@@ -403,8 +449,9 @@ export function exportAllFloorsPng(
   const FLOOR_LEGEND_HEIGHT = floorLegendRows * LABEL_HEIGHT;
   const WALL_LEGEND_HEIGHT = wallLegendRows * LABEL_HEIGHT;
   const ITEM_LEGEND_HEIGHT = itemLegendRows * (ICON_SIZE + 16);
+  const DIAG_HEIGHT = includeShear ? valid.length * LABEL_HEIGHT : 0;
   const FOOTER_HEIGHT =
-    LABEL_HEIGHT + FLOOR_LEGEND_HEIGHT + WALL_LEGEND_HEIGHT + ITEM_LEGEND_HEIGHT;
+    LABEL_HEIGHT + FLOOR_LEGEND_HEIGHT + WALL_LEGEND_HEIGHT + ITEM_LEGEND_HEIGHT + DIAG_HEIGHT;
   const totalH = valid.reduce((sum, r) => sum + r.canvas.height + LABEL_HEIGHT, 0) + FOOTER_HEIGHT;
 
   const combined = document.createElement("canvas");
@@ -618,6 +665,23 @@ export function exportAllFloorsPng(
         ITEM_LEGEND_LABEL.get(type) ?? def.label,
         lx + ICON_SIZE / 2,
         ly + ICON_SIZE + 2,
+      );
+    }
+  }
+
+  if (includeShear) {
+    const diagY = offsetY + ITEM_LEGEND_HEIGHT;
+    const floorIndexById = new Map<string, number>(floors.map((f, i) => [f.id, i]));
+    ctx.fillStyle = DIM_COLOR;
+    ctx.font = "11px 'IBM Plex Mono', monospace";
+    ctx.textAlign = "left";
+    ctx.textBaseline = "middle";
+    for (let i = 0; i < valid.length; i++) {
+      const idx = floorIndexById.get(valid[i].floor.id)!;
+      ctx.fillText(
+        diagnosticLine(valid[i].floor, idx, floors),
+        MARGIN,
+        diagY + i * LABEL_HEIGHT + LABEL_HEIGHT / 2,
       );
     }
   }

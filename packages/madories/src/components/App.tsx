@@ -79,7 +79,7 @@ export function App() {
   );
   const [shearCheck, setShearCheck] = useState(false);
   const [shearLayers, setShearLayers] = useState<ShearLayerFlags>(ALL_SHEAR_LAYERS);
-  const [exportShear, setExportShear] = useState(true);
+  const [exportShear, setExportShear] = useState(false);
 
   const { building, activeFloorId } = current;
 
