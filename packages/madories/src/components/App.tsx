@@ -531,7 +531,6 @@ export function App() {
           <ShearDiagnostic
             floor={floor}
             floors={building.floors}
-            activeFloorId={activeFloorId}
             layers={shearLayers}
             onToggleLayer={(key) => setShearLayers((s) => ({ ...s, [key]: !s[key] }))}
             exportShear={exportShear}
