@@ -16,6 +16,7 @@ import { drawVoidCells } from "./draw-void";
 import { drawWalls } from "./draw-walls";
 import { drawRoomLabels } from "../floor/room-detection";
 import { MM_PER_CELL } from "../units";
+import { drawShearCheck, ALL_SHEAR_LAYERS, type ShearLayerFlags } from "./draw-shear-check";
 
 const LABEL_HEIGHT = 24;
 const BG = "#F5F0E8";
@@ -151,7 +152,12 @@ export function fmtMm(cells: number): string {
   return mm >= 1000 ? `${(mm / 1000).toFixed(2)}m` : `${mm}mm`;
 }
 
-export function renderFloorToCanvas(floor: FloorPlan, cellSize: number): HTMLCanvasElement | null {
+export function renderFloorToCanvas(
+  floor: FloorPlan,
+  cellSize: number,
+  allFloors?: FloorPlan[],
+  shearLayers?: ShearLayerFlags,
+): HTMLCanvasElement | null {
   const bounds = computeBounds(floor);
   if (!bounds) {
     return null;
@@ -209,6 +215,9 @@ export function renderFloorToCanvas(floor: FloorPlan, cellSize: number): HTMLCan
   drawWalls(ctx, floor, cellSize, { ink: DIM_COLOR, windowBlue: "#4A90D9" });
   drawItems(ctx, floor, cellSize);
   drawRoomLabels(ctx, floor, cellSize, DIM_COLOR);
+  if (shearLayers && allFloors) {
+    drawShearCheck(ctx, floor, allFloors, cellSize, shearLayers);
+  }
   ctx.restore();
 
   // Dimension labels based on wall edges only
@@ -296,9 +305,19 @@ export function exportFloorPng(floor: FloorPlan, cellSize: number): void {
   }, "image/png");
 }
 
-export function exportAllFloorsPng(floors: FloorPlan[], cellSize: number): void {
+export function exportAllFloorsPng(
+  floors: FloorPlan[],
+  cellSize: number,
+  includeShear = false,
+  shearLayers: ShearLayerFlags = ALL_SHEAR_LAYERS,
+): void {
   const tsuboPerFloor = floors.map((f) => ({
-    canvas: renderFloorToCanvas(f, cellSize),
+    canvas: renderFloorToCanvas(
+      f,
+      cellSize,
+      includeShear ? floors : undefined,
+      includeShear ? shearLayers : undefined,
+    ),
     floor: f,
     name: f.name,
     tsubo:

@@ -79,6 +79,7 @@ export function App() {
   );
   const [shearCheck, setShearCheck] = useState(false);
   const [shearLayers, setShearLayers] = useState<ShearLayerFlags>(ALL_SHEAR_LAYERS);
+  const [exportShear, setExportShear] = useState(true);
 
   const { building, activeFloorId } = current;
 
@@ -378,7 +379,9 @@ export function App() {
               setToast("読み込みました");
             });
           }}
-          onExportAll={() => exportAllFloorsPng(building.floors, building.cellSize)}
+          onExportAll={() =>
+            exportAllFloorsPng(building.floors, building.cellSize, exportShear, shearLayers)
+          }
           onShare={handleShare}
           onClear={() => dispatch({ floorId: floor.id, type: "CLEAR_FLOOR" })}
           onRotateFloor={() => dispatch({ floorId: floor.id, type: "ROTATE_FLOOR" })}
@@ -531,6 +534,8 @@ export function App() {
             activeFloorId={activeFloorId}
             layers={shearLayers}
             onToggleLayer={(key) => setShearLayers((s) => ({ ...s, [key]: !s[key] }))}
+            exportShear={exportShear}
+            onToggleExportShear={() => setExportShear((s) => !s)}
             onAddWalls={(edges) =>
               dispatch({ edges, floorId: floor.id, type: "SET_WALLS", wallType: "solid" })
             }

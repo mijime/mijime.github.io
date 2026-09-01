@@ -21,6 +21,8 @@ interface Props {
   activeFloorId: string;
   layers: ShearLayerFlags;
   onToggleLayer: (key: keyof ShearLayerFlags) => void;
+  exportShear: boolean;
+  onToggleExportShear: () => void;
   onAddWalls: (edges: EdgeRef[]) => void;
   onClose: () => void;
 }
@@ -41,6 +43,8 @@ export function ShearDiagnostic({
   activeFloorId,
   layers,
   onToggleLayer,
+  exportShear,
+  onToggleExportShear,
   onAddWalls,
   onClose,
 }: Props) {
@@ -216,6 +220,25 @@ export function ShearDiagnostic({
                 <span style={{ ...mono, color: "var(--ink)", fontSize: "10px" }}>{label}</span>
               </label>
             ))}
+            <label
+              style={{
+                alignItems: "center",
+                borderTop: "1px solid var(--border)",
+                cursor: "pointer",
+                display: "flex",
+                gap: "6px",
+                marginTop: "2px",
+                paddingTop: "4px",
+              }}
+            >
+              <input
+                type="checkbox"
+                checked={exportShear}
+                onChange={onToggleExportShear}
+                style={{ accentColor: "var(--terra)" }}
+              />
+              <span style={{ ...mono, color: "var(--terra)", fontSize: "10px" }}>出力に反映</span>
+            </label>
           </div>
 
           <div
