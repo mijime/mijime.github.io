@@ -8,16 +8,18 @@ import {
 import { Canvas } from "@react-three/fiber";
 import { useMemo } from "react";
 import type { FloorPlan } from "../../types";
-import { CAMERA, LIGHTING } from "./config";
+import { type CameraMode, CAMERA, LIGHTING } from "./config";
 import { BoxList, useSharedMaterials } from "./meshes";
 import { buildBuildingScene } from "./scene-model";
+import { WalkControls } from "./walk-controls";
 
 interface Props {
   floors: FloorPlan[];
+  cameraMode: CameraMode;
   darkMode: boolean;
 }
 
-export function FloorPlanScene({ floors, darkMode }: Props) {
+export function FloorPlanScene({ floors, cameraMode, darkMode }: Props) {
   // 全階を縦に積んだモデルを1回だけ構築
   const model = useMemo(() => buildBuildingScene(floors), [floors]);
   const materials = useSharedMaterials(darkMode);
@@ -34,16 +36,20 @@ export function FloorPlanScene({ floors, darkMode }: Props) {
       gl={{ alpha: false, antialias: true }}
     >
       <PerspectiveCamera makeDefault fov={CAMERA.fov} position={[0, camDist, camDist]} />
-      <OrbitControls
-        makeDefault
-        enablePan={false}
-        minPolarAngle={CAMERA.minPolarAngle}
-        maxPolarAngle={CAMERA.maxPolarAngle}
-        minDistance={maxDim * CAMERA.minDistanceFactor}
-        maxDistance={maxDim * CAMERA.maxDistanceFactor}
-        enableDamping
-        dampingFactor={0.1}
-      />
+      {cameraMode === "orbit" ? (
+        <OrbitControls
+          makeDefault
+          enablePan={false}
+          minPolarAngle={CAMERA.minPolarAngle}
+          maxPolarAngle={CAMERA.maxPolarAngle}
+          minDistance={maxDim * CAMERA.minDistanceFactor}
+          maxDistance={maxDim * CAMERA.maxDistanceFactor}
+          enableDamping
+          dampingFactor={0.1}
+        />
+      ) : (
+        <WalkControls floors={floors} />
+      )}
       <ambientLight
         intensity={darkMode ? LIGHTING.ambientIntensity.dark : LIGHTING.ambientIntensity.light}
       />

@@ -1,9 +1,11 @@
 import { Component, type ReactNode } from "react";
 import type { FloorPlan } from "../../types";
+import type { CameraMode } from "./config";
 import { FloorPlanScene } from "./scene";
 
 interface Props {
   floors: FloorPlan[];
+  cameraMode: CameraMode;
   cellSize: number; // 2D側との互換のため受け取るが3Dでは未使用
   darkMode: boolean;
 }
@@ -27,10 +29,10 @@ class SceneErrorBoundary extends Component<{ children: ReactNode }, { hasError: 
   }
 }
 
-export default function Preview3D({ floors, darkMode }: Props) {
+export default function Preview3D({ floors, cameraMode, darkMode }: Props) {
   return (
     <SceneErrorBoundary>
-      <FloorPlanScene floors={floors} darkMode={darkMode} />
+      <FloorPlanScene floors={floors} cameraMode={cameraMode} darkMode={darkMode} />
     </SceneErrorBoundary>
   );
 }

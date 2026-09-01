@@ -26,6 +26,7 @@ import { FloorTabs } from "./floor-tabs";
 import { PlanTabs } from "./plan-tabs";
 import type { ToolMode } from "./tool-mode";
 import { FLOOR_TYPES, floorTypeToSwatchStyle } from "./tool-mode";
+import type { CameraMode } from "./preview-3d/config";
 import { ToolSheet } from "./tool-sheet";
 import type { FloorPlan } from "../types";
 import { ShearDiagnostic } from "./shear-diagnostic";
@@ -68,6 +69,7 @@ export function App() {
   const [activePlanId, setActivePlanIdState] = useState<string | null>(null);
   const [ready, setReady] = useState(false);
   const [viewMode, setViewMode] = useState<"2d" | "3d">("2d");
+  const [cameraMode, setCameraMode] = useState<CameraMode>("orbit");
   const [tool, setTool] = useState<ToolMode>({ kind: "select" });
   const canvasRef = useRef<FloorCanvasHandle>(null);
   const [toast, setToast] = useState<string | null>(null);
@@ -238,6 +240,11 @@ export function App() {
 
   const floor = building.floors.find((f) => f.id === activeFloorId) ?? building.floors[0];
   const ghostFloors = building.floors.filter((f) => f.id !== activeFloorId);
+  // 3Dは「選択中の階まで」を縦に表示(それより上の階は視界を遮らないよう非表示)
+  const visibleFloors =
+    activeFloorId === ""
+      ? [floor]
+      : building.floors.slice(0, building.floors.findIndex((f) => f.id === activeFloorId) + 1);
 
   const pickerRoom = roomPicker
     ? detectRooms(floor).find((r) => r.cells.includes(roomPicker.cellIndex))
@@ -490,7 +497,40 @@ export function App() {
                   </div>
                 }
               >
-                <Preview3D floors={building.floors} cellSize={building.cellSize} darkMode={dark} />
+                <Preview3D
+                  floors={visibleFloors}
+                  cameraMode={cameraMode}
+                  cellSize={building.cellSize}
+                  darkMode={dark}
+                />
+                <div
+                  className="flex gap-2 rounded-lg"
+                  style={{
+                    background: dark ? "rgba(0,0,0,0.6)" : "rgba(255,255,255,0.8)",
+                    padding: "4px",
+                    position: "absolute",
+                    right: "12px",
+                    top: "12px",
+                    zIndex: 10,
+                  }}
+                >
+                  {(["orbit", "walk"] as const).map((mode) => (
+                    <button
+                      key={mode}
+                      onClick={() => setCameraMode(mode)}
+                      style={{
+                        background: cameraMode === mode ? "var(--terra)" : "transparent",
+                        color: cameraMode === mode ? "#fff" : "var(--ink)",
+                        fontSize: "12px",
+                        minHeight: 28,
+                        minWidth: 56,
+                        padding: "0 8px",
+                      }}
+                    >
+                      {mode === "orbit" ? "俯瞰" : "歩く"}
+                    </button>
+                  ))}
+                </div>
               </Suspense>
             )}
           </div>

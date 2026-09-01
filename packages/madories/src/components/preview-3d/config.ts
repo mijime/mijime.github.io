@@ -77,6 +77,15 @@ export const CAMERA = {
   maxPolarAngle: Math.PI / 2 - 0.15,
 };
 
+// 一人称(ウォーキング)モード
+export const WALK = {
+  eyeHeightCm: 160, // 目線の高さ(cm)
+  moveSpeedMps: 1.8, // 移動速度(m/秒)
+  initialOffsetFactor: 0.3, // 初期位置は最下階中央からやや手前に
+};
+
+export type CameraMode = "orbit" | "walk";
+
 export const LIGHTING = {
   ambientIntensity: { dark: 0.3, light: 0.45 },
   directional: {
