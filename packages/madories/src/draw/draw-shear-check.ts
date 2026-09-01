@@ -24,12 +24,8 @@ const GOOD_RGB: [number, number, number] = [46, 160, 90]; // Green = balanced
 const DOT_OUTLINE = "rgba(255,255,255,0.85)";
 // Suggested shear-wall ghost.
 const SUGGEST_COLOR = "rgba(59,130,246,0.9)"; // Blue dashed line
-// Load-path-break markers: filled violet = an upper floor's wall is unsupported
-// Here (fix on this floor); amber outline = this floor's wall lacks support
-// On the floor below (fix downstairs).
-const FIX_HERE_FILL = "rgba(168,85,247,0.95)";
+// Load-path-break markers: alpha varies with severity.
 const BREAK_OUTLINE = "rgba(255,255,255,0.9)";
-const FIX_BELOW_STROKE = "rgba(240,166,60,0.95)";
 // 剛心 (rigidity center, blue cross) vs 重心 (mass center, white circle) markers.
 const RIGID_COLOR = "rgba(59,130,246,0.95)";
 const MASS_FILL = "rgba(255,255,255,0.95)";
@@ -168,6 +164,14 @@ function drawRigidCenterOverlay(
 //    HERE -> the fix is to add a wall/column on this floor (filled violet).
 //  - break.floorIndex === activeIndex    : THIS floor's wall is unsupported on
 //    The floor below -> the fix belongs downstairs (amber outline).
+// 紫(上階未支持)の濃淡: longer wall run floating at a vertex = more concentrated
+// Load = darker violet. Alpha ramps from ~0.38 (single 0.91m cell) to ~1.0 at a
+// 3-cell (2.73m) run.
+function breakAlpha(length: number): number {
+  const t = Math.min(1, Math.max(0, length / 2730));
+  return 0.38 + 0.62 * t;
+}
+
 function drawLoadBreakMarkers(
   ctx: CanvasRenderingContext2D,
   currentFloor: FloorPlan,
@@ -180,10 +184,27 @@ function drawLoadBreakMarkers(
   }
   const size = Math.max(4, cellSize * 0.4);
   for (const b of detectLoadPathBreaks(floors)) {
+    const a = breakAlpha(b.length);
     if (b.floorIndex === activeIndex + 1) {
-      drawBreakDiamond(ctx, b.x, b.y, size, cellSize, FIX_HERE_FILL, BREAK_OUTLINE);
+      drawBreakDiamond(
+        ctx,
+        b.x,
+        b.y,
+        size,
+        cellSize,
+        `rgba(168,85,247,${a.toFixed(2)})`,
+        BREAK_OUTLINE,
+      );
     } else if (b.floorIndex === activeIndex) {
-      drawBreakDiamond(ctx, b.x, b.y, size, cellSize, "transparent", FIX_BELOW_STROKE);
+      drawBreakDiamond(
+        ctx,
+        b.x,
+        b.y,
+        size,
+        cellSize,
+        "transparent",
+        `rgba(240,166,60,${a.toFixed(2)})`,
+      );
     }
   }
 }

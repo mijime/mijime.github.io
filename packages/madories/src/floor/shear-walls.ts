@@ -156,6 +156,9 @@ export interface LoadPathBreak {
    * bottom-up, index 0 = ground floor, which is never checked).
    */
   floorIndex: number;
+  /** Length (mm) of the longest wall run pressing down at this vertex — the
+   * break's severity proxy (a long wall floating at its end concentrates load). */
+  length: number;
 }
 
 /**
@@ -211,10 +214,23 @@ export function detectLoadPathBreaks(floors: FloorPlan[]): LoadPathBreak[] {
   const breaks: LoadPathBreak[] = [];
   for (let i = 1; i < floors.length; i++) {
     const below = floors[i - 1];
-    for (const [vx, vy] of detectStructuralColumnVertices(floors[i])) {
-      if (!vertexOnStructuralWall(below, vx, vy)) {
-        breaks.push({ floorIndex: i, x: vx, y: vy });
+    // Map vertex -> longest structural run pressing down there, for vertices
+    // With no support below. Dedupes shared/corner vertices while carrying the
+    // Worst contributing run's length as the severity proxy.
+    const worse = new Map<string, { x: number; y: number; length: number }>();
+    for (const run of detectShearWallRuns(floors[i])) {
+      for (const [vx, vy] of [run.startVertex, run.endVertex]) {
+        if (vertexOnStructuralWall(below, vx, vy)) {
+          continue;
+        }
+        const key = `${vx},${vy}`;
+        const prev = worse.get(key);
+        const length = prev ? Math.max(prev.length, run.length) : run.length;
+        worse.set(key, { length, x: vx, y: vy });
       }
+    }
+    for (const { length, x, y } of worse.values()) {
+      breaks.push({ floorIndex: i, length, x, y });
     }
   }
   breaks.sort((a, b) => a.floorIndex - b.floorIndex || a.y - b.y || a.x - b.x);

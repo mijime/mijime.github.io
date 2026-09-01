@@ -223,8 +223,8 @@ describe("detectLoadPathBreaks", () => {
     const breaks = detectLoadPathBreaks([a1, a2]);
     expect(breaks).toEqual(
       expect.arrayContaining([
-        { floorIndex: 1, x: 0, y: 0 },
-        { floorIndex: 1, x: 3, y: 0 },
+        expect.objectContaining({ floorIndex: 1, x: 0, y: 0 }),
+        expect.objectContaining({ floorIndex: 1, x: 3, y: 0 }),
       ]),
     );
     expect(breaks).toHaveLength(2);
@@ -268,7 +268,7 @@ describe("detectLoadPathBreaks", () => {
       "solid",
     );
     // (0,1) sits on the lower wall; (3,1) extends past it with no wall below.
-    expect(detectLoadPathBreaks([a1, a2])).toEqual([{ floorIndex: 1, x: 3, y: 1 }]);
+    expect(detectLoadPathBreaks([a1, a2])).toEqual([{ floorIndex: 1, length: 2730, x: 3, y: 1 }]);
   });
 
   it("does NOT flag a 2F wall end that lands over the middle of a 1F wall", () => {
