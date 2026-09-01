@@ -29,7 +29,9 @@ export function WalkControls({ model, move }: Props) {
       if (initial) {
         camera.position.set(initial.x, WALK.eyeHeightCm * CM_TO_M, initial.z);
         camera.rotation.order = "YXZ";
-        camera.rotation.y = 0; // ヨー固定: 常に-Z(建物正面)を見る
+        // ヨー固定: 常に-Z(建物正面)を見る。ピッチも水平にリセットしないと、
+        // 俯瞰(OrbitControls)が残した下向きが残って「真下」に見える
+        camera.rotation.set(0, 0, 0);
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
