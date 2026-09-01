@@ -15,6 +15,9 @@ import { drawTatamiCells } from "./draw-tatami";
 import { drawVoidCells } from "./draw-void";
 import { drawWalls } from "./draw-walls";
 import { drawRoomLabels } from "../floor/room-detection";
+import { MM_PER_CELL } from "../units";
+import { drawShearCheck, ALL_SHEAR_LAYERS, type ShearLayerFlags } from "./draw-shear-check";
+import { computeStructuralReport } from "../floor/structural-report";
 
 const LABEL_HEIGHT = 24;
 const BG = "#F5F0E8";
@@ -23,9 +26,7 @@ const DIM_COLOR = "#5A4A3A";
 const GRID_COLOR = "rgba(90,74,58,0.25)"; // Same RGB as DIM_COLOR at 25% opacity
 const DIM_MARGIN = 28; // Px reserved for dimension rulers
 
-// 1 cell = 0.5 tatami = 910mm
-export const MM_PER_CELL = 910;
-
+// 1 cell = 0.5 tatami = 910mm (see ../units)
 export function computeFloorScores(floor: FloorPlan): { storage: number; windows: number } {
   let storage = 0;
   let windows = 0;
@@ -152,7 +153,12 @@ export function fmtMm(cells: number): string {
   return mm >= 1000 ? `${(mm / 1000).toFixed(2)}m` : `${mm}mm`;
 }
 
-export function renderFloorToCanvas(floor: FloorPlan, cellSize: number): HTMLCanvasElement | null {
+export function renderFloorToCanvas(
+  floor: FloorPlan,
+  cellSize: number,
+  allFloors?: FloorPlan[],
+  shearLayers?: ShearLayerFlags,
+): HTMLCanvasElement | null {
   const bounds = computeBounds(floor);
   if (!bounds) {
     return null;
@@ -210,6 +216,9 @@ export function renderFloorToCanvas(floor: FloorPlan, cellSize: number): HTMLCan
   drawWalls(ctx, floor, cellSize, { ink: DIM_COLOR, windowBlue: "#4A90D9" });
   drawItems(ctx, floor, cellSize);
   drawRoomLabels(ctx, floor, cellSize, DIM_COLOR);
+  if (shearLayers && allFloors) {
+    drawShearCheck(ctx, floor, allFloors, cellSize, shearLayers);
+  }
   ctx.restore();
 
   // Dimension labels based on wall edges only
@@ -297,9 +306,53 @@ export function exportFloorPng(floor: FloorPlan, cellSize: number): void {
   }, "image/png");
 }
 
-export function exportAllFloorsPng(floors: FloorPlan[], cellSize: number): void {
+export function diagnosticLine(floor: FloorPlan, floors: FloorPlan[]): string {
+  const r = computeStructuralReport(floor, floors);
+  const { wallQuantity: qty, quadrant: quad, balanceRatio: ratio } = r;
+  const ecc = r.eccentricity;
+  const perim = r.perimeter;
+  const inter = r.interFloor;
+
+  const parts: string[] = [];
+  parts.push(
+    `壁 横${qty.haveHm.toFixed(1)}/${qty.needM.toFixed(1)}${qty.okH ? "✓" : "✗"}`,
+    `縦${qty.haveVm.toFixed(1)}/${qty.needM.toFixed(1)}${qty.okV ? "✓" : "✗"}`,
+  );
+  const quadNG = quad.quadrants.filter((q) => !q.ok).map((q) => q.name);
+  if (quadNG.length > 0) {
+    parts.push(`四分割NG[${quadNG.join("/")}]`);
+  }
+  parts.push(`比${Math.round(ratio.ratio * 100)}%${ratio.ok ? "✓" : "✗"}`);
+  if (ecc) {
+    parts.push(`偏率eX${ecc.ex.toFixed(2)}/eY${ecc.ey.toFixed(2)}${ecc.ok ? "✓" : "✗"}`);
+  }
+  if (perim) {
+    parts.push(`外周${Math.round(perim.ratio * 100)}%${perim.ok ? "✓" : "✗"}`);
+  }
+  if (inter && !inter.ok) {
+    const d: string[] = [];
+    if (inter.hDeficit > 0) d.push(`横不足${inter.hDeficit.toFixed(1)}m`);
+    if (inter.vDeficit > 0) d.push(`縦不足${inter.vDeficit.toFixed(1)}m`);
+    if (d.length > 0) parts.push(`上下壁量NG(${d.join("/")})`);
+  }
+  if (r.breaksHere.length > 0) parts.push(`通り上×${r.breaksHere.length}`);
+  if (r.breaksBelow.length > 0) parts.push(`通り下×${r.breaksBelow.length}`);
+  return `${floor.name}: ${parts.join("  ")}`;
+}
+
+export function exportAllFloorsPng(
+  floors: FloorPlan[],
+  cellSize: number,
+  includeShear = false,
+  shearLayers: ShearLayerFlags = ALL_SHEAR_LAYERS,
+): void {
   const tsuboPerFloor = floors.map((f) => ({
-    canvas: renderFloorToCanvas(f, cellSize),
+    canvas: renderFloorToCanvas(
+      f,
+      cellSize,
+      includeShear ? floors : undefined,
+      includeShear ? shearLayers : undefined,
+    ),
     floor: f,
     name: f.name,
     tsubo:
@@ -385,8 +438,9 @@ export function exportAllFloorsPng(floors: FloorPlan[], cellSize: number): void 
   const FLOOR_LEGEND_HEIGHT = floorLegendRows * LABEL_HEIGHT;
   const WALL_LEGEND_HEIGHT = wallLegendRows * LABEL_HEIGHT;
   const ITEM_LEGEND_HEIGHT = itemLegendRows * (ICON_SIZE + 16);
+  const DIAG_HEIGHT = includeShear ? valid.length * LABEL_HEIGHT : 0;
   const FOOTER_HEIGHT =
-    LABEL_HEIGHT + FLOOR_LEGEND_HEIGHT + WALL_LEGEND_HEIGHT + ITEM_LEGEND_HEIGHT;
+    LABEL_HEIGHT + FLOOR_LEGEND_HEIGHT + WALL_LEGEND_HEIGHT + ITEM_LEGEND_HEIGHT + DIAG_HEIGHT;
   const totalH = valid.reduce((sum, r) => sum + r.canvas.height + LABEL_HEIGHT, 0) + FOOTER_HEIGHT;
 
   const combined = document.createElement("canvas");
@@ -600,6 +654,21 @@ export function exportAllFloorsPng(floors: FloorPlan[], cellSize: number): void 
         ITEM_LEGEND_LABEL.get(type) ?? def.label,
         lx + ICON_SIZE / 2,
         ly + ICON_SIZE + 2,
+      );
+    }
+  }
+
+  if (includeShear) {
+    const diagY = offsetY + ITEM_LEGEND_HEIGHT;
+    ctx.fillStyle = DIM_COLOR;
+    ctx.font = "11px 'IBM Plex Mono', monospace";
+    ctx.textAlign = "left";
+    ctx.textBaseline = "middle";
+    for (let i = 0; i < valid.length; i++) {
+      ctx.fillText(
+        diagnosticLine(valid[i].floor, floors),
+        MARGIN,
+        diagY + i * LABEL_HEIGHT + LABEL_HEIGHT / 2,
       );
     }
   }

@@ -15,15 +15,19 @@ const baseProps = {
   onShare: () => {},
   onToggleViewMode: () => {},
   onUndo: () => {},
+  shearCheck: false,
+  onToggleShear: () => {},
+  onOpenDsl: () => {},
   viewMode: "2d" as const,
 };
 
 describe("ActionTabs", () => {
-  it("renders 3 category tabs", () => {
+  it("renders the category tabs (edit/file/operation/inspect)", () => {
     const html = renderToString(<ActionTabs {...baseProps} onClose={() => {}} />);
     expect(html).toContain("編集");
     expect(html).toContain("ファイル");
     expect(html).toContain("操作");
+    expect(html).toContain("検査");
   });
 
   it("renders edit actions by default", () => {

@@ -4,6 +4,7 @@ import { getItemDrawOffset } from "../../draw/draw-items";
 import { drawVoidCells } from "../../draw/draw-void";
 import { drawWalls, drawWallPreview } from "../../draw/draw-walls";
 import { computeWallDimensions, fmtMm } from "../../draw/export";
+import { drawShearCheck, type ShearLayerFlags } from "../../draw/draw-shear-check";
 import { clearIconCache, getCachedIcon } from "../../draw/icons/cache";
 import { drawTatamiCells } from "../../draw/draw-tatami";
 import { normalizeSelection } from "../../floor/clipboard-logic";
@@ -19,12 +20,16 @@ interface Props {
   dynamicCanvasRef: React.RefObject<HTMLCanvasElement | null>;
   floor: FloorPlan;
   ghostFloors: FloorPlan[];
+  /** All floors in bottom-up story order (building.floors) — for cross-floor checks */
+  floors: FloorPlan[];
   cellSize: number;
   viewRef: ViewRef;
   selectionRef: SelectionRef;
   selectedItemCell: number | null;
   darkMode: boolean;
   tool: ToolMode;
+  shearCheck: boolean;
+  shearLayers: ShearLayerFlags;
 }
 
 function cssVar(name: string): string {
@@ -142,11 +147,14 @@ export function useCanvasDraw(props: Props): {
     dynamicCanvasRef,
     floor,
     ghostFloors,
+    floors,
     cellSize,
     viewRef,
     selectionRef,
     darkMode,
     tool,
+    shearCheck,
+    shearLayers,
   } = props;
 
   const ghostFloorsRef = useRef<FloorPlan[]>(ghostFloors);
@@ -283,6 +291,10 @@ export function useCanvasDraw(props: Props): {
       drawOverlay(ctx, floor, cellSize, wallDimRef.current);
     }
 
+    if (shearCheck) {
+      drawShearCheck(ctx, floor, floors, cellSize, shearLayers);
+    }
+
     if (wallPreview && wallPreview.length > 0) {
       drawWallPreview(ctx, wallPreview, cellSize, "rgba(37, 99, 235, 0.7)");
     }
@@ -326,7 +338,7 @@ export function useCanvasDraw(props: Props): {
         drawDynamic();
       }, 1000);
     },
-    [floor, cellSize, darkMode, tool],
+    [floors, floor, cellSize, darkMode, tool, shearCheck, shearLayers],
   );
 
   useEffect(() => {

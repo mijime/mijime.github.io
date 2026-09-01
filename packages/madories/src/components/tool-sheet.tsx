@@ -23,6 +23,9 @@ interface Props {
   darkMode: boolean;
   viewMode: "2d" | "3d";
   onToggleViewMode: () => void;
+  shearCheck: boolean;
+  onToggleShear: () => void;
+  onOpenDsl: () => void;
 }
 
 function ToolPanelContent({
@@ -42,6 +45,9 @@ function ToolPanelContent({
   darkMode,
   viewMode,
   onToggleViewMode,
+  shearCheck,
+  onToggleShear,
+  onOpenDsl,
   onClose,
 }: Props & { onClose?: () => void }) {
   return (
@@ -83,6 +89,9 @@ function ToolPanelContent({
           onClose={onClose}
           viewMode={viewMode}
           onToggleViewMode={onToggleViewMode}
+          shearCheck={shearCheck}
+          onToggleShear={onToggleShear}
+          onOpenDsl={onOpenDsl}
         />
       </div>
     </div>

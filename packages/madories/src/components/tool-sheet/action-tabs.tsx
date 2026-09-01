@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import {
+  Activity,
+  Braces,
   Download,
   FolderOpen,
   Link,
@@ -13,14 +15,19 @@ import {
 } from "lucide-react";
 import { btnBase } from "./styles";
 
-type ActionTab = "edit" | "file" | "operation";
+type ActionTab = "edit" | "file" | "operation" | "inspect";
 
 interface ActionItem {
   disabled: boolean;
   icon: React.ReactNode;
   id: string;
   onClick: () => void;
+  /** Tooltip (and title attr) — can be more descriptive */
   title: string;
+  /** Short visible label shown under the icon */
+  label: string;
+  /** When true the button renders as "on" (tinted) — e.g. an active mode toggle */
+  active?: boolean;
 }
 
 interface Props {
@@ -38,6 +45,9 @@ interface Props {
   onClose?: () => void;
   viewMode: "2d" | "3d";
   onToggleViewMode: () => void;
+  shearCheck: boolean;
+  onToggleShear: () => void;
+  onOpenDsl: () => void;
 }
 
 export function ActionTabs({
@@ -55,6 +65,9 @@ export function ActionTabs({
   onClose,
   viewMode,
   onToggleViewMode,
+  shearCheck,
+  onToggleShear,
+  onOpenDsl,
 }: Props) {
   const [activeTab, setActiveTab] = useState<ActionTab>("edit");
   const [clearPending, setClearPending] = useState(false);
@@ -66,8 +79,22 @@ export function ActionTabs({
   }, [clearPending]);
 
   const editActions: ActionItem[] = [
-    { disabled: !canUndo, icon: <Undo2 size={14} />, id: "undo", onClick: onUndo, title: "戻す" },
-    { disabled: !canRedo, icon: <Redo2 size={14} />, id: "redo", onClick: onRedo, title: "進む" },
+    {
+      disabled: !canUndo,
+      icon: <Undo2 size={14} />,
+      id: "undo",
+      label: "戻す",
+      onClick: onUndo,
+      title: "戻す",
+    },
+    {
+      disabled: !canRedo,
+      icon: <Redo2 size={14} />,
+      id: "redo",
+      label: "進む",
+      onClick: onRedo,
+      title: "進む",
+    },
   ];
 
   const fileActions: ActionItem[] = [
@@ -75,6 +102,7 @@ export function ActionTabs({
       disabled: false,
       icon: <Save size={14} />,
       id: "save",
+      label: "保存",
       onClick: () => {
         onSave();
         onClose?.();
@@ -85,6 +113,7 @@ export function ActionTabs({
       disabled: false,
       icon: <FolderOpen size={14} />,
       id: "load",
+      label: "読込",
       onClick: () => {
         onLoad();
         onClose?.();
@@ -95,6 +124,7 @@ export function ActionTabs({
       disabled: false,
       icon: <Download size={14} />,
       id: "export",
+      label: "書出",
       onClick: () => {
         onExportAll();
         onClose?.();
@@ -105,6 +135,7 @@ export function ActionTabs({
       disabled: false,
       icon: <Link size={14} />,
       id: "share",
+      label: "共有",
       onClick: () => {
         onShare();
         onClose?.();
@@ -118,6 +149,7 @@ export function ActionTabs({
       disabled: false,
       icon: <View size={14} />,
       id: "viewMode",
+      label: "2D/3D",
       onClick: onToggleViewMode,
       title: viewMode === "2d" ? "3D表示" : "2D表示",
     },
@@ -125,6 +157,7 @@ export function ActionTabs({
       disabled: false,
       icon: <Maximize2 size={14} />,
       id: "fitView",
+      label: "全体",
       onClick: onFitView,
       title: "全体表示",
     },
@@ -132,6 +165,7 @@ export function ActionTabs({
       disabled: false,
       icon: <RotateCw size={14} />,
       id: "rotate",
+      label: "回転",
       onClick: () => {
         onRotateFloor();
         onClose?.();
@@ -140,10 +174,34 @@ export function ActionTabs({
     },
   ];
 
+  const inspectActions: ActionItem[] = [
+    {
+      disabled: false,
+      icon: <Activity size={14} />,
+      id: "diagnose",
+      label: "診断",
+      onClick: onToggleShear,
+      title: shearCheck ? "診断OFF" : "診断ON",
+      active: shearCheck,
+    },
+    {
+      disabled: false,
+      icon: <Braces size={14} />,
+      id: "dsl",
+      label: "DSL",
+      onClick: () => {
+        onOpenDsl();
+        onClose?.();
+      },
+      title: "DSL",
+    },
+  ];
+
   const tabDefs: { key: ActionTab; label: string; actions: ActionItem[] }[] = [
     { key: "edit", label: "編集", actions: editActions },
     { key: "file", label: "ファイル", actions: fileActions },
     { key: "operation", label: "操作", actions: operationActions },
+    { key: "inspect", label: "検査", actions: inspectActions },
   ];
 
   const currentActions = tabDefs.find((t) => t.key === activeTab)?.actions ?? [];
@@ -170,26 +228,32 @@ export function ActionTabs({
         ))}
       </div>
       <div style={{ display: "flex", gap: "4px" }}>
-        {currentActions.map(({ icon, id, onClick, title, disabled }) => (
+        {currentActions.map(({ icon, id, label, onClick, title, disabled, active }) => (
           <button
             key={id}
             aria-label={title}
+            aria-pressed={active}
             title={title}
             disabled={disabled}
             onClick={onClick}
             style={{
               ...btnBase,
               alignItems: "center",
+              background: active ? "var(--terra)" : "transparent",
               borderRadius: "4px",
+              color: active ? "var(--paper)" : "var(--ink)",
               cursor: disabled ? "default" : "pointer",
               display: "flex",
               flex: 1,
+              flexDirection: "column",
+              gap: "2px",
               justifyContent: "center",
               opacity: disabled ? 0.4 : 1,
-              padding: "6px 0",
+              padding: "4px 0",
             }}
           >
             {icon}
+            <span style={{ fontSize: "8px", letterSpacing: "0.02em" }}>{label}</span>
           </button>
         ))}
       </div>

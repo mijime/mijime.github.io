@@ -28,6 +28,8 @@ import type { ToolMode } from "./tool-mode";
 import { FLOOR_TYPES, floorTypeToSwatchStyle } from "./tool-mode";
 import { ToolSheet } from "./tool-sheet";
 import type { FloorPlan } from "../types";
+import { ShearDiagnostic } from "./shear-diagnostic";
+import { ALL_SHEAR_LAYERS, type ShearLayerFlags } from "../draw/draw-shear-check";
 
 const Preview3D = lazy(() => import("./preview-3d"));
 
@@ -75,6 +77,9 @@ export function App() {
   const [roomPicker, setRoomPicker] = useState<{ cellIndex: number; x: number; y: number } | null>(
     null,
   );
+  const [shearCheck, setShearCheck] = useState(false);
+  const [shearLayers, setShearLayers] = useState<ShearLayerFlags>(ALL_SHEAR_LAYERS);
+  const [exportShear, setExportShear] = useState(false);
 
   const { building, activeFloorId } = current;
 
@@ -311,19 +316,6 @@ export function App() {
             }}
           />
         </div>
-        <button
-          className="md:hidden px-3 py-2 uppercase"
-          onClick={() => setDslOpen(true)}
-          style={{
-            color: "var(--mid)",
-            fontFamily: "IBM Plex Mono, monospace",
-            fontSize: "10px",
-            letterSpacing: "0.1em",
-            whiteSpace: "nowrap",
-          }}
-        >
-          DSL
-        </button>
       </div>
       <div className="flex flex-1 overflow-hidden">
         <ToolSheet
@@ -357,12 +349,17 @@ export function App() {
               setToast("読み込みました");
             });
           }}
-          onExportAll={() => exportAllFloorsPng(building.floors, building.cellSize)}
+          onExportAll={() =>
+            exportAllFloorsPng(building.floors, building.cellSize, exportShear, shearLayers)
+          }
           onShare={handleShare}
           onClear={() => dispatch({ floorId: floor.id, type: "CLEAR_FLOOR" })}
           onRotateFloor={() => dispatch({ floorId: floor.id, type: "ROTATE_FLOOR" })}
           viewMode={viewMode}
           onToggleViewMode={() => setViewMode((v) => (v === "2d" ? "3d" : "2d"))}
+          shearCheck={shearCheck}
+          onToggleShear={() => setShearCheck((s) => !s)}
+          onOpenDsl={() => setDslOpen(true)}
         />
         <DslPanel
           key={activePlanId}
@@ -390,6 +387,9 @@ export function App() {
                 cellSize={building.cellSize}
                 darkMode={dark}
                 tool={tool}
+                shearCheck={shearCheck}
+                floors={building.floors}
+                shearLayers={shearLayers}
                 onSetWalls={(edges: EdgeRef[], wallType) => {
                   dispatch({
                     edges,
@@ -496,6 +496,25 @@ export function App() {
           </div>
         </div>
       </div>
+      {shearCheck && (
+        <div
+          className="max-h-[calc(100vh-90px)] overflow-y-auto"
+          style={{ position: "fixed", right: "8px", top: "80px", zIndex: 55 }}
+        >
+          <ShearDiagnostic
+            floor={floor}
+            floors={building.floors}
+            layers={shearLayers}
+            onToggleLayer={(key) => setShearLayers((s) => ({ ...s, [key]: !s[key] }))}
+            exportShear={exportShear}
+            onToggleExportShear={() => setExportShear((s) => !s)}
+            onAddWalls={(edges) =>
+              dispatch({ edges, floorId: floor.id, type: "SET_WALLS", wallType: "solid" })
+            }
+            onClose={() => setShearCheck(false)}
+          />
+        </div>
+      )}
       {roomPicker && (
         <div
           style={{
