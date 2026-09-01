@@ -338,7 +338,7 @@ export function useCanvasDraw(props: Props): {
         drawDynamic();
       }, 1000);
     },
-    [floor, cellSize, darkMode, tool, shearCheck],
+    [floors, floor, cellSize, darkMode, tool, shearCheck, shearLayers],
   );
 
   useEffect(() => {
