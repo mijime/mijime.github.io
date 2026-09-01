@@ -152,7 +152,7 @@ export function ShearDiagnostic({
           style={{
             alignItems: "center",
             display: "flex",
-            gap: "4px",
+            gap: "16px",
           }}
         >
           <button
@@ -164,7 +164,9 @@ export function ShearDiagnostic({
               color: "var(--mid)",
               cursor: "pointer",
               fontFamily: "IBM Plex Mono, monospace",
-              fontSize: "12px",
+              fontSize: "16px",
+              minWidth: "32px",
+              minHeight: "32px",
               padding: "0",
             }}
           >
@@ -178,7 +180,9 @@ export function ShearDiagnostic({
               color: "var(--mid)",
               cursor: "pointer",
               fontFamily: "IBM Plex Mono, monospace",
-              fontSize: "13px",
+              fontSize: "17px",
+              minWidth: "32px",
+              minHeight: "32px",
               padding: "0",
             }}
           >
