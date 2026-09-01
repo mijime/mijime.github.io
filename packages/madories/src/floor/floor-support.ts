@@ -88,7 +88,8 @@ export function computeFloorSupport(floors: FloorPlan[]): FloorSupport[] {
         if (best === Infinity) {
           continue;
         }
-        const spanM = best * 0.91;
+        // 支持までの距離は「半スパン」。床梁が渡る実質スパンは両側で約2倍。
+        const spanM = best * 0.91 * 2;
         if (spanM > maxSpanM) {
           maxSpanM = spanM;
         }

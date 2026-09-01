@@ -18,46 +18,27 @@ function paint(f: ReturnType<typeof floor>, x1: number, y1: number, x2: number, 
 }
 
 describe("computeFloorSupport", () => {
-  it("flags no cells when the upper deck sits within the lower walled area", () => {
-    // 1F: a 6x6 solid-walled room; 2F: floor only inside it (max ~2 cells from a wall).
+  it("flags no cells for a small, well-supported deck", () => {
+    // 1F: a 2-cell-wide slot walled on both sides; 2F deck sits inside it.
     const lower = setWallsPure(
-      floor(12, 12),
+      floor(10, 10),
       [
-        { kind: "h", x: 3, y: 3 },
-        { kind: "h", x: 4, y: 3 },
-        { kind: "h", x: 5, y: 3 },
-        { kind: "h", x: 6, y: 3 },
-        { kind: "h", x: 7, y: 3 },
-        { kind: "h", x: 8, y: 3 },
-        { kind: "h", x: 3, y: 9 },
-        { kind: "h", x: 4, y: 9 },
-        { kind: "h", x: 5, y: 9 },
-        { kind: "h", x: 6, y: 9 },
-        { kind: "h", x: 7, y: 9 },
-        { kind: "h", x: 8, y: 9 },
         { kind: "v", x: 3, y: 3 },
         { kind: "v", x: 3, y: 4 },
         { kind: "v", x: 3, y: 5 },
-        { kind: "v", x: 3, y: 6 },
-        { kind: "v", x: 3, y: 7 },
-        { kind: "v", x: 3, y: 8 },
-        { kind: "v", x: 9, y: 3 },
-        { kind: "v", x: 9, y: 4 },
-        { kind: "v", x: 9, y: 5 },
-        { kind: "v", x: 9, y: 6 },
-        { kind: "v", x: 9, y: 7 },
-        { kind: "v", x: 9, y: 8 },
+        { kind: "v", x: 5, y: 3 },
+        { kind: "v", x: 5, y: 4 },
+        { kind: "v", x: 5, y: 5 },
       ],
       "solid",
     );
-    // 2F deck only the 6x6 interior (x4-8, y4-8): all cells within ~2 cells of a wall.
-    const upper = paint(floor(12, 12), 4, 4, 8, 8);
+    const upper = paint(floor(10, 10), 4, 4, 5, 6);
     const [sup] = computeFloorSupport([lower, upper]);
     expect(sup).toBeTruthy();
     expect(sup!.overCount).toBe(0);
   });
 
-  it("flags 2F deck that extends far from the single 1F support", () => {
+  it("flags a wide deck spanning far past a single 1F support", () => {
     // 1F: only a thin vertical wall at x=1.
     const lower = setWallsPure(
       floor(12, 12),
@@ -73,7 +54,7 @@ describe("computeFloorSupport", () => {
     const [sup] = computeFloorSupport([lower, upper]);
     expect(sup).toBeTruthy();
     expect(sup!.overCount).toBeGreaterThan(0);
-    // Cells far from x=1 have a long span; flag them via the span map.
+    // Cells far from x=1 have a long clear span; flag them via the span map.
     let farX: { x: number; spanM: number } | undefined;
     if (sup) {
       farX = undefined;

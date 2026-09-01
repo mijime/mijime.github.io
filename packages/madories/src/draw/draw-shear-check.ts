@@ -143,11 +143,11 @@ export function drawShearCheck(
   ctx.restore();
 }
 
-// 床支持: 閾値(3.6m)を超えた"ヤバい"床領域だけを、遠いほど濃い赤で描く。
-// 近さの赤の濃さは、閾値から2倍(7.2m)まで0→1にランプする。
+// 床支持: 全クリアスパン(≈支持距離×2)が閾値(3.6m)を超えた"ヤバい"床領域だけを、
+// スパンが長いほど濃い赤で描く。閾値〜2倍(7.2m)まで alpha 0.35→0.8。
 function spanAlpha(spanM: number): number {
   const t = Math.min(1, Math.max(0, (spanM - SUPPORT_SPAN_MAX_M) / SUPPORT_SPAN_MAX_M));
-  return 0.2 + 0.5 * t; // 0.2 … 0.7 — 赤の強さ
+  return 0.35 + 0.45 * t; // 0.35 … 0.8 — 赤の強さ
 }
 
 function drawFloorSupport(
