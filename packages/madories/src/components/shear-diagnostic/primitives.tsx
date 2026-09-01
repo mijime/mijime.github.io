@@ -144,3 +144,84 @@ export function CheckRow({
     </label>
   );
 }
+
+export type OkState = boolean | undefined;
+
+function okColor(ok: OkState): string {
+  if (ok === undefined) {
+    return "var(--mid)";
+  }
+  return ok ? "rgb(46,160,90)" : "rgb(217,58,45)";
+}
+
+/** Small OK/NG pill used in the summary bar. */
+export function Chip({ label, ok, count }: { label: string; ok: OkState; count?: number }) {
+  const color = okColor(ok);
+  return (
+    <span
+      style={{
+        alignItems: "center",
+        background: "var(--paper)",
+        border: `1px solid ${color}`,
+        borderRadius: "999px",
+        color,
+        display: "inline-flex",
+        fontFamily: "IBM Plex Mono, monospace",
+        fontSize: "9px",
+        gap: "4px",
+        padding: "2px 6px",
+      }}
+    >
+      <span style={{ background: color, borderRadius: "50%", height: "6px", width: "6px" }} />
+      {label}
+      {count ? ` ×${count}` : ""}
+    </span>
+  );
+}
+
+export interface TabDef {
+  id: string;
+  label: string;
+}
+
+/** Segmented tab bar (fills the row). */
+export function TabBar({
+  tabs,
+  active,
+  onSelect,
+}: {
+  tabs: TabDef[];
+  active: string;
+  onSelect: (id: string) => void;
+}) {
+  return (
+    <div
+      style={{
+        borderTop: "1px solid var(--border)",
+        display: "flex",
+        gap: "4px",
+        paddingTop: "6px",
+      }}
+    >
+      {tabs.map((t) => (
+        <button
+          key={t.id}
+          onClick={() => onSelect(t.id)}
+          style={{
+            background: active === t.id ? "var(--ink)" : "transparent",
+            border: active === t.id ? "none" : "1px solid var(--border)",
+            borderRadius: "4px",
+            color: active === t.id ? "var(--paper)" : "var(--mid)",
+            cursor: "pointer",
+            flex: 1,
+            fontFamily: "IBM Plex Mono, monospace",
+            fontSize: "9px",
+            padding: "3px 0",
+          }}
+        >
+          {t.label}
+        </button>
+      ))}
+    </div>
+  );
+}

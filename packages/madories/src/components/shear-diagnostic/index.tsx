@@ -1,11 +1,20 @@
 import { useState } from "react";
 import type { EdgeRef, FloorPlan } from "../../types";
-import { computeStructuralReport } from "../../floor/structural-report";
-import { Gauge, mono, Panel, PanelSection } from "./primitives";
-import { LayerToggles } from "./LayerToggles";
-import { QuadrantRows } from "./QuadrantRows";
-import { MetricGroup } from "./MetricGroup";
 import type { ShearLayerFlags } from "../../draw/draw-shear-check";
+import { computeStructuralReport, type StructuralReport } from "../../floor/structural-report";
+import { mono, Panel, TabBar, type TabDef } from "./primitives";
+import { SummaryBar } from "./SummaryBar";
+import { WallTab } from "./WallTab";
+import { BalanceTab } from "./BalanceTab";
+import { VerticalTab } from "./VerticalTab";
+import { DisplayTab } from "./DisplayTab";
+
+const TABS: TabDef[] = [
+  { id: "wall", label: "壁量" },
+  { id: "balance", label: "分布" },
+  { id: "vertical", label: "上下" },
+  { id: "display", label: "表示" },
+];
 
 interface Props {
   floor: FloorPlan;
@@ -29,9 +38,9 @@ export function ShearDiagnostic({
   onAddWalls,
   onClose,
 }: Props) {
-  const [collapsed, setCollapsed] = useState(false);
   const report = computeStructuralReport(floor, floors);
-  const { wallQuantity } = report;
+  const [collapsed, setCollapsed] = useState(false);
+  const [tab, setTab] = useState<string>(initialTab(report));
 
   return (
     <Panel>
@@ -63,40 +72,21 @@ export function ShearDiagnostic({
 
       {!collapsed && (
         <>
-          <LayerToggles
-            layers={layers}
-            onToggleLayer={onToggleLayer}
-            exportShear={exportShear}
-            onToggleExportShear={onToggleExportShear}
-          />
-          <PanelSection gap={4}>
-            <Gauge label="横" have={wallQuantity.haveHm} need={wallQuantity.needM} />
-            <Gauge label="縦" have={wallQuantity.haveVm} need={wallQuantity.needM} />
-          </PanelSection>
-          <QuadrantRows floor={floor} balance={report.quadrant} onAddWalls={onAddWalls} />
-          <MetricGroup report={report} />
-          {floors.length >= 2 &&
-            (report.breaksHere.length > 0 || report.breaksBelow.length > 0) && (
-              <div
-                style={{
-                  ...mono,
-                  borderTop: "1px solid var(--border)",
-                  color: "var(--mid)",
-                  display: "flex",
-                  flexDirection: "column",
-                  fontSize: "10px",
-                  gap: "2px",
-                  paddingTop: "6px",
-                }}
-              >
-                {report.breaksHere.length > 0 && (
-                  <span>▹ 通りズレ:上階壁 ×{report.breaksHere.length}</span>
-                )}
-                {report.breaksBelow.length > 0 && (
-                  <span>▹ 通りズレ:下階壁 ×{report.breaksBelow.length}</span>
-                )}
-              </div>
-            )}
+          <SummaryBar report={report} />
+          <TabBar tabs={TABS} active={tab} onSelect={setTab} />
+          {tab === "wall" && <WallTab report={report} />}
+          {tab === "balance" && (
+            <BalanceTab floor={floor} report={report} onAddWalls={onAddWalls} />
+          )}
+          {tab === "vertical" && <VerticalTab report={report} />}
+          {tab === "display" && (
+            <DisplayTab
+              layers={layers}
+              onToggleLayer={onToggleLayer}
+              exportShear={exportShear}
+              onToggleExportShear={onToggleExportShear}
+            />
+          )}
           <div style={{ ...mono, color: "var(--mid)", fontSize: "9px", lineHeight: 1.5 }}>
             簡易目安です。実際の構造・耐震計算は建築士/構造設計者に相談してください。
           </div>
@@ -104,6 +94,30 @@ export function ShearDiagnostic({
       )}
     </Panel>
   );
+}
+
+/** NG がある最初のタブを初期表示（問題を拾いやすい） */
+function initialTab(report: StructuralReport): string {
+  const wallNg = !report.wallQuantity.okH || !report.wallQuantity.okV || !report.balanceRatio.ok;
+  const balanceNg =
+    report.quadrant.quadrants.some((q) => !q.ok) ||
+    report.eccentricity?.ok === false ||
+    report.perimeter?.ok === false;
+  const verticalNg =
+    (report.interFloor ? !report.interFloor.ok : false) ||
+    (report.support ? report.support.overCount > 0 : false) ||
+    report.breaksHere.length > 0 ||
+    report.breaksBelow.length > 0;
+  if (wallNg) {
+    return "wall";
+  }
+  if (balanceNg) {
+    return "balance";
+  }
+  if (verticalNg) {
+    return "vertical";
+  }
+  return "wall";
 }
 
 function iconButton(fontSize: number) {
