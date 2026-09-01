@@ -38,6 +38,48 @@ export function computeWallQuantity(floor: FloorPlan): WallQuantity {
   return { areaM2, haveHm, haveVm, needM, okH: haveHm >= needM, okV: haveVm >= needM };
 }
 
+export interface InterFloorWallBalance {
+  /** Index of the LOWER floor in the compared pair (upper = lowerIndex+1) */
+  lowerIndex: number;
+  /** Lower - upper shear-wall length (m), per direction. Positive = the lower
+   * floor has LESS than the floor above = under-braced down there. */
+  hDeficit: number;
+  vDeficit: number;
+  hLower: number;
+  vLower: number;
+  hUpper: number;
+  vUpper: number;
+  ok: boolean;
+}
+
+/**
+ * 上下壁量バランス: lateral load accumulates downward, so each lower floor must
+ * carry at least as much shear wall (per direction) as the floor above it.
+ * This is the real vertical continuity check — unlike wall-position alignment,
+ * which only needs diaphragm/beam transfer. Returns one entry per adjacent pair
+ * (floors must be ordered bottom-up).
+ */
+export function computeInterFloorWallBalance(floors: FloorPlan[]): InterFloorWallBalance[] {
+  const out: InterFloorWallBalance[] = [];
+  for (let i = 0; i + 1 < floors.length; i++) {
+    const lower = computeWallQuantity(floors[i]);
+    const upper = computeWallQuantity(floors[i + 1]);
+    const hDeficit = upper.haveHm - lower.haveHm;
+    const vDeficit = upper.haveVm - lower.haveVm;
+    out.push({
+      hDeficit,
+      hLower: lower.haveHm,
+      hUpper: upper.haveHm,
+      lowerIndex: i,
+      ok: hDeficit <= 0 && vDeficit <= 0,
+      vDeficit,
+      vLower: lower.haveVm,
+      vUpper: upper.haveVm,
+    });
+  }
+  return out;
+}
+
 export interface WallSuggestion {
   kind: "h" | "v";
   x: number;

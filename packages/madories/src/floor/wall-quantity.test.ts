@@ -1,10 +1,16 @@
 import { describe, expect, it } from "vitest";
 import { createFloorPlan } from "../store";
 import { setWallsPure } from "./walls";
-import { computeWallQuantity, suggestWallRun } from "./wall-quantity";
+import { computeInterFloorWallBalance, computeWallQuantity, suggestWallRun } from "./wall-quantity";
 import type { FloorPlan } from "../types";
 
-function encloseRect(floor: FloorPlan, x1: number, y1: number, x2: number, y2: number): FloorPlan {
+export function encloseRect(
+  floor: FloorPlan,
+  x1: number,
+  y1: number,
+  x2: number,
+  y2: number,
+): FloorPlan {
   const edges: { kind: "h" | "v"; x: number; y: number }[] = [];
   for (let x = x1; x <= x2; x++) {
     edges.push({ kind: "h", x, y: y1 }, { kind: "h", x, y: y2 + 1 });
@@ -50,5 +56,29 @@ describe("suggestWallRun", () => {
     const floor = createFloorPlan("test", 4, 4);
     const suggestion = suggestWallRun(floor, "NW", "h");
     expect(suggestion).toBeNull();
+  });
+});
+
+describe("computeInterFloorWallBalance", () => {
+  it("flags a lower floor with less shear wall than the floor above", () => {
+    const lower = encloseRect(createFloorPlan("t", 8, 8), 1, 1, 2, 2); // Small (weak)
+    const upper = encloseRect(createFloorPlan("t", 8, 8), 1, 1, 5, 5); // Large (strong)
+    const [bal] = computeInterFloorWallBalance([lower, upper]);
+    expect(bal.ok).toBe(false);
+    expect(bal.hDeficit).toBeGreaterThan(0);
+    expect(bal.vDeficit).toBeGreaterThan(0);
+  });
+
+  it("passes when the lower floor carries at least as much wall", () => {
+    const lower = encloseRect(createFloorPlan("t", 8, 8), 1, 1, 5, 5); // Strong
+    const upper = encloseRect(createFloorPlan("t", 8, 8), 1, 1, 2, 2); // Weak
+    const [bal] = computeInterFloorWallBalance([lower, upper]);
+    expect(bal.ok).toBe(true);
+    expect(bal.hDeficit).toBeLessThan(0);
+    expect(bal.vDeficit).toBeLessThan(0);
+  });
+
+  it("returns nothing for a single floor", () => {
+    expect(computeInterFloorWallBalance([createFloorPlan("t", 6, 6)])).toEqual([]);
   });
 });

@@ -25,7 +25,6 @@ const DOT_OUTLINE = "rgba(255,255,255,0.85)";
 // Suggested shear-wall ghost.
 const SUGGEST_COLOR = "rgba(59,130,246,0.9)"; // Blue dashed line
 // Load-path-break markers: alpha varies with severity.
-const BREAK_OUTLINE = "rgba(255,255,255,0.9)";
 // 剛心 (rigidity center, blue cross) vs 重心 (mass center, white circle) markers.
 const RIGID_COLOR = "rgba(59,130,246,0.95)";
 const MASS_FILL = "rgba(255,255,255,0.95)";
@@ -157,19 +156,12 @@ function drawRigidCenterOverlay(
   ctx.stroke();
 }
 
-// 荷重経路途切れ (load-path breaks): the inverse of 通し柱. Draw diamond markers
-// At vertices where a wall-run endpoint lacks a structural support directly
-// Below. Two cases are shown on the current floor:
-//  - break.floorIndex === activeIndex+1 : an UPPER floor's wall is unsupported
-//    HERE -> the fix is to add a wall/column on this floor (filled violet).
-//  - break.floorIndex === activeIndex    : THIS floor's wall is unsupported on
-//    The floor below -> the fix belongs downstairs (amber outline).
-// 紫(上階未支持)の濃淡: longer wall run floating at a vertex = more concentrated
-// Load = darker violet. Alpha ramps from ~0.38 (single 0.91m cell) to ~1.0 at a
-// 3-cell (2.73m) run.
+// 通りズレ (格下げ・ソフト) 表示: 上階壁端が下階と列が合ってない位置を、
+// 警告ではなく控えめなアンバー枠で提示する。実構造上は梁・床ダイアフラムで
+// 伝わるのでNGではない ＝ 塗り潰しは使わない。濃淡は軽いseverityのみ。
 function breakAlpha(length: number): number {
   const t = Math.min(1, Math.max(0, length / 2730));
-  return 0.38 + 0.62 * t;
+  return 0.22 + 0.28 * t; // 0.22 … 0.50 に留め、目立たない範囲で
 }
 
 function drawLoadBreakMarkers(
@@ -182,20 +174,9 @@ function drawLoadBreakMarkers(
   if (activeIndex === -1) {
     return;
   }
-  const size = Math.max(4, cellSize * 0.4);
+  const size = Math.max(4, cellSize * 0.32);
   for (const b of detectLoadPathBreaks(floors)) {
-    const a = breakAlpha(b.length);
-    if (b.floorIndex === activeIndex + 1) {
-      drawBreakDiamond(
-        ctx,
-        b.x,
-        b.y,
-        size,
-        cellSize,
-        `rgba(168,85,247,${a.toFixed(2)})`,
-        BREAK_OUTLINE,
-      );
-    } else if (b.floorIndex === activeIndex) {
+    if (b.floorIndex === activeIndex + 1 || b.floorIndex === activeIndex) {
       drawBreakDiamond(
         ctx,
         b.x,
@@ -203,7 +184,7 @@ function drawLoadBreakMarkers(
         size,
         cellSize,
         "transparent",
-        `rgba(240,166,60,${a.toFixed(2)})`,
+        `rgba(240,166,60,${breakAlpha(b.length).toFixed(2)})`,
       );
     }
   }

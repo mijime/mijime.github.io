@@ -1,6 +1,10 @@
 import type { EdgeRef, FloorPlan } from "../types";
 import { computeQuadrantBalance } from "../floor/quadrant-balance";
-import { computeWallQuantity, suggestWallRun } from "../floor/wall-quantity";
+import {
+  computeInterFloorWallBalance,
+  computeWallQuantity,
+  suggestWallRun,
+} from "../floor/wall-quantity";
 import { detectLoadPathBreaks } from "../floor/shear-walls";
 import {
   computeBalanceRatio,
@@ -31,6 +35,7 @@ export function ShearDiagnostic({ floor, floors, activeFloorId, onAddWalls, onCl
   const balanceRatio = computeBalanceRatio(floor);
   const ecc = computeEccentricity(floor);
   const perim = computePerimeterContinuity(floor);
+  const interFloor = computeInterFloorWallBalance(floors).find((b) => b.lowerIndex === activeIndex);
 
   function MiniRow({
     label,
@@ -244,6 +249,22 @@ export function ShearDiagnostic({ floor, floors, activeFloorId, onAddWalls, onCl
           ok={perim?.ok}
           value={perim ? `${Math.round(perim.ratio * 100)}%` : "—"}
         />
+        <MiniRow
+          label="上下壁量"
+          ok={interFloor?.ok}
+          value={
+            interFloor
+              ? interFloor.ok
+                ? "OK"
+                : [
+                    interFloor.hDeficit > 0 ? `横不足${interFloor.hDeficit.toFixed(1)}m` : null,
+                    interFloor.vDeficit > 0 ? `縦不足${interFloor.vDeficit.toFixed(1)}m` : null,
+                  ]
+                    .filter(Boolean)
+                    .join(" ") || "OK"
+              : "—"
+          }
+        />
       </div>
 
       {floors.length >= 2 && (breaksHere.length > 0 || breaksBelow.length > 0) && (
@@ -251,7 +272,7 @@ export function ShearDiagnostic({ floor, floors, activeFloorId, onAddWalls, onCl
           style={{
             ...mono,
             borderTop: "1px solid var(--border)",
-            color: "var(--terra)",
+            color: "var(--mid)",
             display: "flex",
             flexDirection: "column",
             fontSize: "10px",
@@ -259,8 +280,8 @@ export function ShearDiagnostic({ floor, floors, activeFloorId, onAddWalls, onCl
             paddingTop: "6px",
           }}
         >
-          {breaksHere.length > 0 && <span>▹ 上階の壁がこの階に未支持 ×{breaksHere.length}</span>}
-          {breaksBelow.length > 0 && <span>▹ この階の壁が下階に未支持 ×{breaksBelow.length}</span>}
+          {breaksHere.length > 0 && <span>▹ 通りズレ:上階壁 ×{breaksHere.length}</span>}
+          {breaksBelow.length > 0 && <span>▹ 通りズレ:下階壁 ×{breaksBelow.length}</span>}
         </div>
       )}
 
