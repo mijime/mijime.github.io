@@ -87,8 +87,9 @@ export const WALK = {
   playerRadiusM: 0.35, // 衝突判定のプレイヤー半径(m)
   // 視点回転の感度(rad/px)。桁違いに大きくすると回りすぎる
   pointerSpeed: 0.5,
-  // ダンピング補間の追従係数。大きいほどドラッグへ即応(高すぎるとカクつく)
-  lookDamping: 15,
+  // タッチ視点回転の感度倍率。俯瞰(OrbitControls)と同じ基準(2π/clientHeight)への掛け算。
+  // 1で俯瞰と同じ感覚。大きくすると敏感
+  touchLookSensitivity: 1.5,
 };
 
 export type CameraMode = "orbit" | "walk";
