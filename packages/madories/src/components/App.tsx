@@ -33,7 +33,6 @@ import { ShearDiagnostic } from "./shear-diagnostic";
 import { ALL_SHEAR_LAYERS, type ShearLayerFlags } from "../draw/draw-shear-check";
 
 const Preview3D = lazy(() => import("./preview-3d"));
-import { VirtualJoystick } from "./preview-3d/virtual-joystick";
 
 function FloorStats({ floor }: { floor: FloorPlan }) {
   const { storage, windows } = computeFloorScores(floor);
@@ -70,8 +69,10 @@ export function App() {
   const [activePlanId, setActivePlanIdState] = useState<string | null>(null);
   const [ready, setReady] = useState(false);
   const [viewMode, setViewMode] = useState<"2d" | "3d">("2d");
-  const [cameraMode, setCameraMode] = useState<CameraMode>("orbit");
-  // ウォーキングの移動入力(仮想ジョイスティックとキーの合成先)
+  // 3Dは俯瞰(OrbitControls)のみ。歩くモードUIは一時的に削除(コードは残す)
+  const cameraMode: CameraMode = "orbit";
+  // ウォーキングの移動入力(仮想ジョイスティックとキーの合成先)。UI削除により未使用だが
+  // Preview3D が必須で受けるためダミーで保持(後日歩く機能を戻す時のため)
   const moveRef = useRef({ x: 0, z: 0 });
   const [tool, setTool] = useState<ToolMode>({ kind: "select" });
   const canvasRef = useRef<FloorCanvasHandle>(null);
@@ -507,57 +508,6 @@ export function App() {
                   cellSize={building.cellSize}
                   darkMode={dark}
                 />
-                {cameraMode === "walk" && (
-                  <>
-                    {/* 一人称の照準ドット */}
-                    <div
-                      style={{
-                        alignItems: "center",
-                        background: "rgba(255,255,255,0.9)",
-                        borderRadius: "50%",
-                        display: "flex",
-                        height: 6,
-                        justifyContent: "center",
-                        left: "50%",
-                        margin: "-3px 0 0 -3px",
-                        pointerEvents: "none",
-                        position: "absolute",
-                        top: "50%",
-                        width: 6,
-                        zIndex: 15,
-                      }}
-                    />
-                  </>
-                )}
-                <VirtualJoystick move={moveRef} />
-                <div
-                  className="flex gap-2 rounded-lg"
-                  style={{
-                    background: dark ? "rgba(0,0,0,0.6)" : "rgba(255,255,255,0.8)",
-                    padding: "4px",
-                    position: "absolute",
-                    right: "12px",
-                    top: "12px",
-                    zIndex: 10,
-                  }}
-                >
-                  {(["orbit", "walk"] as const).map((mode) => (
-                    <button
-                      key={mode}
-                      onClick={() => setCameraMode(mode)}
-                      style={{
-                        background: cameraMode === mode ? "var(--terra)" : "transparent",
-                        color: cameraMode === mode ? "#fff" : "var(--ink)",
-                        fontSize: "12px",
-                        minHeight: 28,
-                        minWidth: 56,
-                        padding: "0 8px",
-                      }}
-                    >
-                      {mode === "orbit" ? "俯瞰" : "歩く"}
-                    </button>
-                  ))}
-                </div>
               </Suspense>
             )}
           </div>
