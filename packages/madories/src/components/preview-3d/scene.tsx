@@ -5,26 +5,72 @@ import {
   OrbitControls,
   PerspectiveCamera,
 } from "@react-three/drei";
-import { Canvas } from "@react-three/fiber";
+import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { useMemo } from "react";
+import * as THREE from "three";
 import type { FloorPlan } from "../../types";
-import { CAMERA, LIGHTING } from "./config";
+import { type CameraMode, CAMERA, LIGHTING } from "./config";
 import { BoxList, useSharedMaterials } from "./meshes";
-import { buildSceneModel } from "./scene-model";
+import { buildBuildingScene } from "./scene-model";
+import { WalkControls } from "./walk-controls";
 
 interface Props {
-  floor: FloorPlan;
+  floors: FloorPlan[];
+  cameraMode: CameraMode;
+  // ウォーキング時に入力(キー/ジョイスティック合成)を渡す共有ref
+  move: React.MutableRefObject<{ x: number; z: number }>;
   darkMode: boolean;
 }
 
-export function FloorPlanScene({ floor, darkMode }: Props) {
-  const model = useMemo(() => buildSceneModel(floor), [floor]);
+interface OrbitControlsLike {
+  target: THREE.Vector3;
+}
+
+// 俯瞰モードのジョイスティックパン: makeDefault で登録された OrbitControls(state.controls)を
+// 操作して target+カメラを水平に動かす。OrbitControls 自体は素の makeDefault のまま(refを握らない)。
+function OrbitPan({
+  move,
+  panSpeed,
+}: {
+  move: React.MutableRefObject<{ x: number; z: number }>;
+  panSpeed: number;
+}) {
+  const { camera } = useThree();
+  const controls = useThree((s) => s.controls) as OrbitControlsLike | null;
+  const right = useMemo(() => new THREE.Vector3(), []);
+  const fwd = useMemo(() => new THREE.Vector3(), []);
+  const delta = useMemo(() => new THREE.Vector3(), []);
+  useFrame((_, frameDelta) => {
+    if (!controls) return;
+    const { x, z } = move.current;
+    if (x === 0 && z === 0) return;
+    // カメラの右ベクトルと、水平投影した前方ベクトルで移動方向を作る
+    camera.getWorldDirection(fwd);
+    fwd.y = 0;
+    if (fwd.lengthSq() < 1e-6) return;
+    fwd.normalize();
+    right.set(fwd.z, 0, -fwd.x); // -Z前方からの右=+X方向
+    const step = panSpeed * frameDelta;
+    delta
+      .set(0, 0, 0)
+      .addScaledVector(fwd, z * step)
+      .addScaledVector(right, x * step);
+    camera.position.add(delta);
+    controls.target.add(delta);
+  });
+  return null;
+}
+
+export function FloorPlanScene({ floors, cameraMode, move, darkMode }: Props) {
+  // 全階を縦に積んだモデルを1回だけ構築
+  const model = useMemo(() => buildBuildingScene(floors), [floors]);
   const materials = useSharedMaterials(darkMode);
 
   const maxDim = Math.max(model.bounds.width, model.bounds.depth);
   const camDist = maxDim * CAMERA.distanceFactor;
   const bg = darkMode ? "#1a1a1a" : "#eceae6";
   const [dirX, dirY, dirZ] = LIGHTING.directional.positionFactor;
+  const panSpeed = maxDim * CAMERA.panSpeedFactor;
 
   return (
     <Canvas
@@ -33,16 +79,23 @@ export function FloorPlanScene({ floor, darkMode }: Props) {
       gl={{ alpha: false, antialias: true }}
     >
       <PerspectiveCamera makeDefault fov={CAMERA.fov} position={[0, camDist, camDist]} />
-      <OrbitControls
-        makeDefault
-        enablePan={false}
-        minPolarAngle={CAMERA.minPolarAngle}
-        maxPolarAngle={CAMERA.maxPolarAngle}
-        minDistance={maxDim * CAMERA.minDistanceFactor}
-        maxDistance={maxDim * CAMERA.maxDistanceFactor}
-        enableDamping
-        dampingFactor={0.1}
-      />
+      {cameraMode === "orbit" ? (
+        <>
+          <OrbitControls
+            makeDefault
+            enablePan={false}
+            minPolarAngle={CAMERA.minPolarAngle}
+            maxPolarAngle={CAMERA.maxPolarAngle}
+            minDistance={maxDim * CAMERA.minDistanceFactor}
+            maxDistance={maxDim * CAMERA.maxDistanceFactor}
+            enableDamping
+            dampingFactor={0.1}
+          />
+          <OrbitPan move={move} panSpeed={panSpeed} />
+        </>
+      ) : (
+        <WalkControls model={model} move={move} />
+      )}
       <ambientLight
         intensity={darkMode ? LIGHTING.ambientIntensity.dark : LIGHTING.ambientIntensity.light}
       />

@@ -26,6 +26,7 @@ import { FloorTabs } from "./floor-tabs";
 import { PlanTabs } from "./plan-tabs";
 import type { ToolMode } from "./tool-mode";
 import { FLOOR_TYPES, floorTypeToSwatchStyle } from "./tool-mode";
+import type { CameraMode } from "./preview-3d/config";
 import { ToolSheet } from "./tool-sheet";
 import type { FloorPlan } from "../types";
 import { ShearDiagnostic } from "./shear-diagnostic";
@@ -68,6 +69,11 @@ export function App() {
   const [activePlanId, setActivePlanIdState] = useState<string | null>(null);
   const [ready, setReady] = useState(false);
   const [viewMode, setViewMode] = useState<"2d" | "3d">("2d");
+  // 3Dは俯瞰(OrbitControls)のみ。歩くモードUIは一時的に削除(コードは残す)
+  const cameraMode: CameraMode = "orbit";
+  // ウォーキングの移動入力(仮想ジョイスティックとキーの合成先)。UI削除により未使用だが
+  // Preview3D が必須で受けるためダミーで保持(後日歩く機能を戻す時のため)
+  const moveRef = useRef({ x: 0, z: 0 });
   const [tool, setTool] = useState<ToolMode>({ kind: "select" });
   const canvasRef = useRef<FloorCanvasHandle>(null);
   const [toast, setToast] = useState<string | null>(null);
@@ -238,6 +244,11 @@ export function App() {
 
   const floor = building.floors.find((f) => f.id === activeFloorId) ?? building.floors[0];
   const ghostFloors = building.floors.filter((f) => f.id !== activeFloorId);
+  // 3Dは「選択中の階まで」を縦に表示(それより上の階は視界を遮らないよう非表示)
+  const visibleFloors =
+    activeFloorId === ""
+      ? [floor]
+      : building.floors.slice(0, building.floors.findIndex((f) => f.id === activeFloorId) + 1);
 
   const pickerRoom = roomPicker
     ? detectRooms(floor).find((r) => r.cells.includes(roomPicker.cellIndex))
@@ -490,7 +501,13 @@ export function App() {
                   </div>
                 }
               >
-                <Preview3D floor={floor} cellSize={building.cellSize} darkMode={dark} />
+                <Preview3D
+                  floors={visibleFloors}
+                  cameraMode={cameraMode}
+                  move={moveRef}
+                  cellSize={building.cellSize}
+                  darkMode={dark}
+                />
               </Suspense>
             )}
           </div>

@@ -13,12 +13,13 @@ export interface ItemSpec {
 }
 
 function stairsParts(): Part[] {
-  // 1x2セル(91x182cm)に7段、蹴上34.3cm・踏面26cmの直階段
+  // 1x2セル(91x182cm)に7段の直階段。2マスのスペンで2F(240cm)へ上がる実物だが、
+  // プレビューは単フロア基準なので高さを半分(120cm)に抑えて表現する
   const stepCount = 7;
   const width = 85;
   const depthTotal = 182;
   const stepDepth = depthTotal / stepCount;
-  const rise = 240 / stepCount;
+  const rise = 120 / stepCount;
   const parts: Part[] = [];
   for (let i = 0; i < stepCount; i++) {
     parts.push({

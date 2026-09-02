@@ -29,13 +29,16 @@ export interface SceneModel {
   bounds: { width: number; depth: number };
 }
 
-export function buildSceneModel(floor: FloorPlan): SceneModel {
+// 階を重ねたときの階高(=壁高と同じ)で、上階の床スラブが下階の壁天面に乗る
+export const FLOOR_HEIGHT_CM = WALL_HEIGHT_CM;
+
+export function buildSceneModel(floor: FloorPlan, yOffsetCm = 0): SceneModel {
   const halfW = (floor.width * CELL_CM) / 2;
   const halfD = (floor.height * CELL_CM) / 2;
-  // Cm座標(左上原点)→シーンm座標(中心原点)
+  // Cm座標(左上原点)→シーンm座標(中心原点)。yは階の積み上げオフセットを加算
   const toScene = (xCm: number, yCm: number, zCm: number): [number, number, number] => [
     (xCm - halfW) * CM_TO_M,
-    yCm * CM_TO_M,
+    (yCm + yOffsetCm) * CM_TO_M,
     (zCm - halfD) * CM_TO_M,
   ];
   return {
@@ -44,6 +47,21 @@ export function buildSceneModel(floor: FloorPlan): SceneModel {
     items: buildItems(floor, toScene, toSize),
     walls: buildWalls(floor, toScene, toSize),
   };
+}
+
+// 全階を縦に積んだビル全体のモデルを構築する
+export function buildBuildingScene(floors: FloorPlan[]): SceneModel {
+  const all: SceneModel = { bounds: { depth: 0, width: 0 }, floors: [], items: [], walls: [] };
+  for (let i = 0; i < floors.length; i++) {
+    const model = buildSceneModel(floors[i], i * FLOOR_HEIGHT_CM);
+    all.floors.push(...model.floors);
+    all.items.push(...model.items);
+    all.walls.push(...model.walls);
+    // 全階で最大の平面サイズを全体boundsにする
+    all.bounds.width = Math.max(all.bounds.width, model.bounds.width);
+    all.bounds.depth = Math.max(all.bounds.depth, model.bounds.depth);
+  }
+  return all;
 }
 
 type ToScene = (x: number, y: number, z: number) => [number, number, number];
