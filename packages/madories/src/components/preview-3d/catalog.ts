@@ -10,6 +10,11 @@ export interface Part {
 export interface ItemSpec {
   footprint: { w: number; d: number }; // Cm、rotation=0時(w=x方向, d=z方向)
   parts: Part[];
+  /** 2Dアイコンがセル端に接して描かれる家具(椅子/棚/洗面台/テレビ等)。
+   *  背(=幅広面)がセル端に接するよう箱を寄せる。壁の検出はしない。未指定はセル中央配置。
+   *  値は rotation=0 時の「背」の向きベクトル(x,z)。正規化不要、向きのみ使う。
+   *  example: 背を西(-x)に置く→ {x:-1, z:0}、背を南(+z)に置く→ {x:0, z:1} */
+  backDir?: { x: number; z: number };
 }
 
 function stairsParts(): Part[] {
@@ -60,10 +65,12 @@ export const ITEM_CATALOG: Record<ItemType, ItemSpec> = {
       { materialKey: "ceramic", offset: [0, 0, 3], size: [60, 72, 54] },
       { materialKey: "glass", offset: [0, 110, -28], size: [55, 80, 3] },
     ],
+    backDir: { x: 0, z: -1 }, // 壁付け洗面台: 北(-z)を背に
   },
   washbasin_half: {
     footprint: { d: 45, w: 50 },
     parts: [{ materialKey: "ceramic", offset: [0, 0, 0], size: [45, 72, 40] }],
+    backDir: { x: 0, z: -1 }, // 壁付け洗面台: 北(-z)を背に
   },
   washbasin_large: {
     footprint: { d: 165, w: 65 },
@@ -104,14 +111,17 @@ export const ITEM_CATALOG: Record<ItemType, ItemSpec> = {
       { materialKey: "wood", offset: [0, 0, 0], size: [42, 40, 170] },
       { materialKey: "screen", offset: [0, 45, 0], size: [8, 85, 150] },
     ],
+    backDir: { x: -1, z: 0 }, // 2Dアイコンは左端: 西(-x)を背に
   },
   shelf1: {
     footprint: { d: 88, w: 42 },
-    parts: [{ materialKey: "wood", offset: [0, 0, 0], size: [40, 90, 85] }],
+    parts: [{ materialKey: "wood", offset: [0, 0, 0], size: [40, 180, 85] }],
+    backDir: { x: -1, z: 0 }, // 2Dアイコンは左端(幅広面): 西(-x)を背に
   },
   shelf2: {
     footprint: { d: 178, w: 42 },
     parts: [{ materialKey: "wood", offset: [0, 0, 0], size: [40, 180, 176] }],
+    backDir: { x: -1, z: 0 }, // 2Dアイコンは左端(幅広面): 西(-x)を背に
   },
   bed_single: {
     footprint: { d: 196, w: 98 },
