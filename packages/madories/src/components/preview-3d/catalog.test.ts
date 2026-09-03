@@ -42,6 +42,12 @@ describe("catalog", () => {
     }
   });
 
+  it("shelf1 has the same 180cm height as shelf2", () => {
+    const spec = ITEM_CATALOG.shelf1;
+    expect(spec.parts[0].size[1]).toBe(ITEM_CATALOG.shelf2.parts[0].size[1]);
+    expect(spec.parts[0].size[1]).toBe(WALL_HEIGHT_CM * 0.75);
+  });
+
   it("falls back for unknown types", () => {
     const spec = getItemSpec("chair");
     expect(spec.parts.length).toBeGreaterThan(0);

@@ -198,6 +198,44 @@ function getItemDrawOffset(
   return { effectiveH, effectiveW, offX, offY };
 }
 
+// 家具の「背」の辺を決める。背=家具が壁側に向ける面(2Dアイコンでセル端に接する面)。
+// 各家具の backDir(rotation=0 での背の向きベクトル)を、オブジェクトの回転(時計回り・
+// RotatePart と同形式)に応じて回転させ、実シーンの背の向きを求める。
+// 壁の検出はしない。ただセル内での箱の位置(どの辺を端に付けるか)を決めるだけ。
+interface BackSide {
+  axis: "x" | "z";
+  /** True=最大側(東/+x or 南/+z)、false=最小側(西/-x or 北/-z) */
+  atMax: boolean;
+}
+
+// Rotation で backDir ベクトルを回転させる(rotatePart と同じ座標変換)
+function rotateBackDir(
+  dir: { x: number; z: number },
+  rotation: Item["rotation"],
+): { x: number; z: number } {
+  switch (rotation) {
+    case 90: {
+      return { x: -dir.z, z: dir.x };
+    }
+    case 180: {
+      return { x: -dir.x, z: -dir.z };
+    }
+    case 270: {
+      return { x: dir.z, z: -dir.x };
+    }
+    default: {
+      return dir;
+    }
+  }
+}
+
+function backToSide(dir: { x: number; z: number }): BackSide {
+  if (dir.x < 0) return { axis: "x", atMax: false }; // 西
+  if (dir.x > 0) return { axis: "x", atMax: true }; // 東
+  if (dir.z > 0) return { axis: "z", atMax: true }; // 南
+  return { axis: "z", atMax: false }; // 北
+}
+
 function rotatePart(part: Part, rotation: Item["rotation"]): Part {
   const [w, h, d] = part.size;
   const [ox, oy, oz] = part.offset;
@@ -246,14 +284,30 @@ function buildItems(floor: FloorPlan, toScene: ToScene, toSize: ToSize): Box3D[]
       // グリッド外へはみ出す占有分はクランプ対象から除外し、実際に見える範囲へ収める
       const availW = Math.min(effectiveW, floor.width - drawX) * CELL_CM;
       const availD = Math.min(effectiveH, floor.height - drawY) * CELL_CM;
-      const centerX = (drawX + Math.min(effectiveW, floor.width - drawX) / 2) * CELL_CM;
-      const centerZ = (drawY + Math.min(effectiveH, floor.height - drawY) / 2) * CELL_CM;
+      let centerX = (drawX + Math.min(effectiveW, floor.width - drawX) / 2) * CELL_CM;
+      let centerZ = (drawY + Math.min(effectiveH, floor.height - drawY) / 2) * CELL_CM;
       const spec = getItemSpec(cell.item.type);
       const rot = cell.item.rotation;
       const isRotated = rot === 90 || rot === 270;
       const fpW = isRotated ? spec.footprint.d : spec.footprint.w;
       const fpD = isRotated ? spec.footprint.w : spec.footprint.d;
       const scale = Math.min(1, availW / fpW, availD / fpD);
+      // 背を持つ家具(backDir 指定)だけ、オブジェクトの向きに応じた背の辺へ寄せる。
+      // そうでない家具(机等)はセル中央のまま。壁は検出しない。
+      const back = spec.backDir ? backToSide(rotateBackDir(spec.backDir, rot)) : null;
+      if (back) {
+        if (back.axis === "x" && fpW * scale < availW + 1e-6) {
+          centerX = back.atMax
+            ? drawX * CELL_CM + availW - (fpW * scale) / 2
+            : drawX * CELL_CM + (fpW * scale) / 2;
+        }
+        if (back.axis === "z" && fpD * scale < availD + 1e-6) {
+          centerZ = back.atMax
+            ? drawY * CELL_CM + availD - (fpD * scale) / 2
+            : drawY * CELL_CM + (fpD * scale) / 2;
+        }
+      }
+      // パーツ描画は全家具共通。背を持つ家具は背側へ寄せた center を使う。
       for (const rawPart of spec.parts) {
         const part = rotatePart(rawPart, rot);
         const [w, h, d] = part.size;

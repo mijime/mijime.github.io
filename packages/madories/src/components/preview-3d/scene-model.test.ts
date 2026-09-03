@@ -65,7 +65,7 @@ describe("buildSceneModel", () => {
     floor.cells[0].item = { rotation: 0, type: "bed_single" };
     floor.cells[1].item = { rotation: 0, type: "bed_single" };
     const model = buildSceneModel(floor);
-    // Bed_singleのパーツ数 = 3(フレーム+マットレス+枕)
+    // Bed_singleのパーツ数 = 3(フレーム+マットレス+枕)。backDir 未指定で中央配置。
     expect(model.items).toHaveLength(3);
   });
 
@@ -123,6 +123,55 @@ describe("buildSceneModel", () => {
     // 2Dアイコン(上端レール)に合わせ、パネル外面がセル上端 z=-CELL_M/2 に接する
     expect(panel.position[2] - panel.size[2] / 2).toBeCloseTo(-CELL_M / 2);
     expect(panel.size[2]).toBeLessThan(panel.size[0]);
+  });
+
+  it("hugs by backDir (rotation0→west): shelf back rests on its WEST cell edge", () => {
+    const floor = createFloorPlan("test", 1, 1);
+    floor.cells[0].item = { rotation: 0, type: "shelf1" }; // BackDir 西
+    const model = buildSceneModel(floor);
+    const shelf = model.items[0];
+    expect(shelf.position[0] - shelf.size[0] / 2).toBeCloseTo(-CELL_M / 2, 1);
+  });
+
+  it("hugs by backDir (rotation90→north): shelf back rests on its NORTH cell edge", () => {
+    const floor = createFloorPlan("test", 1, 1);
+    floor.cells[0].item = { rotation: 90, type: "shelf1" };
+    const model = buildSceneModel(floor);
+    const shelf = model.items[0];
+    // BackDir(西)を90度回転 → 背は北(-z)
+    expect(shelf.position[2] - shelf.size[2] / 2).toBeCloseTo(-CELL_M / 2, 1);
+  });
+
+  it("hugs by backDir (rotation180→east): shelf back rests on its EAST cell edge", () => {
+    const floor = createFloorPlan("test", 1, 1);
+    floor.cells[0].item = { rotation: 180, type: "shelf1" };
+    const model = buildSceneModel(floor);
+    const shelf = model.items[0];
+    // BackDir(西)を180度回転 → 背は東(+x)
+    expect(shelf.position[0] + shelf.size[0] / 2).toBeCloseTo(CELL_M / 2, 1);
+  });
+
+  it("hugs by backDir (rotation270→south): shelf back rests on its SOUTH cell edge", () => {
+    const floor = createFloorPlan("test", 1, 1);
+    floor.cells[0].item = { rotation: 270, type: "shelf1" };
+    const model = buildSceneModel(floor);
+    const shelf = model.items[0];
+    // BackDir(西)を270度回転 → 背は南(+z)
+    expect(shelf.position[2] + shelf.size[2] / 2).toBeCloseTo(CELL_M / 2, 1);
+  });
+
+  it("hugs to the back side (shelf backDir 西) even when fully enclosed by walls", () => {
+    const floor = createFloorPlan("test", 3, 3);
+    floor.cells[4].item = { rotation: 0, type: "shelf1" }; // 中心セル(1,1)
+    // 中心セルを4方向とも壁で囲む
+    floor.vWalls[vIndex(3, 1, 1)] = "solid"; // 西
+    floor.vWalls[vIndex(3, 2, 1)] = "solid"; // 東
+    floor.hWalls[hIndex(3, 1, 1)] = "solid"; // 北
+    floor.hWalls[hIndex(3, 1, 2)] = "solid"; // 南
+    const model = buildSceneModel(floor);
+    const shelf = model.items[0];
+    // Rotation 0 → 背は西(-x)。4面囲まれでも西端へ寄る
+    expect(shelf.position[0] - shelf.size[0] / 2).toBeCloseTo(-CELL_M / 2, 1);
   });
 
   it("includes boundary walls (bottom and right edges)", () => {
