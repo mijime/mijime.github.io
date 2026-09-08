@@ -1,4 +1,5 @@
 import type { FloorPlan } from "../types";
+import { MM_PER_CELL, tatamiForCells } from "../units";
 
 export interface Room {
   cells: number[];
@@ -86,7 +87,7 @@ function isBlocked(
   return x + 1 >= width || vWalls[y * (width + 1) + x + 1] !== "none";
 }
 
-export function detectRooms(floor: FloorPlan): Room[] {
+export function detectRooms(floor: FloorPlan, mmPerCell: number = MM_PER_CELL): Room[] {
   const total = floor.width * floor.height;
   const visited = new Uint8Array(total);
   const rooms: Room[] = [];
@@ -138,7 +139,7 @@ export function detectRooms(floor: FloorPlan): Room[] {
       rooms.push({
         cells: region,
         simpleShape: vertices <= 6,
-        tatami: region.length / 2,
+        tatami: tatamiForCells(region.length, mmPerCell),
       });
     }
   }
@@ -152,8 +153,9 @@ export function drawRoomLabels(
   cellSize: number,
   inkColor: string,
   outlineColor = "rgba(255,255,255,0.8)",
+  mmPerCell?: number,
 ) {
-  const rooms = detectRooms(floor);
+  const rooms = detectRooms(floor, mmPerCell);
   if (rooms.length === 0) {
     return;
   }

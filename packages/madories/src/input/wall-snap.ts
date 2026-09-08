@@ -6,9 +6,11 @@ export function snapVertex(
   cellSize: number,
   width: number,
   height: number,
+  step = 1,
 ): { vx: number; vy: number } {
-  const vx = Math.min(width, Math.max(0, Math.round(mx / cellSize)));
-  const vy = Math.min(height, Math.max(0, Math.round(my / cellSize)));
+  const quant = (v: number) => Math.round(v / step) * step;
+  const vx = Math.min(width, Math.max(0, quant(mx / cellSize)));
+  const vy = Math.min(height, Math.max(0, quant(my / cellSize)));
   return { vx, vy };
 }
 

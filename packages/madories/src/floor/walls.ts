@@ -70,3 +70,72 @@ export function rotateFloorCW90(floor: FloorPlan): FloorPlan {
   }
   return { ...floor, cells: newCells, hWalls, height: nh, vWalls, width: nw };
 }
+
+// 鏡映では家具の向きが反転する。左右反転: r → -r、上下反転: r → 180-r。
+function mirroredRotationH(rotation: 0 | 90 | 180 | 270): 0 | 90 | 180 | 270 {
+  return ((360 - rotation) % 360) as 0 | 90 | 180 | 270;
+}
+
+function mirroredRotationV(rotation: 0 | 90 | 180 | 270): 0 | 90 | 180 | 270 {
+  return ((180 - rotation + 360) % 360) as 0 | 90 | 180 | 270;
+}
+
+// 左右反転: セル (x,y)→(w-1-x, y)、h エッジ (x,y)→(w-1-x, y)、v エッジ (x,y)→(w-x, y)
+export function flipFloorH(floor: FloorPlan): FloorPlan {
+  const { width, height, cells } = floor;
+  const newCells = cells.map((c) => c);
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      const src = cells[y * width + x];
+      newCells[y * width + (width - 1 - x)] = src.item
+        ? {
+            floorType: src.floorType,
+            item: { ...src.item, rotation: mirroredRotationH(src.item.rotation) },
+          }
+        : src;
+    }
+  }
+  const hWalls = createHWalls(width, height);
+  const vWalls = createVWalls(width, height);
+  for (let y = 0; y <= height; y++) {
+    for (let x = 0; x < width; x++) {
+      hWalls[hIndex(width, width - 1 - x, y)] = floor.hWalls[hIndex(width, x, y)];
+    }
+  }
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x <= width; x++) {
+      vWalls[vIndex(width, width - x, y)] = floor.vWalls[vIndex(width, x, y)];
+    }
+  }
+  return { ...floor, cells: newCells, hWalls, vWalls };
+}
+
+// 上下反転: セル (x,y)→(x, h-1-y)、h エッジ (x,y)→(x, h-y)、v エッジ (x,y)→(x, h-1-y)
+export function flipFloorV(floor: FloorPlan): FloorPlan {
+  const { width, height, cells } = floor;
+  const newCells = cells.map((c) => c);
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      const src = cells[y * width + x];
+      newCells[(height - 1 - y) * width + x] = src.item
+        ? {
+            floorType: src.floorType,
+            item: { ...src.item, rotation: mirroredRotationV(src.item.rotation) },
+          }
+        : src;
+    }
+  }
+  const hWalls = createHWalls(width, height);
+  const vWalls = createVWalls(width, height);
+  for (let y = 0; y <= height; y++) {
+    for (let x = 0; x < width; x++) {
+      hWalls[hIndex(width, x, height - y)] = floor.hWalls[hIndex(width, x, y)];
+    }
+  }
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x <= width; x++) {
+      vWalls[vIndex(width, x, height - 1 - y)] = floor.vWalls[vIndex(width, x, y)];
+    }
+  }
+  return { ...floor, cells: newCells, hWalls, vWalls };
+}

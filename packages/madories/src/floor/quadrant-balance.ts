@@ -97,7 +97,10 @@ function overlap(from: number, to: number, lo: number, hi: number): number {
   return Math.max(0, Math.min(to, hi) - Math.max(from, lo));
 }
 
-export function computeQuadrantBalance(floor: FloorPlan): FloorBalance {
+export function computeQuadrantBalance(
+  floor: FloorPlan,
+  mmPerCell: number = MM_PER_CELL,
+): FloorBalance {
   const bounds = computeWallBounds(floor);
   if (!bounds) {
     return { bounds: null, quadrants: [] };
@@ -111,10 +114,10 @@ export function computeQuadrantBalance(floor: FloorPlan): FloorBalance {
     SW: { h: 0, v: 0 },
   };
 
-  for (const run of detectShearWallRuns(floor)) {
+  for (const run of detectShearWallRuns(floor, mmPerCell)) {
     if (run.kind === "h") {
-      const west = overlap(run.x, run.x + run.cells, minX, midX) * MM_PER_CELL;
-      const east = overlap(run.x, run.x + run.cells, midX, maxX) * MM_PER_CELL;
+      const west = overlap(run.x, run.x + run.cells, minX, midX) * mmPerCell;
+      const east = overlap(run.x, run.x + run.cells, midX, maxX) * mmPerCell;
       if (run.y <= midY) {
         acc.NW.h += west;
         acc.NE.h += east;
@@ -123,8 +126,8 @@ export function computeQuadrantBalance(floor: FloorPlan): FloorBalance {
         acc.SE.h += east;
       }
     } else {
-      const top = overlap(run.y, run.y + run.cells, minY, midY) * MM_PER_CELL;
-      const bottom = overlap(run.y, run.y + run.cells, midY, maxY) * MM_PER_CELL;
+      const top = overlap(run.y, run.y + run.cells, minY, midY) * mmPerCell;
+      const bottom = overlap(run.y, run.y + run.cells, midY, maxY) * mmPerCell;
       if (run.x <= midX) {
         acc.NW.v += top;
         acc.SW.v += bottom;

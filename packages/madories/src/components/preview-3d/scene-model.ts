@@ -32,9 +32,13 @@ export interface SceneModel {
 // 階を重ねたときの階高(=壁高と同じ)で、上階の床スラブが下階の壁天面に乗る
 export const FLOOR_HEIGHT_CM = WALL_HEIGHT_CM;
 
-export function buildSceneModel(floor: FloorPlan, yOffsetCm = 0): SceneModel {
-  const halfW = (floor.width * CELL_CM) / 2;
-  const halfD = (floor.height * CELL_CM) / 2;
+export function buildSceneModel(
+  floor: FloorPlan,
+  yOffsetCm = 0,
+  cellCm: number = CELL_CM,
+): SceneModel {
+  const halfW = (floor.width * cellCm) / 2;
+  const halfD = (floor.height * cellCm) / 2;
   // Cm座標(左上原点)→シーンm座標(中心原点)。yは階の積み上げオフセットを加算
   const toScene = (xCm: number, yCm: number, zCm: number): [number, number, number] => [
     (xCm - halfW) * CM_TO_M,
@@ -42,18 +46,18 @@ export function buildSceneModel(floor: FloorPlan, yOffsetCm = 0): SceneModel {
     (zCm - halfD) * CM_TO_M,
   ];
   return {
-    bounds: { depth: floor.height * CELL_CM * CM_TO_M, width: floor.width * CELL_CM * CM_TO_M },
-    floors: buildFloors(floor, toScene, toSize),
-    items: buildItems(floor, toScene, toSize),
-    walls: buildWalls(floor, toScene, toSize),
+    bounds: { depth: floor.height * cellCm * CM_TO_M, width: floor.width * cellCm * CM_TO_M },
+    floors: buildFloors(floor, toScene, toSize, cellCm),
+    items: buildItems(floor, toScene, toSize, cellCm),
+    walls: buildWalls(floor, toScene, toSize, cellCm),
   };
 }
 
 // 全階を縦に積んだビル全体のモデルを構築する
-export function buildBuildingScene(floors: FloorPlan[]): SceneModel {
+export function buildBuildingScene(floors: FloorPlan[], cellCm: number = CELL_CM): SceneModel {
   const all: SceneModel = { bounds: { depth: 0, width: 0 }, floors: [], items: [], walls: [] };
   for (let i = 0; i < floors.length; i++) {
-    const model = buildSceneModel(floors[i], i * FLOOR_HEIGHT_CM);
+    const model = buildSceneModel(floors[i], i * FLOOR_HEIGHT_CM, cellCm);
     all.floors.push(...model.floors);
     all.items.push(...model.items);
     all.walls.push(...model.walls);
@@ -69,7 +73,7 @@ type ToSize = (w: number, h: number, d: number) => [number, number, number];
 
 const toSize: ToSize = (w, h, d) => [w * CM_TO_M, h * CM_TO_M, d * CM_TO_M];
 
-function buildFloors(floor: FloorPlan, toScene: ToScene, toSize: ToSize): Box3D[] {
+function buildFloors(floor: FloorPlan, toScene: ToScene, toSize: ToSize, cellCm: number): Box3D[] {
   const boxes: Box3D[] = [];
   for (let y = 0; y < floor.height; y++) {
     for (let x = 0; x < floor.width; x++) {
@@ -77,8 +81,8 @@ function buildFloors(floor: FloorPlan, toScene: ToScene, toSize: ToSize): Box3D[
       if (cell.floorType === null) continue;
       boxes.push({
         materialKey: FLOOR_MATERIAL_KEYS[cell.floorType],
-        position: toScene((x + 0.5) * CELL_CM, -FLOOR_THICKNESS_CM / 2, (y + 0.5) * CELL_CM),
-        size: toSize(CELL_CM, FLOOR_THICKNESS_CM, CELL_CM),
+        position: toScene((x + 0.5) * cellCm, -FLOOR_THICKNESS_CM / 2, (y + 0.5) * cellCm),
+        size: toSize(cellCm, FLOOR_THICKNESS_CM, cellCm),
       });
     }
   }
@@ -156,26 +160,26 @@ function wallLayers(wallType: Exclude<WallType, "none">, height: number): WallLa
   }
 }
 
-function buildWalls(floor: FloorPlan, toScene: ToScene, toSize: ToSize): Box3D[] {
+function buildWalls(floor: FloorPlan, toScene: ToScene, toSize: ToSize, cellCm: number): Box3D[] {
   const boxes: Box3D[] = [];
   for (const run of collectWallRuns(floor)) {
     const thickness = run.wallType === "solid_thin" ? WALL_THIN_THICKNESS_CM : WALL_THICKNESS_CM;
     const height = run.edge === "top" ? WALL_HEIGHT_CM : WALL_HEIGHT_LEFT_CM;
-    const length = (run.end - run.start) * CELL_CM + thickness; // 両端t/2延長で角を閉じる
-    const center = ((run.start + run.end) / 2) * CELL_CM;
+    const length = (run.end - run.start) * cellCm + thickness; // 両端t/2延長で角を閉じる
+    const center = ((run.start + run.end) / 2) * cellCm;
     for (const layer of wallLayers(run.wallType, height)) {
       const h = layer.top - layer.bottom;
       const cy = layer.bottom + h / 2;
       if (run.edge === "top") {
         boxes.push({
           materialKey: layer.materialKey,
-          position: toScene(center, cy, run.fixed * CELL_CM),
+          position: toScene(center, cy, run.fixed * cellCm),
           size: toSize(length, h, thickness),
         });
       } else {
         boxes.push({
           materialKey: layer.materialKey,
-          position: toScene(run.fixed * CELL_CM, cy, center),
+          position: toScene(run.fixed * cellCm, cy, center),
           size: toSize(thickness, h, length),
         });
       }
@@ -256,7 +260,7 @@ function rotatePart(part: Part, rotation: Item["rotation"]): Part {
   }
 }
 
-function buildItems(floor: FloorPlan, toScene: ToScene, toSize: ToSize): Box3D[] {
+function buildItems(floor: FloorPlan, toScene: ToScene, toSize: ToSize, cellCm: number): Box3D[] {
   const boxes: Box3D[] = [];
   const visited = new Set<number>();
   for (let y = 0; y < floor.height; y++) {
@@ -282,10 +286,10 @@ function buildItems(floor: FloorPlan, toScene: ToScene, toSize: ToSize): Box3D[]
       const drawX = x + offX;
       const drawY = y + offY;
       // グリッド外へはみ出す占有分はクランプ対象から除外し、実際に見える範囲へ収める
-      const availW = Math.min(effectiveW, floor.width - drawX) * CELL_CM;
-      const availD = Math.min(effectiveH, floor.height - drawY) * CELL_CM;
-      let centerX = (drawX + Math.min(effectiveW, floor.width - drawX) / 2) * CELL_CM;
-      let centerZ = (drawY + Math.min(effectiveH, floor.height - drawY) / 2) * CELL_CM;
+      const availW = Math.min(effectiveW, floor.width - drawX) * cellCm;
+      const availD = Math.min(effectiveH, floor.height - drawY) * cellCm;
+      let centerX = (drawX + Math.min(effectiveW, floor.width - drawX) / 2) * cellCm;
+      let centerZ = (drawY + Math.min(effectiveH, floor.height - drawY) / 2) * cellCm;
       const spec = getItemSpec(cell.item.type);
       const rot = cell.item.rotation;
       const isRotated = rot === 90 || rot === 270;
@@ -298,13 +302,13 @@ function buildItems(floor: FloorPlan, toScene: ToScene, toSize: ToSize): Box3D[]
       if (back) {
         if (back.axis === "x" && fpW * scale < availW + 1e-6) {
           centerX = back.atMax
-            ? drawX * CELL_CM + availW - (fpW * scale) / 2
-            : drawX * CELL_CM + (fpW * scale) / 2;
+            ? drawX * cellCm + availW - (fpW * scale) / 2
+            : drawX * cellCm + (fpW * scale) / 2;
         }
         if (back.axis === "z" && fpD * scale < availD + 1e-6) {
           centerZ = back.atMax
-            ? drawY * CELL_CM + availD - (fpD * scale) / 2
-            : drawY * CELL_CM + (fpD * scale) / 2;
+            ? drawY * cellCm + availD - (fpD * scale) / 2
+            : drawY * cellCm + (fpD * scale) / 2;
         }
       }
       // パーツ描画は全家具共通。背を持つ家具は背側へ寄せた center を使う。

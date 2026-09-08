@@ -4,6 +4,7 @@ import { getItemDrawOffset } from "../../draw/draw-items";
 import { drawVoidCells } from "../../draw/draw-void";
 import { drawWalls, drawWallPreview } from "../../draw/draw-walls";
 import { computeWallDimensions, fmtMm } from "../../draw/export";
+import { tsuboForCells } from "../../units";
 import { drawShearCheck, type ShearLayerFlags } from "../../draw/draw-shear-check";
 import { clearIconCache, getCachedIcon } from "../../draw/icons/cache";
 import { drawTatamiCells } from "../../draw/draw-tatami";
@@ -304,7 +305,7 @@ export function useCanvasDraw(props: Props): {
     // Tsubo count (bottom-right, screen-fixed)
     const usedCells = floor.cells.filter((c) => c.floorType !== null).length;
     if (usedCells > 0) {
-      const tsubo = (usedCells / 4).toFixed(2);
+      const tsubo = tsuboForCells(usedCells).toFixed(2);
       const label = `${tsubo}坪`;
       ctx.save();
       ctx.font = "bold 12px 'IBM Plex Mono', monospace";

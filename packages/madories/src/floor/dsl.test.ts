@@ -27,6 +27,31 @@ describe("floorToDsl", () => {
     expect(dsl).toBe('size 3 3\nname "Test"');
   });
 
+  it("roundtrips size, name, walls, floor and item", () => {
+    let floor = makeFloor(40, 40);
+    floor.name = "1F";
+    floor = setWallsPure(
+      floor,
+      [
+        { kind: "h", x: 4, y: 4 },
+        { kind: "h", x: 5, y: 4 },
+        { kind: "v", x: 4, y: 4 },
+      ],
+      "solid",
+    );
+    floor.cells[4 * 40 + 4] = { floorType: "wood", item: null };
+    floor.cells[5 * 40 + 5] = { floorType: null, item: { rotation: 90, type: "chair" } };
+    const back = dslToFloor(floorToDsl(floor));
+    expect(back.width).toBe(40);
+    expect(back.height).toBe(40);
+    expect(back.name).toBe("1F");
+    expect(getWall(back, { kind: "h", x: 4, y: 4 })).toBe("solid");
+    expect(getWall(back, { kind: "h", x: 5, y: 4 })).toBe("solid");
+    expect(getWall(back, { kind: "v", x: 4, y: 4 })).toBe("solid");
+    expect(back.cells[4 * 40 + 4].floorType).toBe("wood");
+    expect(back.cells[5 * 40 + 5].item).toEqual({ rotation: 90, type: "chair" });
+  });
+
   it("wall run-length: consecutive top walls merge into range", () => {
     let floor = makeFloor(4, 2);
     floor = setWallsPure(

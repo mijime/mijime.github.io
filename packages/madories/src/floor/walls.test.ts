@@ -1,6 +1,14 @@
 import { describe, expect, it } from "vitest";
 import { createFloorPlan } from "../store";
-import { getWall, hIndex, rotateFloorCW90, setWallsPure, vIndex } from "./walls";
+import {
+  flipFloorH,
+  flipFloorV,
+  getWall,
+  hIndex,
+  rotateFloorCW90,
+  setWallsPure,
+  vIndex,
+} from "./walls";
 
 describe("walls", () => {
   it("indexes h/v walls", () => {
@@ -52,5 +60,76 @@ describe("walls", () => {
     expect(r.hWalls).toEqual(floor.hWalls);
     expect(r.vWalls).toEqual(floor.vWalls);
     expect(r.cells).toEqual(floor.cells);
+  });
+
+  it("flipFloorH mirrors cells and walls left-right", () => {
+    let floor = createFloorPlan("t", 4, 3);
+    floor = setWallsPure(
+      floor,
+      [
+        { kind: "h", x: 0, y: 1 },
+        { kind: "v", x: 1, y: 0 },
+      ],
+      "solid",
+    );
+    floor.cells[1 * 4 + 0] = { floorType: "wood", item: { rotation: 90, type: "chair" } };
+    const f = flipFloorH(floor);
+    expect(f.width).toBe(4);
+    expect(f.height).toBe(3);
+    // H(0,1) → h(3,1)、v(1,0) → v(3,0)
+    expect(getWall(f, { kind: "h", x: 3, y: 1 })).toBe("solid");
+    expect(getWall(f, { kind: "v", x: 3, y: 0 })).toBe("solid");
+    expect(getWall(f, { kind: "h", x: 0, y: 1 })).toBe("none");
+    // セル(0,1) → (3,1)、回転90 → 270(鏡映で向き反転)
+    expect(f.cells[1 * 4 + 3].floorType).toBe("wood");
+    expect(f.cells[1 * 4 + 3].item).toEqual({ rotation: 270, type: "chair" });
+    expect(f.cells[1 * 4 + 0].item).toBeNull();
+  });
+
+  it("flipFloorV mirrors cells and walls top-bottom", () => {
+    let floor = createFloorPlan("t", 4, 3);
+    floor = setWallsPure(
+      floor,
+      [
+        { kind: "h", x: 1, y: 0 },
+        { kind: "v", x: 2, y: 2 },
+      ],
+      "solid",
+    );
+    floor.cells[1] = { floorType: "wood", item: { rotation: 0, type: "chair" } };
+    const f = flipFloorV(floor);
+    // H(1,0) → h(1,3)、v(2,2) → v(2,0)
+    expect(getWall(f, { kind: "h", x: 1, y: 3 })).toBe("solid");
+    expect(getWall(f, { kind: "v", x: 2, y: 0 })).toBe("solid");
+    // セル(1,0) → (1,2)、回転0 → 180(上下鏡映)
+    expect(f.cells[2 * 4 + 1].floorType).toBe("wood");
+    expect(f.cells[2 * 4 + 1].item).toEqual({ rotation: 180, type: "chair" });
+  });
+
+  it("double flip is identity and H+V equals 180 rotation", () => {
+    let floor = createFloorPlan("t", 5, 4);
+    floor = setWallsPure(
+      floor,
+      [
+        { kind: "h", x: 0, y: 0 },
+        { kind: "h", x: 3, y: 4 },
+        { kind: "v", x: 5, y: 1 },
+        { kind: "v", x: 1, y: 2 },
+      ],
+      "solid",
+    );
+    floor.cells[6] = { floorType: "wood", item: { rotation: 90, type: "sofa" } };
+    const hh = flipFloorH(flipFloorH(floor));
+    expect(hh.hWalls).toEqual(floor.hWalls);
+    expect(hh.vWalls).toEqual(floor.vWalls);
+    expect(hh.cells).toEqual(floor.cells);
+    const vv = flipFloorV(flipFloorV(floor));
+    expect(vv.cells).toEqual(floor.cells);
+    // H+V = 180度回転と等価
+    const hv = flipFloorV(flipFloorH(floor));
+    const r180 = rotateFloorCW90(rotateFloorCW90(floor));
+    expect(hv.hWalls).toEqual(r180.hWalls);
+    expect(hv.vWalls).toEqual(r180.vWalls);
+    expect(hv.cells).toEqual(r180.cells);
   });
 });

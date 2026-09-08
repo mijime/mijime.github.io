@@ -2,7 +2,13 @@ import { useState } from "react";
 import type { ItemCategory, ItemDef } from "../../items";
 import { ITEM_CATEGORIES, ITEM_DEFS } from "../../items";
 import type { WallType } from "../../types";
-import { FLOOR_TYPES, floorTypeToSwatchStyle, type ToolMode } from "../tool-mode";
+import {
+  FLOOR_TYPES,
+  floorTypeToSwatchStyle,
+  toolBrush,
+  type BrushSize,
+  type ToolMode,
+} from "../tool-mode";
 import { btnBase } from "./styles";
 
 const WALL_TYPES: { type: WallType; label: string }[] = [
@@ -23,6 +29,41 @@ interface Props {
   darkMode: boolean;
 }
 
+function BrushToggle({
+  brush,
+  onChange,
+}: {
+  brush: BrushSize;
+  onChange: (brush: BrushSize) => void;
+}) {
+  return (
+    <div style={{ display: "flex", gap: "4px" }}>
+      {(
+        [
+          { label: "1間", value: 2 },
+          { label: "1/2間", value: 1 },
+        ] as const
+      ).map(({ label, value }) => (
+        <button
+          key={value}
+          title={value === 2 ? "1間(910mm)相当を2x2で描く" : "1/2間(455mm)で描く"}
+          style={{
+            ...btnBase,
+            background: brush === value ? "var(--ink)" : "transparent",
+            borderRadius: "4px",
+            color: brush === value ? "var(--paper)" : "var(--ink)",
+            flex: 1,
+            padding: "3px 8px",
+          }}
+          onClick={() => onChange(value)}
+        >
+          {label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
 function WallSubPanel({
   tool,
   onToolChange,
@@ -31,22 +72,25 @@ function WallSubPanel({
   onToolChange: (tool: ToolMode) => void;
 }) {
   return (
-    <div style={{ display: "flex", flexWrap: "wrap", gap: "4px" }}>
-      {WALL_TYPES.map(({ type, label }) => (
-        <button
-          key={type}
-          style={{
-            ...btnBase,
-            background: tool.wallType === type ? "var(--accent)" : "transparent",
-            borderRadius: "4px",
-            color: tool.wallType === type ? "var(--paper)" : "var(--ink)",
-            padding: "3px 8px",
-          }}
-          onClick={() => onToolChange({ kind: "wall", wallType: type })}
-        >
-          {label}
-        </button>
-      ))}
+    <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+      <BrushToggle brush={toolBrush(tool)} onChange={(brush) => onToolChange({ ...tool, brush })} />
+      <div style={{ display: "flex", flexWrap: "wrap", gap: "4px" }}>
+        {WALL_TYPES.map(({ type, label }) => (
+          <button
+            key={type}
+            style={{
+              ...btnBase,
+              background: tool.wallType === type ? "var(--accent)" : "transparent",
+              borderRadius: "4px",
+              color: tool.wallType === type ? "var(--paper)" : "var(--ink)",
+              padding: "3px 8px",
+            }}
+            onClick={() => onToolChange({ ...tool, kind: "wall", wallType: type })}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
     </div>
   );
 }
@@ -61,40 +105,55 @@ function FloorSubPanel({
   darkMode: boolean;
 }) {
   return (
-    <div style={{ display: "grid", gap: "3px", gridTemplateColumns: "1fr 1fr" }}>
-      {FLOOR_TYPES.map((entry) => {
-        const active = tool.floorType === entry.type;
-        return (
-          <button
-            key={entry.type ?? "blank"}
-            style={{
-              ...btnBase,
-              alignItems: "center",
-              border: active ? "1px solid var(--terra)" : "1px solid var(--border)",
-              borderRadius: "4px",
-              color: active ? "var(--terra)" : "var(--ink)",
-              display: "flex",
-              gap: "6px",
-              padding: "3px 6px",
-            }}
-            onClick={() => onToolChange({ floorType: entry.type, kind: "floor" })}
-          >
-            <span
+    <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+      <BrushToggle brush={toolBrush(tool)} onChange={(brush) => onToolChange({ ...tool, brush })} />
+      <div style={{ display: "grid", gap: "3px", gridTemplateColumns: "1fr 1fr" }}>
+        {FLOOR_TYPES.map((entry) => {
+          const active = tool.floorType === entry.type;
+          return (
+            <button
+              key={entry.type ?? "blank"}
               style={{
-                ...floorTypeToSwatchStyle(entry.type, darkMode),
-                border: "1px solid var(--border)",
-                borderRadius: "2px",
-                display: "inline-block",
-                flexShrink: 0,
-                height: "10px",
-                width: "10px",
+                ...btnBase,
+                alignItems: "center",
+                border: active ? "1px solid var(--terra)" : "1px solid var(--border)",
+                borderRadius: "4px",
+                color: active ? "var(--terra)" : "var(--ink)",
+                display: "flex",
+                gap: "6px",
+                padding: "3px 6px",
               }}
-            />
-            {entry.label}
-          </button>
-        );
-      })}
+              onClick={() => onToolChange({ ...tool, floorType: entry.type, kind: "floor" })}
+            >
+              <span
+                style={{
+                  ...floorTypeToSwatchStyle(entry.type, darkMode),
+                  border: "1px solid var(--border)",
+                  borderRadius: "2px",
+                  display: "inline-block",
+                  flexShrink: 0,
+                  height: "10px",
+                  width: "10px",
+                }}
+              />
+              {entry.label}
+            </button>
+          );
+        })}
+      </div>
     </div>
+  );
+}
+
+function EraseSubPanel({
+  tool,
+  onToolChange,
+}: {
+  tool: Extract<ToolMode, { kind: "erase" }>;
+  onToolChange: (tool: ToolMode) => void;
+}) {
+  return (
+    <BrushToggle brush={toolBrush(tool)} onChange={(brush) => onToolChange({ ...tool, brush })} />
   );
 }
 
@@ -160,6 +219,9 @@ export function SubPanels({ tool, onToolChange, darkMode }: Props) {
   }
   if (tool.kind === "floor") {
     return <FloorSubPanel tool={tool} onToolChange={onToolChange} darkMode={darkMode} />;
+  }
+  if (tool.kind === "erase") {
+    return <EraseSubPanel tool={tool} onToolChange={onToolChange} />;
   }
   if (tool.kind === "item") {
     return <ItemSubPanel tool={tool} onToolChange={onToolChange} />;

@@ -6,6 +6,12 @@ describe("snapVertex", () => {
     expect(snapVertex(33, 30, 32, 10, 10)).toEqual({ vx: 1, vy: 1 });
     expect(snapVertex(-5, 500, 32, 10, 10)).toEqual({ vx: 0, vy: 10 });
   });
+
+  it("snaps to even vertices with step=2 (cell-1 mode)", () => {
+    expect(snapVertex(33, 70, 32, 40, 40, 2)).toEqual({ vx: 2, vy: 2 });
+    expect(snapVertex(70, 70, 32, 40, 40, 2)).toEqual({ vx: 2, vy: 2 });
+    expect(snapVertex(100, 70, 32, 40, 40, 2)).toEqual({ vx: 4, vy: 2 });
+  });
 });
 
 describe("resolveEdges", () => {

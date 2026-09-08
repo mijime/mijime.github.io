@@ -90,29 +90,47 @@ export function App() {
   const { building, activeFloorId } = current;
 
   // Load the plan collection from IndexedDB (with legacy migration) and bootstrap the active plan.
+  // Any failure (corrupt DB, bad rows) falls back to a fresh plan so the app always boots.
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      await migrateFromLegacy();
-      let list = await listPlans();
-      let activeId = await getActivePlanId();
-      if (list.length === 0) {
+      try {
+        await migrateFromLegacy();
+        let list = await listPlans();
+        let activeId = await getActivePlanId();
+        if (list.length === 0) {
+          const plan = createPlan("プラン1");
+          await Promise.all([putPlan(plan), setActivePlanId(plan.id)]);
+          list = [plan];
+          activeId = plan.id;
+        } else if (!activeId || !list.some((p) => p.id === activeId)) {
+          activeId = list[0].id;
+          await setActivePlanId(activeId);
+        }
+        if (cancelled) {
+          return;
+        }
+        const target = list.find((p) => p.id === activeId)!;
+        reset({
+          activeFloorId: target.activeFloorId,
+          building: target.building,
+        });
+        setPlans(list);
+        setActivePlanIdState(activeId);
+      } catch {
+        if (cancelled) {
+          return;
+        }
         const plan = createPlan("プラン1");
-        await Promise.all([putPlan(plan), setActivePlanId(plan.id)]);
-        list = [plan];
-        activeId = plan.id;
-      } else if (!activeId || !list.some((p) => p.id === activeId)) {
-        activeId = list[0].id;
-        await setActivePlanId(activeId);
+        reset({ activeFloorId: plan.activeFloorId, building: plan.building });
+        setPlans([plan]);
+        setActivePlanIdState(plan.id);
+        setToast("保存データが壊れていたため初期化しました");
+      } finally {
+        if (!cancelled) {
+          setReady(true);
+        }
       }
-      if (cancelled) {
-        return;
-      }
-      const target = list.find((p) => p.id === activeId)!;
-      reset({ activeFloorId: target.activeFloorId, building: target.building });
-      setPlans(list);
-      setActivePlanIdState(activeId);
-      setReady(true);
     })();
     return () => {
       cancelled = true;
@@ -352,7 +370,10 @@ export function App() {
                 return;
               }
               const target = data.plans.find((p) => p.id === activeId)!;
-              reset({ activeFloorId: target.activeFloorId, building: target.building });
+              reset({
+                activeFloorId: target.activeFloorId,
+                building: target.building,
+              });
               setPlans(data.plans);
               setActivePlanIdState(activeId);
               replaceAllPlans(data.plans).catch(() => undefined);
@@ -366,6 +387,7 @@ export function App() {
           onShare={handleShare}
           onClear={() => dispatch({ floorId: floor.id, type: "CLEAR_FLOOR" })}
           onRotateFloor={() => dispatch({ floorId: floor.id, type: "ROTATE_FLOOR" })}
+          onFlipFloor={(axis) => dispatch({ axis, floorId: floor.id, type: "FLIP_FLOOR" })}
           viewMode={viewMode}
           onToggleViewMode={() => setViewMode((v) => (v === "2d" ? "3d" : "2d"))}
           shearCheck={shearCheck}

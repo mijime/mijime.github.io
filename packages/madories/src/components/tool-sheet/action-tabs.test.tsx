@@ -11,6 +11,7 @@ const baseProps = {
   onLoad: () => {},
   onRedo: () => {},
   onRotateFloor: () => {},
+  onFlipFloor: () => {},
   onSave: () => {},
   onShare: () => {},
   onToggleViewMode: () => {},

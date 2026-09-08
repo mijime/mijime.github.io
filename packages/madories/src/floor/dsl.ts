@@ -457,8 +457,8 @@ function upsertPatternFloor(
 }
 
 export function dslToFloor(text: string): FloorPlan {
-  let width = 10;
-  let height = 10;
+  let width = 20;
+  let height = 20;
   let name = "Floor";
 
   const cellOverrides = new Map<number, Partial<Cell>>();
@@ -593,7 +593,7 @@ export function dslToFloor(text: string): FloorPlan {
       continue;
     }
 
-    const nameMatch = line.match(/^name\s+"(?<n>[^"]*)$/u);
+    const nameMatch = line.match(/^name\s+"(?<n>[^"]*)"\s*$/u);
     if (nameMatch) {
       name = nameMatch.groups!.n;
       continue;

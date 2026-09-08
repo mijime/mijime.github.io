@@ -41,6 +41,7 @@ describe("PrimaryToolTabs", () => {
 describe("getToolModeForKind", () => {
   it("returns correct ToolMode for wall", () => {
     expect(getToolModeForKind("wall")).toEqual({
+      brush: 2,
       kind: "wall",
       wallType: "solid",
     });
@@ -48,8 +49,9 @@ describe("getToolModeForKind", () => {
 
   it("returns correct ToolMode for floor", () => {
     expect(getToolModeForKind("floor")).toEqual({
-      kind: "floor",
+      brush: 2,
       floorType: "wood",
+      kind: "floor",
     });
   });
 
@@ -61,7 +63,7 @@ describe("getToolModeForKind", () => {
   });
 
   it("returns correct ToolMode for erase", () => {
-    expect(getToolModeForKind("erase")).toEqual({ kind: "erase" });
+    expect(getToolModeForKind("erase")).toEqual({ brush: 2, kind: "erase" });
   });
 
   it("returns correct ToolMode for select", () => {

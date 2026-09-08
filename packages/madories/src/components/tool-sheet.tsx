@@ -15,6 +15,7 @@ interface Props {
   onShare: () => void;
   onClear: () => void;
   onRotateFloor: () => void;
+  onFlipFloor: (axis: "h" | "v") => void;
   canUndo: boolean;
   canRedo: boolean;
   onUndo: () => void;
@@ -37,6 +38,7 @@ function ToolPanelContent({
   onShare,
   onClear,
   onRotateFloor,
+  onFlipFloor,
   canUndo,
   canRedo,
   onUndo,
@@ -86,6 +88,7 @@ function ToolPanelContent({
           onShare={onShare}
           onClear={onClear}
           onRotateFloor={onRotateFloor}
+          onFlipFloor={onFlipFloor}
           onClose={onClose}
           viewMode={viewMode}
           onToggleViewMode={onToggleViewMode}

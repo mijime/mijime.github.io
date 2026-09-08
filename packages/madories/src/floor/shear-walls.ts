@@ -1,5 +1,5 @@
 import type { FloorPlan, WallType } from "../types";
-import { MM_PER_CELL } from "../units";
+import { MM_PER_CELL, SHEAR_STABLE_MIN_MM } from "../units";
 import { hIndex, vIndex } from "./walls";
 
 // A wall carries lateral (seismic) load only if it is `solid`. Window edges
@@ -8,10 +8,11 @@ import { hIndex, vIndex } from "./walls";
 // Break the run: a shear wall interrupted by any opening does not count.
 export const STRUCTURAL_WALL_TYPES: ReadonlySet<WallType> = new Set(["solid"]);
 
-// One cell = 0.91m. A practical shear panel wants ~≥1m, so a 2-cell (1.82m)
-// Run is treated as stable; a single 0.91m run is marked marginal (it can
-// Still brace, but is hard to count as primary shear resistance).
-export const SHEAR_STABLE_MIN_CELLS = 2;
+// One half-grid cell = 455mm. A practical shear panel wants ~≥1m, so a 4-cell
+// (1820mm) run is treated as stable; shorter runs are marked marginal (they can
+// Still brace, but are hard to count as primary shear resistance).
+// See SHEAR_STABLE_MIN_MM: the length check is the source of truth.
+export const SHEAR_STABLE_MIN_CELLS = 4;
 
 export function isStructuralWall(type: WallType): boolean {
   return STRUCTURAL_WALL_TYPES.has(type);
@@ -24,9 +25,9 @@ export interface ShearWallRun {
   y: number;
   /** Number of contiguous cells (edges) in the run */
   cells: number;
-  /** Physical length in mm (= cells * 910) */
+  /** Physical length in mm (= cells * mmPerCell) */
   length: number;
-  /** True when cells >= 2 (stable shear wall), false = 0.91m marginal run */
+  /** True when length >= SHEAR_STABLE_MIN_MM (stable shear wall) */
   stable: boolean;
   /** Endpoint vertices, in (width+1)x(height+1) vertex space */
   startVertex: [number, number];
@@ -37,7 +38,10 @@ export interface ShearWallRun {
  * Detect maximal straight runs of structural wall edges.
  * Horizontal runs scan each hWalls row; vertical runs scan each vWalls column.
  */
-export function detectShearWallRuns(floor: FloorPlan): ShearWallRun[] {
+export function detectShearWallRuns(
+  floor: FloorPlan,
+  mmPerCell: number = MM_PER_CELL,
+): ShearWallRun[] {
   const { width, height, hWalls, vWalls } = floor;
   const runs: ShearWallRun[] = [];
 
@@ -49,12 +53,13 @@ export function detectShearWallRuns(floor: FloorPlan): ShearWallRun[] {
     startVertex: [number, number],
     endVertex: [number, number],
   ) => {
+    const length = cells * mmPerCell;
     runs.push({
       cells,
       endVertex,
       kind,
-      length: cells * MM_PER_CELL,
-      stable: cells >= SHEAR_STABLE_MIN_CELLS,
+      length,
+      stable: length >= SHEAR_STABLE_MIN_MM,
       startVertex,
       x,
       y,
@@ -111,9 +116,12 @@ export interface StackedColumn {
  * grid terms the run endpoints ARE the column locations (L/T junctions show up
  * here because the joining run terminates at the crossing).
  */
-export function detectStructuralColumnVertices(floor: FloorPlan): Array<[number, number]> {
+export function detectStructuralColumnVertices(
+  floor: FloorPlan,
+  mmPerCell?: number,
+): Array<[number, number]> {
   const map = new Map<string, [number, number]>();
-  for (const run of detectShearWallRuns(floor)) {
+  for (const run of detectShearWallRuns(floor, mmPerCell)) {
     map.set(`${run.startVertex[0]},${run.startVertex[1]}`, run.startVertex);
     map.set(`${run.endVertex[0]},${run.endVertex[1]}`, run.endVertex);
   }
@@ -126,10 +134,10 @@ export function detectStructuralColumnVertices(floor: FloorPlan): Array<[number,
  * 通し柱 positions: columns (run-endpoint vertices) that appear on >= 2 floors
  * at the same coordinate, so the vertical load path runs floor to floor.
  */
-export function detectStackedColumns(floors: FloorPlan[]): StackedColumn[] {
+export function detectStackedColumns(floors: FloorPlan[], mmPerCell?: number): StackedColumn[] {
   const counts = new Map<string, { x: number; y: number; count: number }>();
   for (const floor of floors) {
-    for (const [vx, vy] of detectStructuralColumnVertices(floor)) {
+    for (const [vx, vy] of detectStructuralColumnVertices(floor, mmPerCell)) {
       const key = `${vx},${vy}`;
       const entry = counts.get(key) ?? { count: 0, x: vx, y: vy };
       entry.count += 1;
@@ -207,7 +215,7 @@ function vertexOnStructuralWall(floor: FloorPlan, vx: number, vy: number): boole
  * `floors` must be ordered bottom-up (index 0 = ground floor). The ground floor
  * rests on the foundation, which is not modeled, so it is never flagged.
  */
-export function detectLoadPathBreaks(floors: FloorPlan[]): LoadPathBreak[] {
+export function detectLoadPathBreaks(floors: FloorPlan[], mmPerCell?: number): LoadPathBreak[] {
   if (floors.length < 2) {
     return [];
   }
@@ -218,7 +226,7 @@ export function detectLoadPathBreaks(floors: FloorPlan[]): LoadPathBreak[] {
     // With no support below. Dedupes shared/corner vertices while carrying the
     // Worst contributing run's length as the severity proxy.
     const worse = new Map<string, { x: number; y: number; length: number }>();
-    for (const run of detectShearWallRuns(floors[i])) {
+    for (const run of detectShearWallRuns(floors[i], mmPerCell)) {
       for (const [vx, vy] of [run.startVertex, run.endVertex]) {
         if (vertexOnStructuralWall(below, vx, vy)) {
           continue;

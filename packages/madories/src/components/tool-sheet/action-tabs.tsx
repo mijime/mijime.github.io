@@ -3,6 +3,8 @@ import {
   Activity,
   Braces,
   Download,
+  FlipHorizontal2,
+  FlipVertical2,
   FolderOpen,
   Link,
   Maximize2,
@@ -42,6 +44,7 @@ interface Props {
   onShare: () => void;
   onClear: () => void;
   onRotateFloor: () => void;
+  onFlipFloor: (axis: "h" | "v") => void;
   onClose?: () => void;
   viewMode: "2d" | "3d";
   onToggleViewMode: () => void;
@@ -62,6 +65,7 @@ export function ActionTabs({
   onShare,
   onClear,
   onRotateFloor,
+  onFlipFloor,
   onClose,
   viewMode,
   onToggleViewMode,
@@ -171,6 +175,28 @@ export function ActionTabs({
         onClose?.();
       },
       title: "回転",
+    },
+    {
+      disabled: false,
+      icon: <FlipHorizontal2 size={14} />,
+      id: "flipH",
+      label: "左右反転",
+      onClick: () => {
+        onFlipFloor("h");
+        onClose?.();
+      },
+      title: "左右反転",
+    },
+    {
+      disabled: false,
+      icon: <FlipVertical2 size={14} />,
+      id: "flipV",
+      label: "上下反転",
+      onClick: () => {
+        onFlipFloor("v");
+        onClose?.();
+      },
+      title: "上下反転",
     },
   ];
 
