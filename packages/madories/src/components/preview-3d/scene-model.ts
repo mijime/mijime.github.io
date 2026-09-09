@@ -1,4 +1,4 @@
-import { ITEM_DEF_MAP } from "../../items";
+import { ITEM_DEF_MAP, getItemFootprint } from "../../items";
 import type { FloorPlan, Item, WallType } from "../../types";
 import { hIndex, vIndex } from "../../floor/walls";
 import { getItemSpec, type Part } from "./catalog";
@@ -188,20 +188,6 @@ function buildWalls(floor: FloorPlan, toScene: ToScene, toSize: ToSize, cellCm: 
   return boxes;
 }
 
-function getItemDrawOffset(
-  w: number,
-  h: number,
-  rotation: Item["rotation"],
-): { offX: number; offY: number; effectiveW: number; effectiveH: number } {
-  const isRotated = rotation === 90 || rotation === 270;
-  const effectiveW = isRotated ? h : w;
-  const effectiveH = isRotated ? w : h;
-  const asymmetric = w !== h;
-  const offX = asymmetric && rotation === 90 && effectiveW > 1 ? -(effectiveW - 1) : 0;
-  const offY = asymmetric && rotation === 180 && effectiveH > 1 ? -(effectiveH - 1) : 0;
-  return { effectiveH, effectiveW, offX, offY };
-}
-
 // 家具の「背」の辺を決める。背=家具が壁側に向ける面(2Dアイコンでセル端に接する面)。
 // 各家具の backDir(rotation=0 での背の向きベクトル)を、オブジェクトの回転(時計回り・
 // RotatePart と同形式)に応じて回転させ、実シーンの背の向きを求める。
@@ -271,11 +257,7 @@ function buildItems(floor: FloorPlan, toScene: ToScene, toSize: ToSize, cellCm: 
       if (!cell.item) continue;
       const def = ITEM_DEF_MAP.get(cell.item.type);
       if (!def) continue;
-      const { effectiveW, effectiveH, offX, offY } = getItemDrawOffset(
-        def.w,
-        def.h,
-        cell.item.rotation,
-      );
+      const { effectiveW, effectiveH } = getItemFootprint(def, cell.item.rotation);
       for (let dy = 0; dy < effectiveH; dy++) {
         for (let dx = 0; dx < effectiveW; dx++) {
           const cx = x + dx;
@@ -283,8 +265,8 @@ function buildItems(floor: FloorPlan, toScene: ToScene, toSize: ToSize, cellCm: 
           if (cx < floor.width && cy < floor.height) visited.add(cy * floor.width + cx);
         }
       }
-      const drawX = x + offX;
-      const drawY = y + offY;
+      const drawX = x;
+      const drawY = y;
       // グリッド外へはみ出す占有分はクランプ対象から除外し、実際に見える範囲へ収める
       const availW = Math.min(effectiveW, floor.width - drawX) * cellCm;
       const availD = Math.min(effectiveH, floor.height - drawY) * cellCm;

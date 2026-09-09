@@ -173,4 +173,21 @@ describe("round-trip", () => {
     expect(getWall(floor, { kind: "v", x: 2, y: 1 })).toBe("solid");
     expect(getWall(floor, { kind: "v", x: 2, y: 2 })).toBe("solid");
   });
+
+  it("applies place with rotate 90 to pattern items by footprint", () => {
+    // Kitchen 2x6 at pattern (0,0), bbox maxY=5.
+    // CW90 anchor: (5-0-6+1, 0) = (0,0), rotation 90 → occupies 6x2.
+    const text = [
+      "size 10 10",
+      'name "t"',
+      "pattern p",
+      "  floor (0,0)-(1,5) wood",
+      "  item (0,0) kitchen",
+      "end",
+      "place p at (1,1) rotate 90",
+    ].join("\n");
+    const floor = dslToFloor(text);
+    expect(floor.cells[1 * 10 + 1].item).toEqual({ rotation: 90, type: "kitchen" });
+    expect(floor.cells[1 * 10 + 1].floorType).toBe("wood");
+  });
 });

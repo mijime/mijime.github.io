@@ -24,6 +24,15 @@ export function textToFloors(text: string): FloorPlan[] {
   return text.split(SEPARATOR).map((x) => dslToFloor(x));
 }
 
+function uint8ToBinary(bytes: Uint8Array): string {
+  // Chunked: spreading a large array into fromCodePoint() blows the call stack.
+  let binary = "";
+  for (let i = 0; i < bytes.length; i += 0x80_00) {
+    binary += String.fromCodePoint(...bytes.subarray(i, i + 0x80_00));
+  }
+  return binary;
+}
+
 function compress(text: string): Promise<string> {
   const bytes = new TextEncoder().encode(text);
   const stream = new CompressionStream("gzip");
@@ -31,7 +40,7 @@ function compress(text: string): Promise<string> {
   writer.write(bytes);
   writer.close();
   return new Response(stream.readable).arrayBuffer().then((compressed) => {
-    const binary = String.fromCodePoint(...new Uint8Array(compressed));
+    const binary = uint8ToBinary(new Uint8Array(compressed));
     return btoa(binary).replaceAll("+", "-").replaceAll("/", "_").replaceAll("=", "");
   });
 }

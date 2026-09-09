@@ -27,6 +27,7 @@ interface Props {
   shearCheck: boolean;
   onToggleShear: () => void;
   onOpenDsl: () => void;
+  onOpenLog: () => void;
 }
 
 function ToolPanelContent({
@@ -50,6 +51,7 @@ function ToolPanelContent({
   shearCheck,
   onToggleShear,
   onOpenDsl,
+  onOpenLog,
   onClose,
 }: Props & { onClose?: () => void }) {
   return (
@@ -95,6 +97,7 @@ function ToolPanelContent({
           shearCheck={shearCheck}
           onToggleShear={onToggleShear}
           onOpenDsl={onOpenDsl}
+          onOpenLog={onOpenLog}
         />
       </div>
     </div>

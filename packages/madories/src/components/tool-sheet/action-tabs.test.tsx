@@ -19,6 +19,7 @@ const baseProps = {
   shearCheck: false,
   onToggleShear: () => {},
   onOpenDsl: () => {},
+  onOpenLog: () => {},
   viewMode: "2d" as const,
 };
 

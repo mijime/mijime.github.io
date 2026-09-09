@@ -1,7 +1,13 @@
 import { useCallback, useEffect, useRef, useState, lazy, Suspense } from "react";
 import { useDarkMode } from "@mijime/theme/useDarkMode";
 import { computeFloorScores, exportAllFloorsPng } from "../draw/export";
-import { buildShareUrl, encodeFloors, mergeFloors } from "../floor/share";
+import {
+  buildShareUrl,
+  decodeFloors,
+  encodeFloors,
+  getShareParam,
+  mergeFloors,
+} from "../floor/share";
 import {
   createPlan,
   deletePlan,
@@ -11,13 +17,15 @@ import {
   migrateFromLegacy,
   putPlan,
   replaceAllPlans,
+  resetDatabase,
   saveToFile,
   setActivePlanId,
 } from "../storage";
+import { installLogHandlers, logError, logInfo } from "../log";
+import { v4 as uuidv4 } from "uuid";
 import { reducer } from "../store";
 import { detectRooms, ROOM_NAME_PRESETS } from "../floor/room-detection";
 import type { CopiedRegion, EdgeRef, ItemType, Plan } from "../types";
-import { useAppInit } from "../hooks/use-app-init";
 import { useHistory } from "../hooks/use-history";
 import { DslPanel } from "./dsl-panel";
 import type { FloorCanvasHandle } from "./floor-canvas";
@@ -27,6 +35,7 @@ import { PlanTabs } from "./plan-tabs";
 import type { ToolMode } from "./tool-mode";
 import { FLOOR_TYPES, floorTypeToSwatchStyle } from "./tool-mode";
 import type { CameraMode } from "./preview-3d/config";
+import { LogPanel } from "./log-panel";
 import { ToolSheet } from "./tool-sheet";
 import type { FloorPlan } from "../types";
 import { ShearDiagnostic } from "./shear-diagnostic";
@@ -63,7 +72,26 @@ export function App() {
       building: { cellSize: 32, floors: [] },
     });
 
-  useAppInit(push);
+  // Surface unexpected runtime errors in the log + toast so a blank screen never stays silent.
+  useEffect(() => {
+    installLogHandlers();
+    const onError = (e: ErrorEvent) => {
+      const msg = e.message.slice(0, 200);
+      logError(msg);
+      setToast(`エラー: ${msg.slice(0, 120)}`);
+    };
+    const onRejection = (e: PromiseRejectionEvent) => {
+      const msg = String(e.reason ?? "unhandled rejection").slice(0, 200);
+      logError(msg);
+      setToast(`エラー: ${msg.slice(0, 120)}`);
+    };
+    window.addEventListener("error", onError);
+    window.addEventListener("unhandledrejection", onRejection);
+    return () => {
+      window.removeEventListener("error", onError);
+      window.removeEventListener("unhandledrejection", onRejection);
+    };
+  }, []);
 
   const [plans, setPlans] = useState<Plan[]>([]);
   const [activePlanId, setActivePlanIdState] = useState<string | null>(null);
@@ -79,6 +107,7 @@ export function App() {
   const [toast, setToast] = useState<string | null>(null);
   const [fallbackUrl, setFallbackUrl] = useState<string | null>(null);
   const [dslOpen, setDslOpen] = useState(false);
+  const [logOpen, setLogOpen] = useState(false);
   const [customRoomName, setCustomRoomName] = useState("");
   const [roomPicker, setRoomPicker] = useState<{ cellIndex: number; x: number; y: number } | null>(
     null,
@@ -89,14 +118,55 @@ export function App() {
 
   const { building, activeFloorId } = current;
 
-  // Load the plan collection from IndexedDB (with legacy migration) and bootstrap the active plan.
+  // Boot: URL share (?d=) takes precedence and is imported as a new plan;
+  // Otherwise load the plan collection from IndexedDB (with legacy migration).
   // Any failure (corrupt DB, bad rows) falls back to a fresh plan so the app always boots.
+  // ?reset=1 forces a full local-database reset (recovery from data that renders blank).
   useEffect(() => {
     let cancelled = false;
     (async () => {
       try {
+        logInfo("起動: 保存データを読み込みます");
+        if (new URLSearchParams(window.location.search).get("reset") === "1") {
+          await resetDatabase();
+          window.history.replaceState(null, "", window.location.pathname);
+          if (!cancelled) {
+            setToast("保存データをリセットしました");
+          }
+        }
+        const shareParam = getShareParam();
         await migrateFromLegacy();
         let list = await listPlans();
+        if (shareParam) {
+          const floors = await decodeFloors(shareParam);
+          if (floors.length === 0) {
+            throw new Error("共有データが空です");
+          }
+          window.history.replaceState(null, "", window.location.pathname);
+          const used = new Set(list.map((p) => p.name));
+          let name = "共有プラン";
+          for (let n = 2; used.has(name); n++) {
+            name = `共有プラン${n}`;
+          }
+          const plan: Plan = {
+            activeFloorId: floors[0].id,
+            building: { cellSize: 32, floors },
+            id: uuidv4(),
+            name,
+            updatedAt: Date.now(),
+          };
+          await Promise.all([putPlan(plan), setActivePlanId(plan.id)]);
+          list = [plan, ...list];
+          if (!cancelled) {
+            reset({ activeFloorId: plan.activeFloorId, building: plan.building });
+            setPlans(list);
+            setActivePlanIdState(plan.id);
+            setReady(true);
+            logInfo(`共有プランを取り込みました: ${name}`);
+            setToast("共有プランを取り込みました");
+          }
+          return;
+        }
         let activeId = await getActivePlanId();
         if (list.length === 0) {
           const plan = createPlan("プラン1");
@@ -117,6 +187,7 @@ export function App() {
         });
         setPlans(list);
         setActivePlanIdState(activeId);
+        logInfo(`起動完了: プラン${list.length}件`);
       } catch {
         if (cancelled) {
           return;
@@ -125,6 +196,7 @@ export function App() {
         reset({ activeFloorId: plan.activeFloorId, building: plan.building });
         setPlans([plan]);
         setActivePlanIdState(plan.id);
+        logError("起動失敗: 保存データを初期化しました");
         setToast("保存データが壊れていたため初期化しました");
       } finally {
         if (!cancelled) {
@@ -246,17 +318,29 @@ export function App() {
   );
 
   const handleShare = useCallback(() => {
-    encodeFloors(building.floors).then((encoded) => {
-      const url = buildShareUrl(encoded);
-      navigator.clipboard
-        .writeText(url)
-        .then(() => {
-          setToast("URLをコピーしました");
-        })
-        .catch(() => {
+    encodeFloors(building.floors).then(
+      (encoded) => {
+        const url = buildShareUrl(encoded);
+        // Navigator.clipboard requires a secure context (missing on plain-http hosts).
+        if (!navigator.clipboard?.writeText) {
           setFallbackUrl(url);
-        });
-    });
+          return;
+        }
+        navigator.clipboard.writeText(url).then(
+          () => {
+            logInfo("共有URLをコピーしました");
+            setToast("URLをコピーしました");
+          },
+          () => {
+            setFallbackUrl(url);
+          },
+        );
+      },
+      (e) => {
+        logError(`共有URLの生成に失敗: ${String(e).slice(0, 200)}`);
+        setToast("共有URLの生成に失敗しました");
+      },
+    );
   }, [building.floors]);
   const dark = useDarkMode();
 
@@ -393,6 +477,7 @@ export function App() {
           shearCheck={shearCheck}
           onToggleShear={() => setShearCheck((s) => !s)}
           onOpenDsl={() => setDslOpen(true)}
+          onOpenLog={() => setLogOpen(true)}
         />
         <DslPanel
           key={activePlanId}
@@ -535,6 +620,14 @@ export function App() {
           </div>
         </div>
       </div>
+      {logOpen && (
+        <div
+          className="max-h-[calc(100vh-90px)] overflow-y-auto"
+          style={{ position: "fixed", left: "270px", top: "80px", zIndex: 55 }}
+        >
+          <LogPanel onClose={() => setLogOpen(false)} />
+        </div>
+      )}
       {shearCheck && (
         <div
           className="max-h-[calc(100vh-90px)] overflow-y-auto"

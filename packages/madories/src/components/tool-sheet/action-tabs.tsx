@@ -3,6 +3,7 @@ import {
   Activity,
   Braces,
   Download,
+  ScrollText,
   FlipHorizontal2,
   FlipVertical2,
   FolderOpen,
@@ -51,6 +52,7 @@ interface Props {
   shearCheck: boolean;
   onToggleShear: () => void;
   onOpenDsl: () => void;
+  onOpenLog: () => void;
 }
 
 export function ActionTabs({
@@ -72,6 +74,7 @@ export function ActionTabs({
   shearCheck,
   onToggleShear,
   onOpenDsl,
+  onOpenLog,
 }: Props) {
   const [activeTab, setActiveTab] = useState<ActionTab>("edit");
   const [clearPending, setClearPending] = useState(false);
@@ -209,6 +212,17 @@ export function ActionTabs({
       onClick: onToggleShear,
       title: shearCheck ? "診断OFF" : "診断ON",
       active: shearCheck,
+    },
+    {
+      disabled: false,
+      icon: <ScrollText size={14} />,
+      id: "log",
+      label: "ログ",
+      onClick: () => {
+        onOpenLog();
+        onClose?.();
+      },
+      title: "ログ",
     },
     {
       disabled: false,

@@ -1,4 +1,4 @@
-import type { ItemType, WallType } from "./types";
+import type { Item, ItemType, WallType } from "./types";
 
 export type ItemCategory = "建具" | "水回り" | "キッチン" | "リビング" | "寝室" | "外構";
 
@@ -55,6 +55,23 @@ export const ITEM_DEFS: ItemDef[] = [
 ];
 
 export const ITEM_DEF_MAP = new Map(ITEM_DEFS.map((d) => [d.type, d]));
+
+export interface ItemFootprint {
+  effectiveW: number;
+  effectiveH: number;
+}
+
+/**
+ * Footprint size in cells for the item's current rotation.
+ * The anchor cell is always the top-left of the footprint.
+ */
+export function getItemFootprint(def: ItemDef, rotation: Item["rotation"]): ItemFootprint {
+  const isRotated = rotation === 90 || rotation === 270;
+  return {
+    effectiveH: isRotated ? def.w : def.h,
+    effectiveW: isRotated ? def.h : def.w,
+  };
+}
 
 // Maps variant types to their representative type for legend grouping
 export const ITEM_GROUP_REPRESENTATIVE = new Map<ItemType, ItemType>([

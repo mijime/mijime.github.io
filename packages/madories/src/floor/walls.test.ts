@@ -80,10 +80,11 @@ describe("walls", () => {
     expect(getWall(f, { kind: "h", x: 3, y: 1 })).toBe("solid");
     expect(getWall(f, { kind: "v", x: 3, y: 0 })).toBe("solid");
     expect(getWall(f, { kind: "h", x: 0, y: 1 })).toBe("none");
-    // セル(0,1) → (3,1)、回転90 → 270(鏡映で向き反転)
+    // Chair 2x2 at (0,1) → 占有域写像で (2,1)、回転90 → 270
+    // 床材は単セル写像で (3,1) へ(家具とは別々に動く)
     expect(f.cells[1 * 4 + 3].floorType).toBe("wood");
-    expect(f.cells[1 * 4 + 3].item).toEqual({ rotation: 270, type: "chair" });
-    expect(f.cells[1 * 4 + 0].item).toBeNull();
+    expect(f.cells[1 * 4 + 2].item).toEqual({ rotation: 270, type: "chair" });
+    expect(f.cells[1 * 4 + 3].item).toBeNull();
   });
 
   it("flipFloorV mirrors cells and walls top-bottom", () => {
@@ -101,9 +102,11 @@ describe("walls", () => {
     // H(1,0) → h(1,3)、v(2,2) → v(2,0)
     expect(getWall(f, { kind: "h", x: 1, y: 3 })).toBe("solid");
     expect(getWall(f, { kind: "v", x: 2, y: 0 })).toBe("solid");
-    // セル(1,0) → (1,2)、回転0 → 180(上下鏡映)
+    // Chair 2x2 at (1,0) → 占有域写像で (1,1)、回転0 → 180
+    // 床材は単セル写像で (1,2) へ(家具とは別々に動く)
     expect(f.cells[2 * 4 + 1].floorType).toBe("wood");
-    expect(f.cells[2 * 4 + 1].item).toEqual({ rotation: 180, type: "chair" });
+    expect(f.cells[1 * 4 + 1].item).toEqual({ rotation: 180, type: "chair" });
+    expect(f.cells[2 * 4 + 1].item).toBeNull();
   });
 
   it("double flip is identity and H+V equals 180 rotation", () => {
@@ -131,5 +134,27 @@ describe("walls", () => {
     expect(hv.hWalls).toEqual(r180.hWalls);
     expect(hv.vWalls).toEqual(r180.vWalls);
     expect(hv.cells).toEqual(r180.cells);
+  });
+
+  it("rotateFloorCW90 moves asymmetric items by footprint, not by anchor cell", () => {
+    // Kitchen 2x6 at (2,1) occupies cols 2..3, rows 1..6.
+    // CW90 maps the region to cols 1..6, rows 2..3 → anchor (1,2), rotation 90.
+    const floor = createFloorPlan("t", 8, 8);
+    floor.cells[1 * 8 + 2] = { floorType: "wood", item: { rotation: 0, type: "kitchen" } };
+    const r = rotateFloorCW90(floor);
+    expect(r.width).toBe(8);
+    expect(r.height).toBe(8);
+    expect(r.cells[2 * 8 + 1].item).toEqual({ rotation: 90, type: "kitchen" });
+    // 旧アンカーの回転先 (6,2) には床材だけ残り、家具はない
+    expect(r.cells[2 * 8 + 6].floorType).toBe("wood");
+    expect(r.cells[2 * 8 + 6].item).toBeNull();
+  });
+
+  it("four rotations preserve asymmetric item footprints", () => {
+    const floor = createFloorPlan("t", 8, 8);
+    floor.cells[1 * 8 + 2] = { floorType: "wood", item: { rotation: 0, type: "kitchen" } };
+    let r = floor;
+    for (let i = 0; i < 4; i++) r = rotateFloorCW90(r);
+    expect(r.cells).toEqual(floor.cells);
   });
 });

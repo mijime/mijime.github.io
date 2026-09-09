@@ -37,26 +37,3 @@ export function resolveEdges(
   }
   return edges;
 }
-
-export function nearestEdge(
-  mx: number,
-  my: number,
-  cellSize: number,
-  width: number,
-  height: number,
-): EdgeRef | null {
-  const threshold = cellSize * 0.35;
-  const distH = Math.abs(my - Math.round(my / cellSize) * cellSize);
-  const distV = Math.abs(mx - Math.round(mx / cellSize) * cellSize);
-  if (distH > threshold && distV > threshold) {
-    return null;
-  }
-  if (distH <= distV) {
-    const y = Math.min(height, Math.max(0, Math.round(my / cellSize)));
-    const x = Math.min(width - 1, Math.max(0, Math.floor(mx / cellSize)));
-    return { kind: "h", x, y };
-  }
-  const x = Math.min(width, Math.max(0, Math.round(mx / cellSize)));
-  const y = Math.min(height - 1, Math.max(0, Math.floor(my / cellSize)));
-  return { kind: "v", x, y };
-}

@@ -1,5 +1,6 @@
 import { v4 as uuidv4 } from "uuid";
 import type { Cell, EdgeRef, FloorPlan, FloorType, ItemType, WallType } from "../types";
+import { ITEM_DEF_MAP } from "../items";
 import { detectRooms } from "./room-detection";
 import { hIndex, vIndex, createHWalls, createVWalls, getWall } from "./walls";
 
@@ -192,12 +193,23 @@ export function floorToDsl(floor: FloorPlan): string {
     const patternName = `room${ri + 1}`;
     lines.push(`pattern ${patternName}`);
 
-    // Floor rects (only cells in this room, shifted to local coords)
+    // Floor rects (only cells in this room, shifted to local coords).
+    // PackFloorRects needs a row-major grid, but room.cells is in flood order,
+    // So rebuild the pattern bounding box explicitly (holes stay empty).
     const roomCells = room.cells.map((idx) => {
       const gx = idx % width;
       const gy = Math.floor(idx / width);
       return { idx, lx: gx - minX, ly: gy - minY };
     });
+    const patternW = Math.max(...roomCells.map((c) => c.lx)) + 1;
+    const patternH = Math.max(...roomCells.map((c) => c.ly)) + 1;
+    const patternCells: Cell[] = Array.from({ length: patternW * patternH }, () => ({
+      floorType: null,
+      item: null,
+    }));
+    for (const rc of roomCells) {
+      patternCells[rc.ly * patternW + rc.lx] = cells[rc.idx];
+    }
 
     // Collect edges for this room
     const roomEdges = new Map<string, WallType>();
@@ -215,18 +227,14 @@ export function floorToDsl(floor: FloorPlan): string {
       }
     }
 
-    for (const { x1, y1, x2, y2, floorType } of packFloorRects(
-      roomCells.map((rc) => cells[rc.idx]),
-      Math.max(...roomCells.map((c) => c.lx)) + 1,
-      Math.max(...roomCells.map((c) => c.ly)) + 1,
-    )) {
+    for (const { x1, y1, x2, y2, floorType } of packFloorRects(patternCells, patternW, patternH)) {
       const coord = x1 === x2 && y1 === y2 ? `(${x1},${y1})` : `(${x1},${y1})-(${x2},${y2})`;
       lines.push(`  floor ${coord} ${floorType}`);
     }
 
     // Pack pattern walls using run-length encoding
-    const patternMaxX = Math.max(...roomCells.map((c) => c.lx), -1);
-    const patternMaxY = Math.max(...roomCells.map((c) => c.ly), -1);
+    const patternMaxX = patternW - 1;
+    const patternMaxY = patternH - 1;
     const patternHWalls = createHWalls(patternMaxX + 1, patternMaxY + 1);
     const patternVWalls = createVWalls(patternMaxX + 1, patternMaxY + 1);
 
@@ -335,27 +343,52 @@ function rotateEdgeCW90(e: EdgeRef, maxY: number): EdgeRef {
     : { kind: "h", x: maxY - e.y, y: e.x };
 }
 
+function patternKey(x: number, y: number): string {
+  return `${x},${y}`;
+}
+
 function rotatePatternCW90(
   cells: PatternCell[],
   walls: PatternWall[],
   _maxX: number,
   maxY: number,
 ): { cells: PatternCell[]; walls: PatternWall[] } {
-  const newCells = cells.map(({ x, y, floorType, item }) => {
-    const nx = maxY - y;
+  // 床材は単セルで回転、家具アンカーは占有域写像した左上へ (x,y)[w,h] → (maxY-y-h+1, x)
+  const byCoord = new Map<string, PatternCell>();
+  for (const { x, y, floorType } of cells) {
+    if (floorType === undefined) {
+      continue;
+    }
+    byCoord.set(patternKey(maxY - y, x), { floorType, x: maxY - y, y: x });
+  }
+  for (const { x, y, floorType, item } of cells) {
+    if (!item) {
+      continue;
+    }
+    const def = ITEM_DEF_MAP.get(item.type);
+    const dw = def?.w ?? 1;
+    const dh = def?.h ?? 1;
+    const h = item.rotation === 90 || item.rotation === 270 ? dw : dh;
+    const nx = maxY - y - h + 1;
     const ny = x;
-    const newItem = item
-      ? { ...item, rotation: ((item.rotation + 90) % 360) as 0 | 90 | 180 | 270 }
-      : undefined;
-    return { floorType, item: newItem, x: nx, y: ny };
-  });
+    const newItem = { ...item, rotation: ((item.rotation + 90) % 360) as 0 | 90 | 180 | 270 };
+    const existing = byCoord.get(patternKey(nx, ny));
+    if (existing) {
+      existing.item = newItem;
+      if (floorType !== undefined) {
+        existing.floorType = floorType;
+      }
+    } else {
+      byCoord.set(patternKey(nx, ny), { floorType, item: newItem, x: nx, y: ny });
+    }
+  }
 
   const newWalls = walls.map(({ edge, type }) => ({
     edge: rotateEdgeCW90(edge, maxY),
     type,
   }));
 
-  return { cells: newCells, walls: newWalls };
+  return { cells: [...byCoord.values()], walls: newWalls };
 }
 
 function applyPatternCells(

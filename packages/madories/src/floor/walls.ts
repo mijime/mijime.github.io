@@ -1,4 +1,5 @@
-import type { EdgeRef, FloorPlan, WallType } from "../types";
+import type { Cell, EdgeRef, FloorPlan, ItemType, WallType } from "../types";
+import { ITEM_DEF_MAP } from "../items";
 
 export function hIndex(width: number, x: number, y: number): number {
   return y * width + x;
@@ -37,21 +38,48 @@ export function setWallsPure(floor: FloorPlan, edges: EdgeRef[], type: WallType)
   return { ...floor, hWalls, vWalls };
 }
 
+// 家具アンカーは占有域の左上。回転・反転では占有域ごと写像した左上が新アンカーになる。
+// 未知の家具種別は1x1扱い(従来通りの単セル写像に退化)。
+// 回転値を考慮した占有サイズ(90/270度なら縦横入替)。
+function currentSize(type: ItemType, rotation: 0 | 90 | 180 | 270): { w: number; h: number } {
+  const def = ITEM_DEF_MAP.get(type);
+  const w = def?.w ?? 1;
+  const h = def?.h ?? 1;
+  return rotation === 90 || rotation === 270 ? { h: w, w: h } : { h, w };
+}
+
 // CW90: セル (x,y)→(h-1-y, x)、頂点 (vx,vy)→(h-vy, vx)
+// 家具アンカー (x,y)[w,h] → (h-y-h, x)
 export function rotateFloorCW90(floor: FloorPlan): FloorPlan {
   const { width, height, cells } = floor;
   const nw = height;
   const nh = width;
-  const newCells = cells.map((c) => c);
+  // Pass 1: 床材は単セルで回転、家具は剥がす
+  const newCells: Cell[] = cells.map((c) => c);
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
       const src = cells[y * width + x];
-      newCells[x * nw + (height - 1 - y)] = src.item
-        ? {
-            floorType: src.floorType,
-            item: { ...src.item, rotation: ((src.item.rotation + 90) % 360) as 0 | 90 | 180 | 270 },
-          }
-        : src;
+      newCells[x * nw + (height - 1 - y)] = { ...src, item: null };
+    }
+  }
+  // Pass 2: 家具は占有域写像した左上へ。はみ出し配置で範囲外になる場合のみ
+  // 従来の単セル写像にフォールバック(家具を消さないため)
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      const src = cells[y * width + x];
+      if (!src.item) {
+        continue;
+      }
+      const { h } = currentSize(src.item.type, src.item.rotation);
+      let nx = height - y - h;
+      const ny = x;
+      if (nx < 0 || nx >= nw) {
+        nx = height - 1 - y;
+      }
+      newCells[ny * nw + nx] = {
+        ...newCells[ny * nw + nx],
+        item: { ...src.item, rotation: ((src.item.rotation + 90) % 360) as 0 | 90 | 180 | 270 },
+      };
     }
   }
   const hWalls = createHWalls(nw, nh);
@@ -81,18 +109,31 @@ function mirroredRotationV(rotation: 0 | 90 | 180 | 270): 0 | 90 | 180 | 270 {
 }
 
 // 左右反転: セル (x,y)→(w-1-x, y)、h エッジ (x,y)→(w-1-x, y)、v エッジ (x,y)→(w-x, y)
+// 家具アンカー (x,y)[w,h] → (w-x-w, y)
 export function flipFloorH(floor: FloorPlan): FloorPlan {
   const { width, height, cells } = floor;
-  const newCells = cells.map((c) => c);
+  const newCells: Cell[] = cells.map((c) => c);
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
       const src = cells[y * width + x];
-      newCells[y * width + (width - 1 - x)] = src.item
-        ? {
-            floorType: src.floorType,
-            item: { ...src.item, rotation: mirroredRotationH(src.item.rotation) },
-          }
-        : src;
+      newCells[y * width + (width - 1 - x)] = { ...src, item: null };
+    }
+  }
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      const src = cells[y * width + x];
+      if (!src.item) {
+        continue;
+      }
+      const { w } = currentSize(src.item.type, src.item.rotation);
+      let nx = width - x - w;
+      if (nx < 0 || nx >= width) {
+        nx = width - 1 - x;
+      }
+      newCells[y * width + nx] = {
+        ...newCells[y * width + nx],
+        item: { ...src.item, rotation: mirroredRotationH(src.item.rotation) },
+      };
     }
   }
   const hWalls = createHWalls(width, height);
@@ -111,18 +152,31 @@ export function flipFloorH(floor: FloorPlan): FloorPlan {
 }
 
 // 上下反転: セル (x,y)→(x, h-1-y)、h エッジ (x,y)→(x, h-y)、v エッジ (x,y)→(x, h-1-y)
+// 家具アンカー (x,y)[w,h] → (x, h-y-h)
 export function flipFloorV(floor: FloorPlan): FloorPlan {
   const { width, height, cells } = floor;
-  const newCells = cells.map((c) => c);
+  const newCells: Cell[] = cells.map((c) => c);
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
       const src = cells[y * width + x];
-      newCells[(height - 1 - y) * width + x] = src.item
-        ? {
-            floorType: src.floorType,
-            item: { ...src.item, rotation: mirroredRotationV(src.item.rotation) },
-          }
-        : src;
+      newCells[(height - 1 - y) * width + x] = { ...src, item: null };
+    }
+  }
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      const src = cells[y * width + x];
+      if (!src.item) {
+        continue;
+      }
+      const { h } = currentSize(src.item.type, src.item.rotation);
+      let ny = height - y - h;
+      if (ny < 0 || ny >= height) {
+        ny = height - 1 - y;
+      }
+      newCells[ny * width + x] = {
+        ...newCells[ny * width + x],
+        item: { ...src.item, rotation: mirroredRotationV(src.item.rotation) },
+      };
     }
   }
   const hWalls = createHWalls(width, height);
