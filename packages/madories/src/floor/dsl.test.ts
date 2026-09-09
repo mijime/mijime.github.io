@@ -27,6 +27,31 @@ describe("floorToDsl", () => {
     expect(dsl).toBe('size 3 3\nname "Test"');
   });
 
+  it("roundtrips size, name, walls, floor and item", () => {
+    let floor = makeFloor(40, 40);
+    floor.name = "1F";
+    floor = setWallsPure(
+      floor,
+      [
+        { kind: "h", x: 4, y: 4 },
+        { kind: "h", x: 5, y: 4 },
+        { kind: "v", x: 4, y: 4 },
+      ],
+      "solid",
+    );
+    floor.cells[4 * 40 + 4] = { floorType: "wood", item: null };
+    floor.cells[5 * 40 + 5] = { floorType: null, item: { rotation: 90, type: "chair" } };
+    const back = dslToFloor(floorToDsl(floor));
+    expect(back.width).toBe(40);
+    expect(back.height).toBe(40);
+    expect(back.name).toBe("1F");
+    expect(getWall(back, { kind: "h", x: 4, y: 4 })).toBe("solid");
+    expect(getWall(back, { kind: "h", x: 5, y: 4 })).toBe("solid");
+    expect(getWall(back, { kind: "v", x: 4, y: 4 })).toBe("solid");
+    expect(back.cells[4 * 40 + 4].floorType).toBe("wood");
+    expect(back.cells[5 * 40 + 5].item).toEqual({ rotation: 90, type: "chair" });
+  });
+
   it("wall run-length: consecutive top walls merge into range", () => {
     let floor = makeFloor(4, 2);
     floor = setWallsPure(
@@ -147,5 +172,22 @@ describe("round-trip", () => {
     // Pattern bbox maxY=0; CW90: top wall h(0,0)-(1,0) → v edges at local x=1,y=0..1 → global v(2,1),(2,2)
     expect(getWall(floor, { kind: "v", x: 2, y: 1 })).toBe("solid");
     expect(getWall(floor, { kind: "v", x: 2, y: 2 })).toBe("solid");
+  });
+
+  it("applies place with rotate 90 to pattern items by footprint", () => {
+    // Kitchen 2x6 at pattern (0,0), bbox maxY=5.
+    // CW90 anchor: (5-0-6+1, 0) = (0,0), rotation 90 → occupies 6x2.
+    const text = [
+      "size 10 10",
+      'name "t"',
+      "pattern p",
+      "  floor (0,0)-(1,5) wood",
+      "  item (0,0) kitchen",
+      "end",
+      "place p at (1,1) rotate 90",
+    ].join("\n");
+    const floor = dslToFloor(text);
+    expect(floor.cells[1 * 10 + 1].item).toEqual({ rotation: 90, type: "kitchen" });
+    expect(floor.cells[1 * 10 + 1].floorType).toBe("wood");
   });
 });

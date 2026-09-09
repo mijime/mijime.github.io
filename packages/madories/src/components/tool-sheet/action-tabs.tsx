@@ -3,6 +3,9 @@ import {
   Activity,
   Braces,
   Download,
+  ScrollText,
+  FlipHorizontal2,
+  FlipVertical2,
   FolderOpen,
   Link,
   Maximize2,
@@ -42,12 +45,14 @@ interface Props {
   onShare: () => void;
   onClear: () => void;
   onRotateFloor: () => void;
+  onFlipFloor: (axis: "h" | "v") => void;
   onClose?: () => void;
   viewMode: "2d" | "3d";
   onToggleViewMode: () => void;
   shearCheck: boolean;
   onToggleShear: () => void;
   onOpenDsl: () => void;
+  onOpenLog: () => void;
 }
 
 export function ActionTabs({
@@ -62,12 +67,14 @@ export function ActionTabs({
   onShare,
   onClear,
   onRotateFloor,
+  onFlipFloor,
   onClose,
   viewMode,
   onToggleViewMode,
   shearCheck,
   onToggleShear,
   onOpenDsl,
+  onOpenLog,
 }: Props) {
   const [activeTab, setActiveTab] = useState<ActionTab>("edit");
   const [clearPending, setClearPending] = useState(false);
@@ -172,6 +179,28 @@ export function ActionTabs({
       },
       title: "回転",
     },
+    {
+      disabled: false,
+      icon: <FlipHorizontal2 size={14} />,
+      id: "flipH",
+      label: "左右反転",
+      onClick: () => {
+        onFlipFloor("h");
+        onClose?.();
+      },
+      title: "左右反転",
+    },
+    {
+      disabled: false,
+      icon: <FlipVertical2 size={14} />,
+      id: "flipV",
+      label: "上下反転",
+      onClick: () => {
+        onFlipFloor("v");
+        onClose?.();
+      },
+      title: "上下反転",
+    },
   ];
 
   const inspectActions: ActionItem[] = [
@@ -183,6 +212,17 @@ export function ActionTabs({
       onClick: onToggleShear,
       title: shearCheck ? "診断OFF" : "診断ON",
       active: shearCheck,
+    },
+    {
+      disabled: false,
+      icon: <ScrollText size={14} />,
+      id: "log",
+      label: "ログ",
+      onClick: () => {
+        onOpenLog();
+        onClose?.();
+      },
+      title: "ログ",
     },
     {
       disabled: false,

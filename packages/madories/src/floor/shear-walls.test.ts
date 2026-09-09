@@ -22,6 +22,7 @@ describe("detectShearWallRuns", () => {
         { kind: "h", x: 1, y: 1 },
         { kind: "h", x: 2, y: 1 },
         { kind: "h", x: 3, y: 1 },
+        { kind: "h", x: 4, y: 1 },
       ],
       "solid",
     );
@@ -29,15 +30,15 @@ describe("detectShearWallRuns", () => {
     expect(runs).toHaveLength(1);
     const run = runs[0];
     expect(run).toMatchObject({
-      cells: 3,
-      endVertex: [4, 1],
+      cells: 4,
+      endVertex: [5, 1],
       kind: "h",
       startVertex: [1, 1],
       stable: true,
       x: 1,
       y: 1,
     });
-    expect(run.length).toBe(3 * MM_PER_CELL);
+    expect(run.length).toBe(4 * MM_PER_CELL);
   });
 
   it("treats a window edge as a break and splits the run", () => {
@@ -60,7 +61,7 @@ describe("detectShearWallRuns", () => {
     expect(runs.every((r) => r.cells === 1)).toBe(true);
   });
 
-  it("single-cell runs are marginal (stable=false) at 910mm", () => {
+  it("single-cell runs are marginal (stable=false) at 455mm", () => {
     let f = floor(4, 4);
     f = setWallsPure(f, [{ kind: "h", x: 0, y: 0 }], "solid");
     const runs = detectShearWallRuns(f);
@@ -87,14 +88,15 @@ describe("detectShearWallRuns", () => {
         { kind: "v", x: 2, y: 0 },
         { kind: "v", x: 2, y: 1 },
         { kind: "v", x: 2, y: 2 },
+        { kind: "v", x: 2, y: 3 },
       ],
       "solid",
     );
     const runs = detectShearWallRuns(f);
     expect(runs).toHaveLength(1);
     expect(runs[0]).toMatchObject({
-      cells: 3,
-      endVertex: [2, 3],
+      cells: 4,
+      endVertex: [2, 4],
       kind: "v",
       stable: true,
       startVertex: [2, 0],
@@ -268,7 +270,9 @@ describe("detectLoadPathBreaks", () => {
       "solid",
     );
     // (0,1) sits on the lower wall; (3,1) extends past it with no wall below.
-    expect(detectLoadPathBreaks([a1, a2])).toEqual([{ floorIndex: 1, length: 2730, x: 3, y: 1 }]);
+    expect(detectLoadPathBreaks([a1, a2])).toEqual([
+      { floorIndex: 1, length: 3 * MM_PER_CELL, x: 3, y: 1 },
+    ]);
   });
 
   it("does NOT flag a 2F wall end that lands over the middle of a 1F wall", () => {

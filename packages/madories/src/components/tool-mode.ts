@@ -1,11 +1,21 @@
 import type { FloorType, ItemType, WallType } from "../types";
 
+export type BrushSize = 1 | 2;
+
 export type ToolMode =
-  | { kind: "wall"; wallType: WallType }
-  | { kind: "floor"; floorType: FloorType | null }
+  | { kind: "wall"; wallType: WallType; brush?: BrushSize }
+  | { kind: "floor"; floorType: FloorType | null; brush?: BrushSize }
   | { kind: "item"; itemType: ItemType }
-  | { kind: "erase" }
+  | { kind: "erase"; brush?: BrushSize }
   | { kind: "select" };
+
+/** 2x2ブロック(=旧1セル=910mm≒1間) で描くモード用。未指定は1間。 */
+export function toolBrush(tool: ToolMode): BrushSize {
+  if (tool.kind === "wall" || tool.kind === "floor" || tool.kind === "erase") {
+    return tool.brush ?? 2;
+  }
+  return 1;
+}
 
 export const FLOOR_TYPES: {
   dark: string | null;

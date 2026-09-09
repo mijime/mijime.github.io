@@ -5,21 +5,106 @@ import type { Building, Plan, SaveData } from "./types";
 
 // ---- IndexedDB (Dexie) persistence ----
 
+export const DB_NAME = "madories";
+// Dexie schema version. Bump this (and add .stores()/.upgrade()) when the
+// IndexedDB schema itself changes (stores/indexes). App-level data shape
+// Drift (old rows, half-baked writes) is handled by sanitizePlan() below,
+// So a version bump is NOT needed for those.
+export const DB_VERSION = 1;
+
 type PlanRecord = Plan;
 interface MetaRecord {
   key: string;
   value: string;
 }
 
-const db = new Dexie("madories") as Dexie & {
+const db = new Dexie(DB_NAME) as Dexie & {
   plans: EntityTable<PlanRecord, "id">;
   meta: EntityTable<MetaRecord, "key">;
 };
 
-db.version(1).stores({
+db.version(DB_VERSION).stores({
   plans: "id, updatedAt",
   meta: "key",
 });
+
+/**
+ * Runs an IndexedDB operation. If it fails (corrupt DB, schema mismatch,
+ * aborted upgrade, ...), deletes the whole database and retries once, so a
+ * broken local DB can never brick the app boot. Throws only if the retry
+ * also fails.
+ */
+async function withRecovery<T>(fn: () => Promise<T>): Promise<T> {
+  try {
+    return await fn();
+  } catch {
+    await Dexie.delete(DB_NAME);
+    return await fn();
+  }
+}
+
+/** Deletes the local database. The `db` instance re-opens lazily on next use. */
+export async function resetDatabase(): Promise<void> {
+  await Dexie.delete(DB_NAME);
+}
+
+function isValidFloor(floor: unknown): boolean {
+  if (typeof floor !== "object" || floor === null) {
+    return false;
+  }
+  const f = floor as Record<string, unknown>;
+  if (!Number.isInteger(f["width"]) || !Number.isInteger(f["height"])) {
+    return false;
+  }
+  const width = f["width"] as number;
+  const height = f["height"] as number;
+  if (width < 1 || height < 1 || width > 200 || height > 200) {
+    return false;
+  }
+  return (
+    Array.isArray(f["cells"]) &&
+    (f["cells"] as unknown[]).length === width * height &&
+    Array.isArray(f["hWalls"]) &&
+    (f["hWalls"] as unknown[]).length === width * (height + 1) &&
+    Array.isArray(f["vWalls"]) &&
+    (f["vWalls"] as unknown[]).length === (width + 1) * height
+  );
+}
+
+/**
+ * Validates a stored plan and repairs what can be repaired (drops broken
+ * floors, re-points activeFloorId). Returns null when nothing salvageable
+ * remains — callers should drop such plans.
+ */
+export function sanitizePlan(plan: unknown): Plan | null {
+  if (typeof plan !== "object" || plan === null) {
+    return null;
+  }
+  const p = plan as Record<string, unknown>;
+  const building = p["building"] as Record<string, unknown> | undefined;
+  if (typeof building !== "object" || building === null || !Array.isArray(building["floors"])) {
+    return null;
+  }
+  const floors = (building["floors"] as unknown[]).filter((f) => isValidFloor(f));
+  if (floors.length === 0) {
+    return null;
+  }
+  const floorIds = new Set((floors as { id?: unknown }[]).map((f) => f.id));
+  const activeFloorId =
+    typeof p["activeFloorId"] === "string" && floorIds.has(p["activeFloorId"])
+      ? (p["activeFloorId"] as string)
+      : ((floors[0] as { id: string }).id ?? "");
+  if (!activeFloorId) {
+    return null;
+  }
+  return {
+    activeFloorId,
+    building: { ...(building as object), floors } as Building,
+    id: typeof p["id"] === "string" ? (p["id"] as string) : uuidv4(),
+    name: typeof p["name"] === "string" ? (p["name"] as string) : "プラン",
+    updatedAt: typeof p["updatedAt"] === "number" ? (p["updatedAt"] as number) : Date.now(),
+  };
+}
 
 export function createPlan(name: string): Plan {
   const building = createBuilding();
@@ -33,42 +118,47 @@ export function createPlan(name: string): Plan {
 }
 
 async function listPlans(): Promise<Plan[]> {
-  const arr = await db.plans.orderBy("updatedAt").toArray();
+  const arr = await withRecovery(() => db.plans.orderBy("updatedAt").toArray());
   const reversed: Plan[] = [];
   for (let i = arr.length - 1; i >= 0; i--) {
-    reversed.push(arr[i]);
+    const p = sanitizePlan(arr[i]);
+    if (p) {
+      reversed.push(p);
+    }
   }
   return reversed;
 }
 
 async function putPlan(plan: Plan): Promise<void> {
-  await db.plans.put(plan);
+  await withRecovery(() => db.plans.put(plan));
 }
 
 /** Replaces the whole collection atomically, deleting rows no longer in `plans`. */
 async function replaceAllPlans(plans: Plan[]): Promise<void> {
-  await db.transaction("rw", db.plans, async () => {
-    const existing = (await db.plans.toCollection().primaryKeys()) as string[];
-    const keep = new Set(plans.map((p) => p.id));
-    const toDelete = existing.filter((id) => !keep.has(id));
-    await db.plans.bulkPut(plans);
-    if (toDelete.length > 0) {
-      await db.plans.bulkDelete(toDelete);
-    }
-  });
+  await withRecovery(() =>
+    db.transaction("rw", db.plans, async () => {
+      const existing = (await db.plans.toCollection().primaryKeys()) as string[];
+      const keep = new Set(plans.map((p) => p.id));
+      const toDelete = existing.filter((id) => !keep.has(id));
+      await db.plans.bulkPut(plans);
+      if (toDelete.length > 0) {
+        await db.plans.bulkDelete(toDelete);
+      }
+    }),
+  );
 }
 
 async function deletePlan(id: string): Promise<void> {
-  await db.plans.delete(id);
+  await withRecovery(() => db.plans.delete(id));
 }
 
 async function getActivePlanId(): Promise<string | null> {
-  const row = await db.meta.get("activePlanId");
+  const row = await withRecovery(() => db.meta.get("activePlanId"));
   return row?.value ?? null;
 }
 
 async function setActivePlanId(id: string): Promise<void> {
-  await db.meta.put({ key: "activePlanId", value: id });
+  await withRecovery(() => db.meta.put({ key: "activePlanId", value: id }));
 }
 
 // ---- legacy localStorage migration ----
@@ -92,14 +182,17 @@ async function migrateFromLegacy(): Promise<boolean> {
     if ((await db.plans.count()) > 0) {
       return false;
     }
-    const plan: Plan = {
+    const plan = sanitizePlan({
       building: data.building,
       activeFloorId: data.activeFloorId,
       id: uuidv4(),
       name: "プラン1",
       updatedAt: Date.now(),
-    };
-    await db.plans.put(plan);
+    });
+    if (!plan) {
+      return false;
+    }
+    await withRecovery(() => db.plans.put(plan));
     return true;
   } catch {
     return false;
@@ -139,7 +232,14 @@ export function loadFromFile(): Promise<SaveData | null> {
             version: number;
           };
           if (data.version === 3) {
-            resolve(data);
+            const plans = data.plans
+              .map((p) => sanitizePlan(p))
+              .filter((p): p is Plan => p !== null);
+            if (plans.length === 0) {
+              resolve(null);
+              return;
+            }
+            resolve({ ...data, plans });
             return;
           }
           // Legacy single-building file -> single plan
@@ -148,13 +248,17 @@ export function loadFromFile(): Promise<SaveData | null> {
               building: Building;
               activeFloorId: string;
             };
-            const plan: Plan = {
+            const plan = sanitizePlan({
               building: legacy.building,
               activeFloorId: legacy.activeFloorId,
               id: uuidv4(),
               name: "インポート",
               updatedAt: Date.now(),
-            };
+            });
+            if (!plan) {
+              resolve(null);
+              return;
+            }
             resolve({ version: 3, activePlanId: plan.id, plans: [plan] });
             return;
           }

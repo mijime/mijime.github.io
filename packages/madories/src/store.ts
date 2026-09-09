@@ -2,6 +2,8 @@ import { v4 as uuidv4 } from "uuid";
 import {
   createHWalls,
   createVWalls,
+  flipFloorH,
+  flipFloorV,
   hIndex,
   vIndex,
   setWallsPure,
@@ -23,7 +25,7 @@ function createCell(): Cell {
   return { floorType: null, item: null };
 }
 
-export function createFloorPlan(name: string, width = 20, height = 20): FloorPlan {
+export function createFloorPlan(name: string, width = 40, height = 40): FloorPlan {
   return {
     cells: Array.from({ length: width * height }, createCell),
     hWalls: createHWalls(width, height),
@@ -82,7 +84,8 @@ type Action =
   | { type: "ERASE_CELL"; floorId: string; cellIndex: number }
   | { type: "FILL_ROOM"; floorId: string; cellIndex: number; floorType: FloorType }
   | { type: "SET_ROOM_NAME"; floorId: string; cellIndex: number; roomName: string | null }
-  | { type: "ROTATE_FLOOR"; floorId: string };
+  | { type: "ROTATE_FLOOR"; floorId: string }
+  | { type: "FLIP_FLOOR"; floorId: string; axis: "h" | "v" };
 
 function updateFloor(state: Building, floorId: string, fn: (f: FloorPlan) => FloorPlan): Building {
   return {
@@ -331,6 +334,12 @@ function reducerImpl(state: Building, action: Action): Building {
       return updateFloor(state, action.floorId, (floor) => rotateFloorCW90(floor));
     }
 
+    case "FLIP_FLOOR": {
+      return updateFloor(state, action.floorId, (floor) =>
+        action.axis === "h" ? flipFloorH(floor) : flipFloorV(floor),
+      );
+    }
+
     default: {
       return state;
     }
@@ -376,6 +385,7 @@ const NAME_AFFECTING_ACTIONS: Action["type"][] = [
   "ERASE_CELL",
   "ERASE_REGION",
   "ROTATE_FLOOR",
+  "FLIP_FLOOR",
   "CLEAR_FLOOR",
   "PASTE_REGION",
 ];
@@ -389,9 +399,9 @@ export function reducer(state: Building, action: Action): Building {
   if (!floor || !NAME_AFFECTING_ACTIONS.includes(action.type)) {
     return next;
   }
-  // Rotating or clearing the floor reshapes every room → drop all names.
+  // Rotating, flipping or clearing the floor reshapes every room → drop all names.
   const reconciled =
-    action.type === "ROTATE_FLOOR" || action.type === "CLEAR_FLOOR"
+    action.type === "ROTATE_FLOOR" || action.type === "FLIP_FLOOR" || action.type === "CLEAR_FLOOR"
       ? clearAllNames(floor)
       : reconcileNames(floor);
   if (reconciled === floor) {

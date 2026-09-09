@@ -1,5 +1,4 @@
-import type { ItemDef } from "../items";
-import { ITEM_DEF_MAP } from "../items";
+import { ITEM_DEF_MAP, getItemFootprint } from "../items";
 import type { FloorPlan, Item } from "../types";
 import { getCachedIcon } from "./icons/cache";
 
@@ -21,19 +20,6 @@ export function drawItemAt(
   ctx.restore();
 }
 
-export function getItemDrawOffset(
-  def: ItemDef,
-  rotation: 0 | 90 | 180 | 270,
-): { offX: number; offY: number; effectiveW: number; effectiveH: number } {
-  const isRotated = rotation === 90 || rotation === 270;
-  const effectiveW = isRotated ? def.h : def.w;
-  const effectiveH = isRotated ? def.w : def.h;
-  const asymmetric = def.w !== def.h;
-  const offX = asymmetric && rotation === 90 && effectiveW > 1 ? -(effectiveW - 1) : 0;
-  const offY = asymmetric && rotation === 180 && effectiveH > 1 ? -(effectiveH - 1) : 0;
-  return { effectiveH, effectiveW, offX, offY };
-}
-
 export function drawItems(ctx: CanvasRenderingContext2D, floor: FloorPlan, cellSize: number): void {
   const { width, height, cells } = floor;
 
@@ -49,15 +35,12 @@ export function drawItems(ctx: CanvasRenderingContext2D, floor: FloorPlan, cellS
         continue;
       }
 
-      const { effectiveW, effectiveH, offX, offY } = getItemDrawOffset(itemDef, cell.item.rotation);
-      const drawX = x + offX;
-      const drawY = y + offY;
-
-      if (drawX < 0 || drawY < 0 || drawX + effectiveW > width || drawY + effectiveH > height) {
+      const { effectiveW, effectiveH } = getItemFootprint(itemDef, cell.item.rotation);
+      if (x + effectiveW > width || y + effectiveH > height) {
         continue;
       }
 
-      drawItemAt(ctx, cell.item, drawX * cellSize, drawY * cellSize, cellSize);
+      drawItemAt(ctx, cell.item, x * cellSize, y * cellSize, cellSize);
     }
   }
 }

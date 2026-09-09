@@ -1,4 +1,5 @@
 import type { FloorPlan } from "../types";
+import { MM_PER_CELL } from "../units";
 import {
   detectLoadPathBreaks,
   detectShearWallRuns,
@@ -181,11 +182,11 @@ function drawRigidCenterOverlay(
   if (!ecc) {
     return;
   }
-  const MM_PER_CELL = 910;
-  const gx = (ecc.gx / MM_PER_CELL) * cellSize;
-  const gy = (ecc.gy / MM_PER_CELL) * cellSize;
-  const rx = (ecc.rx / MM_PER_CELL) * cellSize;
-  const ry = (ecc.ry / MM_PER_CELL) * cellSize;
+  const mm = MM_PER_CELL;
+  const gx = (ecc.gx / mm) * cellSize;
+  const gy = (ecc.gy / mm) * cellSize;
+  const rx = (ecc.rx / mm) * cellSize;
+  const ry = (ecc.ry / mm) * cellSize;
 
   ctx.strokeStyle = ECC_LINE;
   ctx.lineWidth = 1.5;

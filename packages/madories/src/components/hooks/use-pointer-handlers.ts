@@ -4,7 +4,7 @@ import { copyRegion, normalizeSelection, pasteOriginIndex } from "../../floor/cl
 import { resolveEdges, snapVertex } from "../../input/wall-snap";
 import { resolveItemAction } from "../../input/item-logic";
 import type { CopiedRegion, EdgeRef, FloorPlan, FloorType, WallType } from "../../types";
-import type { ToolMode } from "../tool-mode";
+import { toolBrush, type ToolMode } from "../tool-mode";
 import type { SelectionRef, ViewRef } from "./types";
 
 interface Props {
@@ -206,6 +206,28 @@ export function usePointerHandlers(props: Props): {
     return idx >= 0 && idx < floor.cells.length ? idx : null;
   }
 
+  // Brush=2 (旧1セル相当) では起点セルを含む2x2ブロックを対象にする
+  function blockCells(idx: number): number[] {
+    if (toolBrush(tool) !== 2) {
+      return [idx];
+    }
+    const cx = idx % floor.width;
+    const cy = Math.floor(idx / floor.width);
+    const ox = cx - (cx % 2);
+    const oy = cy - (cy % 2);
+    const out: number[] = [];
+    for (let dy = 0; dy < 2; dy++) {
+      for (let dx = 0; dx < 2; dx++) {
+        const x = ox + dx;
+        const y = oy + dy;
+        if (x < floor.width && y < floor.height) {
+          out.push(y * floor.width + x);
+        }
+      }
+    }
+    return out;
+  }
+
   function handleContextMenu(e: React.MouseEvent<HTMLCanvasElement>) {
     e.preventDefault();
     const { mx, my } = getCanvasPos(e.clientX, e.clientY);
@@ -266,7 +288,14 @@ export function usePointerHandlers(props: Props): {
     }
 
     if (tool.kind === "wall") {
-      wallStartVertexRef.current = snapVertex(mx, my, cellSize, floor.width, floor.height);
+      wallStartVertexRef.current = snapVertex(
+        mx,
+        my,
+        cellSize,
+        floor.width,
+        floor.height,
+        toolBrush(tool),
+      );
       wallPreviewRef.current = [];
       startLongPress(e.clientX, e.clientY);
       return;
@@ -403,7 +432,9 @@ export function usePointerHandlers(props: Props): {
 
     if (tool.kind === "erase") {
       if (!dragMovedRef.current && idx !== null) {
-        onEraseCell(idx);
+        for (const i of blockCells(idx)) {
+          onEraseCell(i);
+        }
       }
       dragMovedRef.current = false;
       return;
@@ -504,7 +535,9 @@ export function usePointerHandlers(props: Props): {
       const idx = getCellAtMouse(mx, my);
       if (idx !== null) {
         dragMovedRef.current = true;
-        onSetFloorType(idx, tool.floorType);
+        for (const i of blockCells(idx)) {
+          onSetFloorType(i, tool.floorType);
+        }
       }
       return;
     }
@@ -513,13 +546,15 @@ export function usePointerHandlers(props: Props): {
       const idx = getCellAtMouse(mx, my);
       if (idx !== null) {
         dragMovedRef.current = true;
-        onEraseCell(idx);
+        for (const i of blockCells(idx)) {
+          onEraseCell(i);
+        }
       }
       return;
     }
 
     if (tool.kind === "wall" && wallStartVertexRef.current && e.buttons === 1) {
-      const end = snapVertex(mx, my, cellSize, floor.width, floor.height);
+      const end = snapVertex(mx, my, cellSize, floor.width, floor.height, toolBrush(tool));
       wallPreviewRef.current = resolveEdges(wallStartVertexRef.current, end);
       if (wallPreviewRef.current.length > 0 && longPressTimerRef.current) {
         clearTimeout(longPressTimerRef.current);

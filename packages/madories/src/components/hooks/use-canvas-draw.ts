@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useRef } from "react";
 import { drawGrid } from "../../draw/draw-grid";
-import { getItemDrawOffset } from "../../draw/draw-items";
+import { getItemFootprint } from "../../items";
 import { drawVoidCells } from "../../draw/draw-void";
 import { drawWalls, drawWallPreview } from "../../draw/draw-walls";
 import { computeWallDimensions, fmtMm } from "../../draw/export";
+import { tsuboForCells } from "../../units";
 import { drawShearCheck, type ShearLayerFlags } from "../../draw/draw-shear-check";
 import { clearIconCache, getCachedIcon } from "../../draw/icons/cache";
 import { drawTatamiCells } from "../../draw/draw-tatami";
@@ -109,9 +110,9 @@ function drawItemsCached(
       if (!def) {
         continue;
       }
-      const { effectiveW, effectiveH, offX, offY } = getItemDrawOffset(def, cell.item.rotation);
-      const drawX = x + offX;
-      const drawY = y + offY;
+      const { effectiveW, effectiveH } = getItemFootprint(def, cell.item.rotation);
+      const drawX = x;
+      const drawY = y;
       if (drawX < 0 || drawY < 0 || drawX + effectiveW > width || drawY + effectiveH > height) {
         continue;
       }
@@ -261,15 +262,9 @@ export function useCanvasDraw(props: Props): {
     if (ghost) {
       const { item } = floor.cells[ghost.fromIdx];
       if (item) {
-        const def = ITEM_DEF_MAP.get(item.type);
-        if (def) {
-          const cx = Math.floor(ghost.mx / cellSize);
-          const cy = Math.floor(ghost.my / cellSize);
-          const { offX, offY } = getItemDrawOffset(def, item.rotation);
-          const drawX = cx + offX;
-          const drawY = cy + offY;
-          drawItemAtCached(ctx, item, drawX * cellSize, drawY * cellSize, cellSize, 0.5, darkMode);
-        }
+        const cx = Math.floor(ghost.mx / cellSize);
+        const cy = Math.floor(ghost.my / cellSize);
+        drawItemAtCached(ctx, item, cx * cellSize, cy * cellSize, cellSize, 0.5, darkMode);
       }
     }
 
@@ -304,7 +299,7 @@ export function useCanvasDraw(props: Props): {
     // Tsubo count (bottom-right, screen-fixed)
     const usedCells = floor.cells.filter((c) => c.floorType !== null).length;
     if (usedCells > 0) {
-      const tsubo = (usedCells / 4).toFixed(2);
+      const tsubo = tsuboForCells(usedCells).toFixed(2);
       const label = `${tsubo}坪`;
       ctx.save();
       ctx.font = "bold 12px 'IBM Plex Mono', monospace";

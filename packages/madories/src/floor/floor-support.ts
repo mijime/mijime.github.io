@@ -1,5 +1,6 @@
 import type { FloorPlan } from "../types";
 import { isStructuralWall } from "./shear-walls";
+import { MM_PER_CELL } from "../units";
 import { hIndex, vIndex } from "./walls";
 
 // 2F床を支える1F支持点（柱・耐力壁）から、この距離を超える2F床領域は
@@ -63,7 +64,10 @@ function supportVertices(floor: FloorPlan): Array<[number, number]> {
  * 距離（＝見かけの梁スパン）を計算し、スパン分布を返す。Floors は bottom-up
  * （index 0 = 1F）。1F は基礎で受けるので i>=1 のみ評価（floors[i-1] が受ける）。
  */
-export function computeFloorSupport(floors: FloorPlan[]): FloorSupport[] {
+export function computeFloorSupport(
+  floors: FloorPlan[],
+  mmPerCell: number = MM_PER_CELL,
+): FloorSupport[] {
   const out: FloorSupport[] = [];
   for (let i = 1; i < floors.length; i++) {
     const lower = floors[i - 1];
@@ -89,7 +93,7 @@ export function computeFloorSupport(floors: FloorPlan[]): FloorSupport[] {
           continue;
         }
         // 支持までの距離は「半スパン」。床梁が渡る実質スパンは両側で約2倍。
-        const spanM = best * 0.91 * 2;
+        const spanM = best * (mmPerCell / 1000) * 2;
         if (spanM > maxSpanM) {
           maxSpanM = spanM;
         }

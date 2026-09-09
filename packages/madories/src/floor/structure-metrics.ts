@@ -1,4 +1,5 @@
 import type { FloorPlan } from "../types";
+import { MM_PER_CELL } from "../units";
 import { detectShearWallRuns, isStructuralWall } from "./shear-walls";
 import { computeWallBounds } from "./quadrant-balance";
 import { hIndex, vIndex } from "./walls";
@@ -23,10 +24,10 @@ export interface BalanceMetrics {
  * floor. Practical rule of thumb stays within roughly 2× — a ratio below 0.5
  * flags wildly uneven bracing in one direction.
  */
-export function computeBalanceRatio(floor: FloorPlan): BalanceMetrics {
+export function computeBalanceRatio(floor: FloorPlan, mmPerCell?: number): BalanceMetrics {
   let h = 0;
   let v = 0;
-  for (const run of detectShearWallRuns(floor)) {
+  for (const run of detectShearWallRuns(floor, mmPerCell)) {
     if (run.kind === "h") {
       h += run.length;
     } else {
@@ -59,7 +60,10 @@ export interface EccentricityMetrics {
  * mass center means the story wants to twist under lateral load. 0.15 per axis
  * is a common practical ceiling.
  */
-export function computeEccentricity(floor: FloorPlan): EccentricityMetrics | null {
+export function computeEccentricity(
+  floor: FloorPlan,
+  mmPerCell: number = MM_PER_CELL,
+): EccentricityMetrics | null {
   const b = computeWallBounds(floor);
   if (!b) {
     return null;
@@ -103,7 +107,7 @@ export function computeEccentricity(floor: FloorPlan): EccentricityMetrics | nul
   let hWx = 0;
   let vLen = 0;
   let vWy = 0;
-  for (const run of detectShearWallRuns(floor)) {
+  for (const run of detectShearWallRuns(floor, mmPerCell)) {
     if (run.kind === "h") {
       hLen += run.length;
       hWx += run.length * (run.x + run.cells / 2);
@@ -118,7 +122,7 @@ export function computeEccentricity(floor: FloorPlan): EccentricityMetrics | nul
   const ex = Math.abs(rx - gx) / spanX;
   const ey = Math.abs(ry - gy) / spanY;
   const ok = ex < 0.15 && ey < 0.15;
-  const mm = 910;
+  const mm = mmPerCell;
   return {
     ex,
     ey,
@@ -146,7 +150,10 @@ export interface PerimeterMetric {
  * wall. A facade with mostly windows/openings on an edge has little continuous
  * bracing there. Below 0.5 is flagged.
  */
-export function computePerimeterContinuity(floor: FloorPlan): PerimeterMetric | null {
+export function computePerimeterContinuity(
+  floor: FloorPlan,
+  mmPerCell: number = MM_PER_CELL,
+): PerimeterMetric | null {
   const b = computeWallBounds(floor);
   if (!b) {
     return null;
@@ -177,6 +184,6 @@ export function computePerimeterContinuity(floor: FloorPlan): PerimeterMetric | 
   }
 
   const ratio = total > 0 ? structural / total : 0;
-  const mm = 910;
+  const mm = mmPerCell;
   return { ratio, structural: structural * mm, total: total * mm, ok: ratio >= 0.5 };
 }

@@ -15,7 +15,7 @@ import { drawTatamiCells } from "./draw-tatami";
 import { drawVoidCells } from "./draw-void";
 import { drawWalls } from "./draw-walls";
 import { drawRoomLabels } from "../floor/room-detection";
-import { MM_PER_CELL } from "../units";
+import { MM_PER_CELL, tsuboForCells } from "../units";
 import { drawShearCheck, ALL_SHEAR_LAYERS, type ShearLayerFlags } from "./draw-shear-check";
 import { computeStructuralReport } from "../floor/structural-report";
 
@@ -148,8 +148,8 @@ export function computeWallDimensions(floor: FloorPlan, cellSize: number) {
   return { bottom, left, right, top };
 }
 
-export function fmtMm(cells: number): string {
-  const mm = cells * MM_PER_CELL;
+export function fmtMm(cells: number, mmPerCell: number = MM_PER_CELL): string {
+  const mm = cells * mmPerCell;
   return mm >= 1000 ? `${(mm / 1000).toFixed(2)}m` : `${mm}mm`;
 }
 
@@ -355,13 +355,14 @@ export function exportAllFloorsPng(
     ),
     floor: f,
     name: f.name,
-    tsubo:
+    tsubo: tsuboForCells(
       f.cells.filter(
         (c) =>
           c.floorType !== null &&
           c.floorType !== "exterior-concrete" &&
           c.floorType !== "exterior-grass",
-      ).length / 4,
+      ).length,
+    ),
   }));
   const valid = tsuboPerFloor.filter((r) => r.canvas !== null) as {
     canvas: HTMLCanvasElement;

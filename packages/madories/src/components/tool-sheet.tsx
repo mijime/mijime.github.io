@@ -15,6 +15,7 @@ interface Props {
   onShare: () => void;
   onClear: () => void;
   onRotateFloor: () => void;
+  onFlipFloor: (axis: "h" | "v") => void;
   canUndo: boolean;
   canRedo: boolean;
   onUndo: () => void;
@@ -26,6 +27,7 @@ interface Props {
   shearCheck: boolean;
   onToggleShear: () => void;
   onOpenDsl: () => void;
+  onOpenLog: () => void;
 }
 
 function ToolPanelContent({
@@ -37,6 +39,7 @@ function ToolPanelContent({
   onShare,
   onClear,
   onRotateFloor,
+  onFlipFloor,
   canUndo,
   canRedo,
   onUndo,
@@ -48,6 +51,7 @@ function ToolPanelContent({
   shearCheck,
   onToggleShear,
   onOpenDsl,
+  onOpenLog,
   onClose,
 }: Props & { onClose?: () => void }) {
   return (
@@ -86,12 +90,14 @@ function ToolPanelContent({
           onShare={onShare}
           onClear={onClear}
           onRotateFloor={onRotateFloor}
+          onFlipFloor={onFlipFloor}
           onClose={onClose}
           viewMode={viewMode}
           onToggleViewMode={onToggleViewMode}
           shearCheck={shearCheck}
           onToggleShear={onToggleShear}
           onOpenDsl={onOpenDsl}
+          onOpenLog={onOpenLog}
         />
       </div>
     </div>

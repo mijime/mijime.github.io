@@ -12,6 +12,7 @@ import type { FloorPlan } from "../../types";
 import { type CameraMode, CAMERA, LIGHTING } from "./config";
 import { BoxList, useSharedMaterials } from "./meshes";
 import { buildBuildingScene } from "./scene-model";
+import { CELL_CM } from "./config";
 import { WalkControls } from "./walk-controls";
 
 interface Props {
@@ -63,7 +64,8 @@ function OrbitPan({
 
 export function FloorPlanScene({ floors, cameraMode, move, darkMode }: Props) {
   // 全階を縦に積んだモデルを1回だけ構築
-  const model = useMemo(() => buildBuildingScene(floors), [floors]);
+  const cellCm = CELL_CM;
+  const model = useMemo(() => buildBuildingScene(floors, cellCm), [floors, cellCm]);
   const materials = useSharedMaterials(darkMode);
 
   const maxDim = Math.max(model.bounds.width, model.bounds.depth);

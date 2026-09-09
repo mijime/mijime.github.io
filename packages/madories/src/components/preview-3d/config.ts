@@ -1,6 +1,6 @@
 import type { FloorType } from "../../types";
 
-export const CELL_CM = 91;
+export const CELL_CM = 45.5;
 export const CM_TO_M = 0.01;
 
 export const WALL_HEIGHT_CM = 240;

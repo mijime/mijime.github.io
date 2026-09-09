@@ -4,7 +4,6 @@ import { computeWallBounds, type QuadrantName } from "./quadrant-balance";
 import { detectShearWallRuns } from "./shear-walls";
 import { hIndex, vIndex } from "./walls";
 
-const CELL_M2 = (MM_PER_CELL / 1000) ** 2;
 // Simplified shear-wall requirement: metres of structural wall per m² of floor.
 // Real 壁量計算 depends on region/story/materials — this is a rough decision aid.
 const NEED_PER_M2 = 0.45;
@@ -19,7 +18,10 @@ export interface WallQuantity {
 }
 
 /** Provided vs required shear wall length, per direction, for a floor. */
-export function computeWallQuantity(floor: FloorPlan): WallQuantity {
+export function computeWallQuantity(
+  floor: FloorPlan,
+  mmPerCell: number = MM_PER_CELL,
+): WallQuantity {
   const b = computeWallBounds(floor);
   if (!b) {
     // No wall at all: a floor with zero structural wall cannot brace anything.
@@ -27,11 +29,12 @@ export function computeWallQuantity(floor: FloorPlan): WallQuantity {
     // Otherwise an empty 2F reads as "OK" (vacuous 0>=0).
     return { areaM2: 0, haveHm: 0, haveVm: 0, needM: 0, okH: false, okV: false };
   }
-  const areaM2 = (b.maxX - b.minX) * (b.maxY - b.minY) * CELL_M2;
+  const cellM2 = (mmPerCell / 1000) ** 2;
+  const areaM2 = (b.maxX - b.minX) * (b.maxY - b.minY) * cellM2;
   const needM = areaM2 * NEED_PER_M2;
   let haveHm = 0;
   let haveVm = 0;
-  for (const run of detectShearWallRuns(floor)) {
+  for (const run of detectShearWallRuns(floor, mmPerCell)) {
     if (run.kind === "h") {
       haveHm += run.length / 1000;
     } else {
@@ -65,11 +68,14 @@ export interface InterFloorWallBalance {
  * which only needs diaphragm/beam transfer. Returns one entry per adjacent pair
  * (floors must be ordered bottom-up).
  */
-export function computeInterFloorWallBalance(floors: FloorPlan[]): InterFloorWallBalance[] {
+export function computeInterFloorWallBalance(
+  floors: FloorPlan[],
+  mmPerCell?: number,
+): InterFloorWallBalance[] {
   const out: InterFloorWallBalance[] = [];
   for (let i = 0; i + 1 < floors.length; i++) {
-    const lower = computeWallQuantity(floors[i]);
-    const upper = computeWallQuantity(floors[i + 1]);
+    const lower = computeWallQuantity(floors[i], mmPerCell);
+    const upper = computeWallQuantity(floors[i + 1], mmPerCell);
     const hDeficit = upper.haveHm - lower.haveHm;
     const vDeficit = upper.haveVm - lower.haveVm;
     out.push({
