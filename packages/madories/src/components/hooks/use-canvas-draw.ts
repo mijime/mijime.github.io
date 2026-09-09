@@ -42,16 +42,18 @@ function drawOverlay(
   floor: FloorPlan,
   cellSize: number,
   wallDim: ReturnType<typeof computeWallDimensions>,
+  scale: number,
 ) {
-  drawRoomLabels(ctx, floor, cellSize, cssVar("--ink"), cssVar("--paper"));
+  drawRoomLabels(ctx, floor, cellSize, cssVar("--ink"), cssVar("--paper"), undefined, scale);
 
   if (!wallDim) {
     return;
   }
+  const k = 1 / scale;
   const ink = cssVar("--ink");
   const fmtPx = (px: number) => fmtMm(px / cellSize);
   ctx.save();
-  ctx.font = "11px 'IBM Plex Mono', monospace";
+  ctx.font = `${11 * k}px 'IBM Plex Mono', monospace`;
   ctx.fillStyle = ink;
   ctx.strokeStyle = ink;
   ctx.lineWidth = 1;
@@ -69,7 +71,7 @@ function drawOverlay(
     ctx.fillText(
       fmtPx(wallDim.right! - wallDim.left!),
       (wallDim.left! + wallDim.right!) / 2,
-      topY - 2,
+      topY - 2 * k,
     );
   }
 
@@ -82,7 +84,7 @@ function drawOverlay(
     ctx.stroke();
     ctx.setLineDash([]);
     ctx.save();
-    ctx.translate(leftX - 2, (wallDim.top! + wallDim.bottom!) / 2);
+    ctx.translate(leftX - 2 * k, (wallDim.top! + wallDim.bottom!) / 2);
     ctx.rotate(-Math.PI / 2);
     ctx.textAlign = "center";
     ctx.textBaseline = "bottom";
@@ -283,7 +285,7 @@ export function useCanvasDraw(props: Props): {
     }
 
     if (wallDimRef.current) {
-      drawOverlay(ctx, floor, cellSize, wallDimRef.current);
+      drawOverlay(ctx, floor, cellSize, wallDimRef.current, scale);
     }
 
     if (shearCheck) {
