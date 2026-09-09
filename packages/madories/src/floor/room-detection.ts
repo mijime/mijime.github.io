@@ -154,18 +154,27 @@ export function drawRoomLabels(
   inkColor: string,
   outlineColor = "rgba(255,255,255,0.8)",
   mmPerCell?: number,
+  /** Current zoom scale (1 = 100%). Divides font/lineWidth so text stays a constant on-screen size regardless of zoom. */
+  scale = 1,
 ) {
   const rooms = detectRooms(floor, mmPerCell);
   if (rooms.length === 0) {
     return;
   }
 
+  // Counter-scale: label text/intro must keep a constant screen size under the
+  // Canvas zoom transform, or it becomes unreadable when zoomed out.
+  const k = 1 / scale;
+
   ctx.save();
-  ctx.font = "bold 13px 'IBM Plex Mono', monospace";
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
 
   for (const room of rooms) {
+    // Show the number only from 2畳 onward (tiny storage/utility rooms stay unlabeled).
+    if (room.tatami < 2) {
+      continue;
+    }
     // Centroid
     let sumX = 0;
     let sumY = 0;
@@ -183,17 +192,17 @@ export function drawRoomLabels(
 
     ctx.strokeStyle = outlineColor;
     ctx.fillStyle = inkColor;
-    ctx.lineWidth = 3;
+    ctx.lineWidth = 3 * k;
 
     if (name) {
-      ctx.font = "bold 14px 'IBM Plex Mono', monospace";
-      ctx.strokeText(name, cx, cy - 7);
-      ctx.fillText(name, cx, cy - 7);
-      ctx.font = "bold 11px 'IBM Plex Mono', monospace";
-      ctx.strokeText(`${room.tatami}畳`, cx, cy + 8);
-      ctx.fillText(`${room.tatami}畳`, cx, cy + 8);
+      ctx.font = `bold ${14 * k}px 'IBM Plex Mono', monospace`;
+      ctx.strokeText(name, cx, cy - 7 * k);
+      ctx.fillText(name, cx, cy - 7 * k);
+      ctx.font = `bold ${11 * k}px 'IBM Plex Mono', monospace`;
+      ctx.strokeText(`${room.tatami}畳`, cx, cy + 8 * k);
+      ctx.fillText(`${room.tatami}畳`, cx, cy + 8 * k);
     } else {
-      ctx.font = "bold 13px 'IBM Plex Mono', monospace";
+      ctx.font = `bold ${13 * k}px 'IBM Plex Mono', monospace`;
       ctx.strokeText(`${room.tatami}畳`, cx, cy);
       ctx.fillText(`${room.tatami}畳`, cx, cy);
     }
