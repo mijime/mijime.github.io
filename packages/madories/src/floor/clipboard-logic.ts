@@ -11,12 +11,29 @@ export function normalizeSelection(sel: { x1: number; y1: number; x2: number; y2
   };
 }
 
+/**
+ * Copies the selected world region. The selection is in world coordinates and
+ * is clamped to the current window; cells outside the window simply don't
+ * exist and are ignored.
+ */
 export function copyRegion(
   floor: FloorPlan,
   sel: { x1: number; y1: number; x2: number; y2: number },
 ): CopiedRegion | null {
   const { x1, y1, x2, y2 } = normalizeSelection(sel);
-  const bounds = computeBounds(floor, { x1, x2, y1, y2 });
+  const cx1 = Math.max(x1, floor.originX);
+  const cy1 = Math.max(y1, floor.originY);
+  const cx2 = Math.min(x2, floor.originX + floor.width - 1);
+  const cy2 = Math.min(y2, floor.originY + floor.height - 1);
+  if (cx1 > cx2 || cy1 > cy2) {
+    return null;
+  }
+  const bounds = computeBounds(floor, {
+    x1: cx1 - floor.originX,
+    x2: cx2 - floor.originX,
+    y1: cy1 - floor.originY,
+    y2: cy2 - floor.originY,
+  });
   if (!bounds) {
     return null;
   }
@@ -44,12 +61,14 @@ export function copyRegion(
   return { cells, height, width, hWalls, vWalls };
 }
 
-export function pasteOriginIndex(
+/** World cell coordinate of the paste origin under the pointer. */
+export function pasteOrigin(
   pos: { mx: number; my: number },
   cellSize: number,
   floor: FloorPlan,
-): number {
-  const cx = Math.min(Math.floor(pos.mx / cellSize), floor.width - 1);
-  const cy = Math.min(Math.floor(pos.my / cellSize), floor.height - 1);
-  return cy * floor.width + cx;
+): { x: number; y: number } {
+  return {
+    x: floor.originX + Math.floor(pos.mx / cellSize),
+    y: floor.originY + Math.floor(pos.my / cellSize),
+  };
 }

@@ -1,6 +1,6 @@
 import { Pencil } from "lucide-react";
 import { useState } from "react";
-import type { ToolMode } from "./tool-mode";
+import type { BrushSize, ToolMode } from "./tool-mode";
 import { PrimaryToolTabs } from "./tool-sheet/primary-tool-tabs";
 import { SubPanels } from "./tool-sheet/sub-panels";
 import { ActionTabs } from "./tool-sheet/action-tabs";
@@ -28,6 +28,8 @@ interface Props {
   onToggleShear: () => void;
   onOpenDsl: () => void;
   onOpenLog: () => void;
+  brush: BrushSize;
+  onBrushChange: (brush: BrushSize) => void;
 }
 
 function ToolPanelContent({
@@ -52,6 +54,8 @@ function ToolPanelContent({
   onToggleShear,
   onOpenDsl,
   onOpenLog,
+  brush,
+  onBrushChange,
   onClose,
 }: Props & { onClose?: () => void }) {
   return (
@@ -65,9 +69,15 @@ function ToolPanelContent({
         padding: "12px 10px",
       }}
     >
-      <PrimaryToolTabs tool={tool} onToolChange={onToolChange} />
+      <PrimaryToolTabs tool={tool} brush={brush} onToolChange={onToolChange} />
       <div style={{ flex: 1, overflowY: "auto", minHeight: 0 }}>
-        <SubPanels tool={tool} onToolChange={onToolChange} darkMode={darkMode} />
+        <SubPanels
+          tool={tool}
+          brush={brush}
+          onBrushChange={onBrushChange}
+          onToolChange={onToolChange}
+          darkMode={darkMode}
+        />
       </div>
       <div
         style={{

@@ -1,5 +1,5 @@
 import { Armchair, BrickWall, Eraser, MousePointer2, PaintRoller } from "lucide-react";
-import { toolBrush, type BrushSize, type ToolMode } from "../tool-mode";
+import type { BrushSize, ToolMode } from "../tool-mode";
 import { btnBase } from "./styles";
 
 const PRIMARY_TOOLS = [
@@ -34,10 +34,11 @@ export function getToolModeForKind(kind: PrimaryToolKind, brush: BrushSize = 2):
 
 interface Props {
   tool: ToolMode;
+  brush: BrushSize;
   onToolChange: (tool: ToolMode) => void;
 }
 
-export function PrimaryToolTabs({ tool, onToolChange }: Props) {
+export function PrimaryToolTabs({ tool, brush, onToolChange }: Props) {
   return (
     <div style={{ display: "flex", gap: "4px" }}>
       {PRIMARY_TOOLS.map(({ kind, label, icon: Icon }) => {
@@ -60,7 +61,7 @@ export function PrimaryToolTabs({ tool, onToolChange }: Props) {
               justifyContent: "center",
               padding: "6px 2px",
             }}
-            onClick={() => onToolChange(getToolModeForKind(kind, toolBrush(tool)))}
+            onClick={() => onToolChange(getToolModeForKind(kind, brush))}
           >
             <Icon size={14} />
             <span style={{ fontSize: "9px" }}>{label}</span>

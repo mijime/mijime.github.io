@@ -1,14 +1,24 @@
-import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react";
+import {
+  forwardRef,
+  useEffect,
+  useImperativeHandle,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 import { exportFloorPng } from "../draw/export";
 import type { CopiedRegion, EdgeRef, FloorPlan, FloorType, WallType } from "../types";
+import { contentArrayRect } from "../floor/frame";
 import { useCanvasDraw } from "./hooks/use-canvas-draw";
 import { usePointerHandlers } from "./hooks/use-pointer-handlers";
-import type { ToolMode } from "./tool-mode";
+import type { BrushSize, ToolMode } from "./tool-mode";
 import type { ShearLayerFlags } from "../draw/draw-shear-check";
 
 interface SelectionContextMenuProps {
   selectionState: { x1: number; y1: number; x2: number; y2: number };
   cellSize: number;
+  originX: number;
+  originY: number;
   viewRef: React.RefObject<{ offsetX: number; offsetY: number; scale: number }>;
   onCopy: () => void;
   onPaste: () => void;
@@ -18,6 +28,8 @@ interface SelectionContextMenuProps {
 function SelectionContextMenu({
   selectionState,
   cellSize,
+  originX,
+  originY,
   viewRef,
   onCopy,
   onPaste,
@@ -26,8 +38,8 @@ function SelectionContextMenu({
   const { offsetX, offsetY, scale } = viewRef.current;
   const x1 = Math.min(selectionState.x1, selectionState.x2);
   const y1 = Math.min(selectionState.y1, selectionState.y2);
-  const px = x1 * cellSize * scale + offsetX;
-  const py = y1 * cellSize * scale + offsetY;
+  const px = (x1 - originX) * cellSize * scale + offsetX;
+  const py = (y1 - originY) * cellSize * scale + offsetY;
   return (
     <div
       className="absolute flex gap-1 z-10 pointer-events-auto"
@@ -64,6 +76,7 @@ function SelectionContextMenu({
 export interface FloorCanvasHandle {
   exportPng: () => void;
   fitToContainer: () => void;
+  centerContent: () => void;
 }
 
 interface Props {
@@ -72,25 +85,37 @@ interface Props {
   cellSize: number;
   darkMode: boolean;
   tool: ToolMode;
+  brush: BrushSize;
   shearCheck: boolean;
   floors: FloorPlan[];
   shearLayers: ShearLayerFlags;
   onSetWalls: (edges: EdgeRef[], wallType: WallType) => void;
-  onSetFloorType: (cellIndex: number, floorType: FloorType | null) => void;
-  onFillRoom: (cellIndex: number) => void;
-  onPlaceItem: (cellIndex: number) => void;
-  onRotateItem: (cellIndex: number) => void;
-  onMoveItem: (fromIndex: number, toIndex: number) => void;
-  onPasteRegion: (originIndex: number, region: CopiedRegion) => void;
+  onSetFloorType: (x: number, y: number, floorType: FloorType | null) => void;
+  onFillRoom: (x: number, y: number) => void;
+  onPlaceItem: (x: number, y: number) => void;
+  onRotateItem: (x: number, y: number) => void;
+  onMoveItem: (fromX: number, fromY: number, toX: number, toY: number) => void;
+  onPasteRegion: (x: number, y: number, region: CopiedRegion) => void;
   onEraseRegion: (x1: number, y1: number, x2: number, y2: number) => void;
-  onEraseCell: (cellIndex: number) => void;
-  onLongPressRoom?: (cellIndex: number, clientX: number, clientY: number) => void;
+  onEraseCell: (x: number, y: number) => void;
+  onLongPressRoom?: (x: number, y: number, clientX: number, clientY: number) => void;
+  onCommit?: () => void;
+  centerNonce?: number;
   onUndo?: () => void;
 }
 
+function contentRectOf(f: FloorPlan) {
+  const r = contentArrayRect(f);
+  if (r) {
+    return r;
+  }
+  return { x1: 0, x2: f.width - 1, y1: 0, y2: f.height - 1 };
+}
+
 export const FloorCanvas = forwardRef<FloorCanvasHandle, Props>((props, ref) => {
-  const { floor, ghostFloors, cellSize, darkMode, tool, shearCheck, floors, shearLayers } = props;
-  const [selectedItemCell, setSelectedItemCell] = useState<number | null>(null);
+  const { floor, ghostFloors, cellSize, darkMode, tool, brush, shearCheck, floors, shearLayers } =
+    props;
+  const [selectedItemCell, setSelectedItemCell] = useState<{ x: number; y: number } | null>(null);
   const [selectionState, setSelectionState] = useState<{
     x1: number;
     y1: number;
@@ -119,6 +144,7 @@ export const FloorCanvas = forwardRef<FloorCanvasHandle, Props>((props, ref) => 
     selectionRef,
     staticCanvasRef,
     tool,
+    brush,
     viewRef,
     shearCheck,
     floors,
@@ -149,6 +175,7 @@ export const FloorCanvas = forwardRef<FloorCanvasHandle, Props>((props, ref) => 
     onSelectionChange: setSelectionState,
     onSetFloorType: props.onSetFloorType,
     onSetWalls: props.onSetWalls,
+    onCommit: props.onCommit,
     onUndo: props.onUndo,
     redraw,
     selectedItemCell,
@@ -158,17 +185,22 @@ export const FloorCanvas = forwardRef<FloorCanvasHandle, Props>((props, ref) => 
     viewRef,
   });
 
-  const floorRef = useRef({ cellSize, height: floor.height, width: floor.width });
-  floorRef.current = { cellSize, height: floor.height, width: floor.width };
+  const frameRef = useRef({ cellSize, floor });
+  frameRef.current = { cellSize, floor };
   const redrawRef = useRef(redraw);
   redrawRef.current = redraw;
 
   function calcFit(cw: number, ch: number) {
-    const { width, height, cellSize: cs } = floorRef.current;
-    const gridW = width * cs;
-    const gridH = height * cs;
+    const { floor: f, cellSize: cs } = frameRef.current;
+    const r = contentRectOf(f);
+    const gridW = (r.x2 - r.x1 + 1) * cs;
+    const gridH = (r.y2 - r.y1 + 1) * cs;
     const scale = Math.min(cw / gridW, ch / gridH) * 0.9;
-    return { offsetX: (cw - gridW * scale) / 2, offsetY: (ch - gridH * scale) / 2, scale };
+    return {
+      offsetX: (cw - gridW * scale) / 2 - r.x1 * cs * scale,
+      offsetY: (ch - gridH * scale) / 2 - r.y1 * cs * scale,
+      scale,
+    };
   }
 
   function fitToContainer() {
@@ -179,6 +211,49 @@ export const FloorCanvas = forwardRef<FloorCanvasHandle, Props>((props, ref) => 
     viewRef.current = calcFit(container.clientWidth, container.clientHeight);
     redrawRef.current();
   }
+
+  function centerContent() {
+    const container = containerRef.current;
+    if (!container) {
+      return;
+    }
+    const { floor: f, cellSize: cs } = frameRef.current;
+    const r = contentRectOf(f);
+    const v = viewRef.current;
+    const cx = (r.x1 + r.x2 + 1) / 2;
+    const cy = (r.y1 + r.y2 + 1) / 2;
+    v.offsetX = container.clientWidth / 2 - cx * cs * v.scale;
+    v.offsetY = container.clientHeight / 2 - cy * cs * v.scale;
+    redrawRef.current();
+  }
+
+  // Keep the content visually fixed when normalization moves the window origin.
+  const prevOriginRef = useRef({ id: floor.id, x: floor.originX, y: floor.originY });
+  useLayoutEffect(() => {
+    const prev = prevOriginRef.current;
+    prevOriginRef.current = { id: floor.id, x: floor.originX, y: floor.originY };
+    if (prev.id !== floor.id) {
+      return;
+    }
+    if (prev.x === floor.originX && prev.y === floor.originY) {
+      return;
+    }
+    const v = viewRef.current;
+    v.offsetX += (floor.originX - prev.x) * cellSize * v.scale;
+    v.offsetY += (floor.originY - prev.y) * cellSize * v.scale;
+    redrawRef.current();
+  }, [floor.id, floor.originX, floor.originY, cellSize]);
+
+  const lastCenterNonceRef = useRef(props.centerNonce ?? 0);
+  useEffect(() => {
+    const nonce = props.centerNonce ?? 0;
+    if (nonce === lastCenterNonceRef.current) {
+      return;
+    }
+    lastCenterNonceRef.current = nonce;
+    centerContent();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [props.centerNonce]);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -213,6 +288,7 @@ export const FloorCanvas = forwardRef<FloorCanvasHandle, Props>((props, ref) => 
       exportFloorPng(floor, cellSize);
     },
     fitToContainer,
+    centerContent,
   }));
 
   return (
@@ -250,6 +326,8 @@ export const FloorCanvas = forwardRef<FloorCanvasHandle, Props>((props, ref) => 
         <SelectionContextMenu
           selectionState={selectionState}
           cellSize={cellSize}
+          originX={floor.originX}
+          originY={floor.originY}
           viewRef={viewRef}
           onCopy={copySelection}
           onPaste={pasteSelection}

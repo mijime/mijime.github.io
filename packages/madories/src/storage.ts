@@ -85,21 +85,28 @@ export function sanitizePlan(plan: unknown): Plan | null {
   if (typeof building !== "object" || building === null || !Array.isArray(building["floors"])) {
     return null;
   }
-  const floors = (building["floors"] as unknown[]).filter((f) => isValidFloor(f));
+  const floors = (building["floors"] as unknown[])
+    .filter((f) => isValidFloor(f))
+    .map((f) => {
+      const fl = f as Record<string, unknown>;
+      fl["originX"] = Number.isInteger(fl["originX"]) ? (fl["originX"] as number) : 0;
+      fl["originY"] = Number.isInteger(fl["originY"]) ? (fl["originY"] as number) : 0;
+      return fl;
+    });
   if (floors.length === 0) {
     return null;
   }
-  const floorIds = new Set((floors as { id?: unknown }[]).map((f) => f.id));
+  const floorIds = new Set(floors.map((f) => (f as unknown as { id?: unknown }).id));
   const activeFloorId =
     typeof p["activeFloorId"] === "string" && floorIds.has(p["activeFloorId"])
       ? (p["activeFloorId"] as string)
-      : ((floors[0] as { id: string }).id ?? "");
+      : ((floors[0] as unknown as { id?: string }).id ?? "");
   if (!activeFloorId) {
     return null;
   }
   return {
     activeFloorId,
-    building: { ...(building as object), floors } as Building,
+    building: { ...(building as object), floors } as unknown as Building,
     id: typeof p["id"] === "string" ? (p["id"] as string) : uuidv4(),
     name: typeof p["name"] === "string" ? (p["name"] as string) : "プラン",
     updatedAt: typeof p["updatedAt"] === "number" ? (p["updatedAt"] as number) : Date.now(),

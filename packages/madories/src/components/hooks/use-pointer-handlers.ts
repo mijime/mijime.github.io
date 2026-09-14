@@ -1,8 +1,9 @@
 import { useEffect, useRef } from "react";
 import { GestureHandler } from "../../input/gesture-handler";
-import { copyRegion, normalizeSelection, pasteOriginIndex } from "../../floor/clipboard-logic";
+import { copyRegion, normalizeSelection } from "../../floor/clipboard-logic";
+import { arrayIndex } from "../../floor/frame";
+import { findItemAnchor } from "../../input/item-hit";
 import { resolveEdges, snapVertex } from "../../input/wall-snap";
-import { resolveItemAction } from "../../input/item-logic";
 import type { CopiedRegion, EdgeRef, FloorPlan, FloorType, WallType } from "../../types";
 import { toolBrush, type ToolMode } from "../tool-mode";
 import type { SelectionRef, ViewRef } from "./types";
@@ -15,20 +16,29 @@ interface Props {
   viewRef: ViewRef;
   selectionRef: SelectionRef;
   onSetWalls: (edges: EdgeRef[], wallType: WallType) => void;
-  onSetFloorType: (cellIndex: number, floorType: FloorType | null) => void;
-  onFillRoom: (cellIndex: number) => void;
-  onPlaceItem: (cellIndex: number) => void;
-  onRotateItem: (cellIndex: number) => void;
-  onMoveItem: (fromIndex: number, toIndex: number) => void;
-  onPasteRegion: (originIndex: number, region: CopiedRegion) => void;
+  onSetFloorType: (x: number, y: number, floorType: FloorType | null) => void;
+  onFillRoom: (x: number, y: number) => void;
+  onPlaceItem: (x: number, y: number) => void;
+  onRotateItem: (x: number, y: number) => void;
+  onMoveItem: (fromX: number, fromY: number, toX: number, toY: number) => void;
+  onPasteRegion: (x: number, y: number, region: CopiedRegion) => void;
   onEraseRegion: (x1: number, y1: number, x2: number, y2: number) => void;
-  onEraseCell: (cellIndex: number) => void;
-  onLongPressRoom?: (cellIndex: number, clientX: number, clientY: number) => void;
+  onEraseCell: (x: number, y: number) => void;
+  onLongPressRoom?: (x: number, y: number, clientX: number, clientY: number) => void;
+  onCommit?: () => void;
   onUndo?: () => void;
-  redraw: (ghost?: { mx: number; my: number; fromIdx: number }, wallPreview?: EdgeRef[]) => void;
-  setSelectedItemCell: (idx: number | null) => void;
-  selectedItemCell: number | null;
+  redraw: (
+    ghost?: { mx: number; my: number; fromX: number; fromY: number },
+    wallPreview?: EdgeRef[],
+  ) => void;
+  setSelectedItemCell: (cell: { x: number; y: number } | null) => void;
+  selectedItemCell: { x: number; y: number } | null;
   onSelectionChange?: (sel: { x1: number; y1: number; x2: number; y2: number } | null) => void;
+}
+
+interface CellPos {
+  x: number;
+  y: number;
 }
 
 export function usePointerHandlers(props: Props): {
@@ -62,6 +72,8 @@ export function usePointerHandlers(props: Props): {
 
   const onUndoRef = useRef(props.onUndo);
   onUndoRef.current = props.onUndo;
+  const onCommitRef = useRef(props.onCommit);
+  onCommitRef.current = props.onCommit;
   const onLongPressRoomRef = useRef(props.onLongPressRoom);
   onLongPressRoomRef.current = props.onLongPressRoom;
 
@@ -73,9 +85,10 @@ export function usePointerHandlers(props: Props): {
 
   const wallStartVertexRef = useRef<{ vx: number; vy: number } | null>(null);
   const wallPreviewRef = useRef<EdgeRef[]>([]);
-  const dragStartRef = useRef<number | null>(null);
+  const dragStartRef = useRef<CellPos | null>(null);
+  const dragDownRef = useRef<CellPos | null>(null);
   const dragMovedRef = useRef(false);
-  const selectionStartRef = useRef<{ x: number; y: number } | null>(null);
+  const selectionStartRef = useRef<CellPos | null>(null);
   const copiedRef = useRef<CopiedRegion | null>(null);
   const mousePosRef = useRef<{ mx: number; my: number } | null>(null);
   const activePointerCountRef = useRef(0);
@@ -152,8 +165,10 @@ export function usePointerHandlers(props: Props): {
         if (!copiedRef.current || !mousePosRef.current) {
           return;
         }
-        const originIndex = pasteOriginIndex(mousePosRef.current, cellSize, floorRef.current);
-        onPasteRegionRef.current(originIndex, copiedRef.current);
+        const f = floorRef.current;
+        const originX = f.originX + Math.floor(mousePosRef.current.mx / cellSize);
+        const originY = f.originY + Math.floor(mousePosRef.current.my / cellSize);
+        onPasteRegionRef.current(originX, originY, copiedRef.current);
       }
 
       if (e.key === "Delete" || e.key === "Backspace") {
@@ -193,36 +208,35 @@ export function usePointerHandlers(props: Props): {
     };
   }
 
+  /** World cell coordinate under the pointer. The plane is unbounded. */
+  function worldAt(mx: number, my: number): CellPos {
+    return {
+      x: floor.originX + Math.floor(mx / cellSize),
+      y: floor.originY + Math.floor(my / cellSize),
+    };
+  }
+
   function setCursor(cursor: string) {
     if (canvasRef.current) {
       canvasRef.current.style.cursor = cursor;
     }
   }
 
-  function getCellAtMouse(mx: number, my: number): number | null {
-    const cx = Math.floor(mx / cellSize);
-    const cy = Math.floor(my / cellSize);
-    const idx = cy * floor.width + cx;
-    return idx >= 0 && idx < floor.cells.length ? idx : null;
+  function cellIndexAt(pos: CellPos): number | null {
+    return arrayIndex(floor, pos.x, pos.y);
   }
 
   // Brush=2 (旧1セル相当) では起点セルを含む2x2ブロックを対象にする
-  function blockCells(idx: number): number[] {
+  function blockCells(pos: CellPos): CellPos[] {
     if (toolBrush(tool) !== 2) {
-      return [idx];
+      return [pos];
     }
-    const cx = idx % floor.width;
-    const cy = Math.floor(idx / floor.width);
-    const ox = cx - (cx % 2);
-    const oy = cy - (cy % 2);
-    const out: number[] = [];
+    const ox = Math.floor(pos.x / 2) * 2;
+    const oy = Math.floor(pos.y / 2) * 2;
+    const out: CellPos[] = [];
     for (let dy = 0; dy < 2; dy++) {
       for (let dx = 0; dx < 2; dx++) {
-        const x = ox + dx;
-        const y = oy + dy;
-        if (x < floor.width && y < floor.height) {
-          out.push(y * floor.width + x);
-        }
+        out.push({ x: ox + dx, y: oy + dy });
       }
     }
     return out;
@@ -231,17 +245,15 @@ export function usePointerHandlers(props: Props): {
   function handleContextMenu(e: React.MouseEvent<HTMLCanvasElement>) {
     e.preventDefault();
     const { mx, my } = getCanvasPos(e.clientX, e.clientY);
-    const idx = getCellAtMouse(mx, my);
-    if (idx === null) {
-      return;
-    }
-    if (!floor.cells[idx].item) {
+    const pos = worldAt(mx, my);
+    const anchor = findItemAnchor(floor, pos.x, pos.y);
+    if (!anchor) {
       return;
     }
     if (tool.kind !== "erase" && tool.kind !== "item") {
       return;
     }
-    onRotateItem(idx);
+    onRotateItem(anchor.x, anchor.y);
   }
 
   function handlePointerDown(e: React.PointerEvent<HTMLCanvasElement>) {
@@ -257,6 +269,7 @@ export function usePointerHandlers(props: Props): {
       wallStartVertexRef.current = null;
       wallPreviewRef.current = [];
       dragStartRef.current = null;
+      dragDownRef.current = null;
       selectionStartRef.current = null;
       if (longPressTimerRef.current) {
         clearTimeout(longPressTimerRef.current);
@@ -271,17 +284,17 @@ export function usePointerHandlers(props: Props): {
     }
 
     const { mx, my } = getCanvasPos(e.clientX, e.clientY);
+    const pos = worldAt(mx, my);
 
     if (tool.kind === "select") {
-      const idx = getCellAtMouse(mx, my);
-      if (idx !== null && floor.cells[idx].item) {
-        dragStartRef.current = idx;
+      const anchor = findItemAnchor(floor, pos.x, pos.y);
+      if (anchor) {
+        dragStartRef.current = { x: anchor.x, y: anchor.y };
+        dragDownRef.current = pos;
         dragMovedRef.current = false;
       } else {
-        const cx = Math.floor(mx / cellSize);
-        const cy = Math.floor(my / cellSize);
-        selectionStartRef.current = { x: cx, y: cy };
-        selectionRef.current = { x1: cx, x2: cx, y1: cy, y2: cy };
+        selectionStartRef.current = pos;
+        selectionRef.current = { x1: pos.x, x2: pos.x, y1: pos.y, y2: pos.y };
         redraw();
       }
       return;
@@ -292,8 +305,8 @@ export function usePointerHandlers(props: Props): {
         mx,
         my,
         cellSize,
-        floor.width,
-        floor.height,
+        floor.originX,
+        floor.originY,
         toolBrush(tool),
       );
       wallPreviewRef.current = [];
@@ -302,14 +315,14 @@ export function usePointerHandlers(props: Props): {
     }
 
     if (tool.kind === "floor") {
-      dragStartRef.current = getCellAtMouse(mx, my);
+      dragStartRef.current = pos;
       dragMovedRef.current = false;
       startLongPress(e.clientX, e.clientY);
       return;
     }
 
     if (tool.kind === "erase") {
-      dragStartRef.current = getCellAtMouse(mx, my);
+      dragStartRef.current = pos;
       dragMovedRef.current = false;
       startLongPress(e.clientX, e.clientY);
       return;
@@ -318,11 +331,9 @@ export function usePointerHandlers(props: Props): {
     if (tool.kind !== "item") {
       return;
     }
-    const idx = getCellAtMouse(mx, my);
-    if (idx === null) {
-      return;
-    }
-    dragStartRef.current = idx;
+    const anchor = findItemAnchor(floor, pos.x, pos.y);
+    dragStartRef.current = anchor ? { x: anchor.x, y: anchor.y } : pos;
+    dragDownRef.current = pos;
     dragMovedRef.current = false;
     startLongPress(e.clientX, e.clientY);
   }
@@ -331,20 +342,18 @@ export function usePointerHandlers(props: Props): {
     longPressDownClientRef.current = { x: clientX, y: clientY };
     longPressTimerRef.current = setTimeout(() => {
       longPressTimerRef.current = null;
-      const pos = longPressDownClientRef.current;
-      if (!pos) {
+      const down = longPressDownClientRef.current;
+      if (!down) {
         return;
       }
-      const { mx: lmx, my: lmy } = getCanvasPos(pos.x, pos.y);
-      const lidx = getCellAtMouse(lmx, lmy);
-      if (lidx === null) {
-        return;
-      }
+      const { mx, my } = getCanvasPos(down.x, down.y);
+      const pos = worldAt(mx, my);
+      const anchor = findItemAnchor(floor, pos.x, pos.y);
       longPressTriggeredRef.current = true;
-      if (floor.cells[lidx].item) {
-        onRotateItem(lidx);
+      if (anchor) {
+        onRotateItem(anchor.x, anchor.y);
       } else {
-        onLongPressRoomRef.current?.(lidx, pos.x, pos.y);
+        onLongPressRoomRef.current?.(pos.x, pos.y, down.x, down.y);
       }
     }, 500);
   }
@@ -390,17 +399,20 @@ export function usePointerHandlers(props: Props): {
     if (tool.kind === "select") {
       selectionStartRef.current = null;
       const start = dragStartRef.current;
+      const down = dragDownRef.current;
       dragStartRef.current = null;
-      if (start !== null) {
+      dragDownRef.current = null;
+      if (start !== null && down !== null) {
         const { mx, my } = getCanvasPos(e.clientX, e.clientY);
-        const idx = getCellAtMouse(mx, my);
-        if (idx !== null && idx !== start) {
+        const pos = worldAt(mx, my);
+        if (pos.x !== down.x || pos.y !== down.y) {
           dragMovedRef.current = true;
-          onMoveItem(start, idx);
+          onMoveItem(start.x, start.y, start.x + (pos.x - down.x), start.y + (pos.y - down.y));
         } else if (!dragMovedRef.current) {
-          if (idx !== null && floor.cells[idx].item) {
-            onRotateItem(idx);
-            setSelectedItemCell(idx);
+          const anchor = findItemAnchor(floor, start.x, start.y);
+          if (anchor) {
+            onRotateItem(anchor.x, anchor.y);
+            setSelectedItemCell({ x: anchor.x, y: anchor.y });
             // Must clear before onSelectionChangeRef fires below, otherwise popup stays visible
             selectionRef.current = null;
           } else {
@@ -411,9 +423,9 @@ export function usePointerHandlers(props: Props): {
       }
       dragMovedRef.current = false;
       onSelectionChangeRef.current?.(selectionRef.current);
+      onCommitRef.current?.();
       return;
     }
-
     if (tool.kind === "wall") {
       wallStartVertexRef.current = null;
       const edges = wallPreviewRef.current;
@@ -421,6 +433,7 @@ export function usePointerHandlers(props: Props): {
       if (edges.length > 0) {
         onSetWalls(edges, tool.wallType);
       }
+      onCommitRef.current?.();
       redraw();
       return;
     }
@@ -428,47 +441,52 @@ export function usePointerHandlers(props: Props): {
     const start = dragStartRef.current;
     dragStartRef.current = null;
     const { mx, my } = getCanvasPos(e.clientX, e.clientY);
-    const idx = getCellAtMouse(mx, my);
+    const pos = worldAt(mx, my);
 
     if (tool.kind === "erase") {
-      if (!dragMovedRef.current && idx !== null) {
-        for (const i of blockCells(idx)) {
-          onEraseCell(i);
+      if (!dragMovedRef.current) {
+        for (const p of blockCells(pos)) {
+          onEraseCell(p.x, p.y);
         }
       }
       dragMovedRef.current = false;
+      onCommitRef.current?.();
       return;
     }
 
     if (tool.kind === "floor") {
+      const idx = cellIndexAt(pos);
       if (
         !dragMovedRef.current &&
-        idx !== null &&
         tool.floorType !== null &&
-        floor.cells[idx].floorType === null
+        (idx === null || floor.cells[idx].floorType === null)
       ) {
-        onFillRoom(idx);
+        onFillRoom(pos.x, pos.y);
       }
       dragMovedRef.current = false;
+      onCommitRef.current?.();
       return;
     }
 
     if (tool.kind === "item") {
-      const action = resolveItemAction({
-        dragMoved: dragMovedRef.current,
-        endCell: idx === null ? undefined : floor.cells[idx],
-        endIdx: idx,
-        startIdx: start,
-        toolItemType: tool.itemType,
-      });
-      if (action === "move") {
-        onMoveItem(start!, idx!);
-      } else if (action === "rotate") {
-        onRotateItem(idx!);
-      } else if (action === "place") {
-        onPlaceItem(idx!);
+      const down = dragDownRef.current;
+      dragDownRef.current = null;
+      if (start === null || down === null) {
+        dragMovedRef.current = false;
+        return;
+      }
+      if (pos.x !== down.x || pos.y !== down.y) {
+        onMoveItem(start.x, start.y, start.x + (pos.x - down.x), start.y + (pos.y - down.y));
+      } else if (!dragMovedRef.current) {
+        const anchor = findItemAnchor(floor, pos.x, pos.y);
+        if (anchor && anchor.item.type === tool.itemType) {
+          onRotateItem(anchor.x, anchor.y);
+        } else {
+          onPlaceItem(pos.x, pos.y);
+        }
       }
       dragMovedRef.current = false;
+      onCommitRef.current?.();
     }
   }
 
@@ -506,55 +524,49 @@ export function usePointerHandlers(props: Props): {
     }
 
     const { mx, my } = getCanvasPos(e.clientX, e.clientY);
+    const pos = worldAt(mx, my);
 
     mousePosRef.current = { mx, my };
 
     if (tool.kind === "select") {
       if (e.buttons === 1 && dragStartRef.current !== null) {
         setCursor("grabbing");
-        redraw({ fromIdx: dragStartRef.current, mx, my });
+        const start = dragStartRef.current;
+        redraw({ fromX: start.x, fromY: start.y, mx, my });
         return;
       }
       if (e.buttons === 1 && selectionStartRef.current) {
-        const cx = Math.floor(mx / cellSize);
-        const cy = Math.floor(my / cellSize);
         selectionRef.current = {
           x1: selectionStartRef.current.x,
-          x2: cx,
+          x2: pos.x,
           y1: selectionStartRef.current.y,
-          y2: cy,
+          y2: pos.y,
         };
         redraw();
       }
-      const hoverIdx = getCellAtMouse(mx, my);
-      setCursor(hoverIdx !== null && floor.cells[hoverIdx].item !== null ? "grab" : "crosshair");
+      const hasHoverItem = findItemAnchor(floor, pos.x, pos.y) !== null;
+      setCursor(hasHoverItem ? "grab" : "crosshair");
       return;
     }
 
     if (tool.kind === "floor" && e.buttons === 1) {
-      const idx = getCellAtMouse(mx, my);
-      if (idx !== null) {
-        dragMovedRef.current = true;
-        for (const i of blockCells(idx)) {
-          onSetFloorType(i, tool.floorType);
-        }
+      dragMovedRef.current = true;
+      for (const p of blockCells(pos)) {
+        onSetFloorType(p.x, p.y, tool.floorType);
       }
       return;
     }
 
     if (tool.kind === "erase" && e.buttons === 1) {
-      const idx = getCellAtMouse(mx, my);
-      if (idx !== null) {
-        dragMovedRef.current = true;
-        for (const i of blockCells(idx)) {
-          onEraseCell(i);
-        }
+      dragMovedRef.current = true;
+      for (const p of blockCells(pos)) {
+        onEraseCell(p.x, p.y);
       }
       return;
     }
 
     if (tool.kind === "wall" && wallStartVertexRef.current && e.buttons === 1) {
-      const end = snapVertex(mx, my, cellSize, floor.width, floor.height, toolBrush(tool));
+      const end = snapVertex(mx, my, cellSize, floor.originX, floor.originY, toolBrush(tool));
       wallPreviewRef.current = resolveEdges(wallStartVertexRef.current, end);
       if (wallPreviewRef.current.length > 0 && longPressTimerRef.current) {
         clearTimeout(longPressTimerRef.current);
@@ -566,15 +578,15 @@ export function usePointerHandlers(props: Props): {
 
     if (dragStartRef.current !== null) {
       setCursor("grabbing");
-      redraw({ fromIdx: dragStartRef.current, mx, my });
+      const start = dragStartRef.current;
+      redraw({ fromX: start.x, fromY: start.y, mx, my });
       return;
     }
 
     if (tool.kind === "erase") {
       setCursor("cell");
     } else if (tool.kind === "item") {
-      const idx = getCellAtMouse(mx, my);
-      const hasItem = idx !== null && floor.cells[idx].item !== null;
+      const hasItem = findItemAnchor(floor, pos.x, pos.y) !== null;
       setCursor(hasItem ? "grab" : "crosshair");
     } else {
       setCursor("crosshair");
@@ -610,8 +622,12 @@ export function usePointerHandlers(props: Props): {
       return;
     }
     const pos = mousePosRef.current ?? { mx: 0, my: 0 };
-    const originIndex = pasteOriginIndex(pos, cellSize, floorRef.current);
-    onPasteRegionRef.current(originIndex, copiedRef.current);
+    const f = floorRef.current;
+    onPasteRegionRef.current(
+      f.originX + Math.floor(pos.mx / cellSize),
+      f.originY + Math.floor(pos.my / cellSize),
+      copiedRef.current,
+    );
   }
 
   function deleteSelection() {

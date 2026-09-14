@@ -23,8 +23,10 @@ describe("share roundtrip", () => {
     const encoded = await encodeFloors([floor]);
     const decoded = await decodeFloors(encoded);
     expect(decoded).toHaveLength(1);
-    expect(decoded[0].width).toBe(40);
-    expect(decoded[0].cells[5 * 40 + 5].floorType).toBe("wood");
-    expect(textToFloors(text)[0].width).toBe(40);
+    // DSL normalizes to the content bbox (3,3)-(36,35) → 34x33.
+    expect(decoded[0].width).toBe(34);
+    expect(decoded[0].height).toBe(33);
+    expect(decoded[0].cells[2 * 34 + 2].floorType).toBe("wood");
+    expect(textToFloors(text)[0].width).toBe(34);
   });
 });

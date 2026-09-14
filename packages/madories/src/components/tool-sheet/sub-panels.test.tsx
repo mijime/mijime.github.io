@@ -7,6 +7,8 @@ describe("SubPanels", () => {
     const html = renderToString(
       <SubPanels
         tool={{ kind: "wall", wallType: "solid" }}
+        brush={2}
+        onBrushChange={() => {}}
         onToolChange={() => {}}
         darkMode={false}
       />,
@@ -20,6 +22,8 @@ describe("SubPanels", () => {
     const html = renderToString(
       <SubPanels
         tool={{ kind: "floor", floorType: "wood" }}
+        brush={2}
+        onBrushChange={() => {}}
         onToolChange={() => {}}
         darkMode={false}
       />,
@@ -32,6 +36,8 @@ describe("SubPanels", () => {
     const html = renderToString(
       <SubPanels
         tool={{ kind: "item", itemType: "door" }}
+        brush={2}
+        onBrushChange={() => {}}
         onToolChange={() => {}}
         darkMode={false}
       />,
@@ -42,10 +48,22 @@ describe("SubPanels", () => {
 
   it("renders nothing for erase/select", () => {
     const eraseHtml = renderToString(
-      <SubPanels tool={{ kind: "erase" }} onToolChange={() => {}} darkMode={false} />,
+      <SubPanels
+        tool={{ kind: "erase" }}
+        brush={2}
+        onBrushChange={() => {}}
+        onToolChange={() => {}}
+        darkMode={false}
+      />,
     );
     const selectHtml = renderToString(
-      <SubPanels tool={{ kind: "select" }} onToolChange={() => {}} darkMode={false} />,
+      <SubPanels
+        tool={{ kind: "select" }}
+        brush={2}
+        onBrushChange={() => {}}
+        onToolChange={() => {}}
+        darkMode={false}
+      />,
     );
     expect(eraseHtml).not.toContain("壁");
     expect(selectHtml).not.toContain("壁");
@@ -55,6 +73,8 @@ describe("SubPanels", () => {
     const html = renderToString(
       <SubPanels
         tool={{ kind: "item", itemType: "door" }}
+        brush={2}
+        onBrushChange={() => {}}
         onToolChange={() => {}}
         darkMode={false}
       />,

@@ -1,6 +1,7 @@
 import { v4 as uuidv4 } from "uuid";
 import type { Cell, EdgeRef, FloorPlan, FloorType, ItemType, WallType } from "../types";
 import { ITEM_DEF_MAP } from "../items";
+import { contentArrayRect } from "./frame";
 import { detectRooms } from "./room-detection";
 import { hIndex, vIndex, createHWalls, createVWalls, getWall } from "./walls";
 
@@ -164,7 +165,15 @@ export function floorToDsl(floor: FloorPlan): string {
   const { width, height, cells, name, hWalls, vWalls } = floor;
   const lines: string[] = [];
 
-  lines.push(`size ${width} ${height}`, `name "${name}"`);
+  // Coordinates are emitted relative to the content's top-left (0,0), so the
+  // DSL stays compact and independent of where the content sits in the window.
+  const content = contentArrayRect(floor);
+  const offX = content ? -content.x1 : 0;
+  const offY = content ? -content.y1 : 0;
+  const sizeW = content ? content.x2 - content.x1 + 1 : width;
+  const sizeH = content ? content.y2 - content.y1 + 1 : height;
+
+  lines.push(`size ${sizeW} ${sizeH}`, `name "${name}"`);
 
   // Detect rooms and emit each as a pattern block
   const rooms = detectRooms(floor);
@@ -264,7 +273,7 @@ export function floorToDsl(floor: FloorPlan): string {
       }
     }
 
-    lines.push("end", `place ${patternName} at (${minX},${minY})`);
+    lines.push("end", `place ${patternName} at (${minX + offX},${minY + offY})`);
   }
 
   // Walls not belonging to any room cell - use run-length encoding
@@ -294,7 +303,12 @@ export function floorToDsl(floor: FloorPlan): string {
     width,
     height,
   )) {
-    const coord = x1 === x2 && y1 === y2 ? `(${x1},${y1})` : `(${x1},${y1})-(${x2},${y2})`;
+    const sx1 = x1 + offX;
+    const sy1 = y1 + offY;
+    const sx2 = x2 + offX;
+    const sy2 = y2 + offY;
+    const coord =
+      sx1 === sx2 && sy1 === sy2 ? `(${sx1},${sy1})` : `(${sx1},${sy1})-(${sx2},${sy2})`;
     lines.push(`wall ${coord} ${side} ${wallType}`);
   }
 
@@ -303,7 +317,12 @@ export function floorToDsl(floor: FloorPlan): string {
     width,
     height,
   )) {
-    const coord = x1 === x2 && y1 === y2 ? `(${x1},${y1})` : `(${x1},${y1})-(${x2},${y2})`;
+    const sx1 = x1 + offX;
+    const sy1 = y1 + offY;
+    const sx2 = x2 + offX;
+    const sy2 = y2 + offY;
+    const coord =
+      sx1 === sx2 && sy1 === sy2 ? `(${sx1},${sy1})` : `(${sx1},${sy1})-(${sx2},${sy2})`;
     lines.push(`floor ${coord} ${floorType}`);
   }
 
@@ -314,7 +333,7 @@ export function floorToDsl(floor: FloorPlan): string {
         const { item } = cells[idx];
         if (item) {
           const rot = item.rotation === 0 ? "" : ` ${item.rotation}`;
-          lines.push(`item (${x},${y}) ${item.type}${rot}`);
+          lines.push(`item (${x + offX},${y + offY}) ${item.type}${rot}`);
         }
       }
     }
@@ -730,5 +749,15 @@ export function dslToFloor(text: string): FloorPlan {
     }
   }
 
-  return { cells, height, id: uuidv4(), name, width, hWalls, vWalls };
+  return {
+    cells,
+    height,
+    id: uuidv4(),
+    name,
+    originX: 0,
+    originY: 0,
+    width,
+    hWalls,
+    vWalls,
+  };
 }

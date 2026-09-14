@@ -174,6 +174,18 @@ describe("detectStackedColumns", () => {
     expect(stacked[1]).toEqual({ floors: 3, x: 1, y: 0 });
   });
 
+  it("aligns by world position when windows have different origins", () => {
+    const wallAt = (originX: number, arrayX: number) => {
+      let f = floor(6, 6);
+      f = setWallsPure(f, [{ kind: "h", x: arrayX, y: 0 }], "solid");
+      return { ...f, originX };
+    };
+    // World x=3/4 on both floors through different windows → stacked.
+    expect(detectStackedColumns([wallAt(0, 3), wallAt(3, 0)])).toHaveLength(2);
+    // World x=3/4 vs world x=0/1 → no overlap.
+    expect(detectStackedColumns([wallAt(0, 3), wallAt(0, 0)])).toHaveLength(0);
+  });
+
   it("counts a shared L-corner vertex once per floor (not per run)", () => {
     const make = () => {
       // Horizontal run ending at (2,1) and a single-cell vertical run ending at

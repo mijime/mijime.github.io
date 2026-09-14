@@ -47,10 +47,11 @@ export function useHistory(initialState: AppState) {
       const last = lastActionRef.current;
       const floorId = "floorId" in action ? action.floorId : undefined;
       const canMerge =
-        last !== null &&
-        last.type === action.type &&
-        last.floorId === floorId &&
-        now - last.t < MERGE_MS;
+        action.type === "NORMALIZE_FLOOR" ||
+        (last !== null &&
+          last.type === action.type &&
+          last.floorId === floorId &&
+          now - last.t < MERGE_MS);
 
       lastActionRef.current = { floorId, t: now, type: action.type };
 

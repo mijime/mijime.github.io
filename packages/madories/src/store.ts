@@ -1,15 +1,9 @@
 import { v4 as uuidv4 } from "uuid";
-import {
-  createHWalls,
-  createVWalls,
-  flipFloorH,
-  flipFloorV,
-  hIndex,
-  vIndex,
-  setWallsPure,
-  rotateFloorCW90,
-} from "./floor/walls";
+import { createHWalls, createVWalls, flipFloorH, flipFloorV, rotateFloorCW90 } from "./floor/walls";
+import { arrayIndex, ensureWorldBounds, normalizeToContent, type WorldRect } from "./floor/frame";
 import { detectRooms, roomTopLeftCell } from "./floor/room-detection";
+import { anchorsIntersectingRect } from "./input/item-hit";
+import { getItemFootprint, ITEM_DEF_MAP } from "./items";
 import type {
   Building,
   Cell,
@@ -32,6 +26,8 @@ export function createFloorPlan(name: string, width = 40, height = 40): FloorPla
     height,
     id: uuidv4(),
     name,
+    originX: 0,
+    originY: 0,
     vWalls: createVWalls(width, height),
     width,
   };
@@ -54,23 +50,33 @@ type Action =
   | {
       type: "SET_FLOOR_TYPE";
       floorId: string;
-      cellIndex: number;
+      x: number;
+      y: number;
       floorType: FloorType | null;
     }
-  | { type: "PLACE_ITEM"; floorId: string; cellIndex: number; item: Item }
-  | { type: "REMOVE_ITEM"; floorId: string; cellIndex: number }
-  | { type: "ROTATE_ITEM"; floorId: string; cellIndex: number }
-  | { type: "MOVE_ITEM"; floorId: string; fromIndex: number; toIndex: number }
+  | { type: "PLACE_ITEM"; floorId: string; x: number; y: number; item: Item }
+  | { type: "REMOVE_ITEM"; floorId: string; x: number; y: number }
+  | { type: "ROTATE_ITEM"; floorId: string; x: number; y: number }
+  | {
+      type: "MOVE_ITEM";
+      floorId: string;
+      fromX: number;
+      fromY: number;
+      toX: number;
+      toY: number;
+    }
   | { type: "ADD_FLOOR" }
   | { type: "IMPORT_FLOOR"; floor: FloorPlan }
   | { type: "REPLACE_FLOOR"; floorId: string; floor: FloorPlan }
   | { type: "RENAME_FLOOR"; floorId: string; name: string }
   | { type: "CLEAR_FLOOR"; floorId: string }
   | { type: "REMOVE_FLOOR"; floorId: string }
+  | { type: "NORMALIZE_FLOOR"; floorId: string }
   | {
       type: "PASTE_REGION";
       floorId: string;
-      originIndex: number;
+      x: number;
+      y: number;
       region: CopiedRegion;
     }
   | {
@@ -81,9 +87,9 @@ type Action =
       x2: number;
       y2: number;
     }
-  | { type: "ERASE_CELL"; floorId: string; cellIndex: number }
-  | { type: "FILL_ROOM"; floorId: string; cellIndex: number; floorType: FloorType }
-  | { type: "SET_ROOM_NAME"; floorId: string; cellIndex: number; roomName: string | null }
+  | { type: "ERASE_CELL"; floorId: string; x: number; y: number }
+  | { type: "FILL_ROOM"; floorId: string; x: number; y: number; floorType: FloorType }
+  | { type: "SET_ROOM_NAME"; floorId: string; x: number; y: number; roomName: string | null }
   | { type: "ROTATE_FLOOR"; floorId: string }
   | { type: "FLIP_FLOOR"; floorId: string; axis: "h" | "v" };
 
@@ -94,77 +100,179 @@ function updateFloor(state: Building, floorId: string, fn: (f: FloorPlan) => Flo
   };
 }
 
-function updateCell(floor: FloorPlan, cellIndex: number, fn: (c: Cell) => Cell): FloorPlan {
+function itemRect(x: number, y: number, item: Item): WorldRect {
+  const def = ITEM_DEF_MAP.get(item.type);
+  if (!def) {
+    return { maxX: x, maxY: y, minX: x, minY: y };
+  }
+  const { effectiveW, effectiveH } = getItemFootprint(def, item.rotation);
+  return { maxX: x + effectiveW - 1, maxY: y + effectiveH - 1, minX: x, minY: y };
+}
+
+function rectOf(x1: number, y1: number, x2: number, y2: number): WorldRect {
   return {
-    ...floor,
-    cells: floor.cells.map((c, i) => (i === cellIndex ? fn(c) : c)),
+    maxX: Math.max(x1, x2),
+    maxY: Math.max(y1, y2),
+    minX: Math.min(x1, x2),
+    minY: Math.min(y1, y2),
   };
+}
+
+/** Grows the floor so the world rect (plus pad) fits, returning the grown floor. */
+function grow(floor: FloorPlan, rect: WorldRect | null): FloorPlan {
+  return rect ? ensureWorldBounds(floor, rect) : floor;
+}
+
+function setCellAt(floor: FloorPlan, x: number, y: number, fn: (cell: Cell) => Cell): FloorPlan {
+  const idx = arrayIndex(floor, x, y);
+  if (idx === null) {
+    return floor;
+  }
+  return { ...floor, cells: floor.cells.map((c, i) => (i === idx ? fn(c) : c)) };
+}
+
+function edgesRect(edges: EdgeRef[]): WorldRect | null {
+  if (edges.length === 0) {
+    return null;
+  }
+  let minX = Infinity;
+  let minY = Infinity;
+  let maxX = -Infinity;
+  let maxY = -Infinity;
+  const include = (x: number, y: number) => {
+    if (x < minX) minX = x;
+    if (y < minY) minY = y;
+    if (x > maxX) maxX = x;
+    if (y > maxY) maxY = y;
+  };
+  for (const e of edges) {
+    const ex = e.x;
+    const ey = e.y;
+    include(ex, ey);
+    include(e.kind === "h" ? ex : ex - 1, e.kind === "h" ? ey - 1 : ey);
+  }
+  return { maxX, maxY, minX, minY };
+}
+
+function applyWallEdge(
+  floor: FloorPlan,
+  e: EdgeRef,
+  type: WallType,
+  hWalls: WallType[],
+  vWalls: WallType[],
+): boolean {
+  const x = e.x - floor.originX;
+  const y = e.y - floor.originY;
+  if (e.kind === "h") {
+    if (x < 0 || x >= floor.width || y < 0 || y > floor.height) {
+      return false;
+    }
+    hWalls[y * floor.width + x] = type;
+    return true;
+  }
+  if (x < 0 || x > floor.width || y < 0 || y >= floor.height) {
+    return false;
+  }
+  vWalls[y * (floor.width + 1) + x] = type;
+  return true;
+}
+
+/** Applies wall edges in world coordinates. Grows the floor first when `growToFit`. */
+function setWallsWorld(
+  floor: FloorPlan,
+  edges: EdgeRef[],
+  type: WallType,
+  growToFit: boolean,
+): FloorPlan {
+  const next = growToFit ? grow(floor, edgesRect(edges)) : floor;
+  let changed = next === floor;
+  const hWalls = [...next.hWalls];
+  const vWalls = [...next.vWalls];
+  for (const e of edges) {
+    if (applyWallEdge(next, e, type, hWalls, vWalls)) {
+      changed = true;
+    }
+  }
+  return changed ? { ...next, hWalls, vWalls } : next;
+}
+
+function cellEdges(x: number, y: number): EdgeRef[] {
+  return [
+    { kind: "h", x, y },
+    { kind: "h", x, y: y + 1 },
+    { kind: "v", x, y },
+    { kind: "v", x: x + 1, y },
+  ];
 }
 
 function reducerImpl(state: Building, action: Action): Building {
   switch (action.type) {
     case "SET_WALLS": {
       return updateFloor(state, action.floorId, (floor) =>
-        setWallsPure(floor, action.edges, action.wallType),
+        setWallsWorld(floor, action.edges, action.wallType, true),
       );
     }
 
     case "SET_FLOOR_TYPE": {
-      return updateFloor(state, action.floorId, (floor) =>
-        updateCell(floor, action.cellIndex, (cell) => ({
+      return updateFloor(state, action.floorId, (floor) => {
+        const next = grow(floor, rectOf(action.x, action.y, action.x, action.y));
+        return setCellAt(next, action.x, action.y, (cell) => ({
           ...cell,
           floorType: action.floorType,
-        })),
-      );
+        }));
+      });
     }
 
     case "PLACE_ITEM": {
-      return updateFloor(state, action.floorId, (floor) =>
-        updateCell(floor, action.cellIndex, (cell) => ({
+      return updateFloor(state, action.floorId, (floor) => {
+        const next = grow(floor, itemRect(action.x, action.y, action.item));
+        return setCellAt(next, action.x, action.y, (cell) => ({
           ...cell,
           item: action.item,
-        })),
-      );
+        }));
+      });
     }
 
     case "REMOVE_ITEM": {
       return updateFloor(state, action.floorId, (floor) =>
-        updateCell(floor, action.cellIndex, (cell) => ({
-          ...cell,
-          item: null,
-        })),
+        setCellAt(floor, action.x, action.y, (cell) => ({ ...cell, item: null })),
       );
     }
 
     case "ROTATE_ITEM": {
-      return updateFloor(state, action.floorId, (floor) =>
-        updateCell(floor, action.cellIndex, (cell) => {
-          if (!cell.item) {
-            return cell;
-          }
-          const rotations: (0 | 90 | 180 | 270)[] = [0, 90, 180, 270];
-          const nextRotation = rotations[(rotations.indexOf(cell.item.rotation) + 1) % 4];
-          return { ...cell, item: { ...cell.item, rotation: nextRotation } };
-        }),
-      );
+      return updateFloor(state, action.floorId, (floor) => {
+        const idx = arrayIndex(floor, action.x, action.y);
+        if (idx === null) {
+          return floor;
+        }
+        const item = floor.cells[idx].item;
+        if (!item) {
+          return floor;
+        }
+        const rotations: (0 | 90 | 180 | 270)[] = [0, 90, 180, 270];
+        const nextRotation = rotations[(rotations.indexOf(item.rotation) + 1) % 4];
+        const nextItem: Item = { ...item, rotation: nextRotation };
+        const grown = grow(floor, itemRect(action.x, action.y, nextItem));
+        return setCellAt(grown, action.x, action.y, (cell) => ({ ...cell, item: nextItem }));
+      });
     }
 
     case "MOVE_ITEM": {
       return updateFloor(state, action.floorId, (floor) => {
-        const { item } = floor.cells[action.fromIndex];
+        const fromIdx = arrayIndex(floor, action.fromX, action.fromY);
+        if (fromIdx === null) {
+          return floor;
+        }
+        const item = floor.cells[fromIdx].item;
         if (!item) {
           return floor;
         }
-        const cells = floor.cells.map((cell, i) => {
-          if (i === action.fromIndex) {
-            return { ...cell, item: null };
-          }
-          if (i === action.toIndex) {
-            return { ...cell, item };
-          }
-          return cell;
-        });
-        return { ...floor, cells };
+        const next = grow(floor, rectOf(action.toX, action.toY, action.fromX, action.fromY));
+        const moved = setCellAt(next, action.fromX, action.fromY, (cell) => ({
+          ...cell,
+          item: null,
+        }));
+        return setCellAt(moved, action.toX, action.toY, (cell) => ({ ...cell, item }));
       });
     }
 
@@ -209,106 +317,115 @@ function reducerImpl(state: Building, action: Action): Building {
       }));
     }
 
+    case "NORMALIZE_FLOOR": {
+      return updateFloor(state, action.floorId, (floor) => normalizeToContent(floor));
+    }
+
     case "PASTE_REGION": {
       return updateFloor(state, action.floorId, (floor) => {
-        const ox = action.originIndex % floor.width;
-        const oy = Math.floor(action.originIndex / floor.width);
-        const cells = [...floor.cells];
-        for (let ry = 0; ry < action.region.height; ry++) {
-          for (let rx = 0; rx < action.region.width; rx++) {
-            const tx = ox + rx;
-            const ty = oy + ry;
-            if (tx >= floor.width || ty >= floor.height) {
-              continue;
+        const { region } = action;
+        const rect = rectOf(
+          action.x,
+          action.y,
+          action.x + region.width - 1,
+          action.y + region.height - 1,
+        );
+        const next = grow(floor, rect);
+        const cells = [...next.cells];
+        for (let ry = 0; ry < region.height; ry++) {
+          for (let rx = 0; rx < region.width; rx++) {
+            const idx = arrayIndex(next, action.x + rx, action.y + ry);
+            if (idx !== null) {
+              cells[idx] = { ...region.cells[ry * region.width + rx] };
             }
-            cells[ty * floor.width + tx] = {
-              ...action.region.cells[ry * action.region.width + rx],
-            };
           }
         }
 
-        const hWalls = [...floor.hWalls];
-        const vWalls = [...floor.vWalls];
-        for (let ry = 0; ry <= action.region.height; ry++) {
-          for (let rx = 0; rx < action.region.width; rx++) {
-            const tx = ox + rx;
-            const ty = oy + ry;
-            if (tx < floor.width && ty <= floor.height) {
-              const w = action.region.hWalls[ry * action.region.width + rx];
-              if (w !== "none") hWalls[hIndex(floor.width, tx, ty)] = w;
+        const hWalls = [...next.hWalls];
+        const vWalls = [...next.vWalls];
+        for (let ry = 0; ry <= region.height; ry++) {
+          for (let rx = 0; rx < region.width; rx++) {
+            const ax = action.x + rx - next.originX;
+            const ay = action.y + ry - next.originY;
+            if (ax >= 0 && ax < next.width && ay >= 0 && ay <= next.height) {
+              const w = region.hWalls[ry * region.width + rx];
+              if (w !== "none") hWalls[ay * next.width + ax] = w;
             }
           }
         }
-        for (let ry = 0; ry < action.region.height; ry++) {
-          for (let rx = 0; rx <= action.region.width; rx++) {
-            const tx = ox + rx;
-            const ty = oy + ry;
-            if (tx <= floor.width && ty < floor.height) {
-              const w = action.region.vWalls[ry * (action.region.width + 1) + rx];
-              if (w !== "none") vWalls[vIndex(floor.width, tx, ty)] = w;
+        for (let ry = 0; ry < region.height; ry++) {
+          for (let rx = 0; rx <= region.width; rx++) {
+            const ax = action.x + rx - next.originX;
+            const ay = action.y + ry - next.originY;
+            if (ax >= 0 && ax <= next.width && ay >= 0 && ay < next.height) {
+              const w = region.vWalls[ry * (region.width + 1) + rx];
+              if (w !== "none") vWalls[ay * (next.width + 1) + ax] = w;
             }
           }
         }
-        return { ...floor, cells, hWalls, vWalls };
+        return { ...next, cells, hWalls, vWalls };
       });
     }
 
     case "ERASE_REGION": {
       return updateFloor(state, action.floorId, (floor) => {
+        const rect = rectOf(action.x1, action.y1, action.x2, action.y2);
+        const anchors = new Set(anchorsIntersectingRect(floor, rect));
         const cells = floor.cells.map((cell, i) => {
-          const x = i % floor.width;
-          const y = Math.floor(i / floor.width);
-          if (x < action.x1 || x > action.x2 || y < action.y1 || y > action.y2) {
-            return cell;
+          const x = floor.originX + (i % floor.width);
+          const y = floor.originY + Math.floor(i / floor.width);
+          const inRect = x >= rect.minX && x <= rect.maxX && y >= rect.minY && y <= rect.maxY;
+          if (inRect) {
+            return createCell();
           }
-          return createCell();
+          if (anchors.has(i)) {
+            return { ...cell, item: null };
+          }
+          return cell;
         });
 
         const edges: EdgeRef[] = [];
-        for (let y = action.y1; y <= action.y2; y++) {
-          for (let x = action.x1; x <= action.x2; x++) {
-            edges.push(
-              { kind: "h", x, y },
-              { kind: "h", x, y: y + 1 },
-              { kind: "v", x, y },
-              { kind: "v", x: x + 1, y },
-            );
+        for (let y = rect.minY; y <= rect.maxY; y++) {
+          for (let x = rect.minX; x <= rect.maxX; x++) {
+            edges.push(...cellEdges(x, y));
           }
         }
-
-        return setWallsPure({ ...floor, cells }, edges, "none");
+        return setWallsWorld({ ...floor, cells }, edges, "none", false);
       });
     }
 
     case "ERASE_CELL": {
       return updateFloor(state, action.floorId, (floor) => {
-        const x = action.cellIndex % floor.width;
-        const y = Math.floor(action.cellIndex / floor.width);
-        const cleared = setWallsPure(
-          floor,
-          [
-            { kind: "h", x, y },
-            { kind: "h", x, y: y + 1 },
-            { kind: "v", x, y },
-            { kind: "v", x: x + 1, y },
-          ],
-          "none",
+        const rect = rectOf(action.x, action.y, action.x, action.y);
+        const anchors = new Set(anchorsIntersectingRect(floor, rect));
+        const cells = floor.cells.map((cell, i) =>
+          anchors.has(i) ? { ...cell, item: null } : cell,
         );
-        return updateCell(cleared, action.cellIndex, () => createCell());
+        const cleared = setWallsWorld(
+          { ...floor, cells },
+          cellEdges(action.x, action.y),
+          "none",
+          false,
+        );
+        return setCellAt(cleared, action.x, action.y, () => createCell());
       });
     }
 
     case "FILL_ROOM": {
       return updateFloor(state, action.floorId, (floor) => {
+        const idx = arrayIndex(floor, action.x, action.y);
+        if (idx === null) {
+          return floor;
+        }
         const rooms = detectRooms(floor);
-        const room = rooms.find((r) => r.cells.includes(action.cellIndex));
+        const room = rooms.find((r) => r.cells.includes(idx));
         if (!room) {
           return floor;
         }
         const cells = [...floor.cells];
-        for (const idx of room.cells) {
-          if (cells[idx].floorType === null) {
-            cells[idx] = { ...cells[idx], floorType: action.floorType };
+        for (const i of room.cells) {
+          if (cells[i].floorType === null) {
+            cells[i] = { ...cells[i], floorType: action.floorType };
           }
         }
         return { ...floor, cells };
@@ -317,8 +434,12 @@ function reducerImpl(state: Building, action: Action): Building {
 
     case "SET_ROOM_NAME": {
       return updateFloor(state, action.floorId, (floor) => {
+        const idx = arrayIndex(floor, action.x, action.y);
+        if (idx === null) {
+          return floor;
+        }
         const rooms = detectRooms(floor);
-        const room = rooms.find((r) => r.cells.includes(action.cellIndex));
+        const room = rooms.find((r) => r.cells.includes(idx));
         if (!room) {
           return floor;
         }
@@ -331,12 +452,14 @@ function reducerImpl(state: Building, action: Action): Building {
     }
 
     case "ROTATE_FLOOR": {
-      return updateFloor(state, action.floorId, (floor) => rotateFloorCW90(floor));
+      return updateFloor(state, action.floorId, (floor) =>
+        normalizeToContent(rotateFloorCW90(floor)),
+      );
     }
 
     case "FLIP_FLOOR": {
       return updateFloor(state, action.floorId, (floor) =>
-        action.axis === "h" ? flipFloorH(floor) : flipFloorV(floor),
+        normalizeToContent(action.axis === "h" ? flipFloorH(floor) : flipFloorV(floor)),
       );
     }
 

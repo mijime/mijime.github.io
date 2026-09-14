@@ -15,6 +15,8 @@ function makeFloor(width: number, height: number, override?: (cells: Cell[]) => 
     height,
     id: "test",
     name: "Test",
+    originX: 0,
+    originY: 0,
     width,
     hWalls: createHWalls(width, height),
     vWalls: createVWalls(width, height),
@@ -42,14 +44,15 @@ describe("floorToDsl", () => {
     floor.cells[4 * 40 + 4] = { floorType: "wood", item: null };
     floor.cells[5 * 40 + 5] = { floorType: null, item: { rotation: 90, type: "chair" } };
     const back = dslToFloor(floorToDsl(floor));
-    expect(back.width).toBe(40);
-    expect(back.height).toBe(40);
+    // Content spans (3,3)-(5,5): the DSL is normalized to a 3x3 window.
+    expect(back.width).toBe(3);
+    expect(back.height).toBe(3);
     expect(back.name).toBe("1F");
-    expect(getWall(back, { kind: "h", x: 4, y: 4 })).toBe("solid");
-    expect(getWall(back, { kind: "h", x: 5, y: 4 })).toBe("solid");
-    expect(getWall(back, { kind: "v", x: 4, y: 4 })).toBe("solid");
-    expect(back.cells[4 * 40 + 4].floorType).toBe("wood");
-    expect(back.cells[5 * 40 + 5].item).toEqual({ rotation: 90, type: "chair" });
+    expect(getWall(back, { kind: "h", x: 1, y: 1 })).toBe("solid");
+    expect(getWall(back, { kind: "h", x: 2, y: 1 })).toBe("solid");
+    expect(getWall(back, { kind: "v", x: 1, y: 1 })).toBe("solid");
+    expect(back.cells[1 * 3 + 1].floorType).toBe("wood");
+    expect(back.cells[2 * 3 + 2].item).toEqual({ rotation: 90, type: "chair" });
   });
 
   it("wall run-length: consecutive top walls merge into range", () => {
@@ -72,7 +75,7 @@ describe("floorToDsl", () => {
     let floor = makeFloor(3, 3);
     floor = setWallsPure(floor, [{ kind: "v", x: 1, y: 1 }], "window_full");
     const dsl = floorToDsl(floor);
-    expect(dsl).toContain("wall (1,1) left window_full");
+    expect(dsl).toContain("wall (1,0) left window_full");
   });
 
   it("floor rect packing: uniform type region merges to single rect", () => {
@@ -112,7 +115,7 @@ describe("floorToDsl", () => {
 });
 
 describe("round-trip", () => {
-  it("dslToFloor(floorToDsl(floor)) reproduces cells", () => {
+  it("dslToFloor(floorToDsl(floor)) reproduces content relative to its top-left", () => {
     let original = createFloorPlan("test", 5, 4);
     original = setWallsPure(original, [{ kind: "h", x: 0, y: 0 }], "solid");
     original = setWallsPure(original, [{ kind: "h", x: 1, y: 0 }], "solid");
@@ -129,12 +132,19 @@ describe("round-trip", () => {
 
     const dsl = floorToDsl(original);
     const restored = dslToFloor(dsl);
-    expect(restored.width).toBe(original.width);
-    expect(restored.height).toBe(original.height);
-    for (let i = 0; i < original.cells.length; i++) {
-      expect(restored.cells[i].floorType).toBe(original.cells[i].floorType);
-      expect(restored.cells[i].item).toEqual(original.cells[i].item);
+    // Content bbox is (0,0)-(3,2) in the original window, so the DSL is 4x3
+    // And nothing shifts.
+    expect(restored.width).toBe(4);
+    expect(restored.height).toBe(3);
+    for (const [x, y] of [
+      [1, 1],
+      [2, 1],
+      [1, 2],
+      [2, 2],
+    ]) {
+      expect(restored.cells[y * 4 + x].floorType).toBe("wood");
     }
+    expect(restored.cells[3].item).toEqual({ rotation: 180, type: "desk" });
     // Check walls using getWall
     for (const edge of [
       { kind: "h" as const, x: 0, y: 0 },
@@ -154,8 +164,8 @@ describe("round-trip", () => {
     expect(text).toContain("right");
     expect(text).toContain("bottom");
     const back = dslToFloor(text);
-    expect(getWall(back, { kind: "v", x: 4, y: 2 })).toBe("solid");
-    expect(getWall(back, { kind: "h", x: 1, y: 4 })).toBe("window_full");
+    expect(getWall(back, { kind: "v", x: 3, y: 0 })).toBe("solid");
+    expect(getWall(back, { kind: "h", x: 0, y: 2 })).toBe("window_full");
   });
 
   it("applies place with rotate 90 to pattern walls", () => {

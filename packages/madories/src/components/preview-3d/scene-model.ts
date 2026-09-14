@@ -36,14 +36,17 @@ export function buildSceneModel(
   floor: FloorPlan,
   yOffsetCm = 0,
   cellCm: number = CELL_CM,
+  centerCm?: { x: number; z: number },
 ): SceneModel {
-  const halfW = (floor.width * cellCm) / 2;
-  const halfD = (floor.height * cellCm) / 2;
+  // World-space center (cm) of the reference frame. Defaults to this floor's
+  // Own window so a single floor is centered on itself.
+  const cx = centerCm?.x ?? floor.originX * cellCm + (floor.width * cellCm) / 2;
+  const cz = centerCm?.z ?? floor.originY * cellCm + (floor.height * cellCm) / 2;
   // Cm座標(左上原点)→シーンm座標(中心原点)。yは階の積み上げオフセットを加算
   const toScene = (xCm: number, yCm: number, zCm: number): [number, number, number] => [
-    (xCm - halfW) * CM_TO_M,
+    (floor.originX * cellCm + xCm - cx) * CM_TO_M,
     (yCm + yOffsetCm) * CM_TO_M,
-    (zCm - halfD) * CM_TO_M,
+    (floor.originY * cellCm + zCm - cz) * CM_TO_M,
   ];
   return {
     bounds: { depth: floor.height * cellCm * CM_TO_M, width: floor.width * cellCm * CM_TO_M },
@@ -56,8 +59,23 @@ export function buildSceneModel(
 // 全階を縦に積んだビル全体のモデルを構築する
 export function buildBuildingScene(floors: FloorPlan[], cellCm: number = CELL_CM): SceneModel {
   const all: SceneModel = { bounds: { depth: 0, width: 0 }, floors: [], items: [], walls: [] };
+  if (floors.length === 0) {
+    return all;
+  }
+  // 全階を world 座標でそろえるため、共通の中心を求める
+  let minX = Infinity;
+  let maxX = -Infinity;
+  let minY = Infinity;
+  let maxY = -Infinity;
+  for (const f of floors) {
+    minX = Math.min(minX, f.originX);
+    maxX = Math.max(maxX, f.originX + f.width);
+    minY = Math.min(minY, f.originY);
+    maxY = Math.max(maxY, f.originY + f.height);
+  }
+  const centerCm = { x: ((minX + maxX) / 2) * cellCm, z: ((minY + maxY) / 2) * cellCm };
   for (let i = 0; i < floors.length; i++) {
-    const model = buildSceneModel(floors[i], i * FLOOR_HEIGHT_CM, cellCm);
+    const model = buildSceneModel(floors[i], i * FLOOR_HEIGHT_CM, cellCm, centerCm);
     all.floors.push(...model.floors);
     all.items.push(...model.items);
     all.walls.push(...model.walls);
