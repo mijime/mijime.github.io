@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { copyRegion, normalizeSelection, pasteOriginIndex } from "./clipboard-logic";
+import { copyRegion, normalizeSelection, pasteOrigin } from "./clipboard-logic";
 import { createFloorPlan } from "../store";
 import { setWallsPure } from "./walls";
 import type { Cell, FloorPlan, WallType } from "../types";
@@ -22,6 +22,8 @@ function makeFloor(
     height,
     id: "test",
     name: "test",
+    originX: 0,
+    originY: 0,
     width,
     hWalls: Array.from({ length: width * (height + 1) }, () => "none" as WallType),
     vWalls: Array.from({ length: (width + 1) * height }, () => "none" as WallType),
@@ -98,16 +100,15 @@ describe("copyRegion", () => {
   });
 });
 
-describe("pasteOriginIndex", () => {
-  it("converts canvas position to cell index", () => {
+describe("pasteOrigin", () => {
+  it("converts canvas position to a world cell coordinate", () => {
     const floor = makeFloor(5, 5);
-    // CellSize=40, mx=85,my=45 → cx=2,cy=1 → index=1*5+2=7
-    expect(pasteOriginIndex({ mx: 85, my: 45 }, 40, floor)).toBe(7);
+    // CellSize=40, mx=85,my=45 → world (2,1) when origin is (0,0)
+    expect(pasteOrigin({ mx: 85, my: 45 }, 40, floor)).toEqual({ x: 2, y: 1 });
   });
 
-  it("clamps to floor bounds", () => {
-    const floor = makeFloor(3, 3);
-    // Mx=500 → cx=12 → clamped to 2
-    expect(pasteOriginIndex({ mx: 500, my: 0 }, 40, floor)).toBe(2);
+  it("is unbounded (no clamping) and honors the origin", () => {
+    const floor = { ...makeFloor(3, 3), originX: 10, originY: -4 };
+    expect(pasteOrigin({ mx: 500, my: 0 }, 40, floor)).toEqual({ x: 22, y: -4 });
   });
 });

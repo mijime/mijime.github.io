@@ -72,7 +72,12 @@ export function computeFloorSupport(
   for (let i = 1; i < floors.length; i++) {
     const lower = floors[i - 1];
     const upper = floors[i];
-    const supports = supportVertices(lower);
+    // Express the lower floor's supports in the upper floor's window coordinates
+    // So floors align by world position, not by each window's top-left.
+    const supports = supportVertices(lower).map(([sx, sy]): [number, number] => [
+      sx + lower.originX - upper.originX,
+      sy + lower.originY - upper.originY,
+    ]);
     const cells: FloorDeckCell[] = [];
     let overCount = 0;
     let maxSpanM = 0;

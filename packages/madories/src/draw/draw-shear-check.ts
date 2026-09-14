@@ -117,7 +117,13 @@ export function drawShearCheck(
     for (const c of detectStackedColumns(floors)) {
       ctx.fillStyle = COLUMN_FILL;
       ctx.beginPath();
-      ctx.arc(c.x * cellSize, c.y * cellSize, radius, 0, Math.PI * 2);
+      ctx.arc(
+        (c.x - currentFloor.originX) * cellSize,
+        (c.y - currentFloor.originY) * cellSize,
+        radius,
+        0,
+        Math.PI * 2,
+      );
       ctx.fill();
       ctx.strokeStyle = STABLE_COLOR;
       ctx.lineWidth = 1.5;
@@ -242,8 +248,8 @@ function drawLoadBreakMarkers(
       const a = breakAlpha(b.length);
       drawBreakDiamond(
         ctx,
-        b.x,
-        b.y,
+        b.x - currentFloor.originX,
+        b.y - currentFloor.originY,
         size,
         cellSize,
         `rgba(240,166,60,${(a * 0.75).toFixed(2)})`,

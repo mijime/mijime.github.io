@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef } from "react";
-import { drawGrid } from "../../draw/draw-grid";
+import { drawInfiniteGrid } from "../../draw/draw-grid";
 import { getItemFootprint } from "../../items";
+import { arrayIndex } from "../../floor/frame";
 import { drawVoidCells } from "../../draw/draw-void";
 import { drawWalls, drawWallPreview } from "../../draw/draw-walls";
 import { computeWallDimensions, fmtMm } from "../../draw/export";
@@ -13,7 +14,7 @@ import { detectRooms, drawRoomLabels } from "../../floor/room-detection";
 import { ITEM_DEF_MAP } from "../../items";
 import type { EdgeRef, FloorPlan, Item } from "../../types";
 import { floorTypeToColor } from "../tool-mode";
-import type { ToolMode } from "../tool-mode";
+import type { BrushSize, ToolMode } from "../tool-mode";
 import type { SelectionRef, ViewRef } from "./types";
 
 interface Props {
@@ -26,9 +27,10 @@ interface Props {
   cellSize: number;
   viewRef: ViewRef;
   selectionRef: SelectionRef;
-  selectedItemCell: number | null;
+  selectedItemCell: { x: number; y: number } | null;
   darkMode: boolean;
   tool: ToolMode;
+  brush: BrushSize;
   shearCheck: boolean;
   shearLayers: ShearLayerFlags;
 }
@@ -143,7 +145,10 @@ function drawItemAtCached(
 }
 
 export function useCanvasDraw(props: Props): {
-  redraw: (ghost?: { mx: number; my: number; fromIdx: number }, wallPreview?: EdgeRef[]) => void;
+  redraw: (
+    ghost?: { mx: number; my: number; fromX: number; fromY: number },
+    wallPreview?: EdgeRef[],
+  ) => void;
 } {
   const {
     staticCanvasRef,
@@ -156,6 +161,7 @@ export function useCanvasDraw(props: Props): {
     selectionRef,
     darkMode,
     tool,
+    brush,
     shearCheck,
     shearLayers,
   } = props;
@@ -222,7 +228,19 @@ export function useCanvasDraw(props: Props): {
 
     drawVoidCells(ctx, floor, cellSize, cssVar("--ink"));
 
-    drawGrid(ctx, floor.width, floor.height, cellSize, cssVar("--grid"));
+    const csPx = cellSize * scale;
+    drawInfiniteGrid(
+      ctx,
+      cellSize,
+      floor.originX,
+      floor.originY,
+      Math.floor(-offsetX / csPx),
+      Math.floor(-offsetY / csPx),
+      Math.ceil((canvas.width - offsetX) / csPx),
+      Math.ceil((canvas.height - offsetY) / csPx),
+      brush,
+      cssVar("--grid"),
+    );
     const wallColors = {
       ink: cssVar("--ink"),
       windowBlue: cssVar("--window-blue"),
@@ -233,7 +251,7 @@ export function useCanvasDraw(props: Props): {
   }
 
   function drawDynamic(
-    ghost?: { mx: number; my: number; fromIdx: number },
+    ghost?: { mx: number; my: number; fromX: number; fromY: number },
     wallPreview?: EdgeRef[],
   ) {
     const canvas = dynamicCanvasRef.current;
@@ -255,14 +273,21 @@ export function useCanvasDraw(props: Props): {
       windowBlue: cssVar("--window-blue"),
     };
     for (const gf of ghostFloorsRef.current) {
+      ctx.save();
+      ctx.translate(
+        (gf.originX - floor.originX) * cellSize,
+        (gf.originY - floor.originY) * cellSize,
+      );
       drawWalls(ctx, gf, cellSize, ghostWallColors);
+      ctx.restore();
     }
     ctx.restore();
 
     drawItemsCached(ctx, floor, cellSize, darkMode);
 
     if (ghost) {
-      const { item } = floor.cells[ghost.fromIdx];
+      const ghostIdx = arrayIndex(floor, ghost.fromX, ghost.fromY);
+      const item = ghostIdx === null ? null : floor.cells[ghostIdx].item;
       if (item) {
         const cx = Math.floor(ghost.mx / cellSize);
         const cy = Math.floor(ghost.my / cellSize);
@@ -273,8 +298,8 @@ export function useCanvasDraw(props: Props): {
     const sel = selectionRef.current;
     if (sel) {
       const { x1, y1, x2, y2 } = normalizeSelection(sel);
-      const px = x1 * cellSize;
-      const py = y1 * cellSize;
+      const px = (x1 - floor.originX) * cellSize;
+      const py = (y1 - floor.originY) * cellSize;
       const pw = (x2 - x1 + 1) * cellSize;
       const ph = (y2 - y1 + 1) * cellSize;
       ctx.fillStyle = "rgba(196,113,74,0.15)";
@@ -293,7 +318,14 @@ export function useCanvasDraw(props: Props): {
     }
 
     if (wallPreview && wallPreview.length > 0) {
-      drawWallPreview(ctx, wallPreview, cellSize, "rgba(37, 99, 235, 0.7)");
+      drawWallPreview(
+        ctx,
+        wallPreview,
+        cellSize,
+        "rgba(37, 99, 235, 0.7)",
+        floor.originX,
+        floor.originY,
+      );
     }
 
     ctx.restore();
@@ -321,7 +353,7 @@ export function useCanvasDraw(props: Props): {
 
   // Biome-ignore lint/correctness/useExhaustiveDependencies: drawStatic/drawDynamic intentionally captured by closure; redraw stabilized on floor/cellSize
   const redraw = useCallback(
-    (ghost?: { mx: number; my: number; fromIdx: number }, wallPreview?: EdgeRef[]) => {
+    (ghost?: { mx: number; my: number; fromX: number; fromY: number }, wallPreview?: EdgeRef[]) => {
       drawStatic();
       drawDynamic(ghost, wallPreview);
 
@@ -335,7 +367,7 @@ export function useCanvasDraw(props: Props): {
         drawDynamic();
       }, 1000);
     },
-    [floors, floor, cellSize, darkMode, tool, shearCheck, shearLayers],
+    [floors, floor, cellSize, darkMode, tool, brush, shearCheck, shearLayers],
   );
 
   useEffect(() => {

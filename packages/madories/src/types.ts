@@ -61,6 +61,13 @@ export interface FloorPlan {
   name: string;
   width: number;
   height: number;
+  /**
+   * World coordinates of the array cell (0,0). The array is a finite window on
+   * an unbounded plane; content is kept `FRAME_PAD` cells away from the window
+   * border by normalization, so the border never acts as a wall for content.
+   */
+  originX: number;
+  originY: number;
   cells: Cell[];
   hWalls: WallType[];
   vWalls: WallType[];

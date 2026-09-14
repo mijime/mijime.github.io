@@ -2,13 +2,7 @@ import { useState } from "react";
 import type { ItemCategory, ItemDef } from "../../items";
 import { ITEM_CATEGORIES, ITEM_DEFS } from "../../items";
 import type { WallType } from "../../types";
-import {
-  FLOOR_TYPES,
-  floorTypeToSwatchStyle,
-  toolBrush,
-  type BrushSize,
-  type ToolMode,
-} from "../tool-mode";
+import { FLOOR_TYPES, floorTypeToSwatchStyle, type BrushSize, type ToolMode } from "../tool-mode";
 import { btnBase } from "./styles";
 
 const WALL_TYPES: { type: WallType; label: string }[] = [
@@ -25,6 +19,8 @@ const ITEMS_BY_CATEGORY = Object.fromEntries(
 
 interface Props {
   tool: ToolMode;
+  brush: BrushSize;
+  onBrushChange: (brush: BrushSize) => void;
   onToolChange: (tool: ToolMode) => void;
   darkMode: boolean;
 }
@@ -66,14 +62,18 @@ function BrushToggle({
 
 function WallSubPanel({
   tool,
+  brush,
+  onBrushChange,
   onToolChange,
 }: {
   tool: Extract<ToolMode, { kind: "wall" }>;
+  brush: BrushSize;
+  onBrushChange: (brush: BrushSize) => void;
   onToolChange: (tool: ToolMode) => void;
 }) {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-      <BrushToggle brush={toolBrush(tool)} onChange={(brush) => onToolChange({ ...tool, brush })} />
+      <BrushToggle brush={brush} onChange={onBrushChange} />
       <div style={{ display: "flex", flexWrap: "wrap", gap: "4px" }}>
         {WALL_TYPES.map(({ type, label }) => (
           <button
@@ -97,16 +97,20 @@ function WallSubPanel({
 
 function FloorSubPanel({
   tool,
+  brush,
+  onBrushChange,
   onToolChange,
   darkMode,
 }: {
   tool: Extract<ToolMode, { kind: "floor" }>;
+  brush: BrushSize;
+  onBrushChange: (brush: BrushSize) => void;
   onToolChange: (tool: ToolMode) => void;
   darkMode: boolean;
 }) {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-      <BrushToggle brush={toolBrush(tool)} onChange={(brush) => onToolChange({ ...tool, brush })} />
+      <BrushToggle brush={brush} onChange={onBrushChange} />
       <div style={{ display: "grid", gap: "3px", gridTemplateColumns: "1fr 1fr" }}>
         {FLOOR_TYPES.map((entry) => {
           const active = tool.floorType === entry.type;
@@ -146,15 +150,13 @@ function FloorSubPanel({
 }
 
 function EraseSubPanel({
-  tool,
-  onToolChange,
+  brush,
+  onBrushChange,
 }: {
-  tool: Extract<ToolMode, { kind: "erase" }>;
-  onToolChange: (tool: ToolMode) => void;
+  brush: BrushSize;
+  onBrushChange: (brush: BrushSize) => void;
 }) {
-  return (
-    <BrushToggle brush={toolBrush(tool)} onChange={(brush) => onToolChange({ ...tool, brush })} />
-  );
+  return <BrushToggle brush={brush} onChange={onBrushChange} />;
 }
 
 function ItemSubPanel({
@@ -213,15 +215,30 @@ function ItemSubPanel({
   );
 }
 
-export function SubPanels({ tool, onToolChange, darkMode }: Props) {
+export function SubPanels({ tool, brush, onBrushChange, onToolChange, darkMode }: Props) {
   if (tool.kind === "wall") {
-    return <WallSubPanel tool={tool} onToolChange={onToolChange} />;
+    return (
+      <WallSubPanel
+        tool={tool}
+        brush={brush}
+        onBrushChange={onBrushChange}
+        onToolChange={onToolChange}
+      />
+    );
   }
   if (tool.kind === "floor") {
-    return <FloorSubPanel tool={tool} onToolChange={onToolChange} darkMode={darkMode} />;
+    return (
+      <FloorSubPanel
+        tool={tool}
+        brush={brush}
+        onBrushChange={onBrushChange}
+        onToolChange={onToolChange}
+        darkMode={darkMode}
+      />
+    );
   }
   if (tool.kind === "erase") {
-    return <EraseSubPanel tool={tool} onToolChange={onToolChange} />;
+    return <EraseSubPanel brush={brush} onBrushChange={onBrushChange} />;
   }
   if (tool.kind === "item") {
     return <ItemSubPanel tool={tool} onToolChange={onToolChange} />;

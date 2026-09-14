@@ -114,18 +114,19 @@ export function drawWallPreview(
   edges: EdgeRef[],
   cellSize: number,
   color: string,
+  originX = 0,
+  originY = 0,
 ): void {
   ctx.save();
   ctx.strokeStyle = color;
   ctx.lineWidth = 4;
   ctx.lineCap = "round";
   for (const e of edges) {
+    const ax = (e.x - originX) * cellSize;
+    const ay = (e.y - originY) * cellSize;
     ctx.beginPath();
-    ctx.moveTo(e.x * cellSize, e.y * cellSize);
-    ctx.lineTo(
-      (e.x + (e.kind === "h" ? 1 : 0)) * cellSize,
-      (e.y + (e.kind === "v" ? 1 : 0)) * cellSize,
-    );
+    ctx.moveTo(ax, ay);
+    ctx.lineTo(ax + (e.kind === "h" ? cellSize : 0), ay + (e.kind === "v" ? cellSize : 0));
     ctx.stroke();
   }
   ctx.restore();

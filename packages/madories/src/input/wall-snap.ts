@@ -1,17 +1,24 @@
 import type { EdgeRef } from "../types";
 
+/**
+ * Snaps a pointer position (array-space pixels) to the nearest world grid
+ * vertex. The plane is unbounded, so there is no clamping; `originX/originY`
+ * place the snap grid in world coordinates.
+ */
 export function snapVertex(
   mx: number,
   my: number,
   cellSize: number,
-  width: number,
-  height: number,
+  originX = 0,
+  originY = 0,
   step = 1,
 ): { vx: number; vy: number } {
-  const quant = (v: number) => Math.round(v / step) * step;
-  const vx = Math.min(width, Math.max(0, quant(mx / cellSize)));
-  const vy = Math.min(height, Math.max(0, quant(my / cellSize)));
-  return { vx, vy };
+  const snap = (v: number, origin: number) => {
+    const snapped = Math.round((origin + v / cellSize) / step) * step;
+    // Normalize -0 so callers can compare with === / toEqual cleanly.
+    return snapped === 0 ? 0 : snapped;
+  };
+  return { vx: snap(mx, originX), vy: snap(my, originY) };
 }
 
 export function resolveEdges(

@@ -74,4 +74,17 @@ describe("computeFloorSupport", () => {
     const single = computeFloorSupport([paint(floor(6, 6), 1, 1, 5, 5)]);
     expect(single).toEqual([]);
   });
+
+  it("aligns supports by world position, not window top-left", () => {
+    // Support wall is at world x=3 (array x=0 with originX=3); the deck sits at
+    // World x=3 too (array x=3 with originX=0) so there is no long span.
+    const lower = {
+      ...setWallsPure(floor(12, 12), [{ kind: "v", x: 0, y: 4 }], "solid"),
+      originX: 3,
+    };
+    const upper = paint(floor(12, 12), 3, 4, 4, 5);
+    const [sup] = computeFloorSupport([lower, upper]);
+    expect(sup).toBeTruthy();
+    expect(sup!.overCount).toBe(0);
+  });
 });

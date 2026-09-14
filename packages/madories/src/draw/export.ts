@@ -9,7 +9,7 @@ import {
   WALL_LEGEND_LABEL,
 } from "../items";
 import { getCachedIcon } from "./icons/cache";
-import { drawGrid } from "./draw-grid";
+import { drawInfiniteGrid } from "./draw-grid";
 import { drawItems } from "./draw-items";
 import { drawTatamiCells } from "./draw-tatami";
 import { drawVoidCells } from "./draw-void";
@@ -25,6 +25,10 @@ const DIM_COLOR = "#5A4A3A";
 
 const GRID_COLOR = "rgba(90,74,58,0.25)"; // Same RGB as DIM_COLOR at 25% opacity
 const DIM_MARGIN = 28; // Px reserved for dimension rulers
+
+// Room labels ("X畳") are sized like the on-screen overlay (~13px) by default,
+// Which reads small on the exported image; bump them for the PNG.
+const EXPORT_ROOM_LABEL_SCALE = 0.7;
 
 // 1 cell = 0.5 tatami = 910mm (see ../units)
 export function computeFloorScores(floor: FloorPlan): { storage: number; windows: number } {
@@ -158,6 +162,7 @@ export function renderFloorToCanvas(
   cellSize: number,
   allFloors?: FloorPlan[],
   shearLayers?: ShearLayerFlags,
+  gridStep = 2,
 ): HTMLCanvasElement | null {
   const bounds = computeBounds(floor);
   if (!bounds) {
@@ -212,10 +217,21 @@ export function renderFloorToCanvas(
   ctx.save();
   ctx.translate(DIM_MARGIN - x1 * cellSize, DIM_MARGIN - y1 * cellSize);
   drawTatamiCells(ctx, floor, cellSize, false);
-  drawGrid(ctx, floor.width, floor.height, cellSize, GRID_COLOR);
+  drawInfiniteGrid(
+    ctx,
+    cellSize,
+    floor.originX,
+    floor.originY,
+    0,
+    0,
+    floor.width,
+    floor.height,
+    gridStep,
+    GRID_COLOR,
+  );
   drawWalls(ctx, floor, cellSize, { ink: DIM_COLOR, windowBlue: "#4A90D9" });
   drawItems(ctx, floor, cellSize);
-  drawRoomLabels(ctx, floor, cellSize, DIM_COLOR);
+  drawRoomLabels(ctx, floor, cellSize, DIM_COLOR, undefined, undefined, EXPORT_ROOM_LABEL_SCALE);
   if (shearLayers && allFloors) {
     drawShearCheck(ctx, floor, allFloors, cellSize, shearLayers);
   }
@@ -292,8 +308,8 @@ export function renderFloorToCanvas(
   return offscreen;
 }
 
-export function exportFloorPng(floor: FloorPlan, cellSize: number): void {
-  const canvas = renderFloorToCanvas(floor, cellSize);
+export function exportFloorPng(floor: FloorPlan, cellSize: number, gridStep = 2): void {
+  const canvas = renderFloorToCanvas(floor, cellSize, undefined, undefined, gridStep);
   if (!canvas) {
     return;
   }
@@ -345,6 +361,7 @@ export function exportAllFloorsPng(
   cellSize: number,
   includeShear = false,
   shearLayers: ShearLayerFlags = ALL_SHEAR_LAYERS,
+  gridStep = 2,
 ): void {
   const tsuboPerFloor = floors.map((f) => ({
     canvas: renderFloorToCanvas(
@@ -352,6 +369,7 @@ export function exportAllFloorsPng(
       cellSize,
       includeShear ? floors : undefined,
       includeShear ? shearLayers : undefined,
+      gridStep,
     ),
     floor: f,
     name: f.name,

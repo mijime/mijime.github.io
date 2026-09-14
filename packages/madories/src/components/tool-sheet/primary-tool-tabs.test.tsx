@@ -6,7 +6,7 @@ import type { ToolMode } from "../tool-mode";
 describe("PrimaryToolTabs", () => {
   it("renders 5 tabs", () => {
     const html = renderToString(
-      <PrimaryToolTabs tool={{ kind: "select" }} onToolChange={() => {}} />,
+      <PrimaryToolTabs tool={{ kind: "select" }} brush={2} onToolChange={() => {}} />,
     );
     expect(html).toContain("壁");
     expect(html).toContain("床");
@@ -17,7 +17,7 @@ describe("PrimaryToolTabs", () => {
 
   it("validates component structure", () => {
     const html = renderToString(
-      <PrimaryToolTabs tool={{ kind: "select" }} onToolChange={() => {}} />,
+      <PrimaryToolTabs tool={{ kind: "select" }} brush={2} onToolChange={() => {}} />,
     );
 
     // Verify all 5 buttons are rendered
@@ -32,7 +32,9 @@ describe("PrimaryToolTabs", () => {
     const kinds: ToolMode["kind"][] = ["wall", "floor", "item", "erase", "select"];
     for (const kind of kinds) {
       const tool = getToolModeForKind(kind);
-      const html = renderToString(<PrimaryToolTabs tool={tool} onToolChange={() => {}} />);
+      const html = renderToString(
+        <PrimaryToolTabs tool={tool} brush={2} onToolChange={() => {}} />,
+      );
       expect(html).toContain("<button");
     }
   });

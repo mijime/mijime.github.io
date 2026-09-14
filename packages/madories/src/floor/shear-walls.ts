@@ -138,8 +138,12 @@ export function detectStackedColumns(floors: FloorPlan[], mmPerCell?: number): S
   const counts = new Map<string, { x: number; y: number; count: number }>();
   for (const floor of floors) {
     for (const [vx, vy] of detectStructuralColumnVertices(floor, mmPerCell)) {
-      const key = `${vx},${vy}`;
-      const entry = counts.get(key) ?? { count: 0, x: vx, y: vy };
+      // Compare across floors in world coordinates (each floor's window origin
+      // May differ after auto-normalization).
+      const wx = vx + floor.originX;
+      const wy = vy + floor.originY;
+      const key = `${wx},${wy}`;
+      const entry = counts.get(key) ?? { count: 0, x: wx, y: wy };
       entry.count += 1;
       counts.set(key, entry);
     }
@@ -222,19 +226,22 @@ export function detectLoadPathBreaks(floors: FloorPlan[], mmPerCell?: number): L
   const breaks: LoadPathBreak[] = [];
   for (let i = 1; i < floors.length; i++) {
     const below = floors[i - 1];
+    const upper = floors[i];
     // Map vertex -> longest structural run pressing down there, for vertices
     // With no support below. Dedupes shared/corner vertices while carrying the
     // Worst contributing run's length as the severity proxy.
     const worse = new Map<string, { x: number; y: number; length: number }>();
-    for (const run of detectShearWallRuns(floors[i], mmPerCell)) {
+    for (const run of detectShearWallRuns(upper, mmPerCell)) {
       for (const [vx, vy] of [run.startVertex, run.endVertex]) {
-        if (vertexOnStructuralWall(below, vx, vy)) {
+        const wx = vx + upper.originX;
+        const wy = vy + upper.originY;
+        if (vertexOnStructuralWall(below, wx - below.originX, wy - below.originY)) {
           continue;
         }
-        const key = `${vx},${vy}`;
+        const key = `${wx},${wy}`;
         const prev = worse.get(key);
         const length = prev ? Math.max(prev.length, run.length) : run.length;
-        worse.set(key, { length, x: vx, y: vy });
+        worse.set(key, { length, x: wx, y: wy });
       }
     }
     for (const { length, x, y } of worse.values()) {

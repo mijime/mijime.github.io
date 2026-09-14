@@ -25,6 +25,7 @@ import { installLogHandlers, logError, logInfo } from "../log";
 import { v4 as uuidv4 } from "uuid";
 import { reducer } from "../store";
 import { detectRooms, ROOM_NAME_PRESETS } from "../floor/room-detection";
+import { arrayIndex } from "../floor/frame";
 import type { CopiedRegion, EdgeRef, ItemType, Plan } from "../types";
 import { useHistory } from "../hooks/use-history";
 import { DslPanel } from "./dsl-panel";
@@ -32,7 +33,7 @@ import type { FloorCanvasHandle } from "./floor-canvas";
 import { FloorCanvas } from "./floor-canvas";
 import { FloorTabs } from "./floor-tabs";
 import { PlanTabs } from "./plan-tabs";
-import type { ToolMode } from "./tool-mode";
+import type { BrushSize, ToolMode } from "./tool-mode";
 import { FLOOR_TYPES, floorTypeToSwatchStyle } from "./tool-mode";
 import type { CameraMode } from "./preview-3d/config";
 import { LogPanel } from "./log-panel";
@@ -109,12 +110,18 @@ export function App() {
   const [dslOpen, setDslOpen] = useState(false);
   const [logOpen, setLogOpen] = useState(false);
   const [customRoomName, setCustomRoomName] = useState("");
-  const [roomPicker, setRoomPicker] = useState<{ cellIndex: number; x: number; y: number } | null>(
-    null,
-  );
+  const [roomPicker, setRoomPicker] = useState<{
+    cx: number;
+    cy: number;
+    x: number;
+    y: number;
+  } | null>(null);
   const [shearCheck, setShearCheck] = useState(false);
   const [shearLayers, setShearLayers] = useState<ShearLayerFlags>(ALL_SHEAR_LAYERS);
   const [exportShear, setExportShear] = useState(false);
+  // 描画ブラシ(一間/1/2)は全体で共有。PNG書き出しのグリッドも同じ値に従う。
+  const [brush, setBrush] = useState<BrushSize>(2);
+  const [centerNonce, setCenterNonce] = useState(0);
 
   const { building, activeFloorId } = current;
 
@@ -353,7 +360,12 @@ export function App() {
       : building.floors.slice(0, building.floors.findIndex((f) => f.id === activeFloorId) + 1);
 
   const pickerRoom = roomPicker
-    ? detectRooms(floor).find((r) => r.cells.includes(roomPicker.cellIndex))
+    ? (() => {
+        const idx = arrayIndex(floor, roomPicker.cx, roomPicker.cy);
+        return idx === null
+          ? null
+          : (detectRooms(floor).find((r) => r.cells.includes(idx)) ?? null);
+      })()
     : null;
   const pickerRoomName = pickerRoom ? (floor.cells[pickerRoom.cells[0]]?.roomName ?? "") : "";
 
@@ -362,10 +374,11 @@ export function App() {
       return;
     }
     dispatch({
-      cellIndex: roomPicker.cellIndex,
       floorId: floor.id,
       roomName: name,
       type: "SET_ROOM_NAME",
+      x: roomPicker.cx,
+      y: roomPicker.cy,
     });
     setCustomRoomName("");
     setRoomPicker(null);
@@ -376,10 +389,11 @@ export function App() {
       return;
     }
     dispatch({
-      cellIndex: roomPicker.cellIndex,
       floorId: floor.id,
       roomName: null,
       type: "SET_ROOM_NAME",
+      x: roomPicker.cx,
+      y: roomPicker.cy,
     });
     setCustomRoomName("");
     setRoomPicker(null);
@@ -466,18 +480,33 @@ export function App() {
             });
           }}
           onExportAll={() =>
-            exportAllFloorsPng(building.floors, building.cellSize, exportShear, shearLayers)
+            exportAllFloorsPng(building.floors, building.cellSize, exportShear, shearLayers, brush)
           }
           onShare={handleShare}
           onClear={() => dispatch({ floorId: floor.id, type: "CLEAR_FLOOR" })}
-          onRotateFloor={() => dispatch({ floorId: floor.id, type: "ROTATE_FLOOR" })}
-          onFlipFloor={(axis) => dispatch({ axis, floorId: floor.id, type: "FLIP_FLOOR" })}
+          onRotateFloor={() => {
+            dispatch({ floorId: floor.id, type: "ROTATE_FLOOR" });
+            setCenterNonce((n) => n + 1);
+          }}
+          onFlipFloor={(axis) => {
+            dispatch({ axis, floorId: floor.id, type: "FLIP_FLOOR" });
+            setCenterNonce((n) => n + 1);
+          }}
           viewMode={viewMode}
           onToggleViewMode={() => setViewMode((v) => (v === "2d" ? "3d" : "2d"))}
           shearCheck={shearCheck}
           onToggleShear={() => setShearCheck((s) => !s)}
           onOpenDsl={() => setDslOpen(true)}
           onOpenLog={() => setLogOpen(true)}
+          brush={brush}
+          onBrushChange={(next) => {
+            setBrush(next);
+            setTool((t) =>
+              t.kind === "wall" || t.kind === "floor" || t.kind === "erase"
+                ? { ...t, brush: next }
+                : t,
+            );
+          }}
         />
         <DslPanel
           key={activePlanId}
@@ -505,6 +534,7 @@ export function App() {
                 cellSize={building.cellSize}
                 darkMode={dark}
                 tool={tool}
+                brush={brush}
                 shearCheck={shearCheck}
                 floors={building.floors}
                 shearLayers={shearLayers}
@@ -516,56 +546,60 @@ export function App() {
                     wallType,
                   });
                 }}
-                onSetFloorType={(cellIndex, floorType) =>
+                onSetFloorType={(x, y, floorType) =>
                   dispatch({
-                    cellIndex,
                     floorId: floor.id,
                     floorType,
                     type: "SET_FLOOR_TYPE",
+                    x,
+                    y,
                   })
                 }
-                onFillRoom={(cellIndex) => {
+                onFillRoom={(x, y) => {
                   if (tool.kind !== "floor" || tool.floorType === null) {
                     return;
                   }
                   dispatch({
-                    cellIndex,
                     floorId: floor.id,
                     floorType: tool.floorType,
                     type: "FILL_ROOM",
+                    x,
+                    y,
                   });
                 }}
-                onPlaceItem={(cellIndex) => {
+                onPlaceItem={(x, y) => {
                   if (tool.kind !== "item") {
                     return;
                   }
                   dispatch({
-                    cellIndex,
                     floorId: floor.id,
                     item: {
                       rotation: 0,
                       type: (tool as { kind: "item"; itemType: ItemType }).itemType,
                     },
                     type: "PLACE_ITEM",
+                    x,
+                    y,
                   });
                 }}
-                onRotateItem={(cellIndex) =>
-                  dispatch({ cellIndex, floorId: floor.id, type: "ROTATE_ITEM" })
-                }
-                onMoveItem={(fromIndex, toIndex) =>
+                onRotateItem={(x, y) => dispatch({ floorId: floor.id, type: "ROTATE_ITEM", x, y })}
+                onMoveItem={(fromX, fromY, toX, toY) =>
                   dispatch({
                     floorId: floor.id,
-                    fromIndex,
-                    toIndex,
+                    fromX,
+                    fromY,
+                    toX,
+                    toY,
                     type: "MOVE_ITEM",
                   })
                 }
-                onPasteRegion={(originIndex: number, region: CopiedRegion) =>
+                onPasteRegion={(x: number, y: number, region: CopiedRegion) =>
                   dispatch({
                     floorId: floor.id,
-                    originIndex,
                     region,
                     type: "PASTE_REGION",
+                    x,
+                    y,
                   })
                 }
                 onEraseRegion={(x1, y1, x2, y2) =>
@@ -578,16 +612,18 @@ export function App() {
                     y2,
                   })
                 }
-                onEraseCell={(cellIndex) =>
-                  dispatch({ cellIndex, floorId: floor.id, type: "ERASE_CELL" })
-                }
-                onLongPressRoom={(cellIndex, clientX, clientY) => {
-                  const room = detectRooms(floor).find((r) => r.cells.includes(cellIndex));
+                onEraseCell={(x, y) => dispatch({ floorId: floor.id, type: "ERASE_CELL", x, y })}
+                onLongPressRoom={(cx, cy, clientX, clientY) => {
+                  const idx = arrayIndex(floor, cx, cy);
+                  const room =
+                    idx === null ? null : detectRooms(floor).find((r) => r.cells.includes(idx));
                   const currentName =
                     room?.cells[0] === undefined ? "" : (floor.cells[room.cells[0]].roomName ?? "");
                   setCustomRoomName(currentName);
-                  setRoomPicker({ cellIndex, x: clientX, y: clientY });
+                  setRoomPicker({ cx, cy, x: clientX, y: clientY });
                 }}
+                onCommit={() => dispatch({ floorId: floor.id, type: "NORMALIZE_FLOOR" })}
+                centerNonce={centerNonce}
                 onUndo={undo}
               />
             ) : (
@@ -698,17 +734,19 @@ export function App() {
                 onClick={() => {
                   if (entry.type === null) {
                     dispatch({
-                      cellIndex: roomPicker.cellIndex,
                       floorId: floor.id,
                       floorType: null,
                       type: "SET_FLOOR_TYPE",
+                      x: roomPicker.cx,
+                      y: roomPicker.cy,
                     });
                   } else {
                     dispatch({
-                      cellIndex: roomPicker.cellIndex,
                       floorId: floor.id,
                       floorType: entry.type,
                       type: "FILL_ROOM",
+                      x: roomPicker.cx,
+                      y: roomPicker.cy,
                     });
                   }
                   setRoomPicker(null);
