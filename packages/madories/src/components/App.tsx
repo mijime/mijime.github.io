@@ -37,6 +37,7 @@ import type { BrushSize, ToolMode } from "./tool-mode";
 import { FLOOR_TYPES, floorTypeToSwatchStyle } from "./tool-mode";
 import type { CameraMode } from "./preview-3d/config";
 import { LogPanel } from "./log-panel";
+import { ShareDialog } from "./share-dialog";
 import { ToolSheet } from "./tool-sheet";
 import type { FloorPlan } from "../types";
 import { ShearDiagnostic } from "./shear-diagnostic";
@@ -106,7 +107,7 @@ export function App() {
   const [tool, setTool] = useState<ToolMode>({ kind: "select" });
   const canvasRef = useRef<FloorCanvasHandle>(null);
   const [toast, setToast] = useState<string | null>(null);
-  const [fallbackUrl, setFallbackUrl] = useState<string | null>(null);
+  const [shareUrl, setShareUrl] = useState<string | null>(null);
   const [dslOpen, setDslOpen] = useState(false);
   const [logOpen, setLogOpen] = useState(false);
   const [customRoomName, setCustomRoomName] = useState("");
@@ -328,19 +329,17 @@ export function App() {
     encodeFloors(building.floors).then(
       (encoded) => {
         const url = buildShareUrl(encoded);
+        setShareUrl(url);
+        logInfo("共有URLを作成しました");
         // Navigator.clipboard requires a secure context (missing on plain-http hosts).
         if (!navigator.clipboard?.writeText) {
-          setFallbackUrl(url);
           return;
         }
         navigator.clipboard.writeText(url).then(
           () => {
-            logInfo("共有URLをコピーしました");
             setToast("URLをコピーしました");
           },
-          () => {
-            setFallbackUrl(url);
-          },
+          () => undefined,
         );
       },
       (e) => {
@@ -881,69 +880,7 @@ export function App() {
           {toast}
         </div>
       )}
-      {fallbackUrl && (
-        <div
-          style={{
-            alignItems: "center",
-            background: "rgba(0,0,0,0.4)",
-            bottom: 0,
-            display: "flex",
-            justifyContent: "center",
-            left: 0,
-            position: "fixed",
-            right: 0,
-            top: 0,
-            zIndex: 100,
-          }}
-          onClick={() => setFallbackUrl(null)}
-        >
-          <div
-            style={{
-              background: "var(--paper)",
-              borderRadius: "10px",
-              display: "flex",
-              flexDirection: "column",
-              gap: "10px",
-              maxWidth: "90vw",
-              padding: "20px",
-              width: "400px",
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div style={{ fontFamily: "IBM Plex Mono, monospace", fontSize: "13px" }}>
-              このURLをコピーしてください
-            </div>
-            <input
-              readOnly
-              value={fallbackUrl}
-              style={{
-                border: "1px solid var(--border)",
-                borderRadius: "4px",
-                fontFamily: "IBM Plex Mono, monospace",
-                fontSize: "12px",
-                padding: "6px 8px",
-                width: "100%",
-              }}
-              onFocus={(e) => e.target.select()}
-            />
-            <button
-              onClick={() => setFallbackUrl(null)}
-              style={{
-                background: "var(--ink)",
-                border: "none",
-                borderRadius: "4px",
-                color: "var(--paper)",
-                cursor: "pointer",
-                fontFamily: "IBM Plex Mono, monospace",
-                fontSize: "12px",
-                padding: "6px 0",
-              }}
-            >
-              閉じる
-            </button>
-          </div>
-        </div>
-      )}
+      {shareUrl && <ShareDialog url={shareUrl} onClose={() => setShareUrl(null)} />}
     </div>
   );
 }
