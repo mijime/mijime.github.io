@@ -175,6 +175,15 @@ export function floorToDsl(floor: FloorPlan): string {
 
   lines.push(`size ${sizeW} ${sizeH}`, `name "${name}"`);
 
+  // Where DSL (0,0) sits in the building's world coordinates. Without it the
+  // Relative position of the floors is lost on import (upstairs rooms and the
+  // Stairs no longer line up), so it is emitted whenever it is not the origin.
+  const anchorX = floor.originX + (content ? content.x1 : 0);
+  const anchorY = floor.originY + (content ? content.y1 : 0);
+  if (anchorX !== 0 || anchorY !== 0) {
+    lines.push(`origin ${anchorX} ${anchorY}`);
+  }
+
   // Detect rooms and emit each as a pattern block
   const rooms = detectRooms(floor);
   const roomMinXY = rooms.map((r) => {
@@ -512,6 +521,8 @@ export function dslToFloor(text: string): FloorPlan {
   let width = 20;
   let height = 20;
   let name = "Floor";
+  let originX = 0;
+  let originY = 0;
 
   const cellOverrides = new Map<number, Partial<Cell>>();
   const edgeWalls = new Map<string, WallType>();
@@ -651,6 +662,15 @@ export function dslToFloor(text: string): FloorPlan {
       continue;
     }
 
+    // Where DSL (0,0) sits in world coordinates (negative allowed: the canvas
+    // Is unbounded). Missing line = legacy payload, anchored at the origin.
+    const originMatch = line.match(/^origin\s+(?<x>-?\d+)\s+(?<y>-?\d+)$/u);
+    if (originMatch) {
+      originX = Math.trunc(Number(originMatch.groups!.x));
+      originY = Math.trunc(Number(originMatch.groups!.y));
+      continue;
+    }
+
     const wallMatch = line.match(
       /^wall\s+(?<coords>[\d(),&-]+)\s+(?<side>top|left|right|bottom)\s+(?<type>\S+)$/u,
     );
@@ -754,8 +774,8 @@ export function dslToFloor(text: string): FloorPlan {
     height,
     id: uuidv4(),
     name,
-    originX: 0,
-    originY: 0,
+    originX,
+    originY,
     width,
     hWalls,
     vWalls,
