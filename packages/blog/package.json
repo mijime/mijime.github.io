@@ -24,36 +24,36 @@
     "format:oxfmt": "oxfmt"
   },
   "dependencies": {
-    "@astrojs/check": "^0.9.9",
-    "@duckdb/duckdb-wasm": "1.33.1-dev45.0",
+    "@astrojs/check": "^0.9.10",
+    "@duckdb/duckdb-wasm": "1.33.1-dev57.0",
     "@mijime/theme": "workspace:*",
-    "@shikijs/rehype": "^4.3.1",
+    "@shikijs/rehype": "^4.5.0",
     "lindera-js": "^0.1.4",
-    "lucide-react": "^1.23.0",
+    "lucide-react": "^1.57.0",
     "mdast": "^3.0.0",
-    "mermaid": "^11.16.0",
+    "mermaid": "^12.2.0",
     "rehype": "^13.0.2",
     "rehype-stringify": "^10.0.1",
     "remark": "^15.0.1",
     "remark-gfm": "^4.0.1",
     "remark-html": "^16.0.1",
     "remark-rehype": "^11.1.2",
-    "typescript": "^6.0.3",
     "unist-util-visit": "^5.1.0",
-    "zod": "^4.4.3"
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "@types/mdast": "^4.0.4",
-    "@types/react": "^19.2.17",
-    "@typescript/native-preview": "7.0.0-dev.20260604.1",
-    "astro": "^6.4.8",
+    "@types/react": "^19.3.0",
+    "@typescript/native-preview": "7.0.0-dev.20260707.2",
+    "astro": "^7.4.0",
     "duckdb": "^1.4.4",
     "oxfmt": "^0.73.0",
     "oxlint": "^1.88.0",
     "remark-frontmatter": "^5.0.0",
-    "remark-mdx-frontmatter": "^5.2.0",
-    "vite": "^8.1.3",
-    "vitest": "^3.2.7"
+    "remark-mdx-frontmatter": "^6.0.0",
+    "typescript": "^6.0.3",
+    "vite": "^8.3.4",
+    "vitest": "^5.0.4"
   },
   "peerDependencies": {
     "astro": "^6.1.9"
