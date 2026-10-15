@@ -21,6 +21,7 @@
     "@mijime/madories": "workspace:*",
     "@mijime/emolog": "workspace:*",
     "@mijime/mintodo": "workspace:*",
+    "@mijime/otete": "workspace:*",
     "@mijime/saiflow": "workspace:*",
     "@mijime/theme": "workspace:*",
     "@tailwindcss/vite": "4.1.8",
