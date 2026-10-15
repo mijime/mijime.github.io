@@ -15,16 +15,15 @@
   },
   "scripts": {
     "test": "vitest run --passWithNoTests",
-    "check": "pnpm run check:format && pnpm run check:tsgo && pnpm run check:oxlint && pnpm run check:astro",
+    "check": "pnpm run check:format && pnpm run check:tsgo && pnpm run check:types && pnpm run check:oxlint",
     "check:format": "oxfmt --check",
     "check:tsgo": "tsgo --noEmit",
     "check:oxlint": "oxlint --format=github --fix",
-    "check:astro": "astro-check",
+    "check:types": "astro sync && tsc --noEmit --runExternalCode",
     "format": "pnpm run format:oxfmt",
     "format:oxfmt": "oxfmt"
   },
   "dependencies": {
-    "@astrojs/check": "^0.9.10",
     "@duckdb/duckdb-wasm": "1.33.1-dev57.0",
     "@mijime/theme": "workspace:*",
     "@shikijs/rehype": "^4.5.0",
@@ -42,6 +41,7 @@
     "zod": "^4.6.7"
   },
   "devDependencies": {
+    "@astrojs/ts-content-mapper": "^0.2.0",
     "@types/mdast": "^4.0.4",
     "@types/react": "^19.3.0",
     "@typescript/native-preview": "7.0.0-dev.20260707.2",
@@ -51,11 +51,11 @@
     "oxlint": "^1.88.0",
     "remark-frontmatter": "^5.0.0",
     "remark-mdx-frontmatter": "^6.0.0",
-    "typescript": "^6.0.3",
+    "typescript": "7.1.0-dev.20261015.1",
     "vite": "^8.3.4",
     "vitest": "^5.0.4"
   },
   "peerDependencies": {
-    "astro": "^6.1.9"
+    "astro": "^7.4.0"
   }
 }

@@ -2,5 +2,12 @@
   "extends": "astro/tsconfigs/strict",
   "compilerOptions": {
     "moduleResolution": "bundler"
-  }
+  },
+  "include": [".astro/types.d.ts", "**/*.ts", "**/*.tsx", "**/*.astro"],
+  "contentMappers": [
+    {
+      "package": "@astrojs/ts-content-mapper",
+      "extensions": [".astro"]
+    }
+  ]
 }
