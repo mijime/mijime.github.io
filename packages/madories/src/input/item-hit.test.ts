@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { arrayIndex } from "../floor/frame";
+import { DEFAULT_STRUCTURAL_CONDITIONS } from "../floor/structural-conditions";
 import { createFloorPlan, reducer } from "../store";
 import type { FloorPlan, Item } from "../types";
 import { anchorsIntersectingRect, findItemAnchor } from "./item-hit";
@@ -55,7 +56,11 @@ describe("anchorsIntersectingRect", () => {
 
 describe("erase removes the whole item", () => {
   it("ERASE_CELL on a non-anchor footprint cell clears the item", () => {
-    const building = { cellSize: 32, floors: [createFloorPlan("t", 20, 20)] };
+    const building = {
+      cellSize: 32,
+      floors: [createFloorPlan("t", 20, 20)],
+      structural: DEFAULT_STRUCTURAL_CONDITIONS,
+    };
     const floorId = building.floors[0].id;
     const placed = reducer(building, {
       floorId,

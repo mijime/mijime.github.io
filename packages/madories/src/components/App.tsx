@@ -14,7 +14,6 @@ import {
   getActivePlanId,
   listPlans,
   loadFromFile,
-  migrateFromLegacy,
   putPlan,
   replaceAllPlans,
   resetDatabase,
@@ -26,6 +25,7 @@ import { v4 as uuidv4 } from "uuid";
 import { reducer } from "../store";
 import { detectRooms, ROOM_NAME_PRESETS } from "../floor/room-detection";
 import { arrayIndex } from "../floor/frame";
+import { DEFAULT_STRUCTURAL_CONDITIONS } from "../floor/structural-conditions";
 import type { CopiedRegion, EdgeRef, ItemType, Plan } from "../types";
 import { useHistory } from "../hooks/use-history";
 import { DslPanel } from "./dsl-panel";
@@ -71,7 +71,7 @@ export function App() {
   const { canRedo, canUndo, current, dispatch, push, redo, reset, setActiveFloorId, undo } =
     useHistory({
       activeFloorId: "",
-      building: { cellSize: 32, floors: [] },
+      building: { cellSize: 32, floors: [], structural: DEFAULT_STRUCTURAL_CONDITIONS },
     });
 
   // Surface unexpected runtime errors in the log + toast so a blank screen never stays silent.
@@ -143,7 +143,6 @@ export function App() {
           }
         }
         const shareParam = getShareParam();
-        await migrateFromLegacy();
         let list = await listPlans();
         if (shareParam) {
           const floors = await decodeFloors(shareParam);
@@ -158,7 +157,7 @@ export function App() {
           }
           const plan: Plan = {
             activeFloorId: floors[0].id,
-            building: { cellSize: 32, floors },
+            building: { cellSize: 32, floors, structural: DEFAULT_STRUCTURAL_CONDITIONS },
             id: uuidv4(),
             name,
             updatedAt: Date.now(),
@@ -479,7 +478,14 @@ export function App() {
             });
           }}
           onExportAll={() =>
-            exportAllFloorsPng(building.floors, building.cellSize, exportShear, shearLayers, brush)
+            exportAllFloorsPng(
+              building.floors,
+              building.cellSize,
+              building.structural,
+              exportShear,
+              shearLayers,
+              brush,
+            )
           }
           onShare={handleShare}
           onClear={() => dispatch({ floorId: floor.id, type: "CLEAR_FLOOR" })}
@@ -537,6 +543,7 @@ export function App() {
                 shearCheck={shearCheck}
                 floors={building.floors}
                 shearLayers={shearLayers}
+                structural={building.structural}
                 onSetWalls={(edges: EdgeRef[], wallType) => {
                   dispatch({
                     edges,
@@ -669,8 +676,8 @@ export function App() {
           style={{ position: "fixed", right: "8px", top: "80px", zIndex: 55 }}
         >
           <ShearDiagnostic
-            floor={floor}
-            floors={building.floors}
+            building={building}
+            activeFloorId={activeFloorId}
             layers={shearLayers}
             onToggleLayer={(key) => setShearLayers((s) => ({ ...s, [key]: !s[key] }))}
             exportShear={exportShear}
@@ -678,6 +685,10 @@ export function App() {
             onAddWalls={(edges) =>
               dispatch({ edges, floorId: floor.id, type: "SET_WALLS", wallType: "solid" })
             }
+            onConditionsChange={(conditions) =>
+              dispatch({ conditions, type: "SET_STRUCTURAL_CONDITIONS" })
+            }
+            onSelectFloor={(id) => setActiveFloorId(id)}
             onClose={() => setShearCheck(false)}
           />
         </div>

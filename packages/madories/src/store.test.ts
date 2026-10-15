@@ -3,6 +3,7 @@ import { createBuilding, createFloorPlan, reducer } from "./store";
 import { setWallsPure } from "./floor/walls";
 import { arrayIndex } from "./floor/frame";
 import type { EdgeRef, FloorPlan } from "./types";
+import { DEFAULT_STRUCTURAL_CONDITIONS } from "./floor/structural-conditions";
 
 const count = (f: FloorPlan) => [...f.hWalls, ...f.vWalls].filter((w) => w !== "none").length;
 
@@ -123,11 +124,24 @@ describe("reducer", () => {
     expect(cellAt(s2.floors[0], 3, 0).item).toBeNull();
   });
 
-  it("addFloor appends new floor with default name", () => {
+  it("addFloor appends new floor with the next auto label", () => {
     const building = createBuilding();
     const next = reducer(building, { type: "ADD_FLOOR" });
     expect(next.floors.length).toBe(2);
-    expect(next.floors[1].name).toBe("新しいレイヤー");
+    expect(next.floors[1].name).toBe("2F");
+    const third = reducer(next, { type: "ADD_FLOOR" });
+    expect(third.floors[2].name).toBe("3F");
+  });
+
+  it("addFloor numbers from the current floor count, not the previous name", () => {
+    const building = createBuilding();
+    const renamed = reducer(building, {
+      floorId: building.floors[0].id,
+      name: "ロフト",
+      type: "RENAME_FLOOR",
+    });
+    const next = reducer(renamed, { type: "ADD_FLOOR" });
+    expect(next.floors[1].name).toBe("2F");
   });
 
   it("renameFloor updates floor name", () => {
@@ -139,6 +153,17 @@ describe("reducer", () => {
       type: "RENAME_FLOOR",
     });
     expect(next.floors[0].name).toBe("地下");
+  });
+
+  it("setStructuralConditions merges partial values with defaults", () => {
+    const building = createBuilding();
+    const next = reducer(building, {
+      conditions: { region: "新潟県" },
+      type: "SET_STRUCTURAL_CONDITIONS",
+    });
+    expect(next.structural?.region).toBe("新潟県");
+    expect(next.structural?.construction).toBe("post_and_beam_panel");
+    expect(next.structural?.storyHeightMm).toBe(2800);
   });
 });
 
@@ -157,7 +182,10 @@ function encloseRect(floor: FloorPlan, x1: number, y1: number, x2: number, y2: n
 // Helper: a building with cells (1,1)-(2,2) enclosed as a 4-cell room.
 function enclosedBuilding() {
   const floor = encloseRect(createFloorPlan("test", 6, 6), 1, 1, 2, 2);
-  return { building: { cellSize: 32, floors: [floor] }, floor };
+  return {
+    building: { cellSize: 32, floors: [floor], structural: DEFAULT_STRUCTURAL_CONDITIONS },
+    floor,
+  };
 }
 
 describe("SET_ROOM_NAME", () => {
@@ -202,7 +230,7 @@ describe("SET_ROOM_NAME", () => {
     // 8-cell room: x=1..4, y=1..2
     const floor = encloseRect(createFloorPlan("test", 6, 6), 1, 1, 4, 2);
     const named = reducer(
-      { cellSize: 32, floors: [floor] },
+      { cellSize: 32, floors: [floor], structural: DEFAULT_STRUCTURAL_CONDITIONS },
       { floorId: floor.id, roomName: "LDK", type: "SET_ROOM_NAME", x: 1, y: 1 },
     );
     const edited = reducer(named, {
@@ -218,7 +246,7 @@ describe("SET_ROOM_NAME", () => {
     // 8-cell room: x=1..4, y=1..2
     const floor = encloseRect(createFloorPlan("test", 6, 6), 1, 1, 4, 2);
     const named = reducer(
-      { cellSize: 32, floors: [floor] },
+      { cellSize: 32, floors: [floor], structural: DEFAULT_STRUCTURAL_CONDITIONS },
       { floorId: floor.id, roomName: "LDK", type: "SET_ROOM_NAME", x: 1, y: 1 },
     );
     // Redraw the bottom wall — the room's top-left (1,1) is unaffected.
@@ -239,7 +267,11 @@ describe("SET_ROOM_NAME", () => {
   it("leaves other rooms' names intact when one room is edited", () => {
     const floor8 = createFloorPlan("test", 8, 6);
     const twoRooms = encloseRect(encloseRect(floor8, 1, 1, 2, 2), 4, 1, 5, 2);
-    const building = { cellSize: 32, floors: [twoRooms] };
+    const building = {
+      cellSize: 32,
+      floors: [twoRooms],
+      structural: DEFAULT_STRUCTURAL_CONDITIONS,
+    };
     const namedA = reducer(building, {
       floorId: twoRooms.id,
       roomName: "LDK",

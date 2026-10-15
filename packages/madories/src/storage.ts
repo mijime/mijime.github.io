@@ -71,6 +71,23 @@ function isValidFloor(floor: unknown): boolean {
   );
 }
 
+const CONSTRUCTIONS = new Set(["post_and_beam_panel", "post_and_beam_brace", "wood_frame"]);
+
+/** 構造条件が揃っているか。旧データ（条件なし）はここで弾き、新規プランに切り替える。 */
+function isValidStructural(value: unknown): boolean {
+  if (typeof value !== "object" || value === null) {
+    return false;
+  }
+  const s = value as Record<string, unknown>;
+  return (
+    typeof s["region"] === "string" &&
+    typeof s["construction"] === "string" &&
+    CONSTRUCTIONS.has(s["construction"]) &&
+    typeof s["storyHeightMm"] === "number" &&
+    s["storyHeightMm"] > 0
+  );
+}
+
 /**
  * Validates a stored plan and repairs what can be repaired (drops broken
  * floors, re-points activeFloorId). Returns null when nothing salvageable
@@ -83,6 +100,9 @@ export function sanitizePlan(plan: unknown): Plan | null {
   const p = plan as Record<string, unknown>;
   const building = p["building"] as Record<string, unknown> | undefined;
   if (typeof building !== "object" || building === null || !Array.isArray(building["floors"])) {
+    return null;
+  }
+  if (!isValidStructural(building["structural"])) {
     return null;
   }
   const floors = (building["floors"] as unknown[])
@@ -168,44 +188,6 @@ async function setActivePlanId(id: string): Promise<void> {
   await withRecovery(() => db.meta.put({ key: "activePlanId", value: id }));
 }
 
-// ---- legacy localStorage migration ----
-
-const LEGACY_KEY = "madories_plan";
-
-/** Migrates the pre-multi-plan localStorage payload into the first IndexedDB plan. */
-async function migrateFromLegacy(): Promise<boolean> {
-  if (typeof localStorage === "undefined") {
-    return false;
-  }
-  const raw = localStorage.getItem(LEGACY_KEY);
-  if (!raw) {
-    return false;
-  }
-  try {
-    const data = JSON.parse(raw) as { version?: number; building: Building; activeFloorId: string };
-    if (data.version !== 2) {
-      return false;
-    }
-    if ((await db.plans.count()) > 0) {
-      return false;
-    }
-    const plan = sanitizePlan({
-      building: data.building,
-      activeFloorId: data.activeFloorId,
-      id: uuidv4(),
-      name: "プラン1",
-      updatedAt: Date.now(),
-    });
-    if (!plan) {
-      return false;
-    }
-    await withRecovery(() => db.plans.put(plan));
-    return true;
-  } catch {
-    return false;
-  }
-}
-
 // ---- file import / export ----
 
 export function saveToFile(plans: Plan[], activePlanId: string): void {
@@ -249,26 +231,6 @@ export function loadFromFile(): Promise<SaveData | null> {
             resolve({ ...data, plans });
             return;
           }
-          // Legacy single-building file -> single plan
-          if (data.version === 2) {
-            const legacy = data as unknown as {
-              building: Building;
-              activeFloorId: string;
-            };
-            const plan = sanitizePlan({
-              building: legacy.building,
-              activeFloorId: legacy.activeFloorId,
-              id: uuidv4(),
-              name: "インポート",
-              updatedAt: Date.now(),
-            });
-            if (!plan) {
-              resolve(null);
-              return;
-            }
-            resolve({ version: 3, activePlanId: plan.id, plans: [plan] });
-            return;
-          }
           resolve(null);
         } catch {
           resolve(null);
@@ -280,13 +242,4 @@ export function loadFromFile(): Promise<SaveData | null> {
   });
 }
 
-export {
-  db,
-  deletePlan,
-  getActivePlanId,
-  listPlans,
-  migrateFromLegacy,
-  putPlan,
-  replaceAllPlans,
-  setActivePlanId,
-};
+export { db, deletePlan, getActivePlanId, listPlans, putPlan, replaceAllPlans, setActivePlanId };

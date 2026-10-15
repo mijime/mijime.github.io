@@ -1,4 +1,4 @@
-import type { FloorPlan } from "../types";
+import type { FloorPlan, StructuralConditions } from "../types";
 import { MM_PER_CELL } from "../units";
 import {
   detectLoadPathBreaks,
@@ -7,7 +7,8 @@ import {
 } from "../floor/shear-walls";
 import { computeQuadrantBalance } from "../floor/quadrant-balance";
 import { suggestWallRun, type WallSuggestion } from "../floor/wall-quantity";
-import { computeEccentricity } from "../floor/structure-metrics";
+import { computeEccentricity } from "../floor/stiffness";
+import { computeFloorWallDemands } from "../floor/wall-demand";
 import { computeFloorSupport, SUPPORT_SPAN_MAX_M } from "../floor/floor-support";
 
 // Structural-wall run highlights (drawn over walls) and 通し柱 markers.
@@ -41,6 +42,28 @@ export function dotColor(ratio: number): string {
   return `rgba(${r},${g},${b},0.92)`;
 }
 
+// 壁負荷: 検定比（負荷÷耐力）で色を変える。緑=余裕、橙=耐力近く、赤=超過。
+const LOAD_OK_RGB: [number, number, number] = [46, 160, 90];
+const LOAD_MID_RGB: [number, number, number] = [240, 166, 60];
+const LOAD_NG_RGB: [number, number, number] = [217, 58, 45];
+
+function mix(a: [number, number, number], b: [number, number, number], t: number) {
+  return `rgba(${Math.round(a[0] + (b[0] - a[0]) * t)},${Math.round(
+    a[1] + (b[1] - a[1]) * t,
+  )},${Math.round(a[2] + (b[2] - a[2]) * t)},0.95)`;
+}
+
+/** 検定比 → 色。0.6以下=緑、1.0=橙、1.5以上=赤。 */
+export function utilizationColor(utilization: number): string {
+  if (utilization <= 0.6) {
+    return mix(LOAD_OK_RGB, LOAD_OK_RGB, 0);
+  }
+  if (utilization <= 1) {
+    return mix(LOAD_OK_RGB, LOAD_MID_RGB, (utilization - 0.6) / 0.4);
+  }
+  return mix(LOAD_MID_RGB, LOAD_NG_RGB, Math.min(1, (utilization - 1) / 0.5));
+}
+
 function drawWallRun(
   ctx: CanvasRenderingContext2D,
   x: number,
@@ -72,8 +95,32 @@ function drawGhostWall(
   ctx.setLineDash([]);
 }
 
+// 壁ごとの負荷を色（検定比）と太さ（負担の大きさ）で描く。
+function drawWallLoads(
+  ctx: CanvasRenderingContext2D,
+  floor: FloorPlan,
+  floors: FloorPlan[],
+  cellSize: number,
+  structural: StructuralConditions,
+): void {
+  const demands = computeFloorWallDemands(floor, floors, structural);
+  let maxShear = 0;
+  for (const d of demands) {
+    maxShear = Math.max(maxShear, Math.abs(d.shearKn));
+  }
+  for (const d of demands) {
+    const loadRatio = maxShear > 0 ? Math.abs(d.shearKn) / maxShear : 0;
+    ctx.strokeStyle = utilizationColor(d.utilization);
+    ctx.lineWidth = Math.max(3, cellSize * (0.14 + 0.2 * loadRatio));
+    ctx.beginPath();
+    drawWallRun(ctx, d.x, d.y, d.cells, d.kind, cellSize);
+    ctx.stroke();
+  }
+}
+
 export interface ShearLayerFlags {
   runs: boolean;
+  loads: boolean;
   columns: boolean;
   quadrant: boolean;
   breaks: boolean;
@@ -84,6 +131,7 @@ export interface ShearLayerFlags {
 export const ALL_SHEAR_LAYERS: ShearLayerFlags = {
   breaks: true,
   columns: true,
+  loads: true,
   quadrant: true,
   rigid: true,
   runs: true,
@@ -96,12 +144,15 @@ export function drawShearCheck(
   floors: FloorPlan[],
   cellSize: number,
   layers: ShearLayerFlags,
+  structural?: StructuralConditions,
 ): void {
   ctx.save();
   ctx.lineCap = "round";
 
-  // Runs on the current floor only (drawing every floor's would be cluttered).
-  if (layers.runs) {
+  // 壁ごとの負荷（ねじれ込み）。有効なら耐力壁ランの表示より優先する。
+  if (layers.loads && structural) {
+    drawWallLoads(ctx, currentFloor, floors, cellSize, structural);
+  } else if (layers.runs) {
     for (const run of detectShearWallRuns(currentFloor)) {
       ctx.strokeStyle = run.stable ? STABLE_COLOR : MARGINAL_COLOR;
       ctx.lineWidth = run.stable ? Math.max(4, cellSize * 0.28) : Math.max(2, cellSize * 0.14);
@@ -189,10 +240,10 @@ function drawRigidCenterOverlay(
     return;
   }
   const mm = MM_PER_CELL;
-  const gx = (ecc.gx / mm) * cellSize;
-  const gy = (ecc.gy / mm) * cellSize;
-  const rx = (ecc.rx / mm) * cellSize;
-  const ry = (ecc.ry / mm) * cellSize;
+  const gx = (ecc.gxMm / mm) * cellSize;
+  const gy = (ecc.gyMm / mm) * cellSize;
+  const rx = (ecc.cxMm / mm) * cellSize;
+  const ry = (ecc.cyMm / mm) * cellSize;
 
   ctx.strokeStyle = ECC_LINE;
   ctx.lineWidth = 1.5;

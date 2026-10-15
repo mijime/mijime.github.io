@@ -1,7 +1,8 @@
 import type { ShearLayerFlags } from "../../draw/draw-shear-check";
-import { CheckRow, PanelSection } from "./primitives";
+import { CheckRow, mono, PanelSection } from "./primitives";
 
 const LAYER_OPTIONS: { key: keyof ShearLayerFlags; label: string }[] = [
+  { key: "loads", label: "壁の負荷" },
   { key: "runs", label: "耐力壁ラン" },
   { key: "columns", label: "通し柱" },
   { key: "quadrant", label: "四分割" },
@@ -28,6 +29,9 @@ export function LayerToggles({ layers, onToggleLayer, exportShear, onToggleExpor
           label={label}
         />
       ))}
+      <div style={{ ...mono, color: "var(--mid)", fontSize: "9px", lineHeight: 1.4 }}>
+        壁の負荷: 緑=余裕 / 橙=耐力付近 / 赤=超過（太さ=負担の大きさ）
+      </div>
       <CheckRow
         checked={exportShear}
         onChange={onToggleExportShear}

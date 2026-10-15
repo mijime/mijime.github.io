@@ -1,4 +1,4 @@
-import type { FloorPlan, ItemType, WallType } from "../types";
+import type { Building, FloorPlan, ItemType, StructuralConditions, WallType } from "../types";
 import { WALL_WINDOW_SCORE } from "../types";
 import { hIndex, vIndex } from "../floor/walls";
 import { FLOOR_TYPES, floorTypeToColor } from "../components/tool-mode";
@@ -163,6 +163,7 @@ export function renderFloorToCanvas(
   allFloors?: FloorPlan[],
   shearLayers?: ShearLayerFlags,
   gridStep = 2,
+  structural?: StructuralConditions,
 ): HTMLCanvasElement | null {
   const bounds = computeBounds(floor);
   if (!bounds) {
@@ -233,7 +234,7 @@ export function renderFloorToCanvas(
   drawItems(ctx, floor, cellSize);
   drawRoomLabels(ctx, floor, cellSize, DIM_COLOR, undefined, undefined, EXPORT_ROOM_LABEL_SCALE);
   if (shearLayers && allFloors) {
-    drawShearCheck(ctx, floor, allFloors, cellSize, shearLayers);
+    drawShearCheck(ctx, floor, allFloors, cellSize, shearLayers, structural);
   }
   ctx.restore();
 
@@ -322,43 +323,45 @@ export function exportFloorPng(floor: FloorPlan, cellSize: number, gridStep = 2)
   }, "image/png");
 }
 
-export function diagnosticLine(floor: FloorPlan, floors: FloorPlan[]): string {
-  const r = computeStructuralReport(floor, floors);
-  const { wallQuantity: qty, quadrant: quad, balanceRatio: ratio } = r;
-  const ecc = r.eccentricity;
-  const perim = r.perimeter;
-  const inter = r.interFloor;
+export function diagnosticLine(
+  floor: FloorPlan,
+  floors: FloorPlan[],
+  structural: StructuralConditions,
+): string {
+  const building: Building = { cellSize: 0, floors, structural };
+  const r = computeStructuralReport(building);
+  const index = floors.findIndex((f) => f.id === floor.id);
+  const stress = r.floors[index] ?? r.floors[0];
+  const { strength, quadrant: quad, eccentricity: ecc } = stress;
+  const required = stress.requiredMultiplierLengthM;
 
   const parts: string[] = [];
   parts.push(
-    `壁 横${qty.haveHm.toFixed(1)}/${qty.needM.toFixed(1)}${qty.okH ? "✓" : "✗"}`,
-    `縦${qty.haveVm.toFixed(1)}/${qty.needM.toFixed(1)}${qty.okV ? "✓" : "✗"}`,
+    `壁 X${strength.hMultiplierLengthM.toFixed(1)}/${required.toFixed(1)}${stress.wallOkH ? "✓" : "✗"}`,
+    `Y${strength.vMultiplierLengthM.toFixed(1)}/${required.toFixed(1)}${stress.wallOkV ? "✓" : "✗"}`,
   );
   const quadNG = quad.quadrants.filter((q) => !q.ok).map((q) => q.name);
   if (quadNG.length > 0) {
     parts.push(`四分割NG[${quadNG.join("/")}]`);
   }
-  parts.push(`比${Math.round(ratio.ratio * 100)}%${ratio.ok ? "✓" : "✗"}`);
   if (ecc) {
     parts.push(`偏率eX${ecc.ex.toFixed(2)}/eY${ecc.ey.toFixed(2)}${ecc.ok ? "✓" : "✗"}`);
   }
-  if (perim) {
-    parts.push(`外周${Math.round(perim.ratio * 100)}%${perim.ok ? "✓" : "✗"}`);
+  if (stress.rigidity) {
+    parts.push(`剛性${stress.rigidity.rsH.toFixed(2)}/${stress.rigidity.rsV.toFixed(2)}`);
   }
-  if (inter && !inter.ok) {
-    const d: string[] = [];
-    if (inter.hDeficit > 0) d.push(`横不足${inter.hDeficit.toFixed(1)}m`);
-    if (inter.vDeficit > 0) d.push(`縦不足${inter.vDeficit.toFixed(1)}m`);
-    if (d.length > 0) parts.push(`上下壁量NG(${d.join("/")})`);
+  if (stress.drift) {
+    parts.push(`変形1/${Math.round(1 / Math.max(stress.drift.driftH, 1e-6))}`);
   }
-  if (r.breaksHere.length > 0) parts.push(`通り上×${r.breaksHere.length}`);
-  if (r.breaksBelow.length > 0) parts.push(`通り下×${r.breaksBelow.length}`);
+  if (stress.breaksHere.length > 0) parts.push(`通り上×${stress.breaksHere.length}`);
+  if (stress.breaksBelow.length > 0) parts.push(`通り下×${stress.breaksBelow.length}`);
   return `${floor.name}: ${parts.join("  ")}`;
 }
 
 export function exportAllFloorsPng(
   floors: FloorPlan[],
   cellSize: number,
+  structural: StructuralConditions,
   includeShear = false,
   shearLayers: ShearLayerFlags = ALL_SHEAR_LAYERS,
   gridStep = 2,
@@ -370,6 +373,7 @@ export function exportAllFloorsPng(
       includeShear ? floors : undefined,
       includeShear ? shearLayers : undefined,
       gridStep,
+      structural,
     ),
     floor: f,
     name: f.name,
@@ -685,7 +689,7 @@ export function exportAllFloorsPng(
     ctx.textBaseline = "middle";
     for (let i = 0; i < valid.length; i++) {
       ctx.fillText(
-        diagnosticLine(valid[i].floor, floors),
+        diagnosticLine(valid[i].floor, floors, structural),
         MARGIN,
         diagY + i * LABEL_HEIGHT + LABEL_HEIGHT / 2,
       );

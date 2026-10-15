@@ -1,46 +1,54 @@
 import { useState } from "react";
-import type { EdgeRef, FloorPlan } from "../../types";
+import type { Building, EdgeRef, StructuralConditions } from "../../types";
 import type { ShearLayerFlags } from "../../draw/draw-shear-check";
-import { computeStructuralReport, type StructuralReport } from "../../floor/structural-report";
+import { computeStructuralReport } from "../../floor/structural-report";
 import { mono, Panel, TabBar, type TabDef } from "./primitives";
 import { SummaryBar } from "./SummaryBar";
+import { OverviewTab } from "./OverviewTab";
 import { WallTab } from "./WallTab";
 import { BalanceTab } from "./BalanceTab";
-import { VerticalTab } from "./VerticalTab";
+import { RigidityTab } from "./RigidityTab";
+import { BasisTab } from "./BasisTab";
 import { DisplayTab } from "./DisplayTab";
 
 const TABS: TabDef[] = [
-  { id: "wall", label: "壁量" },
-  { id: "balance", label: "分布" },
-  { id: "vertical", label: "上下" },
-  { id: "display", label: "表示" },
+  { id: "overview", label: "全体" },
+  { id: "floor", label: "この階" },
+  { id: "basis", label: "根拠" },
 ];
 
 interface Props {
-  floor: FloorPlan;
-  /** All floors in bottom-up story order (building.floors) */
-  floors: FloorPlan[];
+  building: Building;
+  activeFloorId: string;
   layers: ShearLayerFlags;
   onToggleLayer: (key: keyof ShearLayerFlags) => void;
   exportShear: boolean;
   onToggleExportShear: () => void;
   onAddWalls: (edges: EdgeRef[]) => void;
+  onConditionsChange: (conditions: Partial<StructuralConditions>) => void;
+  onSelectFloor: (floorId: string) => void;
   onClose: () => void;
 }
 
 export function ShearDiagnostic({
-  floor,
-  floors,
+  building,
+  activeFloorId,
   layers,
   onToggleLayer,
   exportShear,
   onToggleExportShear,
   onAddWalls,
+  onConditionsChange,
+  onSelectFloor,
   onClose,
 }: Props) {
-  const report = computeStructuralReport(floor, floors);
+  const report = computeStructuralReport(building);
+  const activeIndex = building.floors.findIndex((f) => f.id === activeFloorId);
+  const floor = building.floors[activeIndex] ?? building.floors[0];
+  const stress = report.floors[activeIndex] ?? report.floors[0];
   const [collapsed, setCollapsed] = useState(false);
-  const [tab, setTab] = useState<string>(initialTab(report));
+  const [tab, setTab] = useState<string>("overview");
+  const [displayOpen, setDisplayOpen] = useState(false);
 
   return (
     <Panel>
@@ -54,9 +62,25 @@ export function ShearDiagnostic({
             textTransform: "uppercase",
           }}
         >
-          耐震診断（簡易）
+          許容応力度計算（簡易）
         </div>
-        <div style={{ alignItems: "center", display: "flex", gap: "16px" }}>
+        <div style={{ alignItems: "center", display: "flex", gap: "8px" }}>
+          <button
+            onClick={() => setDisplayOpen((o) => !o)}
+            title="表示設定"
+            style={{
+              background: displayOpen ? "var(--ink)" : "transparent",
+              border: "1px solid var(--border)",
+              borderRadius: "4px",
+              color: displayOpen ? "var(--paper)" : "var(--mid)",
+              cursor: "pointer",
+              fontFamily: "IBM Plex Mono, monospace",
+              fontSize: "9px",
+              padding: "2px 6px",
+            }}
+          >
+            表示
+          </button>
           <button
             onClick={() => setCollapsed((c) => !c)}
             title={collapsed ? "展開" : "最小化"}
@@ -72,21 +96,40 @@ export function ShearDiagnostic({
 
       {!collapsed && (
         <>
-          <SummaryBar report={report} />
-          <TabBar tabs={TABS} active={tab} onSelect={setTab} />
-          {tab === "wall" && <WallTab report={report} />}
-          {tab === "balance" && (
-            <BalanceTab floor={floor} report={report} onAddWalls={onAddWalls} />
-          )}
-          {tab === "vertical" && <VerticalTab report={report} />}
-          {tab === "display" && (
+          {!displayOpen && tab === "floor" && <SummaryBar stress={stress} />}
+          {!displayOpen && <TabBar tabs={TABS} active={tab} onSelect={setTab} />}
+
+          {displayOpen ? (
             <DisplayTab
               layers={layers}
               onToggleLayer={onToggleLayer}
               exportShear={exportShear}
               onToggleExportShear={onToggleExportShear}
             />
+          ) : (
+            <>
+              {tab === "overview" && (
+                <OverviewTab
+                  report={report}
+                  floors={building.floors}
+                  activeFloorIndex={activeIndex}
+                  onSelectFloor={onSelectFloor}
+                  onConditionsChange={onConditionsChange}
+                />
+              )}
+              {tab === "floor" && (
+                <>
+                  <WallTab floor={floor} stress={stress} onAddWalls={onAddWalls} />
+                  <BalanceTab floor={floor} stress={stress} onAddWalls={onAddWalls} />
+                  <RigidityTab stress={stress} />
+                </>
+              )}
+              {tab === "basis" && (
+                <BasisTab stress={stress} region={report.region} conditions={report.conditions} />
+              )}
+            </>
           )}
+
           <div style={{ ...mono, color: "var(--mid)", fontSize: "9px", lineHeight: 1.5 }}>
             簡易目安です。実際の構造・耐震計算は建築士/構造設計者に相談してください。
           </div>
@@ -94,30 +137,6 @@ export function ShearDiagnostic({
       )}
     </Panel>
   );
-}
-
-/** NG がある最初のタブを初期表示（問題を拾いやすい） */
-function initialTab(report: StructuralReport): string {
-  const wallNg = !report.wallQuantity.okH || !report.wallQuantity.okV || !report.balanceRatio.ok;
-  const balanceNg =
-    report.quadrant.quadrants.some((q) => !q.ok) ||
-    report.eccentricity?.ok === false ||
-    report.perimeter?.ok === false;
-  const verticalNg =
-    (report.interFloor ? !report.interFloor.ok : false) ||
-    (report.support ? report.support.overCount > 0 : false) ||
-    report.breaksHere.length > 0 ||
-    report.breaksBelow.length > 0;
-  if (wallNg) {
-    return "wall";
-  }
-  if (balanceNg) {
-    return "balance";
-  }
-  if (verticalNg) {
-    return "vertical";
-  }
-  return "wall";
 }
 
 function iconButton(fontSize: number) {

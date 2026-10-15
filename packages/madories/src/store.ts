@@ -4,6 +4,10 @@ import { arrayIndex, ensureWorldBounds, normalizeToContent, type WorldRect } fro
 import { detectRooms, roomTopLeftCell } from "./floor/room-detection";
 import { anchorsIntersectingRect } from "./input/item-hit";
 import { getItemFootprint, ITEM_DEF_MAP } from "./items";
+import {
+  DEFAULT_STRUCTURAL_CONDITIONS,
+  normalizeStructuralConditions,
+} from "./floor/structural-conditions";
 import type {
   Building,
   Cell,
@@ -12,6 +16,7 @@ import type {
   FloorPlan,
   FloorType,
   Item,
+  StructuralConditions,
   WallType,
 } from "./types";
 
@@ -36,8 +41,18 @@ export function createFloorPlan(name: string, width = 40, height = 40): FloorPla
 export function createBuilding(): Building {
   return {
     cellSize: 32,
-    floors: [createFloorPlan("1F")],
+    floors: [createFloorPlan(nextFloorLabel([]))],
+    structural: DEFAULT_STRUCTURAL_CONDITIONS,
   };
+}
+
+/**
+ * Next auto floor label ("1F", "2F", …) from the current bottom-up floor count.
+ * The number is derived, never asked of the user, so adding a floor never
+ * produces a generic placeholder name.
+ */
+export function nextFloorLabel(floors: FloorPlan[]): string {
+  return `${floors.length + 1}F`;
 }
 
 type Action =
@@ -91,7 +106,8 @@ type Action =
   | { type: "FILL_ROOM"; floorId: string; x: number; y: number; floorType: FloorType }
   | { type: "SET_ROOM_NAME"; floorId: string; x: number; y: number; roomName: string | null }
   | { type: "ROTATE_FLOOR"; floorId: string }
-  | { type: "FLIP_FLOOR"; floorId: string; axis: "h" | "v" };
+  | { type: "FLIP_FLOOR"; floorId: string; axis: "h" | "v" }
+  | { type: "SET_STRUCTURAL_CONDITIONS"; conditions: Partial<StructuralConditions> };
 
 function updateFloor(state: Building, floorId: string, fn: (f: FloorPlan) => FloorPlan): Building {
   return {
@@ -298,7 +314,7 @@ function reducerImpl(state: Building, action: Action): Building {
     case "ADD_FLOOR": {
       return {
         ...state,
-        floors: [...state.floors, createFloorPlan("新しいレイヤー")],
+        floors: [...state.floors, createFloorPlan(nextFloorLabel(state.floors))],
       };
     }
 
@@ -461,6 +477,13 @@ function reducerImpl(state: Building, action: Action): Building {
       return updateFloor(state, action.floorId, (floor) =>
         normalizeToContent(action.axis === "h" ? flipFloorH(floor) : flipFloorV(floor)),
       );
+    }
+
+    case "SET_STRUCTURAL_CONDITIONS": {
+      return {
+        ...state,
+        structural: { ...normalizeStructuralConditions(state.structural), ...action.conditions },
+      };
     }
 
     default: {
