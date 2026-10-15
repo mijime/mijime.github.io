@@ -3,12 +3,8 @@
   "plugins": ["typescript", "unicorn", "oxc"],
   "categories": {
     "correctness": "error",
-    "perf": "error",
-    "style": "error",
-    "nursery": "error",
-    "pedantic": "error",
     "suspicious": "error",
-    "restriction": "error"
+    "perf": "error"
   },
   "ignorePatterns": ["dist", "**/*.gen.ts"],
   "rules": {
