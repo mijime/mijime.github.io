@@ -6,7 +6,6 @@ import {
   deletePlan,
   getActivePlanId,
   listPlans,
-  migrateFromLegacy,
   putPlan,
   replaceAllPlans,
   resetDatabase,
@@ -147,72 +146,17 @@ describe("active plan id", () => {
   });
 });
 
-describe("legacy localStorage migration", () => {
-  const store: Record<string, string> = {};
-
-  function useLocalStorage() {
-    (globalThis as Record<string, unknown>).localStorage = {
-      getItem: (key: string) => store[key] ?? null,
-      setItem: (key: string, value: string) => {
-        store[key] = value;
-      },
-      removeItem: (key: string) => {
-        delete store[key];
-      },
-      clear: () => {
-        for (const key of Object.keys(store)) {
-          delete store[key];
-        }
-      },
-      key: (index: number) => Object.keys(store)[index] ?? null,
-      get length() {
-        return Object.keys(store).length;
-      },
+describe("no legacy migration", () => {
+  it("drops plans saved without structural conditions", () => {
+    const plan = createPlan("old");
+    const withoutStructural = {
+      ...plan,
+      building: { cellSize: plan.building.cellSize, floors: plan.building.floors },
     };
-  }
-
-  beforeEach(() => {
-    for (const key of Object.keys(store)) {
-      delete store[key];
-    }
+    expect(sanitizePlan(withoutStructural)).toBeNull();
   });
 
-  it("migrates a v2 single-building payload into the first plan", async () => {
-    const plan = createPlan("src");
-    useLocalStorage();
-    store["madories_plan"] = JSON.stringify({
-      version: 2,
-      building: plan.building,
-      activeFloorId: plan.activeFloorId,
-    });
-
-    const migrated = await migrateFromLegacy();
-    expect(migrated).toBe(true);
-
-    const list = await listPlans();
-    expect(list).toHaveLength(1);
-    expect(list[0].name).toBe("プラン1");
-    expect(list[0].building.floors[0].id).toBe(plan.building.floors[0].id);
-    expect(list[0].activeFloorId).toBe(plan.activeFloorId);
-  });
-
-  it("does not migrate when plans already exist", async () => {
-    await putPlan(makePlan("existing", 100));
-    useLocalStorage();
-    store["madories_plan"] = JSON.stringify({ version: 2, building: {}, activeFloorId: "" });
-
-    await expect(migrateFromLegacy()).resolves.toBe(false);
-    expect(await listPlans()).toHaveLength(1);
-  });
-
-  it("returns false when no legacy payload exists", async () => {
-    useLocalStorage();
-    expect(await migrateFromLegacy()).toBe(false);
-  });
-
-  it("returns false on corrupt legacy payload", async () => {
-    useLocalStorage();
-    store["madories_plan"] = "not-json{{";
-    await expect(migrateFromLegacy()).resolves.toBe(false);
+  it("accepts the current shape", () => {
+    expect(sanitizePlan(createPlan("current"))).not.toBeNull();
   });
 });

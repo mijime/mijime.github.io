@@ -1,96 +1,6 @@
 import type { EdgeRef, FloorPlan, WallType } from "../types";
-import { MM_PER_CELL } from "../units";
 import { computeWallBounds, type QuadrantName } from "./quadrant-balance";
-import { detectShearWallRuns } from "./shear-walls";
 import { hIndex, vIndex } from "./walls";
-
-// Simplified shear-wall requirement: metres of structural wall per m² of floor.
-// Real 壁量計算 depends on region/story/materials — this is a rough decision aid.
-const NEED_PER_M2 = 0.45;
-
-export interface WallQuantity {
-  areaM2: number;
-  needM: number;
-  haveHm: number;
-  haveVm: number;
-  okH: boolean;
-  okV: boolean;
-}
-
-/** Provided vs required shear wall length, per direction, for a floor. */
-export function computeWallQuantity(
-  floor: FloorPlan,
-  mmPerCell: number = MM_PER_CELL,
-): WallQuantity {
-  const b = computeWallBounds(floor);
-  if (!b) {
-    // No wall at all: a floor with zero structural wall cannot brace anything.
-    // Treat as NG even though the (wall-derived) requirement is also zero —
-    // Otherwise an empty 2F reads as "OK" (vacuous 0>=0).
-    return { areaM2: 0, haveHm: 0, haveVm: 0, needM: 0, okH: false, okV: false };
-  }
-  const cellM2 = (mmPerCell / 1000) ** 2;
-  const areaM2 = (b.maxX - b.minX) * (b.maxY - b.minY) * cellM2;
-  const needM = areaM2 * NEED_PER_M2;
-  let haveHm = 0;
-  let haveVm = 0;
-  for (const run of detectShearWallRuns(floor, mmPerCell)) {
-    if (run.kind === "h") {
-      haveHm += run.length / 1000;
-    } else {
-      haveVm += run.length / 1000;
-    }
-  }
-  // Have > 0 required too: a floor must actually brace, not just "not exceed".
-  const okH = haveHm > 0 && haveHm >= needM;
-  const okV = haveVm > 0 && haveVm >= needM;
-  return { areaM2, haveHm, haveVm, needM, okH, okV };
-}
-
-export interface InterFloorWallBalance {
-  /** Index of the LOWER floor in the compared pair (upper = lowerIndex+1) */
-  lowerIndex: number;
-  /** Lower - upper shear-wall length (m), per direction. Positive = the lower
-   * floor has LESS than the floor above = under-braced down there. */
-  hDeficit: number;
-  vDeficit: number;
-  hLower: number;
-  vLower: number;
-  hUpper: number;
-  vUpper: number;
-  ok: boolean;
-}
-
-/**
- * 上下壁量バランス: lateral load accumulates downward, so each lower floor must
- * carry at least as much shear wall (per direction) as the floor above it.
- * This is the real vertical continuity check — unlike wall-position alignment,
- * which only needs diaphragm/beam transfer. Returns one entry per adjacent pair
- * (floors must be ordered bottom-up).
- */
-export function computeInterFloorWallBalance(
-  floors: FloorPlan[],
-  mmPerCell?: number,
-): InterFloorWallBalance[] {
-  const out: InterFloorWallBalance[] = [];
-  for (let i = 0; i + 1 < floors.length; i++) {
-    const lower = computeWallQuantity(floors[i], mmPerCell);
-    const upper = computeWallQuantity(floors[i + 1], mmPerCell);
-    const hDeficit = upper.haveHm - lower.haveHm;
-    const vDeficit = upper.haveVm - lower.haveVm;
-    out.push({
-      hDeficit,
-      hLower: lower.haveHm,
-      hUpper: upper.haveHm,
-      lowerIndex: i,
-      ok: hDeficit <= 0 && vDeficit <= 0,
-      vDeficit,
-      vLower: lower.haveVm,
-      vUpper: upper.haveVm,
-    });
-  }
-  return out;
-}
 
 export interface WallSuggestion {
   kind: "h" | "v";
@@ -114,12 +24,14 @@ export function suggestWallRun(
   if (!bounds) {
     return null;
   }
+  const { maxX, maxY, midX, midY, minX, minY } = bounds;
+
   const west = quadrant === "NW" || quadrant === "SW";
   const north = quadrant === "NW" || quadrant === "NE";
-  const x1 = west ? bounds.minX : bounds.midX;
-  const x2 = west ? bounds.midX : bounds.maxX;
-  const y1 = north ? bounds.minY : bounds.midY;
-  const y2 = north ? bounds.midY : bounds.maxY;
+  const x1 = west ? minX : midX;
+  const x2 = west ? midX : maxX;
+  const y1 = north ? minY : midY;
+  const y2 = north ? midY : maxY;
 
   let best: WallSuggestion | null = null;
 

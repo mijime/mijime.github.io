@@ -1,60 +1,116 @@
-import type { FloorPlan } from "../types";
-import {
-  computeInterFloorWallBalance,
-  computeWallQuantity,
-  type InterFloorWallBalance,
-  type WallQuantity,
-} from "./wall-quantity";
-import { computeQuadrantBalance, type FloorBalance } from "./quadrant-balance";
-import {
-  computeBalanceRatio,
-  computeEccentricity,
-  computePerimeterContinuity,
-  type BalanceMetrics,
-  type EccentricityMetrics,
-  type PerimeterMetric,
-} from "./structure-metrics";
+import type { Building, StructuralConditions } from "../types";
 import { computeFloorSupport, type FloorSupport } from "./floor-support";
+import {
+  computeSeismicShear,
+  computeStoryGeometries,
+  computeStoryWeights,
+  type StoryGeometry,
+  type StorySeismic,
+  type StoryWeight,
+} from "./loads";
+import { computeQuadrantBalance, type FloorBalance } from "./quadrant-balance";
 import { detectLoadPathBreaks, type LoadPathBreak } from "./shear-walls";
+import {
+  computeEccentricity,
+  computeRigidityRatios,
+  computeStoryDrifts,
+  computeStoryStiffnesses,
+  type Eccentricity,
+  type RigidityRatio,
+  type StoryDrift,
+  type StoryStiffness,
+} from "./stiffness";
+import {
+  normalizeStructuralConditions,
+  regionConditions,
+  type RegionConditions,
+} from "./structural-conditions";
+import { computeWallStrength, type WallStrength } from "./wall-strength";
+import { computeWallDemands, type WallDemand } from "./wall-demand";
 
-/**
- * One-stop structural indicator bundle for a floor (目安). The diagnostic panel
- * and the PNG export both build their readout from this single function, so the
- * per-metric caculation stays in one place.
- */
-export interface StructuralReport {
-  /** Index of this floor in `floors` (bottom-up), or -1 if not found */
+// 許容応力度計算（簡易）のレポート。壁量（地震力に対する必要壁量）・偏心率・
+// 剛性率・層間変形角を軸に、四分割・床支持・通りズレを参考値として同梱する。
+// 診断パネルと PNG 出力はこの1関数を唯一の出所とする。
+
+export interface FloorStress {
   floorIndex: number;
-  wallQuantity: WallQuantity;
+  geometry: StoryGeometry;
+  weight: StoryWeight;
+  seismic: StorySeismic;
+  strength: WallStrength;
+  /** 層剛性（X/Y の kN/m）。剛性率・変形角の根拠表示に使う */
+  stiffness: StoryStiffness;
+  /** 必要壁量（倍率換算長さ m、X/Y 共通） */
+  requiredMultiplierLengthM: number;
+  /** 倍率換算長さ 保有 >= 必要 */
+  wallOkH: boolean;
+  wallOkV: boolean;
+  /** 剛心・重心・偏心率（壁倍率は比で消えるため構法非依存） */
+  eccentricity: Eccentricity | null;
+  /** 壁ごとの負担せん断と検定比（ねじれ込み） */
+  wallDemands: WallDemand[];
+  rigidity: RigidityRatio | undefined;
+  drift: StoryDrift | undefined;
+  // ---- 参考指標 ----
   quadrant: FloorBalance;
-  balanceRatio: BalanceMetrics;
-  eccentricity: EccentricityMetrics | null;
-  perimeter: PerimeterMetric | null;
-  /** 上下壁量: this floor vs the one above (undefined when it is the top/only) */
-  interFloor: InterFloorWallBalance | undefined;
-  /** 床支持: this floor's deck supported by the floor below (undefined when ground) */
   support: FloorSupport | undefined;
-  /** 通りズレ whose demand is on this floor (wants support from the floor above) */
   breaksHere: LoadPathBreak[];
-  /** 通りズレ whose demand is on the floor above (wants support on this floor) */
   breaksBelow: LoadPathBreak[];
 }
 
-export function computeStructuralReport(floor: FloorPlan, floors: FloorPlan[]): StructuralReport {
-  const floorIndex = floors.findIndex((f) => f.id === floor.id);
-  const breaks = detectLoadPathBreaks(floors);
-  const breaksHere = floorIndex === -1 ? [] : breaks.filter((b) => b.floorIndex === floorIndex + 1);
-  const breaksBelow = floorIndex === -1 ? [] : breaks.filter((b) => b.floorIndex === floorIndex);
-  return {
-    balanceRatio: computeBalanceRatio(floor),
-    breaksBelow,
-    breaksHere,
-    eccentricity: computeEccentricity(floor),
-    floorIndex,
-    interFloor: computeInterFloorWallBalance(floors).find((b) => b.lowerIndex === floorIndex),
-    perimeter: computePerimeterContinuity(floor),
-    quadrant: computeQuadrantBalance(floor),
-    support: computeFloorSupport(floors).find((s) => s.floorIndex === floorIndex),
-    wallQuantity: computeWallQuantity(floor),
-  };
+export interface StructuralReport {
+  conditions: StructuralConditions;
+  region: RegionConditions;
+  floors: FloorStress[];
+}
+
+export function computeStructuralReport(building: Building): StructuralReport {
+  const conditions = normalizeStructuralConditions(building.structural);
+  const region = regionConditions(conditions.region);
+  const storyHeightM = conditions.storyHeightMm / 1000;
+
+  const geometries = computeStoryGeometries(building.floors, conditions);
+  const weights = computeStoryWeights(building, conditions);
+  const seismic = computeSeismicShear(building, conditions);
+  const stiffnesses = computeStoryStiffnesses(
+    building.floors,
+    conditions.construction,
+    storyHeightM,
+  );
+  const rigidity = computeRigidityRatios(stiffnesses);
+  const drifts = computeStoryDrifts(seismic, stiffnesses, geometries);
+  const supports = computeFloorSupport(building.floors);
+  const breaks = detectLoadPathBreaks(building.floors);
+
+  const floors: FloorStress[] = building.floors.map((floor, i) => {
+    const strength = computeWallStrength(floor, conditions.construction);
+    const eccentricity = computeEccentricity(floor);
+    const required = seismic[i]?.requiredMultiplierLengthM ?? 0;
+    return {
+      breaksBelow: breaks.filter((b) => b.floorIndex === i),
+      breaksHere: breaks.filter((b) => b.floorIndex === i + 1),
+      drift: drifts.find((d) => d.floorIndex === i),
+      eccentricity,
+      floorIndex: i,
+      geometry: geometries[i],
+      quadrant: computeQuadrantBalance(floor),
+      requiredMultiplierLengthM: required,
+      rigidity: rigidity.find((r) => r.floorIndex === i),
+      seismic: seismic[i],
+      stiffness: stiffnesses[i],
+      strength,
+      support: supports.find((s) => s.floorIndex === i),
+      wallDemands: computeWallDemands(
+        floor,
+        seismic[i]?.shearN ?? 0,
+        eccentricity,
+        conditions.construction,
+      ),
+      wallOkH: required > 0 && strength.hMultiplierLengthM >= required,
+      wallOkV: required > 0 && strength.vMultiplierLengthM >= required,
+      weight: weights[i],
+    };
+  });
+
+  return { conditions, floors, region };
 }

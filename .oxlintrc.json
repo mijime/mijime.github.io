@@ -3,12 +3,8 @@
   "plugins": ["typescript", "unicorn", "oxc"],
   "categories": {
     "correctness": "error",
-    "perf": "error",
-    "style": "error",
-    "nursery": "error",
-    "pedantic": "error",
     "suspicious": "error",
-    "restriction": "error"
+    "perf": "error"
   },
   "ignorePatterns": ["dist", "**/*.gen.ts"],
   "rules": {
@@ -32,6 +28,10 @@
     "eslint/func-style": "off",
     "eslint/sort-keys": "off",
     "eslint/no-magic-numbers": "off",
+    "eslint/one-var": "off",
+    "eslint/sort-vars": "off",
+    "eslint/max-classes-per-file": "off",
+    "unicorn/consistent-function-scoping": "off",
     "eslint/curly": "off",
     "unicorn/prefer-global-this": "off",
     "typescript/array-type": "off",

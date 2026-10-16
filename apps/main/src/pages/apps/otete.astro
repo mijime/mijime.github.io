@@ -1,0 +1,47 @@
+---
+// Otete is a full-screen app, so this page deliberately does NOT use BaseLayout:
+//
+//  - the site header (logo + dark-mode toggle) sat on top of the app's own
+//    Header, and the app already has its own theme toggle, so the two overlapped
+//    And duplicated each other;
+//  - the viewport has to be the app's own: `viewport-fit=cover` so
+//    Env(safe-area-inset-*) works on notched phones, and no pinch-zoom, because
+//    A toddler's fingers are not precise.
+//
+// The app owns the screen; /apps/ is how you get in and out of it.
+import { App as OteteApp } from "@mijime/otete";
+import "@mijime/otete/index.css";
+---
+
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"
+    />
+    <meta name="theme-color" content="#fffdf6" id="tmc" />
+    <title>otete</title>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <!-- Set the app's theme before first paint to avoid a flash. -->
+    <script is:inline>
+      (() => {
+        const stored = (() => {
+          try {
+            return localStorage.getItem("kids-theme");
+          } catch {
+            return null;
+          }
+        })();
+        const dark = stored
+          ? stored === "dark"
+          : matchMedia("(prefers-color-scheme: dark)").matches;
+        document.documentElement.dataset.theme = dark ? "dark" : "light";
+      })();
+    </script>
+  </head>
+  <body>
+    <OteteApp client:only="react" />
+  </body>
+</html>

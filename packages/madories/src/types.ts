@@ -76,6 +76,24 @@ export interface FloorPlan {
 export interface Building {
   cellSize: number;
   floors: FloorPlan[];
+  /** 構造計算の前提条件 */
+  structural: StructuralConditions;
+}
+
+/** 木造の構法プリセット。壁倍率の既定を決める。 */
+export type ConstructionPreset = "post_and_beam_panel" | "post_and_beam_brace" | "wood_frame";
+
+/**
+ * 許容応力度計算の前提条件。すべて UI から入力でき、未設定の項目は
+ * DEFAULT_STRUCTURAL_CONDITIONS で補完される（後方互換）。
+ */
+export interface StructuralConditions {
+  /** 都道府県（地震地域係数・垂直積雪量・基準風速の代表値を引く） */
+  region: string;
+  /** 構法プリセット（壁倍率の既定） */
+  construction: ConstructionPreset;
+  /** 階高（mm、全階共通） */
+  storyHeightMm: number;
 }
 
 export interface Plan {

@@ -12,7 +12,7 @@ import { drawTatamiCells } from "../../draw/draw-tatami";
 import { normalizeSelection } from "../../floor/clipboard-logic";
 import { detectRooms, drawRoomLabels } from "../../floor/room-detection";
 import { ITEM_DEF_MAP } from "../../items";
-import type { EdgeRef, FloorPlan, Item } from "../../types";
+import type { EdgeRef, FloorPlan, Item, StructuralConditions } from "../../types";
 import { floorTypeToColor } from "../tool-mode";
 import type { BrushSize, ToolMode } from "../tool-mode";
 import type { SelectionRef, ViewRef } from "./types";
@@ -33,6 +33,7 @@ interface Props {
   brush: BrushSize;
   shearCheck: boolean;
   shearLayers: ShearLayerFlags;
+  structural: StructuralConditions;
 }
 
 function cssVar(name: string): string {
@@ -164,6 +165,7 @@ export function useCanvasDraw(props: Props): {
     brush,
     shearCheck,
     shearLayers,
+    structural,
   } = props;
 
   const ghostFloorsRef = useRef<FloorPlan[]>(ghostFloors);
@@ -314,7 +316,7 @@ export function useCanvasDraw(props: Props): {
     }
 
     if (shearCheck) {
-      drawShearCheck(ctx, floor, floors, cellSize, shearLayers);
+      drawShearCheck(ctx, floor, floors, cellSize, shearLayers, structural);
     }
 
     if (wallPreview && wallPreview.length > 0) {
@@ -367,7 +369,7 @@ export function useCanvasDraw(props: Props): {
         drawDynamic();
       }, 1000);
     },
-    [floors, floor, cellSize, darkMode, tool, brush, shearCheck, shearLayers],
+    [floors, floor, cellSize, darkMode, tool, brush, shearCheck, shearLayers, structural],
   );
 
   useEffect(() => {

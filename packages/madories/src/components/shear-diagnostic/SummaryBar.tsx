@@ -1,48 +1,29 @@
-import type { StructuralReport } from "../../floor/structural-report";
+import type { FloorStress } from "../../floor/structural-report";
 import { Chip } from "./primitives";
 
-/** 8 つの簡易チェックを OK/NG で一覧した、一目で分かるサマリ。 */
-export function SummaryBar({ report }: { report: StructuralReport }) {
-  const {
-    wallQuantity,
-    quadrant,
-    balanceRatio,
-    eccentricity,
-    perimeter,
-    interFloor,
-    support,
-    breaksHere,
-    breaksBelow,
-  } = report;
+/** 許容応力度（簡易）チェックを OK/NG で一覧したサマリ。 */
+export function SummaryBar({ stress }: { stress: FloorStress }) {
+  const { eccentricity, rigidity, drift, quadrant, support, breaksHere, breaksBelow } = stress;
 
-  const chips: {
-    label: string;
-    ok: boolean | undefined;
-    count: number;
-  }[] = [
+  const chips: { label: string; ok: boolean | undefined; count: number }[] = [
+    { count: 0, label: "壁量", ok: stress.wallOkH && stress.wallOkV },
+    { count: 0, label: "偏心率", ok: eccentricity?.ok },
+    { count: 0, label: "剛性率", ok: rigidity ? rigidity.okH && rigidity.okV : undefined },
+    { count: 0, label: "変形角", ok: drift ? drift.okH && drift.okV : undefined },
     {
-      label: "壁量",
-      ok: wallQuantity.okH && wallQuantity.okV,
-      count: 0,
-    },
-    {
+      count: quadrant.quadrants.filter((q) => !q.ok).length,
       label: "四分割",
       ok: quadrant.quadrants.length > 0 ? quadrant.quadrants.every((q) => q.ok) : undefined,
-      count: quadrant.quadrants.filter((q) => !q.ok).length,
     },
-    { label: "縦横比", ok: balanceRatio.ok, count: 0 },
-    { label: "偏心率", ok: eccentricity?.ok, count: 0 },
-    { label: "外周", ok: perimeter?.ok, count: 0 },
-    { label: "上下壁量", ok: interFloor?.ok, count: 0 },
     {
+      count: support?.overCount ?? 0,
       label: "床支持",
       ok: support ? support.overCount === 0 : undefined,
-      count: support?.overCount ?? 0,
     },
     {
+      count: breaksHere.length + breaksBelow.length,
       label: "通りズレ",
       ok: breaksHere.length === 0 && breaksBelow.length === 0,
-      count: breaksHere.length + breaksBelow.length,
     },
   ];
 

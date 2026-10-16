@@ -7,7 +7,14 @@ import {
   useState,
 } from "react";
 import { exportFloorPng } from "../draw/export";
-import type { CopiedRegion, EdgeRef, FloorPlan, FloorType, WallType } from "../types";
+import type {
+  CopiedRegion,
+  EdgeRef,
+  FloorPlan,
+  FloorType,
+  StructuralConditions,
+  WallType,
+} from "../types";
 import { contentArrayRect } from "../floor/frame";
 import { useCanvasDraw } from "./hooks/use-canvas-draw";
 import { usePointerHandlers } from "./hooks/use-pointer-handlers";
@@ -89,6 +96,7 @@ interface Props {
   shearCheck: boolean;
   floors: FloorPlan[];
   shearLayers: ShearLayerFlags;
+  structural: StructuralConditions;
   onSetWalls: (edges: EdgeRef[], wallType: WallType) => void;
   onSetFloorType: (x: number, y: number, floorType: FloorType | null) => void;
   onFillRoom: (x: number, y: number) => void;
@@ -149,6 +157,7 @@ export const FloorCanvas = forwardRef<FloorCanvasHandle, Props>((props, ref) => 
     shearCheck,
     floors,
     shearLayers,
+    structural: props.structural,
   });
 
   const {

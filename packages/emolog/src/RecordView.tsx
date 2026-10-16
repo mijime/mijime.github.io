@@ -1,6 +1,20 @@
 import { useState, useRef, useEffect } from "react";
 import "emoji-picker-element";
 
+// emoji-picker-element のカスタム要素を JSX で書けるようにする。
+// react-jsx の JSX 名前空間は react 側にあるので、そこを拡張する（型は緩めで十分）。
+declare module "react" {
+  namespace JSX {
+    interface IntrinsicElements {
+      "emoji-picker": {
+        ref?: unknown;
+        class?: string;
+        [attribute: string]: unknown;
+      };
+    }
+  }
+}
+
 const MAX_FAV = 12;
 
 interface RecordViewProps {

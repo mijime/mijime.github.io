@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { useFrame } from "@react-three/fiber";
+import { useFrame, type ThreeEvent } from "@react-three/fiber";
 import { Html } from "@react-three/drei";
 import { useTranslation } from "react-i18next";
 import * as THREE from "three";
@@ -181,7 +181,7 @@ const Platform = React.memo(
       <group position={[pos.x, 0, pos.z]}>
         <mesh
           position={[0, 0.3, 0]}
-          onClick={(ev) => {
+          onClick={(ev: ThreeEvent<MouseEvent>) => {
             ev.stopPropagation();
             onCountryClick(countryKey);
           }}

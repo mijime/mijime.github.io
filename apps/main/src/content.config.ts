@@ -1,6 +1,6 @@
-import { defineCollection } from "astro:content"
-import { glob } from "astro/loaders"
-import { blogSchema } from "@mijime/blog"
+import { defineCollection } from "astro:content";
+import { glob } from "astro/loaders";
+import { blogSchema } from "@mijime/blog";
 
 const blog = defineCollection({
   loader: glob({
@@ -8,6 +8,6 @@ const blog = defineCollection({
     pattern: "**/*.md",
   }),
   schema: blogSchema,
-})
+});
 
-export const collections = { blog }
+export const collections = { blog };
