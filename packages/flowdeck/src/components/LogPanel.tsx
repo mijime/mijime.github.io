@@ -1,0 +1,58 @@
+import { ScrollText } from "lucide-react";
+import type { LogEntry } from "../engine/types";
+
+export const LOG_TONE: Record<LogEntry["kind"], string> = {
+  info: "text-(--mid)",
+  good: "text-emerald-700 dark:text-emerald-400",
+  bad: "text-red-600 dark:text-red-400",
+};
+
+export function groupLogByDay(log: LogEntry[]): { day: number; entries: LogEntry[] }[] {
+  const groups: { day: number; entries: LogEntry[] }[] = [];
+  for (const entry of log) {
+    const last = groups.at(-1);
+    if (last && last.day === entry.day) {
+      last.entries.push(entry);
+    } else {
+      groups.push({ day: entry.day, entries: [entry] });
+    }
+  }
+  return groups;
+}
+
+export function LogPanel({ log }: { log: LogEntry[] }) {
+  const groups = groupLogByDay(log).slice(-2).toReversed();
+
+  return (
+    <section className="rounded-sm border border-(--border) bg-(--paper) p-2">
+      <div className="flex items-center justify-between">
+        <h2 className="serif flex items-center gap-1 text-[12px] font-semibold">
+          <ScrollText size={11} /> ログ
+        </h2>
+        <span className="text-[8px] text-(--mid)">{log.length}件</span>
+      </div>
+      <div className="mt-1 max-h-[148px] space-y-1.5 overflow-y-auto pr-0.5">
+        {groups.map((group) => (
+          <div key={group.day}>
+            <div className="sticky top-0 flex items-center gap-1 bg-(--paper) py-0.5 text-[8px] font-semibold text-(--ink)">
+              <span className="h-px flex-1 bg-(--border)" />
+              Day {group.day}
+              <span className="h-px flex-1 bg-(--border)" />
+            </div>
+            <ul className="space-y-0.5">
+              {group.entries.toReversed().map((entry, index) => (
+                <li
+                  key={`${entry.day}-${index}-${entry.message}`}
+                  className={`text-[8px] leading-snug ${LOG_TONE[entry.kind]}`}
+                >
+                  {entry.message}
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
+        {log.length === 0 && <p className="text-[8px] text-(--mid)">まだログはありません。</p>}
+      </div>
+    </section>
+  );
+}

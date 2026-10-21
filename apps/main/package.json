@@ -18,6 +18,7 @@
     "@astrojs/react": "^7.1.0",
     "@mijime/blog": "workspace:*",
     "@mijime/emolog": "workspace:*",
+    "@mijime/flowdeck": "workspace:*",
     "@mijime/lords-of-the-stigmata": "workspace:*",
     "@mijime/madories": "workspace:*",
     "@mijime/mintodo": "workspace:*",

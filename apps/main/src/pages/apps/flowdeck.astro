@@ -1,0 +1,9 @@
+---
+import { App as FlowdeckApp } from "@mijime/flowdeck";
+import BaseLayout from "../../layouts/base-layout.astro";
+import "@mijime/flowdeck/index.css";
+---
+
+<BaseLayout title="flowdeck">
+  <FlowdeckApp client:only="react" />
+</BaseLayout>
