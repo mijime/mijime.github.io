@@ -1,0 +1,217 @@
+import type { CardEffect, TaskDef, TaskPenalty, TaskReward } from "../engine/types";
+
+const r = (type: TaskReward["type"], level: number, effect?: CardEffect): TaskReward => ({
+  type,
+  level,
+  effect,
+});
+
+function task(
+  id: string,
+  title: string,
+  design: number,
+  dev: number,
+  test: number,
+  score: number,
+  deadline: number,
+  reward: TaskReward,
+): TaskDef {
+  return {
+    id,
+    title,
+    requirements: { design, dev, test },
+    score,
+    deadline: deadline + 1,
+    reward,
+  };
+}
+
+function incident(
+  id: string,
+  title: string,
+  design: number,
+  dev: number,
+  test: number,
+  score: number,
+  deadline: number,
+  reward: TaskReward,
+  penalty: TaskPenalty = { kind: "allPlayersDebt", amount: 2 },
+): TaskDef {
+  return {
+    ...task(id, title, design, dev, test, score, deadline, reward),
+    kind: "incident",
+    penalty,
+  };
+}
+
+/**
+ * スコアと報酬はタスクごとに印刷。
+ * 高スコアは弱いカード、低スコアの改善タスクは強いカード。
+ */
+export const TASK_DEFS: TaskDef[] = [
+  task("search", "商品検索の高速化", 8, 8, 4, 3, 4, r("dev", 3)),
+  task("payment", "決済手段の追加", 10, 10, 6, 5, 5, r("design", 1)),
+  task("signup", "会員登録の簡略化", 5, 5, 3, 3, 3, r("design", 2)),
+  task("favorite", "お気に入り機能", 4, 5, 2, 2, 3, r("dev", 3)),
+  task("cart", "カートの保存", 4, 4, 2, 2, 3, r("dev", 3)),
+  task("review", "レビュー投稿", 4, 5, 3, 3, 3, r("design", 2)),
+  task("recommend", "レコメンド表示", 10, 9, 5, 4, 5, r("dev", 2)),
+  task("shipping", "配送状況の通知", 5, 5, 3, 2, 3, r("dev", 3)),
+  task("i18n", "多言語対応", 12, 10, 6, 5, 5, r("design", 1)),
+  task("a11y", "アクセシビリティ改善", 4, 4, 3, 2, 3, r("design", 3)),
+  task("export", "購入履歴のエクスポート", 3, 5, 2, 2, 3, r("dev", 3)),
+  task("dashboard", "売上ダッシュボード", 8, 7, 4, 4, 4, r("design", 2)),
+  task("coupon", "クーポン適用", 7, 7, 4, 3, 4, r("dev", 3)),
+  task("guest", "ゲスト購入", 4, 5, 3, 3, 3, r("dev", 2)),
+  task("reset", "パスワード再発行", 3, 3, 2, 1, 3, r("design", 3)),
+  task("notify", "通知設定", 4, 5, 2, 2, 3, r("dev", 3)),
+  task("points", "ポイント機能", 7, 8, 4, 3, 4, r("dev", 3)),
+  task("subscription", "サブスクリプション", 9, 9, 5, 4, 5, r("design", 2)),
+  task("inventory", "在庫連携", 8, 9, 4, 3, 4, r("dev", 3)),
+  task("returns", "返品フロー", 6, 7, 4, 3, 4, r("design", 3)),
+  task("auto-test", "自動テスト整備", 6, 6, 6, 0, 4, r("test", 5, { kind: "draw", amount: 1 })),
+  task("refactor", "リファクタリング", 5, 9, 4, 0, 4, r("dev", 5, { kind: "action", amount: 1 })),
+  task(
+    "design-standard",
+    "設計標準化",
+    9,
+    5,
+    4,
+    0,
+    4,
+    r("design", 5, { kind: "boost", amount: 1 }),
+  ),
+  task("ci", "CI 整備", 7, 7, 5, 0, 4, r("test", 5, { kind: "draw", amount: 1 })),
+  task(
+    "docs",
+    "ドキュメント整備",
+    6,
+    5,
+    4,
+    0,
+    4,
+    r("design", 5, { kind: "debt-clean", amount: 1 }),
+  ),
+  task("onboarding", "オンボーディング改善", 5, 5, 3, 3, 3, r("design", 2)),
+  task("alerts", "監視アラート", 6, 7, 4, 3, 4, r("dev", 2)),
+  task("search-filter", "検索フィルタ", 4, 5, 3, 2, 3, r("dev", 3)),
+  task("profile", "プロフィール編集", 4, 5, 2, 2, 3, r("design", 3)),
+  task("wishlist", "ほしいものリスト", 4, 4, 2, 2, 3, r("dev", 3)),
+  task("checkout", "チェックアウト改善", 6, 6, 4, 3, 4, r("design", 2)),
+  task("tax", "税計算", 7, 6, 4, 3, 4, r("dev", 2)),
+  task("fraud", "不正検知", 10, 9, 5, 4, 5, r("dev", 1)),
+  task("analytics", "行動分析", 9, 8, 5, 4, 5, r("design", 1)),
+  task("mobile", "モバイル最適化", 7, 6, 4, 3, 4, r("dev", 2)),
+  task("offline", "オフライン対応", 6, 7, 4, 3, 4, r("dev", 2)),
+  task("cache", "キャッシュ改善", 4, 6, 3, 2, 3, r("dev", 3)),
+  task("logging", "ログ基盤", 6, 7, 4, 0, 4, r("dev", 5, { kind: "draw", amount: 1 })),
+  task("observability", "可観測性", 7, 7, 5, 0, 4, r("test", 5, { kind: "draw", amount: 1 })),
+  task("security", "セキュリティ強化", 9, 8, 5, 4, 5, r("design", 1)),
+  task("rate-limit", "レート制限", 6, 7, 4, 3, 4, r("dev", 2)),
+  task("backup", "バックアップ", 4, 5, 3, 2, 3, r("dev", 3)),
+  task("migration", "データ移行", 9, 9, 5, 4, 5, r("dev", 1)),
+  task("api", "API整備", 6, 7, 4, 3, 4, r("design", 2)),
+  task("a11y-audit", "アクセシビリティ監査", 4, 4, 3, 2, 3, r("design", 3)),
+  task("seo", "SEO改善", 4, 4, 2, 2, 3, r("design", 3)),
+  task("retention", "継続率改善", 7, 6, 4, 3, 4, r("design", 2)),
+  task("pricing", "料金プラン", 7, 6, 4, 3, 4, r("design", 2)),
+  task("support", "サポート導線", 5, 5, 3, 2, 3, r("dev", 3)),
+  task("release", "リリース自動化", 6, 6, 5, 0, 4, r("test", 5, { kind: "action", amount: 1 })),
+
+  // トークンで表現できる効果タスク
+  task(
+    "scope-cut",
+    "スコープ縮小",
+    5,
+    5,
+    3,
+    0,
+    4,
+    r("design", 3, { kind: "requirement", amount: 1 }),
+  ),
+  task(
+    "deadline-negotiation",
+    "期限交渉",
+    4,
+    4,
+    3,
+    0,
+    4,
+    r("design", 3, { kind: "deadline", amount: 1 }),
+  ),
+  task("automation", "自動化", 6, 6, 5, 0, 4, r("test", 5, { kind: "draw", amount: 2 })),
+  task("pair-programming", "ペアプロ", 5, 6, 3, 0, 4, r("dev", 4, { kind: "action", amount: 1 })),
+  task(
+    "debt-settlement",
+    "負債返済",
+    5,
+    5,
+    3,
+    0,
+    4,
+    r("design", 4, { kind: "debt-clean", amount: 2 }),
+  ),
+  task(
+    "design-review",
+    "設計レビュー",
+    5,
+    4,
+    3,
+    0,
+    4,
+    r("design", 4, { kind: "requirement", amount: 1 }),
+  ),
+  task("test-automation", "テスト自動化", 5, 5, 5, 0, 4, r("test", 4, { kind: "draw", amount: 1 })),
+  task(
+    "debt-compression",
+    "負債圧縮",
+    4,
+    5,
+    3,
+    0,
+    4,
+    r("dev", 4, { kind: "debt-clean", amount: 2 }),
+  ),
+  task(
+    "schedule-buffer",
+    "日程バッファ",
+    4,
+    4,
+    3,
+    0,
+    4,
+    r("design", 3, { kind: "deadline", amount: 1 }),
+  ),
+  task("pair-testing", "ペアテスト", 5, 5, 4, 0, 4, r("test", 4, { kind: "action", amount: 1 })),
+
+  // インシデントタスク: 期限切れで全員に負債
+  incident("incident-prod", "本番障害", 4, 8, 4, 2, 2, r("dev", 3), {
+    kind: "allPlayersDebt",
+    amount: 1,
+  }),
+  incident("incident-security", "セキュリティ脆弱性", 3, 6, 6, 2, 2, r("test", 3), {
+    kind: "teamScore",
+    amount: 3,
+  }),
+  incident("incident-data", "データ不整合", 6, 6, 3, 2, 2, r("design", 3), {
+    kind: "discardHand",
+    target: "owner",
+  }),
+  incident("incident-outage", "API停止", 2, 7, 3, 1, 1, r("dev", 2), {
+    kind: "loseAction",
+    target: "all",
+    amount: 1,
+  }),
+  incident("incident-support", "問い合わせ急増", 3, 5, 3, 1, 1, r("design", 2), {
+    kind: "deadlineToken",
+    amount: 1,
+  }),
+  incident("incident-release", "リリース判定", 4, 4, 5, 2, 2, r("test", 2), {
+    kind: "ownerDebt",
+    amount: 2,
+  }),
+];
+
+export const TASK_BY_ID: Record<string, TaskDef> = Object.fromEntries(
+  TASK_DEFS.map((t) => [t.id, t]),
+);
