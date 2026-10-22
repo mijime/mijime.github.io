@@ -142,6 +142,10 @@ export function HelpModal({ rules, onClose }: { rules: TeamRules; onClose: () =>
             <ul className="mt-1 list-disc space-y-0.5 pl-5 text-(--mid)">
               <li>手札のカードをクリックして選択</li>
               <li>光っているタスクをクリックして配置</li>
+              <li>
+                miトークンを持っていると手札バーの「mi N 使う」が押せる。押すと配置モードになり、
+                光ったタスクをクリックでレベル1作業を置く（アクション消費なし）
+              </li>
               <li>共有ボードなので、チームメイトのタスクにもカードを置ける</li>
               <li>「パス」で残りアクションを放棄。全員の手番が終わると日末</li>
               <li>アクションが0になると、その日の手番は自動で終了</li>

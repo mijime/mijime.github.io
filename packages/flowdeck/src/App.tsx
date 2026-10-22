@@ -17,6 +17,7 @@ import { useGame } from "./store";
 export function App() {
   const { state, dispatch } = useGame();
   const [selectedCardId, setSelectedCardId] = useState<number | null>(null);
+  const [tokenMode, setTokenMode] = useState(false);
   const [aiTab, setAiTab] = useState("p2");
   const [helpOpen, setHelpOpen] = useState(false);
   const [newGameOpen, setNewGameOpen] = useState(false);
@@ -39,7 +40,12 @@ export function App() {
 
   useEffect(() => {
     setSelectedCardId(null);
+    setTokenMode(false);
   }, [handKey, state.phase, state.day]);
+
+  useEffect(() => {
+    if (selectedCardId !== null) setTokenMode(false);
+  }, [selectedCardId]);
 
   useEffect(() => {
     if (state.day === previousDay.current) return;
@@ -85,7 +91,12 @@ export function App() {
       <main className="game-table mx-auto mt-2 max-w-[1440px] px-2 pb-4">
         <div className="grid gap-2 lg:grid-cols-[minmax(0,1fr)_360px]">
           <div className="min-w-0">
-            <TeamBoard state={state} dispatch={dispatch} selectedCard={selectedCard} />
+            <TeamBoard
+              state={state}
+              dispatch={dispatch}
+              selectedCard={selectedCard}
+              tokenMode={tokenMode}
+            />
           </div>
           <aside className="min-w-0 space-y-2">
             <TeamPanel state={state} aiTab={aiTab} onSelectAi={setAiTab} />
@@ -99,6 +110,11 @@ export function App() {
         dispatch={dispatch}
         selectedCardId={selectedCardId}
         onSelect={setSelectedCardId}
+        tokenMode={tokenMode}
+        onToggleTokenMode={() => {
+          setSelectedCardId(null);
+          setTokenMode((value) => !value);
+        }}
       />
       {dayBanner !== null && (
         <DayTransition key={dayBanner} day={dayBanner} totalDays={state.totalDays} />

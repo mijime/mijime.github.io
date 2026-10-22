@@ -1,5 +1,5 @@
 import type { Dispatch } from "react";
-import { Lock } from "lucide-react";
+import { Lock, Sparkles } from "lucide-react";
 import type { Action, CardInstance, GameState, TaskCard } from "../engine/types";
 import { taskContributions, taskSum } from "../engine/metrics";
 import {
@@ -26,6 +26,7 @@ interface Props {
   dispatch: Dispatch<Action>;
   selectedCard: CardInstance | null;
   compact?: boolean;
+  tokenMode?: boolean;
 }
 
 function DeadlinePips({ task }: { task: TaskCard }) {
@@ -81,7 +82,14 @@ function Requirement({
   );
 }
 
-export function TaskCardView({ state, task, dispatch, selectedCard, compact = false }: Props) {
+export function TaskCardView({
+  state,
+  task,
+  dispatch,
+  selectedCard,
+  compact = false,
+  tokenMode = false,
+}: Props) {
   const target = targetTypeForLane(task);
   const canTarget = selectedCard !== null && canPlayCardOnTask(selectedCard, task);
   const owner = task.ownerId ? state.players.find((player) => player.id === task.ownerId) : null;
@@ -94,18 +102,27 @@ export function TaskCardView({ state, task, dispatch, selectedCard, compact = fa
   const isDone = task.lane === "done";
   const human = state.players.find((player) => player.isHuman);
   const canUseMi = state.phase === "human" && target !== null && (human?.tokens.mi ?? 0) > 0;
+  const tokenPlacing = tokenMode && canUseMi;
 
   return (
     <article
       onClick={() => {
+        if (tokenPlacing) {
+          dispatch({ type: "USE_TOKEN", token: "mi", taskId: task.id });
+          return;
+        }
         if (canTarget && selectedCard) {
           dispatch({ type: "PLAY_CARD", cardId: selectedCard.id, taskId: task.id });
         }
       }}
       className={`flow-card flow-card-in rounded-sm border-t-[3px] p-1.5 ${
         ownerTone?.border ?? "border-t-(--border)"
-      } ${canTarget ? "cursor-pointer ring-2 ring-(--terra)/60" : ""}`}
-      title={canTarget ? "選択中のカードを置く" : undefined}
+      } ${tokenPlacing ? "cursor-pointer ring-2 ring-(--terra)" : ""} ${
+        canTarget && !tokenPlacing ? "cursor-pointer ring-2 ring-(--terra)/60" : ""
+      }`}
+      title={
+        tokenPlacing ? "miトークンをここに置く" : canTarget ? "選択中のカードを置く" : undefined
+      }
     >
       <div className="flex items-start gap-1">
         <h3
@@ -125,14 +142,24 @@ export function TaskCardView({ state, task, dispatch, selectedCard, compact = fa
               event.stopPropagation();
               dispatch({ type: "USE_TOKEN", token: "mi", taskId: task.id });
             }}
-            className="shrink-0 rounded-sm border border-(--terra)/40 bg-(--terra)/10 px-0.5 text-[6px] font-semibold text-(--terra) hover:bg-(--terra)/20"
+            className={`inline-flex shrink-0 items-center gap-0.5 rounded-sm border px-1 py-0.5 text-[7px] font-semibold transition-colors ${
+              tokenMode
+                ? "border-(--terra) bg-(--terra)/25 text-(--terra)"
+                : "border-(--terra)/40 bg-(--terra)/10 text-(--terra) hover:bg-(--terra)/20"
+            }`}
             title="miトークンをこのレーンにレベル1作業として置く（アクション消費なし）"
           >
-            mi+1
+            <Sparkles size={7} /> miを置く
           </button>
         )}
         <span className="shrink-0 text-[9px] font-semibold text-(--terra)">+{task.score}</span>
       </div>
+
+      {tokenPlacing && (
+        <p className="mt-1 flex items-center gap-1 rounded-sm border border-(--terra)/40 bg-(--terra)/10 px-1 py-0.5 text-[8px] font-medium text-(--terra)">
+          <Sparkles size={8} /> クリックでmiトークンを配置（アクション消費なし）
+        </p>
+      )}
 
       <div className="mt-0.5 flex flex-wrap items-center gap-1 text-[8px] text-(--mid)">
         {!compact && <span>{taskOwnerName(state, task)}</span>}

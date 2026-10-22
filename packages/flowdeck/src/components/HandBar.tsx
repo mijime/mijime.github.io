@@ -17,6 +17,8 @@ interface Props {
   dispatch: Dispatch<Action>;
   selectedCardId: number | null;
   onSelect: (id: number | null) => void;
+  tokenMode: boolean;
+  onToggleTokenMode: () => void;
 }
 
 function HandCard({
@@ -80,11 +82,20 @@ function HandCard({
   );
 }
 
-export function HandBar({ state, dispatch, selectedCardId, onSelect }: Props) {
+export function HandBar({
+  state,
+  dispatch,
+  selectedCardId,
+  onSelect,
+  tokenMode,
+  onToggleTokenMode,
+}: Props) {
   const human = state.players.find((player) => player.isHuman) ?? state.players[0];
   if (!human) return null;
   const isHumanTurn = state.phase === "human";
   const selected = human.hand.find((card) => card.id === selectedCardId) ?? null;
+  const miCount = human.tokens.mi ?? 0;
+  const canUseMi = isHumanTurn && miCount > 0;
 
   return (
     <footer className="flow-hand game-hand">
@@ -95,9 +106,25 @@ export function HandBar({ state, dispatch, selectedCardId, onSelect }: Props) {
             <span className="font-medium text-(--ink)">手札 {human.hand.length}</span>
             <span>山 {human.deck.length}</span>
             <span>捨 {human.discard.length}</span>
-            <span className="inline-flex items-center gap-0.5 rounded-sm border border-(--terra)/30 px-1 text-(--terra)">
-              <Sparkles size={9} /> mi {human.tokens.mi ?? 0}
-            </span>
+            <button
+              type="button"
+              disabled={!canUseMi}
+              aria-pressed={tokenMode}
+              onClick={onToggleTokenMode}
+              title={
+                canUseMi
+                  ? "miトークンを置くタスクを選ぶ（アクション消費なし）"
+                  : "miトークンを持っていません"
+              }
+              className={`inline-flex items-center gap-0.5 rounded-sm border px-1 transition-colors disabled:cursor-not-allowed disabled:opacity-45 ${
+                tokenMode
+                  ? "border-(--terra) bg-(--terra)/20 font-medium text-(--terra)"
+                  : "border-(--terra)/30 text-(--terra) hover:bg-(--terra)/10"
+              }`}
+            >
+              <Sparkles size={9} /> mi {miCount}
+              {miCount > 0 && <span className="ml-0.5">{tokenMode ? "選択中" : "使う"}</span>}
+            </button>
           </div>
           <div className="flex items-center gap-1 text-[9px] text-(--mid)">
             <span className="font-medium text-(--ink)">アクション</span>
@@ -130,31 +157,51 @@ export function HandBar({ state, dispatch, selectedCardId, onSelect }: Props) {
         </div>
 
         <div className="mt-1.5 flex flex-wrap items-center gap-2 rounded-sm border border-(--border)/70 bg-(--paper) px-2 py-1">
-          <span className="text-[9px] text-(--mid)">
-            {selected ? (
-              <>
-                選択中: <strong className="text-(--ink)">{cardTitle(selected)}</strong>
-              </>
-            ) : (
-              "手札からカードを選択"
-            )}
-          </span>
-          <button
-            type="button"
-            disabled={!isHumanTurn || !selected || human.actionsLeft <= 0}
-            onClick={() => {
-              if (!selected) return;
-              dispatch({ type: "DISCARD_CARD", cardId: selected.id });
-              onSelect(null);
-            }}
-            title="選択中のカードを1アクションでデッキから廃棄"
-            className="inline-flex items-center gap-1 rounded-sm border border-red-400/50 bg-red-500/10 px-2 py-0.5 text-[9px] font-medium text-red-700 transition-colors hover:bg-red-500/20 disabled:cursor-not-allowed disabled:opacity-35 dark:text-red-300"
-          >
-            <Trash2 size={11} /> 廃棄（1アクション）
-          </button>
-          <span className="ml-auto text-[8px] text-(--mid)">
-            1アクションずつ順番に行動。パスすると残りを放棄
-          </span>
+          {tokenMode ? (
+            <>
+              <span className="inline-flex items-center gap-1 text-[9px] font-medium text-(--terra)">
+                <Sparkles size={11} /> miトークン配置モード
+              </span>
+              <span className="text-[9px] text-(--mid)">
+                光っているタスクをクリックして、レベル1作業を置きます（アクション消費なし）
+              </span>
+              <button
+                type="button"
+                onClick={onToggleTokenMode}
+                className="rounded-sm border border-(--border) px-2 py-0.5 text-[9px] font-medium text-(--mid) transition-colors hover:border-(--terra) hover:text-(--terra)"
+              >
+                やめる
+              </button>
+            </>
+          ) : (
+            <>
+              <span className="text-[9px] text-(--mid)">
+                {selected ? (
+                  <>
+                    選択中: <strong className="text-(--ink)">{cardTitle(selected)}</strong>
+                  </>
+                ) : (
+                  "手札からカードを選択"
+                )}
+              </span>
+              <button
+                type="button"
+                disabled={!isHumanTurn || !selected || human.actionsLeft <= 0}
+                onClick={() => {
+                  if (!selected) return;
+                  dispatch({ type: "DISCARD_CARD", cardId: selected.id });
+                  onSelect(null);
+                }}
+                title="選択中のカードを1アクションでデッキから廃棄"
+                className="inline-flex items-center gap-1 rounded-sm border border-red-400/50 bg-red-500/10 px-2 py-0.5 text-[9px] font-medium text-red-700 transition-colors hover:bg-red-500/20 disabled:cursor-not-allowed disabled:opacity-35 dark:text-red-300"
+              >
+                <Trash2 size={11} /> 廃棄（1アクション）
+              </button>
+              <span className="ml-auto text-[8px] text-(--mid)">
+                1アクションずつ順番に行動。パスすると残りを放棄
+              </span>
+            </>
+          )}
         </div>
 
         <div className="flow-scroll mt-1.5 flex gap-1.5 overflow-x-auto pb-0.5">
