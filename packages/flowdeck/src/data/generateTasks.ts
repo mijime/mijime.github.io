@@ -1,4 +1,4 @@
-import { randInt } from "../engine/rng";
+import { randInt, shuffle } from "../engine/rng";
 import type { GameState, TaskDef, TaskKind } from "../engine/types";
 import { TASK_DEFS } from "./tasks";
 
@@ -175,6 +175,14 @@ export function generateTaskDefs(state: GameState): TaskDef[] {
       reward: { ...template.reward, level: rewardLevel },
       penalty: template.penalty ? { ...template.penalty } : undefined,
     });
+  }
+
+  const tokenCount = Math.round(defs.length * 0.1);
+  const eligible = defs.filter(
+    (task) => task.kind !== "incident" && task.score > 0 && !task.reward.effect,
+  );
+  for (const task of shuffle(state, eligible).slice(0, tokenCount)) {
+    task.reward.effect = { kind: "token", token: "mi", amount: 1 };
   }
 
   return defs;

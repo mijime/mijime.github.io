@@ -7,6 +7,7 @@ import {
   finishRound,
   playCard,
   pullTask,
+  useToken,
 } from "./core";
 import { randomSeed } from "./rng";
 import { createGame } from "./setup";
@@ -42,6 +43,12 @@ export function reduce(state: GameState, action: Action): GameState {
       if (s.phase !== "human" || s.activePlayerIndex !== 0) return state;
       if (!discardCard(s, s.humanId, action.cardId)) return state;
       finishAction(s);
+      return s;
+    }
+
+    case "USE_TOKEN": {
+      if (s.phase !== "human" || s.activePlayerIndex !== 0) return state;
+      if (!useToken(s, s.humanId, action.token, action.taskId)) return state;
       return s;
     }
 

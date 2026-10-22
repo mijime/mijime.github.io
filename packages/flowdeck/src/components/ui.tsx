@@ -8,6 +8,7 @@ import type {
   TaskPenalty,
 } from "../engine/types";
 import { playerById, taskSum } from "../engine/metrics";
+import { tokenDef } from "../data/tokens";
 import {
   AlertTriangle,
   CheckCircle2,
@@ -305,6 +306,9 @@ export function effectLabel(effect?: CardEffect): string | null {
   if (effect.kind === "boost") return `貢献+${effect.amount}`;
   if (effect.kind === "requirement") return `要件-${effect.amount}`;
   if (effect.kind === "deadline") return `納期+${effect.amount}`;
+  if (effect.kind === "token") {
+    return `${tokenDef(effect.token)?.short ?? effect.token}トークン+${effect.amount}`;
+  }
   return `負債除去${effect.amount}`;
 }
 

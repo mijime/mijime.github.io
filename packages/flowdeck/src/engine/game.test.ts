@@ -4,7 +4,8 @@ import { TASK_DEFS } from "../data/tasks";
 import { pushLog } from "./log";
 import { createGame } from "./setup";
 import { advanceTasks, createTask, expireTasks, refillOpen } from "./tasks";
-import { discardCard, endPlayerTurn, playCard, pullTask, startPlayerTurn } from "./core";
+import { discardCard, endPlayerTurn, playCard, pullTask, startPlayerTurn, useToken } from "./core";
+import { taskSum } from "./metrics";
 import type { CardInstance, GameState, TaskCard } from "./types";
 import { ACTIONS_PER_TURN, HAND_SIZE } from "./types";
 
@@ -78,7 +79,7 @@ describe("setup", () => {
     expect(state.taskDeck).toHaveLength(TASK_DEFS.length - state.rules.openTasks);
     expect(state.uncertaintyDeck).toHaveLength(16);
     expect(state.phase).toBe("human");
-    expect(state.rules).toMatchObject({ openTasks: 4, debtLimit: 18, starThree: 33 });
+    expect(state.rules).toMatchObject({ openTasks: 4, debtLimit: 18, starThree: 29 });
     expect(state.players.filter((player) => !player.isHuman)).toHaveLength(4);
     expect(state.players.every((player) => player.hand.length === HAND_SIZE)).toBe(true);
   });
@@ -89,17 +90,17 @@ describe("setup", () => {
     expect(state.rules).toMatchObject({
       openTasks: 3,
       debtLimit: 15,
-      starThree: 28,
+      starThree: 22,
     });
   });
 
   it("20日/30日で目標と負債上限が伸びる", () => {
     const twenty = createGame(1, 20, 4);
     expect(twenty.totalDays).toBe(20);
-    expect(twenty.rules).toMatchObject({ debtLimit: 32, starOne: 43, starTwo: 63, starThree: 69 });
+    expect(twenty.rules).toMatchObject({ debtLimit: 32, starOne: 34, starTwo: 53, starThree: 60 });
     const thirty = createGame(1, 30, 4);
     expect(thirty.totalDays).toBe(30);
-    expect(thirty.rules).toMatchObject({ debtLimit: 42, starOne: 69, starTwo: 96, starThree: 107 });
+    expect(thirty.rules).toMatchObject({ debtLimit: 42, starOne: 59, starTwo: 83, starThree: 96 });
   });
 
   it("AIの名前・性格は開始時にランダムで決まる", () => {
@@ -146,6 +147,13 @@ describe("setup", () => {
     expect(new Set(state.taskDefs.map((task) => task.title)).size).toBe(state.taskDefs.length);
     expect(state.taskDefs.some((task) => task.title.includes("の"))).toBe(true);
     expect(state.taskDefs.some((task) => task.kind === "incident")).toBe(true);
+  });
+
+  it("タスク報酬の約10%にmiトークン効果が付く", () => {
+    const state = createGame(42);
+    const tokenTasks = state.taskDefs.filter((task) => task.reward.effect?.kind === "token");
+    expect(tokenTasks.length).toBeGreaterThanOrEqual(5);
+    expect(tokenTasks.length).toBeLessThanOrEqual(9);
   });
 
   it("ログは500件を超えると古いものから消える", () => {
@@ -575,6 +583,20 @@ describe("インシデントとトークン効果", () => {
     expect(active.tokens).toBeGreaterThan(0);
   });
 
+  it("miトークンはアクションを消費せずlv1作業として置ける", () => {
+    const state = testState();
+    const task = addTask(state, "inbox", state.humanId, {
+      requirements: { design: 5, dev: 4, test: 2 },
+    });
+    state.players[0]!.tokens = { mi: 1 };
+
+    expect(useToken(state, state.humanId, "mi", task.id)).toBe(true);
+    expect(task.tokenWork.design).toBe(1);
+    expect(taskSum(task, "design")).toBe(1);
+    expect(state.players[0]?.actionsLeft).toBe(ACTIONS_PER_TURN);
+    expect(state.players[0]?.tokens.mi).toBe(0);
+  });
+
   it("要件トークンで現在フェーズの要求が下がる", () => {
     const state = testState();
     const task = addTask(state, "inbox", state.humanId, {
@@ -666,19 +688,21 @@ describe("デッキと報酬", () => {
     expect(state.teamDebt).toBe(0);
   });
 
-  it("テスト要件が高いタスクほど不確実カードを多く引く", () => {
+  it("作業ピース数が多いタスクほど不確実カードを多く引く", () => {
     const state = testState();
     state.uncertaintyDeck = ["u-debt0a", "u-debt0b", "u-debt0a"];
     const task = addTask(state, "test", state.humanId, {
       requirements: { design: 0, dev: 0, test: 4 },
       score: 1,
     });
-    task.attached.push({
-      card: card(state, "test", 4),
-      ownerId: state.humanId,
-      playType: "test",
-      playLevel: 4,
-    });
+    for (let index = 0; index < 4; index += 1) {
+      task.attached.push({
+        card: card(state, "test", 1),
+        ownerId: state.humanId,
+        playType: "test",
+        playLevel: 1,
+      });
+    }
 
     advanceTasks(state);
 

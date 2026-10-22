@@ -20,19 +20,19 @@ export interface TeamRules {
  */
 const TEAM_RULES_TABLE: Record<number, Record<number, TeamRules>> = {
   4: {
-    10: { openTasks: 3, debtLimit: 15, starOne: 11, starTwo: 23, starThree: 28 },
-    20: { openTasks: 3, debtLimit: 29, starOne: 30, starTwo: 47, starThree: 57 },
-    30: { openTasks: 3, debtLimit: 39, starOne: 53, starTwo: 78, starThree: 88 },
+    10: { openTasks: 3, debtLimit: 15, starOne: 7, starTwo: 16, starThree: 22 },
+    20: { openTasks: 3, debtLimit: 29, starOne: 25, starTwo: 42, starThree: 48 },
+    30: { openTasks: 3, debtLimit: 39, starOne: 44, starTwo: 67, starThree: 78 },
   },
   5: {
-    10: { openTasks: 4, debtLimit: 18, starOne: 17, starTwo: 27, starThree: 33 },
-    20: { openTasks: 4, debtLimit: 32, starOne: 43, starTwo: 63, starThree: 69 },
-    30: { openTasks: 4, debtLimit: 42, starOne: 69, starTwo: 96, starThree: 107 },
+    10: { openTasks: 4, debtLimit: 18, starOne: 10, starTwo: 22, starThree: 29 },
+    20: { openTasks: 4, debtLimit: 32, starOne: 34, starTwo: 53, starThree: 60 },
+    30: { openTasks: 4, debtLimit: 42, starOne: 59, starTwo: 83, starThree: 96 },
   },
   6: {
-    10: { openTasks: 4, debtLimit: 22, starOne: 20, starTwo: 33, starThree: 42 },
-    20: { openTasks: 4, debtLimit: 36, starOne: 55, starTwo: 74, starThree: 83 },
-    30: { openTasks: 4, debtLimit: 46, starOne: 89, starTwo: 117, starThree: 128 },
+    10: { openTasks: 4, debtLimit: 22, starOne: 15, starTwo: 26, starThree: 31 },
+    20: { openTasks: 4, debtLimit: 36, starOne: 45, starTwo: 63, starThree: 71 },
+    30: { openTasks: 4, debtLimit: 46, starOne: 76, starTwo: 101, starThree: 115 },
   },
 };
 
@@ -66,7 +66,9 @@ export type CardEffect =
   /** 今のフェーズの要求を軽減するトークン */
   | { kind: "requirement"; amount: number }
   /** タスクの納期を延ばすトークン */
-  | { kind: "deadline"; amount: number };
+  | { kind: "deadline"; amount: number }
+  /** 個人トークンを獲得する */
+  | { kind: "token"; token: string; amount: number };
 
 export interface CardInstance {
   id: number;
@@ -132,6 +134,8 @@ export interface TaskCard {
   deadline: number;
   tokens: number;
   reward: TaskReward;
+  /** mi などの作業トークン。レベル1作業としてフェーズに加算する */
+  tokenWork: { design: number; dev: number; test: number };
   kind: TaskKind;
   penalty?: TaskPenalty;
   lane: TaskLane;
@@ -152,6 +156,8 @@ export interface PlayerState {
   hand: CardInstance[];
   discard: CardInstance[];
   actionsLeft: number;
+  /** mi などの個人トークン */
+  tokens: Record<string, number>;
   /** 翌日開始時に失うアクション数 */
   actionPenalty: number;
   completed: number;
@@ -252,7 +258,7 @@ export interface Outcome {
 }
 
 export interface GameState {
-  version: 16;
+  version: 17;
   seed: number;
   rngState: number;
   day: number;
@@ -287,5 +293,6 @@ export type Action =
   | { type: "RUN_AI_TURN" }
   | { type: "END_ROUND" }
   | { type: "DISCARD_CARD"; cardId: number }
+  | { type: "USE_TOKEN"; token: string; taskId: string }
   | { type: "HYDRATE"; state: GameState }
   | { type: "RESTART"; seed?: number; days?: number; aiCount?: number };

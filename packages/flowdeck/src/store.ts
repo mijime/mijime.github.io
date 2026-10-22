@@ -3,7 +3,7 @@ import { reduce } from "./engine/reducer";
 import { createGame } from "./engine/setup";
 import type { GameState } from "./engine/types";
 
-const STORAGE_KEY = "flowdeck:save:v16";
+const STORAGE_KEY = "flowdeck:save:v17";
 const DB_NAME = "flowdeck";
 const DB_VERSION = 1;
 const STORE_NAME = "saves";
@@ -13,7 +13,7 @@ function isGameState(value: unknown): value is GameState {
   if (typeof value !== "object" || value === null) return false;
   const state = value as Partial<GameState>;
   return (
-    state.version === 16 &&
+    state.version === 17 &&
     typeof state.day === "number" &&
     typeof state.teamScore === "number" &&
     typeof state.teamDebt === "number" &&

@@ -1,7 +1,7 @@
 import type { Dispatch } from "react";
 import { Lock } from "lucide-react";
 import type { Action, CardInstance, GameState, TaskCard } from "../engine/types";
-import { taskContributions } from "../engine/metrics";
+import { taskContributions, taskSum } from "../engine/metrics";
 import {
   CARD_LABEL,
   CARD_TEXT,
@@ -92,6 +92,8 @@ export function TaskCardView({ state, task, dispatch, selectedCard, compact = fa
     ? state.players.find((player) => player.id === contributionLeader.playerId)
     : null;
   const isDone = task.lane === "done";
+  const human = state.players.find((player) => player.isHuman);
+  const canUseMi = state.phase === "human" && target !== null && (human?.tokens.mi ?? 0) > 0;
 
   return (
     <article
@@ -116,6 +118,19 @@ export function TaskCardView({ state, task, dispatch, selectedCard, compact = fa
             INC
           </span>
         )}
+        {canUseMi && (
+          <button
+            type="button"
+            onClick={(event) => {
+              event.stopPropagation();
+              dispatch({ type: "USE_TOKEN", token: "mi", taskId: task.id });
+            }}
+            className="shrink-0 rounded-sm border border-(--terra)/40 bg-(--terra)/10 px-0.5 text-[6px] font-semibold text-(--terra) hover:bg-(--terra)/20"
+            title="miトークンをこのレーンにレベル1作業として置く（アクション消費なし）"
+          >
+            mi+1
+          </button>
+        )}
         <span className="shrink-0 text-[9px] font-semibold text-(--terra)">+{task.score}</span>
       </div>
 
@@ -136,30 +151,21 @@ export function TaskCardView({ state, task, dispatch, selectedCard, compact = fa
         <Requirement
           type="design"
           label="設計"
-          value={task.attached.reduce(
-            (sum, a) => sum + (a.playType === "design" ? a.playLevel : 0),
-            0,
-          )}
+          value={taskSum(task, "design")}
           required={task.requirements.design}
           active={target === "design"}
         />
         <Requirement
           type="dev"
           label="開発"
-          value={task.attached.reduce(
-            (sum, a) => sum + (a.playType === "dev" ? a.playLevel : 0),
-            0,
-          )}
+          value={taskSum(task, "dev")}
           required={task.requirements.dev}
           active={target === "dev"}
         />
         <Requirement
           type="test"
           label="テスト"
-          value={task.attached.reduce(
-            (sum, a) => sum + (a.playType === "test" ? a.playLevel : 0),
-            0,
-          )}
+          value={taskSum(task, "test")}
           required={task.requirements.test}
           active={target === "test"}
         />

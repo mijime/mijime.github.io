@@ -87,6 +87,15 @@ export function HelpModal({ rules, onClose }: { rules: TeamRules; onClose: () =>
           </section>
 
           <section>
+            <h3 className="serif text-[13px] font-semibold">miトークン</h3>
+            <p className="text-(--mid)">
+              タスク報酬の約10%には <strong className="text-(--ink)">miトークン+1</strong> が付く。
+              個人トークンで、自分の手番中ならアクションを消費せず、任意のレーンにレベル1作業として置ける。
+              トークンを使うと少ないカードでタスクを進められるが、不確実性の処理では作業ピースとして数える。
+            </p>
+          </section>
+
+          <section>
             <h3 className="serif text-[13px] font-semibold">カード効果</h3>
             <p className="text-(--mid)">
               一部の投資タスク報酬には効果が付きます。
@@ -102,8 +111,8 @@ export function HelpModal({ rules, onClose }: { rules: TeamRules; onClose: () =>
             <h3 className="serif text-[13px] font-semibold">テストと不確実性</h3>
             <p className="text-(--mid)">
               テストはテストカード専用。テスト要件を満たすと獲得できます。 獲得時に不確実カードを{" "}
-              <strong className="text-(--ink)">1 + floor(テスト要件 / 3)</strong>{" "}
-              枚引き、要求（設計/開発/テスト）が増えます。テストの超過分だけ要求αを軽減できます。
+              <strong className="text-(--ink)">作業ピース数</strong>{" "}
+              から計算して引き、要求（設計/開発/テスト）が増えます。カード枚数が多いほど、またmiトークンを使うほど、不確実性が上がります。テストの超過分だけ要求αを軽減できます。
               軽減後も届かない場合は、獲得者が負債カード1枚を受け取ります（タスクは獲得）。
             </p>
           </section>

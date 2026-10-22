@@ -1,4 +1,4 @@
-import { discardCard, playCard, pullTask } from "./core";
+import { discardCard, playCard, pullTask, useToken } from "./core";
 import { playerWip, taskSum } from "./metrics";
 import type { CardInstance, GameState, PersonalityWeights, PlayerState, TaskCard } from "./types";
 
@@ -47,6 +47,7 @@ function effectValue(card: CardInstance): number {
   if (effect.kind === "boost") return effect.amount * 6;
   if (effect.kind === "requirement") return effect.amount * 9;
   if (effect.kind === "deadline") return effect.amount * 7;
+  if (effect.kind === "token") return effect.amount * 8;
   return effect.amount * 7;
 }
 
@@ -228,9 +229,47 @@ function chooseBotAction(state: GameState, player: PlayerState): BotAction | nul
   return candidates[0]?.action ?? null;
 }
 
+function bestTokenTask(state: GameState): TaskCard | null {
+  let best: TaskCard | null = null;
+  let bestScore = Number.NEGATIVE_INFINITY;
+  for (const task of state.tasks) {
+    const type =
+      task.lane === "inbox"
+        ? "design"
+        : task.lane === "wip"
+          ? "dev"
+          : task.lane === "test"
+            ? "test"
+            : null;
+    if (!type) continue;
+    const remaining = task.requirements[type] - taskSum(task, type);
+    if (remaining <= 0) continue;
+    const score =
+      (remaining <= 1 ? 40 : 0) +
+      task.score * 10 +
+      (task.tokens / Math.max(1, task.deadline)) * 20 +
+      (task.kind === "incident" ? 20 : 0);
+    if (score > bestScore) {
+      best = task;
+      bestScore = score;
+    }
+  }
+  return best;
+}
+
+function useBotTokens(state: GameState, player: PlayerState): void {
+  while ((player.tokens.mi ?? 0) > 0) {
+    const task = bestTokenTask(state);
+    if (!task) break;
+    if (!useToken(state, player.id, "mi", task.id)) break;
+  }
+}
+
 export function runBotAction(state: GameState, playerId: string): boolean {
   const player = state.players.find((entry) => entry.id === playerId);
   if (!player || player.actionsLeft <= 0) return false;
+  // miトークンはアクションを消費しないので、行動前に使い切る。
+  useBotTokens(state, player);
   // 行動は focus / greed / urgency の3軸だけで決める。
   const action = chooseBotAction(state, player);
   if (!action) return false;

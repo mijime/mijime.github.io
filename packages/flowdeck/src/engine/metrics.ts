@@ -105,7 +105,7 @@ export function recomputeTeamStats(state: GameState): void {
 }
 
 export function taskSum(task: TaskCard, type: "design" | "dev" | "test"): number {
-  let total = 0;
+  let total = task.tokenWork[type];
   for (const attached of task.attached) {
     if (attached.playType === type) total += attached.playLevel;
   }

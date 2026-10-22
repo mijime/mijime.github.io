@@ -1,3 +1,4 @@
+import { tokenDef } from "../data/tokens";
 import { discardHand, drawCards } from "./hand";
 import { pushLog } from "./log";
 import { makeSnapshot, playerById, recomputeTeamStats } from "./metrics";
@@ -76,7 +77,49 @@ function applyCardEffect(
   if (effect.kind === "deadline") {
     task.deadline += effect.amount;
     pushLog(state, `${player.name}: 納期トークン +${effect.amount} → ${task.title}`, "good");
+    return;
   }
+
+  if (effect.kind === "token") {
+    const def = tokenDef(effect.token);
+    player.tokens[effect.token] = (player.tokens[effect.token] ?? 0) + effect.amount;
+    pushLog(state, `${player.name}: ${def?.label ?? effect.token} +${effect.amount}`, "good");
+  }
+}
+
+/** 個人トークンを任意レーンのレベル1作業として置く。アクションは消費しない。 */
+export function useToken(
+  state: GameState,
+  playerId: string,
+  token: string,
+  taskId: string,
+): boolean {
+  const player = state.players.find((entry) => entry.id === playerId);
+  if (!player || (player.tokens[token] ?? 0) <= 0) return false;
+  const def = tokenDef(token);
+  if (!def) return false;
+  const task = state.tasks.find((entry) => entry.id === taskId);
+  if (!task) return false;
+  const type =
+    task.lane === "inbox"
+      ? "design"
+      : task.lane === "wip"
+        ? "dev"
+        : task.lane === "test"
+          ? "test"
+          : null;
+  if (!type) return false;
+
+  player.tokens[token] = (player.tokens[token] ?? 0) - 1;
+  task.tokenWork[type] += def.workLevel;
+  const label = type === "design" ? "設計" : type === "dev" ? "開発" : "テスト";
+  pushLog(
+    state,
+    `${player.name}: ${def.label} → ${task.title}（${label} lv${def.workLevel}）`,
+    "good",
+  );
+  advanceTasks(state);
+  return true;
 }
 
 export function playCard(

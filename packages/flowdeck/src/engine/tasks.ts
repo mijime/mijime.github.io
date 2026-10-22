@@ -18,6 +18,7 @@ export function createTask(state: GameState, defId: string): TaskCard {
     deadline: def.deadline,
     tokens: 0,
     reward: { ...def.reward },
+    tokenWork: { design: 0, dev: 0, test: 0 },
     kind: def.kind ?? "normal",
     penalty: def.penalty ? { ...def.penalty } : undefined,
     lane: "open",
@@ -81,7 +82,9 @@ function acquireTask(state: GameState, task: TaskCard): void {
   const devSum = taskSum(task, "dev");
   const testSum = taskSum(task, "test");
   const overTest = Math.max(0, testSum - base.test);
-  const draws = 1 + Math.floor(base.test / 3);
+  const pieces =
+    task.attached.length + task.tokenWork.design + task.tokenWork.dev + task.tokenWork.test;
+  const draws = Math.max(1, Math.ceil(pieces / 2));
   const added = { design: 0, dev: 0, test: 0 };
   const uncertaintyReports: { title: string; description: string }[] = [];
   let extraDebt = 0;
