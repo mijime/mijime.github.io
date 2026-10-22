@@ -28,7 +28,7 @@
     "@mijime/theme": "workspace:*",
     "@shikijs/rehype": "^4.5.0",
     "lindera-js": "^0.1.4",
-    "lucide-react": "^1.57.0",
+    "lucide-react": "^1.61.0",
     "mdast": "^3.0.0",
     "mermaid": "^12.2.0",
     "rehype": "^13.0.2",
@@ -45,15 +45,15 @@
     "@types/mdast": "^4.0.4",
     "@types/react": "^19.3.0",
     "@typescript/native-preview": "7.0.0-dev.20260707.2",
-    "astro": "^7.4.0",
+    "astro": "^7.4.2",
     "duckdb": "^1.4.4",
-    "oxfmt": "^0.73.0",
-    "oxlint": "^1.88.0",
+    "oxfmt": "^0.74.0",
+    "oxlint": "^1.89.0",
     "remark-frontmatter": "^5.0.0",
     "remark-mdx-frontmatter": "^6.0.0",
     "typescript": "7.1.0-dev.20261015.1",
-    "vite": "^8.3.4",
-    "vitest": "^5.0.4"
+    "vite": "^8.3.5",
+    "vitest": "^5.0.5"
   },
   "peerDependencies": {
     "astro": "^7.4.0"

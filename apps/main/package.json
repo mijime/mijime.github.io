@@ -14,8 +14,8 @@
     "format:oxfmt": "oxfmt src"
   },
   "dependencies": {
-    "@astrojs/mdx": "^8.1.0",
-    "@astrojs/react": "^7.1.0",
+    "@astrojs/mdx": "^8.1.1",
+    "@astrojs/react": "^7.1.1",
     "@mijime/blog": "workspace:*",
     "@mijime/emolog": "workspace:*",
     "@mijime/flowdeck": "workspace:*",
@@ -26,8 +26,8 @@
     "@mijime/saiflow": "workspace:*",
     "@mijime/theme": "workspace:*",
     "@tailwindcss/vite": "4.3.3",
-    "astro": "^7.4.0",
-    "lucide-react": "^1.57.0",
+    "astro": "^7.4.2",
+    "lucide-react": "^1.61.0",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
     "tailwindcss": "^4.3.3",
@@ -37,8 +37,8 @@
     "@astrojs/ts-content-mapper": "^0.2.0",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
-    "oxfmt": "^0.73.0",
-    "oxlint": "^1.88.0",
+    "oxfmt": "^0.74.0",
+    "oxlint": "^1.89.0",
     "tsx": "^4.23.15",
     "typescript": "7.1.0-dev.20261015.1"
   }
