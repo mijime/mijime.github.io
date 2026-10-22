@@ -8,10 +8,9 @@ interface Props {
   state: GameState;
   dispatch: Dispatch<Action>;
   selectedCard: CardInstance | null;
-  tokenMode: boolean;
 }
 
-export function TeamBoard({ state, dispatch, selectedCard, tokenMode }: Props) {
+export function TeamBoard({ state, dispatch, selectedCard }: Props) {
   const completed = state.tasks.filter((task) => task.lane === "done");
   const lanes: { lane: "inbox" | "wip" | "test"; hint: string }[] = [
     { lane: "inbox", hint: "設計カードを置く" },
@@ -90,7 +89,6 @@ export function TeamBoard({ state, dispatch, selectedCard, tokenMode }: Props) {
                       task={task}
                       dispatch={dispatch}
                       selectedCard={selectedCard}
-                      tokenMode={tokenMode}
                     />
                   ))}
                   {tasks.length === 0 && (

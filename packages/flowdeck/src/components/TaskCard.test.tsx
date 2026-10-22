@@ -20,40 +20,27 @@ function stateWithToken(): { state: GameState; task: TaskCard } {
 }
 
 describe("TaskCardView のmiトークンUI", () => {
-  it("miトークンを持つ手番中は「miを置く」ボタンを表示する", () => {
+  it("miトークンを持つ手番中はBotマークのボタンを表示する", () => {
     const { state, task } = stateWithToken();
     render(<TaskCardView state={state} task={task} dispatch={vi.fn()} selectedCard={null} />);
 
-    expect(screen.getByRole("button", { name: /miを置く/ })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "miトークンを置く" })).toBeInTheDocument();
   });
 
-  it("「miを置く」を押すとUSE_TOKENをdispatchする", () => {
+  it("Botマークを押すとUSE_TOKENをdispatchする", () => {
     const { state, task } = stateWithToken();
     const dispatch = vi.fn();
     render(<TaskCardView state={state} task={task} dispatch={dispatch} selectedCard={null} />);
 
-    fireEvent.click(screen.getByRole("button", { name: /miを置く/ }));
+    fireEvent.click(screen.getByRole("button", { name: "miトークンを置く" }));
     expect(dispatch).toHaveBeenCalledWith({ type: "USE_TOKEN", token: "mi", taskId: task.id });
   });
 
-  it("miトークンを持っていなければボタンを表示しない", () => {
+  it("miトークンを持っていなければマークを表示しない", () => {
     const { state, task } = stateWithToken();
     state.players.find((player) => player.isHuman)!.tokens = {};
     render(<TaskCardView state={state} task={task} dispatch={vi.fn()} selectedCard={null} />);
 
-    expect(screen.queryByRole("button", { name: /miを置く/ })).toBeNull();
-  });
-
-  it("配置モードではカードのクリックでトークンを置く", () => {
-    const { state, task } = stateWithToken();
-    const dispatch = vi.fn();
-    const { container } = render(
-      <TaskCardView state={state} task={task} dispatch={dispatch} selectedCard={null} tokenMode />,
-    );
-
-    const article = container.querySelector("article");
-    expect(article).not.toBeNull();
-    fireEvent.click(article!);
-    expect(dispatch).toHaveBeenCalledWith({ type: "USE_TOKEN", token: "mi", taskId: task.id });
+    expect(screen.queryByRole("button", { name: "miトークンを置く" })).toBeNull();
   });
 });
