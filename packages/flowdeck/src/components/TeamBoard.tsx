@@ -30,7 +30,7 @@ export function TeamBoard({ state, dispatch, selectedCard }: Props) {
         <div className="flex items-baseline gap-2">
           <h2 className="serif text-[13px] font-semibold">チームボード</h2>
           <span className="text-[9px] text-(--mid)">
-            完了 {completed.length} / チームスコア {state.teamScore}
+            完了 {completed.length} / 企業価値 {state.teamScore}
           </span>
         </div>
         <div className="flex flex-wrap items-center gap-1.5 text-[8px] text-(--mid)">

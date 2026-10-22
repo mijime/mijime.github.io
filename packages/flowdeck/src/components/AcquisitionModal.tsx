@@ -37,7 +37,7 @@ export function AcquisitionModal({ report, debtLimit, onClose }: Props) {
         <div className="space-y-2.5 p-4 text-[10px]">
           <div className="grid grid-cols-2 gap-2">
             <div className="rounded-sm border border-(--border) bg-(--paper) px-2 py-1.5">
-              <span className="block text-[8px] text-(--mid)">チームスコア</span>
+              <span className="block text-[8px] text-(--mid)">企業価値</span>
               <span className="text-[15px] font-semibold text-emerald-700 dark:text-emerald-400">
                 +{report.score}
               </span>
@@ -125,7 +125,7 @@ export function AcquisitionModal({ report, debtLimit, onClose }: Props) {
 
           <div className="flex items-center justify-between gap-2 border-t border-(--border) pt-2 text-[9px] text-(--mid)">
             <span>
-              この獲得の負債 +{report.debt} / チーム負債 {report.teamDebt} / {debtLimit}
+              この獲得の負債 +{report.debt} / 技術的負債 {report.teamDebt} / {debtLimit}
             </span>
             <button
               type="button"

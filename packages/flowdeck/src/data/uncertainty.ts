@@ -6,15 +6,25 @@ const requirement = (
   amount: number,
 ): UncertaintyDef => ({
   id,
-  title: `要求${phase === "design" ? "設計" : phase === "dev" ? "開発" : "テスト"} +${amount}`,
-  description: `獲得時の要求が +${amount} される`,
+  title:
+    phase === "design"
+      ? `仕様追加 +${amount}`
+      : phase === "dev"
+        ? `実装要求 +${amount}`
+        : `品質要求 +${amount}`,
+  description:
+    phase === "design"
+      ? `miの設計提案で要求が +${amount} される`
+      : phase === "dev"
+        ? `jimeの実装要件が +${amount} される`
+        : `jimeの品質基準が +${amount} される`,
   effect: { kind: "require", phase, amount },
 });
 
 const debt = (id: string, amount: number): UncertaintyDef => ({
   id,
-  title: `負債 +${amount}`,
-  description: `負債カードを ${amount} 枚獲得`,
+  title: `技術的負債 +${amount}`,
+  description: `技術的負債カードを ${amount} 枚獲得`,
   effect: { kind: "debt", amount },
 });
 
@@ -33,14 +43,14 @@ export const UNCERTAINTY_DEFS: UncertaintyDef[] = [
   requirement("u-test4b", "test", 2),
   {
     id: "u-debt0a",
-    title: "負債 0",
-    description: "何も起きなかった",
+    title: "問題なし",
+    description: "今回は何も起きなかった",
     effect: { kind: "nothing" },
   },
   {
     id: "u-debt0b",
-    title: "負債 0",
-    description: "何も起きなかった",
+    title: "問題なし",
+    description: "今回は何も起きなかった",
     effect: { kind: "nothing" },
   },
   debt("u-debt1", 1),

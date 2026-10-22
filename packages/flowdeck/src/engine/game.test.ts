@@ -260,7 +260,7 @@ describe("タスクの流れ", () => {
     expect(report?.score).toBe(4);
     expect(report?.reward).toEqual({ type: "dev", level: 5 });
     expect(report?.uncertainty).toEqual([
-      { title: "要求設計 +2", description: "獲得時の要求が +2 される" },
+      { title: "仕様追加 +2", description: "miの設計提案で要求が +2 される" },
     ]);
     expect(report?.added.design).toBe(2);
     expect(report?.unmet).toBe(true);

@@ -17,7 +17,7 @@ export function NewGameModal({ currentDays, currentAiCount, onClose, onStart }: 
       <div className="flow-slide w-full max-w-lg rounded-sm border border-(--border) bg-(--paper) shadow-2xl">
         <div className="flex items-center justify-between border-b border-(--border) bg-(--toolbar-bg) px-4 py-3">
           <div>
-            <p className="text-[9px] tracking-[0.25em] text-(--mid)">NEW GAME / RANDOM TEAM</p>
+            <p className="text-[9px] tracking-[0.25em] text-(--mid)">NEW QUARTER / RANDOM TEAM</p>
             <h2 className="serif mt-1 text-lg font-semibold">新しいゲーム</h2>
           </div>
           <button
@@ -73,12 +73,16 @@ export function NewGameModal({ currentDays, currentAiCount, onClose, onStart }: 
           </section>
 
           <section className="rounded-sm border border-(--border) bg-(--grid)/40 px-3 py-2 text-[10px] text-(--mid)">
-            <p className="flex items-center gap-1 text-(--ink)">
+            <p className="text-(--ink)">
+              コーディングエージェント <strong>mi</strong> と軽量LLM <strong>jime</strong>{" "}
+              を売るSaaS企業の四半期。 全員がmiを使い、jimeのLLM事業で企業価値を伸ばします。
+            </p>
+            <p className="mt-1 flex items-center gap-1 text-(--ink)">
               <Dices size={12} />{" "}
               名前・アイコン・性格・タスク名は開始時にランダム。3つの符号付きの重みで決まります
             </p>
             <p className="mt-1">
-              仕上げ↔着手、得点↔整理、納期↔長期のバランスが、メンバーごとに違う形で決まります。
+              仕上げ↔着手、得点↔整理、SLA↔長期のバランスが、メンバーごとに違う形で決まります。
             </p>
           </section>
 

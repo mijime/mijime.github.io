@@ -2,59 +2,101 @@ import { randInt } from "../engine/rng";
 import type { GameState, TaskDef, TaskKind } from "../engine/types";
 import { TASK_DEFS } from "./tasks";
 
-const SUBJECTS = [
-  "検索",
-  "決済",
-  "会員登録",
-  "カート",
-  "レビュー",
-  "レコメンド",
-  "配送",
-  "多言語",
-  "アクセシビリティ",
-  "購入履歴",
-  "ダッシュボード",
-  "クーポン",
-  "ゲスト購入",
-  "パスワード",
-  "通知",
-  "ポイント",
-  "サブスクリプション",
-  "在庫",
-  "返品",
-  "自動テスト",
-  "リファクタリング",
-  "設計",
-  "CI",
-  "ドキュメント",
-  "監視",
-  "セキュリティ",
-  "レート制限",
-  "バックアップ",
-  "データ移行",
-  "API",
-  "行動分析",
-  "モバイル",
-  "オフライン",
-  "キャッシュ",
-  "ログ",
-  "可観測性",
-  "継続率",
-  "料金",
-  "サポート",
-  "リリース",
-  "オンボーディング",
-  "チェックアウト",
-  "プロフィール",
-  "ほしいものリスト",
-  "検索フィルタ",
-  "通知設定",
-  "不正検知",
-  "データ同期",
-  "認証",
-  "本番環境",
-  "問い合わせ",
+const JIME_SUBJECTS = [
+  "jime",
+  "jime応答",
+  "jime推論",
+  "jime品質",
+  "jime安全性",
+  "jime評価",
+  "jime配信",
+  "jimeコスト",
+  "jime速度",
+  "jime API",
+  "jimeストリーミング",
+  "jimeオンデバイス",
+  "jimeガードレール",
+  "jimeマルチテナント",
+  "jime利用分析",
+  "jime課金",
+  "jimeプロンプト",
+  "jimeコンテキスト",
 ];
+
+const MI_SUBJECTS = [
+  "mi",
+  "miコードレビュー",
+  "miリポジトリ理解",
+  "miテスト生成",
+  "miパッチ生成",
+  "miエージェント",
+  "mi権限",
+  "miワークフロー",
+  "mi評価",
+];
+
+const SAAS_SUBJECTS = [
+  "課金",
+  "SSO",
+  "オンボーディング",
+  "解約導線",
+  "SLA",
+  "サポート",
+  "請求",
+  "管理画面",
+  "APIキー",
+  "監査ログ",
+  "エンタープライズ",
+  "顧客データ",
+  "契約",
+];
+
+const INCIDENT_JIME_SUBJECTS = [
+  "jime",
+  "jime API",
+  "jime推論",
+  "jimeモデル",
+  "jime配信",
+  "jime品質",
+  "jime評価",
+  "jimeガードレール",
+];
+
+const INCIDENT_MI_SUBJECTS = [
+  "mi",
+  "miエージェント",
+  "miコードレビュー",
+  "miテスト生成",
+  "miワークフロー",
+];
+
+const INCIDENT_SAAS_SUBJECTS = [
+  "顧客データ",
+  "課金",
+  "SSO",
+  "GPU",
+  "プロンプト",
+  "監査ログ",
+  "請求",
+];
+
+function pick<T>(state: GameState, pool: T[]): T {
+  return pool[randInt(state, pool.length)] ?? pool[0]!;
+}
+
+function pickNormalSubject(state: GameState): string {
+  const roll = randInt(state, 100);
+  if (roll < 60) return pick(state, JIME_SUBJECTS);
+  if (roll < 85) return pick(state, MI_SUBJECTS);
+  return pick(state, SAAS_SUBJECTS);
+}
+
+function pickIncidentSubject(state: GameState): string {
+  const roll = randInt(state, 100);
+  if (roll < 65) return pick(state, INCIDENT_JIME_SUBJECTS);
+  if (roll < 85) return pick(state, INCIDENT_MI_SUBJECTS);
+  return pick(state, INCIDENT_SAAS_SUBJECTS);
+}
 
 const NOUN_SUFFIXES = [
   "改善",
@@ -68,30 +110,14 @@ const NOUN_SUFFIXES = [
   "自動化",
 ];
 
-const INCIDENT_SUBJECTS = [
-  "本番環境",
-  "API",
-  "認証",
-  "決済",
-  "データ",
-  "通知",
-  "検索",
-  "在庫",
-  "問い合わせ",
-  "リリース",
-  "バックアップ",
-  "監視",
-];
-
-const INCIDENT_SUFFIXES = ["障害", "停止", "漏えい", "不整合", "遅延", "急増"];
+const INCIDENT_SUFFIXES = ["障害", "停止", "漏えい", "不整合", "遅延", "急増", "不足", "過負荷"];
 
 export const HIGH_SCORE_BONUS = 2;
 
 function generateName(state: GameState, kind: TaskKind, used: Set<string>): string {
-  const subjects = kind === "incident" ? INCIDENT_SUBJECTS : SUBJECTS;
   const suffixes = kind === "incident" ? INCIDENT_SUFFIXES : NOUN_SUFFIXES;
   for (let attempt = 0; attempt < 40; attempt += 1) {
-    const subject = subjects[randInt(state, subjects.length)] ?? subjects[0]!;
+    const subject = kind === "incident" ? pickIncidentSubject(state) : pickNormalSubject(state);
     const suffix = suffixes[randInt(state, suffixes.length)] ?? suffixes[0]!;
     const name =
       kind === "incident"

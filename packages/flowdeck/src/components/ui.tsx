@@ -286,7 +286,7 @@ export function penaltyLabel(penalty?: TaskPenalty): string | null {
   if (!penalty) return null;
   if (penalty.kind === "allPlayersDebt") return `全員に負債${penalty.amount}`;
   if (penalty.kind === "ownerDebt") return `担当者に負債${penalty.amount}`;
-  if (penalty.kind === "teamScore") return `チームスコア-${penalty.amount}`;
+  if (penalty.kind === "teamScore") return `企業価値-${penalty.amount}`;
   if (penalty.kind === "discardHand") {
     return penalty.target === "all" ? "全員の手札を捨てる" : "担当者の手札を捨てる";
   }

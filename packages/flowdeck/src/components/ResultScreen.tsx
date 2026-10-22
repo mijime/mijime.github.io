@@ -19,11 +19,9 @@ export function ResultScreen({ state, dispatch }: Props) {
       <div className="mx-auto max-w-3xl px-4 py-6">
         <header className="text-center">
           <p className="flex items-center justify-center gap-1 text-[9px] tracking-[0.3em] text-(--mid)">
-            <Flag size={10} /> PROJECT REVIEW
+            <Flag size={10} /> BOARD REVIEW
           </p>
-          <h1 className="serif mt-1 text-2xl font-semibold">
-            {state.totalDays}日間のプロジェクト終了
-          </h1>
+          <h1 className="serif mt-1 text-2xl font-semibold">{state.totalDays}日間の四半期終了</h1>
           <p className="text-[10px] text-(--mid)">シード {state.seed}</p>
 
           <div className="mt-3 flex items-center justify-center gap-1 text-(--terra)">
@@ -56,16 +54,16 @@ export function ResultScreen({ state, dispatch }: Props) {
 
         <div className="mt-5 grid gap-2">
           <section className="rounded-sm border border-(--border) bg-(--paper) p-3">
-            <h2 className="serif text-[13px] font-semibold">スコア内訳</h2>
+            <h2 className="serif text-[13px] font-semibold">企業価値の内訳</h2>
             <ul className="mt-1.5 space-y-1 text-[10px]">
               <li className="flex items-baseline justify-between gap-2">
-                <span className="text-(--mid)">チームスコア</span>
+                <span className="text-(--mid)">企業価値</span>
                 <span className="font-medium text-emerald-700 dark:text-emerald-400">
                   +{outcome.teamScore}
                 </span>
               </li>
               <li className="flex items-baseline justify-between gap-2">
-                <span className="text-(--mid)">チーム負債 {outcome.teamDebt} × 2</span>
+                <span className="text-(--mid)">技術的負債 {outcome.teamDebt} × 2</span>
                 <span className="font-medium text-red-600 dark:text-red-400">
                   -{outcome.teamDebt * 2}
                 </span>
@@ -79,7 +77,7 @@ export function ResultScreen({ state, dispatch }: Props) {
                 </li>
               )}
               <li className="flex items-baseline justify-between gap-2 border-t border-(--border) pt-1 font-semibold">
-                <span>最終スコア</span>
+                <span>最終評価</span>
                 <span>{outcome.finalScore}</span>
               </li>
             </ul>
@@ -94,12 +92,13 @@ export function ResultScreen({ state, dispatch }: Props) {
               </span>
             </div>
             <p className="mt-2 text-[9px] text-(--mid)">
-              星の閾値: {state.rules.starOne} / {state.rules.starTwo} / {state.rules.starThree}
+              投資家評価の閾値: {state.rules.starOne} / {state.rules.starTwo} /{" "}
+              {state.rules.starThree}
             </p>
           </section>
           <section className="rounded-sm border border-(--border) bg-(--paper) p-3">
             <div className="flex flex-wrap items-baseline justify-between gap-1">
-              <h2 className="serif text-[13px] font-semibold">チームの成績</h2>
+              <h2 className="serif text-[13px] font-semibold">チームの成果</h2>
               <span className="text-[8px] text-(--mid)">
                 プレイ枚数 / ポイントと、現在のデッキ構成
               </span>
@@ -168,7 +167,7 @@ export function ResultScreen({ state, dispatch }: Props) {
         </div>
 
         <section className="mt-2 rounded-sm border border-(--border) bg-(--paper) p-3">
-          <h2 className="serif text-[13px] font-semibold">ふりかえり</h2>
+          <h2 className="serif text-[13px] font-semibold">ボードミーティング</h2>
           <ul className="mt-1 space-y-0.5 text-[10px] text-(--mid)">
             {outcome.tips.map((tip) => (
               <li key={tip}>・{tip}</li>

@@ -24,12 +24,13 @@ export function HelpModal({ rules, onClose }: { rules: TeamRules; onClose: () =>
           <section>
             <h3 className="serif text-[13px] font-semibold">目的</h3>
             <p className="text-(--mid)">
-              設定した日数でチームの価値を最大化します。最終スコアは 「チームスコア − チーム負債 ×
-              2」。チームスコアは
+              miとjimeを売るSaaS企業の四半期。設定した日数で企業価値を最大化します。最終評価は
+              「企業価値 − 技術的負債 × 2 − 期限切れ罰則」。企業価値は
               <strong className="text-(--ink)">デッキに残っているタスクカードの合計</strong>、
-              負債は<strong className="text-(--ink)">デッキに残っている負債カードの枚数</strong>
-              です。 星は {rules.starOne} / {rules.starTwo} / {rules.starThree}
-              、負債が {rules.debtLimit} に達すると失敗です。
+              技術的負債は
+              <strong className="text-(--ink)">デッキに残っている負債カードの枚数</strong>
+              です。 投資家評価は {rules.starOne} / {rules.starTwo} / {rules.starThree}
+              、技術的負債が {rules.debtLimit} に達すると失敗です。
             </p>
           </section>
 
@@ -40,7 +41,7 @@ export function HelpModal({ rules, onClose }: { rules: TeamRules; onClose: () =>
               <li>1アクションずつ順番に行動。あなた → メンバー → あなた …と回る</li>
               <li>BacklogからタスクをReadyへ引き取る（Pull） / カードをタスクに置く</li>
               <li>アクションを使い切ると手番終了。パスすると残りを放棄し、その日はもう動けない</li>
-              <li>全員の手番が終わったら日末。納期トークンと期限切れを処理して次の日へ</li>
+              <li>全員の手番が終わったら日末。SLAトークンと期限切れを処理して次の日へ</li>
               <li>
                 インシデントは期限切れ時に罰則。全員負債、担当者負債、スコア減、手札破棄、翌日アクション減、納期トークン追加など
               </li>
@@ -65,7 +66,7 @@ export function HelpModal({ rules, onClose }: { rules: TeamRules; onClose: () =>
               として獲得者のデッキに入ります。 報酬は
               <strong className="text-(--ink)">貢献ポイント最多</strong>
               の人へ。同点はカード枚数、 さらに同点なら最後にカードを置いた人です。
-              タスク報酬カードにはスコアが付き、デッキに残っている間だけチームスコアに数えます。
+              タスク報酬カードにはスコアが付き、デッキに残っている間だけ企業価値に数えます。
               廃棄するとスコアも消えます。高スコアタスクは設計lv1などの弱いカード、
               CI/CD・リファクタ・ドキュメントなどの改善タスクは強いカード（lv5）になります。
               タスク山札が尽きたら、完了・期限切れのタスク捨て札をシャッフルして山札に戻します。
@@ -93,7 +94,7 @@ export function HelpModal({ rules, onClose }: { rules: TeamRules; onClose: () =>
               <strong className="text-(--ink)">アクション</strong>は追加行動、
               <strong className="text-(--ink)">貢献</strong>は実効レベル+1、
               <strong className="text-(--ink)">負債除去</strong>
-              はデッキとチーム負債を1つ減らします。
+              はデッキと技術的負債を1つ減らします。
             </p>
           </section>
 
@@ -122,7 +123,7 @@ export function HelpModal({ rules, onClose }: { rules: TeamRules; onClose: () =>
               ラウンド終了時に全タスクへ納期トークンが1個置かれ、納期に達するとトラッシュ。
               タスクに載っていたカードは持ち主の捨て札へ戻ります。
               手札のカードは、1アクションを使って1枚廃棄できます。デッキから完全に除去され、
-              タスク報酬カードならスコアが消え、負債カードならチーム負債が1減ります。
+              タスク報酬カードならスコアが消え、負債カードなら技術的負債が1減ります。
               メンバーはタスク報酬カードを自分からは捨てません。
             </p>
           </section>

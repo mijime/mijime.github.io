@@ -81,7 +81,7 @@ export function Header({ state, onHelp, onNewGame }: Props) {
           <div className="flex flex-wrap items-center gap-1.5">
             <Stat
               icon={<TrendingUp size={11} />}
-              label="チーム"
+              label="企業価値"
               value={`${state.teamScore}`}
               tone="good"
             />
@@ -96,7 +96,7 @@ export function Header({ state, onHelp, onNewGame }: Props) {
                     ? "normal"
                     : "bad"
               }
-              title={`最終スコア = チームスコア - 負債 x ${DEBT_SCORE_PENALTY}`}
+              title={`最終評価 = 企業価値 - 技術的負債 x ${DEBT_SCORE_PENALTY} - 期限切れ罰則`}
             />
             <Stat
               icon={<TrendingDown size={11} />}
