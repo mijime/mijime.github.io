@@ -151,6 +151,38 @@ export const TASK_DEFS: TaskDef[] = [
     4,
     r("design", 4, { kind: "debt-clean", amount: 2 }),
   ),
+  task(
+    "design-review",
+    "設計レビュー",
+    5,
+    4,
+    3,
+    0,
+    4,
+    r("design", 4, { kind: "requirement", amount: 1 }),
+  ),
+  task("test-automation", "テスト自動化", 5, 5, 5, 0, 4, r("test", 4, { kind: "draw", amount: 1 })),
+  task(
+    "debt-compression",
+    "負債圧縮",
+    4,
+    5,
+    3,
+    0,
+    4,
+    r("dev", 4, { kind: "debt-clean", amount: 2 }),
+  ),
+  task(
+    "schedule-buffer",
+    "日程バッファ",
+    4,
+    4,
+    3,
+    0,
+    4,
+    r("design", 3, { kind: "deadline", amount: 1 }),
+  ),
+  task("pair-testing", "ペアテスト", 5, 5, 4, 0, 4, r("test", 4, { kind: "action", amount: 1 })),
 
   // インシデントタスク: 期限切れで全員に負債
   incident("incident-prod", "本番障害", 4, 8, 4, 2, 2, r("dev", 3), {

@@ -20,19 +20,19 @@ export interface TeamRules {
  */
 const TEAM_RULES_TABLE: Record<number, Record<number, TeamRules>> = {
   4: {
-    10: { openTasks: 3, debtLimit: 15, starOne: 11, starTwo: 18, starThree: 22 },
-    20: { openTasks: 3, debtLimit: 29, starOne: 25, starTwo: 40, starThree: 46 },
-    30: { openTasks: 3, debtLimit: 39, starOne: 42, starTwo: 64, starThree: 73 },
+    10: { openTasks: 3, debtLimit: 15, starOne: 9, starTwo: 18, starThree: 20 },
+    20: { openTasks: 3, debtLimit: 29, starOne: 22, starTwo: 37, starThree: 42 },
+    30: { openTasks: 3, debtLimit: 39, starOne: 40, starTwo: 62, starThree: 69 },
   },
   5: {
-    10: { openTasks: 4, debtLimit: 18, starOne: 13, starTwo: 22, starThree: 27 },
-    20: { openTasks: 4, debtLimit: 32, starOne: 33, starTwo: 49, starThree: 56 },
-    30: { openTasks: 4, debtLimit: 42, starOne: 55, starTwo: 77, starThree: 88 },
+    10: { openTasks: 4, debtLimit: 18, starOne: 12, starTwo: 20, starThree: 24 },
+    20: { openTasks: 4, debtLimit: 32, starOne: 32, starTwo: 47, starThree: 53 },
+    30: { openTasks: 4, debtLimit: 42, starOne: 53, starTwo: 76, starThree: 85 },
   },
   6: {
-    10: { openTasks: 4, debtLimit: 22, starOne: 16, starTwo: 27, starThree: 31 },
-    20: { openTasks: 4, debtLimit: 36, starOne: 44, starTwo: 60, starThree: 68 },
-    30: { openTasks: 4, debtLimit: 46, starOne: 72, starTwo: 98, starThree: 108 },
+    10: { openTasks: 4, debtLimit: 22, starOne: 14, starTwo: 24, starThree: 29 },
+    20: { openTasks: 4, debtLimit: 36, starOne: 38, starTwo: 58, starThree: 65 },
+    30: { openTasks: 4, debtLimit: 46, starOne: 66, starTwo: 93, starThree: 106 },
   },
 };
 
