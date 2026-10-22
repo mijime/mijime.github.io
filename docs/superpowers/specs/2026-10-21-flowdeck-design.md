@@ -40,6 +40,7 @@ Backlog → Ready（設計） → In Progress（開発） → Review（テスト
   - CI/CD・リファクタ・ドキュメントなどスコア0の改善タスクは強いカード（lv5）
 - タスクに載せたカードは獲得まで固定。獲得時に各カードの持ち主の捨て札へ
 - タスクはテンプレートからゲーム開始時に自動生成する。通常50＋効果10＋インシデント6の構成で、名前・要求・スコア/報酬を少し揺らす
+- 高スコア（スコア4〜5）は生成時に **+2** する
 - 生成結果は `taskDefs` としてstateに保存する（seed再生成だけに依存しない）
 - 山札が尽きたら、完了・期限切れのタスク捨て札をシャッフルして山札に戻す
 - インシデントは `kind: "incident"`。期限切れ時に `TaskPenalty` を解決する
@@ -137,9 +138,9 @@ Backlog → Ready（設計） → In Progress（開発） → Review（テスト
 
 | 日数 | 負債上限 | 星 |
 |---:|---:|---|
-| 10 | 18 | 12 / 20 / 24 |
-| 20 | 32 | 32 / 47 / 53 |
-| 30 | 42 | 53 / 76 / 85 |
+| 10 | 18 | 17 / 27 / 33 |
+| 20 | 32 | 43 / 63 / 69 |
+| 30 | 42 | 69 / 96 / 107 |
 
 目標はランダム編成の分布基準。1星は下位25%、2星は上位25%、3星は上位10%。
 
@@ -149,9 +150,9 @@ Backlog → Ready（設計） → In Progress（開発） → Review（テスト
 
 | 日数 | 中央値 | 星3 |
 |---:|---:|---:|
-| 10 | 16 | 30/300 |
-| 20 | 40 | 31/300 |
-| 30 | 64 | 34/300 |
+| 10 | 23 | 31/300 |
+| 20 | 52 | 33/300 |
+| 30 | 84 | 30/300 |
 
 - WIP上限は撤廃。WIPは表示し、リードタイムとの関係を観察する
 - タスク66種類（通常50＋効果10＋インシデント6）、不確実カード16枚の使い回し
@@ -171,6 +172,8 @@ pnpm --filter @mijime/flowdeck sim -- --seed 42
 pnpm --filter @mijime/flowdeck sim -- --players 4
 pnpm --filter @mijime/flowdeck sim -- --players 5
 pnpm --filter @mijime/flowdeck sim -- --players 6
+pnpm --filter @mijime/flowdeck sim -- --strategies
+pnpm --filter @mijime/flowdeck sim -- --tasks
 pnpm --filter @mijime/flowdeck sim -- --days 20
 pnpm --filter @mijime/flowdeck sim -- --days 30
 pnpm --filter @mijime/flowdeck sim -- --help

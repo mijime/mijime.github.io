@@ -85,6 +85,8 @@ const INCIDENT_SUBJECTS = [
 
 const INCIDENT_SUFFIXES = ["障害", "停止", "漏えい", "不整合", "遅延", "急増"];
 
+export const HIGH_SCORE_BONUS = 2;
+
 function generateName(state: GameState, kind: TaskKind, used: Set<string>): string {
   const subjects = kind === "incident" ? INCIDENT_SUBJECTS : SUBJECTS;
   const suffixes = kind === "incident" ? INCIDENT_SUFFIXES : NOUN_SUFFIXES;
@@ -133,6 +135,10 @@ export function generateTaskDefs(state: GameState): TaskDef[] {
         score -= 1;
         rewardLevel += 1;
       }
+    }
+
+    if (kind === "normal" && score >= 4) {
+      score += HIGH_SCORE_BONUS;
     }
 
     defs.push({

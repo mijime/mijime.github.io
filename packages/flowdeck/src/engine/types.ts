@@ -20,19 +20,19 @@ export interface TeamRules {
  */
 const TEAM_RULES_TABLE: Record<number, Record<number, TeamRules>> = {
   4: {
-    10: { openTasks: 3, debtLimit: 15, starOne: 9, starTwo: 18, starThree: 20 },
-    20: { openTasks: 3, debtLimit: 29, starOne: 22, starTwo: 37, starThree: 42 },
-    30: { openTasks: 3, debtLimit: 39, starOne: 40, starTwo: 62, starThree: 69 },
+    10: { openTasks: 3, debtLimit: 15, starOne: 11, starTwo: 23, starThree: 28 },
+    20: { openTasks: 3, debtLimit: 29, starOne: 30, starTwo: 47, starThree: 57 },
+    30: { openTasks: 3, debtLimit: 39, starOne: 53, starTwo: 78, starThree: 88 },
   },
   5: {
-    10: { openTasks: 4, debtLimit: 18, starOne: 12, starTwo: 20, starThree: 24 },
-    20: { openTasks: 4, debtLimit: 32, starOne: 32, starTwo: 47, starThree: 53 },
-    30: { openTasks: 4, debtLimit: 42, starOne: 53, starTwo: 76, starThree: 85 },
+    10: { openTasks: 4, debtLimit: 18, starOne: 17, starTwo: 27, starThree: 33 },
+    20: { openTasks: 4, debtLimit: 32, starOne: 43, starTwo: 63, starThree: 69 },
+    30: { openTasks: 4, debtLimit: 42, starOne: 69, starTwo: 96, starThree: 107 },
   },
   6: {
-    10: { openTasks: 4, debtLimit: 22, starOne: 14, starTwo: 24, starThree: 29 },
-    20: { openTasks: 4, debtLimit: 36, starOne: 38, starTwo: 58, starThree: 65 },
-    30: { openTasks: 4, debtLimit: 46, starOne: 66, starTwo: 93, starThree: 106 },
+    10: { openTasks: 4, debtLimit: 22, starOne: 20, starTwo: 33, starThree: 42 },
+    20: { openTasks: 4, debtLimit: 36, starOne: 55, starTwo: 74, starThree: 83 },
+    30: { openTasks: 4, debtLimit: 46, starOne: 89, starTwo: 117, starThree: 128 },
   },
 };
 
@@ -252,7 +252,7 @@ export interface Outcome {
 }
 
 export interface GameState {
-  version: 15;
+  version: 16;
   seed: number;
   rngState: number;
   day: number;

@@ -78,7 +78,7 @@ describe("setup", () => {
     expect(state.taskDeck).toHaveLength(TASK_DEFS.length - state.rules.openTasks);
     expect(state.uncertaintyDeck).toHaveLength(16);
     expect(state.phase).toBe("human");
-    expect(state.rules).toMatchObject({ openTasks: 4, debtLimit: 18, starThree: 24 });
+    expect(state.rules).toMatchObject({ openTasks: 4, debtLimit: 18, starThree: 33 });
     expect(state.players.filter((player) => !player.isHuman)).toHaveLength(4);
     expect(state.players.every((player) => player.hand.length === HAND_SIZE)).toBe(true);
   });
@@ -89,17 +89,17 @@ describe("setup", () => {
     expect(state.rules).toMatchObject({
       openTasks: 3,
       debtLimit: 15,
-      starThree: 20,
+      starThree: 28,
     });
   });
 
   it("20日/30日で目標と負債上限が伸びる", () => {
     const twenty = createGame(1, 20, 4);
     expect(twenty.totalDays).toBe(20);
-    expect(twenty.rules).toMatchObject({ debtLimit: 32, starOne: 32, starTwo: 47, starThree: 53 });
+    expect(twenty.rules).toMatchObject({ debtLimit: 32, starOne: 43, starTwo: 63, starThree: 69 });
     const thirty = createGame(1, 30, 4);
     expect(thirty.totalDays).toBe(30);
-    expect(thirty.rules).toMatchObject({ debtLimit: 42, starOne: 53, starTwo: 76, starThree: 85 });
+    expect(thirty.rules).toMatchObject({ debtLimit: 42, starOne: 69, starTwo: 96, starThree: 107 });
   });
 
   it("AIの名前・性格は開始時にランダムで決まる", () => {
