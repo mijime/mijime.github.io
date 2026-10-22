@@ -56,20 +56,16 @@ const SUBJECTS = [
   "問い合わせ",
 ];
 
-const SUFFIXES = [
+const NOUN_SUFFIXES = [
   "改善",
-  "高速化",
-  "簡略化",
-  "自動化",
-  "最適化",
-  "強化",
-  "整備",
   "見直し",
-  "可視化",
-  "安定化",
-  "効率化",
-  "標準化",
+  "整備",
+  "強化",
   "統合",
+  "対応",
+  "刷新",
+  "再構築",
+  "自動化",
 ];
 
 const INCIDENT_SUBJECTS = [
@@ -91,11 +87,16 @@ const INCIDENT_SUFFIXES = ["障害", "停止", "漏えい", "不整合", "遅延
 
 function generateName(state: GameState, kind: TaskKind, used: Set<string>): string {
   const subjects = kind === "incident" ? INCIDENT_SUBJECTS : SUBJECTS;
-  const suffixes = kind === "incident" ? INCIDENT_SUFFIXES : SUFFIXES;
+  const suffixes = kind === "incident" ? INCIDENT_SUFFIXES : NOUN_SUFFIXES;
   for (let attempt = 0; attempt < 40; attempt += 1) {
     const subject = subjects[randInt(state, subjects.length)] ?? subjects[0]!;
     const suffix = suffixes[randInt(state, suffixes.length)] ?? suffixes[0]!;
-    const name = kind === "incident" ? `${subject}${suffix}` : `${subject}の${suffix}`;
+    const name =
+      kind === "incident"
+        ? `${subject}${suffix}`
+        : randInt(state, 2) === 0
+          ? `${subject}の${suffix}`
+          : `${subject}${suffix}`;
     if (!used.has(name)) {
       used.add(name);
       return name;
