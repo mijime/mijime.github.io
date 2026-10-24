@@ -72,9 +72,9 @@ body {
 
 .flow-deadline {
   display: inline-block;
-  width: 0.42rem;
-  height: 0.42rem;
-  border: 1px solid var(--border);
+  width: 0.5rem;
+  height: 0.5rem;
+  border: 1px solid color-mix(in srgb, var(--ink) 38%, transparent);
   border-radius: 50%;
 }
 

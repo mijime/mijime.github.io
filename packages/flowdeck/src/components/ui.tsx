@@ -157,10 +157,10 @@ export const CARD_LABEL: Record<CardType, string> = {
 };
 
 export const CARD_STYLE: Record<CardType, string> = {
-  design: "border-violet-400/60 bg-violet-500/10 text-violet-800 dark:text-violet-200",
-  dev: "border-blue-400/60 bg-blue-500/10 text-blue-800 dark:text-blue-200",
-  test: "border-amber-400/60 bg-amber-500/10 text-amber-800 dark:text-amber-200",
-  debt: "border-red-400/60 bg-red-500/10 text-red-700 dark:text-red-200",
+  design: "border-violet-500/50 bg-violet-500/15 text-(--ink)",
+  dev: "border-blue-500/50 bg-blue-500/15 text-(--ink)",
+  test: "border-amber-500/50 bg-amber-500/15 text-(--ink)",
+  debt: "border-red-500/50 bg-red-500/15 text-(--ink)",
 };
 
 export const CARD_TEXT: Record<CardType, string> = {

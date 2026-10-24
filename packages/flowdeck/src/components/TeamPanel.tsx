@@ -24,7 +24,7 @@ export function TeamPanel({ state, aiTab, onSelectAi }: Props) {
         <h2 className="serif flex items-center gap-1 text-[12px] font-semibold">
           <Users size={11} /> チーム
         </h2>
-        <span className="text-[8px] text-(--mid)">{ais.length}人</span>
+        <span className="text-[9px] text-(--ink)/65">{ais.length}人</span>
       </div>
 
       <div className="grid grid-cols-2 gap-1">
@@ -49,13 +49,13 @@ export function TeamPanel({ state, aiTab, onSelectAi }: Props) {
                   className={playerTone?.text ?? "text-(--mid)"}
                 />
                 <span className="min-w-0 flex-1">
-                  <span className="block truncate text-[9px] font-medium">{player.name}</span>
-                  <span className="block truncate text-[7px] text-(--mid)">
+                  <span className="block truncate text-[10px] font-semibold">{player.name}</span>
+                  <span className="block truncate text-[8.5px] text-(--ink)/65">
                     {traitSummary(player.weights)}
                   </span>
                 </span>
               </span>
-              <span className="mt-0.5 flex items-center justify-between text-[7px] text-(--mid)">
+              <span className="mt-0.5 flex items-center justify-between text-[8.5px] text-(--ink)/65">
                 <span>完了{player.completed}</span>
                 <span>{player.score}pt</span>
                 <span>{player.actionsLeft}手</span>
@@ -65,17 +65,17 @@ export function TeamPanel({ state, aiTab, onSelectAi }: Props) {
         })}
       </div>
 
-      <div className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 border-t border-(--border)/70 pt-1.5 text-[8px] text-(--mid)">
-        <span className={`serif text-[11px] font-semibold ${tone?.text ?? ""}`}>
+      <div className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 border-t border-(--border)/70 pt-1.5 text-[9px] text-(--ink)/65">
+        <span className={`serif text-[12px] font-semibold ${tone?.text ?? ""}`}>
           <TraitIcon weights={selected.weights} size={12} className="mr-0.5 inline" />
           {selected.name}
         </span>
-        {isActive && <span className="text-(--terra)">手番中</span>}
+        {isActive && <span className="font-medium text-(--terra)">手番中</span>}
         <span className="inline-flex items-center gap-0.5">
-          <Hand size={8} /> {selected.hand.length}
+          <Hand size={9} /> {selected.hand.length}
         </span>
         <span className="inline-flex items-center gap-0.5">
-          <Layers size={8} /> 山{selected.deck.length} / 捨{selected.discard.length}
+          <Layers size={9} /> 山{selected.deck.length} / 捨{selected.discard.length}
         </span>
         <span>アクション {selected.actionsLeft}</span>
       </div>
