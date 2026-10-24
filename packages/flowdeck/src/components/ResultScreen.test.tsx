@@ -11,7 +11,6 @@ const player = (overrides: Partial<PlayerOutcome>): PlayerOutcome => ({
   completed: 3,
   score: 6,
   avgWip: 1,
-  lowCards: 0,
   contributed: {
     design: { cards: 2, points: 5 },
     dev: { cards: 1, points: 3 },

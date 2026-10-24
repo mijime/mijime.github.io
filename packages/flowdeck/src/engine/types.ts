@@ -1,8 +1,4 @@
 export const HUMAN_ID = "p1";
-export const ACTIONS_PER_TURN = 3;
-export const HAND_SIZE = 5;
-export const TOTAL_DAYS = 10;
-export const DEBT_SCORE_PENALTY = 2;
 
 export interface TeamRules {
   openTasks: number;
@@ -10,35 +6,6 @@ export interface TeamRules {
   starOne: number;
   starTwo: number;
   starThree: number;
-}
-
-/**
- * 人数×日数の目標値。
- * ランダム編成の分布を基準に、1星は下位25%、2星は上位25%、3星は上位10%。
- * 目標値はカード追加のたびに再計測する。
- * 参照は厳密な最適解ではなく、固定した強政策の近似。
- */
-const TEAM_RULES_TABLE: Record<number, Record<number, TeamRules>> = {
-  4: {
-    10: { openTasks: 3, debtLimit: 10, starOne: 10, starTwo: 21, starThree: 26 },
-    20: { openTasks: 3, debtLimit: 11, starOne: 34, starTwo: 48, starThree: 55 },
-    30: { openTasks: 3, debtLimit: 13, starOne: 58, starTwo: 78, starThree: 85 },
-  },
-  5: {
-    10: { openTasks: 4, debtLimit: 12, starOne: 14, starTwo: 26, starThree: 32 },
-    20: { openTasks: 4, debtLimit: 14, starOne: 44, starTwo: 62, starThree: 70 },
-    30: { openTasks: 4, debtLimit: 16, starOne: 76, starTwo: 97, starThree: 106 },
-  },
-  6: {
-    10: { openTasks: 4, debtLimit: 15, starOne: 17, starTwo: 30, starThree: 36 },
-    20: { openTasks: 4, debtLimit: 18, starOne: 55, starTwo: 72, starThree: 81 },
-    30: { openTasks: 4, debtLimit: 21, starOne: 94, starTwo: 118, starThree: 128 },
-  },
-};
-
-export function teamRulesFor(playerCount: number, totalDays = 10): TeamRules {
-  const byDays = TEAM_RULES_TABLE[playerCount] ?? TEAM_RULES_TABLE[5]!;
-  return byDays[totalDays] ?? byDays[10]!;
 }
 
 export type CardType = "design" | "dev" | "test" | "debt";
@@ -58,17 +25,20 @@ export interface ContributionStats {
   points: number;
 }
 
-export type CardEffect =
-  | { kind: "draw"; amount: number }
-  | { kind: "action"; amount: number }
-  | { kind: "boost"; amount: number }
-  | { kind: "debt-clean"; amount: number }
-  /** 今のフェーズの要求を軽減するトークン */
-  | { kind: "requirement"; amount: number }
-  /** タスクの納期を延ばすトークン */
-  | { kind: "deadline"; amount: number }
-  /** 個人トークンを獲得する */
-  | { kind: "token"; token: string; amount: number };
+export interface CardEffectMap {
+  draw: { amount: number };
+  action: { amount: number };
+  "debt-clean": { amount: number };
+  deadline: { amount: number };
+  token: { token: string; amount: number };
+  shield: { amount: number };
+}
+
+export type CardEffectKind = keyof CardEffectMap;
+
+export type CardEffect = {
+  [K in CardEffectKind]: { kind: K } & CardEffectMap[K];
+}[CardEffectKind];
 
 export interface CardInstance {
   id: number;
@@ -83,7 +53,7 @@ export interface CardInstance {
 export interface AttachedCard {
   card: CardInstance;
   ownerId: string;
-  /** 実際に使った種類（代用時は設計/開発のlv1） */
+  /** 実際に使った種類（代用ありルールでは代用元はlv1） */
   playType: CardType;
   playLevel: number;
 }
@@ -102,17 +72,24 @@ export interface TaskReward {
 
 export type TaskKind = "normal" | "incident";
 
-export type TaskPenalty =
-  | { kind: "allPlayersDebt"; amount: number }
-  | { kind: "ownerDebt"; amount: number }
-  | { kind: "teamScore"; amount: number }
-  | { kind: "discardHand"; target: "owner" | "all" }
-  | { kind: "loseAction"; target: "owner" | "all"; amount: number }
-  | { kind: "deadlineToken"; amount: number };
+export interface TaskPenaltyMap {
+  debt: { target: "owner" | "all"; amount: number };
+  teamScore: { amount: number };
+  discardHand: { target: "owner" | "all" };
+  loseAction: { target: "owner" | "all"; amount: number };
+}
+
+export type TaskPenaltyKind = keyof TaskPenaltyMap;
+
+export type TaskPenalty = {
+  [K in TaskPenaltyKind]: { kind: K } & TaskPenaltyMap[K];
+}[TaskPenaltyKind];
 
 export interface TaskDef {
   id: string;
   title: string;
+  /** 自動生成時のテーマ。テンプレート生成では未設定 */
+  theme?: string;
   requirements: TaskRequirements;
   score: number;
   /** 納期トークンがこの数に達したらトラッシュ */
@@ -158,23 +135,41 @@ export interface PlayerState {
   actionsLeft: number;
   /** mi などの個人トークン */
   tokens: Record<string, number>;
+  /** 次に受ける負債を防ぐシールド */
+  shields?: number;
   /** 翌日開始時に失うアクション数 */
   actionPenalty: number;
   completed: number;
   score: number;
 }
 
-export type UncertaintyEffect =
-  | { kind: "require"; phase: "design" | "dev" | "test"; amount: number }
-  | { kind: "debt"; amount: number }
-  | { kind: "score"; amount: number }
-  | { kind: "nothing" };
+export interface RiskEffectMap {
+  require: { phase: "design" | "dev" | "test"; amount: number };
+  /** 任意フェーズの余剰で吸収できるリスク */
+  wildcard: { amount: number };
+  /** 想定外の好機。LLMトークンを得る */
+  token: { amount: number };
+  nothing: {};
+}
 
-export interface UncertaintyDef {
+export type RiskEffectKind = keyof RiskEffectMap;
+
+export type RiskEffect = {
+  [K in RiskEffectKind]: { kind: K } & RiskEffectMap[K];
+}[RiskEffectKind];
+
+export interface RiskDef {
   id: string;
   title: string;
   description: string;
-  effect: UncertaintyEffect;
+  effect: RiskEffect;
+}
+
+export interface RiskStat {
+  drawn: number;
+  absorbed: number;
+  unmet: number;
+  debt: number;
 }
 
 export interface LogEntry {
@@ -208,7 +203,6 @@ export interface PlayerOutcome {
   completed: number;
   score: number;
   avgWip: number;
-  lowCards: number;
   contributed: Record<ContributionPhase, ContributionStats>;
   deck: Record<CardType, number>;
 }
@@ -232,7 +226,7 @@ export interface AcquisitionReport {
   contributions: Contribution[];
   score: number;
   reward: TaskReward;
-  uncertainty: { title: string; description: string }[];
+  risks: { title: string; description: string }[];
   added: { design: number; dev: number; test: number };
   unmet: boolean;
   debt: number;
@@ -257,7 +251,7 @@ export interface Outcome {
 }
 
 export interface GameState {
-  version: 18;
+  version: 26;
   seed: number;
   rngState: number;
   day: number;
@@ -271,8 +265,10 @@ export interface GameState {
   taskDefs: TaskDef[];
   taskDeck: string[];
   taskDiscard: string[];
-  uncertaintyDeck: string[];
-  uncertaintyDiscard: string[];
+  riskDeck: string[];
+  riskDiscard: string[];
+  /** リスクカードごとの draw / 吸収 / 未吸収 / 発生した負債 */
+  riskStats: Record<string, RiskStat>;
   teamScore: number;
   teamDebt: number;
   scorePenalty: number;

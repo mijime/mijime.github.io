@@ -51,7 +51,7 @@ export function TurnBanner({
                 : "待機"}
         </span>
 
-        <span className="min-w-0 flex-1 text-[9px] text-(--mid)">
+        <span className="min-w-0 flex-1 text-[10px] text-(--ink)/70">
           {isHuman ? (
             <>
               <MousePointerClick size={10} className="mr-1 inline" />

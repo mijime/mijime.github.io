@@ -25,7 +25,7 @@ export function FlowTrack({ counts, onFelt = false }: { counts?: FlowCounts; onF
   return (
     <svg
       viewBox="0 0 620 58"
-      className={`block h-[58px] w-full ${onFelt ? "text-(--felt-ink)" : "text-(--mid)"}`}
+      className={`block h-[58px] w-full ${onFelt ? "text-(--tac-ink)" : "text-(--mid)"}`}
       role="img"
       aria-label={
         counts

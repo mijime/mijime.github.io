@@ -306,66 +306,6 @@ body {
   pointer-events: none;
 }
 
-/* Board-game table */
-:root {
-  --wood: #a8784e;
-  --wood-light: #c69a6f;
-  --wood-dark: #6e4a2e;
-  --felt: #5c6e55;
-  --felt-ink: #f7f2e6;
-  --felt-dot: rgb(255 255 255 / 0.08);
-  --felt-line: rgb(255 255 255 / 0.22);
-}
-
-[data-theme="dark"] {
-  --wood: #3a271a;
-  --wood-light: #523825;
-  --wood-dark: #21150d;
-  --felt: #2c3a30;
-  --felt-ink: #f2eee3;
-  --felt-dot: rgb(255 255 255 / 0.05);
-  --felt-line: rgb(255 255 255 / 0.14);
-}
-
-.game-table {
-  position: relative;
-  border-radius: 16px;
-  padding: 9px;
-  background:
-    repeating-linear-gradient(90deg, transparent 0 42px, rgb(0 0 0 / 0.04) 42px 44px),
-    linear-gradient(170deg, var(--wood-light), var(--wood) 38%, var(--wood-dark));
-  box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.25),
-    0 24px 48px -32px rgb(0 0 0 / 0.65);
-}
-
-.game-table-felt {
-  position: relative;
-  overflow: hidden;
-  border: 1px dashed var(--felt-line);
-  border-radius: 9px;
-  padding: 8px;
-  background: var(--felt);
-  box-shadow:
-    inset 0 2px 10px rgb(0 0 0 / 0.28),
-    inset 0 0 0 1px rgb(0 0 0 / 0.12);
-}
-
-.board-plaque {
-  background: color-mix(in srgb, var(--paper) 96%, var(--grid));
-  border: 1px solid color-mix(in srgb, var(--wood-dark) 35%, var(--border));
-  box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.55),
-    0 8px 18px -16px rgb(0 0 0 / 0.7);
-}
-
-.game-table .game-board {
-  border: 0;
-  padding: 0;
-  background: transparent;
-  box-shadow: none;
-}
-
 /* Paper grain on cards */
 .flow-card {
   position: relative;
@@ -378,30 +318,203 @@ body {
   border-radius: inherit;
   pointer-events: none;
   opacity: 0.05;
-  mix-blend-mode: multiply;
+  mix-blend-mode: soft-light;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
-@media (max-width: 640px) {
-  .game-table {
-    border-radius: 12px;
-    padding: 6px;
-  }
-
-  .game-table-felt {
-    padding: 6px;
-  }
+/* Tactical UI */
+.flow-root[data-theme="dark"] {
+  --paper: #0a1118;
+  --ink: #e6f2f3;
+  --mid: #8aa2b0;
+  --border: #20313f;
+  --grid: #0f1a23;
+  --toolbar-bg: #070c11;
+  --terra: #2ee6c5;
+  --tac-bg: #05090d;
+  --tac-panel: #0a1118;
+  --tac-panel-2: #0d1821;
+  --tac-line: #1c2d3a;
+  --tac-line-bright: #2d4a5c;
+  --tac-accent: #2ee6c5;
+  --tac-amber: #ffb43a;
+  --tac-danger: #ff5f6d;
+  --tac-dim: #5f7887;
+  background:
+    radial-gradient(circle at 50% -10%, rgb(46 230 197 / 0.08), transparent 42rem),
+    radial-gradient(circle at 100% 20%, rgb(56 189 248 / 0.05), transparent 30rem), var(--tac-bg);
+  color: var(--ink);
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
 }
 
-/* Hand rail */
-.game-hand {
-  border-top: 6px solid var(--wood);
-  background: linear-gradient(
-    180deg,
-    color-mix(in srgb, var(--wood-light) 12%, var(--paper)),
-    var(--paper) 42%
-  );
+.flow-root [class~="bg-(--terra)"] {
+  color: #03110e;
+}
+
+.flow-root[data-theme="dark"] .game-topbar {
+  background: color-mix(in srgb, var(--tac-panel) 92%, transparent);
+  border-bottom: 1px solid var(--tac-line-bright);
   box-shadow:
-    0 -14px 34px -30px rgb(0 0 0 / 0.65),
-    inset 0 1px 0 rgb(255 255 255 / 0.3);
+    0 1px 0 rgb(46 230 197 / 0.22),
+    0 16px 32px -30px #000;
+}
+
+.flow-root[data-theme="dark"] .game-logo {
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  text-shadow: 0 0 18px rgb(46 230 197 / 0.35);
+}
+
+.flow-root[data-theme="dark"] .game-stat {
+  background: color-mix(in srgb, var(--tac-panel-2) 88%, transparent);
+  border-color: var(--tac-line);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.04);
+}
+
+.flow-root[data-theme="dark"] .turn-banner {
+  background: linear-gradient(90deg, rgb(46 230 197 / 0.08), transparent 45%), var(--tac-panel);
+  border-color: var(--tac-line);
+  box-shadow:
+    inset 2px 0 0 var(--tac-accent),
+    0 10px 24px -24px #000;
+}
+
+.flow-root[data-theme="dark"] .game-hand {
+  border-top: 1px solid var(--tac-line-bright);
+  background: linear-gradient(180deg, rgb(9 17 24 / 0.96), rgb(5 10 15 / 0.98));
+  box-shadow:
+    0 -1px 0 rgb(46 230 197 / 0.18),
+    0 -20px 40px -30px #000;
+}
+
+.flow-root[data-theme="dark"] .flow-card {
+  background: linear-gradient(160deg, #0e1a24, #0a1219);
+  border-color: var(--tac-line);
+}
+
+.flow-root[data-theme="dark"] .flow-lane {
+  background:
+    linear-gradient(rgb(46 230 197 / 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(46 230 197 / 0.035) 1px, transparent 1px),
+    linear-gradient(180deg, rgb(13 24 33 / 0.9), rgb(7 13 19 / 0.96));
+  background-size:
+    16px 16px,
+    16px 16px,
+    auto;
+  border-color: var(--tac-line);
+  border-radius: 2px;
+}
+
+.flow-root[data-theme="dark"] .game-board {
+  border: 1px solid var(--tac-line);
+  border-radius: 2px;
+  padding: 6px;
+  background: rgb(8 15 21 / 0.55);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.03);
+}
+
+.tac-panel {
+  position: relative;
+  border: 1px solid var(--tac-line);
+  border-radius: 2px;
+  background: linear-gradient(180deg, rgb(13 24 33 / 0.96), rgb(8 15 21 / 0.98));
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.03);
+}
+
+.tac-panel::before,
+.tac-panel::after {
+  content: "";
+  position: absolute;
+  width: 11px;
+  height: 11px;
+  pointer-events: none;
+}
+
+.tac-panel::before {
+  top: -1px;
+  left: -1px;
+  border-top: 2px solid var(--tac-accent);
+  border-left: 2px solid var(--tac-accent);
+}
+
+.tac-panel::after {
+  right: -1px;
+  bottom: -1px;
+  border-right: 2px solid var(--tac-accent);
+  border-bottom: 2px solid var(--tac-accent);
+}
+
+.tac-label {
+  font-size: 9px;
+  line-height: 1.2;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--tac-dim);
+}
+
+.tac-value {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.tac-rule {
+  height: 1px;
+  background: linear-gradient(90deg, var(--tac-line-bright), transparent);
+}
+
+.tac-card {
+  position: relative;
+  border: 1px solid var(--tac-line);
+  border-left: 2px solid var(--tac-accent);
+  border-radius: 2px;
+  background: linear-gradient(160deg, #0e1a24, #0a1219);
+  box-shadow:
+    0 1px 0 rgb(255 255 255 / 0.04),
+    0 12px 20px -18px #000;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.tac-card:hover {
+  border-color: var(--tac-line-bright);
+  box-shadow:
+    0 0 0 1px rgb(46 230 197 / 0.15),
+    0 18px 28px -20px #000;
+}
+
+.tac-lane[data-lane="inbox"] {
+  border-top-color: #a78bfa;
+}
+
+.tac-lane[data-lane="wip"] {
+  border-top-color: #38bdf8;
+}
+
+.tac-lane[data-lane="test"] {
+  border-top-color: #fbbf24;
+}
+
+.tac-lane {
+  border-top-width: 2px;
+  border-top-style: solid;
+}
+
+.tac-track {
+  background: #0a141c;
+  box-shadow: inset 0 0 0 1px var(--tac-line);
+}
+
+.tac-track > span {
+  background: var(--tac-accent);
+  box-shadow: 0 0 10px rgb(46 230 197 / 0.45);
+}
+
+.tac-lane[data-lane="open"] {
+  border-top-color: #38bdf8;
+}
+
+.tac-lane[data-lane="done"] {
+  border-top-color: #34d399;
 }

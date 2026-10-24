@@ -1,4 +1,4 @@
-import { Hand, Layers, Users } from "lucide-react";
+import { Layers, Users } from "lucide-react";
 import type { GameState } from "../engine/types";
 import { PLAYER_TONE, TraitIcon, traitSummary } from "./ui";
 
@@ -19,12 +19,12 @@ export function TeamPanel({ state, aiTab, onSelectAi }: Props) {
   const tone = PLAYER_TONE[selected.id];
 
   return (
-    <section className="rounded-sm border border-(--border) bg-(--paper) p-2">
+    <section className="tac-panel p-2">
       <div className="mb-1.5 flex items-baseline justify-between gap-1">
-        <h2 className="serif flex items-center gap-1 text-[12px] font-semibold">
-          <Users size={11} /> チーム
+        <h2 className="flex items-center gap-1.5 text-[11px] font-semibold tracking-[0.08em]">
+          <Users size={11} className="text-(--terra)" /> チーム
         </h2>
-        <span className="text-[9px] text-(--ink)/65">{ais.length}人</span>
+        <span className="text-[9px] tabular-nums text-(--tac-dim)">{ais.length}人</span>
       </div>
 
       <div className="grid grid-cols-2 gap-1">
@@ -36,48 +36,57 @@ export function TeamPanel({ state, aiTab, onSelectAi }: Props) {
               key={player.id}
               type="button"
               onClick={() => onSelectAi(player.id)}
-              className={`min-w-0 rounded-sm border px-1.5 py-1 text-left transition-colors ${
+              title={`${player.name} / ${traitSummary(player.weights)} / 完了${player.completed} / ${player.score}pt / 手${player.hand.length} / 山${player.deck.length} / 捨${player.discard.length}`}
+              className={`min-w-0 flex items-center gap-1 rounded-sm border px-1.5 py-1 text-left transition-colors ${
                 selectedTab
                   ? `${playerTone?.border ?? "border-(--border)"} ${playerTone?.bg ?? ""}`
-                  : "border-(--border) hover:border-(--terra)/50"
-              } ${player.id === activeId ? "flow-pulse" : ""}`}
+                  : "border-(--tac-line) bg-(--tac-panel-2) hover:border-(--terra)/50"
+              }`}
             >
-              <span className="flex items-center gap-1.5">
-                <TraitIcon
-                  weights={player.weights}
-                  size={14}
-                  className={playerTone?.text ?? "text-(--mid)"}
-                />
-                <span className="min-w-0 flex-1">
-                  <span className="block truncate text-[10px] font-semibold">{player.name}</span>
-                  <span className="block truncate text-[8.5px] text-(--ink)/65">
-                    {traitSummary(player.weights)}
-                  </span>
-                </span>
+              <TraitIcon
+                weights={player.weights}
+                size={12}
+                className={playerTone?.text ?? "text-(--tac-dim)"}
+              />
+              <span className="min-w-0 flex-1 truncate text-[10px] font-semibold">
+                {player.name}
               </span>
-              <span className="mt-0.5 flex items-center justify-between text-[8.5px] text-(--ink)/65">
-                <span>完了{player.completed}</span>
-                <span>{player.score}pt</span>
-                <span>{player.actionsLeft}手</span>
-              </span>
+              {player.id === activeId && (
+                <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-(--terra) shadow-[0_0_6px_var(--terra)]" />
+              )}
             </button>
           );
         })}
       </div>
 
-      <div className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 border-t border-(--border)/70 pt-1.5 text-[9px] text-(--ink)/65">
-        <span className={`serif text-[12px] font-semibold ${tone?.text ?? ""}`}>
-          <TraitIcon weights={selected.weights} size={12} className="mr-0.5 inline" />
-          {selected.name}
-        </span>
-        {isActive && <span className="font-medium text-(--terra)">手番中</span>}
-        <span className="inline-flex items-center gap-0.5">
-          <Hand size={9} /> {selected.hand.length}
-        </span>
-        <span className="inline-flex items-center gap-0.5">
-          <Layers size={9} /> 山{selected.deck.length} / 捨{selected.discard.length}
-        </span>
-        <span>アクション {selected.actionsLeft}</span>
+      <div className="mt-1.5 border-t border-(--tac-line) pt-1.5">
+        <div className="flex items-center gap-1">
+          <span
+            className={`inline-flex items-center gap-0.5 text-[10px] font-semibold ${tone?.text ?? ""}`}
+          >
+            <TraitIcon weights={selected.weights} size={10} />
+            {selected.name}
+          </span>
+          {isActive && <span className="text-[8px] font-medium text-(--terra)">手番中</span>}
+          <span className="ml-auto text-[8px] tabular-nums text-(--tac-dim)">
+            完{selected.completed} / {selected.score}pt
+          </span>
+        </div>
+        <div className="mt-0.5 flex items-center gap-1.5 text-[8px] text-(--tac-dim)">
+          <span className="flex shrink-0 gap-0.5" title={`残りアクション ${selected.actionsLeft}`}>
+            {Array.from({ length: 3 }, (_, index) => (
+              <span
+                key={index}
+                className={`h-1.5 w-1.5 ${index < selected.actionsLeft ? "bg-(--terra)" : "bg-(--border)"}`}
+              />
+            ))}
+          </span>
+          <span className="min-w-0 truncate">{traitSummary(selected.weights)}</span>
+          <span className="ml-auto shrink-0 inline-flex items-center gap-0.5">
+            <Layers size={8} /> 手{selected.hand.length} 山{selected.deck.length} 捨
+            {selected.discard.length}
+          </span>
+        </div>
       </div>
     </section>
   );

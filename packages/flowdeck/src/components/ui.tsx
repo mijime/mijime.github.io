@@ -1,14 +1,13 @@
 import type {
-  CardEffect,
   CardInstance,
   CardType,
   GameState,
   PersonalityWeights,
   TaskCard,
-  TaskPenalty,
 } from "../engine/types";
 import { playerById, taskSum } from "../engine/metrics";
-import { tokenDef } from "../data/tokens";
+import { effectDescription, effectLabel } from "../engine/rules/effects";
+import { effectivePlayLevel, phaseForLane } from "../engine/rules/lanes";
 import {
   AlertTriangle,
   CheckCircle2,
@@ -302,47 +301,15 @@ export function cardTitle(card: CardInstance): string {
   return card.title ?? cardName(card);
 }
 
-export function penaltyLabel(penalty?: TaskPenalty): string | null {
-  if (!penalty) return null;
-  if (penalty.kind === "allPlayersDebt") return `全員に負債${penalty.amount}`;
-  if (penalty.kind === "ownerDebt") return `担当者に負債${penalty.amount}`;
-  if (penalty.kind === "teamScore") return `企業価値-${penalty.amount}`;
-  if (penalty.kind === "discardHand") {
-    return penalty.target === "all" ? "全員の手札を捨てる" : "担当者の手札を捨てる";
-  }
-  if (penalty.kind === "loseAction") {
-    return penalty.target === "all"
-      ? `全員は翌日アクション-${penalty.amount}`
-      : `担当者は翌日アクション-${penalty.amount}`;
-  }
-  return `進行中タスクに納期+${penalty.amount}`;
-}
-
-export function effectLabel(effect?: CardEffect): string | null {
-  if (!effect) return null;
-  if (effect.kind === "draw") return `ドロー+${effect.amount}`;
-  if (effect.kind === "action") return `アクション+${effect.amount}`;
-  if (effect.kind === "boost") return `貢献+${effect.amount}`;
-  if (effect.kind === "requirement") return `要件-${effect.amount}`;
-  if (effect.kind === "deadline") return `納期+${effect.amount}`;
-  if (effect.kind === "token") {
-    return `${tokenDef(effect.token)?.short ?? effect.token}トークン+${effect.amount}`;
-  }
-  return `負債除去${effect.amount}`;
-}
+export { effectDescription, effectLabel } from "../engine/rules/effects";
+export { penaltyLabel } from "../engine/rules/penalties";
 
 export function targetTypeForLane(task: TaskCard): "design" | "dev" | "test" | null {
-  if (task.lane === "inbox") return "design";
-  if (task.lane === "wip") return "dev";
-  if (task.lane === "test") return "test";
-  return null;
+  return phaseForLane(task.lane);
 }
 
 export function effectiveCardLevel(card: CardInstance, target: "design" | "dev" | "test"): number {
-  if (card.type === "debt") return 0;
-  const boost = card.effect?.kind === "boost" ? card.effect.amount : 0;
-  if (target === "test") return card.type === "test" ? card.level + boost : 0;
-  return (card.type === target ? card.level : 1) + boost;
+  return effectivePlayLevel(card, target);
 }
 
 export function canPlayCardOnTask(card: CardInstance, task: TaskCard): boolean {
@@ -355,8 +322,9 @@ export function canPlayCardOnTask(card: CardInstance, task: TaskCard): boolean {
 
 export function rewardLabel(task: TaskCard): string {
   const effect = effectLabel(task.reward.effect);
+  const description = effectDescription(task.reward.effect);
   return `報酬: ${CARD_LABEL[task.reward.type]}lv${task.reward.level}${
-    effect ? ` / ${effect}` : ""
+    effect ? ` / ${effect}${description ? `（${description}）` : ""}` : ""
   }`;
 }
 

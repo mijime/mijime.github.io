@@ -32,7 +32,7 @@ function DeadlinePips({ task }: { task: TaskCard }) {
   const aging = task.tokens >= task.deadline - 1;
   return (
     <span
-      className="inline-flex flex-wrap items-center gap-1 text-[9px] text-(--ink)/65"
+      className="inline-flex flex-wrap items-center gap-1 text-[9px] text-(--tac-dim)"
       title={`納期 ${task.tokens}/${task.deadline}`}
     >
       <span className="inline-flex gap-0.5">
@@ -40,9 +40,7 @@ function DeadlinePips({ task }: { task: TaskCard }) {
           <DeadlinePip key={index} filled={index < task.tokens} />
         ))}
       </span>
-      <span className={aging ? "font-semibold text-red-600 dark:text-red-300" : ""}>
-        {task.tokens}日
-      </span>
+      <span className={aging ? "font-semibold text-red-300" : ""}>{task.tokens}日</span>
     </span>
   );
 }
@@ -61,24 +59,39 @@ function Requirement({
   active: boolean;
 }) {
   const met = required <= 0 || value >= required;
+  const percent = required > 0 ? Math.min(100, (value / required) * 100) : 0;
   return (
     <span
-      className={`rounded-sm border px-1 py-1 text-[10px] ${
+      className={`rounded-sm border px-1 py-1 ${
         met
-          ? "border-emerald-500/50 bg-emerald-500/10"
+          ? "border-emerald-500/40 bg-emerald-500/5"
           : active
-            ? "border-(--terra)/60 bg-(--terra)/5"
-            : "border-(--border) bg-(--paper)"
+            ? "border-(--terra)/50 bg-(--terra)/5"
+            : "border-(--tac-line) bg-(--tac-panel-2)/70"
       }`}
       title={`${label} ${value}/${required}`}
       aria-label={`${label} ${value}/${required}`}
     >
-      <span className="flex items-center justify-center gap-0.5 text-[8px]">
-        <CardTypeBadge type={type} size={8} />
+      <span className="flex items-center gap-1 text-[8px] uppercase tracking-[0.1em] text-(--tac-dim)">
+        <CardTypeBadge type={type} size={7} /> {label}
       </span>
-      <span className="block text-center font-semibold text-(--ink)">
+      <span
+        className={`mt-0.5 block text-center text-[12px] font-semibold tabular-nums ${
+          met ? "text-emerald-300" : "text-(--ink)"
+        }`}
+      >
         {required <= 0 ? "—" : `${value}/${required}`}
       </span>
+      {required > 0 && (
+        <span className="mt-1 block h-0.5 w-full overflow-hidden bg-(--border)">
+          <span
+            className={`block h-full ${
+              met ? "bg-emerald-400" : active ? "bg-(--terra)" : "bg-(--tac-dim)"
+            }`}
+            style={{ width: `${percent}%` }}
+          />
+        </span>
+      )}
     </span>
   );
 }
@@ -87,7 +100,6 @@ export function TaskCardView({ state, task, dispatch, selectedCard, compact = fa
   const target = targetTypeForLane(task);
   const canTarget = selectedCard !== null && canPlayCardOnTask(selectedCard, task);
   const owner = task.ownerId ? state.players.find((player) => player.id === task.ownerId) : null;
-  const ownerTone = task.ownerId ? PLAYER_TONE[task.ownerId] : undefined;
   const contributions = taskContributions(state, task);
   const contributionLeader = contributions[0];
   const contributionLeaderPlayer = contributionLeader
@@ -96,6 +108,14 @@ export function TaskCardView({ state, task, dispatch, selectedCard, compact = fa
   const isDone = task.lane === "done";
   const human = state.players.find((player) => player.isHuman);
   const canUseMi = state.phase === "human" && target !== null && (human?.tokens.mi ?? 0) > 0;
+  const accent =
+    target === "design"
+      ? "#a78bfa"
+      : target === "dev"
+        ? "#38bdf8"
+        : target === "test"
+          ? "#fbbf24"
+          : "var(--tac-accent)";
 
   return (
     <article
@@ -104,19 +124,20 @@ export function TaskCardView({ state, task, dispatch, selectedCard, compact = fa
           dispatch({ type: "PLAY_CARD", cardId: selectedCard.id, taskId: task.id });
         }
       }}
-      className={`flow-card flow-card-in rounded-sm border-t-[3px] p-2 ${
-        ownerTone?.border ?? "border-t-(--border)"
-      } ${canTarget ? "cursor-pointer ring-2 ring-(--terra)/60" : ""}`}
+      className={`tac-card flow-card-in p-2 ${
+        canTarget ? "cursor-pointer ring-2 ring-(--terra)/60" : ""
+      }`}
+      style={{ borderLeftColor: accent }}
       title={canTarget ? "選択中のカードを置く" : undefined}
     >
       <div className="flex items-start gap-1">
         <h3
-          className={`min-w-0 flex-1 font-semibold leading-snug ${compact ? "text-[10px]" : "text-[11.5px]"}`}
+          className={`min-w-0 flex-1 font-semibold leading-snug ${compact ? "text-[10px]" : "text-[12px]"}`}
         >
           {task.title}
         </h3>
         {task.kind === "incident" && (
-          <span className="shrink-0 rounded-sm border border-red-400/60 bg-red-500/15 px-1 text-[8px] font-bold text-red-700 dark:text-red-300">
+          <span className="shrink-0 rounded-sm border border-red-400/60 bg-red-500/15 px-1 text-[8px] font-bold tracking-wider text-red-300">
             INC
           </span>
         )}
@@ -134,18 +155,20 @@ export function TaskCardView({ state, task, dispatch, selectedCard, compact = fa
             <LlmToken className="h-4 w-4" />
           </button>
         )}
-        <span className="shrink-0 text-[11px] font-semibold text-(--terra)">+{task.score}</span>
+        <span className="shrink-0 rounded-sm border border-(--tac-line) bg-(--tac-panel-2) px-1 text-[12px] font-semibold tabular-nums text-(--terra)">
+          +{task.score}
+        </span>
       </div>
 
-      <div className="mt-0.5 flex flex-wrap items-center gap-1 text-[9px] text-(--ink)/65">
+      <div className="mt-0.5 flex flex-wrap items-center gap-1 text-[9px] text-(--tac-dim)">
         {!compact && <span>{taskOwnerName(state, task)}</span>}
         {owner && compact && <span>{owner.name}</span>}
         {isDone && <span>Day {task.acquiredDay} 完了</span>}
-        {task.expiredLane && <span className="font-medium text-red-600">期限切れ</span>}
+        {task.expiredLane && <span className="font-medium text-red-300">期限切れ</span>}
       </div>
 
       {task.kind === "incident" && task.penalty && (
-        <p className="mt-0.5 text-[9px] font-medium text-red-600 dark:text-red-300">
+        <p className="mt-0.5 text-[9px] font-medium text-red-300">
           期限切れ: {penaltyLabel(task.penalty)}
         </p>
       )}
@@ -176,7 +199,7 @@ export function TaskCardView({ state, task, dispatch, selectedCard, compact = fa
 
       {!compact && contributionLeader && (
         <p
-          className="mt-1 flex flex-wrap items-center gap-1 text-[9px] text-(--ink)/65"
+          className="mt-1 flex flex-wrap items-center gap-1 text-[9px] text-(--tac-dim)"
           title={contributions
             .map(
               (contribution) =>
@@ -218,19 +241,19 @@ export function TaskCardView({ state, task, dispatch, selectedCard, compact = fa
       )}
 
       {compact && task.attached.length > 0 && (
-        <p className="mt-0.5 text-[9px] text-(--ink)/65">カード {task.attached.length}枚</p>
+        <p className="mt-0.5 text-[9px] text-(--tac-dim)">カード {task.attached.length}枚</p>
       )}
 
       <div className="mt-1 flex flex-wrap items-center justify-between gap-1">
         <DeadlinePips task={task} />
         <span
-          className="inline-flex items-center gap-0.5 rounded-sm border border-emerald-500/50 bg-emerald-500/10 px-1 py-0.5 text-[9px] text-(--ink)"
+          className="inline-flex items-center gap-0.5 rounded-sm border border-(--tac-line) bg-(--tac-panel-2) px-1 py-0.5 text-[9px] text-(--ink)"
           title={rewardLabel(task)}
         >
           <CardTypeBadge type={task.reward.type} size={8} />
           <LevelStars level={task.reward.level} className="text-[9px] text-(--terra)" />
           {task.reward.effect && (
-            <span className="ml-0.5 text-[8px] font-medium text-(--ink)/70">
+            <span className="ml-0.5 text-[8px] font-medium text-(--tac-dim)">
               {effectLabel(task.reward.effect)}
             </span>
           )}

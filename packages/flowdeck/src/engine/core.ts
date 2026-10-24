@@ -2,10 +2,12 @@ import { tokenDef } from "../data/tokens";
 import { discardHand, drawCards } from "./hand";
 import { pushLog } from "./log";
 import { makeSnapshot, playerById, recomputeTeamStats } from "./metrics";
+import { BASE_RULES, type RuleSet } from "./rules";
+import { applyCardEffect } from "./rules/effects";
+import { effectivePlayLevel, phaseForLane, PHASE_LABEL } from "./rules/lanes";
 import { computeOutcome } from "./scoring";
 import { advanceTasks, canPull, expireTasks, refillOpen } from "./tasks";
-import type { CardInstance, GameState, PlayerState } from "./types";
-import { ACTIONS_PER_TURN } from "./types";
+import type { GameState } from "./types";
 
 export function pullTask(state: GameState, playerId: string, taskId: string): boolean {
   const player = state.players.find((p) => p.id === playerId);
@@ -21,78 +23,13 @@ export function pullTask(state: GameState, playerId: string, taskId: string): bo
   return true;
 }
 
-function applyCardEffect(
-  state: GameState,
-  player: PlayerState,
-  card: CardInstance,
-  task: {
-    title: string;
-    requirements: { design: number; dev: number; test: number };
-    deadline: number;
-  },
-  targetType: "design" | "dev" | "test",
-): void {
-  const effect = card.effect;
-  if (!effect || effect.amount <= 0) return;
-
-  if (effect.kind === "draw") {
-    const drawn = drawCards(state, player, effect.amount);
-    if (drawn > 0) pushLog(state, `${player.name}: カード効果で${drawn}枚ドロー`, "good");
-    return;
-  }
-
-  if (effect.kind === "action") {
-    player.actionsLeft += effect.amount;
-    pushLog(state, `${player.name}: カード効果でアクション +${effect.amount}`, "good");
-    return;
-  }
-
-  if (effect.kind === "debt-clean") {
-    let removed = 0;
-    for (const zone of [player.hand, player.deck, player.discard]) {
-      const index = zone.findIndex((candidate) => candidate.type === "debt");
-      if (index >= 0) {
-        zone.splice(index, 1);
-        removed += 1;
-        if (removed >= effect.amount) break;
-      }
-    }
-    if (removed > 0) {
-      recomputeTeamStats(state);
-      pushLog(state, `${player.name}: カード効果で負債 ${removed}枚を除去`, "good");
-    }
-    return;
-  }
-
-  if (effect.kind === "requirement") {
-    const before = task.requirements[targetType];
-    task.requirements[targetType] = Math.max(0, before - effect.amount);
-    const reduced = before - task.requirements[targetType];
-    if (reduced > 0) {
-      pushLog(state, `${player.name}: 要件トークン -${reduced} → ${task.title}`, "good");
-    }
-    return;
-  }
-
-  if (effect.kind === "deadline") {
-    task.deadline += effect.amount;
-    pushLog(state, `${player.name}: 納期トークン +${effect.amount} → ${task.title}`, "good");
-    return;
-  }
-
-  if (effect.kind === "token") {
-    const def = tokenDef(effect.token);
-    player.tokens[effect.token] = (player.tokens[effect.token] ?? 0) + effect.amount;
-    pushLog(state, `${player.name}: ${def?.label ?? effect.token} +${effect.amount}`, "good");
-  }
-}
-
 /** 個人トークンを任意レーンのレベル1作業として置く。アクションは消費しない。 */
 export function useToken(
   state: GameState,
   playerId: string,
   token: string,
   taskId: string,
+  rules: RuleSet = BASE_RULES,
 ): boolean {
   const player = state.players.find((entry) => entry.id === playerId);
   if (!player || (player.tokens[token] ?? 0) <= 0) return false;
@@ -100,26 +37,18 @@ export function useToken(
   if (!def) return false;
   const task = state.tasks.find((entry) => entry.id === taskId);
   if (!task) return false;
-  const type =
-    task.lane === "inbox"
-      ? "design"
-      : task.lane === "wip"
-        ? "dev"
-        : task.lane === "test"
-          ? "test"
-          : null;
+  const type = phaseForLane(task.lane);
   if (!type) return false;
 
   player.tokens[token] = (player.tokens[token] ?? 0) - 1;
   task.tokenWork[type] += def.workLevel;
   player.contributed[type].points += def.workLevel;
-  const label = type === "design" ? "設計" : type === "dev" ? "開発" : "テスト";
   pushLog(
     state,
-    `${player.name}: ${def.label} → ${task.title}（${label} lv${def.workLevel}）`,
+    `${player.name}: ${def.label} → ${task.title}（${PHASE_LABEL[type]} lv${def.workLevel}）`,
     "good",
   );
-  advanceTasks(state);
+  advanceTasks(state, rules);
   return true;
 }
 
@@ -128,6 +57,7 @@ export function playCard(
   playerId: string,
   cardId: number,
   taskId: string,
+  rules: RuleSet = BASE_RULES,
 ): boolean {
   const player = state.players.find((p) => p.id === playerId);
   if (!player || player.actionsLeft <= 0) return false;
@@ -139,31 +69,23 @@ export function playCard(
   const task = state.tasks.find((t) => t.id === taskId);
   if (!task) return false;
 
-  const targetType =
-    task.lane === "inbox"
-      ? "design"
-      : task.lane === "wip"
-        ? "dev"
-        : task.lane === "test"
-          ? "test"
-          : null;
+  const targetType = phaseForLane(task.lane);
   if (!targetType) return false;
 
-  if (targetType === "test" && card.type !== "test") return false;
+  const playLevel = effectivePlayLevel(card, targetType, rules.balance.allowSubstitution);
+  if (playLevel <= 0) return false;
 
   const playType = targetType;
-  const boost = card.effect?.kind === "boost" ? card.effect.amount : 0;
-  const playLevel = (card.type === targetType ? card.level : 1) + boost;
   player.hand.splice(handIndex, 1);
   task.attached.push({ card, ownerId: playerId, playType, playLevel });
   player.contributed[playType].cards += 1;
   player.contributed[playType].points += playLevel;
   player.actionsLeft -= 1;
-  applyCardEffect(state, player, card, task, playType);
+  if (card.effect) applyCardEffect(rules.effects, { state, player, task }, card.effect);
 
   const support = task.ownerId !== playerId;
   const substitute = card.type !== targetType;
-  const typeLabel = playType === "design" ? "設計" : playType === "dev" ? "開発" : "テスト";
+  const typeLabel = PHASE_LABEL[playType];
   pushLog(
     state,
     `${player.name}: ${typeLabel}lv${playLevel}${substitute ? `（${card.type}lv${card.level}代用）` : ""}${
@@ -172,7 +94,7 @@ export function playCard(
     "info",
   );
 
-  advanceTasks(state);
+  advanceTasks(state, rules);
   return true;
 }
 
@@ -228,19 +150,23 @@ export function finishAction(state: GameState): void {
 }
 
 /** 全員の手札・アクションをリセットして、あなたから1手ずつ始める */
-export function startRound(state: GameState): void {
-  for (const player of state.players) startPlayerTurn(state, player.id);
+export function startRound(state: GameState, rules: RuleSet = BASE_RULES): void {
+  for (const player of state.players) startPlayerTurn(state, player.id, rules);
   state.phase = "human";
   state.activePlayerIndex = 0;
   if ((state.players[0]?.actionsLeft ?? 0) <= 0) advanceAction(state);
 }
 
-export function startPlayerTurn(state: GameState, playerId: string): void {
+export function startPlayerTurn(
+  state: GameState,
+  playerId: string,
+  rules: RuleSet = BASE_RULES,
+): void {
   const player = playerById(state, playerId);
   discardHand(player);
   const penalty = player.actionPenalty;
   player.actionPenalty = 0;
-  player.actionsLeft = Math.max(0, ACTIONS_PER_TURN - penalty);
+  player.actionsLeft = Math.max(0, rules.balance.actionsPerTurn - penalty);
   if (penalty > 0) {
     pushLog(
       state,
@@ -248,11 +174,11 @@ export function startPlayerTurn(state: GameState, playerId: string): void {
       "bad",
     );
   }
-  drawCards(state, player, 5);
+  drawCards(state, player, rules.balance.handSize);
 }
 
-export function finishRound(state: GameState): void {
-  expireTasks(state);
+export function finishRound(state: GameState, rules: RuleSet = BASE_RULES): void {
+  expireTasks(state, rules);
   recomputeTeamStats(state);
   state.metrics.push(makeSnapshot(state));
   pushLog(state, `Day ${state.day} 終了`, "info");
@@ -260,11 +186,11 @@ export function finishRound(state: GameState): void {
 
   if (state.day > state.totalDays) {
     state.phase = "over";
-    state.outcome = computeOutcome(state);
+    state.outcome = computeOutcome(state, rules);
     pushLog(state, "プロジェクト終了", "good");
     return;
   }
 
-  startRound(state);
+  startRound(state, rules);
   pushLog(state, `Day ${state.day} 開始`, "info");
 }

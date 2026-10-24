@@ -9,7 +9,7 @@ import {
   TrendingUp,
 } from "lucide-react";
 import type { GameState } from "../engine/types";
-import { DEBT_SCORE_PENALTY } from "../engine/types";
+import { DEBT_SCORE_PENALTY } from "../engine/rules/balance";
 
 interface Props {
   state: GameState;
@@ -34,19 +34,15 @@ function Stat({
   title?: string;
 }) {
   const toneClass =
-    tone === "good"
-      ? "text-emerald-700 dark:text-emerald-400"
-      : tone === "bad"
-        ? "text-red-600 dark:text-red-400"
-        : "text-(--ink)";
+    tone === "good" ? "text-emerald-400" : tone === "bad" ? "text-red-400" : "text-(--ink)";
   return (
     <span
       className="game-stat inline-flex items-center gap-1 rounded-sm border border-(--border) bg-(--paper) px-1.5 py-0.5"
       title={title}
     >
-      {icon && <span className="text-(--mid)">{icon}</span>}
-      <span className="text-[9px] text-(--mid)">{label}</span>
-      <span className={`text-[11px] font-medium ${toneClass}`}>{value}</span>
+      {icon && <span className="text-(--tac-dim)">{icon}</span>}
+      <span className="tac-label">{label}</span>
+      <span className={`text-[13px] font-semibold tabular-nums ${toneClass}`}>{value}</span>
     </span>
   );
 }
@@ -99,19 +95,23 @@ export function Header({ state, onHelp, onIntro, onNewGame, autoMode, onStopAuto
             <LayoutGrid size={18} className="text-(--terra)" /> Flowdeck
           </h1>
 
-          <div className="flex min-w-[132px] items-center gap-1.5">
-            <span className="inline-flex items-center gap-1 whitespace-nowrap text-[9px] text-(--mid)">
+          <div className="flex min-w-[132px] items-center gap-2">
+            <span className="inline-flex items-center gap-1 whitespace-nowrap tac-label">
               <CalendarDays size={10} /> Day{" "}
-              <strong key={state.day} className="day-pop text-(--ink)">
+              <strong key={state.day} className="day-pop text-[12px] font-semibold text-(--ink)">
                 {state.day}
               </strong>{" "}
               / {state.totalDays}
             </span>
-            <span className="h-1.5 w-24 overflow-hidden rounded-full bg-(--grid)">
-              <span
-                className="block h-full rounded-full bg-(--terra)"
-                style={{ width: `${Math.min(100, (state.day / state.totalDays) * 100)}%` }}
-              />
+            <span className="flex items-center gap-0.5" aria-hidden="true">
+              {Array.from({ length: state.totalDays }, (_, index) => (
+                <span
+                  key={index}
+                  className={`h-2.5 w-[3px] ${
+                    index < state.day ? "bg-(--terra)" : "bg-(--border)"
+                  }`}
+                />
+              ))}
             </span>
           </div>
 
@@ -167,21 +167,30 @@ export function Header({ state, onHelp, onIntro, onNewGame, autoMode, onStopAuto
               onClick={onIntro}
               className="inline-flex items-center gap-1 rounded-sm border border-(--border) bg-(--paper) px-2 py-1 text-[10px] text-(--mid) transition-colors hover:border-(--terra) hover:text-(--terra)"
             >
-              <BookOpen size={12} /> <span className="hidden sm:inline">はじめに</span>
+              <BookOpen size={12} />{" "}
+              <span className="hidden text-[9px] uppercase tracking-[0.12em] sm:inline">
+                はじめに
+              </span>
             </button>
             <button
               type="button"
               onClick={onHelp}
               className="inline-flex items-center gap-1 rounded-sm border border-(--border) bg-(--paper) px-2 py-1 text-[10px] text-(--mid) transition-colors hover:border-(--terra) hover:text-(--terra)"
             >
-              <HelpCircle size={12} /> <span className="hidden sm:inline">遊び方</span>
+              <HelpCircle size={12} />{" "}
+              <span className="hidden text-[9px] uppercase tracking-[0.12em] sm:inline">
+                遊び方
+              </span>
             </button>
             <button
               type="button"
               onClick={onNewGame}
               className="inline-flex items-center gap-1 rounded-sm border border-(--border) bg-(--paper) px-2 py-1 text-[10px] text-(--mid) transition-colors hover:border-(--terra) hover:text-(--terra)"
             >
-              <RotateCcw size={12} /> <span className="hidden sm:inline">新しいゲーム</span>
+              <RotateCcw size={12} />{" "}
+              <span className="hidden text-[9px] uppercase tracking-[0.12em] sm:inline">
+                新しいゲーム
+              </span>
             </button>
           </div>
         </div>

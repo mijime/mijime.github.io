@@ -1,6 +1,6 @@
 import { AlertTriangle, ArrowRight, Sparkles } from "lucide-react";
 import type { AcquisitionReport } from "../engine/types";
-import { CARD_LABEL, LevelStars, effectLabel } from "./ui";
+import { CARD_LABEL, LevelStars, effectDescription, effectLabel } from "./ui";
 
 interface Props {
   report: AcquisitionReport;
@@ -56,7 +56,10 @@ export function AcquisitionModal({ report, debtLimit, onClose }: Props) {
                 <LevelStars level={report.reward.level} className="text-[9px]" />
               </span>
               {report.reward.effect && (
-                <span className="mt-0.5 block text-[8px] text-(--terra)">
+                <span
+                  className="mt-0.5 block text-[8px] text-(--terra)"
+                  title={effectDescription(report.reward.effect) ?? undefined}
+                >
                   {effectLabel(report.reward.effect)}
                 </span>
               )}
@@ -89,9 +92,9 @@ export function AcquisitionModal({ report, debtLimit, onClose }: Props) {
           </section>
 
           <section>
-            <h3 className="text-[9px] font-medium text-(--mid)">不確実カード</h3>
+            <h3 className="text-[9px] font-medium text-(--mid)">リスクカード</h3>
             <ul className="mt-1 space-y-1">
-              {report.uncertainty.map((card, index) => (
+              {report.risks.map((card, index) => (
                 <li
                   key={`${card.title}-${index}`}
                   className="rounded-sm border border-(--border) bg-(--paper) px-2 py-1"
@@ -100,8 +103,8 @@ export function AcquisitionModal({ report, debtLimit, onClose }: Props) {
                   <span className="ml-2 text-[8px] text-(--mid)">{card.description}</span>
                 </li>
               ))}
-              {report.uncertainty.length === 0 && (
-                <li className="text-[9px] text-(--mid)">不確実カードは引かれませんでした。</li>
+              {report.risks.length === 0 && (
+                <li className="text-[9px] text-(--mid)">リスクカードは引かれませんでした。</li>
               )}
             </ul>
           </section>
@@ -115,7 +118,7 @@ export function AcquisitionModal({ report, debtLimit, onClose }: Props) {
           {report.unmet && (
             <p className="flex items-center gap-1 rounded-sm border border-red-400/50 bg-red-500/10 px-2 py-1 text-[9px] text-red-700 dark:text-red-300">
               <AlertTriangle size={11} />
-              要求未達: 負債 +{report.debt}
+              リスク未吸収: 負債 +{report.debt}
             </p>
           )}
 

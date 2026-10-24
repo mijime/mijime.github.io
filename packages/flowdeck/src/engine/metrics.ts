@@ -7,6 +7,7 @@ import type {
   TaskCard,
   TaskLane,
 } from "./types";
+import { activeTasks } from "./rules/lanes";
 
 export function tasksInLane(state: GameState, playerId: string, lane: TaskLane): TaskCard[] {
   return state.tasks.filter((task) => task.ownerId === playerId && task.lane === lane);
@@ -20,16 +21,8 @@ export function laneTasks(state: GameState, lane: TaskLane): TaskCard[] {
   return state.tasks.filter((task) => task.lane === lane);
 }
 
-export function laneCount(state: GameState, lane: TaskLane): number {
-  return state.tasks.filter((task) => task.lane === lane).length;
-}
-
 export function playerWip(state: GameState, playerId: string): number {
-  return state.tasks.filter(
-    (task) =>
-      task.ownerId === playerId &&
-      (task.lane === "inbox" || task.lane === "wip" || task.lane === "test"),
-  ).length;
+  return activeTasks(state).filter((task) => task.ownerId === playerId).length;
 }
 
 export function completedTasks(state: GameState, playerId?: string): TaskCard[] {
@@ -124,7 +117,7 @@ export function makeSnapshot(state: GameState): DaySnapshot {
     teamScore: state.teamScore,
     teamDebt: state.teamDebt,
     open: openTasks(state).length,
-    wip: laneCount(state, "inbox") + laneCount(state, "wip") + laneCount(state, "test"),
+    wip: activeTasks(state).length,
     completed: completedTasks(state).length,
     perPlayer: state.players.map((player) => ({
       id: player.id,

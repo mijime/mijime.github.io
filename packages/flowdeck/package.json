@@ -18,7 +18,8 @@
     "check:oxlint": "oxlint --format=github --fix",
     "format": "pnpm run format:oxfmt",
     "format:oxfmt": "oxfmt",
-    "sim": "tsx scripts/sim.ts"
+    "sim": "tsx scripts/sim.ts",
+    "tasks": "tsx scripts/tasks.ts"
   },
   "dependencies": {
     "@mijime/theme": "workspace:*",

@@ -1,16 +1,16 @@
 import { useEffect, useRef, useState } from "react";
 import { AcquisitionModal } from "./components/AcquisitionModal";
-import { BoardTexture } from "./components/BoardTexture";
 import { DayTransition } from "./components/DayTransition";
+import { DebtWarning } from "./components/DebtWarning";
 import { HandBar } from "./components/HandBar";
 import { Header } from "./components/Header";
 import { HelpModal } from "./components/HelpModal";
 import { IntroScreen } from "./components/IntroScreen";
-import { TeamBoard } from "./components/TeamBoard";
+import { OpsBoard } from "./components/OpsBoard";
 import { LogPanel } from "./components/LogPanel";
 import { NewGameModal } from "./components/NewGameModal";
-import { OpenTasks } from "./components/OpenTasks";
 import { ResultScreen } from "./components/ResultScreen";
+import { TacticalFrame } from "./components/TacticalFrame";
 import { TeamPanel } from "./components/TeamPanel";
 import { TurnBanner } from "./components/TurnBanner";
 import { loadGame, useGame } from "./store";
@@ -106,41 +106,39 @@ export function App() {
   }
 
   return (
-    <div className="flow-root pb-52">
-      <Header
-        state={state}
-        onHelp={() => setHelpOpen(true)}
-        onIntro={() => setIntroMode("review")}
-        onNewGame={() => setNewGameOpen(true)}
-        autoMode={autoMode}
-        onStopAuto={() => setAutoMode(false)}
-      />
-      <TurnBanner state={state} selectedCard={selectedCard} />
+    <div className="flow-root relative pb-52" data-theme="dark">
+      <TacticalFrame />
+      <div className="relative z-10">
+        <Header
+          state={state}
+          onHelp={() => setHelpOpen(true)}
+          onIntro={() => setIntroMode("review")}
+          onNewGame={() => setNewGameOpen(true)}
+          autoMode={autoMode}
+          onStopAuto={() => setAutoMode(false)}
+        />
+        <DebtWarning debt={state.teamDebt} limit={state.rules.debtLimit} />
+        <TurnBanner state={state} selectedCard={selectedCard} />
 
-      <main className="game-table mx-auto mt-2 max-w-[1440px] px-2 pb-4">
-        <div className="game-table-felt">
-          <BoardTexture />
-          <div className="relative">
-            <OpenTasks state={state} dispatch={dispatch} />
-            <div className="mt-2 grid gap-2 lg:grid-cols-[minmax(0,1fr)_360px]">
-              <div className="min-w-0">
-                <TeamBoard state={state} dispatch={dispatch} selectedCard={selectedCard} />
-              </div>
-              <aside className="min-w-0 space-y-2">
-                <TeamPanel state={state} aiTab={aiTab} onSelectAi={setAiTab} />
-                <LogPanel log={state.log} />
-              </aside>
+        <main className="mx-auto mt-2 flex max-w-[1600px] flex-col gap-2 px-2 pb-4 lg:flex-row">
+          <aside className="order-2 flex w-full shrink-0 flex-col gap-2 lg:order-1 lg:w-[230px]">
+            <TeamPanel state={state} aiTab={aiTab} onSelectAi={setAiTab} />
+            <div className="min-h-0 lg:flex-1">
+              <LogPanel log={state.log} />
             </div>
+          </aside>
+          <div className="order-1 min-w-0 flex-1 lg:order-2">
+            <OpsBoard state={state} dispatch={dispatch} selectedCard={selectedCard} />
           </div>
-        </div>
-      </main>
+        </main>
 
-      <HandBar
-        state={state}
-        dispatch={dispatch}
-        selectedCardId={selectedCardId}
-        onSelect={setSelectedCardId}
-      />
+        <HandBar
+          state={state}
+          dispatch={dispatch}
+          selectedCardId={selectedCardId}
+          onSelect={setSelectedCardId}
+        />
+      </div>
       {dayBanner !== null && (
         <DayTransition key={dayBanner} day={dayBanner} totalDays={state.totalDays} />
       )}

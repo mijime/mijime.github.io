@@ -1,8 +1,11 @@
 import type { GameState, Outcome, PlayerOutcome } from "./types";
-import { DEBT_SCORE_PENALTY } from "./types";
+import { BASE_RULES, type RuleSet } from "./rules";
+import { activeTasks, ACTIVE_LANES } from "./rules/lanes";
+import { summarizeTip, type OutcomeFacts } from "./rules/tips";
 
-export function computeOutcome(state: GameState): Outcome {
-  const finalScore = state.teamScore - state.teamDebt * DEBT_SCORE_PENALTY - state.scorePenalty;
+export function computeOutcome(state: GameState, rules: RuleSet = BASE_RULES): Outcome {
+  const finalScore =
+    state.teamScore - state.teamDebt * rules.balance.debtScorePenalty - state.scorePenalty;
   const failed = state.teamDebt >= state.rules.debtLimit || finalScore < state.rules.starOne;
   const stars = failed
     ? 0
@@ -25,7 +28,6 @@ export function computeOutcome(state: GameState): Outcome {
         ? wipValues.reduce((sum, value) => sum + value, 0) / wipValues.length
         : 0;
     const allCards = [...player.hand, ...player.deck, ...player.discard];
-    const lowCards = allCards.filter((card) => card.type !== "debt" && card.level <= 1).length;
     const deck = { design: 0, dev: 0, test: 0, debt: 0 };
     for (const card of allCards) deck[card.type] += 1;
     return {
@@ -36,7 +38,6 @@ export function computeOutcome(state: GameState): Outcome {
       completed: player.completed,
       score: player.score,
       avgWip,
-      lowCards,
       contributed: {
         design: { ...player.contributed.design },
         dev: { ...player.contributed.dev },
@@ -56,36 +57,32 @@ export function computeOutcome(state: GameState): Outcome {
   const avgWip =
     teamWipValues.length > 0
       ? teamWipValues.reduce((sum, value) => sum + value, 0) / teamWipValues.length
-      : state.tasks.filter(
-          (task) => task.lane === "inbox" || task.lane === "wip" || task.lane === "test",
-        ).length;
-  const activeByLane = (["inbox", "wip", "test"] as const)
-    .map((lane) => ({
-      lane,
-      count: state.tasks.filter((task) => task.lane === lane).length,
-    }))
-    .toSorted((a, b) => b.count - a.count);
+      : activeTasks(state).length;
+  const activeByLane = ACTIVE_LANES.map((lane) => ({
+    lane,
+    count: state.tasks.filter((task) => task.lane === lane).length,
+  })).toSorted((a, b) => b.count - a.count);
   const bottleneck = activeByLane[0]?.count ? activeByLane[0].lane : null;
 
-  const tips: string[] = [];
-  if (state.teamDebt >= state.rules.debtLimit) {
-    tips.push("チーム負債が上限に達しました。納期とテストを優先しましょう。");
-  }
-  if (testExpired > 0) {
-    tips.push("テストで納期切れが発生。テストカードの投資か、仲間のテスト支援を増やしましょう。");
-  }
-  if (avgWip > 6) {
-    tips.push("平均WIPが高めです。同時に抱えるタスクを減らすとリードタイムが縮みます。");
-  }
-  if (state.teamDebt >= 5) {
-    tips.push("負債が多めです。1アクション廃棄で負債カードを整理しましょう。");
-  }
-  if (stars === 3) {
-    tips.push("見事なフロー。チームの能力とWIPが噛み合っています。");
-  }
-  if (tips.length === 0) {
-    tips.push("まずは完走。次はテスト投資とWIPの絞り込みを試しましょう。");
-  }
+  const debtPressure = state.teamDebt / Math.max(1, state.rules.debtLimit);
+  const expiryRate = expiredTasks.length / Math.max(1, completed.length);
+  const nextStar =
+    stars === 0 ? state.rules.starOne : stars === 1 ? state.rules.starTwo : state.rules.starThree;
+  const facts: OutcomeFacts = {
+    state,
+    finalScore,
+    stars,
+    completed: completed.length,
+    expired: expiredTasks.length,
+    testExpired,
+    avgWip,
+    bottleneck,
+    nextStar,
+    expiryRate,
+    debtPressure,
+  };
+  const tips = rules.tips.filter((tip) => tip.when(facts)).map((tip) => tip.text(facts));
+  if (tips.length === 0) tips.push(summarizeTip(facts));
 
   return {
     finalScore,

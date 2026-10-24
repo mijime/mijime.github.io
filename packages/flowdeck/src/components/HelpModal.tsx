@@ -9,7 +9,7 @@ import {
   X,
 } from "lucide-react";
 import type { TeamRules } from "../engine/types";
-import { DEBT_SCORE_PENALTY } from "../engine/types";
+import { DEBT_SCORE_PENALTY } from "../engine/rules/balance";
 import { FlowDiagram } from "./FlowDiagram";
 import { LlmToken } from "./Token";
 import { CARD_STYLE, CardTypeBadge } from "./ui";
@@ -103,12 +103,12 @@ export function HelpModal({ rules, onClose }: { rules: TeamRules; onClose: () =>
 
           <section className="grid gap-1 sm:grid-cols-2">
             <p className="rounded-sm border border-(--border) px-2 py-1">
-              設計・開発は互いに <strong className="text-(--ink)">lv1 代用</strong>
-              。テストはテストのみ。
+              各レーンは<strong className="text-(--ink)">同種カードのみ</strong>
+              。LLMトークンはどのレーンにも置ける。
             </p>
             <p className="rounded-sm border border-(--border) px-2 py-1">
-              獲得時に不確実カード。余剰で吸収し、超えた分は
-              <strong className="text-(--ink)">負債1</strong>。
+              獲得時にリスクカード。余剰で吸収し、超えた分は
+              <strong className="text-(--ink)">企業価値-1</strong>。
             </p>
             <p className="rounded-sm border border-(--border) px-2 py-1">
               報酬は<strong className="text-(--ink)">貢献pt最多</strong>

@@ -4,6 +4,7 @@ import type { Action, GameState, PlayerOutcome } from "../engine/types";
 import { CARD_LABEL, CARD_STYLE, CardTypeBadge, LANE_LABEL, PlayerIcon, traitSummary } from "./ui";
 import { LOG_TONE, groupLogByDay } from "./LogPanel";
 import { newSeed } from "../store";
+import { DEBT_SCORE_PENALTY } from "../engine/rules/balance";
 
 interface Props {
   state: GameState;
@@ -50,7 +51,7 @@ export function ResultScreen({ state, dispatch }: Props) {
     : 0;
 
   return (
-    <div className="flow-root">
+    <div className="flow-root" data-theme="dark">
       <div className="mx-auto max-w-3xl px-4 py-6">
         <header className="text-center">
           <h1 className="serif text-2xl font-semibold">{state.totalDays}日間の四半期終了</h1>
@@ -121,15 +122,17 @@ export function ResultScreen({ state, dispatch }: Props) {
             <h2 className="serif text-[13px] font-semibold">企業価値の内訳</h2>
             <ul className="mt-1.5 space-y-1 text-[10px]">
               <li className="flex items-baseline justify-between gap-2">
-                <span className="text-(--mid)">企業価値</span>
+                <span className="text-(--mid)">企業価値（カード）</span>
                 <span className="font-medium text-emerald-700 dark:text-emerald-400">
                   +{outcome.teamScore}
                 </span>
               </li>
               <li className="flex items-baseline justify-between gap-2">
-                <span className="text-(--mid)">技術的負債 {outcome.teamDebt} × 2</span>
+                <span className="text-(--mid)">
+                  技術的負債 {outcome.teamDebt} × {DEBT_SCORE_PENALTY}
+                </span>
                 <span className="font-medium text-red-600 dark:text-red-400">
-                  -{outcome.teamDebt * 2}
+                  -{outcome.teamDebt * DEBT_SCORE_PENALTY}
                 </span>
               </li>
               {outcome.scorePenalty > 0 && (
@@ -187,7 +190,6 @@ export function ResultScreen({ state, dispatch }: Props) {
                       点 <b className="text-(--ink)">{player.score}</b>
                     </span>
                     <span>WIP {player.avgWip.toFixed(1)}</span>
-                    <span>弱い札 {player.lowCards}</span>
                   </div>
 
                   <div className="mt-1 grid grid-cols-3 gap-1">

@@ -1,9 +1,9 @@
 import { useEffect, useReducer, useRef } from "react";
 import { reduce } from "./engine/reducer";
 import { createGame } from "./engine/setup";
-import type { GameState } from "./engine/types";
+import type { Action, GameState } from "./engine/types";
 
-const STORAGE_KEY = "flowdeck:save:v18";
+const STORAGE_KEY = "flowdeck:save:v26";
 const DB_NAME = "flowdeck";
 const DB_VERSION = 1;
 const STORE_NAME = "saves";
@@ -13,7 +13,7 @@ function isGameState(value: unknown): value is GameState {
   if (typeof value !== "object" || value === null) return false;
   const state = value as Partial<GameState>;
   return (
-    state.version === 18 &&
+    state.version === 26 &&
     typeof state.day === "number" &&
     typeof state.teamScore === "number" &&
     typeof state.teamDebt === "number" &&
@@ -108,7 +108,11 @@ export function useGame() {
     initial.current = loadGame();
   }
   const hadLocalSave = useRef(initial.current !== null);
-  const [state, dispatch] = useReducer(reduce, undefined, () => initial.current ?? createGame());
+  const [state, dispatch] = useReducer(
+    (current: GameState, action: Action) => reduce(current, action),
+    undefined,
+    () => initial.current ?? createGame(),
+  );
 
   useEffect(() => {
     if (hadLocalSave.current) return;

@@ -1,8 +1,11 @@
 import { discardCard, playCard, pullTask, useToken } from "./core";
 import { playerWip, taskSum } from "./metrics";
+import { BASE_RULES, type RuleSet } from "./rules";
+import { effectAiValue } from "./rules/effects";
+import { activeTasks, effectivePlayLevel, phaseForLane, type Phase } from "./rules/lanes";
 import type { CardInstance, GameState, PersonalityWeights, PlayerState, TaskCard } from "./types";
 
-type PlayType = "design" | "dev" | "test";
+type PlayType = Phase;
 
 interface PlayCandidate {
   kind: "play";
@@ -17,7 +20,7 @@ interface PlayCandidate {
 type PullCandidate = { kind: "pull"; task: TaskCard };
 type TrashCandidate = { kind: "trash"; card: CardInstance };
 type BotAction = PlayCandidate | PullCandidate | TrashCandidate;
-type ScoredAction = { action: BotAction; score: number };
+export type ScoredAction = { action: BotAction; score: number };
 
 const PLAY_BASE = 60;
 const PULL_BASE = 55;
@@ -32,31 +35,8 @@ function clamp01(value: number): number {
   return Math.max(0, Math.min(1, value));
 }
 
-function boost(card: CardInstance): number {
-  return card.effect?.kind === "boost" ? card.effect.amount : 0;
-}
-
-function effectiveLevel(card: CardInstance, targetType: PlayType): number {
-  if (targetType === "test") return card.type === "test" ? card.level + boost(card) : 0;
-  return (card.type === targetType ? card.level : 1) + boost(card);
-}
-
-function effectValue(card: CardInstance): number {
-  const effect = card.effect;
-  if (!effect) return 0;
-  if (effect.kind === "draw") return effect.amount * 6;
-  if (effect.kind === "action") return effect.amount * 9;
-  if (effect.kind === "boost") return effect.amount * 6;
-  if (effect.kind === "requirement") return effect.amount * 9;
-  if (effect.kind === "deadline") return effect.amount * 7;
-  if (effect.kind === "token") return effect.amount * 8;
-  return effect.amount * 7;
-}
-
 function activeCount(state: GameState): number {
-  return state.tasks.filter(
-    (task) => task.lane === "inbox" || task.lane === "wip" || task.lane === "test",
-  ).length;
+  return activeTasks(state).length;
 }
 
 function urgencyOf(task: TaskCard): number {
@@ -73,14 +53,15 @@ function taskValue(task: TaskCard): number {
   return clamp01(efficiency * 0.6 + absolute * 0.4 + incident);
 }
 
-function playValue(task: TaskCard, card: CardInstance): number {
+function playValue(task: TaskCard, card: CardInstance, rules: RuleSet): number {
   const raw = taskValue(task);
-  return clamp01(raw * 0.8 + clamp01(effectValue(card) / 30) * 0.2);
+  return clamp01(raw * 0.8 + clamp01(effectAiValue(rules.effects, card.effect) / 30) * 0.2);
 }
 
-function playFeature(candidate: PlayCandidate): number {
+function playFeature(candidate: PlayCandidate, rules: RuleSet): number {
   const after =
-    taskSum(candidate.task, candidate.type) + effectiveLevel(candidate.card, candidate.type);
+    taskSum(candidate.task, candidate.type) +
+    effectivePlayLevel(candidate.card, candidate.type, rules.balance.allowSubstitution);
   if (after >= candidate.required) return 1;
   return clamp01(after / Math.max(1, candidate.required));
 }
@@ -91,18 +72,22 @@ function pullFeature(state: GameState, player: PlayerState): number {
   return clamp01(vacancy * (1 - Math.min(1, own / 4)));
 }
 
-function playScore(candidate: PlayCandidate, weights: PersonalityWeights): number {
-  const feature = playFeature(candidate);
+function playScore(candidate: PlayCandidate, weights: PersonalityWeights, rules: RuleSet): number {
+  const feature = playFeature(candidate, rules);
   const quality = candidate.type === "test" ? 0.5 + 0.5 * feature : Math.min(0.2, feature * 0.2);
   const hygiene = Math.max(0, -weights.greed);
   const urgency = urgencyOf(candidate.task);
-  const completion =
-    effectiveLevel(candidate.card, candidate.type) >= candidate.remaining ? 1 : 0.35;
+  const playLevel = effectivePlayLevel(
+    candidate.card,
+    candidate.type,
+    rules.balance.allowSubstitution,
+  );
+  const completion = playLevel >= candidate.remaining ? 1 : 0.35;
 
   return (
     PLAY_BASE +
     weights.focus * FOCUS_SCALE * feature +
-    Math.max(0, weights.greed) * GREED_SCALE * playValue(candidate.task, candidate.card) +
+    Math.max(0, weights.greed) * GREED_SCALE * playValue(candidate.task, candidate.card, rules) +
     hygiene * 12 * quality +
     (candidate.task.kind === "incident" ? 20 : 0) +
     weights.urgency * URGENCY_SCALE * urgency * completion +
@@ -148,6 +133,7 @@ function bestPlay(
   task: TaskCard,
   type: PlayType,
   weights: PersonalityWeights,
+  rules: RuleSet,
 ): ScoredAction | null {
   const remaining = task.requirements[type] - taskSum(task, type);
   if (remaining <= 0) return null;
@@ -155,13 +141,10 @@ function bestPlay(
   let best: ScoredAction | null = null;
   for (const card of player.hand) {
     if (card.type === "debt" || card.level <= 0) continue;
-    if (type === "test" && card.type !== "test") continue;
-    // 代用は lv1 扱い。フェーズを完了できない代用はカードの無駄なので避ける。
-    if (card.type !== type) {
-      const substituteAfter =
-        taskSum(task, type) + 1 + (card.effect?.kind === "boost" ? card.effect.amount : 0);
-      if (substituteAfter < task.requirements[type]) continue;
-    }
+    const playLevel = effectivePlayLevel(card, type, rules.balance.allowSubstitution);
+    if (playLevel <= 0) continue;
+    // 代用ありルールでは lv1 扱い。フェーズを完了できない代用はカードの無駄なので避ける。
+    if (card.type !== type && taskSum(task, type) + playLevel < task.requirements[type]) continue;
     const candidate: PlayCandidate = {
       kind: "play",
       card,
@@ -171,7 +154,7 @@ function bestPlay(
       remaining,
       required: task.requirements[type],
     };
-    const score = playScore(candidate, weights);
+    const score = playScore(candidate, weights, rules);
     if (!best || score > best.score) best = { action: candidate, score };
   }
   return best;
@@ -205,21 +188,18 @@ function bestTrash(
   return best;
 }
 
-function chooseBotAction(state: GameState, player: PlayerState): BotAction | null {
+function chooseBotActionScored(
+  state: GameState,
+  player: PlayerState,
+  rules: RuleSet,
+): ScoredAction | null {
   const weights = player.weights;
   const candidates: ScoredAction[] = [];
 
   for (const task of state.tasks) {
-    const type: PlayType | null =
-      task.lane === "inbox"
-        ? "design"
-        : task.lane === "wip"
-          ? "dev"
-          : task.lane === "test"
-            ? "test"
-            : null;
+    const type = phaseForLane(task.lane);
     if (!type || !task.ownerId) continue;
-    const play = bestPlay(player, task, type, weights);
+    const play = bestPlay(player, task, type, weights, rules);
     if (play) candidates.push(play);
   }
 
@@ -229,21 +209,14 @@ function chooseBotAction(state: GameState, player: PlayerState): BotAction | nul
   if (trash) candidates.push(trash);
 
   candidates.sort((a, b) => b.score - a.score);
-  return candidates[0]?.action ?? null;
+  return candidates[0] ?? null;
 }
 
 function bestTokenTask(state: GameState): TaskCard | null {
   let best: TaskCard | null = null;
   let bestScore = Number.NEGATIVE_INFINITY;
   for (const task of state.tasks) {
-    const type =
-      task.lane === "inbox"
-        ? "design"
-        : task.lane === "wip"
-          ? "dev"
-          : task.lane === "test"
-            ? "test"
-            : null;
+    const type = phaseForLane(task.lane);
     if (!type) continue;
     const remaining = task.requirements[type] - taskSum(task, type);
     if (remaining <= 0) continue;
@@ -260,23 +233,32 @@ function bestTokenTask(state: GameState): TaskCard | null {
   return best;
 }
 
-function useBotTokens(state: GameState, player: PlayerState): void {
+function useBotTokens(state: GameState, player: PlayerState, rules: RuleSet): void {
   while ((player.tokens.mi ?? 0) > 0) {
     const task = bestTokenTask(state);
     if (!task) break;
-    if (!useToken(state, player.id, "mi", task.id)) break;
+    if (!useToken(state, player.id, "mi", task.id, rules)) break;
   }
 }
 
-export function runBotAction(state: GameState, playerId: string): boolean {
+export function runBotAction(
+  state: GameState,
+  playerId: string,
+  rules: RuleSet = BASE_RULES,
+  onDecision?: (decision: ScoredAction) => void,
+): boolean {
   const player = state.players.find((entry) => entry.id === playerId);
   if (!player || player.actionsLeft <= 0) return false;
   // LLMトークンはアクションを消費しないので、行動前に使い切る。
-  useBotTokens(state, player);
+  useBotTokens(state, player, rules);
   // 行動は focus / greed / urgency の3軸だけで決める。
-  const action = chooseBotAction(state, player);
-  if (!action) return false;
-  if (action.kind === "play") return playCard(state, player.id, action.card.id, action.task.id);
+  const decision = chooseBotActionScored(state, player, rules);
+  if (!decision) return false;
+  onDecision?.(decision);
+  const action = decision.action;
+  if (action.kind === "play") {
+    return playCard(state, player.id, action.card.id, action.task.id, rules);
+  }
   if (action.kind === "pull") return pullTask(state, player.id, action.task.id);
   return discardCard(state, player.id, action.card.id);
 }

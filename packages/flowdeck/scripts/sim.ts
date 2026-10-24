@@ -1,8 +1,11 @@
 import process from "node:process";
 import { playBotRound } from "../src/engine/reducer";
 import { createGame } from "../src/engine/setup";
+import type { ScoredAction } from "../src/engine/ai";
+import { resolveRules, RULE_SETS, type RuleSet } from "../src/engine/rules";
 import type { GameState, PersonalityWeights, TaskCard } from "../src/engine/types";
-import { DEBT_SCORE_PENALTY, TOTAL_DAYS, teamRulesFor } from "../src/engine/types";
+import { TOTAL_DAYS } from "../src/engine/rules/balance";
+import { RISK_BY_ID } from "../src/data/risks";
 
 interface Options {
   runs: number;
@@ -11,6 +14,9 @@ interface Options {
   players: number;
   strategies: boolean;
   tasks: boolean;
+  ai: boolean;
+  risks: boolean;
+  ruleset: string;
 }
 
 interface Strategy {
@@ -42,6 +48,7 @@ function parseArgs(argv: string[]): Options {
   const seed = get("seed");
   const days = Number(get("days") ?? String(TOTAL_DAYS));
   const playerCount = Number(get("players") ?? "5");
+  const ruleset = get("ruleset") ?? "base";
   return {
     runs: Number.isFinite(runs) && runs > 0 ? Math.floor(runs) : 300,
     seed: seed !== undefined && Number.isFinite(Number(seed)) ? Number(seed) : null,
@@ -52,6 +59,9 @@ function parseArgs(argv: string[]): Options {
         : 5,
     strategies: argv.includes("--strategies"),
     tasks: argv.includes("--tasks"),
+    ai: argv.includes("--ai"),
+    risks: argv.includes("--risks"),
+    ruleset,
   };
 }
 
@@ -59,15 +69,17 @@ function playOnce(
   seed: number,
   days: number,
   playerCount: number,
+  rules: RuleSet,
   weights?: PersonalityWeights,
+  onDecision?: (decision: ScoredAction) => void,
 ): GameState {
-  const state = createGame(seed, days, playerCount - 1);
+  const state = createGame(seed, days, playerCount - 1, rules);
   if (weights) {
     for (const player of state.players) player.weights = { ...weights };
   }
   let guard = 0;
   while (state.phase !== "over" && guard < days + 5) {
-    playBotRound(state);
+    playBotRound(state, onDecision, rules);
     guard += 1;
   }
   return state;
@@ -119,7 +131,7 @@ function starCounts(
 }
 
 function showSeed(seed: number, days: number, options: Options): void {
-  const state = playOnce(seed, days, options.players);
+  const state = playOnce(seed, days, options.players, resolveRules(options.ruleset));
   const outcome = state.outcome;
   console.log(`\nseed=${seed} days=${days}`);
   console.log(
@@ -129,7 +141,10 @@ function showSeed(seed: number, days: number, options: Options): void {
         teamScore: state.teamScore,
         teamDebt: state.teamDebt,
         scorePenalty: state.scorePenalty,
-        finalScore: state.teamScore - state.teamDebt * DEBT_SCORE_PENALTY - state.scorePenalty,
+        finalScore:
+          state.teamScore -
+          state.teamDebt * resolveRules(options.ruleset).balance.debtScorePenalty -
+          state.scorePenalty,
         players: state.players.map((player) => ({
           name: player.name,
           weights: player.weights,
@@ -166,8 +181,13 @@ function summarize(options: Options): void {
   const leadTimes: number[] = [];
   const expired: number[] = [];
   const testExpired: number[] = [];
-  const lowCards: number[] = [];
-  const rules = teamRulesFor(options.players, options.days);
+  const cardStats = new Map<
+    string,
+    { n: number; req: number; score: number; level: number; value: number }
+  >();
+  const tipRuns = new Map<string, number>();
+  let tipTotal = 0;
+  const rules = resolveRules(options.ruleset).balance.teamRules(options.players, options.days);
   const debtLimit = rules.debtLimit;
   const perPlayer = new Map<
     string,
@@ -175,7 +195,6 @@ function summarize(options: Options): void {
       completed: number[];
       score: number[];
       wip: number[];
-      low: number[];
       design: number[];
       dev: number[];
       test: number[];
@@ -186,7 +205,7 @@ function summarize(options: Options): void {
   >();
 
   for (let seed = 1; seed <= options.runs; seed += 1) {
-    const state = playOnce(seed, options.days, options.players);
+    const state = playOnce(seed, options.days, options.players, resolveRules(options.ruleset));
     const outcome = state.outcome;
     if (!outcome) continue;
     scores.push(outcome.finalScore);
@@ -198,13 +217,38 @@ function summarize(options: Options): void {
     leadTimes.push(outcome.avgLeadTime);
     expired.push(outcome.expired);
     testExpired.push(outcome.testExpired);
-    lowCards.push(outcome.perPlayer.reduce((sum, player) => sum + player.lowCards, 0));
+
+    const seenTips = new Set<string>();
+    for (const tip of outcome.tips) {
+      tipTotal += 1;
+      const category = tipCategory(tip);
+      if (seenTips.has(category)) continue;
+      seenTips.add(category);
+      tipRuns.set(category, (tipRuns.get(category) ?? 0) + 1);
+    }
+
+    for (const def of state.taskDefs) {
+      const category = taskClass(def);
+      const entry = cardStats.get(category) ?? {
+        n: 0,
+        req: 0,
+        score: 0,
+        level: 0,
+        value: 0,
+      };
+      entry.n += 1;
+      entry.req += def.requirements.design + def.requirements.dev + def.requirements.test;
+      entry.score += def.score;
+      entry.level += def.reward.level;
+      entry.value += def.score + def.reward.level + (def.reward.effect ? 1 : 0);
+      cardStats.set(category, entry);
+    }
+
     for (const player of outcome.perPlayer) {
       const entry = perPlayer.get(player.name) ?? {
         completed: [],
         score: [],
         wip: [],
-        low: [],
         design: [],
         dev: [],
         test: [],
@@ -215,7 +259,6 @@ function summarize(options: Options): void {
       entry.completed.push(player.completed);
       entry.score.push(player.score);
       entry.wip.push(player.avgWip);
-      entry.low.push(player.lowCards);
       entry.design.push(player.contributed.design.cards);
       entry.dev.push(player.contributed.dev.cards);
       entry.test.push(player.contributed.test.cards);
@@ -226,7 +269,9 @@ function summarize(options: Options): void {
     }
   }
 
-  console.log(`\n[weights] runs=${scores.length} days=${options.days} players=${options.players}`);
+  console.log(
+    `\n[weights] runs=${scores.length} days=${options.days} players=${options.players} ruleset=${options.ruleset}`,
+  );
   printDistribution("final score", scores);
   printDistribution("team score", teamScores);
   printDistribution("debt", debts);
@@ -234,7 +279,7 @@ function summarize(options: Options): void {
   printDistribution("avg WIP (team)", avgWips);
   printDistribution("avg lead time", leadTimes);
   console.log(
-    `  expired tasks avg=${average(expired).toFixed(2)} / test expired avg=${average(testExpired).toFixed(2)} / low cards avg=${average(lowCards).toFixed(2)}`,
+    `  expired tasks avg=${average(expired).toFixed(2)} / test expired avg=${average(testExpired).toFixed(2)}`,
   );
   console.log(
     `  debt>=${debtLimit}: ${debts.filter((d) => d >= debtLimit).length} / max=${Math.max(...debts)}`,
@@ -243,16 +288,43 @@ function summarize(options: Options): void {
   console.log(
     `    ${rules.starOne}/${rules.starTwo}/${rules.starThree} (debt<${debtLimit}): ${starCounts(scores, { one: rules.starOne, two: rules.starTwo, three: rules.starThree }, debtLimit, debts)}`,
   );
+
+  const sortedScores = scores.toSorted((a, b) => a - b);
+  const sortedDebts = debts.toSorted((a, b) => a - b);
+  console.log(
+    `  recommended: stars ${percentile(sortedScores, 0.25)}/${percentile(sortedScores, 0.75)}/${percentile(sortedScores, 0.9)} / debtLimit ${percentile(sortedDebts, 0.95)} (current ${rules.starOne}/${rules.starTwo}/${rules.starThree} / ${rules.debtLimit})`,
+  );
+
+  console.log("  generated card stats (value = score + reward.level + effect bonus):");
+  for (const category of ["standard", "high-score", "effect", "incident"]) {
+    const entry = cardStats.get(category);
+    if (!entry || entry.n === 0) continue;
+    console.log(
+      `    ${category.padEnd(10)} n=${(entry.n / Math.max(1, scores.length)).toFixed(1)}/run req=${(entry.req / entry.n).toFixed(1)} score=${(entry.score / entry.n).toFixed(2)} lv=${(entry.level / entry.n).toFixed(2)} value/req=${(entry.value / entry.req).toFixed(3)}`,
+    );
+  }
+
+  console.log("  board meeting (runs with tip):");
+  const tipEntries = [...tipRuns.entries()].toSorted((a, b) => b[1] - a[1]);
+  console.log(
+    `    avg tips=${(tipTotal / Math.max(1, scores.length)).toFixed(2)} / ${tipEntries
+      .map(
+        ([category, count]) =>
+          `${category}=${((count / Math.max(1, scores.length)) * 100).toFixed(1)}%`,
+      )
+      .join(" / ")}`,
+  );
+
   console.log("  per player:");
   for (const [name, entry] of perPlayer) {
     console.log(
-      `    ${name}: completed=${average(entry.completed).toFixed(1)} score=${average(entry.score).toFixed(1)} play(設/開/テ)=${average(entry.design).toFixed(1)}/${average(entry.dev).toFixed(1)}/${average(entry.test).toFixed(1)} deck(設/開/テ)=${average(entry.deckDesign).toFixed(1)}/${average(entry.deckDev).toFixed(1)}/${average(entry.deckTest).toFixed(1)} avgWIP=${average(entry.wip).toFixed(1)} lowCards=${average(entry.low).toFixed(1)}`,
+      `    ${name}: completed=${average(entry.completed).toFixed(1)} score=${average(entry.score).toFixed(1)} play(設/開/テ)=${average(entry.design).toFixed(1)}/${average(entry.dev).toFixed(1)}/${average(entry.test).toFixed(1)} deck(設/開/テ)=${average(entry.deckDesign).toFixed(1)}/${average(entry.deckDev).toFixed(1)}/${average(entry.deckTest).toFixed(1)} avgWIP=${average(entry.wip).toFixed(1)}`,
     );
   }
 }
 
 function summarizeStrategies(options: Options): void {
-  const rules = teamRulesFor(options.players, options.days);
+  const rules = resolveRules(options.ruleset).balance.teamRules(options.players, options.days);
   const rows = STRATEGIES.map((strategy) => {
     const scores: number[] = [];
     const debts: number[] = [];
@@ -260,7 +332,13 @@ function summarizeStrategies(options: Options): void {
     let completed = 0;
     let expired = 0;
     for (let seed = 1; seed <= options.runs; seed += 1) {
-      const state = playOnce(seed, options.days, options.players, strategy.weights);
+      const state = playOnce(
+        seed,
+        options.days,
+        options.players,
+        resolveRules(options.ruleset),
+        strategy.weights,
+      );
       const outcome = state.outcome;
       if (!outcome) continue;
       scores.push(outcome.finalScore);
@@ -289,11 +367,27 @@ function summarizeStrategies(options: Options): void {
   }
 }
 
-function taskClass(task: TaskCard): string {
+function taskClass(task: {
+  kind?: TaskCard["kind"];
+  reward: TaskCard["reward"];
+  score: number;
+}): string {
   if (task.kind === "incident") return "incident";
-  if (task.score === 0) return "investment";
-  if (task.score >= 6) return "high-score";
+  if (task.reward.effect) return "effect";
+  if (task.score >= 4) return "high-score";
   return "standard";
+}
+
+function tipCategory(tip: string): string {
+  if (tip.startsWith("3つ星")) return "praise";
+  if (tip.startsWith("負債上限")) return "debt-limit";
+  if (tip.startsWith("星1まであと")) return "score-fail";
+  if (tip.startsWith("Reviewでの期限切れ")) return "test-expiry";
+  if (tip.startsWith("平均WIP")) return "high-wip";
+  if (tip.startsWith("期限切れ")) return "expiry-rate";
+  if (tip.startsWith("負債")) return "debt-pressure";
+  if (tip.startsWith("Reviewがボトルネック")) return "bottleneck";
+  return "summary";
 }
 
 function summarizeTasks(options: Options): void {
@@ -308,7 +402,7 @@ function summarizeTasks(options: Options): void {
   const poolReward: number[] = [];
 
   for (let seed = 1; seed <= options.runs; seed += 1) {
-    const state = playOnce(seed, options.days, options.players);
+    const state = playOnce(seed, options.days, options.players, resolveRules(options.ruleset));
     const defs = state.taskDefs;
     poolScore.push(defs.reduce((sum, task) => sum + task.score, 0));
     poolRequirement.push(
@@ -331,7 +425,9 @@ function summarizeTasks(options: Options): void {
     }
   }
 
-  console.log(`\n[tasks] runs=${options.runs} days=${options.days} players=${options.players}`);
+  console.log(
+    `\n[tasks] runs=${options.runs} days=${options.days} players=${options.players} ruleset=${options.ruleset}`,
+  );
   console.log(
     `  generated pool score: min=${Math.min(...poolScore)} median=${median(poolScore)} max=${Math.max(...poolScore)}`,
   );
@@ -342,7 +438,7 @@ function summarizeTasks(options: Options): void {
     `  generated avg reward: min=${Math.min(...poolReward).toFixed(2)} median=${median(poolReward).toFixed(2)} max=${Math.max(...poolReward).toFixed(2)}`,
   );
   console.log("  completion by class:");
-  for (const key of ["standard", "high-score", "investment", "incident"]) {
+  for (const key of ["standard", "high-score", "effect", "incident"]) {
     const done = classDone.get(key) ?? 0;
     const exp = classExpired.get(key) ?? 0;
     console.log(
@@ -371,6 +467,109 @@ function summarizeTasks(options: Options): void {
   }
 }
 
+function summarizeAi(options: Options): void {
+  const kinds = new Map<string, number>();
+  const playTypes = new Map<string, number>();
+  const scoreTotals = new Map<string, number>();
+  let support = 0;
+  let own = 0;
+  let substitute = 0;
+  let totalActions = 0;
+
+  for (let seed = 1; seed <= options.runs; seed += 1) {
+    playOnce(
+      seed,
+      options.days,
+      options.players,
+      resolveRules(options.ruleset),
+      undefined,
+      (decision) => {
+        totalActions += 1;
+        const kind = decision.action.kind;
+        kinds.set(kind, (kinds.get(kind) ?? 0) + 1);
+        scoreTotals.set(kind, (scoreTotals.get(kind) ?? 0) + decision.score);
+        if (decision.action.kind === "play") {
+          playTypes.set(decision.action.type, (playTypes.get(decision.action.type) ?? 0) + 1);
+          if (decision.action.support) support += 1;
+          else own += 1;
+          if (decision.action.card.type !== decision.action.type) substitute += 1;
+        }
+      },
+    );
+  }
+
+  const runs = Math.max(1, options.runs);
+  const per = (value: number): string => (value / runs).toFixed(1);
+  const playCount = kinds.get("play") ?? 0;
+  const playTotal = Math.max(1, playCount);
+
+  console.log(
+    `\n[ai] runs=${options.runs} days=${options.days} players=${options.players} ruleset=${options.ruleset}`,
+  );
+  console.log(
+    `  actions/game: play=${per(playCount)} pull=${per(kinds.get("pull") ?? 0)} trash=${per(kinds.get("trash") ?? 0)} total=${per(totalActions)}`,
+  );
+  console.log(
+    `  play lanes: design=${per(playTypes.get("design") ?? 0)} dev=${per(playTypes.get("dev") ?? 0)} test=${per(playTypes.get("test") ?? 0)}`,
+  );
+  console.log(
+    `  support=${((support / playTotal) * 100).toFixed(1)}% / own=${((own / playTotal) * 100).toFixed(1)}% / substitute=${substitute} (${((substitute / playTotal) * 100).toFixed(2)}%)`,
+  );
+  console.log(
+    `  avg chosen score: play=${((scoreTotals.get("play") ?? 0) / Math.max(1, playCount)).toFixed(1)} pull=${((scoreTotals.get("pull") ?? 0) / Math.max(1, kinds.get("pull") ?? 0)).toFixed(1)} trash=${((scoreTotals.get("trash") ?? 0) / Math.max(1, kinds.get("trash") ?? 0)).toFixed(1)}`,
+  );
+  console.log("  note: greedy 1-step heuristic. Not a lookahead/optimal solver.");
+}
+
+function summarizeRisks(options: Options): void {
+  const totals = new Map<
+    string,
+    { title: string; drawn: number; absorbed: number; unmet: number; debt: number }
+  >();
+  let riskDebt = 0;
+  let teamDebt = 0;
+
+  for (let seed = 1; seed <= options.runs; seed += 1) {
+    const state = playOnce(seed, options.days, options.players, resolveRules(options.ruleset));
+    for (const [id, stat] of Object.entries(state.riskStats)) {
+      const title = RISK_BY_ID[id]?.title ?? id;
+      const entry = totals.get(title) ?? { title, drawn: 0, absorbed: 0, unmet: 0, debt: 0 };
+      entry.drawn += stat.drawn;
+      entry.absorbed += stat.absorbed;
+      entry.unmet += stat.unmet;
+      entry.debt += stat.debt;
+      totals.set(title, entry);
+    }
+    riskDebt += Object.values(state.riskStats).reduce((sum, stat) => sum + stat.debt, 0);
+    teamDebt += state.teamDebt;
+  }
+
+  const runs = Math.max(1, options.runs);
+  console.log(
+    `\n[risks] runs=${options.runs} days=${options.days} players=${options.players} ruleset=${options.ruleset}`,
+  );
+  console.log(
+    `  risk debt/game=${(riskDebt / runs).toFixed(2)} / final team debt/game=${(teamDebt / runs).toFixed(2)}`,
+  );
+
+  const rows = [...totals.values()]
+    .map((stat) => ({
+      title: stat.title,
+      drawn: stat.drawn,
+      absorbed: stat.absorbed,
+      unmet: stat.unmet,
+      debt: stat.debt,
+      rate: stat.drawn > 0 ? stat.debt / stat.drawn : 0,
+    }))
+    .toSorted((a, b) => b.debt - a.debt || b.drawn - a.drawn);
+
+  for (const row of rows) {
+    console.log(
+      `  ${row.title.padEnd(14)} draw=${(row.drawn / runs).toFixed(1)}/game absorbed=${(row.absorbed / runs).toFixed(1)} unmet=${(row.unmet / runs).toFixed(1)} debt=${(row.debt / runs).toFixed(2)}/game debt/draw=${row.rate.toFixed(2)} share=${riskDebt > 0 ? ((row.debt / riskDebt) * 100).toFixed(1) : "0.0"}%`,
+    );
+  }
+}
+
 function printHelp(): void {
   console.log(`Flowdeck balance simulation
 
@@ -381,14 +580,19 @@ Usage:
   pnpm --filter @mijime/flowdeck sim -- --days 20
   pnpm --filter @mijime/flowdeck sim -- --strategies
   pnpm --filter @mijime/flowdeck sim -- --tasks
+  pnpm --filter @mijime/flowdeck sim -- --ai
+  pnpm --filter @mijime/flowdeck sim -- --risks
 
 Options:
   --runs <n>       number of seeds (default: 300)
   --seed <n>       run one seed and print details
   --days <n>       project length (default: 10)
   --players <n>    4 | 5 | 6 (default: 5)
+  --ruleset <id>   rule set to use (${Object.keys(RULE_SETS).join(", ")}; default: base)
   --strategies     compare fixed focus/greed/urgency policies
   --tasks          task pool and completion/expiry breakdown
+  --ai             AI action mix and chosen-score averages
+  --risks          risk-card draw/absorb/debt distribution
   --help           show this help
 
 Team:
@@ -409,9 +613,11 @@ function main(): void {
     return;
   }
 
-  if (options.strategies || options.tasks) {
+  if (options.strategies || options.tasks || options.ai || options.risks) {
     if (options.strategies) summarizeStrategies(options);
     if (options.tasks) summarizeTasks(options);
+    if (options.ai) summarizeAi(options);
+    if (options.risks) summarizeRisks(options);
     return;
   }
 

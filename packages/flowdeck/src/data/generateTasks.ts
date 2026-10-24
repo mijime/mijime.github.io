@@ -1,184 +1,89 @@
+import type { TaskGenerationPolicy } from "../engine/rules/generation";
 import { randInt } from "../engine/rng";
-import type { GameState, TaskDef, TaskKind } from "../engine/types";
+import type { GameState, TaskDef } from "../engine/types";
+import { applyValueRequirements, redistribute } from "./generationMath";
 import { TASK_DEFS } from "./tasks";
 
-const LLM_SUBJECTS = [
-  "LLM",
-  "LLM応答",
-  "LLM推論",
-  "LLM品質",
-  "LLM安全性",
-  "LLM評価",
-  "LLM配信",
-  "LLMコスト",
-  "LLM速度",
-  "LLM API",
-  "LLMストリーミング",
-  "LLMオンデバイス",
-  "LLMガードレール",
-  "LLMマルチテナント",
-  "LLM利用分析",
-  "LLM課金",
-  "LLMプロンプト",
-  "LLMコンテキスト",
-];
+export { taskEfficiency, taskValue, totalRequirements } from "./generationMath";
 
-const AGENT_SUBJECTS = [
-  "エージェント",
-  "コードレビュー",
-  "リポジトリ理解",
-  "テスト生成",
-  "パッチ生成",
-  "エージェント権限",
-  "エージェントワークフロー",
-  "エージェント評価",
-];
-
-const SAAS_SUBJECTS = [
-  "課金",
-  "SSO",
-  "オンボーディング",
-  "解約導線",
-  "SLA",
-  "サポート",
-  "請求",
-  "管理画面",
-  "APIキー",
-  "監査ログ",
-  "エンタープライズ",
-  "顧客データ",
-  "契約",
-];
-
-const INCIDENT_LLM_SUBJECTS = [
-  "LLM",
-  "LLM API",
-  "LLM推論",
-  "LLMモデル",
-  "LLM配信",
-  "LLM品質",
-  "LLM評価",
-  "LLMガードレール",
-];
-
-const INCIDENT_AGENT_SUBJECTS = [
-  "エージェント",
-  "エージェント実行",
-  "コードレビュー",
-  "テスト生成",
-  "エージェントワークフロー",
-];
-
-const INCIDENT_SAAS_SUBJECTS = [
-  "顧客データ",
-  "課金",
-  "SSO",
-  "GPU",
-  "プロンプト",
-  "監査ログ",
-  "請求",
-];
-
-function pick<T>(state: GameState, pool: T[]): T {
-  return pool[randInt(state, pool.length)] ?? pool[0]!;
-}
-
-function pickNormalSubject(state: GameState): string {
-  const roll = randInt(state, 100);
-  if (roll < 60) return pick(state, LLM_SUBJECTS);
-  if (roll < 85) return pick(state, AGENT_SUBJECTS);
-  return pick(state, SAAS_SUBJECTS);
-}
-
-function pickIncidentSubject(state: GameState): string {
-  const roll = randInt(state, 100);
-  if (roll < 65) return pick(state, INCIDENT_LLM_SUBJECTS);
-  if (roll < 85) return pick(state, INCIDENT_AGENT_SUBJECTS);
-  return pick(state, INCIDENT_SAAS_SUBJECTS);
-}
-
-const NOUN_SUFFIXES = [
-  "改善",
-  "見直し",
-  "整備",
-  "強化",
-  "統合",
-  "対応",
-  "刷新",
-  "再構築",
-  "自動化",
-];
-
-const INCIDENT_SUFFIXES = ["障害", "停止", "漏えい", "不整合", "遅延", "急増", "不足", "過負荷"];
-
-export const HIGH_SCORE_BONUS = 2;
-
-function generateName(state: GameState, kind: TaskKind, used: Set<string>): string {
-  const suffixes = kind === "incident" ? INCIDENT_SUFFIXES : NOUN_SUFFIXES;
-  for (let attempt = 0; attempt < 40; attempt += 1) {
-    const subject = kind === "incident" ? pickIncidentSubject(state) : pickNormalSubject(state);
-    const suffix = suffixes[randInt(state, suffixes.length)] ?? suffixes[0]!;
-    const name =
-      kind === "incident"
-        ? `${subject}${suffix}`
-        : randInt(state, 2) === 0
-          ? `${subject}の${suffix}`
-          : `${subject}${suffix}`;
-    if (!used.has(name)) {
-      used.add(name);
-      return name;
-    }
+/**
+ * スコア帯ごとの要求合計の予算。
+ * 低スコアは軽く、高スコアは重く。効果タスクは報酬込みでやや重め。
+ */
+function requirementBudget(def: TaskDef): readonly [number, number] {
+  if (def.kind === "incident") return [11, 16];
+  if (def.reward.effect) return [14, 19];
+  switch (def.score) {
+    case 1:
+      return [8, 11];
+    case 2:
+      return [10, 13];
+    case 3:
+      return [14, 18];
+    case 6:
+      return [21, 25];
+    case 7:
+      return [23, 28];
+    default:
+      return [12, 22];
   }
-  return `タスク${used.size + 1}`;
+}
+
+/** 予算内の基準値に、1d10: 2/6/2 の難易度揺らぎをかける。効果/インシデントは控えめ。 */
+function budgetRequirementTotal(def: TaskDef, state: GameState): number {
+  const [min, max] = requirementBudget(def);
+  const base = min + randInt(state, max - min + 1);
+  const roll = randInt(state, 10);
+  const swing = roll < 2 ? -0.05 : roll < 8 ? 0 : 0.05;
+  const scale = def.kind === "incident" || def.reward.effect ? 1 : 2;
+  return Math.max(1, Math.round(base * (1 + swing * scale)));
 }
 
 /**
- * 固定テンプレートを種に、名前・要求・スコア/報酬のバランスを毎ゲーム生成する。
- * アーキタイプ（通常/投資/インシデント）はテンプレート側で担保する。
- * テンプレートから名前・要求・スコア/報酬を生成する。
+ * スコア帯の予算から要求合計を決める方式。
+ * 名前・スコア・報酬・納期はテンプレートの印刷値をそのまま使う。
  */
-function buildDef(state: GameState, template: TaskDef, usedNames: Set<string>): TaskDef {
-  const kind = template.kind ?? "normal";
-  const requirements = { ...template.requirements };
-  const phases = ["design", "dev", "test"] as const;
-  const phase = phases[randInt(state, phases.length)] ?? "design";
-  const delta = randInt(state, 3) - 1;
-  const minimum = kind === "incident" ? 1 : 2;
-  requirements[phase] = Math.max(minimum, requirements[phase] + delta);
+export const BUDGET_GENERATION: TaskGenerationPolicy = {
+  base(def, ctx) {
+    redistribute(def.requirements, budgetRequirementTotal(def, ctx.state));
+  },
+  modifiers: [],
+};
 
-  let score = template.score;
-  let rewardLevel = template.reward.level;
-  if (kind === "normal" && score > 0) {
-    const roll = randInt(state, 5);
-    if (roll === 0 && rewardLevel > 1) {
-      score = Math.min(5, score + 1);
-      rewardLevel -= 1;
-    } else if (roll === 1 && score > 0 && rewardLevel < 5) {
-      score -= 1;
-      rewardLevel += 1;
-    }
-  }
+/**
+ * 価値（スコア+報酬lv+効果+罰則）から要求合計を逆算する方式。
+ * 極端に得なタスク/損なタスクを抑えたいときに使う。
+ */
+export const VALUE_GENERATION: TaskGenerationPolicy = {
+  base(def, ctx) {
+    applyValueRequirements(def, ctx.state);
+  },
+  modifiers: [],
+};
 
-  if (kind === "normal" && score >= 4) {
-    score += HIGH_SCORE_BONUS;
-  }
+export function generateTaskDefs(
+  state: GameState,
+  policy: TaskGenerationPolicy = BUDGET_GENERATION,
+): TaskDef[] {
+  if (policy.create) return policy.create(state);
 
-  return {
-    ...template,
-    title: generateName(state, kind, usedNames),
-    requirements,
-    score,
-    reward: { ...template.reward, level: rewardLevel },
-    penalty: template.penalty ? { ...template.penalty } : undefined,
-  };
-}
-
-export function generateTaskDefs(state: GameState): TaskDef[] {
-  const usedNames = new Set<string>();
   const defs: TaskDef[] = [];
 
   for (const template of TASK_DEFS) {
-    defs.push(buildDef(state, template, usedNames));
+    const def: TaskDef = {
+      ...template,
+      requirements: { ...template.requirements },
+      reward: { ...template.reward },
+      penalty: template.penalty ? { ...template.penalty } : undefined,
+    };
+    const ctx = {
+      state,
+      kind: def.kind ?? "normal",
+      randInt: (max: number) => randInt(state, max),
+    };
+    policy.base(def, ctx);
+    for (const modifier of policy.modifiers) modifier.apply(def, ctx);
+    defs.push(def);
   }
 
   return defs;
