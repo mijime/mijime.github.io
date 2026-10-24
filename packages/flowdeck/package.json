@@ -19,6 +19,7 @@
     "format": "pnpm run format:oxfmt",
     "format:oxfmt": "oxfmt",
     "sim": "tsx scripts/sim.ts",
+    "benchmark": "tsx scripts/sim.ts -- --benchmark --runs 1000 --out src/data/benchmark.json",
     "tasks": "tsx scripts/tasks.ts"
   },
   "dependencies": {

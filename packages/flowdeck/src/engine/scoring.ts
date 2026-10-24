@@ -1,7 +1,9 @@
 import type { GameState, Outcome, PlayerOutcome } from "./types";
 import { BASE_RULES, type RuleSet } from "./rules";
 import { activeTasks, ACTIVE_LANES } from "./rules/lanes";
-import { summarizeTip, type OutcomeFacts } from "./rules/tips";
+import { impactOfTip, summarizeTip, type OutcomeFacts } from "./rules/tips";
+import { emptyPlayerAnalytics } from "./analytics/state";
+import { classifyPlayers } from "./analytics/playerTypes";
 
 export function computeOutcome(state: GameState, rules: RuleSet = BASE_RULES): Outcome {
   const finalScore =
@@ -44,8 +46,10 @@ export function computeOutcome(state: GameState, rules: RuleSet = BASE_RULES): O
         test: { ...player.contributed.test },
       },
       deck,
+      analytics: { ...(state.analytics.players?.[player.id] ?? emptyPlayerAnalytics()) },
     };
   });
+  const classified = classifyPlayers(perPlayer);
 
   const leadTimes = completed
     .filter((task) => task.acquiredDay !== null)
@@ -80,8 +84,18 @@ export function computeOutcome(state: GameState, rules: RuleSet = BASE_RULES): O
     nextStar,
     expiryRate,
     debtPressure,
+    players: classified,
   };
-  const tips = rules.tips.filter((tip) => tip.when(facts)).map((tip) => tip.text(facts));
+  const rankedTips = rules.tips
+    .filter((tip) => tip.when(facts))
+    .map((tip) => ({ tip, text: tip.text(facts), impact: impactOfTip(tip, facts) }))
+    .toSorted((a, b) => b.impact - a.impact);
+  const selectedTips = rankedTips.filter((entry) => entry.impact >= 50).slice(0, 5);
+  if (selectedTips.length < 2) {
+    const flavor = rankedTips.find((entry) => entry.impact < 50 && !selectedTips.includes(entry));
+    if (flavor) selectedTips.push(flavor);
+  }
+  const tips = selectedTips.map((entry) => entry.text);
   if (tips.length === 0) tips.push(summarizeTip(facts));
 
   return {
@@ -92,12 +106,12 @@ export function computeOutcome(state: GameState, rules: RuleSet = BASE_RULES): O
     scorePenalty: state.scorePenalty,
     completed: completed.length,
     failed,
-    perPlayer,
+    perPlayer: classified,
     avgLeadTime,
     avgWip,
     bottleneck,
     expired: expiredTasks.length,
     testExpired,
-    tips: tips.slice(0, 3),
+    tips: tips.slice(0, 5),
   };
 }

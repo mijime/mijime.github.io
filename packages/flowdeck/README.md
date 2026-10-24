@@ -19,21 +19,96 @@ pnpm --filter @mijime/flowdeck check
 ```bash
 pnpm --filter @mijime/flowdeck sim
 pnpm --filter @mijime/flowdeck sim -- --runs 1000
+pnpm --filter @mijime/flowdeck sim -- --all
 pnpm --filter @mijime/flowdeck sim -- --seed 42
+pnpm --filter @mijime/flowdeck sim -- --trace 42
 pnpm --filter @mijime/flowdeck sim -- --days 10
 pnpm --filter @mijime/flowdeck sim -- --days 20
 pnpm --filter @mijime/flowdeck sim -- --days 30
 pnpm --filter @mijime/flowdeck sim -- --strategies
+pnpm --filter @mijime/flowdeck sim -- --trends
+pnpm --filter @mijime/flowdeck sim -- --correlations
+pnpm --filter @mijime/flowdeck sim -- --insights
 pnpm --filter @mijime/flowdeck sim -- --tasks
 pnpm --filter @mijime/flowdeck sim -- --ai
 pnpm --filter @mijime/flowdeck sim -- --risks
 pnpm --filter @mijime/flowdeck sim -- --players 4
 pnpm --filter @mijime/flowdeck sim -- --players 6
+pnpm --filter @mijime/flowdeck sim -- --matrix days=10,20,30 players=4,5,6
+pnpm --filter @mijime/flowdeck sim -- --scenarios base,substitution,no-tokens
+pnpm --filter @mijime/flowdeck sim -- --sweep balance.startingTokens=0,1,2
+pnpm --filter @mijime/flowdeck sim -- --compare base,substitution
+pnpm --filter @mijime/flowdeck sim -- --weights focus=1,greed=-1,urgency=1
+pnpm --filter @mijime/flowdeck sim -- --human-weights focus=0.5,greed=0,urgency=0.5
+pnpm --filter @mijime/flowdeck sim -- --runs 1000 --format csv --out /tmp/flowdeck.csv
+pnpm --filter @mijime/flowdeck sim -- --runs 1000 --format json --out /tmp/flowdeck.json
 pnpm --filter @mijime/flowdeck sim -- --help
 ```
 
-`--players` は `4` / `5` / `6`（デフォルト 5）。
-シミュレーション内の人間も同じ3軸モデルで動く。
+`--players` は `4` / `5` / `6`（デフォルト 5）、`--days` は `10` / `20` / `30`（デフォルト 10）。シミュレーション内の人間も同じ3軸モデルで動く。
+
+### レポート
+
+- `--all`: overview / trends / correlations / strategies / tasks / ai / risks / insights をまとめて表示
+- `--trends`: 日ごとのスコア・負債・WIP・レーン滞留・完了数の平均
+- `--correlations`: focus / greed / urgency と個人成績の相関、席順、人間 vs AI
+- `--strategies`: 固定した性格方針どうしの比較。`random(roster)` がランダム編成の基準
+- `--tasks`: タスク生成プール、アーキタイプ・スコア・報酬・効果別の完了率
+- `--ai`: プレイ / Pull / 廃棄、支援率、代用率、トークン使用、選択スコア
+- `--risks`: リスクカード別のドロー・吸収・未吸収・負債
+- `--insights`: 星3率・失敗率・Review期限切れ・リスク発生源・性格相関から注目点を自動生成
+
+overview にはプレイヤータイプの分布と「タイプ×星3率」、ボードミーティング指摘の星3率も表示する。どのタイプ・どの指摘が星3と相関するかをシミュレーションで確認できる。
+
+### 条件を変えて比較する
+
+- `--matrix days=10,20 players=4,5,6`: 日数×人数のマトリクス
+- `--scenarios base,substitution,no-tokens`: プリセット比較
+- `--sweep balance.startingTokens=0,1,2`: 1パラメータの感度分析
+- `--compare base,substitution`: 2条件の平均差と bootstrap 95%信頼区間
+- `--weights` / `--human-weights` / `--ai-weights`: 性格方針を固定
+
+シナリオプリセット: `base` / `substitution` / `no-tokens` / `token-rich` / `fast` / `slow` / `long-hand` / `tight-debt` / `loose-debt` / `budget` / `value` / `stable` / `volatile`。
+
+スイープできるキー: `actionsPerTurn` / `handSize` / `debtScorePenalty` / `startingTokens` / `allowSubstitution` / `openTasks` / `debtLimit` / `starOne` / `starTwo` / `starThree` / `generation` / `generationSwing`。
+
+### タスクの得損（generationSwing）
+
+要求量の揺らぎを `generationSwing` で注入できる。通常タスクは `1 ± generationSwing` 倍、効果・インシデントは半分の振幅。
+
+| swing | 通常タスク | 効果/インシデント |
+| ----: | ---------- | ----------------- |
+|   0.0 | 1.00       | 1.00              |
+|   0.1 | 0.9〜1.1   | 0.95〜1.05        |
+|   0.2 | 0.8〜1.2   | 0.9〜1.1          |
+
+`0.8〜1.2` の得損を入れたいときは `0.2` を指定する。既定値は `0.1`（現行バランス）。
+
+```bash
+pnpm --filter @mijime/flowdeck sim -- --scenarios stable,base,volatile --runs 1000
+pnpm --filter @mijime/flowdeck sim -- --sweep generationSwing=0,0.1,0.2 --runs 1000
+```
+
+### 出力
+
+- `--format text`: 人が読むレポート（デフォルト）
+- `--format json`: メタ情報・スコア分布・星率・全ラン行
+- `--format csv`: 1ラン1行
+- `--out <path>`: JSON/CSVをファイルへ
+- `--from` / `--to`: シード範囲
+- `--progress`: 長時間のスイープで進捗表示
+
+### ベンチマーク
+
+ゲーム内リザルトの参考値は `src/data/benchmark.json` に保存している。再生成:
+
+```bash
+pnpm --filter @mijime/flowdeck benchmark
+# 個別に実行する場合
+pnpm --filter @mijime/flowdeck sim -- --benchmark --runs 1000 --out src/data/benchmark.json
+```
+
+4/5/6人 × 10/20/30日 × 得損（0 / 0.1 / 0.2）を全員ボットで1000シード実行し、スコア分位点・星率・失敗率・完了数・期限切れ・WIP・リードタイムを保存する。
 
 ## テスト
 
@@ -44,7 +119,9 @@ pnpm --filter @mijime/flowdeck check
 
 ## ゲームの長さ
 
-「新しいゲーム」で **10 / 20 / 30日** とチーム人数を選べる。メンバーの名前・アイコン・性格は開始時にランダムで決まる。
+「新しいゲーム」で **10 / 20 / 30日**、チーム人数、**タスクの得損（安定 / 標準 / 波乱）** を選べる。メンバーの名前・アイコン・性格は開始時にランダムで決まる。
+
+タスクの得損は `generationSwing`（0 / 0.1 / 0.2）。波乱にすると通常タスクの要求量が 0.8〜1.2 倍になり、得なタスクと損なタスクが混ざる。既定は標準（±10%）。
 
 デフォルトは **5人（あなた＋メンバー4）**。編成画面でメンバー3〜5人（合計4〜6人）を選べる。レーン別・チーム全体のWIP上限はなし。WIPは「見える化」の指標として表示する。
 
@@ -55,6 +132,26 @@ pnpm --filter @mijime/flowdeck check
 |   30 |       4 |        8 | 104 / 124 / 131 |
 
 目標はランダム編成の分布基準。1星が下位25%、2星が上位25%、3星が上位10%。
+
+### リザルトのサマリー
+
+ゲーム終了後は、従来の「あなたの貢献」「チームの成果」に加えて以下を表示する。
+
+- スコア内訳（企業価値 / 技術的負債 / 期限切れ罰則）と次の星までの進捗
+- 日次推移（企業価値・負債・WIPのスパークライン）
+- 流れ（完了・期限切れ・Review切れ・リードタイム・平均WIP・ボトルネック・レーン別期限切れ）
+- リスク（ドロー・吸収率・未吸収・発生負債・上位の発生源）
+- プレイ傾向（プレイ/Pull/廃棄/パス、設計/開発/テスト、支援率、代用率、LLMトークン）
+- プレイヤーごとの24タイプ判定（エース型 / サポーター型 / 整理屋型など）と「24タイプの見方」
+- 全員ボットの参考値（`src/data/benchmark.json`）との比較
+
+ボードミーティングは星に近づくための処方箋を優先して表示する。
+
+- 次の星までの点差と、負債1枚・高スコア1件・スコア3何件分かの目安
+- Review期限切れ、高スコア期限切れ、WIP過多、Pull過多など星を逃す原因
+- チームの役割やサポート状況は、星の処方箋が4件未満のときの補足として表示
+
+セーブは v27。v26 の localStorage / IndexedDB セーブは読み込み時に `analytics` と日次レーンデータを補って移行する。
 
 5人・1000シードの結果:
 
@@ -133,6 +230,7 @@ UIのチームメイトは **3〜5人**。名前・アイコン・性格は開�
 - 高難度タスクの報酬を一部引き上げ、割に合わないタスクを減らした
 - 効果タスクは報酬が強いため、目標効率を低めにして要求を重くする
 - それでも「高スコア・弱報酬」と「低スコア・強報酬」のリスクリターンは残している
+- `generationSwing` で要求量の得損を注入できる（0〜0.2、既定0.1）。0.2で通常タスクが0.8〜1.2倍
 
 ## タスク生成シミュレーション
 
@@ -140,9 +238,11 @@ UIのチームメイトは **3〜5人**。名前・アイコン・性格は開�
 pnpm --filter @mijime/flowdeck tasks
 pnpm --filter @mijime/flowdeck tasks -- --compare
 pnpm --filter @mijime/flowdeck tasks -- --policy value --seed 42
+pnpm --filter @mijime/flowdeck tasks -- --swing 0.2 --runs 200
+pnpm --filter @mijime/flowdeck tasks -- --policy auto --runs 500 --format json --out /tmp/tasks.json
 ```
 
-`--compare` は budget / value / auto の効率分布を並べる。効率は `価値 / 要求合計` で、`> 0.45` を「安すぎ」、`< 0.25` を「高すぎ」として数える。
+`--compare` は budget / value / auto の効率分布を並べる。効率は `価値 / 要求合計` で、`> 0.45` を「安すぎ」、`< 0.25` を「高すぎ」として数える。`--swing` は 0〜0.2（既定 0.1）。`--format json` は生成プールの要約とアーキタイプ別分布を返す。
 
 ベースは `auto`。テンプレートを使わず、テーマと比率から72枚を完全生成する。
 
@@ -150,6 +250,20 @@ pnpm --filter @mijime/flowdeck tasks -- --policy value --seed 42
 - 内訳: 通常42 / 効果24 / インシデント6
 - 名前・スコア・報酬・納期・効果・罰則を毎ゲーム生成
 - 1ゲーム内の72枚は名前ユニーク。200ゲームで1,731種類のタイトルが出る（テンプレートは72種類固定）
+
+## プレイヤータイプと星の傾向
+
+リザルトでは各プレイヤーを24タイプ + バランス型で判定する。`sim` の overview は「タイプ×星3率」と「ボードミーティング指摘×星3率」を表示する。
+
+5人10日・1000シードの一例:
+
+- 星3率と相性が良い: スコアハンター型 18.8% / 集中職人型 15.0% / メンター型 13.1%
+- 作業量が多いが星3率が低い: エース型 4.5%
+- Review期限切れの指摘があるゲーム: 星3率 5.1%（全体 11.3%）
+- 高スコア期限切れの指摘があるゲーム: 星3率 3.8%
+- 廃棄の指摘があるゲーム: 星3率 15.6%
+
+ボードミーティングは、次の星までの点差、負債1枚の価値、高スコア何件分か、Review/期限切れ/WIPのどの原因を直すかを優先して表示する。
 
 ## リスク分布
 
@@ -186,4 +300,4 @@ pnpm --filter @mijime/flowdeck sim -- --risks --runs 1000
 pnpm --filter @mijime/flowdeck sim -- --runs 1000
 ```
 
-詳細は `docs/superpowers/specs/2026-10-21-flowdeck-design.md` と `src/engine/rules/README.md`。
+詳細は `src/engine/rules/README.md`。

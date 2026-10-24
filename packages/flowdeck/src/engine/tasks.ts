@@ -169,7 +169,7 @@ function acquireTask(state: GameState, task: TaskCard, rules: RuleSet): void {
   }
 
   if (unmet > 0) {
-    addDebt(state, recipient, unmet);
+    addDebt(state, recipient, unmet, "risk");
     pushLog(state, `リスク未吸収: ${task.title}（負債 +${unmet}）`, "bad");
   }
 

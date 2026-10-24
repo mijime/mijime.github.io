@@ -10,7 +10,8 @@ describe("IntroScreen", () => {
     expect(screen.getByText("LLMとエージェントの四半期")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "20日" }));
     fireEvent.click(screen.getByRole("button", { name: "5人" }));
+    fireEvent.click(screen.getByRole("button", { name: /波乱/ }));
     fireEvent.click(screen.getByRole("button", { name: /四半期を開始/ }));
-    expect(onStart).toHaveBeenCalledWith(20, 5);
+    expect(onStart).toHaveBeenCalledWith(20, 5, 0.2);
   });
 });

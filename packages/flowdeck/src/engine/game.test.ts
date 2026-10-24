@@ -185,6 +185,14 @@ describe("setup", () => {
     expect(state.log[0]?.message).toBe("log-10");
     expect(state.log.at(-1)?.message).toBe("log-509");
   });
+
+  it("generationSwingを注入するとタスクの要求量が変わる", () => {
+    const stable = createGame(1, 10, 4, BASE_RULES, 0);
+    const volatile = createGame(1, 10, 4, BASE_RULES, 0.2);
+    expect(stable.generationSwing).toBe(0);
+    expect(volatile.generationSwing).toBe(0.2);
+    expect(volatile.taskDefs).not.toEqual(stable.taskDefs);
+  });
 });
 
 describe("タスクの流れ", () => {
@@ -692,6 +700,16 @@ describe("ボードミーティング", () => {
     const outcome = computeOutcome(state);
     expect(outcome.tips[0]).toContain("負債上限");
     expect(outcome.tips.some((tip) => tip.includes("Review"))).toBe(true);
+  });
+
+  it("星を取るための点差と具体策を返す", () => {
+    const state = testState();
+    state.teamScore = 10;
+    state.teamDebt = 1;
+
+    const outcome = computeOutcome(state);
+    expect(outcome.tips.some((tip) => tip.startsWith("星1まであと"))).toBe(true);
+    expect(outcome.tips.some((tip) => tip.includes("負債1枚減らす"))).toBe(true);
   });
 });
 

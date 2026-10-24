@@ -1,7 +1,8 @@
 import type { TaskGenerationPolicy } from "../engine/rules/generation";
+import { normalizeGenerationSwing } from "../engine/rules/generation";
 import { randInt } from "../engine/rng";
 import type { GameState, TaskDef } from "../engine/types";
-import { applyValueRequirements, redistribute } from "./generationMath";
+import { applyValueRequirements, redistribute, requirementSwing } from "./generationMath";
 import { TASK_DEFS } from "./tasks";
 
 export { taskEfficiency, taskValue, totalRequirements } from "./generationMath";
@@ -30,13 +31,12 @@ function requirementBudget(def: TaskDef): readonly [number, number] {
 }
 
 /** 予算内の基準値に、1d10: 2/6/2 の難易度揺らぎをかける。効果/インシデントは控えめ。 */
-function budgetRequirementTotal(def: TaskDef, state: GameState): number {
+function budgetRequirementTotal(def: TaskDef, state: GameState, swing: number): number {
   const [min, max] = requirementBudget(def);
   const base = min + randInt(state, max - min + 1);
   const roll = randInt(state, 10);
-  const swing = roll < 2 ? -0.05 : roll < 8 ? 0 : 0.05;
-  const scale = def.kind === "incident" || def.reward.effect ? 1 : 2;
-  return Math.max(1, Math.round(base * (1 + swing * scale)));
+  const amount = requirementSwing(def, normalizeGenerationSwing(swing), roll);
+  return Math.max(1, Math.round(base * (1 + amount)));
 }
 
 /**
@@ -45,7 +45,7 @@ function budgetRequirementTotal(def: TaskDef, state: GameState): number {
  */
 export const BUDGET_GENERATION: TaskGenerationPolicy = {
   base(def, ctx) {
-    redistribute(def.requirements, budgetRequirementTotal(def, ctx.state));
+    redistribute(def.requirements, budgetRequirementTotal(def, ctx.state, ctx.swing));
   },
   modifiers: [],
 };
@@ -56,7 +56,7 @@ export const BUDGET_GENERATION: TaskGenerationPolicy = {
  */
 export const VALUE_GENERATION: TaskGenerationPolicy = {
   base(def, ctx) {
-    applyValueRequirements(def, ctx.state);
+    applyValueRequirements(def, ctx.state, 1, ctx.swing);
   },
   modifiers: [],
 };
@@ -65,7 +65,8 @@ export function generateTaskDefs(
   state: GameState,
   policy: TaskGenerationPolicy = BUDGET_GENERATION,
 ): TaskDef[] {
-  if (policy.create) return policy.create(state);
+  const swing = normalizeGenerationSwing(policy.swing);
+  if (policy.create) return policy.create(state, swing);
 
   const defs: TaskDef[] = [];
 
@@ -79,6 +80,7 @@ export function generateTaskDefs(
     const ctx = {
       state,
       kind: def.kind ?? "normal",
+      swing,
       randInt: (max: number) => randInt(state, max),
     };
     policy.base(def, ctx);

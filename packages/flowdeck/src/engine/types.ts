@@ -178,6 +178,29 @@ export interface LogEntry {
   kind: "info" | "good" | "bad";
 }
 
+export interface GameAnalytics {
+  actions: { play: number; pull: number; trash: number; pass: number };
+  playByPhase: Record<ContributionPhase, number>;
+  supportPlays: number;
+  substitutions: number;
+  tokensUsed: number;
+  debtSources: { risk: number; incident: number; other: number };
+  /** プレイヤーごとの行動傾向。リザルトのアーキタイプ判定に使う */
+  players: Record<string, PlayerAnalytics>;
+}
+
+export interface PlayerAnalytics {
+  actions: { play: number; pull: number; trash: number; pass: number };
+  playByPhase: Record<ContributionPhase, number>;
+  supportPlays: number;
+  supportPoints: number;
+  substitutions: number;
+  tokensUsed: number;
+  incidentPlays: number;
+  effectPlays: number;
+  debtCleaned: number;
+}
+
 export interface DaySnapshot {
   day: number;
   teamScore: number;
@@ -185,6 +208,7 @@ export interface DaySnapshot {
   open: number;
   wip: number;
   completed: number;
+  lanes: Record<"open" | "inbox" | "wip" | "test" | "done", number>;
   perPlayer: {
     id: string;
     wip: number;
@@ -205,6 +229,10 @@ export interface PlayerOutcome {
   avgWip: number;
   contributed: Record<ContributionPhase, ContributionStats>;
   deck: Record<CardType, number>;
+  /** リザルトのアーキタイプ判定に使う行動傾向 */
+  analytics?: PlayerAnalytics;
+  /** 判定されたプレイヤータイプ（24種 + バランス型） */
+  archetypeId?: string;
 }
 
 export interface Contribution {
@@ -251,11 +279,13 @@ export interface Outcome {
 }
 
 export interface GameState {
-  version: 26;
+  version: 27;
   seed: number;
   rngState: number;
   day: number;
   totalDays: number;
+  /** このゲームのタスク要求量の揺らぎ幅（0〜0.2） */
+  generationSwing: number;
   phase: "human" | "ai" | "roundEnd" | "over";
   activePlayerIndex: number;
   humanId: string;
@@ -269,6 +299,8 @@ export interface GameState {
   riskDiscard: string[];
   /** リスクカードごとの draw / 吸収 / 未吸収 / 発生した負債 */
   riskStats: Record<string, RiskStat>;
+  /** ゲーム中の行動・負債発生源の集計。リザルトの傾向表示に使う */
+  analytics: GameAnalytics;
   teamScore: number;
   teamDebt: number;
   scorePenalty: number;
@@ -291,4 +323,4 @@ export type Action =
   | { type: "DISCARD_CARD"; cardId: number }
   | { type: "USE_TOKEN"; token: string; taskId: string }
   | { type: "HYDRATE"; state: GameState }
-  | { type: "RESTART"; seed?: number; days?: number; aiCount?: number };
+  | { type: "RESTART"; seed?: number; days?: number; aiCount?: number; generationSwing?: number };

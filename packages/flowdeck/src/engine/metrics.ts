@@ -112,6 +112,17 @@ export function playerById(state: GameState, playerId: string): PlayerState {
 }
 
 export function makeSnapshot(state: GameState): DaySnapshot {
+  const lanes = {
+    open: 0,
+    inbox: 0,
+    wip: 0,
+    test: 0,
+    done: 0,
+  };
+  for (const task of state.tasks) {
+    if (task.lane === "trash") continue;
+    lanes[task.lane] += 1;
+  }
   return {
     day: state.day,
     teamScore: state.teamScore,
@@ -119,6 +130,7 @@ export function makeSnapshot(state: GameState): DaySnapshot {
     open: openTasks(state).length,
     wip: activeTasks(state).length,
     completed: completedTasks(state).length,
+    lanes,
     perPlayer: state.players.map((player) => ({
       id: player.id,
       wip: playerWip(state, player.id),

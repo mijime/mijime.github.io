@@ -117,6 +117,10 @@ export function HelpModal({ rules, onClose }: { rules: TeamRules; onClose: () =>
             <p className="rounded-sm border border-(--border) px-2 py-1">
               タスク報酬カードはデッキに残る間だけ企業価値。捨てるとスコアも消える。
             </p>
+            <p className="rounded-sm border border-(--border) px-2 py-1">
+              タスクの得損は開始時に選択。波乱ほど通常タスクの要求量が
+              <strong className="text-(--ink)">0.8〜1.2倍</strong>に散らばる。
+            </p>
           </section>
         </div>
       </div>

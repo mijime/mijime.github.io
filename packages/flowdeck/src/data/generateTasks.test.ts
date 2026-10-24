@@ -7,6 +7,7 @@ import {
   taskEfficiency,
   VALUE_GENERATION,
 } from "./generateTasks";
+import { requirementSwing } from "./generationMath";
 
 function generate(seed: number, policy: typeof BUDGET_GENERATION): TaskDef[] {
   const state = { seed, rngState: seed >>> 0 } as GameState;
@@ -48,5 +49,42 @@ describe("task generation", () => {
         expect(efficiency).toBeLessThanOrEqual(0.46);
       }
     }
+  });
+
+  it("generationSwingで得損の幅を注入できる", () => {
+    const stable = generate(42, { ...AUTO_GENERATION, swing: 0 });
+    const volatile = generate(42, { ...AUTO_GENERATION, swing: 0.2 });
+    const stableRange = {
+      min: Math.min(...stable.map(taskEfficiency)),
+      max: Math.max(...stable.map(taskEfficiency)),
+    };
+    const volatileRange = {
+      min: Math.min(...volatile.map(taskEfficiency)),
+      max: Math.max(...volatile.map(taskEfficiency)),
+    };
+    expect(stable).not.toEqual(volatile);
+    expect(volatileRange.max - volatileRange.min).toBeGreaterThan(
+      stableRange.max - stableRange.min,
+    );
+    expect(volatileRange.min).toBeGreaterThan(0.2);
+    expect(volatileRange.max).toBeLessThan(0.6);
+  });
+
+  it("swingは通常タスク±20%・effect/incident±10%に収まる", () => {
+    const normal = {
+      kind: "normal",
+      reward: { type: "dev", level: 3 },
+      score: 3,
+    } as unknown as TaskDef;
+    const effect = {
+      kind: "normal",
+      reward: { type: "dev", level: 3, effect: { kind: "draw", amount: 1 } },
+      score: 1,
+    } as unknown as TaskDef;
+    expect(requirementSwing(normal, 0.2, 0)).toBeCloseTo(-0.2);
+    expect(requirementSwing(normal, 0.2, 9)).toBeCloseTo(0.2);
+    expect(requirementSwing(effect, 0.2, 0)).toBeCloseTo(-0.1);
+    expect(requirementSwing(effect, 0.2, 9)).toBeCloseTo(0.1);
+    expect(requirementSwing(normal, 0.2, 5)).toBe(0);
   });
 });

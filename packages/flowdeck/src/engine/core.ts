@@ -1,4 +1,5 @@
 import { tokenDef } from "../data/tokens";
+import { analyticsFor } from "./analytics/state";
 import { discardHand, drawCards } from "./hand";
 import { pushLog } from "./log";
 import { makeSnapshot, playerById, recomputeTeamStats } from "./metrics";
@@ -18,6 +19,8 @@ export function pullTask(state: GameState, playerId: string, taskId: string): bo
   task.lane = "inbox";
   task.ownerId = playerId;
   player.actionsLeft -= 1;
+  state.analytics.actions.pull += 1;
+  analyticsFor(state, playerId).actions.pull += 1;
   refillOpen(state);
   pushLog(state, `${player.name}: ${task.title} を Ready へ`, "info");
   return true;
@@ -43,6 +46,8 @@ export function useToken(
   player.tokens[token] = (player.tokens[token] ?? 0) - 1;
   task.tokenWork[type] += def.workLevel;
   player.contributed[type].points += def.workLevel;
+  state.analytics.tokensUsed += 1;
+  analyticsFor(state, playerId).tokensUsed += 1;
   pushLog(
     state,
     `${player.name}: ${def.label} → ${task.title}（${PHASE_LABEL[type]} lv${def.workLevel}）`,
@@ -81,10 +86,26 @@ export function playCard(
   player.contributed[playType].cards += 1;
   player.contributed[playType].points += playLevel;
   player.actionsLeft -= 1;
+  state.analytics.actions.play += 1;
+  state.analytics.playByPhase[playType] += 1;
+  const playerAnalytics = analyticsFor(state, playerId);
+  playerAnalytics.actions.play += 1;
+  playerAnalytics.playByPhase[playType] += 1;
+  if (card.effect) playerAnalytics.effectPlays += 1;
+  if (task.kind === "incident") playerAnalytics.incidentPlays += 1;
   if (card.effect) applyCardEffect(rules.effects, { state, player, task }, card.effect);
 
   const support = task.ownerId !== playerId;
   const substitute = card.type !== targetType;
+  if (support) {
+    state.analytics.supportPlays += 1;
+    playerAnalytics.supportPlays += 1;
+    playerAnalytics.supportPoints += playLevel;
+  }
+  if (substitute) {
+    state.analytics.substitutions += 1;
+    playerAnalytics.substitutions += 1;
+  }
   const typeLabel = PHASE_LABEL[playType];
   pushLog(
     state,
@@ -106,6 +127,10 @@ export function discardCard(state: GameState, playerId: string, cardId: number):
   const [card] = player.hand.splice(index, 1);
   if (!card) return false;
   player.actionsLeft -= 1;
+  state.analytics.actions.trash += 1;
+  const playerAnalytics = analyticsFor(state, playerId);
+  playerAnalytics.actions.trash += 1;
+  if (card.type === "debt") playerAnalytics.debtCleaned += 1;
   recomputeTeamStats(state);
   pushLog(state, `${player.name}: ${card.title ?? `${card.type} lv${card.level}`} を廃棄`, "info");
   return true;
@@ -119,6 +144,8 @@ export function endPlayerTurn(state: GameState, playerId: string): void {
   discardHand(player);
   player.actionsLeft = 0;
   if (remaining > 0) {
+    state.analytics.actions.pass += 1;
+    analyticsFor(state, playerId).actions.pass += 1;
     pushLog(state, `${player.name}: パス（残り${remaining}アクションを放棄）`, "info");
   }
   if (debt > 0) {

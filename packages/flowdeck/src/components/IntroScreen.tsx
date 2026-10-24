@@ -15,13 +15,18 @@ import {
 import { FlowDiagram } from "./FlowDiagram";
 
 interface Props {
-  onStart?: (days: number, aiCount: number) => void;
+  onStart?: (days: number, aiCount: number, generationSwing: number) => void;
   onClose?: () => void;
   review?: boolean;
 }
 
 const DAY_OPTIONS = [10, 20, 30] as const;
 const AI_OPTIONS = [3, 4, 5] as const;
+const SWING_OPTIONS = [
+  { value: 0, label: "安定", hint: "得損なし" },
+  { value: 0.1, label: "標準", hint: "±10%" },
+  { value: 0.2, label: "波乱", hint: "±20%" },
+] as const;
 
 function ChoiceRow<T extends number>({
   label,
@@ -63,6 +68,7 @@ function ChoiceRow<T extends number>({
 export function IntroScreen({ onStart, onClose, review = false }: Props) {
   const [days, setDays] = useState(10);
   const [aiCount, setAiCount] = useState(4);
+  const [swing, setSwing] = useState(0.1);
 
   return (
     <div className="fixed inset-0 z-[60] flex items-end justify-center overflow-y-auto bg-black/55 p-3 sm:items-center">
@@ -144,6 +150,29 @@ export function IntroScreen({ onStart, onClose, review = false }: Props) {
               />
             </div>
           )}
+
+          {!review && (
+            <section>
+              <p className="mb-1 text-[9px] text-(--mid)">タスクの得損</p>
+              <div className="grid grid-cols-3 gap-1.5">
+                {SWING_OPTIONS.map((option) => (
+                  <button
+                    key={option.value}
+                    type="button"
+                    onClick={() => setSwing(option.value)}
+                    className={`rounded-sm border px-2 py-1.5 text-center ${
+                      swing === option.value
+                        ? "border-(--terra) bg-(--terra) text-white"
+                        : "border-(--border) bg-(--paper) text-(--mid) hover:border-(--terra)/50"
+                    }`}
+                  >
+                    <span className="block text-[11px]">{option.label}</span>
+                    <span className="block text-[7px] opacity-70">{option.hint}</span>
+                  </button>
+                ))}
+              </div>
+            </section>
+          )}
         </div>
 
         <div className="flex items-center justify-end gap-1.5 border-t border-(--border) px-4 py-3">
@@ -158,7 +187,7 @@ export function IntroScreen({ onStart, onClose, review = false }: Props) {
           ) : (
             <button
               type="button"
-              onClick={() => onStart?.(days, aiCount)}
+              onClick={() => onStart?.(days, aiCount, swing)}
               className="inline-flex items-center gap-1 rounded-sm bg-(--terra) px-4 py-1.5 text-[11px] font-medium text-white transition-opacity hover:opacity-90"
             >
               <Play size={12} /> 四半期を開始

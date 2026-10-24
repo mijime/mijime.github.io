@@ -1,11 +1,20 @@
 import { effectGenerationValue } from "../engine/rules/effects";
 import { penaltyGenerationValue } from "../engine/rules/penalties";
+import { DEFAULT_GENERATION_SWING, normalizeGenerationSwing } from "../engine/rules/generation";
 import { randInt } from "../engine/rng";
 import type { GameState, TaskDef, TaskRequirements } from "../engine/types";
 
 export type Phase = keyof TaskRequirements;
 
 export const PHASES: readonly Phase[] = ["design", "dev", "test"];
+
+/** タスク種別ごとの要求量の揺らし幅。effect/incident は控えめにする。 */
+export function requirementSwing(def: TaskDef, swing: number, roll: number): number {
+  const amplitude = def.kind === "incident" || def.reward.effect ? swing / 2 : swing;
+  if (roll < 2) return -amplitude;
+  if (roll < 8) return 0;
+  return amplitude;
+}
 
 export function totalRequirements(requirements: TaskRequirements): number {
   return requirements.design + requirements.dev + requirements.test;
@@ -72,15 +81,24 @@ export function valueTotalBounds(def: TaskDef): readonly [number, number] {
 }
 
 /** 価値（スコア+報酬+効果+罰則）から要求合計を逆算する。 */
-export function valueRequirementTotal(def: TaskDef, state: GameState, totalScale = 1): number {
+export function valueRequirementTotal(
+  def: TaskDef,
+  state: GameState,
+  totalScale = 1,
+  swing = DEFAULT_GENERATION_SWING,
+): number {
   const base = (taskValue(def) / valueEfficiency(def)) * totalScale;
   const roll = randInt(state, 10);
-  const swing = roll < 2 ? -0.05 : roll < 8 ? 0 : 0.05;
-  const scale = def.kind === "incident" || def.reward.effect ? 1 : 2;
+  const amount = requirementSwing(def, normalizeGenerationSwing(swing), roll);
   const [min, max] = valueTotalBounds(def);
-  return Math.min(max, Math.max(min, Math.round(base * (1 + swing * scale))));
+  return Math.min(max, Math.max(min, Math.round(base * (1 + amount))));
 }
 
-export function applyValueRequirements(def: TaskDef, state: GameState, totalScale = 1): void {
-  redistribute(def.requirements, valueRequirementTotal(def, state, totalScale));
+export function applyValueRequirements(
+  def: TaskDef,
+  state: GameState,
+  totalScale = 1,
+  swing = DEFAULT_GENERATION_SWING,
+): void {
+  redistribute(def.requirements, valueRequirementTotal(def, state, totalScale, swing));
 }

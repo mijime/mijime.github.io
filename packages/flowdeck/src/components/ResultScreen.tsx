@@ -1,10 +1,15 @@
 import type { Dispatch } from "react";
 import { RefreshCw, RotateCcw, ScrollText, Star } from "lucide-react";
 import type { Action, GameState, PlayerOutcome } from "../engine/types";
-import { CARD_LABEL, CARD_STYLE, CardTypeBadge, LANE_LABEL, PlayerIcon, traitSummary } from "./ui";
+import { buildResultSummary } from "../engine/analytics/result";
+import { archetypeById } from "../engine/analytics/playerTypes";
+import { benchmarkFor } from "../data/benchmark";
+import { CARD_LABEL, CARD_STYLE, CardTypeBadge, PlayerIcon, traitSummary } from "./ui";
 import { LOG_TONE, groupLogByDay } from "./LogPanel";
 import { newSeed } from "../store";
-import { DEBT_SCORE_PENALTY } from "../engine/rules/balance";
+import { SummaryPanel } from "./result/SummaryPanel";
+import { PlayerArchetypeBadge } from "./result/PlayerArchetypeBadge";
+import { ArchetypeGuide } from "./result/ArchetypeGuide";
 
 interface Props {
   state: GameState;
@@ -38,6 +43,9 @@ export function ResultScreen({ state, dispatch }: Props) {
   const outcome = state.outcome;
   if (!outcome) return null;
 
+  const summary = buildResultSummary(state);
+  const playerCount = state.players?.length ?? outcome.perPlayer.length;
+  const benchmark = benchmarkFor(playerCount, state.totalDays, state.generationSwing ?? 0.1);
   const human = outcome.perPlayer.find((player) => player.isHuman);
   const aiPlayers = outcome.perPlayer.filter((player) => !player.isHuman);
   const humanWork = human ? workPoints(human) : 0;
@@ -88,7 +96,10 @@ export function ResultScreen({ state, dispatch }: Props) {
         {human && (
           <section className="mt-4 rounded-sm border border-(--terra)/40 bg-(--terra)/5 p-3">
             <div className="flex flex-wrap items-baseline justify-between gap-1">
-              <h2 className="serif text-[13px] font-semibold">あなたの貢献</h2>
+              <div className="flex items-center gap-1.5">
+                <h2 className="serif text-[13px] font-semibold">あなたの貢献</h2>
+                <PlayerArchetypeBadge id={human.archetypeId} />
+              </div>
               <span className="text-[8px] text-(--mid)">
                 チーム内 {rank}位 / {outcome.perPlayer.length}人
               </span>
@@ -117,49 +128,9 @@ export function ResultScreen({ state, dispatch }: Props) {
           </section>
         )}
 
-        <div className="mt-5 grid gap-2">
-          <section className="rounded-sm border border-(--border) bg-(--paper) p-3">
-            <h2 className="serif text-[13px] font-semibold">企業価値の内訳</h2>
-            <ul className="mt-1.5 space-y-1 text-[10px]">
-              <li className="flex items-baseline justify-between gap-2">
-                <span className="text-(--mid)">企業価値（カード）</span>
-                <span className="font-medium text-emerald-700 dark:text-emerald-400">
-                  +{outcome.teamScore}
-                </span>
-              </li>
-              <li className="flex items-baseline justify-between gap-2">
-                <span className="text-(--mid)">
-                  技術的負債 {outcome.teamDebt} × {DEBT_SCORE_PENALTY}
-                </span>
-                <span className="font-medium text-red-600 dark:text-red-400">
-                  -{outcome.teamDebt * DEBT_SCORE_PENALTY}
-                </span>
-              </li>
-              {outcome.scorePenalty > 0 && (
-                <li className="flex items-baseline justify-between gap-2">
-                  <span className="text-(--mid)">期限切れ罰則</span>
-                  <span className="font-medium text-red-600 dark:text-red-400">
-                    -{outcome.scorePenalty}
-                  </span>
-                </li>
-              )}
-              <li className="flex items-baseline justify-between gap-2 border-t border-(--border) pt-1 font-semibold">
-                <span>最終評価</span>
-                <span>{outcome.finalScore}</span>
-              </li>
-            </ul>
-            <div className="mt-2 grid grid-cols-2 gap-x-2 gap-y-0.5 text-[9px] text-(--mid)">
-              <span>完了 {outcome.completed}件</span>
-              <span>平均リードタイム {outcome.avgLeadTime.toFixed(1)}日</span>
-              <span>期限切れ {outcome.expired}件</span>
-              <span>テスト切れ {outcome.testExpired}件</span>
-              <span>平均WIP {outcome.avgWip.toFixed(1)}</span>
-              <span>
-                ボトルネック {outcome.bottleneck ? LANE_LABEL[outcome.bottleneck] : "なし"}
-              </span>
-            </div>
-          </section>
+        <SummaryPanel summary={summary} benchmark={benchmark} />
 
+        <div className="mt-2 grid gap-2">
           <section className="rounded-sm border border-(--border) bg-(--paper) p-3">
             <h2 className="serif text-[13px] font-semibold">チームの成果</h2>
             <div className="mt-2 grid gap-1.5 sm:grid-cols-2">
@@ -177,8 +148,11 @@ export function ResultScreen({ state, dispatch }: Props) {
                       <PlayerIcon player={player} size={11} className="text-(--mid)" />
                       {player.name}
                     </span>
-                    <span className="rounded-sm border border-(--border) px-1 text-[7px] text-(--mid)">
-                      {player.isHuman ? "自由" : traitSummary(player.weights)}
+                    <span className="flex items-center gap-1">
+                      <PlayerArchetypeBadge id={player.archetypeId} />
+                      <span className="rounded-sm border border-(--border) px-1 text-[7px] text-(--mid)">
+                        {player.isHuman ? "自由" : traitSummary(player.weights)}
+                      </span>
                     </span>
                   </div>
 
@@ -191,6 +165,9 @@ export function ResultScreen({ state, dispatch }: Props) {
                     </span>
                     <span>WIP {player.avgWip.toFixed(1)}</span>
                   </div>
+                  <p className="mt-0.5 text-[7px] text-(--mid)">
+                    {archetypeById(player.archetypeId).description}
+                  </p>
 
                   <div className="mt-1 grid grid-cols-3 gap-1">
                     {(["design", "dev", "test"] as const).map((type) => (
@@ -225,8 +202,13 @@ export function ResultScreen({ state, dispatch }: Props) {
           </section>
         </div>
 
+        <ArchetypeGuide />
+
         <section className="mt-2 rounded-sm border border-(--border) bg-(--paper) p-3">
-          <h2 className="serif text-[13px] font-semibold">ボードミーティング</h2>
+          <div className="flex items-baseline justify-between gap-2">
+            <h2 className="serif text-[13px] font-semibold">ボードミーティング</h2>
+            <span className="text-[8px] text-(--mid)">星に近づく順</span>
+          </div>
           <ul className="mt-1 space-y-0.5 text-[10px] text-(--mid)">
             {outcome.tips.map((tip) => (
               <li key={tip}>・{tip}</li>

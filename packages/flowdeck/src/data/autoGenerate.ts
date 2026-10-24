@@ -1,4 +1,5 @@
 import type { TaskGenerationPolicy } from "../engine/rules/generation";
+import { DEFAULT_GENERATION_SWING } from "../engine/rules/generation";
 import { randInt, shuffle } from "../engine/rng";
 import type {
   CardEffect,
@@ -134,7 +135,11 @@ function effectRewardLevel(state: GameState, spec: EffectSpec): number {
  * テンプレートを使わず、テーマ・比率・価値-first だけで72枚を生成する。
  * 名前・スコア・報酬・納期・効果・罰則を毎ゲーム作り直す。
  */
-export function generateAutoTasks(state: GameState, totalScale = 1): TaskDef[] {
+export function generateAutoTasks(
+  state: GameState,
+  totalScale = 1,
+  swing = DEFAULT_GENERATION_SWING,
+): TaskDef[] {
   const defs: TaskDef[] = [];
   const usedNames = new Set<string>();
 
@@ -161,7 +166,7 @@ export function generateAutoTasks(state: GameState, totalScale = 1): TaskDef[] {
   };
 
   const add = (def: TaskDef): void => {
-    applyValueRequirements(def, state, totalScale);
+    applyValueRequirements(def, state, totalScale, swing);
     defs.push(def);
   };
 
@@ -228,7 +233,7 @@ export function generateAutoTasks(state: GameState, totalScale = 1): TaskDef[] {
 export const AUTO_GENERATION: TaskGenerationPolicy = {
   base: () => {},
   modifiers: [],
-  create: (state) => generateAutoTasks(state, 1.12),
+  create: (state, swing) => generateAutoTasks(state, 1.12, swing),
 };
 
 export const AUTO_COUNTS = {

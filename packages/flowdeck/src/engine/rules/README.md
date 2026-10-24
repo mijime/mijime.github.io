@@ -9,7 +9,7 @@ rules/
   balance.ts        アクション数・手札・星閾値・リスクドロー比率
   lanes.ts          lane ↔ phase、実効lv
   generation.ts     タスク生成の base + modifiers
-  tips.ts           ボードミーティングの指摘
+  tips.ts           ボードミーティングの指摘（星への影響度順）
   effects/          カード効果（1効果 = 1プラグイン）
   penalties/        期限切れ罰則
   risks/            リスクカードの解決
@@ -79,6 +79,8 @@ task("example", "例", 5, 5, 3, 1, 4, r("dev", 4, { kind: "boost", amount: 1 }))
 - `budget`: スコア帯の予算から要求合計を決める
 - `value`: スコア + 報酬lv×0.5 + 効果価値 + 罰則価値 から要求合計を逆算する
 
+`TaskGenerationPolicy.swing`（0〜0.2）で要求量の得損を注入できる。既定は `0.1`。通常タスクは `1 ± swing`、効果・インシデントは半分の振幅。`0.2` で通常タスクが0.8〜1.2倍になる。
+
 ```bash
 pnpm --filter @mijime/flowdeck tasks -- --compare
 pnpm --filter @mijime/flowdeck tasks -- --policy value --seed 42
@@ -99,3 +101,16 @@ const state = createGame(seed, days, aiCount, altered);
 ```
 
 `state` には `RuleSet` を保存しない（関数を含むため）。UI で切り替えたくなったら `rulesetId` を state に足し、save version を上げる。
+
+## シミュレーション用シナリオ
+
+`scripts/lib/scenarios.ts` は `BASE_RULES` を複製し、バランスだけを差し替えたシナリオを作る。ゲーム本体のデフォルトは `base` のまま。
+
+```ts
+resolveScenario("no-tokens"); // startingTokens = 0
+scenarioFromOverrides("custom", { actionsPerTurn: 4, debtScorePenalty: 3 });
+```
+
+- プリセット: `base` / `substitution` / `no-tokens` / `token-rich` / `fast` / `slow` / `long-hand` / `tight-debt` / `loose-debt` / `budget` / `value`
+- スイープ可能: `actionsPerTurn` / `handSize` / `debtScorePenalty` / `startingTokens` / `allowSubstitution` / `openTasks` / `debtLimit` / `starOne` / `starTwo` / `starThree` / `generation`
+- `teamRules` の上書きは元の関数を捕まえてから包む（`rules.balance.teamRules` をそのまま参照すると再帰する）
