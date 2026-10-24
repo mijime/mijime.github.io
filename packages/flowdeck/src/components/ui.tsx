@@ -149,6 +149,32 @@ export function LevelStars({
   );
 }
 
+const CARD_BADGE: Record<CardType, string> = {
+  design: "bg-violet-600 text-white",
+  dev: "bg-blue-600 text-white",
+  test: "bg-amber-600 text-white",
+  debt: "bg-red-600 text-white",
+};
+
+export function CardTypeBadge({
+  type,
+  size = 9,
+  className = "",
+}: {
+  type: CardType;
+  size?: number;
+  className?: string;
+}) {
+  return (
+    <span
+      className={`inline-flex shrink-0 items-center justify-center rounded-[2px] p-0.5 ${CARD_BADGE[type]} ${className}`}
+      aria-hidden="true"
+    >
+      <CardTypeIcon type={type} size={size} />
+    </span>
+  );
+}
+
 export const CARD_LABEL: Record<CardType, string> = {
   design: "設計",
   dev: "開発",
@@ -161,13 +187,6 @@ export const CARD_STYLE: Record<CardType, string> = {
   dev: "border-blue-500/50 bg-blue-500/15 text-(--ink)",
   test: "border-amber-500/50 bg-amber-500/15 text-(--ink)",
   debt: "border-red-500/50 bg-red-500/15 text-(--ink)",
-};
-
-export const CARD_TEXT: Record<CardType, string> = {
-  design: "text-violet-700 dark:text-violet-300",
-  dev: "text-blue-700 dark:text-blue-300",
-  test: "text-amber-700 dark:text-amber-300",
-  debt: "text-red-600 dark:text-red-400",
 };
 
 const LANE_ICON = {

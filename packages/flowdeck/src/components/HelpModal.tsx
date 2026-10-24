@@ -12,7 +12,7 @@ import {
 import type { TeamRules } from "../engine/types";
 import { DEBT_SCORE_PENALTY } from "../engine/types";
 import { FlowDiagram } from "./FlowDiagram";
-import { CARD_STYLE, CARD_TEXT, CardTypeIcon } from "./ui";
+import { CARD_STYLE, CardTypeBadge } from "./ui";
 
 function Step({ icon, label }: { icon: React.ReactNode; label: string }) {
   return (
@@ -67,7 +67,7 @@ export function HelpModal({ rules, onClose }: { rules: TeamRules; onClose: () =>
                   key={type}
                   className={`rounded-sm border px-1 py-1 text-center ${CARD_STYLE[type]}`}
                 >
-                  <CardTypeIcon type={type} size={9} className={`mx-auto ${CARD_TEXT[type]}`} />
+                  <CardTypeBadge type={type} size={11} className="mx-auto" />
                   <span className="mt-0.5 block text-[9px] font-medium">{label}</span>
                 </span>
               ))}

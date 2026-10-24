@@ -1,15 +1,7 @@
 import type { Dispatch } from "react";
 import { ArrowRight, Layers, Sparkles } from "lucide-react";
 import type { Action, GameState, TaskCard } from "../engine/types";
-import {
-  CARD_TEXT,
-  CardTypeIcon,
-  LaneIcon,
-  LevelStars,
-  effectLabel,
-  penaltyLabel,
-  rewardLabel,
-} from "./ui";
+import { CardTypeBadge, LaneIcon, LevelStars, effectLabel, penaltyLabel, rewardLabel } from "./ui";
 
 interface Props {
   state: GameState;
@@ -92,7 +84,7 @@ function OpenTaskCard({
             }`}
           >
             <span className="flex items-center gap-0.5 text-[8.5px] text-(--ink)/65">
-              <CardTypeIcon type={type} size={9} className={CARD_TEXT[type]} /> {label}
+              <CardTypeBadge type={type} size={8} /> {label}
             </span>
             <span className="block text-center text-[10px] font-semibold text-(--ink)">
               {value}
@@ -107,7 +99,7 @@ function OpenTaskCard({
           className="inline-flex items-center gap-0.5 rounded-sm border border-emerald-500/50 bg-emerald-500/10 px-1 py-0.5 text-[9px] text-(--ink)"
           title={rewardLabel(task)}
         >
-          <CardTypeIcon type={task.reward.type} size={9} className={CARD_TEXT[task.reward.type]} />
+          <CardTypeBadge type={task.reward.type} size={8} />
           <LevelStars level={task.reward.level} className="text-[9px] text-(--terra)" />
           {task.reward.effect && (
             <span className="ml-0.5 text-[8px] font-medium text-(--ink)/70">

@@ -1,7 +1,7 @@
 import type { Dispatch } from "react";
 import { RefreshCw, RotateCcw, ScrollText, Star } from "lucide-react";
 import type { Action, GameState, PlayerOutcome } from "../engine/types";
-import { CARD_LABEL, CARD_STYLE, CardTypeIcon, LANE_LABEL, PlayerIcon, traitSummary } from "./ui";
+import { CARD_LABEL, CARD_STYLE, CardTypeBadge, LANE_LABEL, PlayerIcon, traitSummary } from "./ui";
 import { LOG_TONE, groupLogByDay } from "./LogPanel";
 import { newSeed } from "../store";
 
@@ -198,7 +198,7 @@ export function ResultScreen({ state, dispatch }: Props) {
                         title={`${player.contributed[type].cards}枚 / ${player.contributed[type].points}pt`}
                       >
                         <span className="flex items-center gap-0.5 text-[7px] opacity-70">
-                          <CardTypeIcon type={type} size={7} /> {CARD_LABEL[type]}
+                          <CardTypeBadge type={type} size={7} /> {CARD_LABEL[type]}
                         </span>
                         <span className="block text-[10px] font-medium">
                           {player.contributed[type].cards}枚

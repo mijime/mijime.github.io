@@ -4,8 +4,7 @@ import type { Action, CardInstance, GameState, TaskCard } from "../engine/types"
 import { taskContributions, taskSum } from "../engine/metrics";
 import {
   CARD_LABEL,
-  CARD_TEXT,
-  CardTypeIcon,
+  CardTypeBadge,
   LevelStars,
   CARD_STYLE,
   PLAYER_TONE,
@@ -77,7 +76,7 @@ function Requirement({
       aria-label={`${label} ${value}/${required}`}
     >
       <span className="flex items-center justify-center gap-0.5 text-[8px]">
-        <CardTypeIcon type={type} size={9} className={CARD_TEXT[type]} />
+        <CardTypeBadge type={type} size={8} />
       </span>
       <span className="block text-center font-semibold text-(--ink)">
         {required <= 0 ? "—" : `${value}/${required}`}
@@ -230,7 +229,7 @@ export function TaskCardView({ state, task, dispatch, selectedCard, compact = fa
           className="inline-flex items-center gap-0.5 rounded-sm border border-emerald-500/50 bg-emerald-500/10 px-1 py-0.5 text-[9px] text-(--ink)"
           title={rewardLabel(task)}
         >
-          <CardTypeIcon type={task.reward.type} size={9} className={CARD_TEXT[task.reward.type]} />
+          <CardTypeBadge type={task.reward.type} size={8} />
           <LevelStars level={task.reward.level} className="text-[9px] text-(--terra)" />
           {task.reward.effect && (
             <span className="ml-0.5 text-[8px] font-medium text-(--ink)/70">

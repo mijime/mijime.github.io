@@ -2,15 +2,7 @@ import type { Dispatch } from "react";
 import { Bot, Circle, CircleDot, Hand, Trash2 } from "lucide-react";
 import type { Action, CardInstance, GameState } from "../engine/types";
 import { ACTIONS_PER_TURN } from "../engine/types";
-import {
-  CARD_LABEL,
-  CARD_STYLE,
-  CARD_TEXT,
-  CardTypeIcon,
-  LevelStars,
-  cardTitle,
-  effectLabel,
-} from "./ui";
+import { CARD_LABEL, CARD_STYLE, CardTypeBadge, LevelStars, cardTitle, effectLabel } from "./ui";
 
 interface Props {
   state: GameState;
@@ -47,8 +39,7 @@ function HandCard({
             "DEBT"
           ) : (
             <span className="inline-flex items-center gap-0.5">
-              <CardTypeIcon type={card.type} size={11} className={CARD_TEXT[card.type]} />{" "}
-              {CARD_LABEL[card.type]}
+              <CardTypeBadge type={card.type} size={9} /> {CARD_LABEL[card.type]}
               {card.score !== undefined && (
                 <span className="ml-0.5 font-semibold text-(--terra)">+{card.score}</span>
               )}
