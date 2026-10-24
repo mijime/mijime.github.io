@@ -1,5 +1,5 @@
 import type { Dispatch } from "react";
-import { Lock } from "lucide-react";
+import { Bot, Lock } from "lucide-react";
 import type { Action, CardInstance, GameState, TaskCard } from "../engine/types";
 import { taskContributions, taskSum } from "../engine/metrics";
 import {
@@ -125,10 +125,11 @@ export function TaskCardView({ state, task, dispatch, selectedCard, compact = fa
               event.stopPropagation();
               dispatch({ type: "USE_TOKEN", token: "mi", taskId: task.id });
             }}
-            className="shrink-0 rounded-sm border border-(--terra)/40 bg-(--terra)/10 px-0.5 text-[6px] font-semibold text-(--terra) hover:bg-(--terra)/20"
-            title="miトークンをこのレーンにレベル1作業として置く（アクション消費なし）"
+            aria-label="LLMトークンを置く"
+            title="LLMトークンをこのレーンにレベル1作業として置く（アクション消費なし）"
+            className="inline-flex shrink-0 items-center justify-center rounded-sm border border-(--terra)/40 bg-(--terra)/10 p-0.5 text-(--terra) transition-colors hover:bg-(--terra)/20"
           >
-            mi+1
+            <Bot size={11} />
           </button>
         )}
         <span className="shrink-0 text-[9px] font-semibold text-(--terra)">+{task.score}</span>

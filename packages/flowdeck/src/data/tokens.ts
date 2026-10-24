@@ -10,8 +10,8 @@ export interface TokenDef {
 export const TOKEN_DEFS: Record<string, TokenDef> = {
   mi: {
     id: "mi",
-    label: "miトークン",
-    short: "mi",
+    label: "LLMトークン",
+    short: "LLM",
     workLevel: 1,
     description: "任意のレーンにレベル1作業として置ける。アクションは消費しない。",
   },

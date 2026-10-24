@@ -139,8 +139,26 @@ export const TASK_DEFS: TaskDef[] = [
     4,
     r("design", 3, { kind: "deadline", amount: 1 }),
   ),
-  task("automation", "自動化", 6, 6, 5, 0, 4, r("test", 5, { kind: "draw", amount: 2 })),
-  task("pair-programming", "ペアプロ", 5, 6, 3, 0, 4, r("dev", 4, { kind: "action", amount: 1 })),
+  task(
+    "automation",
+    "自動化",
+    6,
+    6,
+    5,
+    0,
+    4,
+    r("test", 5, { kind: "token", token: "mi", amount: 1 }),
+  ),
+  task(
+    "pair-programming",
+    "ペアプロ",
+    5,
+    6,
+    3,
+    0,
+    4,
+    r("dev", 4, { kind: "token", token: "mi", amount: 1 }),
+  ),
   task(
     "debt-settlement",
     "負債返済",
@@ -182,7 +200,16 @@ export const TASK_DEFS: TaskDef[] = [
     4,
     r("design", 3, { kind: "deadline", amount: 1 }),
   ),
-  task("pair-testing", "ペアテスト", 5, 5, 4, 0, 4, r("test", 4, { kind: "action", amount: 1 })),
+  task(
+    "pair-testing",
+    "ペアテスト",
+    5,
+    5,
+    4,
+    0,
+    4,
+    r("test", 4, { kind: "token", token: "mi", amount: 1 }),
+  ),
 
   // インシデントタスク: 期限切れで全員に負債
   incident("incident-prod", "本番障害", 4, 8, 4, 2, 2, r("dev", 3), {

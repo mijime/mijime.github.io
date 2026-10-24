@@ -18,7 +18,7 @@ export function createGame(
   const safeCount = Math.max(3, Math.min(5, aiCount));
   const rules = teamRulesFor(safeCount + 1, totalDays);
   const state: GameState = {
-    version: 17,
+    version: 18,
     seed,
     rngState: seed >>> 0,
     day: 1,

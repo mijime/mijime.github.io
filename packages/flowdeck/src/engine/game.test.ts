@@ -79,7 +79,7 @@ describe("setup", () => {
     expect(state.taskDeck).toHaveLength(TASK_DEFS.length - state.rules.openTasks);
     expect(state.uncertaintyDeck).toHaveLength(16);
     expect(state.phase).toBe("human");
-    expect(state.rules).toMatchObject({ openTasks: 4, debtLimit: 18, starThree: 29 });
+    expect(state.rules).toMatchObject({ openTasks: 4, debtLimit: 12, starThree: 32 });
     expect(state.players.filter((player) => !player.isHuman)).toHaveLength(4);
     expect(state.players.every((player) => player.hand.length === HAND_SIZE)).toBe(true);
   });
@@ -89,18 +89,18 @@ describe("setup", () => {
     expect(state.players).toHaveLength(4);
     expect(state.rules).toMatchObject({
       openTasks: 3,
-      debtLimit: 15,
-      starThree: 22,
+      debtLimit: 10,
+      starThree: 26,
     });
   });
 
   it("20日/30日で目標と負債上限が伸びる", () => {
     const twenty = createGame(1, 20, 4);
     expect(twenty.totalDays).toBe(20);
-    expect(twenty.rules).toMatchObject({ debtLimit: 32, starOne: 34, starTwo: 53, starThree: 60 });
+    expect(twenty.rules).toMatchObject({ debtLimit: 14, starOne: 44, starTwo: 62, starThree: 70 });
     const thirty = createGame(1, 30, 4);
     expect(thirty.totalDays).toBe(30);
-    expect(thirty.rules).toMatchObject({ debtLimit: 42, starOne: 59, starTwo: 83, starThree: 96 });
+    expect(thirty.rules).toMatchObject({ debtLimit: 16, starOne: 76, starTwo: 97, starThree: 106 });
   });
 
   it("AIの名前・性格は開始時にランダムで決まる", () => {
@@ -149,11 +149,11 @@ describe("setup", () => {
     expect(state.taskDefs.some((task) => task.kind === "incident")).toBe(true);
   });
 
-  it("タスク報酬の約10%にmiトークン効果が付く", () => {
+  it("効果カードの一部にLLMトークン効果が付く", () => {
     const state = createGame(42);
     const tokenTasks = state.taskDefs.filter((task) => task.reward.effect?.kind === "token");
-    expect(tokenTasks.length).toBeGreaterThanOrEqual(5);
-    expect(tokenTasks.length).toBeLessThanOrEqual(9);
+    expect(tokenTasks.length).toBeGreaterThan(0);
+    expect(tokenTasks.every((task) => task.kind !== "incident")).toBe(true);
   });
 
   it("ログは500件を超えると古いものから消える", () => {
@@ -268,12 +268,60 @@ describe("タスクの流れ", () => {
     expect(report?.score).toBe(4);
     expect(report?.reward).toEqual({ type: "dev", level: 5 });
     expect(report?.uncertainty).toEqual([
-      { title: "仕様追加 +2", description: "miの設計提案で要求が +2 される" },
+      { title: "仕様追加 +2", description: "LLMの設計提案で要求が +2 される" },
     ]);
     expect(report?.added.design).toBe(2);
     expect(report?.unmet).toBe(true);
     expect(report?.debt).toBe(1);
     expect(report?.teamDebt).toBe(1);
+  });
+
+  it("賄えない不確実カードの数だけ負債が増える", () => {
+    const state = testState();
+    state.uncertaintyDeck = ["u-design4a", "u-design4a", "u-design4a"];
+    const task = addTask(state, "test", state.humanId, {
+      requirements: { design: 0, dev: 0, test: 5 },
+      score: 4,
+      reward: { type: "dev", level: 5 },
+    });
+    // ピース5枚 → 不確実3枚。
+    for (let i = 0; i < 5; i += 1) {
+      task.attached.push({
+        card: card(state, "test", 1),
+        ownerId: state.humanId,
+        playType: "test",
+        playLevel: 1,
+      });
+    }
+
+    advanceTasks(state);
+
+    // 設計+2が3枚。設計の余剰は0なので3枚とも賄えず、負債3。
+    expect(state.lastAcquisition?.unmet).toBe(true);
+    expect(state.lastAcquisition?.debt).toBe(3);
+  });
+
+  it("余剰作業があれば不確実カードを吸収できる", () => {
+    const state = testState();
+    state.uncertaintyDeck = ["u-design4a"];
+    const task = addTask(state, "wip", state.humanId, {
+      requirements: { design: 3, dev: 0, test: 0 },
+      score: 4,
+      reward: { type: "dev", level: 5 },
+    });
+    // 設計lv5 1枚（要求合計3、ピース1 → 不確実1枚）。設計の余剰は2。
+    task.attached.push({
+      card: card(state, "design", 5),
+      ownerId: state.humanId,
+      playType: "design",
+      playLevel: 5,
+    });
+
+    advanceTasks(state);
+
+    // 設計の余剰2が「設計+2」を吸収するので負債なし。
+    expect(state.lastAcquisition?.unmet).toBe(false);
+    expect(state.lastAcquisition?.debt).toBe(0);
   });
 
   it("報酬カードの効果が捨て札に入る", () => {
@@ -583,7 +631,7 @@ describe("インシデントとトークン効果", () => {
     expect(active.tokens).toBeGreaterThan(0);
   });
 
-  it("miトークンはアクションを消費せずlv1作業として置ける", () => {
+  it("LLMトークンはアクションを消費せずlv1作業として置ける", () => {
     const state = testState();
     const task = addTask(state, "inbox", state.humanId, {
       requirements: { design: 5, dev: 4, test: 2 },
@@ -595,6 +643,8 @@ describe("インシデントとトークン効果", () => {
     expect(taskSum(task, "design")).toBe(1);
     expect(state.players[0]?.actionsLeft).toBe(ACTIONS_PER_TURN);
     expect(state.players[0]?.tokens.mi).toBe(0);
+    // リザルトの貢献ポイントにもLLMトークン分を加算する
+    expect(state.players[0]?.contributed.design.points).toBe(1);
   });
 
   it("要件トークンで現在フェーズの要求が下がる", () => {
@@ -621,22 +671,23 @@ describe("インシデントとトークン効果", () => {
 });
 
 describe("デッキと報酬", () => {
-  it("要求の不確実カードで未達になると負債カードを得る", () => {
+  it("賄えない不確実カードがあると負債カードを得る", () => {
     const state = testState();
-    state.uncertaintyDeck = ["u-design4"];
-    const task = addTask(state, "test", state.humanId, {
-      requirements: { design: 1, dev: 1, test: 1 },
+    state.uncertaintyDeck = ["u-design4a"];
+    const task = addTask(state, "wip", state.humanId, {
+      requirements: { design: 3, dev: 0, test: 0 },
       score: 1,
     });
     task.attached.push({
-      card: card(state, "test", 1),
+      card: card(state, "design", 3),
       ownerId: state.humanId,
-      playType: "test",
-      playLevel: 1,
+      playType: "design",
+      playLevel: 3,
     });
 
     advanceTasks(state);
 
+    // 設計は要件ちょうど（余剰0）。不確実の設計+2を賄えず負債1。
     expect(task.lane).toBe("done");
     expect(state.teamDebt).toBe(1);
     expect(state.players[0]?.discard.some((c) => c.type === "debt")).toBe(true);
@@ -645,15 +696,15 @@ describe("デッキと報酬", () => {
   it("不確実カードの負債効果でチーム負債が増える", () => {
     const state = testState();
     state.uncertaintyDeck = ["u-debt1"];
-    const task = addTask(state, "test", state.humanId, {
-      requirements: { design: 0, dev: 0, test: 1 },
+    const task = addTask(state, "wip", state.humanId, {
+      requirements: { design: 3, dev: 0, test: 0 },
       score: 1,
     });
     task.attached.push({
-      card: card(state, "test", 1),
+      card: card(state, "design", 3),
       ownerId: state.humanId,
-      playType: "test",
-      playLevel: 1,
+      playType: "design",
+      playLevel: 3,
     });
 
     advanceTasks(state);
@@ -662,51 +713,31 @@ describe("デッキと報酬", () => {
     expect(state.players[0]?.discard.some((c) => c.type === "debt")).toBe(true);
   });
 
-  it("超過テストは要求αを軽減する", () => {
-    const state = testState();
-    state.uncertaintyDeck = ["u-design4"];
-    const task = addTask(state, "test", state.humanId, {
-      requirements: { design: 2, dev: 0, test: 2 },
-      score: 1,
-    });
-    task.attached.push({
-      card: card(state, "design", 4),
-      ownerId: state.humanId,
-      playType: "design",
-      playLevel: 4,
-    });
-    task.attached.push({
-      card: card(state, "test", 4),
-      ownerId: state.humanId,
-      playType: "test",
-      playLevel: 4,
-    });
-
-    advanceTasks(state);
-
-    expect(task.lane).toBe("done");
-    expect(state.teamDebt).toBe(0);
-  });
-
-  it("作業ピース数が多いタスクほど不確実カードを多く引く", () => {
-    const state = testState();
-    state.uncertaintyDeck = ["u-debt0a", "u-debt0b", "u-debt0a"];
-    const task = addTask(state, "test", state.humanId, {
-      requirements: { design: 0, dev: 0, test: 4 },
-      score: 1,
-    });
-    for (let index = 0; index < 4; index += 1) {
-      task.attached.push({
-        card: card(state, "test", 1),
-        ownerId: state.humanId,
-        playType: "test",
-        playLevel: 1,
+  it("要求合計に対するピース数で不確実カードの枚数が決まる", () => {
+    const make = (requirement: number, pieces: number) => {
+      const state = testState();
+      state.uncertaintyDeck = ["u-debt0a", "u-debt0b", "u-debt0a", "u-debt0b"];
+      const task = addTask(state, "wip", state.humanId, {
+        requirements: { design: requirement, dev: 0, test: 0 },
+        score: 1,
       });
-    }
+      for (let index = 0; index < pieces; index += 1) {
+        task.attached.push({
+          card: card(state, "design", 1),
+          ownerId: state.humanId,
+          playType: "design",
+          playLevel: 1,
+        });
+      }
+      advanceTasks(state);
+      return state;
+    };
 
-    advanceTasks(state);
-
-    expect(state.uncertaintyDiscard).toHaveLength(2);
+    // 要求合計18: 5枚→0、6枚→1、7枚→2、9枚→3
+    expect(make(18, 5).uncertaintyDiscard).toHaveLength(0);
+    expect(make(18, 6).uncertaintyDiscard).toHaveLength(1);
+    expect(make(18, 7).uncertaintyDiscard).toHaveLength(2);
+    expect(make(18, 9).uncertaintyDiscard).toHaveLength(3);
   });
 
   it("設計カードは開発としてlv1代用できる", () => {
@@ -837,5 +868,14 @@ describe("AI / 通しプレイ", () => {
     pullTask(state, state.humanId, task.id);
     refillOpen(state);
     expect(state.tasks.filter((t) => t.lane === "open").length).toBe(beforeOpen);
+  });
+});
+
+describe("テスト用オート進行", () => {
+  it("AUTO_STEPは人間の手番もボットとして進める", () => {
+    const state = testState();
+    const next = reduce(state, { type: "AUTO_STEP" });
+    expect(next.activePlayerIndex).toBe(1);
+    expect(next.phase).toBe("ai");
   });
 });

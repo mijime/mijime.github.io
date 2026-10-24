@@ -25,6 +25,8 @@ const TRASH_BASE = 0;
 const FOCUS_SCALE = 45;
 const GREED_SCALE = 50;
 const URGENCY_SCALE = 50;
+/** 性格に関係なく、納期が近いタスクを最低限は優先する */
+const URGENCY_BASE = 24;
 
 function clamp01(value: number): number {
   return Math.max(0, Math.min(1, value));
@@ -93,6 +95,9 @@ function playScore(candidate: PlayCandidate, weights: PersonalityWeights): numbe
   const feature = playFeature(candidate);
   const quality = candidate.type === "test" ? 0.5 + 0.5 * feature : Math.min(0.2, feature * 0.2);
   const hygiene = Math.max(0, -weights.greed);
+  const urgency = urgencyOf(candidate.task);
+  const completion =
+    effectiveLevel(candidate.card, candidate.type) >= candidate.remaining ? 1 : 0.35;
 
   return (
     PLAY_BASE +
@@ -100,10 +105,8 @@ function playScore(candidate: PlayCandidate, weights: PersonalityWeights): numbe
     Math.max(0, weights.greed) * GREED_SCALE * playValue(candidate.task, candidate.card) +
     hygiene * 12 * quality +
     (candidate.task.kind === "incident" ? 20 : 0) +
-    weights.urgency *
-      URGENCY_SCALE *
-      urgencyOf(candidate.task) *
-      (effectiveLevel(candidate.card, candidate.type) >= candidate.remaining ? 1 : 0.35)
+    weights.urgency * URGENCY_SCALE * urgency * completion +
+    URGENCY_BASE * urgency * completion
   );
 }
 
@@ -121,7 +124,7 @@ function pullScore(
     Math.max(0, weights.greed) * 40 * taskValue(task) +
     weights.urgency * 30 * urgencyOf(task) +
     (task.kind === "incident" ? 20 : 0) -
-    own * 8
+    own * 14
   );
 }
 
@@ -268,7 +271,7 @@ function useBotTokens(state: GameState, player: PlayerState): void {
 export function runBotAction(state: GameState, playerId: string): boolean {
   const player = state.players.find((entry) => entry.id === playerId);
   if (!player || player.actionsLeft <= 0) return false;
-  // miトークンはアクションを消費しないので、行動前に使い切る。
+  // LLMトークンはアクションを消費しないので、行動前に使い切る。
   useBotTokens(state, player);
   // 行動は focus / greed / urgency の3軸だけで決める。
   const action = chooseBotAction(state, player);

@@ -1,5 +1,5 @@
 import type { Dispatch } from "react";
-import { Circle, CircleDot, Hand, Sparkles, Trash2 } from "lucide-react";
+import { Bot, Circle, CircleDot, Hand, Trash2 } from "lucide-react";
 import type { Action, CardInstance, GameState } from "../engine/types";
 import { ACTIONS_PER_TURN } from "../engine/types";
 import {
@@ -96,7 +96,7 @@ export function HandBar({ state, dispatch, selectedCardId, onSelect }: Props) {
             <span>山 {human.deck.length}</span>
             <span>捨 {human.discard.length}</span>
             <span className="inline-flex items-center gap-0.5 rounded-sm border border-(--terra)/30 px-1 text-(--terra)">
-              <Sparkles size={9} /> mi {human.tokens.mi ?? 0}
+              <Bot size={9} /> LLM {human.tokens.mi ?? 0}
             </span>
           </div>
           <div className="flex items-center gap-1 text-[9px] text-(--mid)">

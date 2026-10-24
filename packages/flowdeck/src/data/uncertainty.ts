@@ -14,10 +14,10 @@ const requirement = (
         : `品質要求 +${amount}`,
   description:
     phase === "design"
-      ? `miの設計提案で要求が +${amount} される`
+      ? `LLMの設計提案で要求が +${amount} される`
       : phase === "dev"
-        ? `jimeの実装要件が +${amount} される`
-        : `jimeの品質基準が +${amount} される`,
+        ? `LLMの実装要件が +${amount} される`
+        : `LLMの品質基準が +${amount} される`,
   effect: { kind: "require", phase, amount },
 });
 

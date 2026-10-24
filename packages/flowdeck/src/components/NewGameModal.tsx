@@ -74,8 +74,8 @@ export function NewGameModal({ currentDays, currentAiCount, onClose, onStart }: 
 
           <section className="rounded-sm border border-(--border) bg-(--grid)/40 px-3 py-2 text-[10px] text-(--mid)">
             <p className="text-(--ink)">
-              コーディングエージェント <strong>mi</strong> と軽量LLM <strong>jime</strong>{" "}
-              を売るSaaS企業の四半期。 全員がmiを使い、jimeのLLM事業で企業価値を伸ばします。
+              コーディングエージェントと <strong>LLM</strong>{" "}
+              を売るSaaS企業の四半期。チームでタスクを流し、企業価値を伸ばします。
             </p>
             <p className="mt-1 flex items-center gap-1 text-(--ink)">
               <Dices size={12} />{" "}

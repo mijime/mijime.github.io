@@ -69,6 +69,17 @@ export function reduce(state: GameState, action: Action): GameState {
       return s;
     }
 
+    case "AUTO_STEP": {
+      // テスト用: 手番のプレイヤー（人間を含む）をボットとして1手進める
+      if (s.phase === "over" || s.phase === "roundEnd") return state;
+      const player = s.players[s.activePlayerIndex];
+      if (!player) return state;
+      const acted = runBotAction(s, player.id);
+      if (!acted) endPlayerTurn(s, player.id);
+      finishAction(s);
+      return s;
+    }
+
     case "END_ROUND": {
       if (s.phase !== "roundEnd") return state;
       finishRound(s);

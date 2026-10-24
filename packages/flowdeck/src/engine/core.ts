@@ -112,6 +112,7 @@ export function useToken(
 
   player.tokens[token] = (player.tokens[token] ?? 0) - 1;
   task.tokenWork[type] += def.workLevel;
+  player.contributed[type].points += def.workLevel;
   const label = type === "design" ? "設計" : type === "dev" ? "開発" : "テスト";
   pushLog(
     state,

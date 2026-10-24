@@ -1,4 +1,5 @@
 import {
+  BookOpen,
   CalendarDays,
   HelpCircle,
   LayoutGrid,
@@ -13,7 +14,10 @@ import { DEBT_SCORE_PENALTY } from "../engine/types";
 interface Props {
   state: GameState;
   onHelp: () => void;
+  onIntro: () => void;
   onNewGame: () => void;
+  autoMode?: boolean;
+  onStopAuto?: () => void;
 }
 
 function Stat({
@@ -47,7 +51,7 @@ function Stat({
   );
 }
 
-export function Header({ state, onHelp, onNewGame }: Props) {
+export function Header({ state, onHelp, onIntro, onNewGame, autoMode, onStopAuto }: Props) {
   const finalScore = state.teamScore - state.teamDebt * DEBT_SCORE_PENALTY;
   return (
     <header className="game-topbar sticky top-[52px] z-30 border-b border-(--border) bg-(--toolbar-bg)/95 backdrop-blur">
@@ -108,6 +112,25 @@ export function Header({ state, onHelp, onNewGame }: Props) {
           </div>
 
           <div className="ml-auto flex items-center gap-1.5">
+            {autoMode && (
+              <span className="inline-flex items-center gap-1 rounded-sm border border-(--terra)/50 bg-(--terra)/10 px-1.5 py-0.5 text-[8px] font-medium text-(--terra)">
+                AUTO
+                <button
+                  type="button"
+                  onClick={onStopAuto}
+                  className="rounded-sm border border-(--terra)/40 px-1 text-[7px] hover:bg-(--terra)/20"
+                >
+                  停止
+                </button>
+              </span>
+            )}
+            <button
+              type="button"
+              onClick={onIntro}
+              className="inline-flex items-center gap-1 rounded-sm border border-(--border) bg-(--paper) px-2 py-1 text-[10px] text-(--mid) transition-colors hover:border-(--terra) hover:text-(--terra)"
+            >
+              <BookOpen size={12} /> <span className="hidden sm:inline">はじめに</span>
+            </button>
             <button
               type="button"
               onClick={onHelp}
