@@ -87,7 +87,7 @@ export const PLAYER_ARCHETYPES: readonly PlayerArchetype[] = [
   {
     id: "generalist",
     label: "ジェネラリスト型",
-    description: "代用プレイで穴を埋める",
+    description: "フェーズの穴を広く埋める",
     group: "starter",
   },
   {

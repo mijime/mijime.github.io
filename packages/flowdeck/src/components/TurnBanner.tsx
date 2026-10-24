@@ -6,8 +6,8 @@ function hint(card: CardInstance | null): string {
   if (!card) return "カードを選ぶ / Backlog から Pull";
   if (card.type === "debt") return "廃棄するかパス";
   if (card.type === "test") return "Review へ";
-  if (card.type === "design") return "Ready へ（他は lv1）";
-  return "In Progress へ（他は lv1）";
+  if (card.type === "design") return "Ready へ";
+  return "In Progress へ";
 }
 
 export function TurnBanner({

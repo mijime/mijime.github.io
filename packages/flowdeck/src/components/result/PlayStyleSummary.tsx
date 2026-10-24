@@ -45,7 +45,7 @@ export function PlayStyleSummary({ style }: { style: StyleData }) {
           支援プレイ <b className="text-(--ink)">{pct(style.supportRate)}</b>
         </span>
         <span>
-          代用 <b className="text-(--ink)">{pct(style.substitutionRate)}</b>
+          プレイ/手番 <b className="text-(--ink)">{style.playsPerTurn.toFixed(2)}</b>
         </span>
         <span>
           LLMトークン <b className="text-(--ink)">{style.tokensUsed}回</b>
