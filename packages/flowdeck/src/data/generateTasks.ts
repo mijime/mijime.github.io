@@ -1,38 +1,37 @@
-import { randInt, shuffle } from "../engine/rng";
+import { randInt } from "../engine/rng";
 import type { GameState, TaskDef, TaskKind } from "../engine/types";
 import { TASK_DEFS } from "./tasks";
 
-const JIME_SUBJECTS = [
-  "jime",
-  "jime応答",
-  "jime推論",
-  "jime品質",
-  "jime安全性",
-  "jime評価",
-  "jime配信",
-  "jimeコスト",
-  "jime速度",
-  "jime API",
-  "jimeストリーミング",
-  "jimeオンデバイス",
-  "jimeガードレール",
-  "jimeマルチテナント",
-  "jime利用分析",
-  "jime課金",
-  "jimeプロンプト",
-  "jimeコンテキスト",
+const LLM_SUBJECTS = [
+  "LLM",
+  "LLM応答",
+  "LLM推論",
+  "LLM品質",
+  "LLM安全性",
+  "LLM評価",
+  "LLM配信",
+  "LLMコスト",
+  "LLM速度",
+  "LLM API",
+  "LLMストリーミング",
+  "LLMオンデバイス",
+  "LLMガードレール",
+  "LLMマルチテナント",
+  "LLM利用分析",
+  "LLM課金",
+  "LLMプロンプト",
+  "LLMコンテキスト",
 ];
 
-const MI_SUBJECTS = [
-  "mi",
-  "miコードレビュー",
-  "miリポジトリ理解",
-  "miテスト生成",
-  "miパッチ生成",
-  "miエージェント",
-  "mi権限",
-  "miワークフロー",
-  "mi評価",
+const AGENT_SUBJECTS = [
+  "エージェント",
+  "コードレビュー",
+  "リポジトリ理解",
+  "テスト生成",
+  "パッチ生成",
+  "エージェント権限",
+  "エージェントワークフロー",
+  "エージェント評価",
 ];
 
 const SAAS_SUBJECTS = [
@@ -51,23 +50,23 @@ const SAAS_SUBJECTS = [
   "契約",
 ];
 
-const INCIDENT_JIME_SUBJECTS = [
-  "jime",
-  "jime API",
-  "jime推論",
-  "jimeモデル",
-  "jime配信",
-  "jime品質",
-  "jime評価",
-  "jimeガードレール",
+const INCIDENT_LLM_SUBJECTS = [
+  "LLM",
+  "LLM API",
+  "LLM推論",
+  "LLMモデル",
+  "LLM配信",
+  "LLM品質",
+  "LLM評価",
+  "LLMガードレール",
 ];
 
-const INCIDENT_MI_SUBJECTS = [
-  "mi",
-  "miエージェント",
-  "miコードレビュー",
-  "miテスト生成",
-  "miワークフロー",
+const INCIDENT_AGENT_SUBJECTS = [
+  "エージェント",
+  "エージェント実行",
+  "コードレビュー",
+  "テスト生成",
+  "エージェントワークフロー",
 ];
 
 const INCIDENT_SAAS_SUBJECTS = [
@@ -86,15 +85,15 @@ function pick<T>(state: GameState, pool: T[]): T {
 
 function pickNormalSubject(state: GameState): string {
   const roll = randInt(state, 100);
-  if (roll < 60) return pick(state, JIME_SUBJECTS);
-  if (roll < 85) return pick(state, MI_SUBJECTS);
+  if (roll < 60) return pick(state, LLM_SUBJECTS);
+  if (roll < 85) return pick(state, AGENT_SUBJECTS);
   return pick(state, SAAS_SUBJECTS);
 }
 
 function pickIncidentSubject(state: GameState): string {
   const roll = randInt(state, 100);
-  if (roll < 65) return pick(state, INCIDENT_JIME_SUBJECTS);
-  if (roll < 85) return pick(state, INCIDENT_MI_SUBJECTS);
+  if (roll < 65) return pick(state, INCIDENT_LLM_SUBJECTS);
+  if (roll < 85) return pick(state, INCIDENT_AGENT_SUBJECTS);
   return pick(state, INCIDENT_SAAS_SUBJECTS);
 }
 
@@ -136,53 +135,50 @@ function generateName(state: GameState, kind: TaskKind, used: Set<string>): stri
 /**
  * 固定テンプレートを種に、名前・要求・スコア/報酬のバランスを毎ゲーム生成する。
  * アーキタイプ（通常/投資/インシデント）はテンプレート側で担保する。
+ * テンプレートから名前・要求・スコア/報酬を生成する。
  */
+function buildDef(state: GameState, template: TaskDef, usedNames: Set<string>): TaskDef {
+  const kind = template.kind ?? "normal";
+  const requirements = { ...template.requirements };
+  const phases = ["design", "dev", "test"] as const;
+  const phase = phases[randInt(state, phases.length)] ?? "design";
+  const delta = randInt(state, 3) - 1;
+  const minimum = kind === "incident" ? 1 : 2;
+  requirements[phase] = Math.max(minimum, requirements[phase] + delta);
+
+  let score = template.score;
+  let rewardLevel = template.reward.level;
+  if (kind === "normal" && score > 0) {
+    const roll = randInt(state, 5);
+    if (roll === 0 && rewardLevel > 1) {
+      score = Math.min(5, score + 1);
+      rewardLevel -= 1;
+    } else if (roll === 1 && score > 0 && rewardLevel < 5) {
+      score -= 1;
+      rewardLevel += 1;
+    }
+  }
+
+  if (kind === "normal" && score >= 4) {
+    score += HIGH_SCORE_BONUS;
+  }
+
+  return {
+    ...template,
+    title: generateName(state, kind, usedNames),
+    requirements,
+    score,
+    reward: { ...template.reward, level: rewardLevel },
+    penalty: template.penalty ? { ...template.penalty } : undefined,
+  };
+}
+
 export function generateTaskDefs(state: GameState): TaskDef[] {
   const usedNames = new Set<string>();
   const defs: TaskDef[] = [];
 
   for (const template of TASK_DEFS) {
-    const kind = template.kind ?? "normal";
-    const requirements = { ...template.requirements };
-    const phases = ["design", "dev", "test"] as const;
-    const phase = phases[randInt(state, phases.length)] ?? "design";
-    const delta = randInt(state, 3) - 1;
-    const minimum = kind === "incident" ? 1 : 2;
-    requirements[phase] = Math.max(minimum, requirements[phase] + delta);
-
-    let score = template.score;
-    let rewardLevel = template.reward.level;
-    if (kind === "normal" && score > 0) {
-      const roll = randInt(state, 5);
-      if (roll === 0 && rewardLevel > 1) {
-        score = Math.min(5, score + 1);
-        rewardLevel -= 1;
-      } else if (roll === 1 && score > 0 && rewardLevel < 5) {
-        score -= 1;
-        rewardLevel += 1;
-      }
-    }
-
-    if (kind === "normal" && score >= 4) {
-      score += HIGH_SCORE_BONUS;
-    }
-
-    defs.push({
-      ...template,
-      title: generateName(state, kind, usedNames),
-      requirements,
-      score,
-      reward: { ...template.reward, level: rewardLevel },
-      penalty: template.penalty ? { ...template.penalty } : undefined,
-    });
-  }
-
-  const tokenCount = Math.round(defs.length * 0.1);
-  const eligible = defs.filter(
-    (task) => task.kind !== "incident" && task.score > 0 && !task.reward.effect,
-  );
-  for (const task of shuffle(state, eligible).slice(0, tokenCount)) {
-    task.reward.effect = { kind: "token", token: "mi", amount: 1 };
+    defs.push(buildDef(state, template, usedNames));
   }
 
   return defs;

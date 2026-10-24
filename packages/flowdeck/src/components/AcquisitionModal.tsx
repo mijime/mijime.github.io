@@ -104,12 +104,6 @@ export function AcquisitionModal({ report, debtLimit, onClose }: Props) {
             </ul>
           </section>
 
-          {report.mitigation > 0 && (
-            <p className="text-[9px] text-emerald-700 dark:text-emerald-400">
-              超過テスト {report.mitigation}pt: 要求αを軽減
-            </p>
-          )}
-
           {added.length > 0 && (
             <p className="text-[9px] text-(--mid)">
               追加要求: {added.map(([, label, value]) => `${label}+${value}`).join(" / ")}
@@ -119,7 +113,7 @@ export function AcquisitionModal({ report, debtLimit, onClose }: Props) {
           {report.unmet && (
             <p className="flex items-center gap-1 rounded-sm border border-red-400/50 bg-red-500/10 px-2 py-1 text-[9px] text-red-700 dark:text-red-300">
               <AlertTriangle size={11} />
-              要求未達: 負債カード +1（タスクは獲得）
+              要求未達: 賄えなかった不確実カード分の負債（タスクは獲得）
             </p>
           )}
 

@@ -1,7 +1,15 @@
-import { X } from "lucide-react";
+import { Sparkles, X } from "lucide-react";
 import type { TeamRules } from "../engine/types";
 
-export function HelpModal({ rules, onClose }: { rules: TeamRules; onClose: () => void }) {
+export function HelpModal({
+  rules,
+  onClose,
+  onIntro,
+}: {
+  rules: TeamRules;
+  onClose: () => void;
+  onIntro?: () => void;
+}) {
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/45 p-3 sm:items-center">
       <div className="flow-slide max-h-[90vh] w-full max-w-xl overflow-y-auto rounded-sm border border-(--border) bg-(--paper) shadow-2xl">
@@ -21,10 +29,19 @@ export function HelpModal({ rules, onClose }: { rules: TeamRules; onClose: () =>
         </div>
 
         <div className="space-y-4 px-4 py-4 text-[11px] leading-relaxed">
+          {onIntro && (
+            <button
+              type="button"
+              onClick={onIntro}
+              className="flex w-full items-center justify-center gap-1 rounded-sm border border-(--terra)/40 bg-(--terra)/5 px-3 py-2 text-[10px] font-medium text-(--terra) transition-colors hover:bg-(--terra)/10"
+            >
+              <Sparkles size={12} /> ストーリーとチュートリアルをもう一度見る
+            </button>
+          )}
           <section>
             <h3 className="serif text-[13px] font-semibold">目的</h3>
             <p className="text-(--mid)">
-              miとjimeを売るSaaS企業の四半期。設定した日数で企業価値を最大化します。最終評価は
+              コーディングエージェントとLLMを売るSaaS企業の四半期。設定した日数で企業価値を最大化します。最終評価は
               「企業価値 − 技術的負債 × 2 − 期限切れ罰則」。企業価値は
               <strong className="text-(--ink)">デッキに残っているタスクカードの合計</strong>、
               技術的負債は
@@ -87,9 +104,9 @@ export function HelpModal({ rules, onClose }: { rules: TeamRules; onClose: () =>
           </section>
 
           <section>
-            <h3 className="serif text-[13px] font-semibold">miトークン</h3>
+            <h3 className="serif text-[13px] font-semibold">LLMトークン</h3>
             <p className="text-(--mid)">
-              タスク報酬の約10%には <strong className="text-(--ink)">miトークン+1</strong> が付く。
+              効果カードの一部には <strong className="text-(--ink)">LLMトークン+1</strong> が付く。
               個人トークンで、自分の手番中ならアクションを消費せず、任意のレーンにレベル1作業として置ける。
               トークンを使うと少ないカードでタスクを進められるが、不確実性の処理では作業ピースとして数える。
             </p>
@@ -112,7 +129,7 @@ export function HelpModal({ rules, onClose }: { rules: TeamRules; onClose: () =>
             <p className="text-(--mid)">
               テストはテストカード専用。テスト要件を満たすと獲得できます。 獲得時に不確実カードを{" "}
               <strong className="text-(--ink)">作業ピース数</strong>{" "}
-              から計算して引き、要求（設計/開発/テスト）が増えます。カード枚数が多いほど、またmiトークンを使うほど、不確実性が上がります。テストの超過分だけ要求αを軽減できます。
+              から計算して引き、要求（設計/開発/テスト）が増えます。カード枚数が多いほど、またLLMトークンを使うほど、不確実性が上がります。テストの超過分だけ要求αを軽減できます。
               軽減後も届かない場合は、獲得者が負債カード1枚を受け取ります（タスクは獲得）。
             </p>
           </section>
@@ -143,7 +160,7 @@ export function HelpModal({ rules, onClose }: { rules: TeamRules; onClose: () =>
               <li>手札のカードをクリックして選択</li>
               <li>光っているタスクをクリックして配置</li>
               <li>
-                miトークンを持っていると、タスクカード右上にロボットのマークが出る。押すとそのレーンに
+                LLMトークンを持っていると、タスクカード右上にロボットのマークが出る。押すとそのレーンに
                 レベル1作業を置く（アクション消費なし）
               </li>
               <li>共有ボードなので、チームメイトのタスクにもカードを置ける</li>

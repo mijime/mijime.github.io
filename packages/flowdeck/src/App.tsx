@@ -5,6 +5,7 @@ import { HandBar } from "./components/HandBar";
 import { FlowStrip } from "./components/FlowStrip";
 import { Header } from "./components/Header";
 import { HelpModal } from "./components/HelpModal";
+import { IntroScreen } from "./components/IntroScreen";
 import { TeamBoard } from "./components/TeamBoard";
 import { LogPanel } from "./components/LogPanel";
 import { NewGameModal } from "./components/NewGameModal";
@@ -12,10 +13,31 @@ import { OpenTasks } from "./components/OpenTasks";
 import { ResultScreen } from "./components/ResultScreen";
 import { TeamPanel } from "./components/TeamPanel";
 import { TurnBanner } from "./components/TurnBanner";
-import { useGame } from "./store";
+import { loadGame, useGame } from "./store";
+
+const INTRO_KEY = "flowdeck:intro:v1";
+
+function shouldShowIntro(): boolean {
+  try {
+    if (typeof window !== "undefined" && new URLSearchParams(window.location.search).has("auto")) {
+      return false;
+    }
+    return !localStorage.getItem(INTRO_KEY);
+  } catch {
+    return false;
+  }
+}
 
 export function App() {
   const { state, dispatch } = useGame();
+  const [introMode, setIntroMode] = useState<"first" | "review" | null>(() => {
+    if (!shouldShowIntro()) return null;
+    return loadGame() === null ? "first" : "review";
+  });
+  const [autoMode, setAutoMode] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return new URLSearchParams(window.location.search).has("auto");
+  });
   const [selectedCardId, setSelectedCardId] = useState<number | null>(null);
   const [aiTab, setAiTab] = useState("p2");
   const [helpOpen, setHelpOpen] = useState(false);
@@ -56,6 +78,18 @@ export function App() {
   }, [state.phase, state.activePlayerIndex, showAcquisition, dispatch]);
 
   useEffect(() => {
+    if (!autoMode || state.phase !== "human" || showAcquisition) return;
+    const timer = setTimeout(() => dispatch({ type: "AUTO_STEP" }), 450);
+    return () => clearTimeout(timer);
+  }, [autoMode, state.phase, state.activePlayerIndex, state.day, showAcquisition, dispatch]);
+
+  useEffect(() => {
+    if (!autoMode || !showAcquisition || !humanAcquisition) return;
+    const timer = setTimeout(() => setDismissedAcquisitionId(humanAcquisition.id), 700);
+    return () => clearTimeout(timer);
+  }, [autoMode, showAcquisition, humanAcquisition]);
+
+  useEffect(() => {
     if (state.phase !== "roundEnd" || showAcquisition) return;
     const timer = setTimeout(() => dispatch({ type: "END_ROUND" }), 550);
     return () => clearTimeout(timer);
@@ -76,7 +110,10 @@ export function App() {
       <Header
         state={state}
         onHelp={() => setHelpOpen(true)}
+        onIntro={() => setIntroMode("review")}
         onNewGame={() => setNewGameOpen(true)}
+        autoMode={autoMode}
+        onStopAuto={() => setAutoMode(false)}
       />
       <FlowStrip state={state} />
       <TurnBanner state={state} selectedCard={selectedCard} />
@@ -110,7 +147,16 @@ export function App() {
           onClose={() => setDismissedAcquisitionId(humanAcquisition.id)}
         />
       )}
-      {helpOpen && <HelpModal rules={state.rules} onClose={() => setHelpOpen(false)} />}
+      {helpOpen && (
+        <HelpModal
+          rules={state.rules}
+          onClose={() => setHelpOpen(false)}
+          onIntro={() => {
+            setHelpOpen(false);
+            setIntroMode("review");
+          }}
+        />
+      )}
       {newGameOpen && (
         <NewGameModal
           currentDays={state.totalDays}
@@ -119,6 +165,28 @@ export function App() {
           onStart={(days, aiCount) => {
             setNewGameOpen(false);
             dispatch({ type: "RESTART", days, aiCount });
+          }}
+        />
+      )}
+      {introMode && (
+        <IntroScreen
+          review={introMode === "review"}
+          onStart={(days, aiCount) => {
+            try {
+              localStorage.setItem(INTRO_KEY, "1");
+            } catch {
+              // 保存できなくても開始する
+            }
+            setIntroMode(null);
+            dispatch({ type: "RESTART", days, aiCount });
+          }}
+          onClose={() => {
+            try {
+              localStorage.setItem(INTRO_KEY, "1");
+            } catch {
+              // 保存できなくても閉じる
+            }
+            setIntroMode(null);
           }}
         />
       )}

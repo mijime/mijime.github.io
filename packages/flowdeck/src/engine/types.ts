@@ -20,19 +20,19 @@ export interface TeamRules {
  */
 const TEAM_RULES_TABLE: Record<number, Record<number, TeamRules>> = {
   4: {
-    10: { openTasks: 3, debtLimit: 15, starOne: 7, starTwo: 16, starThree: 22 },
-    20: { openTasks: 3, debtLimit: 29, starOne: 25, starTwo: 42, starThree: 48 },
-    30: { openTasks: 3, debtLimit: 39, starOne: 44, starTwo: 67, starThree: 78 },
+    10: { openTasks: 3, debtLimit: 10, starOne: 10, starTwo: 21, starThree: 26 },
+    20: { openTasks: 3, debtLimit: 11, starOne: 34, starTwo: 48, starThree: 55 },
+    30: { openTasks: 3, debtLimit: 13, starOne: 58, starTwo: 78, starThree: 85 },
   },
   5: {
-    10: { openTasks: 4, debtLimit: 18, starOne: 10, starTwo: 22, starThree: 29 },
-    20: { openTasks: 4, debtLimit: 32, starOne: 34, starTwo: 53, starThree: 60 },
-    30: { openTasks: 4, debtLimit: 42, starOne: 59, starTwo: 83, starThree: 96 },
+    10: { openTasks: 4, debtLimit: 12, starOne: 14, starTwo: 26, starThree: 32 },
+    20: { openTasks: 4, debtLimit: 14, starOne: 44, starTwo: 62, starThree: 70 },
+    30: { openTasks: 4, debtLimit: 16, starOne: 76, starTwo: 97, starThree: 106 },
   },
   6: {
-    10: { openTasks: 4, debtLimit: 22, starOne: 15, starTwo: 26, starThree: 31 },
-    20: { openTasks: 4, debtLimit: 36, starOne: 45, starTwo: 63, starThree: 71 },
-    30: { openTasks: 4, debtLimit: 46, starOne: 76, starTwo: 101, starThree: 115 },
+    10: { openTasks: 4, debtLimit: 15, starOne: 17, starTwo: 30, starThree: 36 },
+    20: { openTasks: 4, debtLimit: 18, starOne: 55, starTwo: 72, starThree: 81 },
+    30: { openTasks: 4, debtLimit: 21, starOne: 94, starTwo: 118, starThree: 128 },
   },
 };
 
@@ -233,7 +233,6 @@ export interface AcquisitionReport {
   score: number;
   reward: TaskReward;
   uncertainty: { title: string; description: string }[];
-  mitigation: number;
   added: { design: number; dev: number; test: number };
   unmet: boolean;
   debt: number;
@@ -258,7 +257,7 @@ export interface Outcome {
 }
 
 export interface GameState {
-  version: 17;
+  version: 18;
   seed: number;
   rngState: number;
   day: number;
@@ -291,6 +290,7 @@ export type Action =
   | { type: "PLAY_CARD"; cardId: number; taskId: string }
   | { type: "END_TURN" }
   | { type: "RUN_AI_TURN" }
+  | { type: "AUTO_STEP" }
   | { type: "END_ROUND" }
   | { type: "DISCARD_CARD"; cardId: number }
   | { type: "USE_TOKEN"; token: string; taskId: string }

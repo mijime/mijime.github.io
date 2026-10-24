@@ -96,7 +96,7 @@ export function HandBar({ state, dispatch, selectedCardId, onSelect }: Props) {
             <span>山 {human.deck.length}</span>
             <span>捨 {human.discard.length}</span>
             <span className="inline-flex items-center gap-0.5 rounded-sm border border-(--terra)/30 px-1 text-(--terra)">
-              <Bot size={9} /> mi {human.tokens.mi ?? 0}
+              <Bot size={9} /> LLM {human.tokens.mi ?? 0}
             </span>
           </div>
           <div className="flex items-center gap-1 text-[9px] text-(--mid)">

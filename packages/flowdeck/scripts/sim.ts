@@ -91,7 +91,7 @@ function median(values: number[]): number {
 function printDistribution(label: string, values: number[]): void {
   const sorted = values.toSorted((a, b) => a - b);
   console.log(
-    `  ${label}: min=${sorted[0]} p10=${percentile(sorted, 0.1)} p25=${percentile(sorted, 0.25)} median=${percentile(sorted, 0.5)} p75=${percentile(sorted, 0.75)} p90=${percentile(sorted, 0.9)} max=${sorted.at(-1)} avg=${average(values).toFixed(1)}`,
+    `  ${label}: min=${sorted[0]} p10=${percentile(sorted, 0.1)} p25=${percentile(sorted, 0.25)} median=${percentile(sorted, 0.5)} p75=${percentile(sorted, 0.75)} p90=${percentile(sorted, 0.9)} p95=${percentile(sorted, 0.95)} max=${sorted.at(-1)} avg=${average(values).toFixed(1)}`,
   );
 }
 

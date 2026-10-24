@@ -125,8 +125,8 @@ export function TaskCardView({ state, task, dispatch, selectedCard, compact = fa
               event.stopPropagation();
               dispatch({ type: "USE_TOKEN", token: "mi", taskId: task.id });
             }}
-            aria-label="miトークンを置く"
-            title="miトークンをこのレーンにレベル1作業として置く（アクション消費なし）"
+            aria-label="LLMトークンを置く"
+            title="LLMトークンをこのレーンにレベル1作業として置く（アクション消費なし）"
             className="inline-flex shrink-0 items-center justify-center rounded-sm border border-(--terra)/40 bg-(--terra)/10 p-0.5 text-(--terra) transition-colors hover:bg-(--terra)/20"
           >
             <Bot size={11} />

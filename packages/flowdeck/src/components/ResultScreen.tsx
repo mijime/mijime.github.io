@@ -1,6 +1,6 @@
 import type { Dispatch } from "react";
 import { Flag, RefreshCw, RotateCcw, ScrollText, Star } from "lucide-react";
-import type { Action, GameState } from "../engine/types";
+import type { Action, GameState, PlayerOutcome } from "../engine/types";
 import { CARD_LABEL, CARD_STYLE, CardTypeIcon, LANE_LABEL, PlayerIcon, traitSummary } from "./ui";
 import { LOG_TONE, groupLogByDay } from "./LogPanel";
 import { newSeed } from "../store";
@@ -10,9 +10,35 @@ interface Props {
   dispatch: Dispatch<Action>;
 }
 
+function workPoints(player: PlayerOutcome): number {
+  return (
+    player.contributed.design.points +
+    player.contributed.dev.points +
+    player.contributed.test.points
+  );
+}
+
+function workCards(player: PlayerOutcome): number {
+  return (
+    player.contributed.design.cards + player.contributed.dev.cards + player.contributed.test.cards
+  );
+}
+
 export function ResultScreen({ state, dispatch }: Props) {
   const outcome = state.outcome;
   if (!outcome) return null;
+
+  const human = outcome.perPlayer.find((player) => player.isHuman);
+  const aiPlayers = outcome.perPlayer.filter((player) => !player.isHuman);
+  const humanWork = human ? workPoints(human) : 0;
+  const teamWork = outcome.perPlayer.reduce((sum, player) => sum + workPoints(player), 0);
+  const aiWork = teamWork - humanWork;
+  const aiAverage = aiPlayers.length > 0 ? aiWork / aiPlayers.length : 0;
+  const share = teamWork > 0 ? humanWork / teamWork : 0;
+  const ratio = aiAverage > 0 ? humanWork / aiAverage : 0;
+  const rank = human
+    ? outcome.perPlayer.filter((player) => workPoints(player) > humanWork).length + 1
+    : 0;
 
   return (
     <div className="flow-root">
@@ -51,6 +77,38 @@ export function ResultScreen({ state, dispatch }: Props) {
                   } pt`}
           </p>
         </header>
+
+        {human && (
+          <section className="mt-4 rounded-sm border border-(--terra)/40 bg-(--terra)/5 p-3">
+            <div className="flex flex-wrap items-baseline justify-between gap-1">
+              <h2 className="serif text-[13px] font-semibold">あなたの貢献</h2>
+              <span className="text-[8px] text-(--mid)">
+                チーム内 {rank}位 / {outcome.perPlayer.length}人
+              </span>
+            </div>
+            <div className="mt-1.5 flex flex-wrap items-baseline gap-x-4 gap-y-1 text-[10px]">
+              <span>
+                作業 <b className="text-(--ink)">{humanWork}pt</b>
+              </span>
+              <span>
+                プレイ <b className="text-(--ink)">{workCards(human)}枚</b>
+              </span>
+              <span>
+                獲得 <b className="text-(--ink)">{human.completed}件</b>
+              </span>
+              <span>
+                報酬 <b className="text-(--ink)">{human.score}pt</b>
+              </span>
+            </div>
+            <p className="mt-1 text-[9px] text-(--mid)">
+              チームの作業の <b className="text-(--ink)">{Math.round(share * 100)}%</b>、AI平均の{" "}
+              <b className="text-(--ink)">{ratio.toFixed(2)}倍</b>
+            </p>
+            <p className="mt-0.5 text-[8px] text-(--mid)">
+              作業 = 置いたカードの実効レベル合計＋LLMトークン
+            </p>
+          </section>
+        )}
 
         <div className="mt-5 grid gap-2">
           <section className="rounded-sm border border-(--border) bg-(--paper) p-3">
@@ -107,7 +165,11 @@ export function ResultScreen({ state, dispatch }: Props) {
               {outcome.perPlayer.map((player) => (
                 <article
                   key={player.id}
-                  className="rounded-sm border border-(--border) bg-(--paper) px-2 py-1.5"
+                  className={`rounded-sm border bg-(--paper) px-2 py-1.5 ${
+                    player.isHuman
+                      ? "border-(--terra)/60 ring-1 ring-(--terra)/25"
+                      : "border-(--border)"
+                  }`}
                 >
                   <div className="flex items-center justify-between gap-2">
                     <span className="inline-flex items-center gap-1 text-[10px] font-medium">

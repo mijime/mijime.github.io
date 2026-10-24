@@ -81,11 +81,18 @@ function acquireTask(state: GameState, task: TaskCard): void {
   const designSum = taskSum(task, "design");
   const devSum = taskSum(task, "dev");
   const testSum = taskSum(task, "test");
-  const overTest = Math.max(0, testSum - base.test);
   const pieces =
     task.attached.length + task.tokenWork.design + task.tokenWork.dev + task.tokenWork.test;
-  const draws = Math.max(1, Math.ceil(pieces / 2));
+  // 要求合計に対する作業ピース数（カード＋LLMトークン）の比率で0〜3枚引く。
+  const requirementTotal = base.design + base.dev + base.test;
+  let draws = 0;
+  if (requirementTotal > 0) {
+    if (2 * pieces >= requirementTotal) draws = 3;
+    else if (8 * pieces >= 3 * requirementTotal) draws = 2;
+    else if (3 * pieces >= requirementTotal) draws = 1;
+  }
   const added = { design: 0, dev: 0, test: 0 };
+  const requirements: { phase: "design" | "dev" | "test"; amount: number }[] = [];
   const uncertaintyReports: { title: string; description: string }[] = [];
   let extraDebt = 0;
   let scoreBonus = 0;
@@ -99,6 +106,7 @@ function acquireTask(state: GameState, task: TaskCard): void {
     switch (def.effect.kind) {
       case "require":
         added[def.effect.phase] += def.effect.amount;
+        requirements.push({ phase: def.effect.phase, amount: def.effect.amount });
         pushLog(state, `不確実: ${def.title}`, "bad");
         break;
       case "debt":
@@ -115,26 +123,24 @@ function acquireTask(state: GameState, task: TaskCard): void {
     }
   }
 
-  // 超過テストは要求αを軽減する
-  let mitigation = overTest;
-  for (const phase of ["design", "dev", "test"] as const) {
-    const reduce = Math.min(added[phase], mitigation);
-    added[phase] -= reduce;
-    mitigation -= reduce;
-  }
-  if (overTest > 0) {
-    pushLog(state, `超過テスト ${overTest}pt: 要求αを軽減`, "good");
-  }
-
-  const required = {
-    design: base.design + added.design,
-    dev: base.dev + added.dev,
-    test: base.test + added.test,
+  // 要求は合算せず、不確実カード1枚ごとに作業で賄えたか判定する。
+  // ベース要件を超えた分（余剰作業）だけが不確実を吸収できる。
+  const surplus = {
+    design: Math.max(0, designSum - base.design),
+    dev: Math.max(0, devSum - base.dev),
+    test: Math.max(0, testSum - base.test),
   };
-  const unmet = designSum < required.design || devSum < required.dev || testSum < required.test;
-  if (unmet) {
-    extraDebt += 1;
-    pushLog(state, `要求未達: ${task.title}（負債 +1）`, "bad");
+  let unmet = 0;
+  for (const requirement of requirements) {
+    if (surplus[requirement.phase] >= requirement.amount) {
+      surplus[requirement.phase] -= requirement.amount;
+    } else {
+      unmet += 1;
+    }
+  }
+  if (unmet > 0) {
+    extraDebt += unmet;
+    pushLog(state, `要求未達: ${task.title}（不確実 ${unmet}枚を賄えず / 負債 +${unmet}）`, "bad");
   }
   if (extraDebt > 0) addDebt(state, recipient, extraDebt);
 
@@ -152,9 +158,8 @@ function acquireTask(state: GameState, task: TaskCard): void {
       score: task.score + scoreBonus,
       reward: { ...task.reward },
       uncertainty: uncertaintyReports,
-      mitigation: overTest,
       added: { ...added },
-      unmet,
+      unmet: unmet > 0,
       debt: extraDebt,
       teamDebt: state.teamDebt,
     };

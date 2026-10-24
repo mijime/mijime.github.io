@@ -18,7 +18,6 @@ const report: AcquisitionReport = {
   score: 4,
   reward: { type: "dev", level: 5 },
   uncertainty: [{ title: "要求設計 +2", description: "獲得時の要求が +2 される" }],
-  mitigation: 0,
   added: { design: 2, dev: 0, test: 0 },
   unmet: true,
   debt: 1,
@@ -36,7 +35,9 @@ describe("AcquisitionModal", () => {
     expect(screen.getByText(/開発/)).toBeInTheDocument();
     expect(screen.getByText("5pt / 2枚")).toBeInTheDocument();
     expect(screen.getByText("引いた人: ミナ")).toBeInTheDocument();
-    expect(screen.getByText("要求未達: 負債カード +1（タスクは獲得）")).toBeInTheDocument();
+    expect(
+      screen.getByText("要求未達: 賄えなかった不確実カード分の負債（タスクは獲得）"),
+    ).toBeInTheDocument();
 
     fireEvent.click(screen.getByText("閉じる"));
     expect(onClose).toHaveBeenCalledTimes(1);
