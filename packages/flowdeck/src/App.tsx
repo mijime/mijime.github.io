@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { AcquisitionModal } from "./components/AcquisitionModal";
+import { BoardTexture } from "./components/BoardTexture";
 import { DayTransition } from "./components/DayTransition";
 import { HandBar } from "./components/HandBar";
 import { Header } from "./components/Header";
@@ -105,7 +106,7 @@ export function App() {
   }
 
   return (
-    <div className="flow-root pb-44">
+    <div className="flow-root pb-52">
       <Header
         state={state}
         onHelp={() => setHelpOpen(true)}
@@ -115,17 +116,22 @@ export function App() {
         onStopAuto={() => setAutoMode(false)}
       />
       <TurnBanner state={state} selectedCard={selectedCard} />
-      <OpenTasks state={state} dispatch={dispatch} />
 
       <main className="game-table mx-auto mt-2 max-w-[1440px] px-2 pb-4">
-        <div className="grid gap-2 lg:grid-cols-[minmax(0,1fr)_360px]">
-          <div className="min-w-0">
-            <TeamBoard state={state} dispatch={dispatch} selectedCard={selectedCard} />
+        <div className="game-table-felt">
+          <BoardTexture />
+          <div className="relative">
+            <OpenTasks state={state} dispatch={dispatch} />
+            <div className="mt-2 grid gap-2 lg:grid-cols-[minmax(0,1fr)_360px]">
+              <div className="min-w-0">
+                <TeamBoard state={state} dispatch={dispatch} selectedCard={selectedCard} />
+              </div>
+              <aside className="min-w-0 space-y-2">
+                <TeamPanel state={state} aiTab={aiTab} onSelectAi={setAiTab} />
+                <LogPanel log={state.log} />
+              </aside>
+            </div>
           </div>
-          <aside className="min-w-0 space-y-2">
-            <TeamPanel state={state} aiTab={aiTab} onSelectAi={setAiTab} />
-            <LogPanel log={state.log} />
-          </aside>
         </div>
       </main>
 

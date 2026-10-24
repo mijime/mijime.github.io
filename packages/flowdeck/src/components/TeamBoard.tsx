@@ -1,6 +1,7 @@
 import type { Dispatch } from "react";
 import { CheckCircle2 } from "lucide-react";
 import type { Action, CardInstance, GameState } from "../engine/types";
+import { FlowTrack, type FlowCounts } from "./FlowTrack";
 import { TaskCardView } from "./TaskCard";
 import { LANE_LABEL, PLAYER_TONE, LaneIcon, PlayerIcon, laneCountAll } from "./ui";
 
@@ -20,10 +21,17 @@ export function TeamBoard({ state, dispatch, selectedCard }: Props) {
   const wipCount = activeCounts.reduce((sum, entry) => sum + entry.count, 0);
   const maxActive = Math.max(0, ...activeCounts.map((entry) => entry.count));
   const bottleneckLane = activeCounts.find((entry) => entry.count === maxActive)?.lane ?? null;
+  const flowCounts: FlowCounts = {
+    open: laneCountAll(state, "open"),
+    inbox: laneCountAll(state, "inbox"),
+    wip: laneCountAll(state, "wip"),
+    test: laneCountAll(state, "test"),
+    done: completed.length,
+  };
 
   return (
     <section className="game-board min-w-0">
-      <div className="mb-1.5 flex flex-wrap items-baseline justify-between gap-1">
+      <div className="board-plaque mb-1.5 flex flex-wrap items-baseline justify-between gap-1 rounded-sm px-2 py-1">
         <div className="flex items-baseline gap-2">
           <h2 className="serif text-[13px] font-semibold">チームボード</h2>
           <span className="text-[9px] text-(--mid)">
@@ -45,53 +53,56 @@ export function TeamBoard({ state, dispatch, selectedCard }: Props) {
       </div>
 
       <div className="flow-scroll overflow-x-auto pb-2">
-        <div className="grid min-w-[720px] grid-cols-3 items-start gap-1.5">
-          {lanes.map((lane) => {
-            const tasks = state.tasks.filter((task) => task.lane === lane);
-            const bottleneck = maxActive > 0 && lane === bottleneckLane;
-            return (
-              <div
-                key={lane}
-                data-lane={lane}
-                title={bottleneck ? "ボトルネック" : undefined}
-                className={`flow-lane min-w-0 rounded-sm p-1.5 ${
-                  bottleneck ? "ring-1 ring-amber-400/60" : ""
-                }`}
-              >
-                <div className="mb-1 flex items-baseline justify-between gap-1">
-                  <h3 className="serif flex items-center gap-1 text-[11px] font-semibold">
-                    <LaneIcon
-                      lane={lane}
-                      size={12}
-                      className={
-                        lane === "inbox"
-                          ? "text-violet-600 dark:text-violet-300"
-                          : lane === "wip"
-                            ? "text-blue-600 dark:text-blue-300"
-                            : "text-amber-600 dark:text-amber-300"
-                      }
-                    />
-                    {LANE_LABEL[lane]}
-                  </h3>
-                  <span className="text-[9px] text-(--mid)">{laneCountAll(state, lane)}</span>
+        <div className="min-w-[720px]">
+          <FlowTrack counts={flowCounts} onFelt />
+          <div className="mt-1 grid grid-cols-3 items-start gap-1.5">
+            {lanes.map((lane) => {
+              const tasks = state.tasks.filter((task) => task.lane === lane);
+              const bottleneck = maxActive > 0 && lane === bottleneckLane;
+              return (
+                <div
+                  key={lane}
+                  data-lane={lane}
+                  title={bottleneck ? "ボトルネック" : undefined}
+                  className={`flow-lane min-w-0 rounded-sm p-1.5 ${
+                    bottleneck ? "ring-1 ring-amber-400/60" : ""
+                  }`}
+                >
+                  <div className="mb-1 flex items-baseline justify-between gap-1">
+                    <h3 className="serif flex items-center gap-1 text-[11px] font-semibold">
+                      <LaneIcon
+                        lane={lane}
+                        size={12}
+                        className={
+                          lane === "inbox"
+                            ? "text-violet-600 dark:text-violet-300"
+                            : lane === "wip"
+                              ? "text-blue-600 dark:text-blue-300"
+                              : "text-amber-600 dark:text-amber-300"
+                        }
+                      />
+                      {LANE_LABEL[lane]}
+                    </h3>
+                    <span className="text-[9px] text-(--mid)">{laneCountAll(state, lane)}</span>
+                  </div>
+                  <div className="space-y-1.5">
+                    {tasks.map((task) => (
+                      <TaskCardView
+                        key={task.id}
+                        state={state}
+                        task={task}
+                        dispatch={dispatch}
+                        selectedCard={selectedCard}
+                      />
+                    ))}
+                    {tasks.length === 0 && (
+                      <p className="py-3 text-center text-[9px] text-(--mid)">—</p>
+                    )}
+                  </div>
                 </div>
-                <div className="space-y-1.5">
-                  {tasks.map((task) => (
-                    <TaskCardView
-                      key={task.id}
-                      state={state}
-                      task={task}
-                      dispatch={dispatch}
-                      selectedCard={selectedCard}
-                    />
-                  ))}
-                  {tasks.length === 0 && (
-                    <p className="py-3 text-center text-[9px] text-(--mid)">—</p>
-                  )}
-                </div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
       </div>
 

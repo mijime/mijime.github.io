@@ -1,7 +1,9 @@
 import type { Dispatch } from "react";
-import { Bot, Circle, CircleDot, Hand, Trash2 } from "lucide-react";
+import { Hand, Trash2 } from "lucide-react";
 import type { Action, CardInstance, GameState } from "../engine/types";
 import { ACTIONS_PER_TURN } from "../engine/types";
+import { CardPile } from "./CardPile";
+import { ActionToken, LlmToken } from "./Token";
 import { CARD_LABEL, CARD_STYLE, CardTypeBadge, LevelStars, cardTitle, effectLabel } from "./ui";
 
 interface Props {
@@ -76,18 +78,18 @@ export function HandBar({ state, dispatch, selectedCardId, onSelect }: Props) {
     <footer className="flow-hand game-hand">
       <div className="mx-auto max-w-[1440px] px-3 py-2">
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-          <div className="flex items-center gap-1.5 text-[10px] text-(--ink)/70">
+          <div className="flex items-center gap-2 text-[10px] text-(--ink)/70">
             <Hand size={13} />
             <span className="font-semibold text-(--ink)" title="手札">
               {human.hand.length}
             </span>
-            <span title="山札">山{human.deck.length}</span>
-            <span title="捨て札">捨{human.discard.length}</span>
+            <CardPile tone="deck" count={human.deck.length} label="山札" />
+            <CardPile tone="discard" count={human.discard.length} label="捨て札" />
             <span
-              className="inline-flex items-center gap-0.5 rounded-sm border border-(--terra)/30 px-1 text-(--terra)"
+              className="inline-flex items-center gap-1 rounded-sm border border-(--terra)/30 px-1 text-(--terra)"
               title="LLMトークン"
             >
-              <Bot size={9} /> {human.tokens.mi ?? 0}
+              <LlmToken className="h-3.5 w-3.5" /> {human.tokens.mi ?? 0}
             </span>
           </div>
           <div
@@ -95,12 +97,7 @@ export function HandBar({ state, dispatch, selectedCardId, onSelect }: Props) {
             title="残りアクション"
           >
             {Array.from({ length: Math.max(ACTIONS_PER_TURN, human.actionsLeft) }, (_, index) => (
-              <span
-                key={index}
-                className={index < human.actionsLeft ? "text-(--terra)" : "text-(--border)"}
-              >
-                {index < human.actionsLeft ? <CircleDot size={15} /> : <Circle size={15} />}
-              </span>
+              <ActionToken key={index} filled={index < human.actionsLeft} />
             ))}
             <span className="ml-1 text-[12px] font-semibold text-(--ink)">{human.actionsLeft}</span>
           </div>

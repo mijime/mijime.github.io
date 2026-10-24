@@ -1,6 +1,5 @@
 import {
   ArrowRight,
-  Bot,
   CalendarDays,
   CircleDot,
   Layers,
@@ -12,6 +11,7 @@ import {
 import type { TeamRules } from "../engine/types";
 import { DEBT_SCORE_PENALTY } from "../engine/types";
 import { FlowDiagram } from "./FlowDiagram";
+import { LlmToken } from "./Token";
 import { CARD_STYLE, CardTypeBadge } from "./ui";
 
 function Step({ icon, label }: { icon: React.ReactNode; label: string }) {
@@ -80,7 +80,7 @@ export function HelpModal({ rules, onClose }: { rules: TeamRules; onClose: () =>
                 <Trash2 size={9} /> 廃棄は1アクション
               </span>
               <span className="inline-flex items-center gap-1">
-                <Bot size={9} className="text-(--terra)" /> アクションなしで lv1
+                <LlmToken className="h-3.5 w-3.5" /> アクションなしで lv1
               </span>
             </div>
           </section>

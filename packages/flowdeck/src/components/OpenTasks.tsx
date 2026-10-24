@@ -1,6 +1,8 @@
 import type { Dispatch } from "react";
-import { ArrowRight, Layers, Sparkles } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import type { Action, GameState, TaskCard } from "../engine/types";
+import { CardPile } from "./CardPile";
+import { DeadlinePip } from "./Token";
 import { CardTypeBadge, LaneIcon, LevelStars, effectLabel, penaltyLabel, rewardLabel } from "./ui";
 
 interface Props {
@@ -16,10 +18,7 @@ function DeadlinePips({ task }: { task: TaskCard }) {
     >
       <span className="inline-flex gap-0.5">
         {Array.from({ length: task.deadline }, (_, index) => (
-          <span
-            key={index}
-            className={`flow-deadline ${index < task.tokens ? "flow-deadline--filled" : ""}`}
-          />
+          <DeadlinePip key={index} filled={index < task.tokens} />
         ))}
       </span>
     </span>
@@ -128,8 +127,8 @@ export function OpenTasks({ state, dispatch }: Props) {
   const canPull = state.phase === "human" && (human?.actionsLeft ?? 0) > 0;
 
   return (
-    <section className="game-backlog mx-auto mt-2 max-w-[1440px] px-2">
-      <div className="flex flex-wrap items-baseline justify-between gap-1">
+    <section className="game-backlog mx-auto max-w-[1440px]">
+      <div className="mb-1.5 flex flex-wrap items-baseline justify-between gap-1 rounded-sm border border-(--border) bg-(--paper)/95 px-2 py-1 shadow-sm">
         <div className="flex items-baseline gap-2">
           <h2 className="serif flex items-center gap-1 text-[13px] font-semibold">
             <LaneIcon lane="open" size={12} className="text-sky-600 dark:text-sky-300" /> Backlog
@@ -138,13 +137,10 @@ export function OpenTasks({ state, dispatch }: Props) {
             {open.length}/{state.rules.openTasks}
           </span>
         </div>
-        <div className="flex flex-wrap gap-2 text-[9px] text-(--ink)/65">
-          <span className="inline-flex items-center gap-1" title="タスク山札 / 捨て札">
-            <Layers size={9} /> 山{state.taskDeck.length} 捨{state.taskDiscard.length}
-          </span>
-          <span className="inline-flex items-center gap-1" title="不確実カード">
-            <Sparkles size={9} /> 不確実{state.uncertaintyDeck.length}
-          </span>
+        <div className="flex flex-wrap items-center gap-2 text-[9px] text-(--ink)/65">
+          <CardPile tone="deck" count={state.taskDeck.length} label="タスク山札" />
+          <CardPile tone="discard" count={state.taskDiscard.length} label="捨て札" />
+          <CardPile tone="uncertainty" count={state.uncertaintyDeck.length} label="不確実カード" />
         </div>
       </div>
       <div className="flow-scroll mt-1 flex gap-2 overflow-x-auto pb-1">

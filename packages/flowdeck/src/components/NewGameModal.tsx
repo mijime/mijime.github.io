@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Dices, X } from "lucide-react";
+import { X } from "lucide-react";
+import { DicePair } from "./Dice";
 
 interface Props {
   currentDays: number;
@@ -69,7 +70,7 @@ export function NewGameModal({ currentDays, currentAiCount, onClose, onStart }: 
           </section>
 
           <p className="flex items-center gap-1 rounded-sm border border-(--border) bg-(--grid)/40 px-3 py-2 text-[9px] text-(--mid)">
-            <Dices size={12} /> 名前・性格・タスクは開始時にランダム
+            <DicePair className="h-4 w-5" /> 名前・性格・タスクは開始時にランダム
           </p>
 
           <div className="flex justify-end gap-2 border-t border-(--border) pt-3">

@@ -1,7 +1,8 @@
 import type { Dispatch } from "react";
-import { Award, Bot, Lock } from "lucide-react";
+import { Award, Lock } from "lucide-react";
 import type { Action, CardInstance, GameState, TaskCard } from "../engine/types";
 import { taskContributions, taskSum } from "../engine/metrics";
+import { DeadlinePip, LlmToken } from "./Token";
 import {
   CARD_LABEL,
   CardTypeBadge,
@@ -36,10 +37,7 @@ function DeadlinePips({ task }: { task: TaskCard }) {
     >
       <span className="inline-flex gap-0.5">
         {Array.from({ length: task.deadline }, (_, index) => (
-          <span
-            key={index}
-            className={`flow-deadline ${index < task.tokens ? "flow-deadline--filled" : ""}`}
-          />
+          <DeadlinePip key={index} filled={index < task.tokens} />
         ))}
       </span>
       <span className={aging ? "font-semibold text-red-600 dark:text-red-300" : ""}>
@@ -133,7 +131,7 @@ export function TaskCardView({ state, task, dispatch, selectedCard, compact = fa
             title="LLMトークンをこのレーンにレベル1作業として置く（アクション消費なし）"
             className="inline-flex shrink-0 items-center justify-center rounded-sm border border-(--terra)/40 bg-(--terra)/10 p-0.5 text-(--terra) transition-colors hover:bg-(--terra)/20"
           >
-            <Bot size={11} />
+            <LlmToken className="h-4 w-4" />
           </button>
         )}
         <span className="shrink-0 text-[11px] font-semibold text-(--terra)">+{task.score}</span>

@@ -70,19 +70,6 @@ body {
   background: color-mix(in srgb, var(--grid) 28%, transparent);
 }
 
-.flow-deadline {
-  display: inline-block;
-  width: 0.5rem;
-  height: 0.5rem;
-  border: 1px solid color-mix(in srgb, var(--ink) 38%, transparent);
-  border-radius: 50%;
-}
-
-.flow-deadline--filled {
-  background: var(--terra);
-  border-color: var(--terra);
-}
-
 @keyframes flow-card-in {
   from {
     opacity: 0;
@@ -317,4 +304,104 @@ body {
   color: var(--mid);
   opacity: 0.55;
   pointer-events: none;
+}
+
+/* Board-game table */
+:root {
+  --wood: #a8784e;
+  --wood-light: #c69a6f;
+  --wood-dark: #6e4a2e;
+  --felt: #5c6e55;
+  --felt-ink: #f7f2e6;
+  --felt-dot: rgb(255 255 255 / 0.08);
+  --felt-line: rgb(255 255 255 / 0.22);
+}
+
+[data-theme="dark"] {
+  --wood: #3a271a;
+  --wood-light: #523825;
+  --wood-dark: #21150d;
+  --felt: #2c3a30;
+  --felt-ink: #f2eee3;
+  --felt-dot: rgb(255 255 255 / 0.05);
+  --felt-line: rgb(255 255 255 / 0.14);
+}
+
+.game-table {
+  position: relative;
+  border-radius: 16px;
+  padding: 9px;
+  background:
+    repeating-linear-gradient(90deg, transparent 0 42px, rgb(0 0 0 / 0.04) 42px 44px),
+    linear-gradient(170deg, var(--wood-light), var(--wood) 38%, var(--wood-dark));
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.25),
+    0 24px 48px -32px rgb(0 0 0 / 0.65);
+}
+
+.game-table-felt {
+  position: relative;
+  overflow: hidden;
+  border: 1px dashed var(--felt-line);
+  border-radius: 9px;
+  padding: 8px;
+  background: var(--felt);
+  box-shadow:
+    inset 0 2px 10px rgb(0 0 0 / 0.28),
+    inset 0 0 0 1px rgb(0 0 0 / 0.12);
+}
+
+.board-plaque {
+  background: color-mix(in srgb, var(--paper) 96%, var(--grid));
+  border: 1px solid color-mix(in srgb, var(--wood-dark) 35%, var(--border));
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.55),
+    0 8px 18px -16px rgb(0 0 0 / 0.7);
+}
+
+.game-table .game-board {
+  border: 0;
+  padding: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+/* Paper grain on cards */
+.flow-card {
+  position: relative;
+}
+
+.flow-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0.05;
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+@media (max-width: 640px) {
+  .game-table {
+    border-radius: 12px;
+    padding: 6px;
+  }
+
+  .game-table-felt {
+    padding: 6px;
+  }
+}
+
+/* Hand rail */
+.game-hand {
+  border-top: 6px solid var(--wood);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--wood-light) 12%, var(--paper)),
+    var(--paper) 42%
+  );
+  box-shadow:
+    0 -14px 34px -30px rgb(0 0 0 / 0.65),
+    inset 0 1px 0 rgb(255 255 255 / 0.3);
 }
