@@ -16,10 +16,7 @@ export function NewGameModal({ currentDays, currentAiCount, onClose, onStart }: 
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/45 p-3 sm:items-center">
       <div className="flow-slide w-full max-w-lg rounded-sm border border-(--border) bg-(--paper) shadow-2xl">
         <div className="flex items-center justify-between border-b border-(--border) bg-(--toolbar-bg) px-4 py-3">
-          <div>
-            <p className="text-[9px] tracking-[0.25em] text-(--mid)">NEW QUARTER / RANDOM TEAM</p>
-            <h2 className="serif mt-1 text-lg font-semibold">新しいゲーム</h2>
-          </div>
+          <h2 className="serif text-lg font-semibold">新しいゲーム</h2>
           <button
             type="button"
             onClick={onClose}
@@ -52,7 +49,7 @@ export function NewGameModal({ currentDays, currentAiCount, onClose, onStart }: 
           </section>
 
           <section>
-            <p className="mb-1.5 text-[9px] text-(--mid)">チーム人数</p>
+            <p className="mb-1.5 text-[9px] text-(--mid)">メンバー人数</p>
             <div className="flex gap-1.5">
               {[3, 4, 5].map((option) => (
                 <button
@@ -69,22 +66,11 @@ export function NewGameModal({ currentDays, currentAiCount, onClose, onStart }: 
                 </button>
               ))}
             </div>
-            <p className="mt-1 text-[9px] text-(--mid)">合計 {aiCount + 1}人</p>
           </section>
 
-          <section className="rounded-sm border border-(--border) bg-(--grid)/40 px-3 py-2 text-[10px] text-(--mid)">
-            <p className="text-(--ink)">
-              コーディングエージェントと <strong>LLM</strong>{" "}
-              を売るSaaS企業の四半期。チームでタスクを流し、企業価値を伸ばします。
-            </p>
-            <p className="mt-1 flex items-center gap-1 text-(--ink)">
-              <Dices size={12} />{" "}
-              名前・アイコン・性格・タスク名は開始時にランダム。3つの符号付きの重みで決まります
-            </p>
-            <p className="mt-1">
-              仕上げ↔着手、得点↔整理、SLA↔長期のバランスが、メンバーごとに違う形で決まります。
-            </p>
-          </section>
+          <p className="flex items-center gap-1 rounded-sm border border-(--border) bg-(--grid)/40 px-3 py-2 text-[9px] text-(--mid)">
+            <Dices size={12} /> 名前・性格・タスクは開始時にランダム
+          </p>
 
           <div className="flex justify-end gap-2 border-t border-(--border) pt-3">
             <button

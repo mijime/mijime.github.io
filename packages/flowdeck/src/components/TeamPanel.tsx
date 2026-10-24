@@ -70,9 +70,6 @@ export function TeamPanel({ state, aiTab, onSelectAi }: Props) {
           <TraitIcon weights={selected.weights} size={12} className="mr-0.5 inline" />
           {selected.name}
         </span>
-        <span className="rounded-sm border border-(--border) px-1 text-[7px]">
-          {traitSummary(selected.weights)}
-        </span>
         {isActive && <span className="text-(--terra)">手番中</span>}
         <span className="inline-flex items-center gap-0.5">
           <Hand size={8} /> {selected.hand.length}

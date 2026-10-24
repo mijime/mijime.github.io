@@ -92,15 +92,19 @@ export function HandBar({ state, dispatch, selectedCardId, onSelect }: Props) {
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
           <div className="flex items-center gap-1.5 text-[9px] text-(--mid)">
             <Hand size={12} />
-            <span className="font-medium text-(--ink)">手札 {human.hand.length}</span>
-            <span>山 {human.deck.length}</span>
-            <span>捨 {human.discard.length}</span>
-            <span className="inline-flex items-center gap-0.5 rounded-sm border border-(--terra)/30 px-1 text-(--terra)">
-              <Bot size={9} /> LLM {human.tokens.mi ?? 0}
+            <span className="font-medium text-(--ink)" title="手札">
+              {human.hand.length}
+            </span>
+            <span title="山札">山{human.deck.length}</span>
+            <span title="捨て札">捨{human.discard.length}</span>
+            <span
+              className="inline-flex items-center gap-0.5 rounded-sm border border-(--terra)/30 px-1 text-(--terra)"
+              title="LLMトークン"
+            >
+              <Bot size={9} /> {human.tokens.mi ?? 0}
             </span>
           </div>
-          <div className="flex items-center gap-1 text-[9px] text-(--mid)">
-            <span className="font-medium text-(--ink)">アクション</span>
+          <div className="flex items-center gap-1 text-[9px] text-(--mid)" title="残りアクション">
             {Array.from({ length: Math.max(ACTIONS_PER_TURN, human.actionsLeft) }, (_, index) => (
               <span
                 key={index}
@@ -132,11 +136,9 @@ export function HandBar({ state, dispatch, selectedCardId, onSelect }: Props) {
         <div className="mt-1.5 flex flex-wrap items-center gap-2 rounded-sm border border-(--border)/70 bg-(--paper) px-2 py-1">
           <span className="text-[9px] text-(--mid)">
             {selected ? (
-              <>
-                選択中: <strong className="text-(--ink)">{cardTitle(selected)}</strong>
-              </>
+              <strong className="text-(--ink)">{cardTitle(selected)}</strong>
             ) : (
-              "手札からカードを選択"
+              "カードを選択"
             )}
           </span>
           <button
@@ -150,11 +152,8 @@ export function HandBar({ state, dispatch, selectedCardId, onSelect }: Props) {
             title="選択中のカードを1アクションでデッキから廃棄"
             className="inline-flex items-center gap-1 rounded-sm border border-red-400/50 bg-red-500/10 px-2 py-0.5 text-[9px] font-medium text-red-700 transition-colors hover:bg-red-500/20 disabled:cursor-not-allowed disabled:opacity-35 dark:text-red-300"
           >
-            <Trash2 size={11} /> 廃棄（1アクション）
+            <Trash2 size={11} /> 廃棄
           </button>
-          <span className="ml-auto text-[8px] text-(--mid)">
-            1アクションずつ順番に行動。パスすると残りを放棄
-          </span>
         </div>
 
         <div className="flow-scroll mt-1.5 flex gap-1.5 overflow-x-auto pb-0.5">
@@ -167,11 +166,7 @@ export function HandBar({ state, dispatch, selectedCardId, onSelect }: Props) {
               onSelect={() => onSelect(card.id === selectedCardId ? null : card.id)}
             />
           ))}
-          {human.hand.length === 0 && (
-            <p className="py-4 text-[9px] text-(--mid)">
-              {isHumanTurn ? "手札がありません。ターンを終了してください。" : "手札を捨てました。"}
-            </p>
-          )}
+          {human.hand.length === 0 && <p className="py-4 text-[9px] text-(--mid)">手札なし</p>}
         </div>
       </div>
     </footer>

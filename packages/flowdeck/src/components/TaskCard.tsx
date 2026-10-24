@@ -1,5 +1,5 @@
 import type { Dispatch } from "react";
-import { Bot, Lock } from "lucide-react";
+import { Award, Bot, Lock } from "lucide-react";
 import type { Action, CardInstance, GameState, TaskCard } from "../engine/types";
 import { taskContributions, taskSum } from "../engine/metrics";
 import {
@@ -31,8 +31,10 @@ interface Props {
 function DeadlinePips({ task }: { task: TaskCard }) {
   const aging = task.tokens >= task.deadline - 1;
   return (
-    <span className="inline-flex flex-wrap items-center gap-1 text-[8px] text-(--mid)">
-      <span>納期</span>
+    <span
+      className="inline-flex flex-wrap items-center gap-1 text-[8px] text-(--mid)"
+      title={`納期 ${task.tokens}/${task.deadline}`}
+    >
       <span className="inline-flex gap-0.5">
         {Array.from({ length: task.deadline }, (_, index) => (
           <span
@@ -42,7 +44,7 @@ function DeadlinePips({ task }: { task: TaskCard }) {
         ))}
       </span>
       <span className={aging ? "font-medium text-red-600 dark:text-red-300" : ""}>
-        滞在{task.tokens}日
+        {task.tokens}日
       </span>
     </span>
   );
@@ -72,11 +74,14 @@ function Requirement({
             : "border-(--border) bg-(--paper) text-(--mid)"
       }`}
       title={`${label} ${value}/${required}`}
+      aria-label={`${label} ${value}/${required}`}
     >
-      <span className="flex items-center gap-0.5 text-[7px] opacity-70">
-        <CardTypeIcon type={type} size={7} className={CARD_TEXT[type]} /> {label}
+      <span className="flex items-center justify-center gap-0.5 text-[7px] opacity-70">
+        <CardTypeIcon type={type} size={7} className={CARD_TEXT[type]} />
       </span>
-      <span className="font-medium">{required <= 0 ? "—" : `${value}/${required}`}</span>
+      <span className="block text-center font-medium">
+        {required <= 0 ? "—" : `${value}/${required}`}
+      </span>
     </span>
   );
 }
@@ -182,12 +187,12 @@ export function TaskCardView({ state, task, dispatch, selectedCard, compact = fa
             )
             .join(" / ")}
         >
-          <span>{isDone ? "獲得" : "獲得候補"}</span>
+          <Award size={8} className="text-(--terra)" />
           <span className="inline-flex items-center gap-0.5 font-medium text-(--terra)">
             {contributionLeaderPlayer && <PlayerIcon player={contributionLeaderPlayer} size={8} />}
             {contributionLeader.playerName} {contributionLeader.points}pt
           </span>
-          {contributions.length > 1 && <span>（{contributions.length}人で貢献）</span>}
+          {contributions.length > 1 && <span>他{contributions.length - 1}人</span>}
         </p>
       )}
 
@@ -226,7 +231,6 @@ export function TaskCardView({ state, task, dispatch, selectedCard, compact = fa
           title={rewardLabel(task)}
         >
           <CardTypeIcon type={task.reward.type} size={8} />
-          {CARD_LABEL[task.reward.type]}{" "}
           <LevelStars level={task.reward.level} className="text-[7px]" />
           {task.reward.effect && (
             <span className="ml-0.5 text-[6px] opacity-75">{effectLabel(task.reward.effect)}</span>
@@ -237,8 +241,8 @@ export function TaskCardView({ state, task, dispatch, selectedCard, compact = fa
       {canTarget && selectedCard && (
         <p className="mt-1 flex items-center gap-1 text-[7.5px] text-(--terra)">
           <Lock size={8} />
-          {cardName(selectedCard)} を配置（実効 lv
-          {effectiveCardLevel(selectedCard, target ?? "design")}）
+          {cardName(selectedCard)} → lv
+          {effectiveCardLevel(selectedCard, target ?? "design")}
         </p>
       )}
     </article>

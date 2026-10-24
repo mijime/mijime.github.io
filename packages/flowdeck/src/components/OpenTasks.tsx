@@ -143,11 +143,11 @@ export function OpenTasks({ state, dispatch }: Props) {
           </span>
         </div>
         <div className="flex flex-wrap gap-2 text-[8px] text-(--mid)">
-          <span className="inline-flex items-center gap-1">
-            <Layers size={9} /> タスク山札 {state.taskDeck.length} / 捨 {state.taskDiscard.length}
+          <span className="inline-flex items-center gap-1" title="タスク山札 / 捨て札">
+            <Layers size={9} /> 山{state.taskDeck.length} 捨{state.taskDiscard.length}
           </span>
-          <span className="inline-flex items-center gap-1">
-            <Sparkles size={9} /> 不確実 {state.uncertaintyDeck.length}
+          <span className="inline-flex items-center gap-1" title="不確実カード">
+            <Sparkles size={9} /> 不確実{state.uncertaintyDeck.length}
           </span>
         </div>
       </div>
@@ -161,9 +161,7 @@ export function OpenTasks({ state, dispatch }: Props) {
             canPull={canPull}
           />
         ))}
-        {open.length === 0 && (
-          <p className="py-4 text-[10px] text-(--mid)">Backlog のタスクがありません。</p>
-        )}
+        {open.length === 0 && <p className="py-4 text-[10px] text-(--mid)">—</p>}
       </div>
     </section>
   );

@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from "react";
 import { AcquisitionModal } from "./components/AcquisitionModal";
 import { DayTransition } from "./components/DayTransition";
 import { HandBar } from "./components/HandBar";
-import { FlowStrip } from "./components/FlowStrip";
 import { Header } from "./components/Header";
 import { HelpModal } from "./components/HelpModal";
 import { IntroScreen } from "./components/IntroScreen";
@@ -115,7 +114,6 @@ export function App() {
         autoMode={autoMode}
         onStopAuto={() => setAutoMode(false)}
       />
-      <FlowStrip state={state} />
       <TurnBanner state={state} selectedCard={selectedCard} />
       <OpenTasks state={state} dispatch={dispatch} />
 
@@ -147,16 +145,7 @@ export function App() {
           onClose={() => setDismissedAcquisitionId(humanAcquisition.id)}
         />
       )}
-      {helpOpen && (
-        <HelpModal
-          rules={state.rules}
-          onClose={() => setHelpOpen(false)}
-          onIntro={() => {
-            setHelpOpen(false);
-            setIntroMode("review");
-          }}
-        />
-      )}
+      {helpOpen && <HelpModal rules={state.rules} onClose={() => setHelpOpen(false)} />}
       {newGameOpen && (
         <NewGameModal
           currentDays={state.totalDays}

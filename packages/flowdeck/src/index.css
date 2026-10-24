@@ -299,3 +299,22 @@ body {
   display: inline-block;
   animation: day-pop 0.35s ease both;
 }
+
+/* Lane flow cues */
+.flow-lane {
+  position: relative;
+}
+
+.flow-lane[data-lane="inbox"]::after,
+.flow-lane[data-lane="wip"]::after {
+  content: "›";
+  position: absolute;
+  top: 50%;
+  right: -0.62rem;
+  transform: translateY(-50%);
+  font-size: 14px;
+  line-height: 1;
+  color: var(--mid);
+  opacity: 0.55;
+  pointer-events: none;
+}

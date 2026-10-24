@@ -1,14 +1,13 @@
 import { MousePointerClick } from "lucide-react";
 import type { CardInstance, GameState } from "../engine/types";
-import { PLAYER_TONE, PlayerIcon, cardName, cardTitle, traitSummary } from "./ui";
+import { PLAYER_TONE, PlayerIcon, cardName, cardTitle } from "./ui";
 
 function hint(card: CardInstance | null): string {
-  if (!card) return "手札を選ぶか、Backlogからタスクを引き取る";
-  if (card.type === "debt")
-    return "負債カードはプレイできません。廃棄するか、パスで手札ごと捨てます。";
-  if (card.type === "test") return "Reviewのタスクに置ける。Ready/In Progressにはlv1代用";
-  if (card.type === "design") return "Readyにフル、In Progressにlv1代用で置ける";
-  return "In Progressにフル、Readyにlv1代用で置ける";
+  if (!card) return "カードを選ぶ / Backlog から Pull";
+  if (card.type === "debt") return "廃棄するかパス";
+  if (card.type === "test") return "Review へ";
+  if (card.type === "design") return "Ready へ（他は lv1）";
+  return "In Progress へ（他は lv1）";
 }
 
 export function TurnBanner({
@@ -23,7 +22,6 @@ export function TurnBanner({
   const isAi = state.phase === "ai";
   const awaiting = state.phase === "roundEnd";
   const tone = active ? PLAYER_TONE[active.id] : undefined;
-  const traits = active ? traitSummary(active.weights) : null;
 
   return (
     <section className="mx-auto mt-1.5 max-w-[1440px] px-2">
@@ -53,35 +51,27 @@ export function TurnBanner({
                 : "待機"}
         </span>
 
-        {traits && <span className={`text-[9px] ${tone?.text ?? "text-(--mid)"}`}>{traits}</span>}
-
         <span className="min-w-0 flex-1 text-[9px] text-(--mid)">
           {isHuman ? (
             <>
               <MousePointerClick size={10} className="mr-1 inline" />
               {selectedCard ? (
                 <>
-                  <strong className="text-(--ink)">
-                    {cardTitle(selectedCard)}（{cardName(selectedCard)}）
-                  </strong>
-                  <span className="ml-1">{hint(selectedCard)}</span>
+                  <strong className="text-(--ink)">{cardTitle(selectedCard)}</strong>
+                  <span className="ml-1">
+                    {cardName(selectedCard)} → {hint(selectedCard)}
+                  </span>
                 </>
               ) : (
                 hint(null)
               )}
             </>
           ) : isAi ? (
-            "メンバーがカードとタスクを選んでいます…"
+            "選択中…"
           ) : (
-            "納期トークンと期限切れを処理しています"
+            "納期と期限切れを処理中"
           )}
         </span>
-
-        {!isHuman && !awaiting && active && (
-          <span className="text-[8px] text-(--mid)">
-            手札 {active.hand.length} / 山 {active.deck.length}
-          </span>
-        )}
       </div>
     </section>
   );
