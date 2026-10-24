@@ -135,7 +135,7 @@ export function printOverview(results: RunResult[], options: OverviewOptions): v
     ]),
   );
 
-  subheading("プレイヤータイプ");
+  subheading("ポジション");
   const typeCounts = new Map<string, number>();
   for (const result of results) {
     for (const player of result.state.outcome?.perPlayer ?? []) {
@@ -148,7 +148,7 @@ export function printOverview(results: RunResult[], options: OverviewOptions): v
     [...typeCounts.values()].reduce((sum, count) => sum + count, 0),
   );
   printTable(
-    ["type", "count", "share"],
+    ["position", "count", "share"],
     [...typeCounts.entries()]
       .toSorted((a, b) => b[1] - a[1])
       .map(([id, count]) => [
@@ -178,9 +178,9 @@ export function printOverview(results: RunResult[], options: OverviewOptions): v
       typeStats.set(id, entry);
     }
   }
-  subheading("プレイヤータイプと星の関係");
+  subheading("ポジションと星の関係");
   printTable(
-    ["type", "n", "作業pt", "報酬pt", "獲得", "星3率"],
+    ["position", "n", "作業pt", "報酬pt", "完了", "星3率"],
     [...typeStats.entries()]
       .toSorted((a, b) => b[1].star3 / b[1].count - a[1].star3 / a[1].count)
       .map(([id, stat]) => [

@@ -173,7 +173,7 @@ function acquireTask(state: GameState, task: TaskCard, rules: RuleSet): void {
     pushLog(state, `リスク未吸収: ${task.title}（負債 +${unmet}）`, "bad");
   }
 
-  // モーダルは人間が獲得者になった時だけ対象にする。AI の獲得で上書きしない。
+  // モーダルは人間が受取者になった時だけ対象にする。AI の完了で上書きしない。
   if (recipient.isHuman) {
     state.lastAcquisition = {
       id: task.id,
@@ -198,8 +198,8 @@ function acquireTask(state: GameState, task: TaskCard, rules: RuleSet): void {
   task.acquiredDay = state.day;
   state.taskDiscard.push(task.defId);
   recipient.completed += 1;
-  const contributionText = contributions.length > 0 ? ` / 獲得者: ${recipient.name}` : "";
-  pushLog(state, `獲得: ${task.title}（チーム +${task.score}${contributionText}）`, "good");
+  const contributionText = contributions.length > 0 ? ` / 受取者: ${recipient.name}` : "";
+  pushLog(state, `完了: ${task.title}（企業価値 +${task.score}${contributionText}）`, "good");
 
   recipient.discard.push({
     id: state.nextCardId++,
@@ -275,12 +275,12 @@ export function expireTasks(state: GameState, rules: RuleSet = BASE_RULES): void
     if (task.penalty) applyExpiryPenalty(state, task, rules);
 
     if (previous === "open") {
-      pushLog(state, `納期切れ（Backlog）: ${task.title}`, "bad");
+      pushLog(state, `期限切れ（Backlog）: ${task.title}`, "bad");
       continue;
     }
 
     returnAttachedCards(state, task);
-    pushLog(state, `納期切れ: ${task.title}（カードは捨て札へ）`, "bad");
+    pushLog(state, `期限切れ: ${task.title}（カードは捨て札へ）`, "bad");
   }
   refillOpen(state);
 }

@@ -96,6 +96,6 @@ describe("ResultScreen", () => {
     expect(screen.getByText("日次推移")).toBeInTheDocument();
     expect(screen.getByText(/参考 中央値/)).toBeInTheDocument();
     expect(screen.getAllByTestId("player-archetype").length).toBeGreaterThanOrEqual(5);
-    expect(screen.getByText("24タイプの見方")).toBeInTheDocument();
+    expect(screen.getByText("ポジション一覧")).toBeInTheDocument();
   });
 });

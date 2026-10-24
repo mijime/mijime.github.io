@@ -62,7 +62,7 @@ export function ResultScreen({ state, dispatch }: Props) {
     <div className="flow-root" data-theme="dark">
       <div className="mx-auto max-w-3xl px-4 py-6">
         <header className="text-center">
-          <h1 className="serif text-2xl font-semibold">{state.totalDays}日間の四半期終了</h1>
+          <h1 className="serif text-2xl font-semibold">{state.totalDays}日間のプロジェクト終了</h1>
           <p className="text-[10px] text-(--mid)">シード {state.seed}</p>
 
           <div className="mt-3 flex items-center justify-center gap-1 text-(--terra)">
@@ -107,7 +107,7 @@ export function ResultScreen({ state, dispatch }: Props) {
             <div className="mt-2 grid grid-cols-4 gap-1">
               <ContributionStat label="作業" value={`${humanWork}pt`} />
               <ContributionStat label="プレイ" value={`${workCards(human)}枚`} />
-              <ContributionStat label="獲得" value={`${human.completed}件`} />
+              <ContributionStat label="完了" value={`${human.completed}件`} />
               <ContributionStat label="報酬" value={`${human.score}pt`} />
             </div>
             <div className="mt-2 flex items-center gap-2">
@@ -158,7 +158,7 @@ export function ResultScreen({ state, dispatch }: Props) {
 
                   <div className="mt-1 flex flex-wrap gap-x-3 gap-y-0.5 text-[8px] text-(--mid)">
                     <span>
-                      獲得 <b className="text-(--ink)">{player.completed}</b>
+                      完了 <b className="text-(--ink)">{player.completed}</b>
                     </span>
                     <span>
                       点 <b className="text-(--ink)">{player.score}</b>

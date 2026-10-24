@@ -69,7 +69,7 @@ export function TurnBanner({
           ) : isAi ? (
             "選択中…"
           ) : (
-            "納期と期限切れを処理中"
+            "期限切れを処理中"
           )}
         </span>
       </div>

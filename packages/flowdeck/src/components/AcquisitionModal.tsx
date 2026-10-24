@@ -22,7 +22,7 @@ export function AcquisitionModal({ report, debtLimit, onClose }: Props) {
       <div className="flow-slide w-full max-w-lg rounded-sm border border-(--border) bg-(--paper) shadow-2xl">
         <div className="flex items-start justify-between gap-2 border-b border-(--border) bg-(--toolbar-bg) px-4 py-3">
           <div className="min-w-0">
-            <h2 className="serif text-lg font-semibold">タスク獲得</h2>
+            <h2 className="serif text-lg font-semibold">タスク完了</h2>
             <p className="mt-0.5 truncate text-[11px]">{report.taskTitle}</p>
             <p className="mt-1 flex flex-wrap items-center gap-x-2 text-[9px] text-(--mid)">
               <span className="inline-flex items-center gap-1 text-(--terra)">
@@ -45,7 +45,7 @@ export function AcquisitionModal({ report, debtLimit, onClose }: Props) {
               </span>
             </div>
             <div className="rounded-sm border border-(--border) bg-(--paper) px-2 py-1.5">
-              <span className="block text-[8px] text-(--mid)">報酬カード（獲得者へ）</span>
+              <span className="block text-[8px] text-(--mid)">報酬カード（受取者へ）</span>
               <span
                 className={`text-[12px] font-medium ${
                   report.reward.level > 0 ? "text-(--ink)" : "text-(--mid)"
@@ -86,7 +86,7 @@ export function AcquisitionModal({ report, debtLimit, onClose }: Props) {
                 </li>
               ))}
               {report.contributions.length === 0 && (
-                <li className="text-[9px] text-(--mid)">貢献カードなし（引いた人が獲得）。</li>
+                <li className="text-[9px] text-(--mid)">貢献カードなし（引いた人が受取）。</li>
               )}
             </ul>
           </section>
@@ -124,7 +124,7 @@ export function AcquisitionModal({ report, debtLimit, onClose }: Props) {
 
           <div className="flex items-center justify-between gap-2 border-t border-(--border) pt-2 text-[9px] text-(--mid)">
             <span>
-              この獲得の負債 +{report.debt} / 技術的負債 {report.teamDebt} / {debtLimit}
+              この完了の負債 +{report.debt} / 技術的負債 {report.teamDebt} / {debtLimit}
             </span>
             <button
               type="button"

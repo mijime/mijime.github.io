@@ -105,11 +105,11 @@ export function countsBy<T>(items: T[], key: (item: T) => string): Map<string, n
 }
 
 export function tipCategory(tip: string): string {
-  if (tip.startsWith("3つ星")) return "praise";
+  if (tip.startsWith("星3")) return "praise";
   if (tip.startsWith("負債上限")) return "debt-limit";
   if (tip.startsWith("星")) return "star-plan";
   if (tip.startsWith("高スコア(4以上)の期限切れ")) return "high-score-expiry";
-  if (tip.startsWith("スコアハンター型がいない")) return "score-role-gap";
+  if (tip.startsWith("バリューエンジニアがいない")) return "score-role-gap";
   if (tip.startsWith("Reviewでの期限切れ")) return "test-expiry";
   if (tip.startsWith("平均WIP")) return "high-wip";
   if (tip.startsWith("期限切れ")) return "expiry-rate";
@@ -117,14 +117,14 @@ export function tipCategory(tip: string): string {
   if (tip.startsWith("負債")) return "debt-pressure";
   if (tip.startsWith("Reviewがボトルネック")) return "bottleneck";
   if (tip.startsWith("役割分担")) return "archetype-spread";
-  if (tip.includes("サポート役")) return "support-core";
+  if (tip.includes("支援役")) return "support-core";
   if (tip.includes("に作業が集中")) return "solo-carry";
   if (tip.startsWith("支援プレイが")) return "low-support";
   if (tip.startsWith("LLMトークン")) return "token-economy";
   if (tip.startsWith("効果カード")) return "effect-combo";
   if (tip.startsWith("廃棄")) return "hygiene";
   if (tip.startsWith("Pull")) return "over-pull";
-  if (tip.startsWith("バランス型")) return "role-fog";
+  if (tip.startsWith("オールラウンダー")) return "role-fog";
   if (tip.startsWith("プレイの")) return "phase-bias";
   if (tip.startsWith("あなたは")) return "human-type";
   return "summary";

@@ -95,7 +95,7 @@ export function printInsights(results: RunResult[]): void {
   const worstType = eligibleTypes.at(-1);
   if (bestType && worstType) {
     insights.push(
-      `星3と相性の良いタイプは「${archetypeById(bestType.id).label}」${formatPercent(bestType.rate)}、苦戦しやすいのは「${archetypeById(worstType.id).label}」${formatPercent(worstType.rate)}。`,
+      `星3と相性の良いポジションは「${archetypeById(bestType.id).label}」${formatPercent(bestType.rate)}、苦戦しやすいのは「${archetypeById(worstType.id).label}」${formatPercent(worstType.rate)}。`,
     );
   }
 

@@ -2,10 +2,10 @@ import { useId } from "react";
 
 const STATIONS = [
   { key: "open", label: "Backlog", color: "#0284c7" },
-  { key: "inbox", label: "Ready", color: "#7c3aed" },
-  { key: "wip", label: "In Progress", color: "#2563eb" },
-  { key: "test", label: "Review", color: "#d97706" },
-  { key: "done", label: "Done", color: "#059669" },
+  { key: "inbox", label: "Ready（設計）", color: "#7c3aed" },
+  { key: "wip", label: "In Progress（開発）", color: "#2563eb" },
+  { key: "test", label: "Review（テスト）", color: "#d97706" },
+  { key: "done", label: "Done（完了）", color: "#059669" },
 ] as const;
 
 export type FlowCounts = Record<(typeof STATIONS)[number]["key"], number>;

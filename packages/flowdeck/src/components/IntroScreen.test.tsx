@@ -7,11 +7,11 @@ describe("IntroScreen", () => {
     const onStart = vi.fn();
     render(<IntroScreen onStart={onStart} />);
 
-    expect(screen.getByText("LLMとエージェントの四半期")).toBeInTheDocument();
+    expect(screen.getByText("LLMとエージェントのプロジェクト")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "20日" }));
     fireEvent.click(screen.getByRole("button", { name: "5人" }));
     fireEvent.click(screen.getByRole("button", { name: /波乱/ }));
-    fireEvent.click(screen.getByRole("button", { name: /四半期を開始/ }));
+    fireEvent.click(screen.getByRole("button", { name: /プロジェクトを開始/ }));
     expect(onStart).toHaveBeenCalledWith(20, 5, 0.2);
   });
 });

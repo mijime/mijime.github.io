@@ -25,11 +25,11 @@ const report: AcquisitionReport = {
 };
 
 describe("AcquisitionModal", () => {
-  it("獲得内容・リスクカード・報酬を表示する", () => {
+  it("完了内容・リスクカード・報酬を表示する", () => {
     const onClose = vi.fn();
     render(<AcquisitionModal report={report} debtLimit={12} onClose={onClose} />);
 
-    expect(screen.getByText("タスク獲得")).toBeInTheDocument();
+    expect(screen.getByText("タスク完了")).toBeInTheDocument();
     expect(screen.getByText("レポート確認")).toBeInTheDocument();
     expect(screen.getByText("仕様追加 +2")).toBeInTheDocument();
     expect(screen.getByText(/開発/)).toBeInTheDocument();

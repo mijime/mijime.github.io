@@ -54,7 +54,7 @@ export function ScoreBreakdown({
         )}
       </div>
       <ul className="mt-2 space-y-1 text-[10px]">
-        <ScoreRow label="企業価値（カード）" value={score.teamScore} tone="positive" />
+        <ScoreRow label="企業価値（報酬カード）" value={score.teamScore} tone="positive" />
         <ScoreRow label="技術的負債" value={score.debtPenalty} tone="negative" />
         {score.incidentPenalty > 0 && (
           <ScoreRow label="期限切れ罰則" value={score.incidentPenalty} tone="negative" />

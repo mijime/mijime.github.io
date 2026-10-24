@@ -185,7 +185,7 @@ export interface GameAnalytics {
   substitutions: number;
   tokensUsed: number;
   debtSources: { risk: number; incident: number; other: number };
-  /** プレイヤーごとの行動傾向。リザルトのアーキタイプ判定に使う */
+  /** プレイヤーごとの行動傾向。リザルトのポジション判定に使う */
   players: Record<string, PlayerAnalytics>;
 }
 
@@ -229,9 +229,9 @@ export interface PlayerOutcome {
   avgWip: number;
   contributed: Record<ContributionPhase, ContributionStats>;
   deck: Record<CardType, number>;
-  /** リザルトのアーキタイプ判定に使う行動傾向 */
+  /** リザルトのポジション判定に使う行動傾向 */
   analytics?: PlayerAnalytics;
-  /** 判定されたプレイヤータイプ（24種 + バランス型） */
+  /** 判定されたポジション（24種 + オールラウンダー） */
   archetypeId?: string;
 }
 

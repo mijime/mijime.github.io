@@ -163,7 +163,7 @@ export const BASE_TIPS: readonly TipRule[] = [
     id: "praise",
     when: (facts) => facts.stars === 3,
     text: (facts) =>
-      `3つ星。完了${facts.completed}件 / 期限切れ${facts.expired}件 / WIP平均${facts.avgWip.toFixed(1)}。`,
+      `星3。完了${facts.completed}件 / 期限切れ${facts.expired}件 / WIP平均${facts.avgWip.toFixed(1)}。`,
   },
   {
     id: "debt-limit",
@@ -187,7 +187,7 @@ export const BASE_TIPS: readonly TipRule[] = [
     when: (facts) =>
       facts.stars < 3 && !facts.players.some((player) => player.archetypeId === "score-hunter"),
     text: () =>
-      "スコアハンター型がいない。星3はスコア6〜7の獲得が近道。次のBacklogで高スコアを1件優先する。",
+      `${archetypeById("score-hunter").label}がいない。星3はスコア6〜7の完了が近道。次のBacklogで高スコアを1件優先する。`,
   },
   {
     id: "test-expiry",
@@ -204,7 +204,7 @@ export const BASE_TIPS: readonly TipRule[] = [
     id: "expiry-rate",
     when: (facts) => facts.expiryRate >= 0.4,
     text: (facts) =>
-      `期限切れ${facts.expired}件（完了${facts.completed}件）。Backlogの選択と納期管理を見直す。`,
+      `期限切れ${facts.expired}件（完了${facts.completed}件）。Backlogの選択と期限管理を見直す。`,
   },
   {
     id: "debt-pressure",
@@ -232,7 +232,7 @@ export const BASE_TIPS: readonly TipRule[] = [
     text: (facts) => {
       const player = supportLeader(facts);
       return player
-        ? `${player.name}がサポート役。支援${player.analytics?.supportPlays ?? 0}回 / ${player.analytics?.supportPoints ?? 0}pt。次はこの支援をReviewに寄せる。`
+        ? `${player.name}が支援役。支援${player.analytics?.supportPlays ?? 0}回 / ${player.analytics?.supportPoints ?? 0}pt。次はこの支援をReviewに寄せる。`
         : "支援プレイが機能している。";
     },
   },
@@ -245,7 +245,7 @@ export const BASE_TIPS: readonly TipRule[] = [
     text: (facts) => {
       const top = leaders(facts)[0];
       return top
-        ? `${top.name}に作業が集中（${Math.round(workShare(top, facts) * 100)}%）。次はサポートかPullで分散する。`
+        ? `${top.name}に作業が集中（${Math.round(workShare(top, facts) * 100)}%）。次は支援かPullで分散する。`
         : "作業が1人に集中している。";
     },
   },
@@ -253,7 +253,7 @@ export const BASE_TIPS: readonly TipRule[] = [
     id: "low-support",
     when: (facts) => facts.state.analytics.actions.play >= 10 && teamSupportRate(facts) < 0.3,
     text: (facts) =>
-      `支援プレイが${Math.round(teamSupportRate(facts) * 100)}%。他者のReviewや設計を手伝うと流れが速くなる。`,
+      `支援プレイが${Math.round(teamSupportRate(facts) * 100)}%。他メンバーのReviewや設計を手伝うと流れが速くなる。`,
   },
   {
     id: "token-economy",
@@ -281,10 +281,10 @@ export const BASE_TIPS: readonly TipRule[] = [
   },
   {
     id: "role-fog",
-    when: (facts) => (typeCounts(facts).get("バランス型") ?? 0) >= 2,
+    when: (facts) => (typeCounts(facts).get("オールラウンダー") ?? 0) >= 2,
     text: (facts) => {
-      const balanced = typeCounts(facts).get("バランス型") ?? 0;
-      return `バランス型が${balanced}人。役割を1つ決めると、支援・設計・Reviewのどれかが強くなる。`;
+      const balanced = typeCounts(facts).get("オールラウンダー") ?? 0;
+      return `オールラウンダーが${balanced}人。役割を1つ決めると、支援・設計・Reviewのどれかが強くなる。`;
     },
   },
   {

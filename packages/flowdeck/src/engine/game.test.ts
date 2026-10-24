@@ -391,7 +391,7 @@ describe("タスクの流れ", () => {
     expect(state.players[0]?.contributed.test).toEqual({ cards: 2, points: 4 });
   });
 
-  it("獲得者は引いた人ではなく、貢献ポイントが最大の人", () => {
+  it("受取者は引いた人ではなく、貢献ポイントが最大の人", () => {
     const state = testState();
     const task = addTask(state, "test", state.players[1]!.id, {
       requirements: { design: 1, dev: 1, test: 1 },

@@ -66,7 +66,7 @@ export function printTasks(results: RunResult[]): void {
     `  efficiency       avg=${formatNumber(mean(poolEfficiency), 3)} / too-cheap(>0.45)=${formatPercent(rate(poolEfficiency.filter((value) => value > 0.45).length, poolEfficiency.length))} / too-expensive(<0.25)=${formatPercent(rate(poolEfficiency.filter((value) => value < 0.25).length, poolEfficiency.length))}`,
   );
 
-  subheading("アーキタイプ別の完了率");
+  subheading("タスク種別の完了率");
   printTable(
     ["class", "done/game", "expired/game", "rate"],
     (["standard", "high-score", "effect", "incident"] as const).map((category) => {

@@ -89,15 +89,17 @@ export function HelpModal({ rules, onClose }: { rules: TeamRules; onClose: () =>
             <div className="flex flex-wrap items-center justify-center gap-1.5 text-[10px] text-(--ink)">
               <span>企業価値</span>
               <span className="text-(--mid)">−</span>
-              <span>負債×{DEBT_SCORE_PENALTY}</span>
+              <span>技術的負債×{DEBT_SCORE_PENALTY}</span>
               <span className="text-(--mid)">=</span>
-              <strong>見込み</strong>
+              <strong>最終評価</strong>
             </div>
             <div className="mt-1 flex items-center justify-center gap-2 text-[8px]">
               <span>星1 {rules.starOne}</span>
               <span>星2 {rules.starTwo}</span>
               <span>星3 {rules.starThree}</span>
-              <span className="text-red-600 dark:text-red-300">負債 {rules.debtLimit} で失敗</span>
+              <span className="text-red-600 dark:text-red-300">
+                技術的負債 {rules.debtLimit} で失敗
+              </span>
             </div>
           </section>
 
@@ -107,20 +109,68 @@ export function HelpModal({ rules, onClose }: { rules: TeamRules; onClose: () =>
               。LLMトークンはどのレーンにも置ける。
             </p>
             <p className="rounded-sm border border-(--border) px-2 py-1">
-              獲得時にリスクカード。余剰で吸収し、超えた分は
+              タスク完了時にリスクカード。余剰で吸収し、超えた分は
               <strong className="text-(--ink)">企業価値-1</strong>。
             </p>
             <p className="rounded-sm border border-(--border) px-2 py-1">
-              報酬は<strong className="text-(--ink)">貢献pt最多</strong>
-              の人へ。同点は枚数、最後に置いた人。
+              報酬カードは<strong className="text-(--ink)">貢献pt最多</strong>
+              のメンバーへ。同点は枚数、最後に置いた人。
             </p>
             <p className="rounded-sm border border-(--border) px-2 py-1">
-              タスク報酬カードはデッキに残る間だけ企業価値。捨てるとスコアも消える。
+              報酬カードはデッキに残る間だけ企業価値。捨てると企業価値も消える。
             </p>
             <p className="rounded-sm border border-(--border) px-2 py-1">
               タスクの得損は開始時に選択。波乱ほど通常タスクの要求量が
               <strong className="text-(--ink)">0.8〜1.2倍</strong>に散らばる。
             </p>
+          </section>
+
+          <section>
+            <h3 className="mb-1 text-[9px] font-medium text-(--mid)">用語</h3>
+            <dl className="grid gap-x-3 gap-y-1 text-[8px] sm:grid-cols-2">
+              <div>
+                <dt className="font-medium text-(--ink)">プロジェクト</dt>
+                <dd className="text-(--mid)">10 / 20 / 30日のゲーム期間</dd>
+              </div>
+              <div>
+                <dt className="font-medium text-(--ink)">メンバー</dt>
+                <dd className="text-(--mid)">あなたと協力するAI</dd>
+              </div>
+              <div>
+                <dt className="font-medium text-(--ink)">完了</dt>
+                <dd className="text-(--mid)">Doneに到達したタスク</dd>
+              </div>
+              <div>
+                <dt className="font-medium text-(--ink)">報酬</dt>
+                <dd className="text-(--mid)">完了時に受け取るカード</dd>
+              </div>
+              <div>
+                <dt className="font-medium text-(--ink)">企業価値</dt>
+                <dd className="text-(--mid)">デッキにある報酬カードの合計</dd>
+              </div>
+              <div>
+                <dt className="font-medium text-(--ink)">最終評価</dt>
+                <dd className="text-(--mid)">
+                  企業価値 − 技術的負債×{DEBT_SCORE_PENALTY} − 期限切れ罰則
+                </dd>
+              </div>
+              <div>
+                <dt className="font-medium text-(--ink)">技術的負債</dt>
+                <dd className="text-(--mid)">デッキ内の負債カード</dd>
+              </div>
+              <div>
+                <dt className="font-medium text-(--ink)">期限切れ</dt>
+                <dd className="text-(--mid)">納期トークンが上限に達したタスク</dd>
+              </div>
+              <div>
+                <dt className="font-medium text-(--ink)">支援</dt>
+                <dd className="text-(--mid)">他メンバーのタスクへのプレイ</dd>
+              </div>
+              <div>
+                <dt className="font-medium text-(--ink)">Pull</dt>
+                <dd className="text-(--mid)">BacklogからReadyへ引く</dd>
+              </div>
+            </dl>
           </section>
         </div>
       </div>

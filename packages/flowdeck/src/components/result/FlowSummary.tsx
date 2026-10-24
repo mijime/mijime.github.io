@@ -31,7 +31,7 @@ export function FlowSummary({
       <div className="mt-2 grid grid-cols-3 gap-1">
         <Stat label="完了" value={`${flow.completed}件`} />
         <Stat label="期限切れ" value={`${flow.expired}件`} />
-        <Stat label="Review切れ" value={`${flow.testExpired}件`} />
+        <Stat label="Review期限切れ" value={`${flow.testExpired}件`} />
         <Stat
           label="リードタイム"
           value={`${flow.avgLeadTime.toFixed(1)}日`}

@@ -20,7 +20,7 @@ function finishedGame(seed = 42) {
 }
 
 describe("player archetypes", () => {
-  it("24の専門型とバランス型を定義している", () => {
+  it("24の専門ポジションとオールラウンダーを定義している", () => {
     expect(PLAYER_ARCHETYPES).toHaveLength(25);
     expect(new Set(PLAYER_ARCHETYPES.map((type) => type.id)).size).toBe(25);
     expect(new Set(PLAYER_ARCHETYPES.map((type) => type.label)).size).toBe(25);
@@ -28,7 +28,7 @@ describe("player archetypes", () => {
     expect(archetypeById("unknown")).toBe(BALANCED_ARCHETYPE);
   });
 
-  it("ゲーム終了時に全員へタイプが割り当てられる", () => {
+  it("ゲーム終了時に全員へポジションが割り当てられる", () => {
     const state = finishedGame();
     const team = state.outcome?.perPlayer ?? [];
     expect(team).toHaveLength(5);
@@ -40,7 +40,7 @@ describe("player archetypes", () => {
     expect(new Set(team.map((player) => player.archetypeId)).size).toBeGreaterThan(1);
   });
 
-  it("チーム内で最も強い軸のタイプを選ぶ", () => {
+  it("チーム内で最も強い軸のポジションを選ぶ", () => {
     const state = finishedGame();
     const team = state.outcome?.perPlayer ?? [];
     for (const player of team) {

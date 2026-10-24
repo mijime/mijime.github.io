@@ -124,7 +124,7 @@ export function Header({ state, onHelp, onIntro, onNewGame, autoMode, onStopAuto
             />
             <Stat
               icon={<Star size={11} />}
-              label="見込み"
+              label="最終評価"
               value={`${finalScore}`}
               tone={
                 finalScore >= state.rules.starThree
@@ -143,7 +143,7 @@ export function Header({ state, onHelp, onIntro, onNewGame, autoMode, onStopAuto
             />
             <Stat
               icon={<TrendingDown size={11} />}
-              label="負債"
+              label="技術的負債"
               value={`${state.teamDebt}/${state.rules.debtLimit}`}
               tone={state.teamDebt >= state.rules.debtLimit - 2 ? "bad" : "normal"}
             />

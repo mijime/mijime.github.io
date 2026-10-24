@@ -27,10 +27,10 @@ import {
 
 export const LANE_LABEL: Record<"open" | "inbox" | "wip" | "test" | "done", string> = {
   open: "Backlog",
-  inbox: "Ready",
-  wip: "In Progress",
-  test: "Review",
-  done: "Done",
+  inbox: "Ready（設計）",
+  wip: "In Progress（開発）",
+  test: "Review（テスト）",
+  done: "Done（完了）",
 };
 
 export const LANE_HINT: Record<"open" | "inbox" | "wip" | "test" | "done", string> = {
@@ -69,7 +69,7 @@ const TRAIT_ICON = {
 
 const TRAIT_DIRECTION: Record<keyof PersonalityWeights, (value: number) => string> = {
   focus: (value) => (value >= 0 ? "仕上げ" : "着手"),
-  greed: (value) => (value >= 0 ? "得点" : "整理"),
+  greed: (value) => (value >= 0 ? "報酬" : "整理"),
   urgency: (value) => (value >= 0 ? "納期" : "長期"),
 };
 

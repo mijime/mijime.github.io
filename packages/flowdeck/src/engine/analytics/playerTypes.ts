@@ -12,119 +12,144 @@ export interface PlayerArchetype {
 
 export const BALANCED_ARCHETYPE: PlayerArchetype = {
   id: "balanced",
-  label: "バランス型",
+  label: "オールラウンダー",
   description: "突出した得意分野はないが、穴も少ない",
   group: "utility",
 };
 
-/** 24の専門型 + バランス型 = 25パターン。 */
+/** 24の専門ポジション + オールラウンダー = 25パターン。 */
 export const PLAYER_ARCHETYPES: readonly PlayerArchetype[] = [
-  { id: "ace", label: "エース型", description: "作業量と完了数でチームを牽引する", group: "ace" },
+  {
+    id: "ace",
+    label: "リードエンジニア",
+    description: "作業量と完了数でチームを牽引する",
+    group: "ace",
+  },
   {
     id: "finisher",
-    label: "フィニッシャー型",
+    label: "クローザー",
     description: "少ない手数でタスクを仕上げる",
     group: "ace",
   },
   {
     id: "score-hunter",
-    label: "スコアハンター型",
+    label: "バリューエンジニア",
     description: "報酬点の高いタスクを引き当てる",
     group: "ace",
   },
-  { id: "collector", label: "コレクター型", description: "完了数を着実に積み上げる", group: "ace" },
+  {
+    id: "collector",
+    label: "デリバリーリード",
+    description: "完了数を着実に積み上げる",
+    group: "ace",
+  },
   {
     id: "design-ace",
-    label: "設計エース型",
+    label: "ソフトウェアアーキテクト",
     description: "設計フェーズで主導権を握る",
     group: "ace",
   },
-  { id: "dev-ace", label: "実装エース型", description: "開発フェーズを大量に進める", group: "ace" },
-  { id: "test-ace", label: "テストエース型", description: "Reviewを押し切る", group: "ace" },
+  {
+    id: "dev-ace",
+    label: "ソフトウェアエンジニア",
+    description: "開発フェーズを大量に進める",
+    group: "ace",
+  },
+  { id: "test-ace", label: "QAエンジニア", description: "Reviewを押し切る", group: "ace" },
   {
     id: "supporter",
-    label: "サポーター型",
+    label: "サポートエンジニア",
     description: "他人のタスクを広く支援する",
     group: "support",
   },
   {
     id: "test-supporter",
-    label: "テストサポーター型",
+    label: "QAサポーター",
     description: "テスト支援に偏ってチームを支える",
     group: "support",
   },
   {
     id: "mentor",
-    label: "メンター型",
+    label: "メンター",
     description: "支援ポイントでチームを底上げする",
     group: "support",
   },
   {
     id: "facilitator",
-    label: "ファシリテーター型",
+    label: "スクラムマスター",
     description: "Pullと支援で流れを作る",
     group: "support",
   },
   {
     id: "starter",
-    label: "スターター型",
+    label: "プロジェクトマネージャー",
     description: "タスクを引き出すが仕上げは少ない",
     group: "starter",
   },
-  { id: "planner", label: "プランナー型", description: "設計とPullで段取りする", group: "starter" },
+  { id: "planner", label: "プランナー", description: "設計とPullで段取りする", group: "starter" },
   {
     id: "architect",
-    label: "アーキテクト型",
+    label: "テックリード",
     description: "設計枚数が多く、土台を作る",
     group: "starter",
   },
   {
     id: "fullstack",
-    label: "フルスタック型",
+    label: "フルスタックエンジニア",
     description: "3フェーズを均等にこなす",
     group: "starter",
   },
   {
     id: "generalist",
-    label: "ジェネラリスト型",
+    label: "ジェネラリスト",
     description: "フェーズの穴を広く埋める",
     group: "starter",
   },
   {
     id: "token-user",
-    label: "トークン使い型",
+    label: "プロンプトエンジニア",
     description: "LLMトークンを積極的に使う",
     group: "starter",
   },
-  { id: "organizer", label: "整理屋型", description: "廃棄でデッキを整える", group: "utility" },
+  {
+    id: "organizer",
+    label: "リファクタラー",
+    description: "廃棄でデッキを整える",
+    group: "utility",
+  },
   {
     id: "debt-cleaner",
-    label: "負債クリーナー型",
+    label: "メンテナー",
     description: "負債カードの処理に強い",
     group: "utility",
   },
   {
     id: "quality",
-    label: "品質屋型",
+    label: "クオリティエンジニア",
     description: "テストと完了のバランスが良い",
     group: "utility",
   },
   {
     id: "firefighter",
-    label: "火消し型",
+    label: "インシデントレスポンダー",
     description: "インシデントを優先的に処理する",
     group: "utility",
   },
-  { id: "parallel", label: "並列型", description: "WIPを抱えて広く進める", group: "utility" },
+  {
+    id: "parallel",
+    label: "マルチタスカー",
+    description: "WIPを抱えて広く進める",
+    group: "utility",
+  },
   {
     id: "focused",
-    label: "集中職人型",
+    label: "スペシャリスト",
     description: "WIPを絞って効率よく進める",
     group: "utility",
   },
   {
     id: "combo",
-    label: "コンボ型",
+    label: "コンボデザイナー",
     description: "効果カードを多用して盤面を動かす",
     group: "utility",
   },
@@ -408,7 +433,7 @@ export function classifyPlayer(player: PlayerOutcome, team: PlayerOutcome[]): Pl
       best = entry.type;
     }
   }
-  // どの軸も平均的ならバランス型に落とす
+  // どの軸も平均的ならオールラウンダーに落とす
   const maxRatio = Math.max(
     profile.workRatio,
     profile.completionRatio,

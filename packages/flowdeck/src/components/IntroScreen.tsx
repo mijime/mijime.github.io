@@ -75,7 +75,7 @@ export function IntroScreen({ onStart, onClose, review = false }: Props) {
       <div className="flow-slide w-full max-w-xl rounded-sm border border-(--border) bg-(--paper) shadow-2xl">
         <div className="flex items-center justify-between border-b border-(--border) bg-(--toolbar-bg) px-4 py-2.5">
           <h1 className="serif flex items-center gap-1.5 text-base font-semibold">
-            <Sparkles size={14} className="text-(--terra)" /> LLMとエージェントの四半期
+            <Sparkles size={14} className="text-(--terra)" /> LLMとエージェントのプロジェクト
           </h1>
           {review && (
             <button
@@ -91,7 +91,7 @@ export function IntroScreen({ onStart, onClose, review = false }: Props) {
 
         <div className="space-y-3 px-4 py-4">
           <p className="text-[11px] leading-relaxed text-(--mid)">
-            LLMとエージェントを売るSaaS企業の四半期。カンバンを流して企業価値を伸ばす。
+            LLMとエージェントを売るSaaS企業のプロジェクト。カンバンを流して企業価値を伸ばす。
           </p>
 
           <FlowDiagram />
@@ -124,8 +124,8 @@ export function IntroScreen({ onStart, onClose, review = false }: Props) {
             <span className="inline-flex items-center gap-1" title="仕上げ ↔ 着手">
               <Gauge size={9} /> 仕上げ
             </span>
-            <span className="inline-flex items-center gap-1" title="得点 ↔ 整理">
-              <Gem size={9} /> 得点
+            <span className="inline-flex items-center gap-1" title="報酬 ↔ 整理">
+              <Gem size={9} /> 報酬
             </span>
             <span className="inline-flex items-center gap-1" title="納期 ↔ 長期">
               <Timer size={9} /> 納期
@@ -190,7 +190,7 @@ export function IntroScreen({ onStart, onClose, review = false }: Props) {
               onClick={() => onStart?.(days, aiCount, swing)}
               className="inline-flex items-center gap-1 rounded-sm bg-(--terra) px-4 py-1.5 text-[11px] font-medium text-white transition-opacity hover:opacity-90"
             >
-              <Play size={12} /> 四半期を開始
+              <Play size={12} /> プロジェクトを開始
             </button>
           )}
         </div>
