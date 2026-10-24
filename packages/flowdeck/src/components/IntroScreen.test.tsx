@@ -8,11 +8,6 @@ describe("IntroScreen", () => {
     render(<IntroScreen onStart={onStart} />);
 
     expect(screen.getByText("LLMとエージェントの四半期")).toBeInTheDocument();
-    for (let index = 0; index < 4; index += 1) {
-      fireEvent.click(screen.getByRole("button", { name: /次へ/ }));
-    }
-    expect(screen.getByText("四半期を始める")).toBeInTheDocument();
-
     fireEvent.click(screen.getByRole("button", { name: "20日" }));
     fireEvent.click(screen.getByRole("button", { name: "5人" }));
     fireEvent.click(screen.getByRole("button", { name: /四半期を開始/ }));

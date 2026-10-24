@@ -34,10 +34,8 @@ describe("AcquisitionModal", () => {
     expect(screen.getByText("要求設計 +2")).toBeInTheDocument();
     expect(screen.getByText(/開発/)).toBeInTheDocument();
     expect(screen.getByText("5pt / 2枚")).toBeInTheDocument();
-    expect(screen.getByText("引いた人: ミナ")).toBeInTheDocument();
-    expect(
-      screen.getByText("要求未達: 賄えなかった不確実カード分の負債（タスクは獲得）"),
-    ).toBeInTheDocument();
+    expect(screen.getByText("引: ミナ")).toBeInTheDocument();
+    expect(screen.getByText("要求未達: 負債 +1")).toBeInTheDocument();
 
     fireEvent.click(screen.getByText("閉じる"));
     expect(onClose).toHaveBeenCalledTimes(1);

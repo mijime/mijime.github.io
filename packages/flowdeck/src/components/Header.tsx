@@ -4,7 +4,7 @@ import {
   HelpCircle,
   LayoutGrid,
   RotateCcw,
-  Target,
+  Star,
   TrendingDown,
   TrendingUp,
 } from "lucide-react";
@@ -51,20 +51,53 @@ function Stat({
   );
 }
 
+function StarMeter({
+  score,
+  starOne,
+  starTwo,
+  starThree,
+}: {
+  score: number;
+  starOne: number;
+  starTwo: number;
+  starThree: number;
+}) {
+  const max = Math.max(1, starThree);
+  const percent = Math.min(100, Math.max(0, (score / max) * 100));
+  return (
+    <span
+      className="game-stat inline-flex items-center gap-1 rounded-sm border border-(--border) bg-(--paper) px-1.5 py-0.5"
+      title={`星1 ${starOne} / 星2 ${starTwo} / 星3 ${starThree}`}
+    >
+      <Star size={10} className="text-(--terra)" />
+      <span className="relative h-1.5 w-16 overflow-hidden rounded-full bg-(--grid)">
+        <span
+          className={`absolute inset-y-0 left-0 rounded-full ${
+            score >= starThree ? "bg-emerald-500" : "bg-(--terra)"
+          }`}
+          style={{ width: `${percent}%` }}
+        />
+        {[starOne, starTwo].map((threshold) => (
+          <span
+            key={threshold}
+            className="absolute inset-y-0 w-px bg-(--paper)"
+            style={{ left: `${(threshold / max) * 100}%` }}
+          />
+        ))}
+      </span>
+    </span>
+  );
+}
+
 export function Header({ state, onHelp, onIntro, onNewGame, autoMode, onStopAuto }: Props) {
   const finalScore = state.teamScore - state.teamDebt * DEBT_SCORE_PENALTY;
   return (
     <header className="game-topbar sticky top-[52px] z-30 border-b border-(--border) bg-(--toolbar-bg)/95 backdrop-blur">
       <div className="mx-auto max-w-[1440px] px-3 py-2">
         <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-          <div className="flex items-baseline gap-2">
-            <h1 className="game-logo serif flex items-center gap-1.5 text-lg font-semibold tracking-wide sm:text-xl">
-              <LayoutGrid size={18} className="text-(--terra)" /> Flowdeck
-            </h1>
-            <span className="hidden text-[9px] tracking-[0.2em] text-(--mid) sm:inline">
-              CO-OP KANBAN DECKBUILDER
-            </span>
-          </div>
+          <h1 className="game-logo serif flex items-center gap-1.5 text-lg font-semibold tracking-wide sm:text-xl">
+            <LayoutGrid size={18} className="text-(--terra)" /> Flowdeck
+          </h1>
 
           <div className="flex min-w-[132px] items-center gap-1.5">
             <span className="inline-flex items-center gap-1 whitespace-nowrap text-[9px] text-(--mid)">
@@ -90,7 +123,7 @@ export function Header({ state, onHelp, onIntro, onNewGame, autoMode, onStopAuto
               tone="good"
             />
             <Stat
-              icon={<Target size={11} />}
+              icon={<Star size={11} />}
               label="見込み"
               value={`${finalScore}`}
               tone={
@@ -102,13 +135,18 @@ export function Header({ state, onHelp, onIntro, onNewGame, autoMode, onStopAuto
               }
               title={`最終評価 = 企業価値 - 技術的負債 x ${DEBT_SCORE_PENALTY} - 期限切れ罰則`}
             />
+            <StarMeter
+              score={finalScore}
+              starOne={state.rules.starOne}
+              starTwo={state.rules.starTwo}
+              starThree={state.rules.starThree}
+            />
             <Stat
               icon={<TrendingDown size={11} />}
               label="負債"
               value={`${state.teamDebt}/${state.rules.debtLimit}`}
               tone={state.teamDebt >= state.rules.debtLimit - 2 ? "bad" : "normal"}
             />
-            <Stat icon={<Target size={11} />} label="目標" value={`${state.rules.starThree}`} />
           </div>
 
           <div className="ml-auto flex items-center gap-1.5">

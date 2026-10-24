@@ -20,18 +20,20 @@ export function AcquisitionModal({ report, debtLimit, onClose }: Props) {
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/45 p-3 sm:items-center">
       <div className="flow-slide w-full max-w-lg rounded-sm border border-(--border) bg-(--paper) shadow-2xl">
-        <div className="border-b border-(--border) bg-(--toolbar-bg) px-4 py-3">
-          <p className="text-[9px] tracking-[0.25em] text-(--mid)">
-            TASK ACQUIRED / DAY {report.day}
-          </p>
-          <h2 className="serif mt-1 text-lg font-semibold">タスク獲得</h2>
-          <p className="mt-1 text-[11px]">{report.taskTitle}</p>
-          <p className="mt-1 text-[9px] text-(--mid)">
-            獲得者（最多貢献）: <strong className="text-(--ink)">{report.recipientName}</strong>
-            {report.pullerId !== report.recipientId && (
-              <span className="ml-2">引いた人: {report.pullerName}</span>
-            )}
-          </p>
+        <div className="flex items-start justify-between gap-2 border-b border-(--border) bg-(--toolbar-bg) px-4 py-3">
+          <div className="min-w-0">
+            <h2 className="serif text-lg font-semibold">タスク獲得</h2>
+            <p className="mt-0.5 truncate text-[11px]">{report.taskTitle}</p>
+            <p className="mt-1 flex flex-wrap items-center gap-x-2 text-[9px] text-(--mid)">
+              <span className="inline-flex items-center gap-1 text-(--terra)">
+                <Sparkles size={9} /> {report.recipientName}
+              </span>
+              {report.pullerId !== report.recipientId && <span>引: {report.pullerName}</span>}
+            </p>
+          </div>
+          <span className="shrink-0 rounded-sm border border-(--border) px-1.5 py-0.5 text-[8px] text-(--mid)">
+            Day {report.day}
+          </span>
         </div>
 
         <div className="space-y-2.5 p-4 text-[10px]">
@@ -62,7 +64,7 @@ export function AcquisitionModal({ report, debtLimit, onClose }: Props) {
           </div>
 
           <section>
-            <h3 className="text-[9px] font-medium text-(--mid)">貢献（点 → 枚数 → 最後）</h3>
+            <h3 className="text-[9px] font-medium text-(--mid)">貢献</h3>
             <ul className="mt-1 space-y-0.5">
               {report.contributions.map((contribution, index) => (
                 <li
@@ -113,7 +115,7 @@ export function AcquisitionModal({ report, debtLimit, onClose }: Props) {
           {report.unmet && (
             <p className="flex items-center gap-1 rounded-sm border border-red-400/50 bg-red-500/10 px-2 py-1 text-[9px] text-red-700 dark:text-red-300">
               <AlertTriangle size={11} />
-              要求未達: 賄えなかった不確実カード分の負債（タスクは獲得）
+              要求未達: 負債 +{report.debt}
             </p>
           )}
 
