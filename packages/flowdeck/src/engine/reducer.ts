@@ -10,16 +10,25 @@ import {
   useToken,
 } from "./core";
 import { randomSeed } from "./rng";
+import { BASE_RULES, type RuleSet } from "./rules";
 import { createGame } from "./setup";
 import type { Action, GameState } from "./types";
 
-export function reduce(state: GameState, action: Action): GameState {
+export { playBotRound } from "./sim/run";
+
+export function reduce(state: GameState, action: Action, rules: RuleSet = BASE_RULES): GameState {
   if (action.type === "HYDRATE") {
     return action.state;
   }
 
   if (action.type === "RESTART") {
-    return createGame(action.seed ?? randomSeed(), action.days ?? state.totalDays, action.aiCount);
+    return createGame(
+      action.seed ?? randomSeed(),
+      action.days ?? state.totalDays,
+      action.aiCount,
+      rules,
+      action.generationSwing ?? state.generationSwing,
+    );
   }
 
   const s: GameState = structuredClone(state);
@@ -34,7 +43,7 @@ export function reduce(state: GameState, action: Action): GameState {
 
     case "PLAY_CARD": {
       if (s.phase !== "human" || s.activePlayerIndex !== 0) return state;
-      if (!playCard(s, s.humanId, action.cardId, action.taskId)) return state;
+      if (!playCard(s, s.humanId, action.cardId, action.taskId, rules)) return state;
       finishAction(s);
       return s;
     }
@@ -48,7 +57,7 @@ export function reduce(state: GameState, action: Action): GameState {
 
     case "USE_TOKEN": {
       if (s.phase !== "human" || s.activePlayerIndex !== 0) return state;
-      if (!useToken(s, s.humanId, action.token, action.taskId)) return state;
+      if (!useToken(s, s.humanId, action.token, action.taskId, rules)) return state;
       return s;
     }
 
@@ -63,7 +72,7 @@ export function reduce(state: GameState, action: Action): GameState {
       if (s.phase !== "ai") return state;
       const player = s.players[s.activePlayerIndex];
       if (!player) return state;
-      const acted = runBotAction(s, player.id);
+      const acted = runBotAction(s, player.id, rules);
       if (!acted) endPlayerTurn(s, player.id);
       finishAction(s);
       return s;
@@ -74,7 +83,7 @@ export function reduce(state: GameState, action: Action): GameState {
       if (s.phase === "over" || s.phase === "roundEnd") return state;
       const player = s.players[s.activePlayerIndex];
       if (!player) return state;
-      const acted = runBotAction(s, player.id);
+      const acted = runBotAction(s, player.id, rules);
       if (!acted) endPlayerTurn(s, player.id);
       finishAction(s);
       return s;
@@ -82,25 +91,11 @@ export function reduce(state: GameState, action: Action): GameState {
 
     case "END_ROUND": {
       if (s.phase !== "roundEnd") return state;
-      finishRound(s);
+      finishRound(s, rules);
       return s;
     }
 
     default:
       return state;
   }
-}
-
-/** シミュレーション用: 人間を含む全員を1アクションずつ1日進める */
-export function playBotRound(state: GameState): void {
-  let guard = 0;
-  while (state.phase !== "roundEnd" && state.phase !== "over" && guard < 500) {
-    const player = state.players[state.activePlayerIndex];
-    if (!player) break;
-    const acted = runBotAction(state, player.id);
-    if (!acted) endPlayerTurn(state, player.id);
-    finishAction(state);
-    guard += 1;
-  }
-  if (state.phase === "roundEnd") finishRound(state);
 }

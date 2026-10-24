@@ -1,5 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
+import { createGame } from "../engine/setup";
+import { playBotRound } from "../engine/sim/run";
 import type { GameState, Outcome, PlayerOutcome } from "../engine/types";
 import { ResultScreen } from "./ResultScreen";
 
@@ -11,7 +13,6 @@ const player = (overrides: Partial<PlayerOutcome>): PlayerOutcome => ({
   completed: 3,
   score: 6,
   avgWip: 1,
-  lowCards: 0,
   contributed: {
     design: { cards: 2, points: 5 },
     dev: { cards: 1, points: 3 },
@@ -69,5 +70,32 @@ describe("ResultScreen", () => {
     expect(screen.getByText(/チーム内 1位/)).toBeInTheDocument();
     expect(screen.getByText(/チームの作業の/)).toBeInTheDocument();
     expect(screen.getByText("2.00倍")).toBeInTheDocument();
+  });
+
+  it("プロジェクト・サマリーを表示する", () => {
+    render(<ResultScreen state={stateWithOutcome()} dispatch={vi.fn()} />);
+
+    expect(screen.getByText("プロジェクト・サマリー")).toBeInTheDocument();
+    expect(screen.getByText("スコア内訳")).toBeInTheDocument();
+    expect(screen.getByText("日次推移")).toBeInTheDocument();
+    expect(screen.getByText("流れ")).toBeInTheDocument();
+    expect(screen.getByText("リスク")).toBeInTheDocument();
+    expect(screen.getByText("プレイ傾向")).toBeInTheDocument();
+  });
+
+  it("実ゲームの終了状態でもサマリーを表示する", () => {
+    const state = createGame(42, 10, 4);
+    let guard = 0;
+    while (state.phase !== "over" && guard < 20) {
+      playBotRound(state);
+      guard += 1;
+    }
+    render(<ResultScreen state={state} dispatch={vi.fn()} />);
+
+    expect(screen.getByText("プロジェクト・サマリー")).toBeInTheDocument();
+    expect(screen.getByText("日次推移")).toBeInTheDocument();
+    expect(screen.getByText(/参考 中央値/)).toBeInTheDocument();
+    expect(screen.getAllByTestId("player-archetype").length).toBeGreaterThanOrEqual(5);
+    expect(screen.getByText("ポジション一覧")).toBeInTheDocument();
   });
 });

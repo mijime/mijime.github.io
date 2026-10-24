@@ -1,5 +1,4 @@
 import type { GameState, PlayerState } from "./types";
-import { HAND_SIZE } from "./types";
 import { randInt, shuffle } from "./rng";
 
 export function drawCards(state: GameState, player: PlayerState, count: number): number {
@@ -16,12 +15,6 @@ export function drawCards(state: GameState, player: PlayerState, count: number):
     drawn += 1;
   }
   return drawn;
-}
-
-/** 手札が尽きたら5枚補充する */
-export function drawIfEmpty(state: GameState, player: PlayerState): number {
-  if (player.hand.length > 0) return 0;
-  return drawCards(state, player, HAND_SIZE);
 }
 
 export function discardHand(player: PlayerState): number {

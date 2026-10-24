@@ -70,19 +70,6 @@ body {
   background: color-mix(in srgb, var(--grid) 28%, transparent);
 }
 
-.flow-deadline {
-  display: inline-block;
-  width: 0.42rem;
-  height: 0.42rem;
-  border: 1px solid var(--border);
-  border-radius: 50%;
-}
-
-.flow-deadline--filled {
-  background: var(--terra);
-  border-color: var(--terra);
-}
-
 @keyframes flow-card-in {
   from {
     opacity: 0;
@@ -298,4 +285,236 @@ body {
 .day-pop {
   display: inline-block;
   animation: day-pop 0.35s ease both;
+}
+
+/* Lane flow cues */
+.flow-lane {
+  position: relative;
+}
+
+.flow-lane[data-lane="inbox"]::after,
+.flow-lane[data-lane="wip"]::after {
+  content: "›";
+  position: absolute;
+  top: 50%;
+  right: -0.62rem;
+  transform: translateY(-50%);
+  font-size: 14px;
+  line-height: 1;
+  color: var(--mid);
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+/* Paper grain on cards */
+.flow-card {
+  position: relative;
+}
+
+.flow-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0.05;
+  mix-blend-mode: soft-light;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* Tactical UI */
+.flow-root[data-theme="dark"] {
+  --paper: #0a1118;
+  --ink: #e6f2f3;
+  --mid: #8aa2b0;
+  --border: #20313f;
+  --grid: #0f1a23;
+  --toolbar-bg: #070c11;
+  --terra: #2ee6c5;
+  --tac-bg: #05090d;
+  --tac-panel: #0a1118;
+  --tac-panel-2: #0d1821;
+  --tac-line: #1c2d3a;
+  --tac-line-bright: #2d4a5c;
+  --tac-accent: #2ee6c5;
+  --tac-amber: #ffb43a;
+  --tac-danger: #ff5f6d;
+  --tac-dim: #5f7887;
+  background:
+    radial-gradient(circle at 50% -10%, rgb(46 230 197 / 0.08), transparent 42rem),
+    radial-gradient(circle at 100% 20%, rgb(56 189 248 / 0.05), transparent 30rem), var(--tac-bg);
+  color: var(--ink);
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+}
+
+.flow-root [class~="bg-(--terra)"] {
+  color: #03110e;
+}
+
+.flow-root[data-theme="dark"] .game-topbar {
+  background: color-mix(in srgb, var(--tac-panel) 92%, transparent);
+  border-bottom: 1px solid var(--tac-line-bright);
+  box-shadow:
+    0 1px 0 rgb(46 230 197 / 0.22),
+    0 16px 32px -30px #000;
+}
+
+.flow-root[data-theme="dark"] .game-logo {
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  text-shadow: 0 0 18px rgb(46 230 197 / 0.35);
+}
+
+.flow-root[data-theme="dark"] .game-stat {
+  background: color-mix(in srgb, var(--tac-panel-2) 88%, transparent);
+  border-color: var(--tac-line);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.04);
+}
+
+.flow-root[data-theme="dark"] .turn-banner {
+  background: linear-gradient(90deg, rgb(46 230 197 / 0.08), transparent 45%), var(--tac-panel);
+  border-color: var(--tac-line);
+  box-shadow:
+    inset 2px 0 0 var(--tac-accent),
+    0 10px 24px -24px #000;
+}
+
+.flow-root[data-theme="dark"] .game-hand {
+  border-top: 1px solid var(--tac-line-bright);
+  background: linear-gradient(180deg, rgb(9 17 24 / 0.96), rgb(5 10 15 / 0.98));
+  box-shadow:
+    0 -1px 0 rgb(46 230 197 / 0.18),
+    0 -20px 40px -30px #000;
+}
+
+.flow-root[data-theme="dark"] .flow-card {
+  background: linear-gradient(160deg, #0e1a24, #0a1219);
+  border-color: var(--tac-line);
+}
+
+.flow-root[data-theme="dark"] .flow-lane {
+  background:
+    linear-gradient(rgb(46 230 197 / 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(46 230 197 / 0.035) 1px, transparent 1px),
+    linear-gradient(180deg, rgb(13 24 33 / 0.9), rgb(7 13 19 / 0.96));
+  background-size:
+    16px 16px,
+    16px 16px,
+    auto;
+  border-color: var(--tac-line);
+  border-radius: 2px;
+}
+
+.flow-root[data-theme="dark"] .game-board {
+  border: 1px solid var(--tac-line);
+  border-radius: 2px;
+  padding: 6px;
+  background: rgb(8 15 21 / 0.55);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.03);
+}
+
+.tac-panel {
+  position: relative;
+  border: 1px solid var(--tac-line);
+  border-radius: 2px;
+  background: linear-gradient(180deg, rgb(13 24 33 / 0.96), rgb(8 15 21 / 0.98));
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.03);
+}
+
+.tac-panel::before,
+.tac-panel::after {
+  content: "";
+  position: absolute;
+  width: 11px;
+  height: 11px;
+  pointer-events: none;
+}
+
+.tac-panel::before {
+  top: -1px;
+  left: -1px;
+  border-top: 2px solid var(--tac-accent);
+  border-left: 2px solid var(--tac-accent);
+}
+
+.tac-panel::after {
+  right: -1px;
+  bottom: -1px;
+  border-right: 2px solid var(--tac-accent);
+  border-bottom: 2px solid var(--tac-accent);
+}
+
+.tac-label {
+  font-size: 9px;
+  line-height: 1.2;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--tac-dim);
+}
+
+.tac-value {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.tac-rule {
+  height: 1px;
+  background: linear-gradient(90deg, var(--tac-line-bright), transparent);
+}
+
+.tac-card {
+  position: relative;
+  border: 1px solid var(--tac-line);
+  border-left: 2px solid var(--tac-accent);
+  border-radius: 2px;
+  background: linear-gradient(160deg, #0e1a24, #0a1219);
+  box-shadow:
+    0 1px 0 rgb(255 255 255 / 0.04),
+    0 12px 20px -18px #000;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.tac-card:hover {
+  border-color: var(--tac-line-bright);
+  box-shadow:
+    0 0 0 1px rgb(46 230 197 / 0.15),
+    0 18px 28px -20px #000;
+}
+
+.tac-lane[data-lane="inbox"] {
+  border-top-color: #a78bfa;
+}
+
+.tac-lane[data-lane="wip"] {
+  border-top-color: #38bdf8;
+}
+
+.tac-lane[data-lane="test"] {
+  border-top-color: #fbbf24;
+}
+
+.tac-lane {
+  border-top-width: 2px;
+  border-top-style: solid;
+}
+
+.tac-track {
+  background: #0a141c;
+  box-shadow: inset 0 0 0 1px var(--tac-line);
+}
+
+.tac-track > span {
+  background: var(--tac-accent);
+  box-shadow: 0 0 10px rgb(46 230 197 / 0.45);
+}
+
+.tac-lane[data-lane="open"] {
+  border-top-color: #38bdf8;
+}
+
+.tac-lane[data-lane="done"] {
+  border-top-color: #34d399;
 }

@@ -1,9 +1,12 @@
 import { useEffect, useReducer, useRef } from "react";
+import { normalizeAnalytics } from "./engine/analytics/state";
+import { DEFAULT_GENERATION_SWING } from "./engine/rules/generation";
 import { reduce } from "./engine/reducer";
 import { createGame } from "./engine/setup";
-import type { GameState } from "./engine/types";
+import type { Action, GameState } from "./engine/types";
 
-const STORAGE_KEY = "flowdeck:save:v18";
+const STORAGE_KEY = "flowdeck:save:v27";
+const LEGACY_STORAGE_KEYS = ["flowdeck:save:v26"];
 const DB_NAME = "flowdeck";
 const DB_VERSION = 1;
 const STORE_NAME = "saves";
@@ -13,7 +16,7 @@ function isGameState(value: unknown): value is GameState {
   if (typeof value !== "object" || value === null) return false;
   const state = value as Partial<GameState>;
   return (
-    state.version === 18 &&
+    (state.version === 27 || state.version === 26) &&
     typeof state.day === "number" &&
     typeof state.teamScore === "number" &&
     typeof state.teamDebt === "number" &&
@@ -30,12 +33,29 @@ function isGameState(value: unknown): value is GameState {
   );
 }
 
+/** v26セーブに analytics と lanes を補ってv27として返す。 */
+export function normalizeState(state: GameState): GameState {
+  const next = state as GameState;
+  next.version = 27;
+  next.generationSwing ??= DEFAULT_GENERATION_SWING;
+  next.analytics = normalizeAnalytics(next.analytics);
+  next.metrics = (next.metrics ?? []).map((snapshot) => {
+    snapshot.lanes ??= { open: 0, inbox: 0, wip: 0, test: 0, done: 0 };
+    snapshot.perPlayer ??= [];
+    return snapshot;
+  });
+  return next;
+}
+
 export function loadGame(): GameState | null {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return null;
-    const parsed = JSON.parse(raw) as unknown;
-    return isGameState(parsed) ? parsed : null;
+    for (const key of [STORAGE_KEY, ...LEGACY_STORAGE_KEYS]) {
+      const raw = localStorage.getItem(key);
+      if (!raw) continue;
+      const parsed = JSON.parse(raw) as unknown;
+      if (isGameState(parsed)) return normalizeState(parsed);
+    }
+    return null;
   } catch {
     return null;
   }
@@ -72,7 +92,8 @@ export async function loadGameAsync(): Promise<GameState | null> {
       const request = db.transaction(STORE_NAME, "readonly").objectStore(STORE_NAME).get(SAVE_KEY);
       request.addEventListener("success", () => {
         db.close();
-        resolve(isGameState(request.result) ? request.result : null);
+        const saved = request.result;
+        resolve(isGameState(saved) ? normalizeState(saved) : null);
       });
       request.addEventListener("error", () => {
         db.close();
@@ -108,7 +129,11 @@ export function useGame() {
     initial.current = loadGame();
   }
   const hadLocalSave = useRef(initial.current !== null);
-  const [state, dispatch] = useReducer(reduce, undefined, () => initial.current ?? createGame());
+  const [state, dispatch] = useReducer(
+    (current: GameState, action: Action) => reduce(current, action),
+    undefined,
+    () => initial.current ?? createGame(),
+  );
 
   useEffect(() => {
     if (hadLocalSave.current) return;

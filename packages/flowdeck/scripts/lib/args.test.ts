@@ -1,0 +1,49 @@
+import { describe, expect, it } from "vitest";
+import { parseArgs } from "./args";
+
+describe("parseArgs", () => {
+  it("既定値とシード範囲を解決する", () => {
+    const options = parseArgs(["--runs", "50", "--from", "10"]);
+    expect(options.from).toBe(10);
+    expect(options.to).toBe(59);
+    expect(options.runs).toBe(50);
+    expect(options.days).toBe(10);
+    expect(options.players).toBe(5);
+    expect(options.overview).toBe(true);
+  });
+
+  it("マトリクスを2次元で読む", () => {
+    const options = parseArgs(["--matrix", "days=10,20", "players=4,5"]);
+    expect(options.matrix).toEqual({ days: [10, 20], players: [4, 5] });
+    expect(options.overview).toBe(false);
+  });
+
+  it("スイープと比較を読む", () => {
+    const options = parseArgs([
+      "--sweep",
+      "balance.startingTokens=0,1,2",
+      "--compare",
+      "base,substitution",
+      "--weights",
+      "focus=1,greed=-1,urgency=0.5",
+    ]);
+    expect(options.sweep?.key).toBe("startingTokens");
+    expect(options.sweep?.values).toEqual([0, 1, 2]);
+    expect(options.compare).toEqual(["base", "substitution"]);
+    expect(options.weights?.all).toEqual({ focus: 1, greed: -1, urgency: 0.5 });
+  });
+
+  it("10/20/30以外の日数を拒否する", () => {
+    expect(() => parseArgs(["--days", "15"])).toThrow("--days must be one of");
+  });
+
+  it("generationSwingの上限を拒否する", () => {
+    expect(() => parseArgs(["--sweep", "generationSwing=0,0.3"])).toThrow(
+      "generationSwing must be between 0 and 0.2",
+    );
+  });
+
+  it("未知のシナリオを拒否する", () => {
+    expect(() => parseArgs(["--scenario", "unknown"])).toThrow("unknown scenario");
+  });
+});

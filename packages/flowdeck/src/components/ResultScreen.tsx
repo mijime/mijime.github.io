@@ -1,9 +1,15 @@
 import type { Dispatch } from "react";
-import { Flag, RefreshCw, RotateCcw, ScrollText, Star } from "lucide-react";
+import { RefreshCw, RotateCcw, ScrollText, Star } from "lucide-react";
 import type { Action, GameState, PlayerOutcome } from "../engine/types";
-import { CARD_LABEL, CARD_STYLE, CardTypeIcon, LANE_LABEL, PlayerIcon, traitSummary } from "./ui";
+import { buildResultSummary } from "../engine/analytics/result";
+import { archetypeById } from "../engine/analytics/playerTypes";
+import { benchmarkFor } from "../data/benchmark";
+import { CARD_LABEL, CARD_STYLE, CardTypeBadge, PlayerIcon, traitSummary } from "./ui";
 import { LOG_TONE, groupLogByDay } from "./LogPanel";
 import { newSeed } from "../store";
+import { SummaryPanel } from "./result/SummaryPanel";
+import { PlayerArchetypeBadge } from "./result/PlayerArchetypeBadge";
+import { ArchetypeGuide } from "./result/ArchetypeGuide";
 
 interface Props {
   state: GameState;
@@ -24,10 +30,22 @@ function workCards(player: PlayerOutcome): number {
   );
 }
 
+function ContributionStat({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-sm border border-(--border) bg-(--paper) px-1 py-1 text-center">
+      <span className="block text-[7.5px] text-(--mid)">{label}</span>
+      <span className="block text-[11px] font-semibold text-(--ink)">{value}</span>
+    </div>
+  );
+}
+
 export function ResultScreen({ state, dispatch }: Props) {
   const outcome = state.outcome;
   if (!outcome) return null;
 
+  const summary = buildResultSummary(state);
+  const playerCount = state.players?.length ?? outcome.perPlayer.length;
+  const benchmark = benchmarkFor(playerCount, state.totalDays, state.generationSwing ?? 0.1);
   const human = outcome.perPlayer.find((player) => player.isHuman);
   const aiPlayers = outcome.perPlayer.filter((player) => !player.isHuman);
   const humanWork = human ? workPoints(human) : 0;
@@ -41,13 +59,10 @@ export function ResultScreen({ state, dispatch }: Props) {
     : 0;
 
   return (
-    <div className="flow-root">
+    <div className="flow-root" data-theme="dark">
       <div className="mx-auto max-w-3xl px-4 py-6">
         <header className="text-center">
-          <p className="flex items-center justify-center gap-1 text-[9px] tracking-[0.3em] text-(--mid)">
-            <Flag size={10} /> BOARD REVIEW
-          </p>
-          <h1 className="serif mt-1 text-2xl font-semibold">{state.totalDays}日間の四半期終了</h1>
+          <h1 className="serif text-2xl font-semibold">{state.totalDays}日間のプロジェクト終了</h1>
           <p className="text-[10px] text-(--mid)">シード {state.seed}</p>
 
           <div className="mt-3 flex items-center justify-center gap-1 text-(--terra)">
@@ -65,9 +80,9 @@ export function ResultScreen({ state, dispatch }: Props) {
           </p>
           <p className="mt-1 text-[10px] text-(--mid)">
             {outcome.failed
-              ? `失敗: 負債が上限（${state.rules.debtLimit}）に達したか、スコアが星1未満です`
+              ? `失敗: 負債上限 ${state.rules.debtLimit} / 星1未満`
               : outcome.stars === 3
-                ? "最高評価！ チームの流れとデッキが噛み合いました。"
+                ? "最高評価"
                 : `次の星まであと ${
                     (outcome.stars === 0
                       ? state.rules.starOne
@@ -81,86 +96,43 @@ export function ResultScreen({ state, dispatch }: Props) {
         {human && (
           <section className="mt-4 rounded-sm border border-(--terra)/40 bg-(--terra)/5 p-3">
             <div className="flex flex-wrap items-baseline justify-between gap-1">
-              <h2 className="serif text-[13px] font-semibold">あなたの貢献</h2>
+              <div className="flex items-center gap-1.5">
+                <h2 className="serif text-[13px] font-semibold">あなたの貢献</h2>
+                <PlayerArchetypeBadge id={human.archetypeId} />
+              </div>
               <span className="text-[8px] text-(--mid)">
                 チーム内 {rank}位 / {outcome.perPlayer.length}人
               </span>
             </div>
-            <div className="mt-1.5 flex flex-wrap items-baseline gap-x-4 gap-y-1 text-[10px]">
-              <span>
-                作業 <b className="text-(--ink)">{humanWork}pt</b>
+            <div className="mt-2 grid grid-cols-4 gap-1">
+              <ContributionStat label="作業" value={`${humanWork}pt`} />
+              <ContributionStat label="プレイ" value={`${workCards(human)}枚`} />
+              <ContributionStat label="完了" value={`${human.completed}件`} />
+              <ContributionStat label="報酬" value={`${human.score}pt`} />
+            </div>
+            <div className="mt-2 flex items-center gap-2">
+              <span className="shrink-0 text-[8px] text-(--mid)">チームの作業の</span>
+              <span className="relative h-2 flex-1 overflow-hidden rounded-full bg-(--grid)">
+                <span
+                  className="absolute inset-y-0 left-0 rounded-full bg-(--terra)"
+                  style={{ width: `${Math.round(share * 100)}%` }}
+                />
               </span>
-              <span>
-                プレイ <b className="text-(--ink)">{workCards(human)}枚</b>
+              <span className="text-[10px] font-semibold text-(--ink)">
+                {Math.round(share * 100)}%
               </span>
-              <span>
-                獲得 <b className="text-(--ink)">{human.completed}件</b>
-              </span>
-              <span>
-                報酬 <b className="text-(--ink)">{human.score}pt</b>
+              <span className="text-[9px] text-(--mid)">
+                AI平均の <b className="text-(--ink)">{ratio.toFixed(2)}倍</b>
               </span>
             </div>
-            <p className="mt-1 text-[9px] text-(--mid)">
-              チームの作業の <b className="text-(--ink)">{Math.round(share * 100)}%</b>、AI平均の{" "}
-              <b className="text-(--ink)">{ratio.toFixed(2)}倍</b>
-            </p>
-            <p className="mt-0.5 text-[8px] text-(--mid)">
-              作業 = 置いたカードの実効レベル合計＋LLMトークン
-            </p>
           </section>
         )}
 
-        <div className="mt-5 grid gap-2">
+        <SummaryPanel summary={summary} benchmark={benchmark} />
+
+        <div className="mt-2 grid gap-2">
           <section className="rounded-sm border border-(--border) bg-(--paper) p-3">
-            <h2 className="serif text-[13px] font-semibold">企業価値の内訳</h2>
-            <ul className="mt-1.5 space-y-1 text-[10px]">
-              <li className="flex items-baseline justify-between gap-2">
-                <span className="text-(--mid)">企業価値</span>
-                <span className="font-medium text-emerald-700 dark:text-emerald-400">
-                  +{outcome.teamScore}
-                </span>
-              </li>
-              <li className="flex items-baseline justify-between gap-2">
-                <span className="text-(--mid)">技術的負債 {outcome.teamDebt} × 2</span>
-                <span className="font-medium text-red-600 dark:text-red-400">
-                  -{outcome.teamDebt * 2}
-                </span>
-              </li>
-              {outcome.scorePenalty > 0 && (
-                <li className="flex items-baseline justify-between gap-2">
-                  <span className="text-(--mid)">期限切れ罰則</span>
-                  <span className="font-medium text-red-600 dark:text-red-400">
-                    -{outcome.scorePenalty}
-                  </span>
-                </li>
-              )}
-              <li className="flex items-baseline justify-between gap-2 border-t border-(--border) pt-1 font-semibold">
-                <span>最終評価</span>
-                <span>{outcome.finalScore}</span>
-              </li>
-            </ul>
-            <div className="mt-2 grid grid-cols-2 gap-x-2 gap-y-0.5 text-[9px] text-(--mid)">
-              <span>完了 {outcome.completed}件</span>
-              <span>平均リードタイム {outcome.avgLeadTime.toFixed(1)}日</span>
-              <span>期限切れ {outcome.expired}件</span>
-              <span>テスト切れ {outcome.testExpired}件</span>
-              <span>平均WIP {outcome.avgWip.toFixed(1)}</span>
-              <span>
-                ボトルネック {outcome.bottleneck ? LANE_LABEL[outcome.bottleneck] : "なし"}
-              </span>
-            </div>
-            <p className="mt-2 text-[9px] text-(--mid)">
-              投資家評価の閾値: {state.rules.starOne} / {state.rules.starTwo} /{" "}
-              {state.rules.starThree}
-            </p>
-          </section>
-          <section className="rounded-sm border border-(--border) bg-(--paper) p-3">
-            <div className="flex flex-wrap items-baseline justify-between gap-1">
-              <h2 className="serif text-[13px] font-semibold">チームの成果</h2>
-              <span className="text-[8px] text-(--mid)">
-                プレイ枚数 / ポイントと、現在のデッキ構成
-              </span>
-            </div>
+            <h2 className="serif text-[13px] font-semibold">チームの成果</h2>
             <div className="mt-2 grid gap-1.5 sm:grid-cols-2">
               {outcome.perPlayer.map((player) => (
                 <article
@@ -176,21 +148,26 @@ export function ResultScreen({ state, dispatch }: Props) {
                       <PlayerIcon player={player} size={11} className="text-(--mid)" />
                       {player.name}
                     </span>
-                    <span className="rounded-sm border border-(--border) px-1 text-[7px] text-(--mid)">
-                      {player.isHuman ? "自由" : traitSummary(player.weights)}
+                    <span className="flex items-center gap-1">
+                      <PlayerArchetypeBadge id={player.archetypeId} />
+                      <span className="rounded-sm border border-(--border) px-1 text-[7px] text-(--mid)">
+                        {player.isHuman ? "自由" : traitSummary(player.weights)}
+                      </span>
                     </span>
                   </div>
 
                   <div className="mt-1 flex flex-wrap gap-x-3 gap-y-0.5 text-[8px] text-(--mid)">
                     <span>
-                      獲得 <b className="text-(--ink)">{player.completed}</b>
+                      完了 <b className="text-(--ink)">{player.completed}</b>
                     </span>
                     <span>
                       点 <b className="text-(--ink)">{player.score}</b>
                     </span>
                     <span>WIP {player.avgWip.toFixed(1)}</span>
-                    <span>弱い札 {player.lowCards}</span>
                   </div>
+                  <p className="mt-0.5 text-[7px] text-(--mid)">
+                    {archetypeById(player.archetypeId).description}
+                  </p>
 
                   <div className="mt-1 grid grid-cols-3 gap-1">
                     {(["design", "dev", "test"] as const).map((type) => (
@@ -200,7 +177,7 @@ export function ResultScreen({ state, dispatch }: Props) {
                         title={`${player.contributed[type].cards}枚 / ${player.contributed[type].points}pt`}
                       >
                         <span className="flex items-center gap-0.5 text-[7px] opacity-70">
-                          <CardTypeIcon type={type} size={7} /> {CARD_LABEL[type]}
+                          <CardTypeBadge type={type} size={7} /> {CARD_LABEL[type]}
                         </span>
                         <span className="block text-[10px] font-medium">
                           {player.contributed[type].cards}枚
@@ -222,14 +199,16 @@ export function ResultScreen({ state, dispatch }: Props) {
                 </article>
               ))}
             </div>
-            <p className="mt-1 text-[8px] text-(--mid)">
-              プレイはゲーム中に置いたカード、デッキは手札＋山札＋捨て札。弱い札はlv1以下の報酬カード。
-            </p>
-          </section>{" "}
+          </section>
         </div>
 
+        <ArchetypeGuide />
+
         <section className="mt-2 rounded-sm border border-(--border) bg-(--paper) p-3">
-          <h2 className="serif text-[13px] font-semibold">ボードミーティング</h2>
+          <div className="flex items-baseline justify-between gap-2">
+            <h2 className="serif text-[13px] font-semibold">ボードミーティング</h2>
+            <span className="text-[8px] text-(--mid)">星に近づく順</span>
+          </div>
           <ul className="mt-1 space-y-0.5 text-[10px] text-(--mid)">
             {outcome.tips.map((tip) => (
               <li key={tip}>・{tip}</li>
@@ -270,10 +249,7 @@ export function ResultScreen({ state, dispatch }: Props) {
           </div>
         </section>
 
-        <footer className="mt-4 flex flex-wrap items-center justify-between gap-2">
-          <span className="text-[9px] text-(--mid)">
-            同じシードなら同じ展開になります（{state.seed}）
-          </span>
+        <footer className="mt-4 flex flex-wrap items-center justify-end gap-2">
           <div className="flex flex-wrap gap-2">
             <button
               type="button"

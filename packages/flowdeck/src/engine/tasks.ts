@@ -1,9 +1,12 @@
 import { TASK_BY_ID } from "../data/tasks";
-import { UNCERTAINTY_BY_ID } from "../data/uncertainty";
-import { addCardToDiscard, discardHand } from "./hand";
+import { RISK_BY_ID } from "../data/risks";
+import { addDebt } from "./debt";
 import { pushLog } from "./log";
 import { playerById, recomputeTeamStats, taskContributions, taskSum } from "./metrics";
-import type { GameState, PlayerState, TaskCard } from "./types";
+import { BASE_RULES, type RuleSet } from "./rules";
+import { applyPenalty } from "./rules/penalties";
+import { resolveRisk } from "./rules/risks";
+import type { GameState, TaskCard } from "./types";
 import { shuffle } from "./rng";
 
 export function createTask(state: GameState, defId: string): TaskCard {
@@ -46,12 +49,6 @@ export function refillOpen(state: GameState): void {
   }
 }
 
-export function addDebt(state: GameState, player: PlayerState, amount: number): void {
-  addCardToDiscard(state, player, "debt", 0, amount);
-  recomputeTeamStats(state);
-  pushLog(state, `${player.name} に負債 +${amount}`, "bad");
-}
-
 export function returnAttachedCards(state: GameState, task: TaskCard): void {
   for (const attached of task.attached) {
     const owner = state.players.find((player) => player.id === attached.ownerId);
@@ -60,19 +57,32 @@ export function returnAttachedCards(state: GameState, task: TaskCard): void {
   task.attached = [];
 }
 
-function drawUncertaintyDef(state: GameState): string | null {
-  if (state.uncertaintyDeck.length === 0) {
-    if (state.uncertaintyDiscard.length === 0) return null;
-    state.uncertaintyDeck = shuffle(state, state.uncertaintyDiscard);
-    state.uncertaintyDiscard = [];
+function drawRiskDef(state: GameState): string | null {
+  if (state.riskDeck.length === 0) {
+    if (state.riskDiscard.length === 0) return null;
+    state.riskDeck = shuffle(state, state.riskDiscard);
+    state.riskDiscard = [];
   }
-  const defId = state.uncertaintyDeck.shift();
+  const defId = state.riskDeck.shift();
   if (!defId) return null;
-  state.uncertaintyDiscard.push(defId);
+  state.riskDiscard.push(defId);
   return defId;
 }
 
-function acquireTask(state: GameState, task: TaskCard): void {
+function recordRisk(
+  state: GameState,
+  id: string,
+  outcome: { absorbed?: number; unmet?: number; debt?: number },
+): void {
+  state.riskStats ??= {};
+  const stat = (state.riskStats[id] ??= { drawn: 0, absorbed: 0, unmet: 0, debt: 0 });
+  stat.drawn += 1;
+  stat.absorbed += outcome.absorbed ?? 0;
+  stat.unmet += outcome.unmet ?? 0;
+  stat.debt += outcome.debt ?? 0;
+}
+
+function acquireTask(state: GameState, task: TaskCard, rules: RuleSet): void {
   if (!task.ownerId) return;
   const puller = playerById(state, task.ownerId);
   const contributions = taskContributions(state, task);
@@ -87,44 +97,39 @@ function acquireTask(state: GameState, task: TaskCard): void {
   const requirementTotal = base.design + base.dev + base.test;
   let draws = 0;
   if (requirementTotal > 0) {
-    if (2 * pieces >= requirementTotal) draws = 3;
-    else if (8 * pieces >= 3 * requirementTotal) draws = 2;
-    else if (3 * pieces >= requirementTotal) draws = 1;
+    const threshold = rules.balance.riskDraws.find(
+      (entry) => pieces * entry.denominator >= requirementTotal * entry.numerator,
+    );
+    draws = threshold?.draws ?? 0;
   }
   const added = { design: 0, dev: 0, test: 0 };
-  const requirements: { phase: "design" | "dev" | "test"; amount: number }[] = [];
-  const uncertaintyReports: { title: string; description: string }[] = [];
-  let extraDebt = 0;
-  let scoreBonus = 0;
+  const requirements: { id: string; phase: "design" | "dev" | "test"; amount: number }[] = [];
+  const wildcardCards: { id: string; amount: number }[] = [];
+  const riskReports: { title: string; description: string }[] = [];
+  let riskTokens = 0;
 
   for (let i = 0; i < draws; i += 1) {
-    const defId = drawUncertaintyDef(state);
+    const defId = drawRiskDef(state);
     if (!defId) break;
-    const def = UNCERTAINTY_BY_ID[defId];
+    const def = RISK_BY_ID[defId];
     if (!def) continue;
-    uncertaintyReports.push({ title: def.title, description: def.description });
-    switch (def.effect.kind) {
-      case "require":
-        added[def.effect.phase] += def.effect.amount;
-        requirements.push({ phase: def.effect.phase, amount: def.effect.amount });
-        pushLog(state, `不確実: ${def.title}`, "bad");
-        break;
-      case "debt":
-        extraDebt += def.effect.amount;
-        pushLog(state, `不確実: ${def.title}`, "bad");
-        break;
-      case "score":
-        scoreBonus += def.effect.amount;
-        pushLog(state, `不確実: ${def.title}`, "good");
-        break;
-      case "nothing":
-        pushLog(state, `不確実: ${def.title}`, "info");
-        break;
+    riskReports.push({ title: def.title, description: def.description });
+    const resolution = resolveRisk(rules.risks, def.effect);
+    if (resolution.requirement) {
+      const { phase, amount } = resolution.requirement;
+      added[phase] += amount;
+      requirements.push({ id: def.id, phase, amount });
+    } else if (resolution.wildcard) {
+      wildcardCards.push({ id: def.id, amount: resolution.wildcard });
+    } else {
+      if (resolution.token) riskTokens += resolution.token;
+      recordRisk(state, def.id, { absorbed: 1 });
     }
+    pushLog(state, `リスク: ${def.title}`, resolution.tone);
   }
 
-  // 要求は合算せず、不確実カード1枚ごとに作業で賄えたか判定する。
-  // ベース要件を超えた分（余剰作業）だけが不確実を吸収できる。
+  // 要求は合算せず、リスクカード1枚ごとに作業で賄えたか判定する。
+  // ベース要件を超えた分（余剰作業）だけがリスクを吸収できる。
   const surplus = {
     design: Math.max(0, designSum - base.design),
     dev: Math.max(0, devSum - base.dev),
@@ -134,17 +139,41 @@ function acquireTask(state: GameState, task: TaskCard): void {
   for (const requirement of requirements) {
     if (surplus[requirement.phase] >= requirement.amount) {
       surplus[requirement.phase] -= requirement.amount;
+      recordRisk(state, requirement.id, { absorbed: 1 });
     } else {
       unmet += 1;
+      recordRisk(state, requirement.id, { unmet: 1, debt: 1 });
     }
   }
-  if (unmet > 0) {
-    extraDebt += unmet;
-    pushLog(state, `要求未達: ${task.title}（不確実 ${unmet}枚を賄えず / 負債 +${unmet}）`, "bad");
+  // 仕様変更は任意フェーズの余剰で吸収する。大きい余剰から使う。
+  for (const card of wildcardCards) {
+    let unmetUnits = 0;
+    for (let i = 0; i < card.amount; i += 1) {
+      const phase = (["test", "dev", "design"] as const).reduce(
+        (best, candidate) => (surplus[candidate] > surplus[best] ? candidate : best),
+        "test",
+      );
+      if (surplus[phase] > 0) {
+        surplus[phase] -= 1;
+      } else {
+        unmetUnits += 1;
+      }
+    }
+    unmet += unmetUnits;
+    recordRisk(state, card.id, unmetUnits === 0 ? { absorbed: 1 } : { unmet: 1, debt: unmetUnits });
   }
-  if (extraDebt > 0) addDebt(state, recipient, extraDebt);
 
-  // モーダルは人間が獲得者になった時だけ対象にする。AI の獲得で上書きしない。
+  if (riskTokens > 0) {
+    recipient.tokens.mi = (recipient.tokens.mi ?? 0) + riskTokens;
+    pushLog(state, `${recipient.name}: 想定外の好機でLLMトークン +${riskTokens}`, "good");
+  }
+
+  if (unmet > 0) {
+    addDebt(state, recipient, unmet, "risk");
+    pushLog(state, `リスク未吸収: ${task.title}（負債 +${unmet}）`, "bad");
+  }
+
+  // モーダルは人間が受取者になった時だけ対象にする。AI の完了で上書きしない。
   if (recipient.isHuman) {
     state.lastAcquisition = {
       id: task.id,
@@ -155,12 +184,12 @@ function acquireTask(state: GameState, task: TaskCard): void {
       recipientId: recipient.id,
       recipientName: recipient.name,
       contributions,
-      score: task.score + scoreBonus,
+      score: task.score,
       reward: { ...task.reward },
-      uncertainty: uncertaintyReports,
+      risks: riskReports,
       added: { ...added },
       unmet: unmet > 0,
-      debt: extraDebt,
+      debt: unmet,
       teamDebt: state.teamDebt,
     };
   }
@@ -169,12 +198,8 @@ function acquireTask(state: GameState, task: TaskCard): void {
   task.acquiredDay = state.day;
   state.taskDiscard.push(task.defId);
   recipient.completed += 1;
-  const contributionText = contributions.length > 0 ? ` / 獲得者: ${recipient.name}` : "";
-  pushLog(
-    state,
-    `獲得: ${task.title}（チーム +${task.score + scoreBonus}${contributionText}）`,
-    "good",
-  );
+  const contributionText = contributions.length > 0 ? ` / 受取者: ${recipient.name}` : "";
+  pushLog(state, `完了: ${task.title}（企業価値 +${task.score}${contributionText}）`, "good");
 
   recipient.discard.push({
     id: state.nextCardId++,
@@ -182,7 +207,7 @@ function acquireTask(state: GameState, task: TaskCard): void {
     level: task.reward.level,
     title: task.title,
     effect: task.reward.effect,
-    score: task.score + scoreBonus,
+    score: task.score,
   });
   recomputeTeamStats(state);
   pushLog(
@@ -195,7 +220,7 @@ function acquireTask(state: GameState, task: TaskCard): void {
 }
 
 /** 要件を満たしたタスクを次のレーンへ進める */
-export function advanceTasks(state: GameState): void {
+export function advanceTasks(state: GameState, rules: RuleSet = BASE_RULES): void {
   let changed = true;
   let guard = 0;
   while (changed && guard < 50) {
@@ -215,86 +240,28 @@ export function advanceTasks(state: GameState): void {
           pushLog(state, `Review へ: ${task.title}`, "info");
           changed = true;
         } else {
-          acquireTask(state, task);
+          acquireTask(state, task, rules);
           changed = true;
         }
       } else if (task.lane === "test") {
         if (taskSum(task, "test") < task.requirements.test) continue;
-        acquireTask(state, task);
+        acquireTask(state, task, rules);
         changed = true;
       }
     }
   }
 }
 
-export function activeWip(state: GameState): number {
-  return state.tasks.filter(
-    (task) => task.lane === "inbox" || task.lane === "wip" || task.lane === "test",
-  ).length;
-}
-
 export function canPull(state: GameState): boolean {
   return state.tasks.some((task) => task.lane === "open");
 }
 
-function penaltyTargets(state: GameState, task: TaskCard, target: "owner" | "all"): PlayerState[] {
-  if (target === "all") return state.players;
-  const owner = task.ownerId
-    ? state.players.find((player) => player.id === task.ownerId)
-    : undefined;
-  return owner ? [owner] : state.players;
+function applyExpiryPenalty(state: GameState, task: TaskCard, rules: RuleSet): void {
+  if (!task.penalty) return;
+  applyPenalty(rules.penalties, { state, task }, task.penalty);
 }
 
-function applyExpiryPenalty(state: GameState, task: TaskCard): void {
-  const penalty = task.penalty;
-  if (!penalty) return;
-
-  if (penalty.kind === "allPlayersDebt" || penalty.kind === "ownerDebt") {
-    const targets =
-      penalty.kind === "allPlayersDebt" ? state.players : penaltyTargets(state, task, "owner");
-    pushLog(
-      state,
-      `罰則: ${task.title} → ${penalty.kind === "allPlayersDebt" ? "全員" : "担当者"}に負債 ${penalty.amount}枚`,
-      "bad",
-    );
-    for (const player of targets) addDebt(state, player, penalty.amount);
-    return;
-  }
-
-  if (penalty.kind === "teamScore") {
-    state.scorePenalty += penalty.amount;
-    pushLog(state, `罰則: ${task.title} → チームスコア -${penalty.amount}`, "bad");
-    return;
-  }
-
-  if (penalty.kind === "discardHand") {
-    const targets = penaltyTargets(state, task, penalty.target);
-    for (const player of targets) {
-      const discarded = discardHand(player);
-      pushLog(state, `罰則: ${task.title} → ${player.name} の手札 ${discarded}枚を捨て札へ`, "bad");
-    }
-    return;
-  }
-
-  if (penalty.kind === "loseAction") {
-    const targets = penaltyTargets(state, task, penalty.target);
-    for (const player of targets) player.actionPenalty += penalty.amount;
-    pushLog(
-      state,
-      `罰則: ${task.title} → ${penalty.target === "all" ? "全員" : "担当者"}の次回アクション -${penalty.amount}`,
-      "bad",
-    );
-    return;
-  }
-
-  const active = state.tasks.filter(
-    (entry) => entry.lane === "inbox" || entry.lane === "wip" || entry.lane === "test",
-  );
-  for (const entry of active) entry.tokens += penalty.amount;
-  pushLog(state, `罰則: ${task.title} → 進行中タスクに納期トークン +${penalty.amount}`, "bad");
-}
-
-export function expireTasks(state: GameState): void {
+export function expireTasks(state: GameState, rules: RuleSet = BASE_RULES): void {
   for (const task of state.tasks) {
     if (task.lane === "done" || task.lane === "trash") continue;
     task.tokens += 1;
@@ -305,15 +272,15 @@ export function expireTasks(state: GameState): void {
     task.lane = "trash";
     state.taskDiscard.push(task.defId);
 
-    if (task.penalty) applyExpiryPenalty(state, task);
+    if (task.penalty) applyExpiryPenalty(state, task, rules);
 
     if (previous === "open") {
-      pushLog(state, `納期切れ（Backlog）: ${task.title}`, "bad");
+      pushLog(state, `期限切れ（Backlog）: ${task.title}`, "bad");
       continue;
     }
 
     returnAttachedCards(state, task);
-    pushLog(state, `納期切れ: ${task.title}（カードは捨て札へ）`, "bad");
+    pushLog(state, `期限切れ: ${task.title}（カードは捨て札へ）`, "bad");
   }
   refillOpen(state);
 }

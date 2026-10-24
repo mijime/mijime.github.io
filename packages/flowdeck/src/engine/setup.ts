@@ -1,28 +1,36 @@
 import { TEAMMATES } from "../data/teammates";
 import { INITIAL_DECK_SPECS, makeCard } from "../data/cards";
 import { generateTaskDefs } from "../data/generateTasks";
-import { UNCERTAINTY_DEFS } from "../data/uncertainty";
+import { RISK_DEFS } from "../data/risks";
+import { emptyGameAnalytics, emptyPlayerAnalytics } from "./analytics/state";
 import { startRound } from "./core";
 import { makeSnapshot } from "./metrics";
 import { pushLog } from "./log";
 import { randInt, randomSeed, shuffle } from "./rng";
 import { refillOpen } from "./tasks";
+import { BASE_RULES, type RuleSet } from "./rules";
+import { normalizeGenerationSwing } from "./rules/generation";
 import type { GameState, PersonalityWeights, PlayerState } from "./types";
-import { ACTIONS_PER_TURN, HUMAN_ID, TOTAL_DAYS, teamRulesFor } from "./types";
+import { TOTAL_DAYS } from "./rules/balance";
+import { HUMAN_ID } from "./types";
 
 export function createGame(
   seed: number = randomSeed(),
   totalDays = TOTAL_DAYS,
   aiCount = 4,
+  ruleSet: RuleSet = BASE_RULES,
+  generationSwing?: number,
 ): GameState {
   const safeCount = Math.max(3, Math.min(5, aiCount));
-  const rules = teamRulesFor(safeCount + 1, totalDays);
+  const teamRules = ruleSet.balance.teamRules(safeCount + 1, totalDays);
+  const swing = normalizeGenerationSwing(generationSwing ?? ruleSet.generation.swing);
   const state: GameState = {
-    version: 18,
+    version: 27,
     seed,
     rngState: seed >>> 0,
     day: 1,
     totalDays,
+    generationSwing: swing,
     phase: "human",
     activePlayerIndex: 0,
     humanId: HUMAN_ID,
@@ -31,8 +39,10 @@ export function createGame(
     taskDefs: [],
     taskDeck: [],
     taskDiscard: [],
-    uncertaintyDeck: [],
-    uncertaintyDiscard: [],
+    riskDeck: [],
+    riskDiscard: [],
+    riskStats: {},
+    analytics: emptyGameAnalytics(),
     teamScore: 0,
     teamDebt: 0,
     scorePenalty: 0,
@@ -42,7 +52,7 @@ export function createGame(
     metrics: [],
     outcome: null,
     lastAcquisition: null,
-    rules,
+    rules: teamRules,
   };
 
   const characters = shuffle(state, TEAMMATES).slice(0, safeCount);
@@ -83,28 +93,30 @@ export function createGame(
       deck,
       hand: [],
       discard: [],
-      actionsLeft: ACTIONS_PER_TURN,
-      tokens: {},
+      actionsLeft: ruleSet.balance.actionsPerTurn,
+      tokens: ruleSet.balance.startingTokens > 0 ? { mi: ruleSet.balance.startingTokens } : {},
+      shields: 0,
       actionPenalty: 0,
       completed: 0,
       score: 0,
     };
     state.players.push(player);
+    state.analytics.players[player.id] = emptyPlayerAnalytics();
   }
   state.nextCardId = cardId;
 
-  state.taskDefs = generateTaskDefs(state);
+  state.taskDefs = generateTaskDefs(state, { ...ruleSet.generation, swing });
   state.taskDeck = shuffle(
     state,
     state.taskDefs.map((task) => task.id),
   );
-  state.uncertaintyDeck = shuffle(
+  state.riskDeck = shuffle(
     state,
-    UNCERTAINTY_DEFS.map((card) => card.id),
+    RISK_DEFS.map((card) => card.id),
   );
 
   refillOpen(state);
-  startRound(state);
+  startRound(state, ruleSet);
   state.metrics.push(makeSnapshot(state));
   pushLog(state, `プロジェクト開始: ${totalDays}日間 / ${specs.length}人協力`, "good");
 

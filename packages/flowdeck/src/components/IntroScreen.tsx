@@ -1,223 +1,198 @@
 import { useState } from "react";
 import {
-  ArrowLeft,
   ArrowRight,
   Building2,
-  GitBranch,
+  Gauge,
+  Gem,
   Play,
   Sparkles,
   Star,
+  Timer,
+  TrendingDown,
   Users,
+  X,
 } from "lucide-react";
+import { FlowDiagram } from "./FlowDiagram";
 
 interface Props {
-  onStart?: (days: number, aiCount: number) => void;
+  onStart?: (days: number, aiCount: number, generationSwing: number) => void;
   onClose?: () => void;
   review?: boolean;
 }
 
-const STEPS = [
-  {
-    eyebrow: "STORY",
-    title: "LLMとエージェントの四半期",
-    icon: Building2,
-    body: (
-      <ul className="list-disc space-y-1.5 pl-4">
-        <li>舞台は、LLMとエージェントを売るSaaS企業。</li>
-        <li>あなたは四半期のチームを任された。</li>
-        <li>カンバンを流して、企業価値を伸ばそう。</li>
-      </ul>
-    ),
-  },
-  {
-    eyebrow: "GOAL",
-    title: "企業価値を最大化",
-    icon: Star,
-    body: (
-      <ul className="list-disc space-y-1.5 pl-4">
-        <li>
-          <strong>企業価値</strong> = デッキのタスク報酬カード。
-        </li>
-        <li>
-          <strong>技術的負債</strong>は1枚 -2点。上限で失敗。
-        </li>
-        <li>最終スコアで星が決まる。3つ星を目指そう。</li>
-      </ul>
-    ),
-  },
-  {
-    eyebrow: "FLOW",
-    title: "カンバンを流す",
-    icon: GitBranch,
-    body: (
-      <ul className="list-disc space-y-1.5 pl-4">
-        <li className="font-medium text-(--ink)">Backlog → 設計 → 開発 → テスト → Done</li>
-        <li>手札のカードをタスクに置く。1手ずつ順番に。</li>
-        <li>全員が終わったら日末。納期が1つ進む。</li>
-      </ul>
-    ),
-  },
-  {
-    eyebrow: "TEAM",
-    title: "仲間はランダム",
-    icon: Users,
-    body: (
-      <ul className="list-disc space-y-1.5 pl-4">
-        <li>仲間は3〜5人。名前と性格はランダム。</li>
-        <li>
-          <strong>仕上げ↔着手 / 得点↔整理 / 納期↔長期</strong>の3軸。
-        </li>
-        <li>チームの癖を読んで動こう。</li>
-      </ul>
-    ),
-  },
+const DAY_OPTIONS = [10, 20, 30] as const;
+const AI_OPTIONS = [3, 4, 5] as const;
+const SWING_OPTIONS = [
+  { value: 0, label: "安定", hint: "得損なし" },
+  { value: 0.1, label: "標準", hint: "±10%" },
+  { value: 0.2, label: "波乱", hint: "±20%" },
 ] as const;
 
+function ChoiceRow<T extends number>({
+  label,
+  options,
+  value,
+  suffix,
+  onChange,
+}: {
+  label: string;
+  options: readonly T[];
+  value: number;
+  suffix: string;
+  onChange: (value: T) => void;
+}) {
+  return (
+    <section>
+      <p className="mb-1 text-[9px] text-(--mid)">{label}</p>
+      <div className="flex gap-1.5">
+        {options.map((option) => (
+          <button
+            key={option}
+            type="button"
+            onClick={() => onChange(option)}
+            className={`rounded-sm border px-3 py-1.5 text-[11px] ${
+              value === option
+                ? "border-(--terra) bg-(--terra) text-white"
+                : "border-(--border) bg-(--paper) text-(--mid) hover:border-(--terra)/50"
+            }`}
+          >
+            {option}
+            {suffix}
+          </button>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 export function IntroScreen({ onStart, onClose, review = false }: Props) {
-  const [step, setStep] = useState(0);
   const [days, setDays] = useState(10);
   const [aiCount, setAiCount] = useState(4);
-  const lastStep = review ? STEPS.length - 1 : STEPS.length;
-  const last = step === lastStep;
-  const current = step < STEPS.length ? STEPS[step] : null;
+  const [swing, setSwing] = useState(0.1);
 
   return (
     <div className="fixed inset-0 z-[60] flex items-end justify-center overflow-y-auto bg-black/55 p-3 sm:items-center">
       <div className="flow-slide w-full max-w-xl rounded-sm border border-(--border) bg-(--paper) shadow-2xl">
         <div className="flex items-center justify-between border-b border-(--border) bg-(--toolbar-bg) px-4 py-2.5">
-          <p className="flex items-center gap-1 text-[9px] tracking-[0.25em] text-(--mid)">
-            <Sparkles size={11} className="text-(--terra)" /> FLOWDECK / ONBOARDING
-          </p>
-          {!review && (
+          <h1 className="serif flex items-center gap-1.5 text-base font-semibold">
+            <Sparkles size={14} className="text-(--terra)" /> LLMとエージェントのプロジェクト
+          </h1>
+          {review && (
             <button
               type="button"
-              onClick={() => setStep(STEPS.length)}
-              className="text-[9px] text-(--mid) underline-offset-2 hover:text-(--terra) hover:underline"
+              onClick={onClose}
+              aria-label="閉じる"
+              className="rounded-sm border border-(--border) p-1 text-(--mid) hover:border-(--terra) hover:text-(--terra)"
             >
-              スキップ
+              <X size={14} />
             </button>
           )}
         </div>
 
-        <div className="px-5 py-5">
-          {current ? (
-            <>
-              <p className="text-[9px] tracking-[0.25em] text-(--terra)">{current.eyebrow}</p>
-              <h1 className="serif mt-1 flex items-center gap-2 text-xl font-semibold">
-                <current.icon size={18} className="text-(--terra)" />
-                {current.title}
-              </h1>
-              <div className="mt-3 space-y-2 text-[11px] leading-relaxed text-(--mid)">
-                {current.body}
+        <div className="space-y-3 px-4 py-4">
+          <p className="text-[11px] leading-relaxed text-(--mid)">
+            LLMとエージェントを売るSaaS企業のプロジェクト。カンバンを流して企業価値を伸ばす。
+          </p>
+
+          <FlowDiagram />
+
+          <div className="grid grid-cols-3 gap-1">
+            <div className="rounded-sm border border-(--border) bg-(--paper) px-2 py-1.5">
+              <span className="flex items-center gap-1 text-[8px] text-(--mid)">
+                <Building2 size={9} /> 企業価値
+              </span>
+              <span className="block text-[10px] font-medium">デッキの報酬</span>
+            </div>
+            <div className="rounded-sm border border-(--border) bg-(--paper) px-2 py-1.5">
+              <span className="flex items-center gap-1 text-[8px] text-(--mid)">
+                <TrendingDown size={9} /> 技術的負債
+              </span>
+              <span className="block text-[10px] font-medium">1枚 -2</span>
+            </div>
+            <div className="rounded-sm border border-(--border) bg-(--paper) px-2 py-1.5">
+              <span className="flex items-center gap-1 text-[8px] text-(--mid)">
+                <Star size={9} /> 評価
+              </span>
+              <span className="block text-[10px] font-medium">星3まで</span>
+            </div>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 rounded-sm border border-(--border) bg-(--grid)/40 px-2.5 py-1.5 text-[9px] text-(--mid)">
+            <span className="inline-flex items-center gap-1 text-(--ink)">
+              <Users size={10} /> あなた＋メンバー3〜5人
+            </span>
+            <span className="inline-flex items-center gap-1" title="仕上げ ↔ 着手">
+              <Gauge size={9} /> 仕上げ
+            </span>
+            <span className="inline-flex items-center gap-1" title="報酬 ↔ 整理">
+              <Gem size={9} /> 報酬
+            </span>
+            <span className="inline-flex items-center gap-1" title="納期 ↔ 長期">
+              <Timer size={9} /> 納期
+            </span>
+          </div>
+
+          {!review && (
+            <div className="grid gap-3 sm:grid-cols-2">
+              <ChoiceRow
+                label="日数"
+                options={DAY_OPTIONS}
+                value={days}
+                suffix="日"
+                onChange={setDays}
+              />
+              <ChoiceRow
+                label="メンバー人数"
+                options={AI_OPTIONS}
+                value={aiCount}
+                suffix="人"
+                onChange={setAiCount}
+              />
+            </div>
+          )}
+
+          {!review && (
+            <section>
+              <p className="mb-1 text-[9px] text-(--mid)">タスクの得損</p>
+              <div className="grid grid-cols-3 gap-1.5">
+                {SWING_OPTIONS.map((option) => (
+                  <button
+                    key={option.value}
+                    type="button"
+                    onClick={() => setSwing(option.value)}
+                    className={`rounded-sm border px-2 py-1.5 text-center ${
+                      swing === option.value
+                        ? "border-(--terra) bg-(--terra) text-white"
+                        : "border-(--border) bg-(--paper) text-(--mid) hover:border-(--terra)/50"
+                    }`}
+                  >
+                    <span className="block text-[11px]">{option.label}</span>
+                    <span className="block text-[7px] opacity-70">{option.hint}</span>
+                  </button>
+                ))}
               </div>
-            </>
-          ) : (
-            <>
-              <p className="text-[9px] tracking-[0.25em] text-(--terra)">START</p>
-              <h1 className="serif mt-1 flex items-center gap-2 text-xl font-semibold">
-                <Play size={18} className="text-(--terra)" /> 四半期を始める
-              </h1>
-
-              <div className="mt-4 space-y-3 text-[11px]">
-                <section>
-                  <p className="mb-1.5 text-[9px] text-(--mid)">日数</p>
-                  <div className="flex gap-1.5">
-                    {[10, 20, 30].map((option) => (
-                      <button
-                        key={option}
-                        type="button"
-                        onClick={() => setDays(option)}
-                        className={`rounded-sm border px-3 py-1.5 text-[11px] ${
-                          days === option
-                            ? "border-(--terra) bg-(--terra) text-white"
-                            : "border-(--border) bg-(--paper) text-(--mid) hover:border-(--terra)/50"
-                        }`}
-                      >
-                        {option}日
-                      </button>
-                    ))}
-                  </div>
-                </section>
-
-                <section>
-                  <p className="mb-1.5 text-[9px] text-(--mid)">チーム人数</p>
-                  <div className="flex gap-1.5">
-                    {[3, 4, 5].map((option) => (
-                      <button
-                        key={option}
-                        type="button"
-                        onClick={() => setAiCount(option)}
-                        className={`rounded-sm border px-3 py-1.5 text-[11px] ${
-                          aiCount === option
-                            ? "border-(--terra) bg-(--terra) text-white"
-                            : "border-(--border) bg-(--paper) text-(--mid) hover:border-(--terra)/50"
-                        }`}
-                      >
-                        {option}人
-                      </button>
-                    ))}
-                  </div>
-                  <p className="mt-1 text-[9px] text-(--mid)">合計 {aiCount + 1}人</p>
-                </section>
-
-                <p className="rounded-sm border border-(--border) bg-(--grid)/40 px-3 py-2 text-[9px] text-(--mid)">
-                  名前・性格・タスク名はランダム。同じシードなら同じ展開になります。
-                </p>
-              </div>
-            </>
+            </section>
           )}
         </div>
 
-        <div className="flex items-center justify-between border-t border-(--border) px-4 py-3">
-          <div className="flex items-center gap-1">
-            {Array.from({ length: review ? STEPS.length : STEPS.length + 1 }, (_, index) => (
-              <span
-                key={index}
-                className={`h-1.5 w-1.5 rounded-full ${
-                  index === step ? "bg-(--terra)" : "bg-(--border)"
-                }`}
-              />
-            ))}
-          </div>
-
-          <div className="flex items-center gap-1.5">
-            {step > 0 && (
-              <button
-                type="button"
-                onClick={() => setStep((value) => Math.max(0, value - 1))}
-                className="inline-flex items-center gap-1 rounded-sm border border-(--border) px-2.5 py-1.5 text-[10px] text-(--mid) hover:border-(--terra) hover:text-(--terra)"
-              >
-                <ArrowLeft size={11} /> 戻る
-              </button>
-            )}
-            {last ? (
-              review ? (
-                <button
-                  type="button"
-                  onClick={onClose}
-                  className="inline-flex items-center gap-1 rounded-sm bg-(--terra) px-4 py-1.5 text-[11px] font-medium text-white transition-opacity hover:opacity-90"
-                >
-                  閉じる <ArrowRight size={12} />
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => onStart?.(days, aiCount)}
-                  className="inline-flex items-center gap-1 rounded-sm bg-(--terra) px-4 py-1.5 text-[11px] font-medium text-white transition-opacity hover:opacity-90"
-                >
-                  <Play size={12} /> 四半期を開始
-                </button>
-              )
-            ) : (
-              <button
-                type="button"
-                onClick={() => setStep((value) => value + 1)}
-                className="inline-flex items-center gap-1 rounded-sm bg-(--terra) px-3 py-1.5 text-[11px] font-medium text-white transition-opacity hover:opacity-90"
-              >
-                次へ <ArrowRight size={12} />
-              </button>
-            )}
-          </div>
+        <div className="flex items-center justify-end gap-1.5 border-t border-(--border) px-4 py-3">
+          {review ? (
+            <button
+              type="button"
+              onClick={onClose}
+              className="inline-flex items-center gap-1 rounded-sm bg-(--terra) px-4 py-1.5 text-[11px] font-medium text-white transition-opacity hover:opacity-90"
+            >
+              閉じる <ArrowRight size={12} />
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={() => onStart?.(days, aiCount, swing)}
+              className="inline-flex items-center gap-1 rounded-sm bg-(--terra) px-4 py-1.5 text-[11px] font-medium text-white transition-opacity hover:opacity-90"
+            >
+              <Play size={12} /> プロジェクトを開始
+            </button>
+          )}
         </div>
       </div>
     </div>

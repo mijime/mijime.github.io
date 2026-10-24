@@ -7,15 +7,11 @@ describe("IntroScreen", () => {
     const onStart = vi.fn();
     render(<IntroScreen onStart={onStart} />);
 
-    expect(screen.getByText("LLMとエージェントの四半期")).toBeInTheDocument();
-    for (let index = 0; index < 4; index += 1) {
-      fireEvent.click(screen.getByRole("button", { name: /次へ/ }));
-    }
-    expect(screen.getByText("四半期を始める")).toBeInTheDocument();
-
+    expect(screen.getByText("LLMとエージェントのプロジェクト")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "20日" }));
     fireEvent.click(screen.getByRole("button", { name: "5人" }));
-    fireEvent.click(screen.getByRole("button", { name: /四半期を開始/ }));
-    expect(onStart).toHaveBeenCalledWith(20, 5);
+    fireEvent.click(screen.getByRole("button", { name: /波乱/ }));
+    fireEvent.click(screen.getByRole("button", { name: /プロジェクトを開始/ }));
+    expect(onStart).toHaveBeenCalledWith(20, 5, 0.2);
   });
 });
