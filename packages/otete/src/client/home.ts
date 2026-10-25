@@ -1,9 +1,9 @@
 import { openAdmin } from "./admin";
-import { boing, isMuted, marimba, plink, setMuted, soundIcon, speak } from "./audio";
+import { isMuted, marimba, plink, setMuted, soundIcon } from "./audio";
 import { deleteDrawing, listDrawings, objectUrlsFor } from "./drawings";
 import { dropOverlay, makeOverlay } from "./overlay";
 import { themeIcon, toggleTheme } from "./theme";
-import { HOME_PILL, bindHome, createGuideBanner, hint, holdTap, tap } from "./ui";
+import { HOME_PILL, bindHome, hint, holdTap, tap } from "./ui";
 
 export type Nav = {
   home: () => void;
@@ -19,21 +19,11 @@ export type Nav = {
   gallery: () => void;
 };
 
-let homeFriendIdx = 0;
-
-const CHEERS = [
-  "いっぱい あそぼうね！",
-  "どれで あそぶ？",
-  "タッチ してみてね！",
-  "わーい！ だいすき！",
-  "いっしょに あそぼー！",
-];
-
 export function renderHome(root: HTMLElement, nav: Nav): void {
   root.innerHTML = `
     <div class="stage-screen home-screen">
       <div class="toy-topbar">
-        <div class="toy-badge">🖐️ おてて</div>
+        <span></span>
         <div class="home-tools">
           <button class="icon-btn" id="h-set" aria-label="せってい" title="せってい（ながおし）">⚙️</button>
           <button class="icon-btn" id="h-snd" aria-label="おと">${soundIcon()}</button>
@@ -42,76 +32,50 @@ export function renderHome(root: HTMLElement, nav: Nav): void {
       </div>
 
       <div class="home-layout">
-        <div id="h-guide-slot"></div>
-
         <div class="home-toys-col">
           <div class="toy-box">
-            <button class="toy-card" data-go="feed" style="--c1:#ff8787;--c2:#fa5252;--sh-c:#c92a2a" type="button">
+            <button class="toy-card" data-go="feed" aria-label="もぐもぐ" style="--c1:#ff8787;--c2:#fa5252;--sh-c:#c92a2a" type="button">
               <span class="toy-emo">🍎</span>
-              <span class="toy-lbl">もぐもぐ</span>
             </button>
 
-            <button class="toy-card" data-go="peek" style="--c1:#74c0fc;--c2:#228be6;--sh-c:#1864ab" type="button">
+            <button class="toy-card" data-go="peek" aria-label="あわあわ" style="--c1:#74c0fc;--c2:#228be6;--sh-c:#1864ab" type="button">
               <span class="toy-emo">🫧</span>
-              <span class="toy-lbl">あわあわ</span>
             </button>
 
-            <button class="toy-card" data-go="puzzle" style="--c1:#63e6be;--c2:#0ca678;--sh-c:#087f5b" type="button">
+            <button class="toy-card" data-go="puzzle" aria-label="すぽっ！" style="--c1:#63e6be;--c2:#0ca678;--sh-c:#087f5b" type="button">
               <span class="toy-emo">🧩</span>
-              <span class="toy-lbl">すぽっ！</span>
             </button>
 
-            <button class="toy-card" data-go="trace" style="--c1:#8ce99a;--c2:#2f9e44;--sh-c:#2b8a3e" type="button">
+            <button class="toy-card" data-go="trace" aria-label="ぽっぽー" style="--c1:#8ce99a;--c2:#2f9e44;--sh-c:#2b8a3e" type="button">
               <span class="toy-emo">🚂</span>
-              <span class="toy-lbl">ぽっぽー</span>
             </button>
 
-            <button class="toy-card" data-go="code" style="--c1:#b197fc;--c2:#7950f2;--sh-c:#5f3dc4" type="button">
+            <button class="toy-card" data-go="code" aria-label="プログラム" style="--c1:#b197fc;--c2:#7950f2;--sh-c:#5f3dc4" type="button">
               <span class="toy-emo">🤖</span>
-              <span class="toy-lbl">プログラム</span>
             </button>
 
-            <button class="toy-card" data-go="draw" style="--c1:#ff9ec0;--c2:#f06595;--sh-c:#a61e4d" type="button">
+            <button class="toy-card" data-go="draw" aria-label="おえかき" style="--c1:#ff9ec0;--c2:#f06595;--sh-c:#a61e4d" type="button">
               <span class="toy-emo">🎨</span>
-              <span class="toy-lbl">おえかき</span>
             </button>
           </div>
 
           <div class="shelf-row">
-            <button class="shelf-btn" data-go="learn" style="--c1:#ffd43b;--c2:#f59f00;--sh-c:#d9480f" type="button">
+            <button class="shelf-btn" data-go="learn" aria-label="ずかん" style="--c1:#ffd43b;--c2:#f59f00;--sh-c:#d9480f" type="button">
               <span class="shelf-emo">📖</span>
-              <span class="shelf-lbl">ずかん</span>
             </button>
-            <button class="shelf-btn" data-go="count" style="--c1:#b197fc;--c2:#7950f2;--sh-c:#5f3dc4" type="button">
+            <button class="shelf-btn" data-go="count" aria-label="かず" style="--c1:#b197fc;--c2:#7950f2;--sh-c:#5f3dc4" type="button">
               <span class="shelf-emo">🔢</span>
-              <span class="shelf-lbl">かず</span>
             </button>
-            <button class="shelf-btn" data-go="camera" style="--c1:#66d9e8;--c2:#1098ad;--sh-c:#0b7285" type="button">
+            <button class="shelf-btn" data-go="camera" aria-label="かがみ" style="--c1:#66d9e8;--c2:#1098ad;--sh-c:#0b7285" type="button">
               <span class="shelf-emo">🪞</span>
-              <span class="shelf-lbl">かがみ</span>
             </button>
-            <button class="shelf-btn" data-go="gallery" style="--c1:#91a7ff;--c2:#4c6ef5;--sh-c:#364fc7" type="button">
+            <button class="shelf-btn" data-go="gallery" aria-label="さくひん" style="--c1:#91a7ff;--c2:#4c6ef5;--sh-c:#364fc7" type="button">
               <span class="shelf-emo">🖼️</span>
-              <span class="shelf-lbl">さくひん</span>
             </button>
           </div>
         </div>
       </div>
     </div>`;
-
-  const guide = createGuideBanner({
-    friendIdx: homeFriendIdx,
-    onReplay: () => {
-      homeFriendIdx = (homeFriendIdx + 1) % 4;
-      guide.nextFriend(false);
-      const msg = CHEERS[Math.trunc(Math.random() * CHEERS.length)]!;
-      guide.setMessage(msg);
-      boing(1.1);
-      speak(msg);
-    },
-  });
-  guide.setMessage("いっぱい あそぼうね！");
-  root.querySelector("#h-guide-slot")!.replaceWith(guide.el);
 
   root.querySelectorAll<HTMLElement>("[data-go]").forEach((el, i) => {
     tap(el, () => {
