@@ -1,6 +1,7 @@
 import React, { type JSX } from "react";
 import { useSaiflowState } from "../store";
 import { ChartTooltip } from "./ChartTooltip";
+import { xTickIndices } from "../utils";
 
 export function logTicks(max: number): number[] {
   const ticks: number[] = [];
@@ -56,11 +57,11 @@ export function BarChart() {
   }
   const groups = [...groupSet].toSorted();
 
-  const padding = { top: 24, right: 24, bottom: 40, left: 56 };
+  const padding = { top: 40, right: 24, bottom: 40, left: 56 };
   const width = Math.max(600, rows.length * 14 + padding.left + padding.right);
   const height = 340;
-  const midY = height / 2;
   const plotH = (height - padding.top - padding.bottom) / 2;
+  const midY = padding.top + plotH;
 
   const maxVal =
     Math.max(
@@ -89,7 +90,7 @@ export function BarChart() {
     })
     .join(" ");
 
-  const xTickInterval = Math.max(1, Math.floor(rows.length / 10));
+  const xTicks = xTickIndices(rows.length);
 
   return (
     <div className="h-full overflow-auto relative">
@@ -222,33 +223,31 @@ export function BarChart() {
             width={step}
             height={height - padding.top - padding.bottom}
             fill="transparent"
-            onMouseEnter={(e) => setHover({ i, mx: e.clientX, my: e.clientY })}
-            onMouseMove={(e) =>
+            onPointerEnter={(e) => setHover({ i, mx: e.clientX, my: e.clientY })}
+            onPointerDown={(e) => setHover({ i, mx: e.clientX, my: e.clientY })}
+            onPointerMove={(e) =>
               setHover((h) => (h ? { ...h, mx: e.clientX, my: e.clientY } : null))
             }
-            onMouseLeave={() => setHover(null)}
+            onPointerLeave={() => setHover(null)}
           />
         ))}
 
         {/* X axis labels */}
-        {rows.map((r, i) => {
-          if (i % xTickInterval !== 0 && i !== rows.length - 1) return null;
-          return (
-            <text
-              key={i}
-              x={x(i)}
-              y={height - padding.bottom + 16}
-              textAnchor="middle"
-              fill="var(--ink)"
-              opacity={0.5}
-            >
-              {r.age}
-            </text>
-          );
-        })}
+        {xTicks.map((i) => (
+          <text
+            key={i}
+            x={x(i)}
+            y={height - padding.bottom + 16}
+            textAnchor="middle"
+            fill="var(--ink)"
+            opacity={0.5}
+          >
+            {rows[i].age}
+          </text>
+        ))}
 
         {/* Legend */}
-        <g transform={`translate(${padding.left}, 6)`}>
+        <g transform={`translate(${padding.left}, 16)`}>
           {groups.map((g, gi) => {
             const lx = gi * 90;
             return (
@@ -280,7 +279,7 @@ export function BarChart() {
               strokeDasharray="3,2"
             />
             <text x={18} y={0} fill="var(--ink)" opacity={0.7} fontSize={11}>
-              収支
+              現金収支
             </text>
           </g>
         </g>
@@ -297,11 +296,11 @@ export function BarChart() {
                     value: String(rows[hover.i].age),
                   },
                   {
-                    label: "収入",
+                    label: "収入(現金)",
                     value: rows[hover.i].totalIncome.toLocaleString(),
                   },
                   {
-                    label: "支出",
+                    label: "支出(現金)",
                     value: rows[hover.i].totalExpense.toLocaleString(),
                   },
                   ...groups.flatMap((g, gi) => [
@@ -317,7 +316,7 @@ export function BarChart() {
                     },
                   ]),
                   {
-                    label: "収支",
+                    label: "現金収支",
                     value: (
                       rows[hover.i].totalIncome - rows[hover.i].totalExpense
                     ).toLocaleString(),

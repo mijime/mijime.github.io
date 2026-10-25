@@ -1,6 +1,7 @@
 import React from "react";
 import { useSaiflowState } from "../store";
 import { ChartTooltip } from "./ChartTooltip";
+import { xTickIndices } from "../utils";
 
 const COLORS = [
   "rgba(99, 179, 237, 1)",
@@ -19,7 +20,7 @@ export function LineChart() {
   const [hover, setHover] = React.useState<{ i: number; mx: number; my: number } | null>(null);
 
   const assetNames = [...new Set(rows.flatMap((r) => Object.keys(r.balances)))];
-  const padding = { top: 24, right: 24, bottom: 40, left: 56 };
+  const padding = { top: 40, right: 24, bottom: 40, left: 56 };
   const width = Math.max(600, rows.length * 14 + padding.left + padding.right);
   const height = 350;
 
@@ -43,11 +44,7 @@ export function LineChart() {
   const tickCount = 5;
   const tickStep = range / tickCount;
 
-  const xTickInterval = Math.max(1, Math.floor((rows.length - 1) / 10));
-  const xTicks: number[] = [];
-  for (let i = 0; i < rows.length; i++) {
-    if (i % xTickInterval === 0 || i === rows.length - 1) xTicks.push(i);
-  }
+  const xTicks = xTickIndices(rows.length);
 
   return (
     <div className="h-full overflow-auto relative">
@@ -96,11 +93,12 @@ export function LineChart() {
             width={step}
             height={plotH}
             fill="transparent"
-            onMouseEnter={(e) => setHover({ i, mx: e.clientX, my: e.clientY })}
-            onMouseMove={(e) =>
+            onPointerEnter={(e) => setHover({ i, mx: e.clientX, my: e.clientY })}
+            onPointerDown={(e) => setHover({ i, mx: e.clientX, my: e.clientY })}
+            onPointerMove={(e) =>
               setHover((h) => (h ? { ...h, mx: e.clientX, my: e.clientY } : null))
             }
-            onMouseLeave={() => setHover(null)}
+            onPointerLeave={() => setHover(null)}
           />
         ))}
 
@@ -159,7 +157,7 @@ export function LineChart() {
         />
 
         {/* Legend */}
-        <g transform={`translate(${padding.left}, 6)`}>
+        <g transform={`translate(${padding.left}, 16)`}>
           {[
             ...assetNames.map((n, i) => ({ name: n, color: COLORS[i % COLORS.length] })),
             { name: "総資産", color: "var(--ink)" },

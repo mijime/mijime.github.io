@@ -78,3 +78,43 @@ describe("ChildForm birth age input", () => {
     expect((spinbuttons[0] as HTMLInputElement).value).toBe("2");
   });
 });
+
+describe("MortgageForm property tax", () => {
+  const openMortgage = () => {
+    const onSave = vi.fn();
+    render(
+      <SaiflowProvider state={{ currentAge: 35 }}>
+        <AddEventModal currentAge={35} onSave={onSave} onClose={vi.fn()} />
+      </SaiflowProvider>,
+    );
+    fireEvent.click(screen.getByText("住宅ローン"));
+    return { onSave };
+  };
+
+  it("estimates the annual tax from the property price", () => {
+    const { onSave } = openMortgage();
+    fireEvent.change(screen.getByLabelText("物件価格（万円）"), { target: { value: "4000" } });
+
+    expect(screen.getByLabelText("固定資産税（年額）")).toHaveValue(16);
+
+    fireEvent.click(screen.getByText("保存"));
+    const [[events]] = onSave.mock.calls;
+    const tax = events.find((e: Event) => e.name === "税金(固定資産税)");
+    expect(tax.ops[0].value).toBe(16);
+    const house = events.find((e: Event) => e.name === "住宅(取得)");
+    expect(house.ops[0]).toEqual({ asset: "住宅", op: "+", value: 4000 });
+  });
+
+  it("uses a manually entered annual amount instead of the rate", () => {
+    const { onSave } = openMortgage();
+    fireEvent.change(screen.getByLabelText("物件価格（万円）"), { target: { value: "4000" } });
+    fireEvent.change(screen.getByLabelText("固定資産税（年額）"), {
+      target: { value: "400" },
+    });
+
+    fireEvent.click(screen.getByText("保存"));
+    const [[events]] = onSave.mock.calls;
+    const tax = events.find((e: Event) => e.name === "税金(固定資産税)");
+    expect(tax.ops[0].value).toBe(400);
+  });
+});

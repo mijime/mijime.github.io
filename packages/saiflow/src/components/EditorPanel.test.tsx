@@ -23,3 +23,22 @@ describe("EditorPanel", () => {
     expect(screen.getByText("GUI")).toBeInTheDocument();
   });
 });
+
+describe("EditorPanel with parse errors", () => {
+  it("disables the GUI tab and keeps the DSL editor visible", () => {
+    render(
+      <SaiflowProvider
+        state={{
+          activeTab: "gui",
+          parsed: { errors: [{ line: 1, message: "bad" }] },
+          dslText: "bad",
+        }}
+      >
+        <EditorPanel />
+      </SaiflowProvider>,
+    );
+
+    expect(screen.getByRole("button", { name: "GUI" })).toBeDisabled();
+    expect(screen.getByRole("textbox", { name: "DSL" })).toBeInTheDocument();
+  });
+});

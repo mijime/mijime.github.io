@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { Button, IconButton, Input, Modal, Select } from "@mijime/theme/ui";
+import { X } from "lucide-react";
 import type { AssetOp, Event } from "../types";
 import { fmt } from "../utils";
 import { OP_COLORS } from "../constants";
@@ -14,21 +16,25 @@ function FormActions({
 }) {
   return (
     <div className="flex gap-2 justify-end pt-2">
-      <button
-        className="px-3 py-1 text-xs opacity-40 hover:opacity-100 border border-(--border) rounded"
-        onClick={onClose}
-      >
+      <Button variant="secondary" size="sm" onClick={onClose}>
         キャンセル
-      </button>
-      <button
-        className="px-3 py-1 text-xs bg-(--terra) text-white rounded disabled:opacity-30"
-        disabled={saveDisabled}
-        onClick={onSave}
-      >
+      </Button>
+      <Button variant="primary" size="sm" disabled={saveDisabled} onClick={onSave}>
         保存
-      </button>
+      </Button>
     </div>
   );
+}
+
+/**
+ * Rough annual fixed asset tax (万円/年).
+ *
+ * The real tax is 1.4% of the assessed value, not the purchase price, and is
+ * reduced for residential land. 0.4% of the purchase price is a common
+ * effective rate, so use it only as the initial estimate.
+ */
+export function estimateAnnualPropertyTax(propertyPrice: number): number {
+  return Math.round(propertyPrice * 0.004);
 }
 
 function calcMortgage(principal: number, annualRate: number, years: number) {
@@ -89,44 +95,31 @@ export function AddEventModal({
   const FormComponent = pattern ? PATTERN_FORM[pattern] : null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center" onClick={onClose}>
-      <div className="absolute inset-0 bg-black/30" />
-      <div
-        className="relative w-[340px] max-h-[80vh] flex flex-col bg-(--paper) border border-(--border) rounded shadow-lg"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="flex items-center gap-2 px-4 pt-3 pb-2 border-b border-(--border)">
-          {selected && (
-            <button
-              className="text-xs opacity-40 hover:opacity-100 shrink-0"
-              onClick={() => setPattern(null)}
+    <Modal open onClose={onClose} title={selected ? selected.label : "イベント追加"} size="sm">
+      {selected && (
+        <Button variant="ghost" size="sm" className="mb-3" onClick={() => setPattern(null)}>
+          ← 戻る
+        </Button>
+      )}
+      <p className="text-[10px] opacity-30 mb-3">金額の単位: 万円</p>
+      {selected && FormComponent ? (
+        <FormComponent currentAge={currentAge} onSave={onSave} onClose={onClose} />
+      ) : (
+        <div className="grid grid-cols-2 gap-2">
+          {PATTERNS.map((patternOption) => (
+            <Button
+              key={patternOption.id}
+              variant="secondary"
+              className="h-auto w-full flex-col items-start gap-1 whitespace-normal p-3 text-left"
+              onClick={() => setPattern(patternOption.id)}
             >
-              ← 戻る
-            </button>
-          )}
-          <span className="text-sm font-medium">{selected ? selected.label : "イベント追加"}</span>
+              <span className="text-xs font-medium">{patternOption.label}</span>
+              <span className="text-[10px] opacity-40">{patternOption.desc}</span>
+            </Button>
+          ))}
         </div>
-
-        <div className="flex-1 overflow-y-auto p-4">
-          {selected && FormComponent ? (
-            <FormComponent currentAge={currentAge} onSave={onSave} onClose={onClose} />
-          ) : (
-            <div className="grid grid-cols-2 gap-2">
-              {PATTERNS.map((p) => (
-                <button
-                  key={p.id}
-                  className="p-3 text-left border border-(--border) rounded hover:bg-(--grid)/50 transition-colors"
-                  onClick={() => setPattern(p.id)}
-                >
-                  <div className="text-xs font-medium">{p.label}</div>
-                  <div className="text-[10px] opacity-40 mt-0.5">{p.desc}</div>
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
+      )}
+    </Modal>
   );
 }
 
@@ -175,19 +168,30 @@ function MortgageForm({
   const [years, setYears] = useState(35);
   const [startAge, setStartAge] = useState(currentAge);
   const [yearMode, setYearMode] = useState<"offset" | "age">("offset");
-  const [propertyTaxRate, setPropertyTaxRate] = useState(1.4);
+  const [annualPropertyTax, setAnnualPropertyTax] = useState(0);
+  const [taxEdited, setTaxEdited] = useState(false);
 
   const toDisplay = (v: number) => (yearMode === "age" ? v : v - currentAge);
   const fromDisplay = (v: number) => (yearMode === "age" ? v : v + currentAge);
 
   const loanAmount = Math.max(0, propertyPrice - downPayment);
   const result = calcMortgage(loanAmount, interestRate, years);
+  const estimatedTax = estimateAnnualPropertyTax(propertyPrice);
+  const propertyTax = taxEdited ? annualPropertyTax : estimatedTax;
 
   const handleSave = () => {
     if (propertyPrice <= 0) return;
     const multiplier = 1 + interestRate / 100;
     const annualPayment = result === null ? 0 : result.annual;
-    const events: Event[] = [];
+    const events: Event[] = [
+      {
+        name: "住宅(取得)",
+        group: "住宅ローン",
+        startAge,
+        endAge: startAge,
+        ops: [{ asset: "住宅", op: "+" as const, value: propertyPrice }],
+      },
+    ];
     if (downPayment > 0) {
       events.push({
         name: "住居費(頭金)",
@@ -225,7 +229,6 @@ function MortgageForm({
         },
       );
     }
-    const propertyTax = Math.round((propertyPrice * propertyTaxRate) / 100);
     if (propertyTax > 0) {
       events.push({
         name: "税金(固定資産税)",
@@ -242,22 +245,26 @@ function MortgageForm({
     <div className="space-y-3">
       <div className="flex gap-1.5 items-center">
         <label className="text-[11px] opacity-40 shrink-0 w-14">物件価格</label>
-        <input
+        <Input
+          aria-label="物件価格（万円）"
           type="number"
           className="flex-1 px-1.5 py-0.5 text-xs bg-(--paper) text-(--ink) border border-(--border) rounded tabular-nums outline-none focus:border-(--terra)"
           value={propertyPrice || ""}
           onChange={(e) => setPropertyPrice(Number(e.target.value))}
         />
+        <span className="text-[11px] opacity-30">万円</span>
       </div>
 
       <div className="flex gap-1.5 items-center">
         <label className="text-[11px] opacity-40 shrink-0 w-14">頭金</label>
-        <input
+        <Input
+          aria-label="頭金（万円）"
           type="number"
           className="flex-1 px-1.5 py-0.5 text-xs bg-(--paper) text-(--ink) border border-(--border) rounded tabular-nums outline-none focus:border-(--terra)"
           value={downPayment || ""}
           onChange={(e) => setDownPayment(Number(e.target.value))}
         />
+        <span className="text-[11px] opacity-30">万円</span>
       </div>
 
       {propertyPrice > 0 && (
@@ -265,7 +272,7 @@ function MortgageForm({
           <span className="opacity-40">借入額</span>
           <span className="tabular-nums">
             {loanAmount > 0 ? (
-              `¥${fmt(loanAmount)}`
+              `${fmt(loanAmount)}万円`
             ) : (
               <span className="text-red-400">頭金が物件価格を超えています</span>
             )}
@@ -275,7 +282,8 @@ function MortgageForm({
 
       <div className="flex gap-1.5 items-center">
         <label className="text-[11px] opacity-40 shrink-0 w-14">金利</label>
-        <input
+        <Input
+          aria-label="金利（%）"
           type="number"
           className="w-16 px-1.5 py-0.5 text-xs bg-(--paper) text-(--ink) border border-(--border) rounded tabular-nums outline-none focus:border-(--terra)"
           value={interestRate}
@@ -287,7 +295,8 @@ function MortgageForm({
 
       <div className="flex gap-1.5 items-center">
         <label className="text-[11px] opacity-40 shrink-0 w-14">返済年数</label>
-        <input
+        <Input
+          aria-label="返済年数"
           type="number"
           className="w-16 px-1.5 py-0.5 text-xs bg-(--paper) text-(--ink) border border-(--border) rounded tabular-nums outline-none focus:border-(--terra)"
           value={years}
@@ -298,15 +307,15 @@ function MortgageForm({
 
       <div className="flex gap-1.5 items-center">
         <label className="text-[11px] opacity-40 shrink-0 w-14">開始</label>
-        <select
+        <Select
           className="text-[11px] bg-(--paper) text-(--ink) border border-(--border) rounded px-1 py-0.5 outline-none cursor-pointer"
           value={yearMode}
           onChange={(e) => setYearMode(e.target.value as "offset" | "age")}
         >
           <option value="offset">年数</option>
           <option value="age">年齢</option>
-        </select>
-        <input
+        </Select>
+        <Input
           type="number"
           className="w-16 px-1.5 py-0.5 text-xs bg-(--paper) text-(--ink) border border-(--border) rounded tabular-nums outline-none focus:border-(--terra)"
           value={toDisplay(startAge)}
@@ -318,35 +327,51 @@ function MortgageForm({
         <div className="border-t border-(--border) pt-2 space-y-1">
           <div className="flex justify-between text-[11px]">
             <span className="opacity-40">月々の返済額</span>
-            <span className="tabular-nums font-medium">¥{fmt(result.monthly)}</span>
+            <span className="tabular-nums font-medium">{fmt(result.monthly)}万円/月</span>
           </div>
           <div className="flex justify-between text-[11px]">
             <span className="opacity-40">年間返済額</span>
-            <span className="tabular-nums font-medium">¥{fmt(result.annual)}</span>
+            <span className="tabular-nums font-medium">{fmt(result.annual)}万円/年</span>
           </div>
           <div className="flex justify-between text-[11px]">
             <span className="opacity-40">総返済額</span>
-            <span className="tabular-nums">¥{fmt(result.total)}</span>
+            <span className="tabular-nums">{fmt(result.total)}万円</span>
           </div>
         </div>
       )}
 
       <div className="flex gap-1.5 items-center">
-        <label className="text-[11px] opacity-40 shrink-0 w-14">固定資産税</label>
-        <input
+        <label htmlFor="saiflow-property-tax" className="text-[11px] opacity-40 shrink-0 w-14">
+          固定資産税
+        </label>
+        <Input
+          id="saiflow-property-tax"
+          aria-label="固定資産税（年額）"
           type="number"
           className="w-16 px-1.5 py-0.5 text-xs bg-(--paper) text-(--ink) border border-(--border) rounded tabular-nums outline-none focus:border-(--terra)"
-          value={propertyTaxRate}
-          step="0.1"
-          onChange={(e) => setPropertyTaxRate(Number(e.target.value))}
+          value={propertyTax || ""}
+          onChange={(e) => {
+            setTaxEdited(true);
+            setAnnualPropertyTax(Number(e.target.value));
+          }}
         />
-        <span className="text-[11px] opacity-30">%</span>
-        {propertyPrice > 0 && (
-          <span className="text-[10px] opacity-30 tabular-nums ml-1">
-            ¥{fmt(Math.round((propertyPrice * propertyTaxRate) / 100))}/年
-          </span>
+        <span className="text-[11px] opacity-30">万円/年</span>
+        {taxEdited ? (
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-auto px-1 py-0 text-[10px]"
+            onClick={() => setTaxEdited(false)}
+          >
+            目安に戻す
+          </Button>
+        ) : (
+          <span className="text-[10px] opacity-30">物件価格の0.4%で仮置き</span>
         )}
       </div>
+      <p className="text-[10px] opacity-25 leading-relaxed pl-[3.75rem]">
+        実際の税額は固定資産税評価額と土地の軽減措置で変わります。不明なら「目安」のままでOKです。
+      </p>
 
       <FormActions onClose={onClose} onSave={handleSave} saveDisabled={propertyPrice <= 0} />
     </div>
@@ -366,15 +391,15 @@ function YearInput({
   const display = mode === "age" ? value : value - currentAge;
   return (
     <div className="flex gap-1 items-center">
-      <select
+      <Select
         className="text-[11px] bg-(--paper) text-(--ink) border border-(--border) rounded px-1 py-0.5 outline-none cursor-pointer"
         value={mode}
         onChange={(e) => setMode(e.target.value as "offset" | "age")}
       >
         <option value="offset">年数</option>
         <option value="age">年齢</option>
-      </select>
-      <input
+      </Select>
+      <Input
         type="number"
         className="w-16 px-1.5 py-0.5 text-xs bg-(--paper) text-(--ink) border border-(--border) rounded tabular-nums outline-none focus:border-(--terra)"
         value={display}
@@ -408,29 +433,20 @@ function InitialForm({
       events.push({
         name: "貯金",
         group: "初期設定",
-        startAge: 0,
-        endAge: 0,
+        startAge: currentAge,
+        endAge: currentAge,
         ops: [{ asset: "現金", op: "+" as const, value: initialCash }],
       });
     }
     if (annualIncome > 0) {
       const incomeEndAge = retirementAge > currentAge ? retirementAge : null;
-      events.push(
-        {
-          name: "年収",
-          group: "初期設定",
-          startAge: currentAge,
-          endAge: incomeEndAge,
-          ops: [{ asset: "現金", op: "+" as const, value: annualIncome }],
-        },
-        {
-          name: "税金",
-          group: "初期設定",
-          startAge: currentAge,
-          endAge: incomeEndAge,
-          ops: [{ asset: "現金", op: "-" as const, value: Math.round(annualIncome * 0.2) }],
-        },
-      );
+      events.push({
+        name: "年収",
+        group: "初期設定",
+        startAge: currentAge,
+        endAge: incomeEndAge,
+        ops: [{ asset: "現金", op: "+" as const, value: annualIncome }],
+      });
     }
     if (livingMonthly > 0) {
       events.push({
@@ -458,43 +474,44 @@ function InitialForm({
     <div className="space-y-3">
       <div className="flex gap-1.5 items-center">
         <label className="text-[11px] opacity-40 shrink-0 w-14">初期現金</label>
-        <input
+        <Input
           type="number"
           className="flex-1 px-1.5 py-0.5 text-xs bg-(--paper) text-(--ink) border border-(--border) rounded tabular-nums outline-none focus:border-(--terra)"
           value={initialCash || ""}
           onChange={(e) => setInitialCash(Number(e.target.value))}
         />
+        <span className="text-[11px] opacity-30">万円</span>
       </div>
       <div className="flex gap-1.5 items-center">
         <label className="text-[11px] opacity-40 shrink-0 w-14">年収</label>
-        <input
+        <Input
           type="number"
           className="flex-1 px-1.5 py-0.5 text-xs bg-(--paper) text-(--ink) border border-(--border) rounded tabular-nums outline-none focus:border-(--terra)"
           value={annualIncome || ""}
           onChange={(e) => setAnnualIncome(Number(e.target.value))}
         />
-        <span className="text-[11px] opacity-30">/年</span>
+        <span className="text-[11px] opacity-30">万円/年</span>
         <span className="text-[10px] opacity-25">〜65歳</span>
       </div>
       <div className="flex gap-1.5 items-center">
         <label className="text-[11px] opacity-40 shrink-0 w-14">生活費</label>
-        <input
+        <Input
           type="number"
           className="flex-1 px-1.5 py-0.5 text-xs bg-(--paper) text-(--ink) border border-(--border) rounded tabular-nums outline-none focus:border-(--terra)"
           value={livingMonthly || ""}
           onChange={(e) => setLivingMonthly(Number(e.target.value))}
         />
-        <span className="text-[11px] opacity-30">/月</span>
+        <span className="text-[11px] opacity-30">万円/月</span>
       </div>
       <div className="flex gap-1.5 items-center">
         <label className="text-[11px] opacity-40 shrink-0 w-14">住居費</label>
-        <input
+        <Input
           type="number"
           className="flex-1 px-1.5 py-0.5 text-xs bg-(--paper) text-(--ink) border border-(--border) rounded tabular-nums outline-none focus:border-(--terra)"
           value={housingMonthly || ""}
           onChange={(e) => setHousingMonthly(Number(e.target.value))}
         />
-        <span className="text-[11px] opacity-30">/月</span>
+        <span className="text-[11px] opacity-30">万円/月</span>
       </div>
       <FormActions
         onClose={onClose}
@@ -568,7 +585,7 @@ function InvestForm({
     <div className="space-y-3">
       <div className="flex gap-1.5 items-center">
         <label className="text-[11px] opacity-40 shrink-0 w-14">名称</label>
-        <input
+        <Input
           className="flex-1 px-1.5 py-0.5 text-xs bg-(--paper) text-(--ink) border border-(--border) rounded outline-none focus:border-(--terra)"
           placeholder="NISA"
           value={name}
@@ -577,20 +594,21 @@ function InvestForm({
       </div>
       <div className="flex gap-1.5 items-center">
         <label className="text-[11px] opacity-40 shrink-0 w-14">月額積立</label>
-        <input
+        <Input
           type="number"
           className="flex-1 px-1.5 py-0.5 text-xs bg-(--paper) text-(--ink) border border-(--border) rounded tabular-nums outline-none focus:border-(--terra)"
           value={monthlyAmount || ""}
           onChange={(e) => setMonthlyAmount(Number(e.target.value))}
         />
+        <span className="text-[11px] opacity-30">万円/月</span>
       </div>
       <div className="flex justify-between text-[11px] px-1">
         <span className="opacity-40">年間積立額</span>
-        <span className="tabular-nums">¥{fmt(annualAmount)}</span>
+        <span className="tabular-nums">{fmt(annualAmount)}万円/年</span>
       </div>
       <div className="flex gap-1.5 items-center">
         <label className="text-[11px] opacity-40 shrink-0 w-14">年利</label>
-        <input
+        <Input
           type="number"
           className="w-16 px-1.5 py-0.5 text-xs bg-(--paper) text-(--ink) border border-(--border) rounded tabular-nums outline-none focus:border-(--terra)"
           value={annualReturn}
@@ -608,18 +626,20 @@ function InvestForm({
         <label className="text-[11px] opacity-40 shrink-0 w-14" />
         <span className="text-[11px] opacity-30">終了</span>
         <YearInput value={endAge ?? 0} onChange={(v) => setEndAge(v)} currentAge={currentAge} />
-        <button
-          className="text-[10px] opacity-30 hover:opacity-100"
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-auto px-1 py-0 text-[10px]"
           onClick={() => setEndAge(null)}
         >
           指定なし
-        </button>
+        </Button>
       </div>
       <div className="border-t border-(--border) pt-3 space-y-3">
         <p className="text-[11px] opacity-40">切り崩し</p>
         <div className="flex gap-1.5 items-center">
           <label className="text-[11px] opacity-40 shrink-0 w-14">月額</label>
-          <input
+          <Input
             type="number"
             className="flex-1 px-1.5 py-0.5 text-xs bg-(--paper) text-(--ink) border border-(--border) rounded tabular-nums outline-none focus:border-(--terra)"
             value={withdrawMonthly || ""}
@@ -628,7 +648,7 @@ function InvestForm({
         </div>
         <div className="flex justify-between text-[11px] px-1">
           <span className="opacity-40">年間受取額</span>
-          <span className="tabular-nums">¥{fmt(annualWithdraw)}</span>
+          <span className="tabular-nums">{fmt(annualWithdraw)}万円/年</span>
         </div>
         <div className="flex gap-1.5 items-center">
           <label className="text-[11px] opacity-40 shrink-0 w-14">開始</label>
@@ -650,11 +670,13 @@ function InvestForm({
 
 type SchoolType = "public" | "private" | null;
 
+// 文部科学省「令和5年度 子供の学習費調査」の学習費総額（万円/年）。
+// 大学は同調査の対象外のため概算。
 const SCHOOL_PRESETS: Record<string, { period: string; public: number; private: number }> = {
-  幼稚園: { period: "3年", public: 0, private: 50 },
-  小学校: { period: "6年", public: 10, private: 100 },
-  中学校: { period: "3年", public: 15, private: 100 },
-  高校: { period: "3年", public: 15, private: 80 },
+  幼稚園: { period: "3年", public: 17, private: 31 },
+  小学校: { period: "6年", public: 35, private: 167 },
+  中学校: { period: "3年", public: 54, private: 144 },
+  高校: { period: "3年", public: 51, private: 106 },
   大学: { period: "4年", public: 60, private: 120 },
 };
 
@@ -730,7 +752,7 @@ function ChildForm({
     <div className="space-y-3">
       <div className="flex gap-1.5 items-center">
         <label className="text-[11px] opacity-40 shrink-0 w-14">名前</label>
-        <input
+        <Input
           className="flex-1 px-1.5 py-0.5 text-xs bg-(--paper) text-(--ink) border border-(--border) rounded outline-none focus:border-(--terra)"
           placeholder="子1"
           value={childName}
@@ -739,7 +761,7 @@ function ChildForm({
       </div>
       <div className="flex gap-1.5 items-center">
         <label className="text-[11px] opacity-40 shrink-0 w-14">誕生</label>
-        <select
+        <Select
           className="text-[11px] bg-(--paper) text-(--ink) border border-(--border) rounded px-1 py-0.5 outline-none cursor-pointer"
           value={yearMode}
           onChange={(e) => {
@@ -748,8 +770,8 @@ function ChildForm({
         >
           <option value="offset">年数</option>
           <option value="age">年齢</option>
-        </select>
-        <input
+        </Select>
+        <Input
           type="number"
           className="w-16 px-1.5 py-0.5 text-xs bg-(--paper) text-(--ink) border border-(--border) rounded tabular-nums outline-none focus:border-(--terra)"
           value={yearMode === "age" ? birthAge : birthAge - _currentAge}
@@ -764,13 +786,13 @@ function ChildForm({
       </div>
       <div className="flex gap-1.5 items-center">
         <label className="text-[11px] opacity-40 shrink-0 w-14">生活費</label>
-        <input
+        <Input
           type="number"
           className="w-20 px-1.5 py-0.5 text-xs bg-(--paper) text-(--ink) border border-(--border) rounded tabular-nums outline-none focus:border-(--terra)"
           value={livingMonthly || ""}
           onChange={(e) => setLivingMonthly(Number(e.target.value))}
         />
-        <span className="text-[11px] opacity-30">万/月</span>
+        <span className="text-[11px] opacity-30">万円/月</span>
         <span className="text-[10px] opacity-25">〜18歳</span>
       </div>
       <div className="border-t border-(--border) pt-2 space-y-2">
@@ -780,17 +802,21 @@ function ChildForm({
           return (
             <div key={stage} className="flex items-center gap-1">
               <span className="text-[11px] opacity-40 shrink-0 w-14">{stage}</span>
-              <div className="flex border border-(--border) rounded overflow-hidden text-[10px]">
-                <button
-                  className={`px-2 py-0.5 ${type === "public" ? "bg-(--terra) text-white" : "opacity-40"}`}
+              <div className="flex overflow-hidden rounded border border-(--border)">
+                <Button
+                  variant={type === "public" ? "primary" : "ghost"}
+                  size="sm"
+                  className="rounded-none border-0 px-2 py-0.5 text-[10px]"
                   onClick={() =>
                     setSchools((s) => ({ ...s, [stage]: s[stage] === "public" ? null : "public" }))
                   }
                 >
                   公立
-                </button>
-                <button
-                  className={`px-2 py-0.5 border-l border-(--border) ${type === "private" ? "bg-(--terra) text-white" : "opacity-40"}`}
+                </Button>
+                <Button
+                  variant={type === "private" ? "primary" : "ghost"}
+                  size="sm"
+                  className="rounded-none border-0 px-2 py-0.5 text-[10px]"
                   onClick={() =>
                     setSchools((s) => ({
                       ...s,
@@ -799,7 +825,7 @@ function ChildForm({
                   }
                 >
                   私立
-                </button>
+                </Button>
               </div>
               {type && (
                 <span className="text-[10px] opacity-30 ml-1 tabular-nums">
@@ -839,7 +865,7 @@ export function EventForm({
     <div className="px-3 pb-3 space-y-2">
       <div className="flex gap-1.5 items-center">
         <label className="text-[11px] opacity-40 shrink-0">名称</label>
-        <input
+        <Input
           className="flex-1 min-w-0 px-1.5 py-0.5 text-xs bg-(--paper) text-(--ink) border border-(--border) rounded outline-none focus:border-(--terra)"
           placeholder="イベント名"
           value={event.name}
@@ -849,7 +875,7 @@ export function EventForm({
 
       <div className="flex gap-1.5 items-center">
         <label className="text-[11px] opacity-40 shrink-0">グループ</label>
-        <input
+        <Input
           className="flex-1 min-w-0 px-1.5 py-0.5 text-xs bg-(--paper) text-(--ink) border border-(--border) rounded outline-none focus:border-(--terra)"
           placeholder="(なし)"
           value={event.group ?? ""}
@@ -859,15 +885,15 @@ export function EventForm({
 
       <div className="flex gap-1 items-center">
         <label className="text-[11px] opacity-40 shrink-0">期間</label>
-        <select
+        <Select
           className="text-[11px] bg-(--paper) text-(--ink) border border-(--border) rounded px-1 py-0.5 outline-none cursor-pointer"
           value={yearMode}
           onChange={(e) => setYearMode(e.target.value as "offset" | "age")}
         >
           <option value="offset">年数</option>
           <option value="age">年齢</option>
-        </select>
-        <input
+        </Select>
+        <Input
           type="number"
           className="w-14 px-1.5 py-0.5 text-xs bg-(--paper) text-(--ink) border border-(--border) rounded tabular-nums outline-none focus:border-(--terra)"
           value={toDisplay(event.startAge)}
@@ -876,7 +902,7 @@ export function EventForm({
           }
         />
         <span className="text-[11px] opacity-30">→</span>
-        <input
+        <Input
           type="number"
           className="w-14 px-1.5 py-0.5 text-xs bg-(--paper) text-(--ink) border border-(--border) rounded tabular-nums outline-none focus:border-(--terra)"
           placeholder={yearMode === "age" ? "年齢" : "終了"}
@@ -897,14 +923,16 @@ export function EventForm({
       <div className="space-y-1.5">
         <div className="flex items-center justify-between">
           <span className="text-[11px] opacity-40">操作</span>
-          <button
-            className="text-[11px] opacity-30 hover:opacity-100 transition-opacity"
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-auto px-1 py-0"
             onClick={() =>
               onChange({ ...event, ops: [...event.ops, { asset: "", op: "+", value: 0 }] })
             }
           >
             + 追加
-          </button>
+          </Button>
         </div>
         {event.ops.length === 0 && (
           <p className="text-[11px] opacity-20 py-1">
@@ -926,12 +954,9 @@ export function EventForm({
       </div>
 
       {!hideDelete && (
-        <button
-          className="text-xs text-red-400/70 hover:text-red-400 transition-colors"
-          onClick={onDelete}
-        >
+        <Button variant="danger" size="sm" onClick={onDelete}>
           イベントを削除
-        </button>
+        </Button>
       )}
     </div>
   );
@@ -953,13 +978,13 @@ function OpRow({
 
   return (
     <div className="flex gap-1 items-center">
-      <input
+      <Input
         className="flex-1 min-w-0 px-1.5 py-0.5 text-xs bg-(--paper) text-(--ink) border border-(--border) rounded outline-none focus:border-(--terra)"
         placeholder="資産名"
         value={op.asset}
         onChange={(e) => onChange({ ...op, asset: e.target.value })}
       />
-      <select
+      <Select
         className={`w-9 px-0.5 py-1 text-xs rounded border border-(--border) outline-none cursor-pointer tabular-nums ${OP_COLORS[op.op]}`}
         value={op.op}
         onChange={(e) => onChange({ ...op, op: e.target.value as "+" | "-" | "*" })}
@@ -967,29 +992,25 @@ function OpRow({
         <option value="+">+</option>
         <option value="-">−</option>
         <option value="*">×</option>
-      </select>
-      <input
+      </Select>
+      <Input
         type="number"
         className="w-16 px-1.5 py-0.5 text-xs bg-(--paper) text-(--ink) border border-(--border) rounded tabular-nums outline-none focus:border-(--terra)"
-        placeholder={unit === "month" ? "月額" : "年額"}
+        placeholder={unit === "month" ? "月額(万円)" : "年額(万円)"}
         value={displayValue || ""}
         onChange={(e) => onChange({ ...op, value: saveValue(Number(e.target.value)) })}
       />
-      <select
+      <Select
         className="text-[11px] bg-(--paper) text-(--ink) border border-(--border) rounded px-0.5 py-0.5 outline-none cursor-pointer tabular-nums"
         value={unit}
         onChange={(e) => setUnit(e.target.value as "year" | "month")}
       >
         <option value="year">年</option>
         <option value="month">月</option>
-      </select>
-      <button
-        className="w-5 h-5 flex items-center justify-center text-xs text-red-400/60 hover:text-red-400 shrink-0 rounded hover:bg-red-500/5 transition-colors"
-        aria-label="操作を削除"
-        onClick={onDelete}
-      >
-        ×
-      </button>
+      </Select>
+      <IconButton label="操作を削除" size="icon-sm" variant="ghost" onClick={onDelete}>
+        <X size={12} />
+      </IconButton>
     </div>
   );
 }

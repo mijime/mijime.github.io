@@ -290,3 +290,267 @@ describe("simulate", () => {
     expect(rows[0].groupIncome["(未分類)"]).toBe(100);
   });
 });
+
+describe("cash flow classification", () => {
+  it("excludes transfers between cash and investments from income/expense", () => {
+    const cfg: SimulationConfig = {
+      currentAge: 35,
+      simulationYears: 1,
+      scenario: {
+        name: "test",
+        events: [
+          {
+            name: "給料",
+            group: "給与",
+            startAge: 35,
+            endAge: 35,
+            ops: [{ asset: "現金", op: "+", value: 500 }],
+          },
+          {
+            name: "NISA積立",
+            group: "投資",
+            startAge: 35,
+            endAge: 35,
+            ops: [
+              { asset: "現金", op: "-", value: 100 },
+              { asset: "NISA", op: "+", value: 100 },
+            ],
+          },
+        ],
+      },
+    };
+    const rows = simulate(cfg);
+
+    expect(rows[0].totalIncome).toBe(500);
+    expect(rows[0].totalExpense).toBe(0);
+    expect(rows[0].groupIncome).toEqual({ 給与: 500 });
+    expect(rows[0].groupExpense).toEqual({});
+    expect(rows[0].balances["現金"]).toBe(400);
+    expect(rows[0].balances["NISA"]).toBe(100);
+    expect(rows[0].operations.filter((o) => o.flow === "transfer")).toHaveLength(2);
+  });
+
+  it("does not treat borrowing as an expense", () => {
+    const cfg: SimulationConfig = {
+      currentAge: 35,
+      simulationYears: 1,
+      scenario: {
+        name: "test",
+        events: [
+          {
+            name: "借入実行",
+            startAge: 35,
+            endAge: 35,
+            ops: [{ asset: "借入", op: "-", value: 3200 }],
+          },
+        ],
+      },
+    };
+    const rows = simulate(cfg);
+
+    expect(rows[0].totalExpense).toBe(0);
+    expect(rows[0].balances["借入"]).toBe(-3200);
+  });
+
+  it("does not treat loan principal repayment as income or expense", () => {
+    const cfg: SimulationConfig = {
+      currentAge: 35,
+      simulationYears: 1,
+      scenario: {
+        name: "test",
+        events: [
+          {
+            name: "給料",
+            startAge: 35,
+            endAge: 35,
+            ops: [{ asset: "現金", op: "+", value: 1000 }],
+          },
+          {
+            name: "借入実行",
+            startAge: 35,
+            endAge: 35,
+            ops: [{ asset: "借入", op: "-", value: 3200 }],
+          },
+          {
+            name: "借入返済",
+            startAge: 35,
+            endAge: 35,
+            ops: [
+              { asset: "現金", op: "-", value: 125 },
+              { asset: "借入", op: "+", value: 125 },
+            ],
+          },
+        ],
+      },
+    };
+    const rows = simulate(cfg);
+
+    expect(rows[0].totalIncome).toBe(1000);
+    expect(rows[0].totalExpense).toBe(0);
+    expect(rows[0].balances["現金"]).toBe(875);
+    expect(rows[0].balances["借入"]).toBe(-3075);
+  });
+});
+
+describe("automatic drawdown", () => {
+  const config: SimulationConfig = {
+    currentAge: 60,
+    simulationYears: 1,
+    scenario: {
+      name: "test",
+      events: [
+        {
+          name: "初期",
+          startAge: 60,
+          endAge: 60,
+          ops: [
+            { asset: "現金", op: "+", value: 100 },
+            { asset: "NISA", op: "+", value: 500 },
+          ],
+        },
+        {
+          name: "生活費",
+          startAge: 60,
+          endAge: 60,
+          ops: [{ asset: "現金", op: "-", value: 300 }],
+        },
+      ],
+    },
+  };
+
+  it("sells investments to cover a cash shortfall", () => {
+    const rows = simulate({ ...config, autoDrawdown: true });
+    expect(rows[0].balances["現金"]).toBe(0);
+    expect(rows[0].balances["NISA"]).toBe(300);
+    expect(rows[0].totalAssets).toBe(300);
+    expect(rows[0].totalExpense).toBe(300);
+  });
+
+  it("can be disabled", () => {
+    const rows = simulate({ ...config, autoDrawdown: false });
+    expect(rows[0].balances["現金"]).toBe(-200);
+    expect(rows[0].balances["NISA"]).toBe(500);
+    expect(rows[0].totalAssets).toBe(300);
+  });
+
+  it("does not sell iDeCo before age 60", () => {
+    const rows = simulate({
+      currentAge: 50,
+      simulationYears: 1,
+      autoDrawdown: true,
+      scenario: {
+        name: "test",
+        events: [
+          {
+            name: "初期",
+            startAge: 50,
+            endAge: 50,
+            ops: [{ asset: "iDeCo", op: "+", value: 500 }],
+          },
+          {
+            name: "生活費",
+            startAge: 50,
+            endAge: 50,
+            ops: [{ asset: "現金", op: "-", value: 100 }],
+          },
+        ],
+      },
+    });
+    expect(rows[0].balances["現金"]).toBe(-100);
+    expect(rows[0].balances["iDeCo"]).toBe(500);
+  });
+});
+describe("automatic income tax", () => {
+  const base: SimulationConfig = {
+    currentAge: 35,
+    simulationYears: 1,
+    estimateTaxes: true,
+    scenario: {
+      name: "test",
+      events: [
+        {
+          name: "年収",
+          startAge: 35,
+          endAge: 35,
+          ops: [{ asset: "現金", op: "+", value: 500 }],
+        },
+        {
+          name: "生活費",
+          startAge: 35,
+          endAge: 35,
+          ops: [{ asset: "現金", op: "-", value: 100 }],
+        },
+      ],
+    },
+  };
+
+  it("adds estimated tax and social insurance on salary", () => {
+    const rows = simulate(base);
+    expect(rows[0].totalIncome).toBe(500);
+    expect(rows[0].totalExpense).toBe(190);
+    expect(rows[0].balances["現金"]).toBe(310);
+    expect(rows[0].operations.some((op) => op.eventName === "税金・社会保険")).toBe(true);
+  });
+
+  it("does not tax opening cash or one-off income", () => {
+    const rows = simulate({
+      ...base,
+      scenario: {
+        name: "test",
+        events: [
+          {
+            name: "初期現金",
+            startAge: 35,
+            endAge: 35,
+            ops: [{ asset: "現金", op: "+", value: 1000 }],
+          },
+          {
+            name: "年収",
+            startAge: 35,
+            endAge: 35,
+            ops: [{ asset: "現金", op: "+", value: 500 }],
+          },
+          {
+            name: "臨時収入",
+            startAge: 35,
+            endAge: 35,
+            ops: [{ asset: "現金", op: "+", value: 100 }],
+          },
+          {
+            name: "生活費",
+            startAge: 35,
+            endAge: 35,
+            ops: [{ asset: "現金", op: "-", value: 100 }],
+          },
+        ],
+      },
+    });
+    expect(rows[0].totalExpense).toBe(190);
+    expect(rows[0].balances["現金"]).toBe(1410);
+  });
+
+  it("respects an explicit tax event", () => {
+    const rows = simulate({
+      ...base,
+      scenario: {
+        name: "test",
+        events: [
+          {
+            name: "年収",
+            startAge: 35,
+            endAge: 35,
+            ops: [{ asset: "現金", op: "+", value: 500 }],
+          },
+          {
+            name: "税金",
+            startAge: 35,
+            endAge: 35,
+            ops: [{ asset: "現金", op: "-", value: 100 }],
+          },
+        ],
+      },
+    });
+    expect(rows[0].totalExpense).toBe(100);
+    expect(rows[0].operations.some((op) => op.eventName === "税金・社会保険")).toBe(false);
+  });
+});

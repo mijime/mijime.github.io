@@ -15,6 +15,10 @@ db.version(1).stores({
   scenarios: "++id, name, updatedAt",
 });
 
+// Ids deleted in this session. A debounced autosave may still be in flight;
+// it must not resurrect a document the user just deleted.
+const deletedIds = new Set<number>();
+
 async function saveScenario(opts: {
   id?: number;
   name: string;
@@ -23,14 +27,20 @@ async function saveScenario(opts: {
   simulationYears: number;
 }): Promise<number> {
   if (opts.id !== undefined) {
-    await db.scenarios.update(opts.id, {
+    if (deletedIds.has(opts.id)) {
+      if (!(await db.scenarios.get(opts.id))) return opts.id;
+      deletedIds.delete(opts.id);
+    }
+    const updated = await db.scenarios.update(opts.id, {
       name: opts.name,
       dslText: opts.dslText,
       currentAge: opts.currentAge,
       simulationYears: opts.simulationYears,
       updatedAt: new Date(),
     });
-    return opts.id;
+    if (updated > 0) return opts.id;
+    // The record was deleted elsewhere (another tab, storage cleanup, ...).
+    // Re-create it instead of silently dropping the user's edits.
   }
   const id = await db.scenarios.add({
     name: opts.name,
@@ -58,6 +68,7 @@ async function listScenarios(): Promise<Scenario[]> {
 
 async function deleteScenario(id: number): Promise<void> {
   await db.scenarios.delete(id);
+  deletedIds.add(id);
 }
 
 export { db, saveScenario, loadScenario, listScenarios, deleteScenario };

@@ -8,6 +8,7 @@
   },
   "scripts": {
     "dev": "vite",
+    "cli": "node src/cli.ts",
     "build": "tsgo --noEmit && vite build",
     "preview": "vite preview",
     "test": "vitest run",
@@ -21,12 +22,14 @@
   "dependencies": {
     "@mijime/theme": "workspace:*",
     "dexie": "^4.4.6",
+    "lucide-react": "^1.61.0",
     "recharts": "^3.10.1"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.3.3",
     "@testing-library/jest-dom": "^7.0.1",
     "@testing-library/react": "^16.3.3",
+    "@types/node": "^26.6.5",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "@typescript/native-preview": "7.0.0-dev.20260707.2",
