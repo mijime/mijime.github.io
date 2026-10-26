@@ -1,4 +1,5 @@
 import { useRef } from "react";
+import { Button, Modal } from "@mijime/theme/ui";
 import type { ExportData } from "./types";
 
 interface SettingsDialogProps {
@@ -57,31 +58,39 @@ export function SettingsDialog({
   }
 
   return (
-    <div className="emolog-settings-overlay" onClick={onClose}>
-      <div className="emolog-settings" onClick={(e) => e.stopPropagation()}>
-        <h3 className="emolog-settings-title">設定</h3>
-        <div className="emolog-settings-actions">
-          <button onClick={handleExport} className="emolog-settings-btn">
-            📤 データをエクスポート
-          </button>
-          <button onClick={() => fileInputRef.current?.click()} className="emolog-settings-btn">
-            📥 データをインポート
-          </button>
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept=".json"
-            style={{ display: "none" }}
-            onChange={handleImport}
-          />
-          <button onClick={handleDeleteAll} className="emolog-settings-btn emolog-settings-danger">
-            🗑️ すべてのデータを削除
-          </button>
-        </div>
-        <button onClick={onClose} className="emolog-settings-close">
+    <Modal
+      open
+      onClose={onClose}
+      title="設定"
+      size="sm"
+      footer={
+        <Button variant="secondary" size="sm" onClick={onClose}>
           閉じる
-        </button>
+        </Button>
+      }
+    >
+      <div className="flex flex-col gap-2">
+        <Button variant="secondary" onClick={handleExport} className="justify-start">
+          📤 データをエクスポート
+        </Button>
+        <Button
+          variant="secondary"
+          onClick={() => fileInputRef.current?.click()}
+          className="justify-start"
+        >
+          📥 データをインポート
+        </Button>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept=".json"
+          className="hidden"
+          onChange={handleImport}
+        />
+        <Button variant="danger" onClick={handleDeleteAll} className="justify-start">
+          🗑️ すべてのデータを削除
+        </Button>
       </div>
-    </div>
+    </Modal>
   );
 }

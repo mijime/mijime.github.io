@@ -76,3 +76,39 @@ describe("reducer", () => {
     expect(next).toBe(state);
   });
 });
+
+describe("reducer save status / hydration", () => {
+  it("HYDRATE merges a patch", () => {
+    const state = initialState();
+    const next = reducer(state, {
+      type: "HYDRATE",
+      patch: { started: true, scenarioName: "読み込み済み", saveStatus: "saved" },
+    });
+    expect(next.started).toBe(true);
+    expect(next.scenarioName).toBe("読み込み済み");
+    expect(next.saveStatus).toBe("saved");
+    expect(next.currentAge).toBe(state.currentAge);
+    expect(next.documentVersion).toBe(state.documentVersion + 1);
+  });
+
+  it("SET_SAVE_STATUS stores time and error", () => {
+    const at = new Date("2026-01-02T03:04:05Z");
+    const next = reducer(initialState(), {
+      type: "SET_SAVE_STATUS",
+      status: "error",
+      error: "quota",
+    });
+    expect(next.saveStatus).toBe("error");
+    expect(next.saveError).toBe("quota");
+
+    const saved = reducer(next, {
+      type: "SET_SAVE_STATUS",
+      status: "saved",
+      at,
+      error: null,
+    });
+    expect(saved.saveStatus).toBe("saved");
+    expect(saved.lastSavedAt).toBe(at);
+    expect(saved.saveError).toBeNull();
+  });
+});

@@ -66,7 +66,7 @@ describe("TaskCard", () => {
     );
     expect(screen.getByText("牛乳")).toBeTruthy();
     expect(screen.getByTestId("add-child-n1")).toBeTruthy();
-    expect(screen.getByTestId("task-status-n1").className).toContain("bg-sky-500");
+    expect(screen.getByTestId("task-status-n1").className).toContain("bg-(--info)");
   });
 
   it("dispatches ADD_CHILD_INLINE in mindmap mode", () => {
@@ -169,7 +169,7 @@ describe("TaskCard", () => {
     const card = screen.getByTestId("task-card-n1");
     // [MetaRow, Hairline, BodyRow] — children[1] is the hairline
     const hairline = card.children[1] as HTMLElement;
-    expect(hairline.style.borderTop).toBe("1px solid rgb(14, 165, 233)");
+    expect(hairline.style.borderTop).toBe("1px solid var(--tone-sky)");
     expect(hairline.style.opacity).toBe("");
   });
 
@@ -227,7 +227,7 @@ describe("TaskCard", () => {
     const card = screen.getByTestId("task-card-n1");
     // Done: DOM is [BodyRow, Hairline]; hairline is at index 1
     const hairline = card.children[1] as HTMLElement;
-    expect(hairline.style.borderTop).toBe("1px solid rgb(244, 63, 94)");
+    expect(hairline.style.borderTop).toBe("1px solid var(--tone-rose)");
     expect(hairline.style.opacity).toBe("0.35");
     // Meta row status dot is absent
     expect(screen.queryByTestId("status-dot-button-n1")).toBeNull();

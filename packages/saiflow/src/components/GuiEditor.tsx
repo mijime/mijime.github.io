@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { runSimulation, useSaiflowDispatch, useSaiflowState } from "../store";
+import { Button, IconButton, Input } from "@mijime/theme/ui";
+import { Plus, Trash2 } from "lucide-react";
+import { useSaiflowDispatch, useSaiflowState } from "../store";
 import { scenariosToDsl } from "../dslgen";
 import { AddEventModal, EventForm } from "./AddEventModal";
 import type { AssetOp, Event, Scenario } from "../types";
@@ -12,54 +14,46 @@ function primaryOp(ops: AssetOp[]): AssetOp | null {
   return ops[0] ?? null;
 }
 
+function initialScenarios(scenarios: Scenario[]): Scenario[] {
+  return scenarios.length > 0 ? structuredClone(scenarios) : [{ name: "デフォルト", events: [] }];
+}
+
 export function GuiEditor() {
   const state = useSaiflowState();
   const dispatch = useSaiflowDispatch();
-  const [scenarios, setScenarios] = useState<Scenario[]>([]);
+  const [scenarios, setScenarios] = useState<Scenario[]>(() => initialScenarios(state.scenarios));
   const [expandedIdx, setExpandedIdx] = useState<number | null>(null);
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
   const [modalOpen, setModalOpen] = useState(false);
   const [editingGroup, setEditingGroup] = useState<string | null>(null);
   const [editValue, setEditValue] = useState("");
-  const timerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const scenariosRef = useRef(scenarios);
+  scenariosRef.current = scenarios;
   const stateRef = useRef(state);
   stateRef.current = state;
 
+  // Adopt a document loaded from outside this editor (saved list, restore).
+  // GUI edits always round-trip through scenariosToDsl, so different data
+  // means someone else replaced the document.
   useEffect(() => {
-    if (state.scenarios.length > 0) {
-      setScenarios(structuredClone(state.scenarios));
-    } else {
-      setScenarios([{ name: "デフォルト", events: [] }]);
+    if (stateRef.current.dslText === scenariosToDsl(scenariosRef.current)) return;
+    if (JSON.stringify(stateRef.current.scenarios) === JSON.stringify(scenariosRef.current)) {
+      return;
     }
-  }, []);
-
-  const sync = useCallback(
-    (s: Scenario[]) => {
-      if (timerRef.current) clearTimeout(timerRef.current);
-      timerRef.current = setTimeout(() => {
-        const st = stateRef.current;
-        dispatch({ type: "SET_DSL", text: scenariosToDsl(s) });
-        const idx = Math.min(st.activeScenarioIndex, s.length - 1);
-        dispatch({ type: "SET_SCENARIOS", scenarios: s });
-        dispatch({ type: "SET_ACTIVE_SCENARIO", index: idx });
-        const scenario = s[idx];
-        if (scenario) {
-          runSimulation(dispatch, st.currentAge, st.simulationYears, scenario);
-        }
-      }, 300);
-    },
-    [dispatch],
-  );
+    const next = initialScenarios(stateRef.current.scenarios);
+    scenariosRef.current = next;
+    setScenarios(next);
+    setExpandedIdx(null);
+  }, [state.dslText]);
 
   const update = useCallback(
     (fn: (prev: Scenario[]) => Scenario[]) => {
-      setScenarios((prev) => {
-        const next = fn(prev);
-        sync(next);
-        return next;
-      });
+      const next = fn(scenariosRef.current);
+      scenariosRef.current = next;
+      setScenarios(next);
+      dispatch({ type: "SET_DSL", text: scenariosToDsl(next) });
     },
-    [sync],
+    [dispatch],
   );
 
   const addEvents = useCallback(
@@ -76,12 +70,6 @@ export function GuiEditor() {
   );
 
   useEffect(() => {
-    const scenario = scenarios[state.activeScenarioIndex];
-    if (!scenario) return;
-    runSimulation(dispatch, state.currentAge, state.simulationYears, scenario);
-  }, [state.currentAge, state.simulationYears, state.activeScenarioIndex, scenarios, dispatch]);
-
-  useEffect(() => {
     setEditingGroup(null);
     setEditValue("");
   }, [state.activeScenarioIndex]);
@@ -91,15 +79,15 @@ export function GuiEditor() {
     return (
       <div className="flex flex-col items-center justify-center h-full gap-3 p-6">
         <p className="text-sm text-(--ink) opacity-40">シナリオがありません</p>
-        <button
-          className="px-3 py-1.5 text-xs border border-(--border) rounded hover:bg-(--mid)"
+        <Button
+          variant="secondary"
+          size="sm"
           onClick={() => {
-            setScenarios([{ name: "デフォルト", events: [] }]);
-            sync([{ name: "デフォルト", events: [] }]);
+            update(() => [{ name: "デフォルト", events: [] }]);
           }}
         >
           シナリオを作成
-        </button>
+        </Button>
       </div>
     );
   }
@@ -199,14 +187,15 @@ export function GuiEditor() {
 
     return (
       <div className="flex items-center border-b border-(--border) bg-(--grid)/30">
-        <button
-          className="flex-1 flex items-center gap-2 px-3 py-2 text-left text-xs hover:bg-(--mid)/20 transition-colors"
+        <Button
+          variant="ghost"
+          className="h-auto flex-1 justify-start gap-2 px-3 py-2 text-left text-xs"
           onClick={toggle}
         >
           <span className="opacity-30 w-3 shrink-0 text-[10px]">{isExpanded ? "▼" : "▶"}</span>
           {isEditing ? (
-            <input
-              className="flex-1 min-w-0 px-1 py-0.5 text-xs bg-(--paper) text-(--ink) border border-(--border) rounded outline-none focus:border-(--terra)"
+            <Input
+              className="flex-1 min-w-0 px-1 py-0.5 text-xs"
               value={editValue}
               onChange={(e) => setEditValue(e.target.value)}
               onBlur={commitRename}
@@ -227,21 +216,22 @@ export function GuiEditor() {
             </span>
           )}
           <span className="opacity-30 tabular-nums">({count})</span>
-        </button>
-        <button
-          className="px-2 py-1 text-xs opacity-30 hover:opacity-100 transition-colors shrink-0"
+        </Button>
+        <IconButton
+          label={`${groupName}にイベントを追加`}
+          size="icon-sm"
           onClick={handleAddToGroup}
-          title="このグループにイベントを追加"
         >
-          +
-        </button>
-        <button
-          className="px-2 py-1 text-xs text-red-400/50 hover:text-red-400 transition-colors shrink-0"
+          <Plus size={12} />
+        </IconButton>
+        <IconButton
+          label={`${groupName}を削除`}
+          size="icon-sm"
+          variant="ghost"
           onClick={handleDeleteGroup}
-          title="グループを削除"
         >
-          🗑
-        </button>
+          <Trash2 size={12} />
+        </IconButton>
       </div>
     );
   };
@@ -250,8 +240,8 @@ export function GuiEditor() {
     <div className="flex flex-col h-full">
       <div className="px-3 py-2 border-b border-(--border)">
         <div className="flex items-center gap-2">
-          <input
-            className="flex-1 min-w-0 bg-transparent text-sm font-medium outline-none placeholder:text-(--ink)/25"
+          <Input
+            className="min-w-0 flex-1 text-sm font-medium"
             placeholder="シナリオ名"
             value={scenario.name}
             onChange={(e) =>
@@ -267,17 +257,20 @@ export function GuiEditor() {
           </span>
         </div>
         <div className="flex gap-1 mt-1.5">
-          <button
-            className="text-xs opacity-40 hover:opacity-100 transition-opacity"
+          <Button
+            variant="ghost"
+            size="sm"
             onClick={() =>
               update((prev) => [...prev, { name: `シナリオ${prev.length + 1}`, events: [] }])
             }
           >
             + 新規シナリオ
-          </button>
+          </Button>
           {scenarios.length > 1 && (
-            <button
-              className="text-xs text-red-400/70 hover:text-red-400 transition-colors ml-auto"
+            <Button
+              variant="danger"
+              size="sm"
+              className="ml-auto"
               onClick={() => {
                 const idx = state.activeScenarioIndex;
                 update((prev) => prev.filter((_, i) => i !== idx));
@@ -285,19 +278,21 @@ export function GuiEditor() {
               }}
             >
               シナリオを削除
-            </button>
+            </Button>
           )}
         </div>
       </div>
 
       <div className="flex-1 overflow-y-auto">
         <div className="px-2 py-1.5">
-          <button
-            className="w-full py-1.5 text-xs opacity-40 hover:opacity-100 border border-dashed border-(--border) rounded transition-opacity"
+          <Button
+            variant="secondary"
+            size="sm"
+            className="w-full border-dashed"
             onClick={() => setModalOpen(true)}
           >
             + イベントを追加
-          </button>
+          </Button>
         </div>
         {events.length === 0 ? (
           <div className="p-6 text-center">
@@ -333,8 +328,9 @@ export function GuiEditor() {
                     isExpanded ? "bg-(--grid)/50" : ""
                   }`}
                 >
-                  <button
-                    className="w-full px-3 py-2 text-left text-xs flex items-center gap-2 hover:bg-(--mid)/20 transition-colors"
+                  <Button
+                    variant="ghost"
+                    className="h-auto w-full justify-start gap-2 px-3 py-2 text-left text-xs"
                     onClick={() => setExpandedIdx(isExpanded ? null : idx)}
                   >
                     <span className="opacity-30 w-3 shrink-0 text-[10px]">
@@ -363,7 +359,7 @@ export function GuiEditor() {
                         )}
                       </span>
                     )}
-                  </button>
+                  </Button>
 
                   {isExpanded && (
                     <EventForm
@@ -415,12 +411,14 @@ export function GuiEditor() {
       </div>
 
       <div className="p-2 border-t border-(--border)">
-        <button
-          className="w-full py-1.5 text-xs opacity-40 hover:opacity-100 border border-dashed border-(--border) rounded transition-opacity"
+        <Button
+          variant="secondary"
+          size="sm"
+          className="w-full border-dashed"
           onClick={() => setModalOpen(true)}
         >
           + イベントを追加
-        </button>
+        </Button>
       </div>
       {modalOpen && (
         <AddEventModal

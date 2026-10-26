@@ -29,10 +29,10 @@ export function computeCategories(rows: YearRow[]): {
     const income: Record<string, number> = {};
     const expense: Record<string, number> = {};
 
-    for (const { eventName, op } of row.operations) {
+    for (const { eventName, op, flow } of row.operations) {
       const cat = categoryName(eventName);
-      if (op.op === "+") income[cat] = (income[cat] ?? 0) + op.value;
-      if (op.op === "-") expense[cat] = (expense[cat] ?? 0) + op.value;
+      if (flow === "income") income[cat] = (income[cat] ?? 0) + op.value;
+      if (flow === "expense") expense[cat] = (expense[cat] ?? 0) + op.value;
     }
 
     const net: Record<string, number> = {};

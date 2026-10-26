@@ -1,8 +1,10 @@
 import React from "react";
+import { SegmentedControl } from "@mijime/theme/ui";
 import { useSaiflowState } from "../store";
 import { computeCategories } from "../categories";
 import { ChartTooltip } from "./ChartTooltip";
 import { logTicks } from "./BarChart";
+import { fmt, xTickIndices } from "../utils";
 
 const PALETTE = [
   "hsl(120, 65%, 50%)",
@@ -38,12 +40,14 @@ export function CategoryChart() {
     mx: number;
     my: number;
   } | null>(null);
+  const [scaleMode, setScaleMode] = React.useState<"linear" | "log">("linear");
 
-  const padding = { top: 24, right: 24, bottom: 40, left: 56 };
+  const legendRows = Math.max(1, Math.ceil(denseCats.length / 6));
+  const padding = { top: 24 + legendRows * 16, right: 24, bottom: 40, left: 56 };
   const width = Math.max(600, rows.length * 14 + padding.left + padding.right);
   const height = 380;
-  const midY = height / 2;
   const plotH = (height - padding.top - padding.bottom) / 2;
+  const midY = padding.top + plotH;
 
   const maxIncome = Math.max(
     ...breakdowns.map((b) => denseCats.reduce((s, c) => s + (b.income[c] ?? 0), 0)),
@@ -59,15 +63,30 @@ export function CategoryChart() {
   const barW = Math.max(3, step * 0.65);
   const x = (i: number) => padding.left + i * step + step / 2;
 
-  const scale = (v: number) => Math.log10(v + 1) / Math.log10(maxVal + 1);
+  const scale = (v: number) =>
+    scaleMode === "log" ? Math.log10(v + 1) / Math.log10(maxVal + 1) : v / maxVal;
   const incomeY = (v: number) => midY - scale(v) * plotH;
   const expenseY = (v: number) => midY + scale(v) * plotH;
 
-  const yTicks = logTicks(maxVal);
-  const xTickInterval = Math.max(1, Math.floor(rows.length / 10));
+  const yTicks =
+    scaleMode === "log"
+      ? logTicks(maxVal)
+      : Array.from({ length: 5 }, (_, index) => (maxVal * index) / 4);
+  const xTicks = xTickIndices(rows.length);
 
   return (
     <div className="h-full overflow-auto relative">
+      <div className="flex justify-end px-2 py-1">
+        <SegmentedControl
+          ariaLabel="縦軸のスケール"
+          value={scaleMode}
+          onChange={setScaleMode}
+          options={[
+            { value: "linear", label: "線形" },
+            { value: "log", label: "対数" },
+          ]}
+        />
+      </div>
       <svg width={width} height={height} className="font-sans text-xs">
         <line
           x1={padding.left}
@@ -100,7 +119,7 @@ export function CategoryChart() {
               fill="var(--ink)"
               opacity={0.5}
             >
-              {v}
+              {scaleMode === "log" ? v : fmt(Math.round(v))}
             </text>
             <text
               x={padding.left - 6}
@@ -109,7 +128,7 @@ export function CategoryChart() {
               fill="var(--ink)"
               opacity={0.5}
             >
-              {v}
+              {scaleMode === "log" ? v : fmt(Math.round(v))}
             </text>
           </g>
         ))}
@@ -182,31 +201,29 @@ export function CategoryChart() {
             width={step}
             height={height - padding.top - padding.bottom}
             fill="transparent"
-            onMouseEnter={(e) => setHover({ i, mx: e.clientX, my: e.clientY })}
-            onMouseMove={(e) =>
+            onPointerEnter={(e) => setHover({ i, mx: e.clientX, my: e.clientY })}
+            onPointerDown={(e) => setHover({ i, mx: e.clientX, my: e.clientY })}
+            onPointerMove={(e) =>
               setHover((h) => (h ? { ...h, mx: e.clientX, my: e.clientY } : null))
             }
-            onMouseLeave={() => setHover(null)}
+            onPointerLeave={() => setHover(null)}
           />
         ))}
 
-        {rows.map((r, i) => {
-          if (i % xTickInterval !== 0 && i !== rows.length - 1) return null;
-          return (
-            <text
-              key={`x${i}`}
-              x={x(i)}
-              y={height - padding.bottom + 16}
-              textAnchor="middle"
-              fill="var(--ink)"
-              opacity={0.5}
-            >
-              {r.age}
-            </text>
-          );
-        })}
+        {xTicks.map((i) => (
+          <text
+            key={`x${i}`}
+            x={x(i)}
+            y={height - padding.bottom + 16}
+            textAnchor="middle"
+            fill="var(--ink)"
+            opacity={0.5}
+          >
+            {rows[i].age}
+          </text>
+        ))}
 
-        <g transform={`translate(${padding.left}, 4)`}>
+        <g transform={`translate(${padding.left}, 16)`}>
           {denseCats.map((cat, i) => {
             const col = i % 6;
             const row = Math.floor(i / 6);
@@ -253,8 +270,8 @@ export function CategoryChart() {
                 const totalInc = denseCats.reduce((s, c) => s + (b.income[c] ?? 0), 0);
                 const totalExp = denseCats.reduce((s, c) => s + (b.expense[c] ?? 0), 0);
                 lines.push(
-                  { label: "収入計", value: totalInc.toLocaleString() },
-                  { label: "支出計", value: totalExp.toLocaleString() },
+                  { label: "収入(現金)", value: totalInc.toLocaleString() },
+                  { label: "支出(現金)", value: totalExp.toLocaleString() },
                 );
                 return { x: hover.mx, y: hover.my, lines };
               })()

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Button, Field, Input, Modal } from "@mijime/theme/ui";
 import { useMindStore } from "../hooks/use-mind-store";
 
 const MAX_NAME = 50;
@@ -31,63 +32,41 @@ export function BoardNameDialog() {
   };
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center"
-      style={{ background: "rgba(0,0,0,0.4)" }}
-      onClick={close}
-    >
-      <form
-        onSubmit={onSubmit}
-        onClick={(e) => e.stopPropagation()}
-        className="rounded p-6 w-[420px] max-w-[90vw]"
-        style={{ background: "var(--paper)", border: "1px solid var(--border)" }}
-      >
-        <h2
-          className="text-lg mb-4"
-          style={{ fontFamily: '"Crimson Pro", serif', fontWeight: 600, color: "var(--ink)" }}
-        >
-          {modal.mode === "create" ? "新しいボード" : "ボード名を変更"}
-        </h2>
-        <input
-          autoFocus
-          type="text"
-          value={name}
-          onChange={(e) => setName(e.target.value.slice(0, MAX_NAME))}
-          maxLength={MAX_NAME}
-          placeholder="例: メインプロジェクト"
-          className="w-full px-3 py-2 text-sm rounded outline-none"
-          style={{
-            background: "var(--toolbar-bg)",
-            border: "1px solid var(--border)",
-            color: "var(--ink)",
-          }}
-        />
-        <div className="text-xs mt-1" style={{ color: "var(--mid)" }}>
-          {name.length} / {MAX_NAME}
-        </div>
-        <div className="flex justify-end gap-2 mt-4">
-          <button
-            type="button"
-            onClick={close}
-            className="px-4 py-2 text-sm rounded transition"
-            style={{
-              background: "var(--paper)",
-              border: "1px solid var(--border)",
-              color: "var(--ink)",
-            }}
-          >
+    <Modal
+      open
+      onClose={close}
+      title={modal.mode === "create" ? "新しいボード" : "ボード名を変更"}
+      size="sm"
+      footer={
+        <>
+          <Button variant="secondary" size="sm" onClick={close}>
             キャンセル
-          </button>
-          <button
+          </Button>
+          <Button
+            variant="primary"
+            size="sm"
             type="submit"
+            form="board-name-form"
             disabled={!name.trim()}
-            className="px-4 py-2 text-sm rounded transition disabled:opacity-50"
-            style={{ background: "var(--terra)", color: "var(--paper)" }}
           >
             {modal.mode === "create" ? "作成" : "保存"}
-          </button>
-        </div>
+          </Button>
+        </>
+      }
+    >
+      <form id="board-name-form" onSubmit={onSubmit}>
+        <Field label="ボード名" hint={`${name.length} / ${MAX_NAME}`} htmlFor="board-name-input">
+          <Input
+            id="board-name-input"
+            autoFocus
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value.slice(0, MAX_NAME))}
+            maxLength={MAX_NAME}
+            placeholder="例: メインプロジェクト"
+          />
+        </Field>
       </form>
-    </div>
+    </Modal>
   );
 }

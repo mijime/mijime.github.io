@@ -83,18 +83,18 @@ describe("formatBadges", () => {
 
 describe("categoryBorderColor", () => {
   it("maps colors to hex/var values", () => {
-    expect(categoryBorderColor("sky")).toBe("#0ea5e9");
-    expect(categoryBorderColor("emerald")).toBe("#10b981");
-    expect(categoryBorderColor("rose")).toBe("#f43f5e");
+    expect(categoryBorderColor("sky")).toBe("var(--tone-sky)");
+    expect(categoryBorderColor("emerald")).toBe("var(--tone-green)");
+    expect(categoryBorderColor("rose")).toBe("var(--tone-rose)");
     expect(categoryBorderColor("slate")).toBe("var(--mid)");
   });
 });
 
 describe("statusDotClass", () => {
   it("returns the right class per status", () => {
-    expect(statusDotClass("inbox")).toBe("bg-slate-400");
-    expect(statusDotClass("wip")).toBe("bg-sky-500");
-    expect(statusDotClass("review")).toBe("bg-amber-500");
-    expect(statusDotClass("done")).toBe("bg-emerald-500");
+    expect(statusDotClass("inbox")).toBe("bg-(--mid)");
+    expect(statusDotClass("wip")).toBe("bg-(--info)");
+    expect(statusDotClass("review")).toBe("bg-(--warning)");
+    expect(statusDotClass("done")).toBe("bg-(--success)");
   });
 });

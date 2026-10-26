@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { Button } from "@mijime/theme/ui";
 
 interface SnackBarProps {
   message: string | null;
@@ -19,15 +20,16 @@ export function SnackBar({ message, action, onDismiss }: SnackBarProps) {
     <div className="emolog-snackbar">
       <span className="emolog-snackbar-text">{message}</span>
       {action && (
-        <button
-          className="emolog-snackbar-action"
+        <Button
+          variant="primary"
+          size="sm"
           onClick={() => {
             action.onClick();
             onDismiss();
           }}
         >
           {action.label}
-        </button>
+        </Button>
       )}
     </div>
   );

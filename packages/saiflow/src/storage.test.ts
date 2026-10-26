@@ -52,3 +52,32 @@ describe("storage", () => {
     expect(list).toEqual([]);
   });
 });
+
+describe("storage recovery", () => {
+  beforeEach(async () => {
+    await db.scenarios.clear();
+  });
+
+  it("re-creates a scenario when its id no longer exists", async () => {
+    const id = await saveScenario({
+      name: "stale",
+      dslText: "old",
+      currentAge: 35,
+      simulationYears: 50,
+    });
+    await db.scenarios.delete(id);
+
+    const newId = await saveScenario({
+      id,
+      name: "recovered",
+      dslText: "new",
+      currentAge: 35,
+      simulationYears: 50,
+    });
+
+    expect(newId).not.toBe(id);
+    const list = await listScenarios();
+    expect(list).toHaveLength(1);
+    expect(list[0].name).toBe("recovered");
+  });
+});

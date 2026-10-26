@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "scripts": {
     "dev": "pnpm --filter @mijime/main dev",
+    "sim": "node packages/saiflow/src/cli.ts",
     "preview": "pnpm --filter @mijime/main preview",
     "build": "pnpm -r run build",
     "check": "pnpm -r run check",

@@ -1,25 +1,9 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
+import { Button, SegmentedControl } from "@mijime/theme/ui";
 import { useSaiflowState } from "../store";
-import { computeCategories, type CategoryBreakdown, categoryName } from "../categories";
+import { computeCategories, type CategoryBreakdown } from "../categories";
 import type { YearRow } from "../types";
 import { fmt } from "../utils";
-
-function adjustedTotals(ops: YearRow["operations"]): { income: number; expense: number } {
-  const byEvent = new Map<string, { inc: number; exp: number }>();
-  for (const { eventName, op } of ops) {
-    const e = byEvent.get(eventName) ?? { inc: 0, exp: 0 };
-    if (op.op === "+") e.inc += op.value;
-    if (op.op === "-") e.exp += op.value;
-    byEvent.set(eventName, e);
-  }
-  let income = 0;
-  let expense = 0;
-  for (const { inc, exp } of byEvent.values()) {
-    if (inc > exp) income += inc - exp;
-    if (exp > inc) expense += exp - inc;
-  }
-  return { income, expense };
-}
 
 function perAssetIncExp(ops: YearRow["operations"]): Map<string, { inc: number; exp: number }> {
   const map = new Map<string, { inc: number; exp: number }>();
@@ -45,33 +29,18 @@ function downloadCsv(
   cats: string[],
   assetNames: string[],
   breakdowns: CategoryBreakdown[],
-  cashAsset: string,
 ) {
-  const header = ["年齢", ...cats, "収入計", "支出計", "収支", ...assetNames, "総資産"];
+  const header = ["年齢", ...cats, "収入(現金)", "支出(現金)", "現金収支", ...assetNames, "総資産"];
   const lines = [header.join(",")];
   for (let i = 0; i < rows.length; i++) {
     const r = rows[i];
     const b = breakdowns[i];
-    const adj = adjustedTotals(r.operations);
-    const net = adj.income - adj.expense;
     const row = [
       r.age,
-      ...cats.map((c) => {
-        const v = b.net[c] ?? 0;
-        if (v !== 0) return v;
-        const inc = b.income[c] ?? 0;
-        if (inc === 0) return 0;
-        let cashNet = 0;
-        for (const { eventName, op } of r.operations) {
-          if (categoryName(eventName) !== c || op.asset !== cashAsset) continue;
-          if (op.op === "+") cashNet += op.value;
-          if (op.op === "-") cashNet -= op.value;
-        }
-        return cashNet >= 0 ? inc : -inc;
-      }),
-      adj.income,
-      adj.expense,
-      net,
+      ...cats.map((c) => b.net[c] ?? 0),
+      r.totalIncome,
+      r.totalExpense,
+      r.totalIncome - r.totalExpense,
       ...assetNames.map((a) => r.balances[a] ?? 0),
       r.totalAssets,
     ];
@@ -89,6 +58,8 @@ function downloadCsv(
 export function SummaryTable() {
   const state = useSaiflowState();
   const { rows } = state;
+  const [mode, setMode] = useState<"compact" | "detail">("compact");
+  const showCategories = mode === "detail";
 
   const { allCategories, breakdowns } = useMemo(() => {
     if (!rows || rows.length === 0) return { allCategories: [], breakdowns: [] };
@@ -111,35 +82,47 @@ export function SummaryTable() {
     return [...set].toSorted();
   }, [rows]);
 
-  const cashAsset = useMemo(
-    () => assetNames.find((a) => a === "現金") ?? assetNames[0] ?? "",
-    [assetNames],
-  );
-
   if (!rows || rows.length === 0) return null;
 
   return (
     <div className="h-full overflow-auto">
-      <div className="flex justify-end px-2 py-1">
-        <button
-          className="text-xs text-(--ink) opacity-40 hover:opacity-100 transition-opacity"
-          onClick={() => downloadCsv(rows, denseCats, assetNames, breakdowns, cashAsset)}
+      <div className="flex items-center gap-2 px-2 py-1 flex-wrap">
+        <span className="text-[10px] text-(--ink) opacity-30">
+          金額単位: 万円（借入・積立・運用益は含まない現金ベース）
+        </span>
+        <SegmentedControl
+          ariaLabel="表示密度"
+          value={mode}
+          onChange={setMode}
+          options={[
+            { value: "compact", label: "コンパクト" },
+            { value: "detail", label: "詳細" },
+          ]}
+          className="ml-auto"
+        />
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => downloadCsv(rows, denseCats, assetNames, breakdowns)}
         >
           CSVダウンロード
-        </button>
+        </Button>
       </div>
       <table className="w-full border-collapse text-sm">
         <thead className="sticky top-0 bg-(--toolbar-bg)">
           <tr>
-            <th className="px-2 py-1 text-left border-b border-(--border)">年齢</th>
-            {denseCats.map((cat) => (
-              <th key={cat} className="px-2 py-1 text-right border-b border-(--border)">
-                {cat}
-              </th>
-            ))}
-            <th className="px-2 py-1 text-right border-b border-(--border)">収入計</th>
-            <th className="px-2 py-1 text-right border-b border-(--border)">支出計</th>
-            <th className="px-2 py-1 text-right border-b border-(--border)">収支</th>
+            <th className="sticky left-0 z-20 bg-(--toolbar-bg) px-2 py-1 text-left border-b border-(--border)">
+              年齢
+            </th>
+            {showCategories &&
+              denseCats.map((cat) => (
+                <th key={cat} className="px-2 py-1 text-right border-b border-(--border)">
+                  {cat}
+                </th>
+              ))}
+            <th className="px-2 py-1 text-right border-b border-(--border)">収入(現金)</th>
+            <th className="px-2 py-1 text-right border-b border-(--border)">支出(現金)</th>
+            <th className="px-2 py-1 text-right border-b border-(--border)">現金収支</th>
             {assetNames.map((name) => (
               <th key={name} className="px-2 py-1 text-right border-b border-(--border)">
                 {name}
@@ -151,59 +134,52 @@ export function SummaryTable() {
         <tbody>
           {rows.map((row, i) => {
             const b = breakdowns[i];
-            const adj = adjustedTotals(row.operations);
             const ieMap = perAssetIncExp(row.operations);
-            const net = adj.income - adj.expense;
+            const net = row.totalIncome - row.totalExpense;
             const netNegative = net < 0;
             return (
               <tr key={i} className={netNegative ? "bg-red-100 dark:bg-red-950" : ""}>
-                <td className="px-2 py-0.5 border-b border-(--border)">{row.age}</td>
-                {denseCats.map((cat) => {
-                  const v = b.net[cat] ?? 0;
-                  const inc = b.income[cat] ?? 0;
-                  const exp = b.expense[cat] ?? 0;
-                  if (v === 0 && inc === 0 && exp === 0) {
+                <td
+                  className={`sticky left-0 z-10 px-2 py-0.5 border-b border-(--border) ${
+                    netNegative ? "bg-red-100 dark:bg-red-950" : "bg-(--paper)"
+                  }`}
+                >
+                  {row.age}
+                </td>
+                {showCategories &&
+                  denseCats.map((cat) => {
+                    const v = b.net[cat] ?? 0;
+                    const inc = b.income[cat] ?? 0;
+                    const exp = b.expense[cat] ?? 0;
+                    if (v === 0 && inc === 0 && exp === 0) {
+                      return (
+                        <td
+                          key={cat}
+                          className="px-2 py-0.5 text-right border-b border-(--border) opacity-30"
+                        >
+                          0
+                        </td>
+                      );
+                    }
                     return (
                       <td
                         key={cat}
-                        className="px-2 py-0.5 text-right border-b border-(--border) opacity-30"
+                        className={`px-2 py-0.5 text-right border-b border-(--border) tabular-nums ${v < 0 ? "text-red-500" : ""}`}
                       >
-                        0
+                        {fmtRounded(v)}
                       </td>
                     );
-                  }
-                  const display = v !== 0 ? v : inc;
-                  const transfer = v === 0;
-                  let neg = v < 0;
-                  if (transfer && cashAsset) {
-                    let cashNet = 0;
-                    for (const { eventName, op } of row.operations) {
-                      if (categoryName(eventName) !== cat || op.asset !== cashAsset) continue;
-                      if (op.op === "+") cashNet += op.value;
-                      if (op.op === "-") cashNet -= op.value;
-                    }
-                    neg = cashNet < 0;
-                  }
-                  return (
-                    <td
-                      key={cat}
-                      className={`px-2 py-0.5 text-right border-b border-(--border) tabular-nums ${neg ? "text-red-500" : ""}`}
-                    >
-                      {fmtRounded(Math.abs(display))}
-                      {transfer && <span className="ml-0.5 text-[10px] opacity-40">振替</span>}
-                    </td>
-                  );
-                })}
+                  })}
                 <td className="px-2 py-0.5 text-right border-b border-(--border) tabular-nums">
-                  {fmtRounded(adj.income)}
+                  {fmtRounded(row.totalIncome)}
                 </td>
                 <td className="px-2 py-0.5 text-right border-b border-(--border) tabular-nums">
-                  {fmtRounded(adj.expense)}
+                  {fmtRounded(row.totalExpense)}
                 </td>
                 <td
                   className={`px-2 py-0.5 text-right border-b border-(--border) tabular-nums ${netNegative ? "text-red-500" : ""}`}
                 >
-                  {fmtRounded(Math.abs(net))}
+                  {fmtRounded(net)}
                 </td>
                 {assetNames.map((name) => {
                   const v = row.balances[name] ?? 0;

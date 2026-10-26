@@ -1,7 +1,15 @@
 import { describe, it, expect } from "vitest";
-import { render, screen } from "@testing-library/react";
+import type { ReactNode } from "react";
+import { render, screen, waitFor } from "@testing-library/react";
 import { DslEditor } from "./DslEditor";
-import { SaiflowProvider } from "../store";
+import { SaiflowProvider, useSaiflowState } from "../store";
+import { useDslSync } from "../useDslSync";
+import type { YearRow } from "../types";
+
+function Harness({ children }: { children: ReactNode }) {
+  useDslSync();
+  return <>{children}</>;
+}
 
 describe("DslEditor", () => {
   it("renders textarea with dslText from state", () => {
@@ -12,7 +20,7 @@ describe("DslEditor", () => {
     );
     const textarea = screen.getByRole("textbox");
     expect(textarea).toBeInTheDocument();
-    expect(textarea.textContent).toBe("# 現状維持\n現金,0,0,現金+1000\n");
+    expect((textarea as HTMLTextAreaElement).value).toBe("# 現状維持\n現金,0,0,現金+1000\n");
   });
 
   it("shows parse errors when present", () => {
@@ -22,7 +30,9 @@ describe("DslEditor", () => {
           dslText: "# テスト\nbad",
         }}
       >
-        <DslEditor />
+        <Harness>
+          <DslEditor />
+        </Harness>
       </SaiflowProvider>,
     );
     expect(screen.getByText(/形式である必要があります/)).toBeInTheDocument();
@@ -57,4 +67,59 @@ describe("DslEditor", () => {
     );
     expect(screen.getByText(/解析OK/)).toBeInTheDocument();
   });
+});
+
+describe("DslEditor error handling", () => {
+  const row: YearRow = {
+    age: 35,
+    operations: [],
+    balances: { 現金: 100 },
+    totalIncome: 100,
+    totalExpense: 0,
+    totalAssets: 100,
+    groupIncome: {},
+    groupExpense: {},
+  };
+
+  function RowsProbe() {
+    const state = useSaiflowState();
+    return <div data-testid="rows">{state.rows?.length ?? 0}</div>;
+  }
+
+  it("keeps the last result visible while the DSL has errors", async () => {
+    render(
+      <SaiflowProvider state={{ dslText: "bad line", rows: [row] }}>
+        <Harness>
+          <DslEditor />
+          <RowsProbe />
+        </Harness>
+      </SaiflowProvider>,
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText(/エラーあり/)).toBeInTheDocument();
+    });
+    expect(screen.getByTestId("rows")).toHaveTextContent("1");
+    expect(screen.getByText("bad line", { selector: "code" })).toBeInTheDocument();
+  });
+
+  it("records the last valid DSL after a successful parse", async () => {
+    render(
+      <SaiflowProvider state={{ dslText: "# A\n,現金,35,35,現金+100\n" }}>
+        <Harness>
+          <DslEditor />
+          <LastValidProbe />
+        </Harness>
+      </SaiflowProvider>,
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId("last-valid")).toHaveTextContent("現金+100");
+    });
+  });
+
+  function LastValidProbe() {
+    const state = useSaiflowState();
+    return <div data-testid="last-valid">{state.lastValidDsl}</div>;
+  }
 });

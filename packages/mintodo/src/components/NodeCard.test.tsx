@@ -408,7 +408,7 @@ describe("NodeCard drag-and-drop", () => {
     expect(capturedState!.nodes.root.children).toContain("b");
   });
 
-  it("dragenter adds ring-2 ring-sky-400 class to valid target", () => {
+  it("dragenter adds ring-2 ring-(--info) class to valid target", () => {
     const { container } = setup({
       nodes: {
         root: makeNode("root", null, { isRoot: true, children: ["a", "b"], x: -9999, y: -9999 }),
@@ -448,7 +448,7 @@ describe("NodeCard drag-and-drop", () => {
     // Now the drag is active; check ring appears on target
     // (collision runs and finds b as over since a is excluded)
     expect(b.className).toContain("ring-2");
-    expect(b.className).toContain("ring-sky-400");
+    expect(b.className).toContain("ring-(--info)");
     // End the drag
     act(() => {
       doc.dispatchEvent(
@@ -573,6 +573,6 @@ describe("NodeCard drag-and-drop", () => {
     const b = container.querySelector('[data-node-id="b"]') as HTMLElement;
     dragFromTo(a, b);
     expect(b.className).not.toContain("ring-2");
-    expect(b.className).not.toContain("ring-sky-400");
+    expect(b.className).not.toContain("ring-(--info)");
   });
 });

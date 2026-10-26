@@ -68,13 +68,13 @@ export function NodeCard({ node }: Props) {
         ref={setNodeRef}
         id={`node-dom-${node.id}`}
         data-node-id={node.id}
-        className={`absolute -translate-x-1/2 -translate-y-1/2 p-4 rounded flex items-center justify-between gap-3 min-w-[200px] min-h-[60px] max-w-[280px] ${isSelected ? "node-selected" : ""} ${isMatch ? "" : "opacity-30"} ${isRingVisible ? "ring-2 ring-sky-400" : ""}`}
+        className={`absolute -translate-x-1/2 -translate-y-1/2 p-4 rounded flex items-center justify-between gap-3 min-w-[200px] min-h-[60px] max-w-[280px] ${isSelected ? "node-selected" : ""} ${isMatch ? "" : "opacity-30"} ${isRingVisible ? "ring-2 ring-(--info)" : ""}`}
         style={{
           left: node.x,
           top: node.y,
-          background: "var(--terra)",
-          color: "var(--paper)",
-          border: "2px solid var(--terra)",
+          background: "var(--accent)",
+          color: "var(--on-accent)",
+          border: "2px solid var(--accent)",
           fontFamily: '"Crimson Pro", serif',
           fontWeight: 600,
         }}
@@ -126,7 +126,7 @@ export function NodeCard({ node }: Props) {
         e.stopPropagation();
         dispatch({ nodeId: node.id, type: "START_INLINE_EDIT" });
       }}
-      className={`absolute -translate-x-1/2 -translate-y-1/2 px-4 py-3 rounded border-l-4 flex flex-col gap-2 min-w-[220px] max-w-[320px] ${isSelected ? "node-selected" : ""} ${isMatch ? "" : "opacity-30"} ${isRingVisible ? "ring-2 ring-sky-400" : ""}`}
+      className={`absolute -translate-x-1/2 -translate-y-1/2 px-4 py-3 rounded border-l-4 flex flex-col gap-2 min-w-[220px] max-w-[320px] ${isSelected ? "node-selected" : ""} ${isMatch ? "" : "opacity-30"} ${isRingVisible ? "ring-2 ring-(--info)" : ""}`}
       style={{
         left: node.x,
         top: node.y,
@@ -136,14 +136,14 @@ export function NodeCard({ node }: Props) {
         borderRight: "1px solid var(--border)",
         borderBottom: "1px solid var(--border)",
         borderLeft: `4px solid ${borderColor}`,
-        boxShadow: priBorder ? "0 0 0 1px var(--terra)" : undefined,
+        boxShadow: priBorder ? "0 0 0 1px var(--accent)" : undefined,
         opacity: isDragging ? 0.4 : isInvalidTarget ? 0.3 : 1,
         touchAction: "none",
       }}
     >
       <div className="flex items-center justify-between">
         <span
-          className="text-[10px] text-slate-400 overflow-hidden text-ellipsis whitespace-nowrap text-left [direction:rtl]"
+          className="text-[10px] text-(--mid) overflow-hidden text-ellipsis whitespace-nowrap text-left [direction:rtl]"
           title={breadcrumb}
         >
           {breadcrumb}
@@ -153,7 +153,7 @@ export function NodeCard({ node }: Props) {
             <button
               type="button"
               data-testid={`collapse-${node.id}`}
-              className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1 rounded-md transition"
+              className="text-(--mid) hover:text-(--ink) p-1 rounded-md transition"
               onClick={(e) => {
                 e.stopPropagation();
                 dispatch({ id: node.id, type: "TOGGLE_COLLAPSE" });
@@ -161,7 +161,7 @@ export function NodeCard({ node }: Props) {
               onPointerDown={(e) => e.stopPropagation()}
             >
               {node.collapsed ? (
-                <span className="flex items-center gap-0.5 text-[10px] font-semibold text-slate-500">
+                <span className="flex items-center gap-0.5 text-[10px] font-semibold text-(--mid)">
                   <ChevronDown size={12} />+{countHiddenDescendants(state.nodes, node.id)}
                 </span>
               ) : (
@@ -172,7 +172,7 @@ export function NodeCard({ node }: Props) {
           <button
             type="button"
             data-testid="ellipsis"
-            className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1 rounded-md transition"
+            className="text-(--mid) hover:text-(--ink) p-1 rounded-md transition"
             onClick={(e) => {
               e.stopPropagation();
               dispatch({ modal: { kind: "edit", nodeId: node.id }, type: "OPEN_MODAL" });
@@ -184,7 +184,7 @@ export function NodeCard({ node }: Props) {
           <button
             type="button"
             data-testid={`worklog-button-${node.id}`}
-            className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1 rounded-md transition relative"
+            className="text-(--mid) hover:text-(--ink) p-1 rounded-md transition relative"
             onClick={(e) => {
               e.stopPropagation();
               dispatch({ modal: { kind: "work-log", nodeId: node.id }, type: "OPEN_MODAL" });
@@ -194,7 +194,7 @@ export function NodeCard({ node }: Props) {
           >
             <ListOrdered size={12} />
             {node.workLogs.length > 0 && (
-              <span className="absolute -top-0.5 -right-0.5 bg-slate-500 text-white text-[8px] font-bold rounded-full min-w-[14px] h-[14px] flex items-center justify-center px-0.5 leading-none">
+              <span className="absolute -top-0.5 -right-0.5 bg-(--mid) text-(--on-accent) text-[8px] font-bold rounded-full min-w-[14px] h-[14px] flex items-center justify-center px-0.5 leading-none">
                 {node.workLogs.length}
               </span>
             )}
