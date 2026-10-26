@@ -5,8 +5,8 @@ import { reduce } from "./engine/reducer";
 import { createGame } from "./engine/setup";
 import type { Action, GameState } from "./engine/types";
 
-const STORAGE_KEY = "flowdeck:save:v27";
-const LEGACY_STORAGE_KEYS = ["flowdeck:save:v26"];
+const STORAGE_KEY = "flowdeck:save:v28";
+const LEGACY_STORAGE_KEYS = ["flowdeck:save:v27", "flowdeck:save:v26"];
 const DB_NAME = "flowdeck";
 const DB_VERSION = 1;
 const STORE_NAME = "saves";
@@ -16,7 +16,7 @@ function isGameState(value: unknown): value is GameState {
   if (typeof value !== "object" || value === null) return false;
   const state = value as Partial<GameState>;
   return (
-    (state.version === 27 || state.version === 26) &&
+    (state.version === 28 || state.version === 27 || state.version === 26) &&
     typeof state.day === "number" &&
     typeof state.teamScore === "number" &&
     typeof state.teamDebt === "number" &&
@@ -33,11 +33,12 @@ function isGameState(value: unknown): value is GameState {
   );
 }
 
-/** v26セーブに analytics と lanes を補ってv27として返す。 */
+/** v26/v27セーブに analytics・lanes・aiProfile を補ってv28として返す。 */
 export function normalizeState(state: GameState): GameState {
   const next = state as GameState;
-  next.version = 27;
+  next.version = 28;
   next.generationSwing ??= DEFAULT_GENERATION_SWING;
+  next.aiProfile ??= "standard";
   next.analytics = normalizeAnalytics(next.analytics);
   next.metrics = (next.metrics ?? []).map((snapshot) => {
     snapshot.lanes ??= { open: 0, inbox: 0, wip: 0, test: 0, done: 0 };

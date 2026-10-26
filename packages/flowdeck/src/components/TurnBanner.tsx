@@ -27,19 +27,19 @@ export function TurnBanner({
     <section className="mx-auto mt-1.5 max-w-[1440px] px-2">
       <div
         className={`turn-banner flex flex-wrap items-center gap-x-3 gap-y-1 rounded-sm border px-3 py-1.5 ${
-          isHuman ? "border-(--terra)/50 bg-(--terra)/5" : "border-(--border) bg-(--paper)"
+          isHuman ? "border-(--accent)/50 bg-(--accent)/5" : "border-(--border) bg-(--paper)"
         }`}
       >
         <span
           className={`inline-flex items-center gap-1.5 rounded-sm px-1.5 py-0.5 text-[10px] font-semibold ${
-            isHuman ? "bg-(--terra) text-white" : "bg-(--grid) text-(--ink)"
+            isHuman ? "bg-(--accent) text-(--on-accent)" : "bg-(--grid) text-(--ink)"
           }`}
         >
           {active && (
             <PlayerIcon
               player={active}
               size={13}
-              className={isHuman ? "text-white" : (tone?.text ?? "text-(--mid)")}
+              className={isHuman ? "text-(--on-accent)" : (tone?.text ?? "text-(--mid)")}
             />
           )}
           {isHuman

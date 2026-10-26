@@ -1,4 +1,5 @@
 import { runBotAction } from "./ai";
+import { botOptionsForProfile } from "./ai/profiles";
 import {
   advanceAction,
   discardCard,
@@ -28,6 +29,7 @@ export function reduce(state: GameState, action: Action, rules: RuleSet = BASE_R
       action.aiCount,
       rules,
       action.generationSwing ?? state.generationSwing,
+      action.aiProfile ?? state.aiProfile,
     );
   }
 
@@ -72,7 +74,7 @@ export function reduce(state: GameState, action: Action, rules: RuleSet = BASE_R
       if (s.phase !== "ai") return state;
       const player = s.players[s.activePlayerIndex];
       if (!player) return state;
-      const acted = runBotAction(s, player.id, rules);
+      const acted = runBotAction(s, player.id, rules, undefined, botOptionsForProfile(s.aiProfile));
       if (!acted) endPlayerTurn(s, player.id);
       finishAction(s);
       return s;
@@ -83,7 +85,7 @@ export function reduce(state: GameState, action: Action, rules: RuleSet = BASE_R
       if (s.phase === "over" || s.phase === "roundEnd") return state;
       const player = s.players[s.activePlayerIndex];
       if (!player) return state;
-      const acted = runBotAction(s, player.id, rules);
+      const acted = runBotAction(s, player.id, rules, undefined, botOptionsForProfile(s.aiProfile));
       if (!acted) endPlayerTurn(s, player.id);
       finishAction(s);
       return s;

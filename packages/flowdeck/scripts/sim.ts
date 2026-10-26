@@ -22,6 +22,9 @@ import { printRisks } from "./lib/reports/risks";
 import { printCompare } from "./lib/reports/compare";
 import { printScenarioTable, type ScenarioResult } from "./lib/reports/matrix";
 import { printTrace } from "./lib/reports/trace";
+import { printMonteCarlo } from "./lib/reports/montecarlo";
+import { GAME_LENGTH_OPTIONS } from "../src/engine/rules/balance";
+import { AI_PROFILES } from "../src/engine/ai/profiles";
 
 function seedsOf(options: SimOptions): number[] {
   return Array.from({ length: options.to - options.from + 1 }, (_, index) => options.from + index);
@@ -41,6 +44,7 @@ function runScenario(
     days: options.days,
     playerCount: options.players,
     rules: scenario.rules,
+    aiProfile: options.aiProfile,
     weights: options.weights ?? undefined,
     collectDecisions,
   };
@@ -54,6 +58,7 @@ function printSeed(options: SimOptions): void {
     days: options.days,
     playerCount: options.players,
     rules: scenario.rules,
+    aiProfile: options.aiProfile,
     weights: options.weights ?? undefined,
     collectDecisions: true,
   });
@@ -88,6 +93,7 @@ function runMatrix(options: SimOptions): void {
         days,
         playerCount: players,
         rules: scenario.rules,
+        aiProfile: options.aiProfile,
         weights: options.weights ?? undefined,
       };
       const results = runSeeds(config, seedsOf(options), options.progress ? progress : undefined);
@@ -141,22 +147,27 @@ function runCompare(options: SimOptions): void {
 
 function runBenchmark(options: SimOptions): void {
   const entries = [];
-  for (const swing of [0, 0.1, 0.2]) {
-    for (const players of [4, 5, 6]) {
-      for (const days of [10, 20, 30]) {
-        const config: Omit<RunConfig, "seed"> = {
-          days,
-          playerCount: players,
-          rules: resolveScenario("base", options.ruleset).rules,
-          generationSwing: swing,
-        };
-        const results = runSeeds(
-          config,
-          Array.from({ length: options.runs }, (_, index) => index + 1),
-          options.progress ? progress : undefined,
-        );
-        entries.push(benchmarkEntry(results, players, days, swing));
-        console.error(`  benchmark swing=${swing} ${players}p/${days}d done`);
+  for (const aiProfile of AI_PROFILES) {
+    for (const swing of [0, 0.1, 0.2]) {
+      for (const players of [4, 5, 6]) {
+        for (const days of GAME_LENGTH_OPTIONS) {
+          // 長丁場は1回が重いので、基準データは最大200シードに抑える。
+          const runs = days > 30 ? Math.min(options.runs, 200) : options.runs;
+          const config: Omit<RunConfig, "seed"> = {
+            days,
+            playerCount: players,
+            rules: resolveScenario("base", options.ruleset).rules,
+            generationSwing: swing,
+            aiProfile,
+          };
+          const results = runSeeds(
+            config,
+            Array.from({ length: runs }, (_, index) => index + 1),
+            options.progress ? progress : undefined,
+          );
+          entries.push(benchmarkEntry(results, players, days, swing, aiProfile));
+          console.error(`  benchmark ${aiProfile} swing=${swing} ${players}p/${days}d done`);
+        }
       }
     }
   }
@@ -183,6 +194,7 @@ function printReports(results: RunResult[], options: SimOptions): void {
         days: options.days,
         players: options.players,
         rules: resolveScenario(options.scenario, options.ruleset).rules,
+        aiProfile: options.aiProfile,
         baselineName: options.weights ? "current" : "random(roster)",
       },
       results,
@@ -206,6 +218,22 @@ function main(): void {
     runBenchmark(options);
     return;
   }
+  if (options.montecarlo) {
+    const scenario = resolveScenario(options.scenario, options.ruleset);
+    printMonteCarlo({
+      days: options.days,
+      players: options.players,
+      rules: scenario.rules,
+      aiProfile: options.aiProfile,
+      samples: options.samples,
+      seeds: options.mcSeeds,
+      seed: options.mcSeed,
+      scope: options.mcScope,
+      top: options.top,
+      progress: options.progress,
+    });
+    return;
+  }
   if (options.seed !== null) {
     printSeed(options);
     return;
@@ -218,6 +246,7 @@ function main(): void {
         days: options.days,
         playerCount: options.players,
         rules: scenario.rules,
+        aiProfile: options.aiProfile,
         weights: options.weights ?? undefined,
         collectDecisions: true,
       }),

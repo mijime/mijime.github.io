@@ -9,6 +9,7 @@ describe("normalizeState", () => {
     legacy.version = 26;
     delete legacy.analytics;
     delete legacy.generationSwing;
+    delete legacy.aiProfile;
     legacy.metrics = [
       {
         day: 1,
@@ -22,7 +23,8 @@ describe("normalizeState", () => {
     ];
 
     const normalized = normalizeState(legacy as unknown as typeof state);
-    expect(normalized.version).toBe(27);
+    expect(normalized.version).toBe(28);
+    expect(normalized.aiProfile).toBe("standard");
     expect(normalized.generationSwing).toBe(0.1);
     expect(normalized.analytics.actions.play).toBe(0);
     expect(normalized.metrics[0]?.lanes).toEqual({

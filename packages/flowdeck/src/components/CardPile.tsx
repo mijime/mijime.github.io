@@ -31,7 +31,7 @@ export function CardPile({
     >
       <Icon
         size={14}
-        className={tone === "risk" ? "text-(--terra)" : "text-(--tac-dim)"}
+        className={tone === "risk" ? "text-(--accent)" : "text-(--mid)"}
         aria-hidden="true"
       />
       <span className="text-[10px] font-semibold tabular-nums text-(--ink)">{count}</span>

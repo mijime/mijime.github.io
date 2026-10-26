@@ -1,8 +1,10 @@
 import type { ScoredAction } from "../../src/engine/ai";
+import type { BotOptions } from "../../src/engine/ai/types";
+import { botOptionsForProfile, DEFAULT_AI_PROFILE } from "../../src/engine/ai/profiles";
 import { playBotRound } from "../../src/engine/sim/run";
 import { createGame } from "../../src/engine/setup";
 import type { RuleSet } from "../../src/engine/rules";
-import type { GameState, PersonalityWeights } from "../../src/engine/types";
+import type { GameState, PersonalityWeights, AiProfile } from "../../src/engine/types";
 
 export interface WeightsConfig {
   all?: PersonalityWeights;
@@ -16,7 +18,9 @@ export interface RunConfig {
   playerCount: number;
   rules: RuleSet;
   generationSwing?: number;
+  aiProfile?: AiProfile;
   weights?: WeightsConfig;
+  bot?: BotOptions;
   collectDecisions?: boolean;
 }
 
@@ -56,6 +60,7 @@ export function runGame(config: RunConfig): RunResult {
     config.playerCount - 1,
     config.rules,
     config.generationSwing,
+    config.aiProfile,
   );
   applyWeights(config, state);
   const decisions: DecisionTrace[] = [];
@@ -80,6 +85,7 @@ export function runGame(config: RunConfig): RunResult {
           }
         : undefined,
       config.rules,
+      config.bot ?? botOptionsForProfile(config.aiProfile ?? DEFAULT_AI_PROFILE),
     );
     guard += 1;
   }

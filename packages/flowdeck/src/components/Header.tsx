@@ -8,6 +8,7 @@ import {
   TrendingDown,
   TrendingUp,
 } from "lucide-react";
+import { Badge, Button, SectionLabel, StatChip, cx } from "@mijime/theme/ui";
 import type { GameState } from "../engine/types";
 import { DEBT_SCORE_PENALTY } from "../engine/rules/balance";
 
@@ -33,17 +34,14 @@ function Stat({
   icon?: React.ReactNode;
   title?: string;
 }) {
-  const toneClass =
-    tone === "good" ? "text-emerald-400" : tone === "bad" ? "text-red-400" : "text-(--ink)";
   return (
-    <span
-      className="game-stat inline-flex items-center gap-1 rounded-sm border border-(--border) bg-(--paper) px-1.5 py-0.5"
+    <StatChip
+      label={label}
+      value={value}
+      icon={icon}
+      tone={tone === "good" ? "good" : tone === "bad" ? "bad" : "neutral"}
       title={title}
-    >
-      {icon && <span className="text-(--tac-dim)">{icon}</span>}
-      <span className="tac-label">{label}</span>
-      <span className={`text-[13px] font-semibold tabular-nums ${toneClass}`}>{value}</span>
-    </span>
+    />
   );
 }
 
@@ -61,16 +59,14 @@ function StarMeter({
   const max = Math.max(1, starThree);
   const percent = Math.min(100, Math.max(0, (score / max) * 100));
   return (
-    <span
-      className="game-stat inline-flex items-center gap-1 rounded-sm border border-(--border) bg-(--paper) px-1.5 py-0.5"
-      title={`星1 ${starOne} / 星2 ${starTwo} / 星3 ${starThree}`}
-    >
-      <Star size={10} className="text-(--terra)" />
+    <span className="ui-stat" title={`星1 ${starOne} / 星2 ${starTwo} / 星3 ${starThree}`}>
+      <Star size={10} className="text-(--accent)" />
       <span className="relative h-1.5 w-16 overflow-hidden rounded-full bg-(--grid)">
         <span
-          className={`absolute inset-y-0 left-0 rounded-full ${
-            score >= starThree ? "bg-emerald-500" : "bg-(--terra)"
-          }`}
+          className={cx(
+            "absolute inset-y-0 left-0 rounded-full",
+            score >= starThree ? "bg-(--success)" : "bg-(--accent)",
+          )}
           style={{ width: `${percent}%` }}
         />
         {[starOne, starTwo].map((threshold) => (
@@ -92,27 +88,39 @@ export function Header({ state, onHelp, onIntro, onNewGame, autoMode, onStopAuto
       <div className="mx-auto max-w-[1440px] px-3 py-2">
         <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
           <h1 className="game-logo serif flex items-center gap-1.5 text-lg font-semibold tracking-wide sm:text-xl">
-            <LayoutGrid size={18} className="text-(--terra)" /> Flowdeck
+            <LayoutGrid size={18} className="text-(--accent)" /> Flowdeck
           </h1>
 
           <div className="flex min-w-[132px] items-center gap-2">
-            <span className="inline-flex items-center gap-1 whitespace-nowrap tac-label">
+            <SectionLabel className="inline-flex items-center gap-1 whitespace-nowrap">
               <CalendarDays size={10} /> Day{" "}
               <strong key={state.day} className="day-pop text-[12px] font-semibold text-(--ink)">
                 {state.day}
               </strong>{" "}
               / {state.totalDays}
-            </span>
-            <span className="flex items-center gap-0.5" aria-hidden="true">
-              {Array.from({ length: state.totalDays }, (_, index) => (
+            </SectionLabel>
+            {state.totalDays <= 30 ? (
+              <span className="flex items-center gap-0.5" aria-hidden="true">
+                {Array.from({ length: state.totalDays }, (_, index) => (
+                  <span
+                    key={index}
+                    className={`h-2.5 w-[3px] ${
+                      index < state.day ? "bg-(--accent)" : "bg-(--border)"
+                    }`}
+                  />
+                ))}
+              </span>
+            ) : (
+              <span
+                className="relative h-2.5 w-16 overflow-hidden rounded-full bg-(--border)"
+                aria-hidden="true"
+              >
                 <span
-                  key={index}
-                  className={`h-2.5 w-[3px] ${
-                    index < state.day ? "bg-(--terra)" : "bg-(--border)"
-                  }`}
+                  className="absolute inset-y-0 left-0 rounded-full bg-(--accent)"
+                  style={{ width: `${(state.day / state.totalDays) * 100}%` }}
                 />
-              ))}
-            </span>
+              </span>
+            )}
           </div>
 
           <div className="flex flex-wrap items-center gap-1.5">
@@ -151,47 +159,45 @@ export function Header({ state, onHelp, onIntro, onNewGame, autoMode, onStopAuto
 
           <div className="ml-auto flex items-center gap-1.5">
             {autoMode && (
-              <span className="inline-flex items-center gap-1 rounded-sm border border-(--terra)/50 bg-(--terra)/10 px-1.5 py-0.5 text-[8px] font-medium text-(--terra)">
+              <Badge tone="accent" className="gap-1">
                 AUTO
-                <button
-                  type="button"
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
                   onClick={onStopAuto}
-                  className="rounded-sm border border-(--terra)/40 px-1 text-[7px] hover:bg-(--terra)/20"
+                  className="h-4 w-auto px-1 text-[7px] text-(--accent)"
                 >
                   停止
-                </button>
-              </span>
+                </Button>
+              </Badge>
             )}
-            <button
-              type="button"
+            <Button
+              variant="secondary"
+              size="sm"
               onClick={onIntro}
-              className="inline-flex items-center gap-1 rounded-sm border border-(--border) bg-(--paper) px-2 py-1 text-[10px] text-(--mid) transition-colors hover:border-(--terra) hover:text-(--terra)"
+              className="gap-1 px-2 py-1 text-(--mid)"
             >
               <BookOpen size={12} />{" "}
-              <span className="hidden text-[9px] uppercase tracking-[0.12em] sm:inline">
-                はじめに
-              </span>
-            </button>
-            <button
-              type="button"
+              <SectionLabel className="hidden sm:inline">はじめに</SectionLabel>
+            </Button>
+            <Button
+              variant="secondary"
+              size="sm"
               onClick={onHelp}
-              className="inline-flex items-center gap-1 rounded-sm border border-(--border) bg-(--paper) px-2 py-1 text-[10px] text-(--mid) transition-colors hover:border-(--terra) hover:text-(--terra)"
+              className="gap-1 px-2 py-1 text-(--mid)"
             >
               <HelpCircle size={12} />{" "}
-              <span className="hidden text-[9px] uppercase tracking-[0.12em] sm:inline">
-                遊び方
-              </span>
-            </button>
-            <button
-              type="button"
+              <SectionLabel className="hidden sm:inline">遊び方</SectionLabel>
+            </Button>
+            <Button
+              variant="secondary"
+              size="sm"
               onClick={onNewGame}
-              className="inline-flex items-center gap-1 rounded-sm border border-(--border) bg-(--paper) px-2 py-1 text-[10px] text-(--mid) transition-colors hover:border-(--terra) hover:text-(--terra)"
+              className="gap-1 px-2 py-1 text-(--mid)"
             >
               <RotateCcw size={12} />{" "}
-              <span className="hidden text-[9px] uppercase tracking-[0.12em] sm:inline">
-                新しいゲーム
-              </span>
-            </button>
+              <SectionLabel className="hidden sm:inline">新しいゲーム</SectionLabel>
+            </Button>
           </div>
         </div>
       </div>

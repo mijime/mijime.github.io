@@ -5,7 +5,8 @@
   "exports": {
     "./index.css": "./src/index.css",
     "./DarkModeToggle": "./src/dark-mode-toggle.tsx",
-    "./useDarkMode": "./src/use-dark-mode.ts"
+    "./useDarkMode": "./src/use-dark-mode.ts",
+    "./ui": "./src/ui/index.ts"
   },
   "scripts": {
     "check": "pnpm run check:format && pnpm run check:oxlint",

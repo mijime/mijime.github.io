@@ -33,7 +33,7 @@ export function phaseForLane(lane: TaskLane): Phase | null {
 export function effectivePlayLevel(
   card: CardInstance,
   phase: Phase,
-  allowSubstitution = true,
+  allowSubstitution = false,
 ): number {
   if (card.type === "debt") return 0;
   if (card.type === phase) return card.level;

@@ -24,13 +24,13 @@ export function RiskSummary({ risk }: { risk: RiskData }) {
         </div>
         <div className="rounded-sm border border-(--border) px-1 py-1">
           <span className="block text-(--mid)">未吸収</span>
-          <span className="block text-[12px] font-semibold tabular-nums text-red-600 dark:text-red-400">
+          <span className="block text-[12px] font-semibold tabular-nums text-(--danger)">
             {risk.unmet}
           </span>
         </div>
         <div className="rounded-sm border border-(--border) px-1 py-1">
           <span className="block text-(--mid)">発生負債</span>
-          <span className="block text-[12px] font-semibold tabular-nums text-red-600 dark:text-red-400">
+          <span className="block text-[12px] font-semibold tabular-nums text-(--danger)">
             {risk.debt}
           </span>
         </div>

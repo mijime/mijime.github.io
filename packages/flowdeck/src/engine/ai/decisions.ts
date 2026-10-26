@@ -4,7 +4,7 @@ import type { RuleSet } from "../rules";
 import { effectivePlayLevel, phaseForLane } from "../rules/lanes";
 import type { GameState, PersonalityWeights, PlayerState, TaskCard } from "../types";
 import { pullScore, playScore, trashScore } from "./scoring";
-import type { PlayCandidate, ScoredAction, PlayType } from "./types";
+import type { PlayCandidate, ScoredAction, PlayType, TokenPolicy } from "./types";
 
 function bestPlay(
   player: PlayerState,
@@ -90,7 +90,7 @@ export function chooseBotActionScored(
   return candidates[0] ?? null;
 }
 
-function bestTokenTask(state: GameState): TaskCard | null {
+function bestTokenTask(state: GameState, finishOnly: boolean): TaskCard | null {
   let best: TaskCard | null = null;
   let bestScore = Number.NEGATIVE_INFINITY;
   for (const task of state.tasks) {
@@ -98,6 +98,7 @@ function bestTokenTask(state: GameState): TaskCard | null {
     if (!type) continue;
     const remaining = task.requirements[type] - taskSum(task, type);
     if (remaining <= 0) continue;
+    if (finishOnly && remaining > 1) continue;
     const score =
       (remaining <= 1 ? 40 : 0) +
       task.score * 10 +
@@ -111,9 +112,16 @@ function bestTokenTask(state: GameState): TaskCard | null {
   return best;
 }
 
-export function useBotTokens(state: GameState, player: PlayerState, rules: RuleSet): void {
+export function useBotTokens(
+  state: GameState,
+  player: PlayerState,
+  rules: RuleSet,
+  policy: TokenPolicy = "immediate",
+): void {
+  if (policy === "never") return;
+  const finishOnly = policy === "finish" || policy === "after-finish";
   while ((player.tokens.mi ?? 0) > 0) {
-    const task = bestTokenTask(state);
+    const task = bestTokenTask(state, finishOnly);
     if (!task) break;
     if (!useToken(state, player.id, "mi", task.id, rules)) break;
   }

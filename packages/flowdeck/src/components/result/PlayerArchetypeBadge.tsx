@@ -1,10 +1,10 @@
 import { archetypeById, type ArchetypeGroup } from "../../engine/analytics/playerTypes";
 
 const GROUP_STYLE: Record<ArchetypeGroup, string> = {
-  ace: "border-(--terra)/50 bg-(--terra)/10 text-(--terra)",
-  support: "border-sky-500/40 bg-sky-500/10 text-sky-700 dark:text-sky-300",
-  starter: "border-violet-500/40 bg-violet-500/10 text-violet-700 dark:text-violet-300",
-  utility: "border-emerald-500/40 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300",
+  ace: "border-(--accent)/50 bg-(--accent)/10 text-(--accent)",
+  support: "border-(--info)/40 bg-(--info)/10 text-(--info)",
+  starter: "border-(--tone-violet)/40 bg-(--tone-violet)/10 text-(--tone-violet)",
+  utility: "border-(--success)/40 bg-(--success)/10 text-(--success)",
 };
 
 export function PlayerArchetypeBadge({ id }: { id: string | undefined }) {

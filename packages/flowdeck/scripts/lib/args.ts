@@ -1,5 +1,5 @@
-import type { PersonalityWeights } from "../../src/engine/types";
-import { TOTAL_DAYS } from "../../src/engine/rules/balance";
+import type { AiProfile, PersonalityWeights } from "../../src/engine/types";
+import { GAME_LENGTH_OPTIONS, TOTAL_DAYS } from "../../src/engine/rules/balance";
 import { OVERRIDE_KEYS, scenarioIds, type OverrideKey } from "./scenarios";
 import { MAX_GENERATION_SWING } from "../../src/engine/rules/generation";
 import type { WeightsConfig } from "./runner";
@@ -13,6 +13,7 @@ export interface SimOptions {
   seed: number | null;
   days: number;
   players: number;
+  aiProfile: AiProfile;
   ruleset: string;
   scenario: string;
   strategies: boolean;
@@ -33,11 +34,17 @@ export interface SimOptions {
   out: string | null;
   progress: boolean;
   benchmark: boolean;
+  montecarlo: boolean;
+  samples: number;
+  mcSeeds: number;
+  mcSeed: number;
+  mcScope: "all" | "ai";
+  top: number;
   weights: WeightsConfig | null;
   help: boolean;
 }
 
-const DAY_OPTIONS = new Set([10, 20, 30]);
+const DAY_OPTIONS = new Set<number>(GAME_LENGTH_OPTIONS);
 const PLAYER_OPTIONS = new Set([4, 5, 6]);
 
 function get(argv: string[], name: string): string | undefined {
@@ -173,6 +180,10 @@ export function parseArgs(argv: string[]): SimOptions {
     seedValue !== undefined && Number.isFinite(Number(seedValue)) ? Number(seedValue) : null;
   const days = int(get(argv, "days"), TOTAL_DAYS);
   const players = int(get(argv, "players"), 5);
+  const aiProfileValue = get(argv, "ai-profile") ?? "strong";
+  if (aiProfileValue !== "standard" && aiProfileValue !== "strong") {
+    throw new Error(`--ai-profile must be standard or strong: ${aiProfileValue}`);
+  }
   if (!DAY_OPTIONS.has(days)) {
     throw new Error(`--days must be one of ${[...DAY_OPTIONS].join(", ")}: ${days}`);
   }
@@ -192,7 +203,8 @@ export function parseArgs(argv: string[]): SimOptions {
   }
   const matrix = parseMatrix(getMatrixSpec(argv));
   for (const value of matrix?.days ?? []) {
-    if (!DAY_OPTIONS.has(value)) throw new Error(`--matrix days must be 10, 20, or 30: ${value}`);
+    if (!DAY_OPTIONS.has(value))
+      throw new Error(`--matrix days must be one of ${[...DAY_OPTIONS].join(", ")}: ${value}`);
   }
   for (const value of matrix?.players ?? []) {
     if (!PLAYER_OPTIONS.has(value))
@@ -222,6 +234,7 @@ export function parseArgs(argv: string[]): SimOptions {
     seed,
     days,
     players,
+    aiProfile: aiProfileValue as AiProfile,
     ruleset: get(argv, "ruleset") ?? "base",
     scenario,
     strategies: argv.includes("--strategies"),
@@ -253,6 +266,12 @@ export function parseArgs(argv: string[]): SimOptions {
     out: get(argv, "out") ?? null,
     progress: argv.includes("--progress"),
     benchmark: argv.includes("--benchmark"),
+    montecarlo: argv.includes("--montecarlo") || argv.includes("--mc"),
+    samples: Math.max(0, int(get(argv, "samples"), 32)),
+    mcSeeds: Math.max(1, int(get(argv, "mc-seeds"), 24)),
+    mcSeed: Math.max(1, int(get(argv, "mc-seed"), 1)),
+    mcScope: get(argv, "mc-scope") === "ai" ? "ai" : "all",
+    top: Math.max(1, int(get(argv, "top"), 10)),
     weights,
     help: argv.includes("--help") || argv.includes("-h"),
   };
@@ -269,6 +288,7 @@ Usage:
   pnpm --filter @mijime/flowdeck sim -- --trends
   pnpm --filter @mijime/flowdeck sim -- --correlations
   pnpm --filter @mijime/flowdeck sim -- --strategies
+  pnpm --filter @mijime/flowdeck sim -- --montecarlo --samples 32 --mc-seeds 24
   pnpm --filter @mijime/flowdeck sim -- --tasks
   pnpm --filter @mijime/flowdeck sim -- --ai
   pnpm --filter @mijime/flowdeck sim -- --risks
@@ -284,8 +304,9 @@ Options:
   --from <n>          first seed (default: 1)
   --to <n>            last seed (default: from + runs - 1)
   --seed <n>          run one seed and print details
-  --days <n>          10 | 20 | 30 (default: 10)
+  --days <n>          ${GAME_LENGTH_OPTIONS.join(" | ")} (default: 10)
   --players <n>       4 | 5 | 6 (default: 5)
+  --ai-profile <s>    standard | strong (default: strong)
   --ruleset <id>      base (default: base)
   --scenario <id>     ${scenarioIds().join(", ")}
   --weights <spec>    focus,greed,urgency (e.g. focus=1,greed=-1,urgency=0)
@@ -299,6 +320,12 @@ Options:
   --correlations      personality, seat, and human/AI correlations
   --insights          data-driven balance observations
   --strategies        compare fixed personality policies
+  --montecarlo, --mc  Monte Carlo search over token timing and weights
+  --samples <n>       random policies to sample for --mc (default: 32)
+  --mc-seeds <n>      seeds per policy for --mc (default: 24)
+  --mc-seed <n>       random seed for policy sampling (default: 1)
+  --mc-scope <s>      all | ai (default: all; ai keeps the human neutral)
+  --top <n>           show top N policies (default: 10)
   --tasks             task pool and completion breakdown
   --ai                AI action mix
   --risks             risk-card debt breakdown

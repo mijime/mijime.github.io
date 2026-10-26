@@ -60,7 +60,7 @@ export function FlowSummary({
                 <span className="w-14 shrink-0 text-(--mid)">{LANE_LABEL[lane]}</span>
                 <span className="relative h-1.5 flex-1 overflow-hidden rounded-full bg-(--grid)">
                   <span
-                    className="absolute inset-y-0 left-0 rounded-full bg-amber-500/80"
+                    className="absolute inset-y-0 left-0 rounded-full bg-(--warning)/80"
                     style={{ width: `${width}%` }}
                   />
                 </span>

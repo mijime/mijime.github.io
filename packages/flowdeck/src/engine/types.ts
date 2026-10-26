@@ -18,6 +18,8 @@ export interface PersonalityWeights {
   /** + 納期 / - 長期 */
   urgency: number;
 }
+
+export type AiProfile = "standard" | "strong";
 export type ContributionPhase = "design" | "dev" | "test";
 
 export interface ContributionStats {
@@ -279,11 +281,13 @@ export interface Outcome {
 }
 
 export interface GameState {
-  version: 27;
+  version: 28;
   seed: number;
   rngState: number;
   day: number;
   totalDays: number;
+  /** チームメイトAIの性格生成プロファイル */
+  aiProfile: AiProfile;
   /** このゲームのタスク要求量の揺らぎ幅（0〜0.2） */
   generationSwing: number;
   phase: "human" | "ai" | "roundEnd" | "over";
@@ -323,4 +327,11 @@ export type Action =
   | { type: "DISCARD_CARD"; cardId: number }
   | { type: "USE_TOKEN"; token: string; taskId: string }
   | { type: "HYDRATE"; state: GameState }
-  | { type: "RESTART"; seed?: number; days?: number; aiCount?: number; generationSwing?: number };
+  | {
+      type: "RESTART";
+      seed?: number;
+      days?: number;
+      aiCount?: number;
+      generationSwing?: number;
+      aiProfile?: AiProfile;
+    };

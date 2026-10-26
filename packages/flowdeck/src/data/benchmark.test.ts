@@ -15,10 +15,24 @@ describe("benchmark", () => {
     expect(benchmarkFor(3, 10)).toBeNull();
   });
 
+  it("長期ゲームの参考値も返す", () => {
+    const hundred = benchmarkFor(5, 100);
+    expect(hundred?.runs).toBe(200);
+    expect(hundred?.score.median).toBeGreaterThan(0);
+  });
+
+  it("プロファイル別の参考値を持つ", () => {
+    const standard = benchmarkFor(5, 10, 0.1, "standard");
+    const strong = benchmarkFor(5, 10, 0.1, "strong");
+    expect(standard?.aiProfile).toBe("standard");
+    expect(strong?.aiProfile).toBe("strong");
+    expect(strong?.score.median).toBeGreaterThan(standard?.score.median ?? 0);
+  });
+
   it("得損の振れ幅ごとに参考値を持つ", () => {
     expect(benchmarkFor(5, 10, 0)?.swing).toBe(0);
     expect(benchmarkFor(5, 10, 0.2)?.swing).toBe(0.2);
-    expect(benchmarkFor(5, 10, 0.2)?.score.median).not.toBe(benchmarkFor(5, 10, 0)?.score.median);
+    expect(benchmarkFor(5, 10, 0.2)?.score.mean).not.toBe(benchmarkFor(5, 10, 0)?.score.mean);
   });
 
   it("スコアのpercentileを補間する", () => {

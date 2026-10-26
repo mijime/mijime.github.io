@@ -57,6 +57,7 @@ function stateWithOutcome(): GameState {
     outcome,
     rules: { openTasks: 4, debtLimit: 12, starOne: 10, starTwo: 20, starThree: 30 },
     totalDays: 10,
+    aiProfile: "standard",
     seed: 1,
     log: [],
   } as unknown as GameState;
@@ -96,6 +97,6 @@ describe("ResultScreen", () => {
     expect(screen.getByText("日次推移")).toBeInTheDocument();
     expect(screen.getByText(/参考 中央値/)).toBeInTheDocument();
     expect(screen.getAllByTestId("player-archetype").length).toBeGreaterThanOrEqual(5);
-    expect(screen.getByText("ポジション一覧")).toBeInTheDocument();
+    expect(screen.queryByText("ポジション一覧")).toBeNull();
   });
 });

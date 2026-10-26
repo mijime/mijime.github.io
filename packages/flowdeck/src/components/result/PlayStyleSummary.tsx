@@ -7,10 +7,10 @@ function pct(value: number): string {
 export function PlayStyleSummary({ style }: { style: StyleData }) {
   const total = Math.max(1, style.actions.total);
   const rows = [
-    { label: "プレイ", value: style.actions.play, color: "bg-sky-500/75" },
-    { label: "Pull", value: style.actions.pull, color: "bg-violet-500/75" },
-    { label: "廃棄", value: style.actions.trash, color: "bg-amber-500/75" },
-    { label: "パス", value: style.actions.pass, color: "bg-zinc-500/50" },
+    { label: "プレイ", value: style.actions.play, color: "bg-(--tone-sky)/75" },
+    { label: "Pull", value: style.actions.pull, color: "bg-(--tone-violet)/75" },
+    { label: "廃棄", value: style.actions.trash, color: "bg-(--tone-amber)/75" },
+    { label: "パス", value: style.actions.pass, color: "bg-(--mid)/50" },
   ];
   return (
     <section className="rounded-sm border border-(--border) bg-(--paper) p-3">

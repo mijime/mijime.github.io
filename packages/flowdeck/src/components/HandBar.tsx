@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { Dispatch } from "react";
 import { Hand, Shield, Trash2 } from "lucide-react";
+import { Badge, Button, SectionLabel } from "@mijime/theme/ui";
 import type { Action, CardInstance, GameState } from "../engine/types";
 import { ACTIONS_PER_TURN } from "../engine/rules/balance";
 import { CardPile } from "./CardPile";
@@ -43,7 +44,7 @@ function HandCard({
       onClick={onSelect}
       title={effectDescription(card.effect) ?? undefined}
       className={`relative flex h-[96px] w-[124px] shrink-0 snap-start flex-col rounded-sm border p-2.5 text-left shadow-sm transition-all ${style} ${
-        selected ? "ring-2 ring-(--terra) ring-offset-1 ring-offset-(--paper)" : ""
+        selected ? "ring-2 ring-(--accent) ring-offset-1 ring-offset-(--paper)" : ""
       } ${disabled ? "opacity-60" : "hover:-translate-y-0.5"}`}
     >
       <span className="flex items-baseline justify-between gap-1">
@@ -54,7 +55,7 @@ function HandCard({
             <span className="inline-flex items-center gap-0.5">
               <CardTypeBadge type={card.type} size={9} /> {CARD_LABEL[card.type]}
               {card.score !== undefined && (
-                <span className="ml-0.5 font-semibold text-(--terra)">+{card.score}</span>
+                <span className="ml-0.5 font-semibold text-(--accent)">+{card.score}</span>
               )}
             </span>
           )}
@@ -107,10 +108,10 @@ export function HandBar({ state, dispatch, selectedCardId, onSelect }: Props) {
     <footer className="flow-hand game-hand">
       <div className="mx-auto max-w-[1600px] px-3 py-2">
         <div className="flex flex-col gap-2 lg:flex-row">
-          <div className="tac-panel hidden w-[220px] shrink-0 p-2 lg:block">
+          <div className="ui-panel hidden w-[220px] shrink-0 p-2 lg:block">
             <div className="flex items-center justify-between">
-              <span className="tac-label">Selected</span>
-              <span className="tac-label">{human.actionsLeft} AP</span>
+              <SectionLabel>Selected</SectionLabel>
+              <SectionLabel>{human.actionsLeft} AP</SectionLabel>
             </div>
             {selected ? (
               <>
@@ -121,37 +122,40 @@ export function HandBar({ state, dispatch, selectedCardId, onSelect }: Props) {
                   </span>
                 </div>
                 <div className="mt-1 flex items-center justify-between">
-                  <span className="text-[9px] text-(--tac-dim)">{cardName(selected)}</span>
+                  <span className="text-[9px] text-(--mid)">{cardName(selected)}</span>
                   {selected.type === "debt" ? (
-                    <span className="text-[12px] font-bold text-red-300">!</span>
+                    <span className="text-[12px] font-bold text-(--danger)">!</span>
                   ) : (
                     <LevelStars
                       level={selected.level}
-                      className="text-[10px] text-(--terra)"
+                      className="text-[10px] text-(--accent)"
                       showEmpty={false}
                     />
                   )}
                 </div>
                 {selected.type === "test" && (
-                  <p className="mt-1 text-[9px] font-medium text-sky-300">Review専用・lvそのまま</p>
+                  <p className="mt-1 text-[9px] font-medium text-(--info)">
+                    Review専用・lvそのまま
+                  </p>
                 )}
                 {effectLabel(selected.effect) && (
-                  <p className="mt-1 text-[9px] font-medium text-(--terra)">
+                  <p className="mt-1 text-[9px] font-medium text-(--accent)">
                     {effectLabel(selected.effect)}
                   </p>
                 )}
-                <button
-                  type="button"
+                <Button
+                  variant="danger"
+                  size="sm"
                   disabled={!isHumanTurn || human.actionsLeft <= 0}
                   onClick={() => {
                     dispatch({ type: "DISCARD_CARD", cardId: selected.id });
                     onSelect(null);
                   }}
                   title="選択中のカードを1アクションでデッキから廃棄"
-                  className="mt-2 inline-flex w-full items-center justify-center gap-1 rounded-sm border border-red-400/50 bg-red-500/10 px-2 py-1 text-[9px] font-medium text-red-300 transition-colors hover:bg-red-500/20 disabled:cursor-not-allowed disabled:opacity-35"
+                  className="mt-2 w-full gap-1"
                 >
                   <Trash2 size={10} /> 廃棄
-                </button>
+                </Button>
               </>
             ) : (
               <>
@@ -165,14 +169,14 @@ export function HandBar({ state, dispatch, selectedCardId, onSelect }: Props) {
                   ).map(([type, lane]) => (
                     <div
                       key={type}
-                      className="rounded-sm border border-(--tac-line) bg-(--tac-panel-2) px-1 py-1"
+                      className="rounded-sm border border-(--border) bg-(--surface) px-1 py-1"
                     >
                       <CardTypeBadge type={type} size={7} className="mx-auto" />
-                      <span className="mt-0.5 block text-[7px] text-(--tac-dim)">{lane}</span>
+                      <span className="mt-0.5 block text-[7px] text-(--mid)">{lane}</span>
                     </div>
                   ))}
                 </div>
-                <p className="mt-2 text-[9px] text-(--tac-dim)">カードを選択</p>
+                <p className="mt-2 text-[9px] text-(--mid)">カードを選択</p>
               </>
             )}
           </div>
@@ -180,26 +184,20 @@ export function HandBar({ state, dispatch, selectedCardId, onSelect }: Props) {
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
               <div className="flex items-center gap-2 text-[10px] text-(--ink)/70">
-                <span className="tac-label hidden sm:inline">Loadout</span>
+                <SectionLabel className="hidden sm:inline">Loadout</SectionLabel>
                 <Hand size={13} />
                 <span className="font-semibold text-(--ink)" title="手札">
                   {human.hand.length}
                 </span>
                 <CardPile tone="deck" count={human.deck.length} label="山札" />
                 <CardPile tone="discard" count={human.discard.length} label="捨て札" />
-                <span
-                  className="inline-flex items-center gap-1 rounded-sm border border-(--terra)/30 px-1 text-(--terra)"
-                  title="LLMトークン"
-                >
+                <Badge tone="accent" className="gap-1" title="LLMトークン">
                   <LlmToken className="h-3.5 w-3.5" /> {human.tokens.mi ?? 0}
-                </span>
+                </Badge>
                 {(human.shields ?? 0) > 0 && (
-                  <span
-                    className="inline-flex items-center gap-0.5 rounded-sm border border-sky-400/30 px-1 text-sky-300"
-                    title="シールド（次の負債を防ぐ）"
-                  >
+                  <Badge tone="info" className="gap-0.5" title="シールド（次の負債を防ぐ）">
                     <Shield size={11} /> {human.shields}
-                  </span>
+                  </Badge>
                 )}
               </div>
               <div
@@ -222,15 +220,16 @@ export function HandBar({ state, dispatch, selectedCardId, onSelect }: Props) {
                     {state.phase === "ai" ? "メンバーの手番" : "日末処理"}
                   </span>
                 )}
-                <button
-                  type="button"
+                <Button
+                  variant="primary"
+                  size="sm"
                   onClick={() => dispatch({ type: "END_TURN" })}
                   disabled={!isHumanTurn}
                   title="残りのアクションを放棄して、この日はもう動かない"
-                  className="rounded-sm bg-(--terra) px-3 py-1.5 text-[10px] font-semibold text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-35"
+                  className="px-3 py-1.5"
                 >
                   パス
-                </button>
+                </Button>
               </div>
             </div>
 
@@ -238,8 +237,9 @@ export function HandBar({ state, dispatch, selectedCardId, onSelect }: Props) {
               <span className="min-w-0 truncate text-[10px] text-(--ink)">
                 {selected ? cardTitle(selected) : "カードを選択"}
               </span>
-              <button
-                type="button"
+              <Button
+                variant="danger"
+                size="sm"
                 disabled={!isHumanTurn || !selected || human.actionsLeft <= 0}
                 onClick={() => {
                   if (!selected) return;
@@ -247,19 +247,19 @@ export function HandBar({ state, dispatch, selectedCardId, onSelect }: Props) {
                   onSelect(null);
                 }}
                 title="選択中のカードを1アクションでデッキから廃棄"
-                className="ml-auto inline-flex items-center gap-1 rounded-sm border border-red-400/50 bg-red-500/10 px-2 py-0.5 text-[9px] font-medium text-red-300 transition-colors hover:bg-red-500/20 disabled:cursor-not-allowed disabled:opacity-35"
+                className="ml-auto gap-1"
               >
                 <Trash2 size={10} /> 廃棄
-              </button>
+              </Button>
             </div>
 
             <div className="mt-1 flex items-center gap-1.5 sm:hidden">
-              <Hand size={11} className="text-(--terra)" />
-              <span className="text-[9px] tracking-[0.1em] text-(--tac-dim)">手札</span>
+              <Hand size={11} className="text-(--accent)" />
+              <span className="text-[9px] tracking-[0.1em] text-(--mid)">手札</span>
               <span className="text-[12px] font-semibold tabular-nums text-(--ink)">
                 {human.hand.length}
               </span>
-              <span className="text-[9px] text-(--tac-dim)">枚</span>
+              <span className="text-[9px] text-(--mid)">枚</span>
               <span className="ml-1 flex items-center gap-0.5">
                 {human.hand.map((card, index) => (
                   <span
@@ -267,15 +267,15 @@ export function HandBar({ state, dispatch, selectedCardId, onSelect }: Props) {
                     title={`${index + 1}: ${cardTitle(card)}`}
                     className={`h-2 w-3.5 rounded-[1px] border ${
                       card.id === selectedCardId
-                        ? "border-(--terra) bg-(--terra)"
-                        : "border-(--border) bg-(--tac-panel-2)"
+                        ? "border-(--accent) bg-(--accent)"
+                        : "border-(--border) bg-(--surface)"
                     }`}
                   />
                 ))}
               </span>
               {canScroll.right && (
                 <span
-                  className="ml-auto text-[12px] leading-none text-(--terra)"
+                  className="ml-auto text-[12px] leading-none text-(--accent)"
                   aria-hidden="true"
                 >
                   →
@@ -289,7 +289,7 @@ export function HandBar({ state, dispatch, selectedCardId, onSelect }: Props) {
               )}
               {canScroll.right && (
                 <div className="pointer-events-none absolute inset-y-0 right-0 z-10 flex w-8 items-center justify-end bg-gradient-to-l from-(--paper) via-(--paper)/80 to-transparent pr-0.5">
-                  <span className="text-[16px] leading-none text-(--terra)">›</span>
+                  <span className="text-[16px] leading-none text-(--accent)">›</span>
                 </div>
               )}
               <div
@@ -307,7 +307,7 @@ export function HandBar({ state, dispatch, selectedCardId, onSelect }: Props) {
                   />
                 ))}
                 {human.hand.length === 0 && (
-                  <p className="py-4 text-[9px] text-(--tac-dim)">手札なし</p>
+                  <p className="py-4 text-[9px] text-(--mid)">手札なし</p>
                 )}
               </div>
             </div>

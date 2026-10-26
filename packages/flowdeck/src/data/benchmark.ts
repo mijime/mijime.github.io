@@ -1,9 +1,11 @@
 import raw from "./benchmark.json";
+import type { AiProfile } from "../engine/types";
 
 export interface BenchmarkEntry {
   players: number;
   days: number;
   swing: number;
+  aiProfile: AiProfile;
   runs: number;
   score: { p10: number; p25: number; median: number; p75: number; p90: number; mean: number };
   stars: number[];
@@ -22,10 +24,15 @@ interface BenchmarkFile {
   configs: Record<string, BenchmarkEntry>;
 }
 
-const benchmark = raw as BenchmarkFile;
+const benchmark = raw as unknown as BenchmarkFile;
 
-export function benchmarkFor(players: number, days: number, swing = 0.1): BenchmarkEntry | null {
-  return benchmark.configs[`${players}x${days}x${swing.toFixed(1)}`] ?? null;
+export function benchmarkFor(
+  players: number,
+  days: number,
+  swing = 0.1,
+  aiProfile: AiProfile = "standard",
+): BenchmarkEntry | null {
+  return benchmark.configs[`${players}x${days}x${swing.toFixed(1)}x${aiProfile}`] ?? null;
 }
 
 /** p10/p25/median/p75/p90 から percentile を線形補間する。 */

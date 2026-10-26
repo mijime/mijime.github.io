@@ -13,9 +13,9 @@ function ScoreRow({
 }) {
   const color =
     tone === "positive"
-      ? "text-emerald-700 dark:text-emerald-400"
+      ? "text-(--success)"
       : tone === "negative"
-        ? "text-red-600 dark:text-red-400"
+        ? "text-(--danger)"
         : "text-(--ink)";
   return (
     <li
@@ -71,7 +71,7 @@ export function ScoreBreakdown({
         </div>
         <div className="mt-1 h-2 overflow-hidden rounded-full bg-(--grid)">
           <div
-            className="h-full rounded-full bg-(--terra) transition-[width]"
+            className="h-full rounded-full bg-(--accent) transition-[width]"
             style={{ width: `${Math.round(progress * 100)}%` }}
           />
         </div>

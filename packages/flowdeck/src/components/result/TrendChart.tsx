@@ -43,16 +43,21 @@ export function TrendChart({ trend }: { trend: DaySnapshot[] }) {
     {
       key: "score",
       label: "企業価値",
-      color: "#34d399",
+      color: "var(--success)",
       values: trend.map((snapshot) => snapshot.teamScore),
     },
     {
       key: "debt",
       label: "技術的負債",
-      color: "#f87171",
+      color: "var(--danger)",
       values: trend.map((snapshot) => snapshot.teamDebt),
     },
-    { key: "wip", label: "WIP", color: "#fbbf24", values: trend.map((snapshot) => snapshot.wip) },
+    {
+      key: "wip",
+      label: "WIP",
+      color: "var(--warning)",
+      values: trend.map((snapshot) => snapshot.wip),
+    },
   ];
   return (
     <div className="space-y-2">
