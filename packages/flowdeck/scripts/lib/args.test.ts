@@ -33,7 +33,35 @@ describe("parseArgs", () => {
     expect(options.weights?.all).toEqual({ focus: 1, greed: -1, urgency: 0.5 });
   });
 
-  it("10/20/30以外の日数を拒否する", () => {
+  it("チームメイトのプロファイルを読む", () => {
+    expect(parseArgs([]).aiProfile).toBe("strong");
+    expect(parseArgs(["--ai-profile", "strong"]).aiProfile).toBe("strong");
+    expect(() => parseArgs(["--ai-profile", "unknown"])).toThrow("--ai-profile must be");
+  });
+
+  it("Monte Carloオプションを読む", () => {
+    const options = parseArgs([
+      "--mc",
+      "--samples",
+      "16",
+      "--mc-seeds",
+      "12",
+      "--mc-seed",
+      "7",
+      "--mc-scope",
+      "ai",
+      "--top",
+      "5",
+    ]);
+    expect(options.montecarlo).toBe(true);
+    expect(options.samples).toBe(16);
+    expect(options.mcSeeds).toBe(12);
+    expect(options.mcSeed).toBe(7);
+    expect(options.mcScope).toBe("ai");
+    expect(options.top).toBe(5);
+  });
+
+  it("選択肢以外の日数を拒否する", () => {
     expect(() => parseArgs(["--days", "15"])).toThrow("--days must be one of");
   });
 

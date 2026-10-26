@@ -308,16 +308,15 @@ export function targetTypeForLane(task: TaskCard): "design" | "dev" | "test" | n
   return phaseForLane(task.lane);
 }
 
-export function effectiveCardLevel(card: CardInstance, target: "design" | "dev" | "test"): number {
-  return effectivePlayLevel(card, target);
-}
-
-export function canPlayCardOnTask(card: CardInstance, task: TaskCard): boolean {
+export function canPlayCardOnTask(
+  card: CardInstance,
+  task: TaskCard,
+  allowSubstitution = false,
+): boolean {
   if (isDebtCard(card)) return false;
   const target = targetTypeForLane(task);
   if (!target) return false;
-  if (target === "test") return card.type === "test";
-  return true;
+  return effectivePlayLevel(card, target, allowSubstitution) > 0;
 }
 
 export function rewardLabel(task: TaskCard): string {

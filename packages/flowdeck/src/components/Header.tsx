@@ -99,16 +99,28 @@ export function Header({ state, onHelp, onIntro, onNewGame, autoMode, onStopAuto
               </strong>{" "}
               / {state.totalDays}
             </SectionLabel>
-            <span className="flex items-center gap-0.5" aria-hidden="true">
-              {Array.from({ length: state.totalDays }, (_, index) => (
+            {state.totalDays <= 30 ? (
+              <span className="flex items-center gap-0.5" aria-hidden="true">
+                {Array.from({ length: state.totalDays }, (_, index) => (
+                  <span
+                    key={index}
+                    className={`h-2.5 w-[3px] ${
+                      index < state.day ? "bg-(--accent)" : "bg-(--border)"
+                    }`}
+                  />
+                ))}
+              </span>
+            ) : (
+              <span
+                className="relative h-2.5 w-16 overflow-hidden rounded-full bg-(--border)"
+                aria-hidden="true"
+              >
                 <span
-                  key={index}
-                  className={`h-2.5 w-[3px] ${
-                    index < state.day ? "bg-(--accent)" : "bg-(--border)"
-                  }`}
+                  className="absolute inset-y-0 left-0 rounded-full bg-(--accent)"
+                  style={{ width: `${(state.day / state.totalDays) * 100}%` }}
                 />
-              ))}
-            </span>
+              </span>
+            )}
           </div>
 
           <div className="flex flex-wrap items-center gap-1.5">

@@ -1,5 +1,5 @@
 import type { Dispatch } from "react";
-import { Award, Lock } from "lucide-react";
+import { Award } from "lucide-react";
 import { Badge, Button } from "@mijime/theme/ui";
 import type { Action, CardInstance, GameState, TaskCard } from "../engine/types";
 import { taskContributions, taskSum } from "../engine/metrics";
@@ -12,7 +12,6 @@ import {
   PLAYER_TONE,
   canPlayCardOnTask,
   cardName,
-  effectiveCardLevel,
   effectLabel,
   PlayerIcon,
   penaltyLabel,
@@ -261,14 +260,6 @@ export function TaskCardView({ state, task, dispatch, selectedCard, compact = fa
           )}
         </span>
       </div>
-
-      {canTarget && selectedCard && (
-        <p className="mt-1 flex items-center gap-1 text-[9px] font-medium text-(--accent)">
-          <Lock size={9} />
-          {cardName(selectedCard)} → lv
-          {effectiveCardLevel(selectedCard, target ?? "design")}
-        </p>
-      )}
     </article>
   );
 }

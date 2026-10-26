@@ -153,24 +153,25 @@ export function App() {
           currentDays={state.totalDays}
           currentAiCount={state.players.filter((player) => !player.isHuman).length}
           currentSwing={state.generationSwing}
+          currentAiProfile={state.aiProfile}
           onClose={() => setNewGameOpen(false)}
-          onStart={(days, aiCount, generationSwing) => {
+          onStart={(days, aiCount, generationSwing, aiProfile) => {
             setNewGameOpen(false);
-            dispatch({ type: "RESTART", days, aiCount, generationSwing });
+            dispatch({ type: "RESTART", days, aiCount, generationSwing, aiProfile });
           }}
         />
       )}
       {introMode && (
         <IntroScreen
           review={introMode === "review"}
-          onStart={(days, aiCount, generationSwing) => {
+          onStart={(days, aiCount, generationSwing, aiProfile) => {
             try {
               localStorage.setItem(INTRO_KEY, "1");
             } catch {
               // 保存できなくても開始する
             }
             setIntroMode(null);
-            dispatch({ type: "RESTART", days, aiCount, generationSwing });
+            dispatch({ type: "RESTART", days, aiCount, generationSwing, aiProfile });
           }}
           onClose={() => {
             try {

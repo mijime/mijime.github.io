@@ -12,15 +12,17 @@ import {
   Users,
 } from "lucide-react";
 import { Button, Modal, SectionLabel, SegmentedControl } from "@mijime/theme/ui";
+import { GAME_LENGTH_OPTIONS, type GameLength } from "../engine/rules/balance";
+import { AI_PROFILE_OPTIONS } from "../engine/ai/profiles";
+import type { AiProfile } from "../engine/types";
 import { FlowDiagram } from "./FlowDiagram";
 
 interface Props {
-  onStart?: (days: number, aiCount: number, generationSwing: number) => void;
+  onStart?: (days: number, aiCount: number, generationSwing: number, aiProfile: AiProfile) => void;
   onClose?: () => void;
   review?: boolean;
 }
 
-const DAY_OPTIONS = [10, 20, 30] as const;
 const AI_OPTIONS = [3, 4, 5] as const;
 const SWING_OPTIONS = [
   { value: 0, label: "安定", hint: "得損なし" },
@@ -57,9 +59,10 @@ function ChoiceRow<T extends number>({
 }
 
 export function IntroScreen({ onStart, onClose, review = false }: Props) {
-  const [days, setDays] = useState<10 | 20 | 30>(10);
+  const [days, setDays] = useState<GameLength>(10);
   const [aiCount, setAiCount] = useState<3 | 4 | 5>(4);
   const [swing, setSwing] = useState(0.1);
+  const [aiProfile, setAiProfile] = useState<AiProfile>("strong");
 
   return (
     <Modal
@@ -79,7 +82,11 @@ export function IntroScreen({ onStart, onClose, review = false }: Props) {
             閉じる <ArrowRight size={12} />
           </Button>
         ) : (
-          <Button variant="primary" size="sm" onClick={() => onStart?.(days, aiCount, swing)}>
+          <Button
+            variant="primary"
+            size="sm"
+            onClick={() => onStart?.(days, aiCount, swing, aiProfile)}
+          >
             <Play size={12} /> プロジェクトを開始
           </Button>
         )
@@ -132,7 +139,7 @@ export function IntroScreen({ onStart, onClose, review = false }: Props) {
           <div className="grid gap-3 sm:grid-cols-2">
             <ChoiceRow
               label="日数"
-              options={DAY_OPTIONS}
+              options={GAME_LENGTH_OPTIONS}
               value={days}
               suffix="日"
               onChange={setDays}
@@ -145,6 +152,23 @@ export function IntroScreen({ onStart, onClose, review = false }: Props) {
               onChange={setAiCount}
             />
           </div>
+        )}
+
+        {!review && (
+          <section>
+            <SectionLabel className="mb-1 block">チームメイト</SectionLabel>
+            <SegmentedControl
+              ariaLabel="チームメイト"
+              value={aiProfile}
+              onChange={setAiProfile}
+              options={AI_PROFILE_OPTIONS.map((option) => ({
+                value: option.value,
+                label: option.label,
+                hint: option.hint,
+              }))}
+              className="w-full [&>button]:flex-1"
+            />
+          </section>
         )}
 
         {!review && (

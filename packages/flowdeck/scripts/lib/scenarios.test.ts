@@ -20,7 +20,7 @@ describe("scenarios", () => {
       openTasks: 7,
       debtLimit: 3,
       starOne: 99,
-      starTwo: 36,
+      starTwo: 40,
     });
   });
 

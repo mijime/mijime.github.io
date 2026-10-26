@@ -65,8 +65,8 @@ export function applyOverrides(base: RuleSet, id: string, overrides: RuleOverrid
     debtScorePenalty: overrides.debtScorePenalty ?? rules.balance.debtScorePenalty,
     startingTokens: overrides.startingTokens ?? rules.balance.startingTokens,
     allowSubstitution: overrides.allowSubstitution ?? rules.balance.allowSubstitution,
-    teamRules: (playerCount, totalDays) => {
-      const original = originalTeamRules(playerCount, totalDays);
+    teamRules: (playerCount, totalDays, profile) => {
+      const original = originalTeamRules(playerCount, totalDays, profile);
       return {
         openTasks: overrides.openTasks ?? original.openTasks,
         debtLimit: overrides.debtLimit ?? original.debtLimit,

@@ -10,7 +10,6 @@ import { LOG_TONE, groupLogByDay } from "./LogPanel";
 import { newSeed } from "../store";
 import { SummaryPanel } from "./result/SummaryPanel";
 import { PlayerArchetypeBadge } from "./result/PlayerArchetypeBadge";
-import { ArchetypeGuide } from "./result/ArchetypeGuide";
 
 interface Props {
   state: GameState;
@@ -46,7 +45,12 @@ export function ResultScreen({ state, dispatch }: Props) {
 
   const summary = buildResultSummary(state);
   const playerCount = state.players?.length ?? outcome.perPlayer.length;
-  const benchmark = benchmarkFor(playerCount, state.totalDays, state.generationSwing ?? 0.1);
+  const benchmark = benchmarkFor(
+    playerCount,
+    state.totalDays,
+    state.generationSwing ?? 0.1,
+    state.aiProfile,
+  );
   const human = outcome.perPlayer.find((player) => player.isHuman);
   const aiPlayers = outcome.perPlayer.filter((player) => !player.isHuman);
   const humanWork = human ? workPoints(human) : 0;
@@ -64,7 +68,9 @@ export function ResultScreen({ state, dispatch }: Props) {
       <div className="mx-auto max-w-3xl px-4 py-6">
         <header className="text-center">
           <h1 className="serif text-2xl font-semibold">{state.totalDays}日間のプロジェクト終了</h1>
-          <p className="text-[10px] text-(--mid)">シード {state.seed}</p>
+          <p className="text-[10px] text-(--mid)">
+            シード {state.seed} / {state.aiProfile === "strong" ? "有能" : "標準"}チームメイト
+          </p>
 
           <div className="mt-3 flex items-center justify-center gap-1 text-(--accent)">
             {Array.from({ length: 3 }, (_, index) => (
@@ -202,8 +208,6 @@ export function ResultScreen({ state, dispatch }: Props) {
             </div>
           </section>
         </div>
-
-        <ArchetypeGuide />
 
         <section className="mt-2 rounded-sm border border-(--border) bg-(--paper) p-3">
           <div className="flex items-baseline justify-between gap-2">

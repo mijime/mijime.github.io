@@ -1,4 +1,4 @@
-import type { PersonalityWeights } from "../../../src/engine/types";
+import type { AiProfile, PersonalityWeights } from "../../../src/engine/types";
 import type { RuleSet } from "../../../src/engine/rules";
 import { formatNumber, formatPercent, median, rate } from "../stats";
 import { runRows } from "../aggregate";
@@ -31,6 +31,7 @@ export interface StrategyOptions {
   days: number;
   players: number;
   rules: RuleSet;
+  aiProfile?: AiProfile;
   baselineName?: string;
 }
 
@@ -80,6 +81,7 @@ export function printStrategies(
         days: options.days,
         playerCount: options.players,
         rules: options.rules,
+        aiProfile: options.aiProfile,
         weights: { all: strategy.weights },
       },
       seeds,

@@ -10,7 +10,8 @@ import { discardCard, endPlayerTurn, playCard, pullTask, startPlayerTurn, useTok
 import { taskSum } from "./metrics";
 import { computeOutcome } from "./scoring";
 import type { CardInstance, GameState, TaskCard } from "./types";
-import { ACTIONS_PER_TURN, HAND_SIZE } from "./rules/balance";
+import { ACTIONS_PER_TURN, GAME_LENGTH_OPTIONS, HAND_SIZE, teamRulesFor } from "./rules/balance";
+import { useBotTokens } from "./ai/decisions";
 
 function testState(): GameState {
   const state = createGame(1);
@@ -82,7 +83,7 @@ describe("setup", () => {
     expect(state.taskDeck).toHaveLength(TASK_DEFS.length - state.rules.openTasks);
     expect(state.riskDeck).toHaveLength(16);
     expect(state.phase).toBe("human");
-    expect(state.rules).toMatchObject({ openTasks: 4, debtLimit: 6, starThree: 40 });
+    expect(state.rules).toMatchObject({ openTasks: 4, debtLimit: 6, starThree: 45 });
     expect(state.players.filter((player) => !player.isHuman)).toHaveLength(4);
     expect(state.players.every((player) => player.hand.length === HAND_SIZE)).toBe(true);
   });
@@ -104,26 +105,64 @@ describe("setup", () => {
     expect(state.rules).toMatchObject({
       openTasks: 3,
       debtLimit: 5,
-      starThree: 33,
+      starThree: 36,
     });
   });
 
-  it("20日/30日で目標と負債上限が伸びる", () => {
+  it("20日/30日/100日で目標と負債上限が伸びる", () => {
     const twenty = createGame(1, 20, 4);
     expect(twenty.totalDays).toBe(20);
-    expect(twenty.rules).toMatchObject({ debtLimit: 7, starOne: 64, starTwo: 78, starThree: 85 });
+    expect(twenty.rules).toMatchObject({ debtLimit: 7, starOne: 80, starTwo: 89, starThree: 94 });
     const thirty = createGame(1, 30, 4);
     expect(thirty.totalDays).toBe(30);
     expect(thirty.rules).toMatchObject({
       debtLimit: 8,
-      starOne: 104,
-      starTwo: 124,
-      starThree: 131,
+      starOne: 129,
+      starTwo: 142,
+      starThree: 145,
+    });
+    const hundred = createGame(1, 100, 4);
+    expect(hundred.totalDays).toBe(100);
+    expect(hundred.rules).toMatchObject({
+      debtLimit: 11,
+      starOne: 505,
+      starTwo: 525,
+      starThree: 533,
     });
   });
 
-  it("AIの名前・性格は開始時にランダムで決まる", () => {
-    const state = createGame(1, 10, 4);
+  it("全ゲーム長×人数×プロファイルの目標値が揃っている", () => {
+    for (const profile of ["standard", "strong"] as const) {
+      for (const players of [4, 5, 6]) {
+        for (const days of GAME_LENGTH_OPTIONS) {
+          const rules = teamRulesFor(players, days, profile);
+          expect(rules.openTasks).toBeGreaterThan(0);
+          expect(rules.debtLimit).toBeGreaterThan(0);
+          expect(rules.starOne).toBeLessThan(rules.starTwo);
+          expect(rules.starTwo).toBeLessThan(rules.starThree);
+        }
+      }
+    }
+  });
+
+  it("有能プロファイルでは強めの範囲で性格がランダムになる", () => {
+    const state = createGame(1, 10, 4, BASE_RULES, undefined, "strong");
+    expect(state.aiProfile).toBe("strong");
+    const ais = state.players.filter((player) => !player.isHuman);
+    expect(ais).toHaveLength(4);
+    for (const ai of ais) {
+      expect(ai.weights.focus).toBeGreaterThanOrEqual(0.25);
+      expect(ai.weights.focus).toBeLessThanOrEqual(1);
+      expect(ai.weights.greed).toBeGreaterThanOrEqual(-1);
+      expect(ai.weights.greed).toBeLessThanOrEqual(-0.25);
+      expect(ai.weights.urgency).toBeGreaterThanOrEqual(0.5);
+      expect(ai.weights.urgency).toBeLessThanOrEqual(1);
+    }
+    expect(new Set(ais.map((ai) => JSON.stringify(ai.weights))).size).toBeGreaterThan(1);
+  });
+
+  it("標準プロファイルではAIの名前・性格がランダムで決まる", () => {
+    const state = createGame(1, 10, 4, BASE_RULES, undefined, "standard");
     const ais = state.players.filter((player) => !player.isHuman);
     expect(ais).toHaveLength(4);
     expect(new Set(ais.map((player) => player.name)).size).toBe(4);
@@ -665,6 +704,51 @@ describe("インシデントとトークン効果", () => {
     expect(state.players[0]?.tokens.mi).toBe(0);
     // リザルトの貢献ポイントにもLLMトークン分を加算する
     expect(state.players[0]?.contributed.design.points).toBe(1);
+  });
+
+  it("finishトークン政策は残り1点のタスクだけに使う", () => {
+    const state = testState();
+    const player = state.players[0]!;
+    const task = addTask(state, "inbox", state.humanId, {
+      requirements: { design: 5, dev: 0, test: 0 },
+    });
+    player.tokens = { mi: 1 };
+    task.tokenWork.design = 2;
+
+    useBotTokens(state, player, BASE_RULES, "finish");
+    expect(player.tokens.mi).toBe(1);
+    expect(task.tokenWork.design).toBe(2);
+
+    task.tokenWork.design = 4;
+    useBotTokens(state, player, BASE_RULES, "finish");
+    expect(player.tokens.mi).toBe(0);
+    expect(taskSum(task, "design")).toBe(5);
+  });
+
+  it("neverトークン政策はトークンを残す", () => {
+    const state = testState();
+    const player = state.players[0]!;
+    const task = addTask(state, "inbox", state.humanId, {
+      requirements: { design: 5, dev: 0, test: 0 },
+    });
+    player.tokens = { mi: 1 };
+    task.tokenWork.design = 4;
+
+    useBotTokens(state, player, BASE_RULES, "never");
+    expect(player.tokens.mi).toBe(1);
+    expect(task.tokenWork.design).toBe(4);
+  });
+
+  it("playBotRoundにトークン政策を渡せる", () => {
+    const state = testState();
+    for (const player of state.players) player.tokens = { mi: 1 };
+    addTask(state, "inbox", state.humanId, {
+      requirements: { design: 5, dev: 0, test: 0 },
+    });
+
+    playBotRound(state, undefined, BASE_RULES, { tokenPolicy: "never" });
+    expect(state.players.every((player) => player.tokens.mi === 1)).toBe(true);
+    expect(state.analytics.tokensUsed).toBe(0);
   });
 
   it("シールドは次の負債を防ぐ", () => {

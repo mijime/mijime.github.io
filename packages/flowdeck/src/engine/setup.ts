@@ -6,13 +6,14 @@ import { emptyGameAnalytics, emptyPlayerAnalytics } from "./analytics/state";
 import { startRound } from "./core";
 import { makeSnapshot } from "./metrics";
 import { pushLog } from "./log";
-import { randInt, randomSeed, shuffle } from "./rng";
+import { randomSeed, shuffle } from "./rng";
 import { refillOpen } from "./tasks";
 import { BASE_RULES, type RuleSet } from "./rules";
 import { normalizeGenerationSwing } from "./rules/generation";
-import type { GameState, PersonalityWeights, PlayerState } from "./types";
+import type { AiProfile, GameState, PlayerState } from "./types";
 import { TOTAL_DAYS } from "./rules/balance";
 import { HUMAN_ID } from "./types";
+import { DEFAULT_AI_PROFILE, rollAiWeights } from "./ai/profiles";
 
 export function createGame(
   seed: number = randomSeed(),
@@ -20,16 +21,18 @@ export function createGame(
   aiCount = 4,
   ruleSet: RuleSet = BASE_RULES,
   generationSwing?: number,
+  aiProfile: AiProfile = DEFAULT_AI_PROFILE,
 ): GameState {
   const safeCount = Math.max(3, Math.min(5, aiCount));
-  const teamRules = ruleSet.balance.teamRules(safeCount + 1, totalDays);
+  const teamRules = ruleSet.balance.teamRules(safeCount + 1, totalDays, aiProfile);
   const swing = normalizeGenerationSwing(generationSwing ?? ruleSet.generation.swing);
   const state: GameState = {
-    version: 27,
+    version: 28,
     seed,
     rngState: seed >>> 0,
     day: 1,
     totalDays,
+    aiProfile,
     generationSwing: swing,
     phase: "human",
     activePlayerIndex: 0,
@@ -56,12 +59,6 @@ export function createGame(
   };
 
   const characters = shuffle(state, TEAMMATES).slice(0, safeCount);
-  const randomWeight = () => Math.round((randInt(state, 2001) / 1000 - 1) * 100) / 100;
-  const randomWeights = (): PersonalityWeights => ({
-    focus: randomWeight(),
-    greed: randomWeight(),
-    urgency: randomWeight(),
-  });
   const specs = [
     {
       id: HUMAN_ID,
@@ -73,7 +70,7 @@ export function createGame(
       id: character.id,
       name: character.name,
       isHuman: false,
-      weights: randomWeights(),
+      weights: rollAiWeights(aiProfile, state),
     })),
   ];
   let cardId = 1;

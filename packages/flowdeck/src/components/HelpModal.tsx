@@ -9,7 +9,7 @@ import {
 } from "lucide-react";
 import { Modal } from "@mijime/theme/ui";
 import type { TeamRules } from "../engine/types";
-import { DEBT_SCORE_PENALTY } from "../engine/rules/balance";
+import { DEBT_SCORE_PENALTY, GAME_LENGTH_OPTIONS } from "../engine/rules/balance";
 import { FlowDiagram } from "./FlowDiagram";
 import { LlmToken } from "./Token";
 import { CARD_STYLE, CardTypeBadge } from "./ui";
@@ -115,11 +115,15 @@ export function HelpModal({ rules, onClose }: { rules: TeamRules; onClose: () =>
           <dl className="grid gap-x-3 gap-y-1 text-[8px] sm:grid-cols-2">
             <div>
               <dt className="font-medium text-(--ink)">プロジェクト</dt>
-              <dd className="text-(--mid)">10 / 20 / 30日のゲーム期間</dd>
+              <dd className="text-(--mid)">{GAME_LENGTH_OPTIONS.join(" / ")}日のゲーム期間</dd>
             </div>
             <div>
               <dt className="font-medium text-(--ink)">メンバー</dt>
               <dd className="text-(--mid)">あなたと協力するAI</dd>
+            </div>
+            <div>
+              <dt className="font-medium text-(--ink)">チームメイト</dt>
+              <dd className="text-(--mid)">標準（個性重視）/ 有能（整理重視）</dd>
             </div>
             <div>
               <dt className="font-medium text-(--ink)">完了</dt>
