@@ -1,5 +1,6 @@
 import type { Dispatch } from "react";
 import { RefreshCw, RotateCcw, ScrollText, Star } from "lucide-react";
+import { Button } from "@mijime/theme/ui";
 import type { Action, GameState, PlayerOutcome } from "../engine/types";
 import { buildResultSummary } from "../engine/analytics/result";
 import { archetypeById } from "../engine/analytics/playerTypes";
@@ -59,13 +60,13 @@ export function ResultScreen({ state, dispatch }: Props) {
     : 0;
 
   return (
-    <div className="flow-root" data-theme="dark">
+    <div className="flow-root">
       <div className="mx-auto max-w-3xl px-4 py-6">
         <header className="text-center">
           <h1 className="serif text-2xl font-semibold">{state.totalDays}日間のプロジェクト終了</h1>
           <p className="text-[10px] text-(--mid)">シード {state.seed}</p>
 
-          <div className="mt-3 flex items-center justify-center gap-1 text-(--terra)">
+          <div className="mt-3 flex items-center justify-center gap-1 text-(--accent)">
             {Array.from({ length: 3 }, (_, index) => (
               <Star
                 key={index}
@@ -94,7 +95,7 @@ export function ResultScreen({ state, dispatch }: Props) {
         </header>
 
         {human && (
-          <section className="mt-4 rounded-sm border border-(--terra)/40 bg-(--terra)/5 p-3">
+          <section className="mt-4 rounded-sm border border-(--accent)/40 bg-(--accent)/5 p-3">
             <div className="flex flex-wrap items-baseline justify-between gap-1">
               <div className="flex items-center gap-1.5">
                 <h2 className="serif text-[13px] font-semibold">あなたの貢献</h2>
@@ -114,7 +115,7 @@ export function ResultScreen({ state, dispatch }: Props) {
               <span className="shrink-0 text-[8px] text-(--mid)">チームの作業の</span>
               <span className="relative h-2 flex-1 overflow-hidden rounded-full bg-(--grid)">
                 <span
-                  className="absolute inset-y-0 left-0 rounded-full bg-(--terra)"
+                  className="absolute inset-y-0 left-0 rounded-full bg-(--accent)"
                   style={{ width: `${Math.round(share * 100)}%` }}
                 />
               </span>
@@ -139,7 +140,7 @@ export function ResultScreen({ state, dispatch }: Props) {
                   key={player.id}
                   className={`rounded-sm border bg-(--paper) px-2 py-1.5 ${
                     player.isHuman
-                      ? "border-(--terra)/60 ring-1 ring-(--terra)/25"
+                      ? "border-(--accent)/60 ring-1 ring-(--accent)/25"
                       : "border-(--border)"
                   }`}
                 >
@@ -193,7 +194,7 @@ export function ResultScreen({ state, dispatch }: Props) {
                     デッキ: 設計 {player.deck.design} / 開発 {player.deck.dev} / テスト{" "}
                     {player.deck.test}
                     {player.deck.debt > 0 && (
-                      <span className="text-red-600"> / 負債 {player.deck.debt}</span>
+                      <span className="text-(--danger)"> / 負債 {player.deck.debt}</span>
                     )}
                   </p>
                 </article>
@@ -251,20 +252,22 @@ export function ResultScreen({ state, dispatch }: Props) {
 
         <footer className="mt-4 flex flex-wrap items-center justify-end gap-2">
           <div className="flex flex-wrap gap-2">
-            <button
-              type="button"
+            <Button
+              variant="secondary"
+              size="sm"
               onClick={() => dispatch({ type: "RESTART", seed: state.seed })}
-              className="inline-flex items-center gap-1 rounded-sm border border-(--border) bg-(--paper) px-2 py-1 text-[10px] text-(--mid) transition-colors hover:border-(--terra) hover:text-(--terra)"
+              className="gap-1 px-2 py-1 text-(--mid)"
             >
               <RefreshCw size={11} /> 同じシードで再挑戦
-            </button>
-            <button
-              type="button"
+            </Button>
+            <Button
+              variant="primary"
+              size="sm"
               onClick={() => dispatch({ type: "RESTART", seed: newSeed() })}
-              className="inline-flex items-center gap-1 rounded-sm bg-(--terra) px-3 py-1.5 text-[11px] font-medium text-white transition-opacity hover:opacity-90"
+              className="px-3 py-1.5"
             >
               <RotateCcw size={12} /> もう一度（新しいシード）
-            </button>
+            </Button>
           </div>
         </footer>
       </div>

@@ -1,11 +1,11 @@
 import { useId } from "react";
 
 const STATIONS = [
-  { key: "open", label: "Backlog", color: "#0284c7" },
-  { key: "inbox", label: "Ready（設計）", color: "#7c3aed" },
-  { key: "wip", label: "In Progress（開発）", color: "#2563eb" },
-  { key: "test", label: "Review（テスト）", color: "#d97706" },
-  { key: "done", label: "Done（完了）", color: "#059669" },
+  { key: "open", label: "Backlog", color: "var(--tone-sky)" },
+  { key: "inbox", label: "Ready（設計）", color: "var(--tone-violet)" },
+  { key: "wip", label: "In Progress（開発）", color: "var(--tone-blue)" },
+  { key: "test", label: "Review（テスト）", color: "var(--tone-amber)" },
+  { key: "done", label: "Done（完了）", color: "var(--tone-green)" },
 ] as const;
 
 export type FlowCounts = Record<(typeof STATIONS)[number]["key"], number>;
@@ -25,7 +25,7 @@ export function FlowTrack({ counts, onFelt = false }: { counts?: FlowCounts; onF
   return (
     <svg
       viewBox="0 0 620 58"
-      className={`block h-[58px] w-full ${onFelt ? "text-(--tac-ink)" : "text-(--mid)"}`}
+      className={`block h-[58px] w-full ${onFelt ? "text-(--ink)" : "text-(--mid)"}`}
       role="img"
       aria-label={
         counts
@@ -67,7 +67,7 @@ export function FlowTrack({ counts, onFelt = false }: { counts?: FlowCounts; onF
                 cy="24"
                 r="18"
                 fill="none"
-                stroke="var(--terra)"
+                stroke="var(--accent)"
                 strokeWidth="2"
                 strokeDasharray="3 3"
               />
@@ -80,12 +80,12 @@ export function FlowTrack({ counts, onFelt = false }: { counts?: FlowCounts; onF
                 textAnchor="middle"
                 fontSize="10"
                 fontWeight="700"
-                fill="#ffffff"
+                fill="var(--paper)"
               >
                 {counts[station.key]}
               </text>
             ) : (
-              <circle cx={x} cy="24" r="3.5" fill="#ffffff" opacity="0.9" />
+              <circle cx={x} cy="24" r="3.5" fill="var(--paper)" opacity="0.9" />
             )}
             <text x={x} y="52" textAnchor="middle" fontSize="8" fill="currentColor">
               {station.label}

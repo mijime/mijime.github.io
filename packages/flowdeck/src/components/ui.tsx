@@ -149,10 +149,10 @@ export function LevelStars({
 }
 
 const CARD_BADGE: Record<CardType, string> = {
-  design: "bg-violet-600 text-white",
-  dev: "bg-blue-600 text-white",
-  test: "bg-amber-600 text-white",
-  debt: "bg-red-600 text-white",
+  design: "border-(--tone-violet)/40 bg-(--tone-violet)/15 text-(--tone-violet)",
+  dev: "border-(--tone-blue)/40 bg-(--tone-blue)/15 text-(--tone-blue)",
+  test: "border-(--tone-amber)/40 bg-(--tone-amber)/15 text-(--tone-amber)",
+  debt: "border-(--danger)/40 bg-(--danger)/15 text-(--danger)",
 };
 
 export function CardTypeBadge({
@@ -182,10 +182,10 @@ export const CARD_LABEL: Record<CardType, string> = {
 };
 
 export const CARD_STYLE: Record<CardType, string> = {
-  design: "border-violet-500/50 bg-violet-500/15 text-(--ink)",
-  dev: "border-blue-500/50 bg-blue-500/15 text-(--ink)",
-  test: "border-amber-500/50 bg-amber-500/15 text-(--ink)",
-  debt: "border-red-500/50 bg-red-500/15 text-(--ink)",
+  design: "border-(--tone-violet)/45 bg-(--tone-violet)/10 text-(--ink)",
+  dev: "border-(--tone-blue)/45 bg-(--tone-blue)/10 text-(--ink)",
+  test: "border-(--tone-amber)/45 bg-(--tone-amber)/10 text-(--ink)",
+  debt: "border-(--danger)/45 bg-(--danger)/10 text-(--ink)",
 };
 
 const LANE_ICON = {
@@ -214,76 +214,76 @@ export const PLAYER_TONE: Record<
   { text: string; bg: string; border: string; dot: string }
 > = {
   p1: {
-    text: "text-(--terra)",
-    bg: "bg-(--terra)/10",
-    border: "border-(--terra)/50",
-    dot: "bg-(--terra)",
+    text: "text-(--accent)",
+    bg: "bg-(--accent)/10",
+    border: "border-(--accent)/50",
+    dot: "bg-(--accent)",
   },
   p2: {
-    text: "text-violet-700 dark:text-violet-300",
-    bg: "bg-violet-500/10",
-    border: "border-violet-400/50",
-    dot: "bg-violet-500",
+    text: "text-(--tone-violet)",
+    bg: "bg-(--tone-violet)/10",
+    border: "border-(--tone-violet)/50",
+    dot: "bg-(--tone-violet)",
   },
   p3: {
-    text: "text-blue-700 dark:text-blue-300",
-    bg: "bg-blue-500/10",
-    border: "border-blue-400/50",
-    dot: "bg-blue-500",
+    text: "text-(--tone-blue)",
+    bg: "bg-(--tone-blue)/10",
+    border: "border-(--tone-blue)/50",
+    dot: "bg-(--tone-blue)",
   },
   p4: {
-    text: "text-amber-700 dark:text-amber-300",
-    bg: "bg-amber-500/10",
-    border: "border-amber-400/50",
-    dot: "bg-amber-500",
+    text: "text-(--tone-amber)",
+    bg: "bg-(--tone-amber)/10",
+    border: "border-(--tone-amber)/50",
+    dot: "bg-(--tone-amber)",
   },
   p5: {
-    text: "text-rose-700 dark:text-rose-300",
-    bg: "bg-rose-500/10",
-    border: "border-rose-400/50",
-    dot: "bg-rose-500",
+    text: "text-(--tone-rose)",
+    bg: "bg-(--tone-rose)/10",
+    border: "border-(--tone-rose)/50",
+    dot: "bg-(--tone-rose)",
   },
   p6: {
-    text: "text-teal-700 dark:text-teal-300",
-    bg: "bg-teal-500/10",
-    border: "border-teal-400/50",
-    dot: "bg-teal-500",
+    text: "text-(--tone-teal)",
+    bg: "bg-(--tone-teal)/10",
+    border: "border-(--tone-teal)/50",
+    dot: "bg-(--tone-teal)",
   },
   p7: {
-    text: "text-sky-700 dark:text-sky-300",
-    bg: "bg-sky-500/10",
-    border: "border-sky-400/50",
-    dot: "bg-sky-500",
+    text: "text-(--tone-sky)",
+    bg: "bg-(--tone-sky)/10",
+    border: "border-(--tone-sky)/50",
+    dot: "bg-(--tone-sky)",
   },
   p8: {
-    text: "text-indigo-700 dark:text-indigo-300",
-    bg: "bg-indigo-500/10",
-    border: "border-indigo-400/50",
-    dot: "bg-indigo-500",
+    text: "text-(--tone-indigo)",
+    bg: "bg-(--tone-indigo)/10",
+    border: "border-(--tone-indigo)/50",
+    dot: "bg-(--tone-indigo)",
   },
   p9: {
-    text: "text-orange-700 dark:text-orange-300",
-    bg: "bg-orange-500/10",
-    border: "border-orange-400/50",
-    dot: "bg-orange-500",
+    text: "text-(--tone-orange)",
+    bg: "bg-(--tone-orange)/10",
+    border: "border-(--tone-orange)/50",
+    dot: "bg-(--tone-orange)",
   },
   p10: {
-    text: "text-lime-700 dark:text-lime-300",
-    bg: "bg-lime-500/10",
-    border: "border-lime-400/50",
-    dot: "bg-lime-500",
+    text: "text-(--tone-lime)",
+    bg: "bg-(--tone-lime)/10",
+    border: "border-(--tone-lime)/50",
+    dot: "bg-(--tone-lime)",
   },
   p11: {
-    text: "text-fuchsia-700 dark:text-fuchsia-300",
-    bg: "bg-fuchsia-500/10",
-    border: "border-fuchsia-400/50",
-    dot: "bg-fuchsia-500",
+    text: "text-(--tone-fuchsia)",
+    bg: "bg-(--tone-fuchsia)/10",
+    border: "border-(--tone-fuchsia)/50",
+    dot: "bg-(--tone-fuchsia)",
   },
   p12: {
-    text: "text-cyan-700 dark:text-cyan-300",
-    bg: "bg-cyan-500/10",
-    border: "border-cyan-400/50",
-    dot: "bg-cyan-500",
+    text: "text-(--tone-cyan)",
+    bg: "bg-(--tone-cyan)/10",
+    border: "border-(--tone-cyan)/50",
+    dot: "bg-(--tone-cyan)",
   },
 };
 

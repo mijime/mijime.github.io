@@ -19,12 +19,12 @@ export function TeamPanel({ state, aiTab, onSelectAi }: Props) {
   const tone = PLAYER_TONE[selected.id];
 
   return (
-    <section className="tac-panel p-2">
+    <section className="ui-panel p-2">
       <div className="mb-1.5 flex items-baseline justify-between gap-1">
         <h2 className="flex items-center gap-1.5 text-[11px] font-semibold tracking-[0.08em]">
-          <Users size={11} className="text-(--terra)" /> チーム
+          <Users size={11} className="text-(--accent)" /> チーム
         </h2>
-        <span className="text-[9px] tabular-nums text-(--tac-dim)">{ais.length}人</span>
+        <span className="text-[9px] tabular-nums text-(--mid)">{ais.length}人</span>
       </div>
 
       <div className="grid grid-cols-2 gap-1">
@@ -40,26 +40,26 @@ export function TeamPanel({ state, aiTab, onSelectAi }: Props) {
               className={`min-w-0 flex items-center gap-1 rounded-sm border px-1.5 py-1 text-left transition-colors ${
                 selectedTab
                   ? `${playerTone?.border ?? "border-(--border)"} ${playerTone?.bg ?? ""}`
-                  : "border-(--tac-line) bg-(--tac-panel-2) hover:border-(--terra)/50"
+                  : "border-(--border) bg-(--surface) hover:border-(--accent)/50"
               }`}
             >
               <TraitIcon
                 weights={player.weights}
                 size={12}
-                className={playerTone?.text ?? "text-(--tac-dim)"}
+                className={playerTone?.text ?? "text-(--mid)"}
               />
               <span className="min-w-0 flex-1 truncate text-[10px] font-semibold">
                 {player.name}
               </span>
               {player.id === activeId && (
-                <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-(--terra) shadow-[0_0_6px_var(--terra)]" />
+                <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-(--accent) shadow-[0_0_6px_var(--accent)]" />
               )}
             </button>
           );
         })}
       </div>
 
-      <div className="mt-1.5 border-t border-(--tac-line) pt-1.5">
+      <div className="mt-1.5 border-t border-(--border) pt-1.5">
         <div className="flex items-center gap-1">
           <span
             className={`inline-flex items-center gap-0.5 text-[10px] font-semibold ${tone?.text ?? ""}`}
@@ -67,17 +67,17 @@ export function TeamPanel({ state, aiTab, onSelectAi }: Props) {
             <TraitIcon weights={selected.weights} size={10} />
             {selected.name}
           </span>
-          {isActive && <span className="text-[8px] font-medium text-(--terra)">手番中</span>}
-          <span className="ml-auto text-[8px] tabular-nums text-(--tac-dim)">
+          {isActive && <span className="text-[8px] font-medium text-(--accent)">手番中</span>}
+          <span className="ml-auto text-[8px] tabular-nums text-(--mid)">
             完{selected.completed} / {selected.score}pt
           </span>
         </div>
-        <div className="mt-0.5 flex items-center gap-1.5 text-[8px] text-(--tac-dim)">
+        <div className="mt-0.5 flex items-center gap-1.5 text-[8px] text-(--mid)">
           <span className="flex shrink-0 gap-0.5" title={`残りアクション ${selected.actionsLeft}`}>
             {Array.from({ length: 3 }, (_, index) => (
               <span
                 key={index}
-                className={`h-1.5 w-1.5 ${index < selected.actionsLeft ? "bg-(--terra)" : "bg-(--border)"}`}
+                className={`h-1.5 w-1.5 ${index < selected.actionsLeft ? "bg-(--accent)" : "bg-(--border)"}`}
               />
             ))}
           </span>

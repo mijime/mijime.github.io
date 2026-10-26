@@ -13,40 +13,101 @@ body,
 }
 
 body {
-  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-family: var(--font-mono);
 }
 
 .flow-root {
   min-height: 100%;
-  background: var(--paper);
+  background:
+    radial-gradient(
+      circle at 12% 0%,
+      color-mix(in srgb, var(--accent) 8%, transparent),
+      transparent 34rem
+    ),
+    radial-gradient(
+      circle at 88% 8%,
+      color-mix(in srgb, var(--grid) 50%, transparent),
+      transparent 30rem
+    ),
+    var(--paper);
   color: var(--ink);
 }
 
 .serif {
-  font-family: "Shippori Mincho", "Hiragino Mincho ProN", serif;
+  font-family: var(--font-serif);
 }
 
+/* ── Cards / lanes / felt ───────────────────────────── */
 .flow-lane {
-  background: color-mix(in srgb, var(--grid) 38%, transparent);
-  border: 1px solid var(--border);
+  position: relative;
+  border: 1px solid color-mix(in srgb, var(--border) 80%, transparent);
+  border-radius: var(--radius-sm);
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--paper) 62%, transparent), transparent 55%),
+    color-mix(in srgb, var(--grid) 44%, transparent);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, white 30%, transparent);
+}
+
+.flow-lane[data-lane="inbox"] {
+  border-top: 3px solid color-mix(in srgb, var(--tone-violet) 70%, var(--border));
+}
+
+.flow-lane[data-lane="wip"] {
+  border-top: 3px solid color-mix(in srgb, var(--tone-blue) 70%, var(--border));
+}
+
+.flow-lane[data-lane="test"] {
+  border-top: 3px solid color-mix(in srgb, var(--tone-amber) 70%, var(--border));
+}
+
+.flow-lane[data-lane="inbox"]::after,
+.flow-lane[data-lane="wip"]::after {
+  content: "›";
+  position: absolute;
+  top: 50%;
+  right: -0.62rem;
+  transform: translateY(-50%);
+  color: var(--mid);
+  font-size: 14px;
+  line-height: 1;
+  opacity: 0.55;
+  pointer-events: none;
 }
 
 .flow-card {
-  background: color-mix(in srgb, var(--paper) 94%, var(--grid));
-  border: 1px solid var(--border);
+  position: relative;
+  border: 1px solid color-mix(in srgb, var(--border) 80%, transparent);
+  border-radius: var(--radius-sm);
+  background: linear-gradient(
+    160deg,
+    color-mix(in srgb, var(--paper) 95%, white),
+    color-mix(in srgb, var(--grid) 18%, var(--paper))
+  );
   box-shadow:
-    0 1px 0 var(--border),
-    0 10px 18px -18px rgb(0 0 0 / 0.55);
+    0 1px 0 color-mix(in srgb, var(--border) 80%, transparent),
+    0 8px 16px -16px rgb(0 0 0 / 0.55);
   transition:
     box-shadow 0.15s ease,
     transform 0.15s ease,
     border-color 0.15s ease;
 }
 
+.flow-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0.04;
+  mix-blend-mode: soft-light;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
 .flow-card:hover {
+  transform: translateY(-1px);
   box-shadow:
-    0 1px 0 var(--border),
-    0 12px 20px -16px rgb(0 0 0 / 0.55);
+    0 1px 0 color-mix(in srgb, var(--border) 80%, transparent),
+    0 12px 20px -18px rgb(0 0 0 / 0.55);
 }
 
 .flow-hand {
@@ -55,10 +116,14 @@ body {
   bottom: 0;
   left: 0;
   z-index: 40;
-  border-top: 1px solid var(--border);
-  background: color-mix(in srgb, var(--paper) 94%, transparent);
+  border-top: 2px solid color-mix(in srgb, var(--accent) 32%, var(--border));
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--paper) 92%, transparent),
+    color-mix(in srgb, var(--paper) 98%, var(--grid))
+  );
   backdrop-filter: blur(8px);
-  box-shadow: 0 -8px 22px -18px rgb(0 0 0 / 0.55);
+  box-shadow: 0 -14px 34px -30px rgb(0 0 0 / 0.65);
 }
 
 .flow-scroll {
@@ -68,66 +133,6 @@ body {
 
 .flow-inset {
   background: color-mix(in srgb, var(--grid) 28%, transparent);
-}
-
-@keyframes flow-card-in {
-  from {
-    opacity: 0;
-    transform: translateY(4px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.flow-card-in {
-  animation: flow-card-in 0.2s ease both;
-}
-
-@keyframes flow-pulse {
-  0%,
-  100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.5;
-  }
-}
-
-.flow-pulse {
-  animation: flow-pulse 1.5s ease-in-out infinite;
-}
-
-@keyframes flow-slide {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.flow-slide {
-  animation: flow-slide 0.2s ease both;
-}
-
-/* Game table */
-.flow-root {
-  background:
-    radial-gradient(
-      circle at 12% 0%,
-      color-mix(in srgb, var(--terra) 10%, transparent),
-      transparent 34rem
-    ),
-    radial-gradient(
-      circle at 88% 8%,
-      color-mix(in srgb, var(--grid) 50%, transparent),
-      transparent 30rem
-    ),
-    var(--paper);
 }
 
 .game-topbar {
@@ -146,7 +151,7 @@ body {
 
 .game-flow {
   background: color-mix(in srgb, var(--paper) 78%, var(--grid));
-  box-shadow: inset 0 1px 0 color-mix(in srgb, white 45%, transparent);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, white 40%, transparent);
 }
 
 .turn-banner {
@@ -161,61 +166,18 @@ body {
 
 .game-board {
   border: 1px solid color-mix(in srgb, var(--border) 85%, transparent);
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   padding: 8px;
   background:
     linear-gradient(180deg, color-mix(in srgb, var(--paper) 65%, transparent), transparent 42%),
     color-mix(in srgb, var(--grid) 34%, transparent);
   box-shadow:
-    inset 0 1px 0 color-mix(in srgb, white 40%, transparent),
+    inset 0 1px 0 color-mix(in srgb, white 35%, transparent),
     0 18px 40px -38px rgb(0 0 0 / 0.65);
 }
 
-.flow-lane {
-  background:
-    linear-gradient(180deg, color-mix(in srgb, var(--paper) 62%, transparent), transparent 55%),
-    color-mix(in srgb, var(--grid) 44%, transparent);
-  border: 1px solid color-mix(in srgb, var(--border) 80%, transparent);
-  border-radius: 4px;
-  box-shadow: inset 0 1px 0 color-mix(in srgb, white 35%, transparent);
-}
-
-.flow-lane[data-lane="inbox"] {
-  border-top: 3px solid color-mix(in srgb, #8b5cf6 72%, var(--border));
-}
-
-.flow-lane[data-lane="wip"] {
-  border-top: 3px solid color-mix(in srgb, #3b82f6 72%, var(--border));
-}
-
-.flow-lane[data-lane="test"] {
-  border-top: 3px solid color-mix(in srgb, #f59e0b 72%, var(--border));
-}
-
-.flow-card {
-  border-radius: 4px;
-  background: linear-gradient(
-    160deg,
-    color-mix(in srgb, var(--paper) 95%, white),
-    color-mix(in srgb, var(--grid) 18%, var(--paper))
-  );
-  box-shadow:
-    0 1px 0 color-mix(in srgb, var(--border) 80%, transparent),
-    0 8px 16px -16px rgb(0 0 0 / 0.55);
-}
-
-.flow-card:hover {
-  transform: translateY(-1px);
-}
-
 .game-hand {
-  border-top: 2px solid color-mix(in srgb, var(--terra) 32%, var(--border));
-  background: linear-gradient(
-    180deg,
-    color-mix(in srgb, var(--paper) 92%, transparent),
-    color-mix(in srgb, var(--paper) 98%, var(--grid))
-  );
-  box-shadow: 0 -14px 34px -30px rgb(0 0 0 / 0.65);
+  border-top: 2px solid color-mix(in srgb, var(--accent) 32%, var(--border));
 }
 
 .game-backlog .flow-card {
@@ -224,7 +186,7 @@ body {
     0 12px 20px -20px rgb(0 0 0 / 0.6);
 }
 
-/* Day / round transition */
+/* ── Day / round transition ─────────────────────────── */
 .day-transition-layer {
   position: fixed;
   inset: 0;
@@ -240,9 +202,9 @@ body {
 }
 
 .day-transition-card {
-  border: 1px solid color-mix(in srgb, var(--terra) 45%, var(--border));
-  border-top: 3px solid var(--terra);
-  border-radius: 4px;
+  border: 1px solid color-mix(in srgb, var(--accent) 45%, var(--border));
+  border-top: 3px solid var(--accent);
+  border-radius: var(--radius-sm);
   background: color-mix(in srgb, var(--paper) 94%, var(--grid));
   padding: 1rem 1.75rem;
   text-align: center;
@@ -287,234 +249,47 @@ body {
   animation: day-pop 0.35s ease both;
 }
 
-/* Lane flow cues */
-.flow-lane {
-  position: relative;
+/* ── Motion ─────────────────────────────────────────── */
+@keyframes flow-card-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-.flow-lane[data-lane="inbox"]::after,
-.flow-lane[data-lane="wip"]::after {
-  content: "›";
-  position: absolute;
-  top: 50%;
-  right: -0.62rem;
-  transform: translateY(-50%);
-  font-size: 14px;
-  line-height: 1;
-  color: var(--mid);
-  opacity: 0.55;
-  pointer-events: none;
+.flow-card-in {
+  animation: flow-card-in 0.2s ease both;
 }
 
-/* Paper grain on cards */
-.flow-card {
-  position: relative;
+@keyframes flow-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
 }
 
-.flow-card::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  pointer-events: none;
-  opacity: 0.05;
-  mix-blend-mode: soft-light;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)'/%3E%3C/svg%3E");
+.flow-pulse {
+  animation: flow-pulse 1.5s ease-in-out infinite;
 }
 
-/* Tactical UI */
-.flow-root[data-theme="dark"] {
-  --paper: #0a1118;
-  --ink: #e6f2f3;
-  --mid: #8aa2b0;
-  --border: #20313f;
-  --grid: #0f1a23;
-  --toolbar-bg: #070c11;
-  --terra: #2ee6c5;
-  --tac-bg: #05090d;
-  --tac-panel: #0a1118;
-  --tac-panel-2: #0d1821;
-  --tac-line: #1c2d3a;
-  --tac-line-bright: #2d4a5c;
-  --tac-accent: #2ee6c5;
-  --tac-amber: #ffb43a;
-  --tac-danger: #ff5f6d;
-  --tac-dim: #5f7887;
-  background:
-    radial-gradient(circle at 50% -10%, rgb(46 230 197 / 0.08), transparent 42rem),
-    radial-gradient(circle at 100% 20%, rgb(56 189 248 / 0.05), transparent 30rem), var(--tac-bg);
-  color: var(--ink);
-  font-family: "IBM Plex Mono", ui-monospace, monospace;
+@keyframes flow-slide {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-.flow-root [class~="bg-(--terra)"] {
-  color: #03110e;
-}
-
-.flow-root[data-theme="dark"] .game-topbar {
-  background: color-mix(in srgb, var(--tac-panel) 92%, transparent);
-  border-bottom: 1px solid var(--tac-line-bright);
-  box-shadow:
-    0 1px 0 rgb(46 230 197 / 0.22),
-    0 16px 32px -30px #000;
-}
-
-.flow-root[data-theme="dark"] .game-logo {
-  text-transform: uppercase;
-  letter-spacing: 0.16em;
-  text-shadow: 0 0 18px rgb(46 230 197 / 0.35);
-}
-
-.flow-root[data-theme="dark"] .game-stat {
-  background: color-mix(in srgb, var(--tac-panel-2) 88%, transparent);
-  border-color: var(--tac-line);
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.04);
-}
-
-.flow-root[data-theme="dark"] .turn-banner {
-  background: linear-gradient(90deg, rgb(46 230 197 / 0.08), transparent 45%), var(--tac-panel);
-  border-color: var(--tac-line);
-  box-shadow:
-    inset 2px 0 0 var(--tac-accent),
-    0 10px 24px -24px #000;
-}
-
-.flow-root[data-theme="dark"] .game-hand {
-  border-top: 1px solid var(--tac-line-bright);
-  background: linear-gradient(180deg, rgb(9 17 24 / 0.96), rgb(5 10 15 / 0.98));
-  box-shadow:
-    0 -1px 0 rgb(46 230 197 / 0.18),
-    0 -20px 40px -30px #000;
-}
-
-.flow-root[data-theme="dark"] .flow-card {
-  background: linear-gradient(160deg, #0e1a24, #0a1219);
-  border-color: var(--tac-line);
-}
-
-.flow-root[data-theme="dark"] .flow-lane {
-  background:
-    linear-gradient(rgb(46 230 197 / 0.035) 1px, transparent 1px),
-    linear-gradient(90deg, rgb(46 230 197 / 0.035) 1px, transparent 1px),
-    linear-gradient(180deg, rgb(13 24 33 / 0.9), rgb(7 13 19 / 0.96));
-  background-size:
-    16px 16px,
-    16px 16px,
-    auto;
-  border-color: var(--tac-line);
-  border-radius: 2px;
-}
-
-.flow-root[data-theme="dark"] .game-board {
-  border: 1px solid var(--tac-line);
-  border-radius: 2px;
-  padding: 6px;
-  background: rgb(8 15 21 / 0.55);
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.03);
-}
-
-.tac-panel {
-  position: relative;
-  border: 1px solid var(--tac-line);
-  border-radius: 2px;
-  background: linear-gradient(180deg, rgb(13 24 33 / 0.96), rgb(8 15 21 / 0.98));
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.03);
-}
-
-.tac-panel::before,
-.tac-panel::after {
-  content: "";
-  position: absolute;
-  width: 11px;
-  height: 11px;
-  pointer-events: none;
-}
-
-.tac-panel::before {
-  top: -1px;
-  left: -1px;
-  border-top: 2px solid var(--tac-accent);
-  border-left: 2px solid var(--tac-accent);
-}
-
-.tac-panel::after {
-  right: -1px;
-  bottom: -1px;
-  border-right: 2px solid var(--tac-accent);
-  border-bottom: 2px solid var(--tac-accent);
-}
-
-.tac-label {
-  font-size: 9px;
-  line-height: 1.2;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--tac-dim);
-}
-
-.tac-value {
-  font-variant-numeric: tabular-nums;
-  font-weight: 600;
-  color: var(--ink);
-}
-
-.tac-rule {
-  height: 1px;
-  background: linear-gradient(90deg, var(--tac-line-bright), transparent);
-}
-
-.tac-card {
-  position: relative;
-  border: 1px solid var(--tac-line);
-  border-left: 2px solid var(--tac-accent);
-  border-radius: 2px;
-  background: linear-gradient(160deg, #0e1a24, #0a1219);
-  box-shadow:
-    0 1px 0 rgb(255 255 255 / 0.04),
-    0 12px 20px -18px #000;
-  transition:
-    border-color 0.15s ease,
-    box-shadow 0.15s ease;
-}
-
-.tac-card:hover {
-  border-color: var(--tac-line-bright);
-  box-shadow:
-    0 0 0 1px rgb(46 230 197 / 0.15),
-    0 18px 28px -20px #000;
-}
-
-.tac-lane[data-lane="inbox"] {
-  border-top-color: #a78bfa;
-}
-
-.tac-lane[data-lane="wip"] {
-  border-top-color: #38bdf8;
-}
-
-.tac-lane[data-lane="test"] {
-  border-top-color: #fbbf24;
-}
-
-.tac-lane {
-  border-top-width: 2px;
-  border-top-style: solid;
-}
-
-.tac-track {
-  background: #0a141c;
-  box-shadow: inset 0 0 0 1px var(--tac-line);
-}
-
-.tac-track > span {
-  background: var(--tac-accent);
-  box-shadow: 0 0 10px rgb(46 230 197 / 0.45);
-}
-
-.tac-lane[data-lane="open"] {
-  border-top-color: #38bdf8;
-}
-
-.tac-lane[data-lane="done"] {
-  border-top-color: #34d399;
+.flow-slide {
+  animation: flow-slide 0.2s ease both;
 }

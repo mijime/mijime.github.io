@@ -10,7 +10,6 @@ import { OpsBoard } from "./components/OpsBoard";
 import { LogPanel } from "./components/LogPanel";
 import { NewGameModal } from "./components/NewGameModal";
 import { ResultScreen } from "./components/ResultScreen";
-import { TacticalFrame } from "./components/TacticalFrame";
 import { TeamPanel } from "./components/TeamPanel";
 import { TurnBanner } from "./components/TurnBanner";
 import { loadGame, useGame } from "./store";
@@ -106,8 +105,7 @@ export function App() {
   }
 
   return (
-    <div className="flow-root relative pb-52" data-theme="dark">
-      <TacticalFrame />
+    <div className="flow-root relative pb-52">
       <div className="relative z-10">
         <Header
           state={state}
