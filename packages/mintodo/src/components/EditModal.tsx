@@ -1,15 +1,16 @@
 import { ChevronDown, ChevronUp, Pencil, Trash2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { Button, Field, Input, Modal, SectionLabel, Textarea } from "@mijime/theme/ui";
 import { parseInlineDSL } from "../dsl";
 import { useMindStore } from "../hooks/use-mind-store";
 import { buildBreadcrumb, parentBreadcrumb } from "../lib/breadcrumb";
 import type { CategoryColor, Priority, TaskStatus } from "../types";
 
 const COLORS: { value: CategoryColor; label: string; bg: string }[] = [
-  { value: "slate", label: "slate", bg: "bg-slate-400" },
-  { value: "sky", label: "sky", bg: "bg-sky-400" },
-  { value: "emerald", label: "emerald", bg: "bg-emerald-400" },
-  { value: "rose", label: "rose", bg: "bg-rose-400" },
+  { value: "slate", label: "slate", bg: "bg-(--mid)" },
+  { value: "sky", label: "sky", bg: "bg-(--tone-sky)" },
+  { value: "emerald", label: "emerald", bg: "bg-(--tone-green)" },
+  { value: "rose", label: "rose", bg: "bg-(--tone-rose)" },
 ];
 
 const PRIORITIES: { value: Priority; label: string }[] = [
@@ -26,7 +27,7 @@ const STATUSES: { value: TaskStatus; label: string }[] = [
 ];
 
 function swatchActive(c: CategoryColor, current: CategoryColor): string {
-  return c === current ? "ring-2 ring-offset-1 ring-slate-700 dark:ring-slate-200" : "";
+  return c === current ? "ring-2 ring-offset-1 ring-(--accent) ring-offset-(--paper)" : "";
 }
 
 export function EditModal() {
@@ -184,243 +185,163 @@ export function EditModal() {
   }
 
   return (
-    <div
-      data-testid="edit-modal"
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      style={{ background: "rgba(0,0,0,0.4)" }}
-      onClick={(e) => {
-        if (e.target === e.currentTarget) close();
-      }}
-    >
-      <div
-        className="w-full max-w-md rounded overflow-hidden"
-        style={{ background: "var(--paper)", border: "1px solid var(--border)" }}
-      >
-        <div className="p-6">
-          <h3
-            data-testid="edit-modal-title"
-            className="text-lg mb-4 flex items-center gap-2 truncate"
-            style={{ fontFamily: '"Crimson Pro", serif', fontWeight: 600, color: "var(--ink)" }}
-            title={breadcrumb}
-          >
-            <Pencil size={18} style={{ color: "var(--terra)" }} />
-            {breadcrumb}
-          </h3>
-          <div className="space-y-4">
-            <div>
-              <label
-                className="block text-xs uppercase tracking-wider mb-1"
-                style={{ color: "var(--mid)" }}
-              >
-                内容 (DSL可: @priority:high @color:sky @due:2026-12-31 @done)
-              </label>
-              <textarea
-                data-testid="edit-modal-textarea"
-                value={text}
-                onChange={(e) => handleTextChange(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
-                    e.preventDefault();
-                    commit();
-                  }
-                }}
-                rows={3}
-                className="w-full px-3 py-2 rounded text-sm outline-none resize-y min-h-[60px] font-mono"
-                style={{
-                  background: "var(--toolbar-bg)",
-                  border: "1px solid var(--border)",
-                  color: "var(--ink)",
-                }}
-                placeholder="タスクを入力..."
-                autoFocus
-              />
-            </div>
-            <button
-              type="button"
-              data-testid="edit-modal-attr-toggle"
-              onClick={() => setExpanded((v) => !v)}
-              className="text-xs flex items-center gap-1 hover:underline"
-              style={{ color: "var(--mid)" }}
-            >
-              {expanded ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
-              属性
-            </button>
-            {expanded && (
-              <div className="space-y-4 border-t pt-4" style={{ borderColor: "var(--border)" }}>
-                <div>
-                  <label
-                    className="block text-xs uppercase tracking-wider mb-1"
-                    style={{ color: "var(--mid)" }}
-                  >
-                    カテゴリーカラー
-                  </label>
-                  <div className="flex items-center gap-2">
-                    {COLORS.map((c) => (
-                      <button
-                        key={c.value}
-                        type="button"
-                        onClick={() => handleColorClick(c.value)}
-                        className={`w-7 h-7 rounded-full ${c.bg} ${swatchActive(c.value, categoryColor)}`}
-                        aria-label={c.label}
-                      />
-                    ))}
-                  </div>
-                </div>
-                <div>
-                  <label
-                    className="block text-xs uppercase tracking-wider mb-1"
-                    style={{ color: "var(--mid)" }}
-                  >
-                    優先度
-                  </label>
-                  <div className="grid grid-cols-3 gap-2">
-                    {PRIORITIES.map((p) => (
-                      <button
-                        key={p.value}
-                        type="button"
-                        data-priority={p.value}
-                        aria-pressed={priority === p.value}
-                        onClick={() => handlePriorityClick(p.value)}
-                        className="py-2 rounded text-xs font-medium transition"
-                        style={
-                          priority === p.value
-                            ? { background: "var(--terra)", color: "var(--paper)" }
-                            : {
-                                background: "var(--paper)",
-                                border: "1px solid var(--border)",
-                                color: "var(--ink)",
-                              }
-                        }
-                      >
-                        {p.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-                <div>
-                  <label
-                    className="block text-xs uppercase tracking-wider mb-1"
-                    style={{ color: "var(--mid)" }}
-                  >
-                    ステータス
-                  </label>
-                  <div className="grid grid-cols-4 gap-2">
-                    {STATUSES.map((s) => (
-                      <button
-                        key={s.value}
-                        type="button"
-                        data-status={s.value}
-                        data-testid={`status-${s.value}`}
-                        aria-pressed={status === s.value}
-                        onClick={() => handleStatusClick(s.value)}
-                        className="py-2 rounded text-xs font-medium transition"
-                        style={
-                          status === s.value
-                            ? { background: "var(--terra)", color: "var(--paper)" }
-                            : {
-                                background: "var(--paper)",
-                                border: "1px solid var(--border)",
-                                color: "var(--ink)",
-                              }
-                        }
-                      >
-                        {s.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-                <div>
-                  <label
-                    className="block text-xs uppercase tracking-wider mb-1"
-                    style={{ color: "var(--mid)" }}
-                  >
-                    期限
-                  </label>
-                  <input
-                    type="date"
-                    value={dueDate}
-                    onChange={(e) => handleDueDateChange(e.target.value)}
-                    className="w-full px-3 py-2 rounded text-sm outline-none"
-                    style={{
-                      background: "var(--toolbar-bg)",
-                      border: "1px solid var(--border)",
-                      color: "var(--ink)",
-                    }}
-                  />
-                </div>
-                <div>
-                  <label
-                    className="block text-xs uppercase tracking-wider mb-1"
-                    style={{ color: "var(--mid)" }}
-                  >
-                    見積もり (時間)
-                  </label>
-                  <input
-                    type="number"
-                    data-testid="edit-modal-estimate"
-                    min={0}
-                    step={0.5}
-                    value={localEstimate === null ? "" : localEstimate}
-                    onChange={(e) =>
-                      setLocalEstimate(
-                        e.target.value === "" ? null : Math.max(0, Number(e.target.value)),
-                      )
-                    }
-                    className="w-full px-3 py-2 rounded text-sm outline-none"
-                    style={{
-                      background: "var(--toolbar-bg)",
-                      border: "1px solid var(--border)",
-                      color: "var(--ink)",
-                    }}
-                  />
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-        <div
-          className="flex justify-between items-center p-4"
-          style={{ background: "var(--toolbar-bg)", borderTop: "1px solid var(--border)" }}
+    <Modal
+      open
+      onClose={close}
+      testId="edit-modal"
+      size="md"
+      title={
+        <span
+          data-testid="edit-modal-title"
+          className="flex items-center gap-2 truncate"
+          title={breadcrumb}
         >
+          <Pencil size={18} className="shrink-0 text-(--accent)" />
+          <span className="truncate">{breadcrumb}</span>
+        </span>
+      }
+      footer={
+        <div className="flex w-full items-center justify-between gap-2">
           {isNew ? (
             <div />
           ) : (
-            <button
-              type="button"
+            <Button
+              variant="ghost"
+              size="sm"
               data-testid="edit-modal-delete"
-              className="px-4 py-2 rounded text-sm font-semibold transition flex items-center gap-1.5"
-              style={{ color: "var(--terra)" }}
+              className="gap-1.5 text-(--accent)"
               onClick={handleDelete}
             >
               <Trash2 size={14} /> 削除
-            </button>
+            </Button>
           )}
           <div className="flex gap-2">
-            <button
-              type="button"
-              data-testid="edit-modal-cancel"
-              className="px-4 py-2 rounded text-sm font-medium transition"
-              style={{
-                background: "var(--paper)",
-                border: "1px solid var(--border)",
-                color: "var(--ink)",
-              }}
-              onClick={close}
-            >
+            <Button variant="secondary" size="sm" data-testid="edit-modal-cancel" onClick={close}>
               キャンセル
-            </button>
-            <button
-              type="button"
-              data-testid="edit-modal-save"
-              className="px-5 py-2 rounded text-sm font-semibold transition"
-              style={{ background: "var(--terra)", color: "var(--paper)" }}
-              onClick={commit}
-            >
+            </Button>
+            <Button variant="primary" size="sm" data-testid="edit-modal-save" onClick={commit}>
               保存
-            </button>
+            </Button>
           </div>
         </div>
+      }
+    >
+      <div className="space-y-4">
+        <Field
+          label="内容 (DSL可: @priority:high @color:sky @due:2026-12-31 @done)"
+          htmlFor="edit-modal-textarea"
+        >
+          <Textarea
+            id="edit-modal-textarea"
+            data-testid="edit-modal-textarea"
+            value={text}
+            onChange={(e) => handleTextChange(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
+                e.preventDefault();
+                commit();
+              }
+            }}
+            rows={3}
+            className="min-h-[60px] resize-y font-mono"
+            placeholder="タスクを入力..."
+            autoFocus
+          />
+        </Field>
+        <button
+          type="button"
+          data-testid="edit-modal-attr-toggle"
+          onClick={() => setExpanded((v) => !v)}
+          className="flex items-center gap-1 text-xs text-(--mid) hover:underline"
+        >
+          {expanded ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
+          属性
+        </button>
+        {expanded && (
+          <div className="space-y-4 border-t border-(--border) pt-4">
+            <div>
+              <SectionLabel className="mb-1 block">カテゴリーカラー</SectionLabel>
+              <div className="flex items-center gap-2">
+                {COLORS.map((c) => (
+                  <button
+                    key={c.value}
+                    type="button"
+                    onClick={() => handleColorClick(c.value)}
+                    className={`h-7 w-7 rounded-full ${c.bg} ${swatchActive(c.value, categoryColor)}`}
+                    aria-label={c.label}
+                  />
+                ))}
+              </div>
+            </div>
+            <div>
+              <SectionLabel className="mb-1 block">優先度</SectionLabel>
+              <div className="grid grid-cols-3 gap-2">
+                {PRIORITIES.map((p) => (
+                  <button
+                    key={p.value}
+                    type="button"
+                    data-priority={p.value}
+                    aria-pressed={priority === p.value}
+                    onClick={() => handlePriorityClick(p.value)}
+                    className={`rounded-sm border px-1 py-2 text-xs font-medium transition ${
+                      priority === p.value
+                        ? "border-(--accent) bg-(--accent) text-(--on-accent)"
+                        : "border-(--border) bg-(--paper) text-(--ink)"
+                    }`}
+                  >
+                    {p.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div>
+              <SectionLabel className="mb-1 block">ステータス</SectionLabel>
+              <div className="grid grid-cols-4 gap-2">
+                {STATUSES.map((s) => (
+                  <button
+                    key={s.value}
+                    type="button"
+                    data-status={s.value}
+                    data-testid={`status-${s.value}`}
+                    aria-pressed={status === s.value}
+                    onClick={() => handleStatusClick(s.value)}
+                    className={`rounded-sm border px-1 py-2 text-xs font-medium transition ${
+                      status === s.value
+                        ? "border-(--accent) bg-(--accent) text-(--on-accent)"
+                        : "border-(--border) bg-(--paper) text-(--ink)"
+                    }`}
+                  >
+                    {s.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <Field label="期限" htmlFor="edit-modal-due">
+              <Input
+                id="edit-modal-due"
+                type="date"
+                value={dueDate}
+                onChange={(e) => handleDueDateChange(e.target.value)}
+              />
+            </Field>
+            <Field label="見積もり (時間)" htmlFor="edit-modal-estimate">
+              <Input
+                id="edit-modal-estimate"
+                type="number"
+                data-testid="edit-modal-estimate"
+                min={0}
+                step={0.5}
+                value={localEstimate === null ? "" : localEstimate}
+                onChange={(e) =>
+                  setLocalEstimate(
+                    e.target.value === "" ? null : Math.max(0, Number(e.target.value)),
+                  )
+                }
+              />
+            </Field>
+          </div>
+        )}
       </div>
-    </div>
+    </Modal>
   );
 }

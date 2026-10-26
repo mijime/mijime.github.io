@@ -1,3 +1,4 @@
+import { Button, Modal } from "@mijime/theme/ui";
 import { useMindStore } from "../hooks/use-mind-store";
 
 export function BoardDeleteDialog() {
@@ -17,51 +18,28 @@ export function BoardDeleteDialog() {
   };
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center"
-      style={{ background: "rgba(0,0,0,0.4)" }}
-      onClick={close}
-    >
-      <div
-        onClick={(e) => e.stopPropagation()}
-        className="rounded p-6 w-[420px] max-w-[90vw]"
-        style={{ background: "var(--paper)", border: "1px solid var(--border)" }}
-      >
-        <h2
-          className="text-lg mb-2"
-          style={{ fontFamily: '"Crimson Pro", serif', fontWeight: 600, color: "var(--ink)" }}
-        >
-          ボードを削除
-        </h2>
-        <p className="text-sm mb-1" style={{ color: "var(--ink)" }}>
-          「<span style={{ fontWeight: 600 }}>{modal.boardName}</span>」を削除しますか?
-        </p>
-        <p className="text-xs mb-4" style={{ color: "var(--terra)" }}>
-          このボードのすべてのタスクが削除されます。この操作は取り消せません。
-        </p>
-        <div className="flex justify-end gap-2">
-          <button
-            type="button"
-            onClick={close}
-            className="px-4 py-2 text-sm rounded transition"
-            style={{
-              background: "var(--paper)",
-              border: "1px solid var(--border)",
-              color: "var(--ink)",
-            }}
-          >
+    <Modal
+      open
+      onClose={close}
+      title="ボードを削除"
+      size="sm"
+      footer={
+        <>
+          <Button variant="secondary" size="sm" onClick={close}>
             キャンセル
-          </button>
-          <button
-            type="button"
-            onClick={onConfirm}
-            className="px-4 py-2 text-sm rounded transition"
-            style={{ background: "var(--terra)", color: "var(--paper)" }}
-          >
+          </Button>
+          <Button variant="danger" size="sm" onClick={onConfirm}>
             削除
-          </button>
-        </div>
-      </div>
-    </div>
+          </Button>
+        </>
+      }
+    >
+      <p className="text-sm">
+        「<span className="font-semibold">{modal.boardName}</span>」を削除しますか?
+      </p>
+      <p className="mt-1 text-xs text-(--accent)">
+        このボードのすべてのタスクが削除されます。この操作は取り消せません。
+      </p>
+    </Modal>
   );
 }

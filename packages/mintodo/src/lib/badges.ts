@@ -51,13 +51,13 @@ export function formatBadges(node: MindNode): BadgeInfo {
 export function categoryBorderColor(c: MindNode["categoryColor"]): string {
   switch (c) {
     case "sky": {
-      return "#0ea5e9";
+      return "var(--tone-sky)";
     }
     case "emerald": {
-      return "#10b981";
+      return "var(--tone-green)";
     }
     case "rose": {
-      return "#f43f5e";
+      return "var(--tone-rose)";
     }
     default: {
       return "var(--mid)";
@@ -68,16 +68,16 @@ export function categoryBorderColor(c: MindNode["categoryColor"]): string {
 export function statusDotClass(s: TaskStatus): string {
   switch (s) {
     case "wip": {
-      return "bg-sky-500";
+      return "bg-(--info)";
     }
     case "review": {
-      return "bg-amber-500";
+      return "bg-(--warning)";
     }
     case "done": {
-      return "bg-emerald-500";
+      return "bg-(--success)";
     }
     default: {
-      return "bg-slate-400";
+      return "bg-(--mid)";
     }
   }
 }

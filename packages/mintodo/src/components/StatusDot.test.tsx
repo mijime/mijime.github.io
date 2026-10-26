@@ -3,26 +3,26 @@ import { describe, expect, it, vi } from "vitest";
 import { StatusDot } from "./StatusDot";
 
 describe("StatusDot", () => {
-  it("renders wip with bg-sky-500", () => {
+  it("renders wip with bg-(--info)", () => {
     render(<StatusDot status="wip" testId="dot" />);
     const el = screen.getByTestId("dot");
-    expect(el.className).toContain("bg-sky-500");
+    expect(el.className).toContain("bg-(--info)");
     expect(el.className).toContain("rounded-full");
   });
 
-  it("renders review with bg-amber-500", () => {
+  it("renders review with bg-(--warning)", () => {
     render(<StatusDot status="review" testId="dot" />);
-    expect(screen.getByTestId("dot").className).toContain("bg-amber-500");
+    expect(screen.getByTestId("dot").className).toContain("bg-(--warning)");
   });
 
-  it("renders done with bg-emerald-500", () => {
+  it("renders done with bg-(--success)", () => {
     render(<StatusDot status="done" testId="dot" />);
-    expect(screen.getByTestId("dot").className).toContain("bg-emerald-500");
+    expect(screen.getByTestId("dot").className).toContain("bg-(--success)");
   });
 
-  it("renders inbox with bg-slate-400", () => {
+  it("renders inbox with bg-(--mid)", () => {
     render(<StatusDot status="inbox" testId="dot" />);
-    expect(screen.getByTestId("dot").className).toContain("bg-slate-400");
+    expect(screen.getByTestId("dot").className).toContain("bg-(--mid)");
   });
 
   it("uses box-shadow ring", () => {

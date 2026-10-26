@@ -1,3 +1,5 @@
+@import "@mijime/theme/index.css";
+
 .emolog {
   max-width: 480px;
   margin: 0 auto;
@@ -150,7 +152,7 @@
 }
 
 .emolog-cal-today {
-  outline: 2px solid var(--terra);
+  outline: 2px solid var(--accent);
   outline-offset: -2px;
 }
 
@@ -340,14 +342,14 @@
 
 .emolog-list-menu-del {
   border-top: 1px solid var(--grid) !important;
-  color: #e74c3c !important;
+  color: var(--danger) !important;
 }
 
 .emolog-list-rename-input {
   padding: 6px 12px;
   font-size: 13px;
   font-family: "IBM Plex Mono", monospace;
-  border: 1px solid var(--terra);
+  border: 1px solid var(--accent);
   border-radius: 20px;
   background: var(--bg);
   color: var(--ink);
@@ -377,24 +379,6 @@
 
 .emolog-snackbar-text {
   white-space: nowrap;
-}
-
-.emolog-snackbar-action {
-  background: var(--terra);
-  border: none;
-  color: white;
-  padding: 4px 12px;
-  border-radius: 6px;
-  font-size: 12px;
-  font-family: "IBM Plex Mono", monospace;
-  font-weight: 600;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: opacity 0.15s;
-}
-
-.emolog-snackbar-action:hover {
-  opacity: 0.85;
 }
 
 @keyframes emoSnackIn {
@@ -438,7 +422,7 @@
 }
 
 .emolog-tabbar-active {
-  color: var(--terra);
+  color: var(--accent);
 }
 
 .emolog-tabbar-icon {
@@ -457,7 +441,7 @@
   left: 0;
   width: 33.333%;
   height: 2px;
-  background: var(--terra);
+  background: var(--accent);
   transition: transform 0.2s ease;
   border-radius: 0 0 2px 2px;
 }
@@ -539,8 +523,8 @@
   --background: var(--surface);
   --border-color: var(--grid);
   --input-border-color: var(--grid);
-  --input-border-focus-color: var(--terra);
-  --indicator-color: var(--terra);
+  --input-border-focus-color: var(--accent);
+  --indicator-color: var(--accent);
   --button-active-background: var(--hover);
   width: 100%;
   height: 360px;
@@ -568,7 +552,7 @@
 }
 
 .emolog-record-note-input:focus {
-  border-color: var(--terra);
+  border-color: var(--accent);
 }
 
 .emolog-record-note-input::placeholder {
@@ -681,8 +665,8 @@
   margin-left: 6px;
   font-size: 9px;
   line-height: 1.4;
-  background: var(--terra);
-  color: white;
+  background: var(--accent);
+  color: var(--on-accent);
   padding: 1px 7px;
   border-radius: 8px;
   vertical-align: middle;
@@ -706,9 +690,9 @@
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  background: var(--terra);
+  background: var(--accent);
   border: 2px solid var(--bg);
-  box-shadow: 0 0 0 1px var(--terra);
+  box-shadow: 0 0 0 1px var(--accent);
   transform: translateY(-50%);
   z-index: 1;
 }
@@ -738,7 +722,7 @@
 }
 
 .emolog-history-emoji-active {
-  background: var(--terra);
+  background: var(--accent);
 }
 
 .emolog-history-emoji-edit {
@@ -750,7 +734,7 @@
   padding: 2px 4px;
   font-size: 20px;
   text-align: center;
-  border: 1px solid var(--terra);
+  border: 1px solid var(--accent);
   border-radius: 6px;
   background: var(--bg);
   outline: none;
@@ -783,7 +767,7 @@
   padding: 4px 8px;
   font-size: 13px;
   font-family: "IBM Plex Mono", monospace;
-  border: 1px solid var(--terra);
+  border: 1px solid var(--accent);
   border-radius: 4px;
   background: var(--bg);
   color: var(--ink);
@@ -862,84 +846,4 @@
   color: var(--bg) !important;
   border-color: var(--ink) !important;
   font-weight: 600;
-}
-
-/* ── 設定ダイアログ ── */
-.emolog-settings-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.4);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 2000;
-  animation: emoFadeIn 0.2s ease;
-}
-
-.emolog-settings {
-  background: var(--surface);
-  border: 1px solid var(--grid);
-  border-radius: 14px;
-  padding: 24px;
-  max-width: 320px;
-  width: calc(100% - 32px);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
-}
-
-.emolog-settings-title {
-  font-size: 16px;
-  font-weight: 600;
-  margin: 0 0 16px 0;
-  color: var(--ink);
-}
-
-.emolog-settings-actions {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin-bottom: 16px;
-}
-
-.emolog-settings-btn {
-  padding: 10px 16px;
-  font-size: 13px;
-  font-family: "IBM Plex Mono", monospace;
-  border: 1px solid var(--grid);
-  border-radius: 8px;
-  background: var(--bg);
-  color: var(--ink);
-  cursor: pointer;
-  text-align: left;
-  transition: background 0.15s;
-}
-
-.emolog-settings-btn:hover {
-  background: var(--hover);
-}
-
-.emolog-settings-danger {
-  color: #e74c3c !important;
-  border-color: #e74c3c40 !important;
-}
-
-.emolog-settings-danger:hover {
-  background: #e74c3c10 !important;
-}
-
-.emolog-settings-close {
-  width: 100%;
-  padding: 8px;
-  font-size: 13px;
-  font-family: "IBM Plex Mono", monospace;
-  border: 1px solid var(--grid);
-  border-radius: 8px;
-  background: var(--bg);
-  color: var(--mid);
-  cursor: pointer;
-  transition: all 0.15s;
-}
-
-.emolog-settings-close:hover {
-  background: var(--hover);
-  color: var(--ink);
 }

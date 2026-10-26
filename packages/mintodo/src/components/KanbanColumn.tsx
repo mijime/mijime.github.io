@@ -60,7 +60,7 @@ export function KanbanColumn({ status }: Props) {
     <div
       ref={setNodeRef}
       data-testid={`kanban-column-${status}`}
-      className={`w-72 shrink-0 flex flex-col gap-2 rounded p-3 h-full ${isOver ? "ring-2 ring-sky-400" : ""}`}
+      className={`w-72 shrink-0 flex flex-col gap-2 rounded p-3 h-full ${isOver ? "ring-2 ring-(--info)" : ""}`}
       style={{ background: "var(--toolbar-bg)", border: "1px solid var(--border)" }}
     >
       <div className="flex items-center justify-between mb-1 shrink-0">

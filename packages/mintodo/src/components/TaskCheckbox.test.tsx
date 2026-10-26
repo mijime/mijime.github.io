@@ -14,7 +14,7 @@ describe("TaskCheckbox", () => {
     render(<TaskCheckbox isDone={true} onToggle={() => {}} testId="cb" />);
     const btn = screen.getByTestId("cb");
     expect(btn.textContent).toBe("✓");
-    expect(btn.className).toContain("bg-emerald-500");
+    expect(btn.className).toContain("bg-(--success)");
   });
 
   it("calls onToggle when clicked and stops propagation", () => {

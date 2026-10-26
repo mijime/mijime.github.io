@@ -234,7 +234,7 @@ export function App() {
       {/* ── リストタブバー ── */}
       <div className="emolog-lists">
         {listError ? (
-          <div className="emolog-list-placeholder" style={{ color: "#e74c3c" }}>
+          <div className="emolog-list-placeholder" style={{ color: "var(--danger)" }}>
             エラー: {listError}
           </div>
         ) : lists.length === 0 ? (

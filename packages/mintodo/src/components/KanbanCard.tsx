@@ -76,7 +76,7 @@ export function KanbanCard({ node }: Props) {
           >
             <ListOrdered size={12} />
             {node.workLogs.length > 0 && (
-              <span className="absolute -top-0.5 -right-0.5 bg-slate-500 text-white text-[8px] font-bold rounded-full min-w-[14px] h-[14px] flex items-center justify-center px-0.5 leading-none">
+              <span className="absolute -top-0.5 -right-0.5 bg-(--mid) text-(--on-accent) text-[8px] font-bold rounded-full min-w-[14px] h-[14px] flex items-center justify-center px-0.5 leading-none">
                 {node.workLogs.length}
               </span>
             )}
