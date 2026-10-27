@@ -1,0 +1,78 @@
+/* Preset: 大阪翡翠 (Osaka jade) — deep green / teal UI. */
+
+:root[data-palette="osaka-jade"] {
+  --palette-primary: #2f7a6a;
+  --palette-on-primary: #f3fffb;
+  --palette-secondary: #1f5a5a;
+  --palette-on-secondary: #efffff;
+  --palette-highlight: #a97a2a;
+  --palette-on-highlight: #241a08;
+
+  --palette-bg: #f6faf7;
+  --palette-surface: #ecf4ef;
+  --palette-surface-raised: #ffffff;
+  --palette-sunken: #dfece4;
+  --palette-hover: #e8f2eb;
+  --palette-fg: #17211d;
+  --palette-muted: #5f7269;
+  --palette-border: #cbdad1;
+  --palette-grid: #dce9e1;
+  --palette-toolbar: #eef6f1;
+
+  --palette-success: #2f7a4f;
+  --palette-warning: #8e6320;
+  --palette-danger: #a93b3b;
+  --palette-info: #2f6f7a;
+}
+
+:root[data-palette="osaka-jade"][data-theme="dark"] {
+  --palette-primary: #6fc7ae;
+  --palette-on-primary: #10201b;
+  --palette-secondary: #8fc7c0;
+  --palette-on-secondary: #0f1d1c;
+  --palette-highlight: #d8b168;
+  --palette-on-highlight: #241a08;
+
+  --palette-bg: #0f1614;
+  --palette-surface: #16201d;
+  --palette-surface-raised: #1c2824;
+  --palette-sunken: #0a100e;
+  --palette-hover: #22302b;
+  --palette-fg: #e9f3ee;
+  --palette-muted: #9bb0a7;
+  --palette-border: #2d3d37;
+  --palette-grid: #24322d;
+  --palette-toolbar: #131c19;
+
+  --palette-success: #8fd0a0;
+  --palette-warning: #d8b168;
+  --palette-danger: #e78a86;
+  --palette-info: #8fc7d8;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root[data-palette="osaka-jade"]:not([data-theme="light"]) {
+    --palette-primary: #6fc7ae;
+    --palette-on-primary: #10201b;
+    --palette-secondary: #8fc7c0;
+    --palette-on-secondary: #0f1d1c;
+    --palette-highlight: #d8b168;
+    --palette-on-highlight: #241a08;
+
+    --palette-bg: #0f1614;
+    --palette-surface: #16201d;
+    --palette-surface-raised: #1c2824;
+    --palette-sunken: #0a100e;
+    --palette-hover: #22302b;
+    --palette-fg: #e9f3ee;
+    --palette-muted: #9bb0a7;
+    --palette-border: #2d3d37;
+    --palette-grid: #24322d;
+    --palette-toolbar: #131c19;
+
+    --palette-success: #8fd0a0;
+    --palette-warning: #d8b168;
+    --palette-danger: #e78a86;
+    --palette-info: #8fc7d8;
+  }
+}

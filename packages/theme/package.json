@@ -6,6 +6,7 @@
     "./index.css": "./src/index.css",
     "./tokens.css": "./src/tokens.css",
     "./themes/sumi.css": "./src/themes/sumi.css",
+    "./themes/osaka-jade.css": "./src/themes/osaka-jade.css",
     "./palette": "./src/palette.ts",
     "./usePalette": "./src/use-palette.ts",
     "./PaletteToggle": "./src/palette-toggle.tsx",

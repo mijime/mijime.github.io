@@ -1,4 +1,5 @@
 @import "./themes/sumi.css";
+@import "./themes/osaka-jade.css";
 
 /* ── Theme contract ─────────────────────────────────── */
 /* Swap `--palette-*` to create a theme.

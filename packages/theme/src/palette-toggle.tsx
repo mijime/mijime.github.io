@@ -1,13 +1,17 @@
 import { usePalette } from "./use-palette";
 
+const ORDER = ["kaga", "sumi", "osaka-jade"] as const;
+
 const LABELS: Record<string, string> = {
   kaga: "加賀",
   sumi: "墨",
+  "osaka-jade": "翡翠",
 };
 
 export function PaletteToggle() {
   const { palette, setPalette } = usePalette();
-  const next = palette === "sumi" ? "kaga" : "sumi";
+  const index = ORDER.indexOf(palette as (typeof ORDER)[number]);
+  const next = ORDER[(index + 1) % ORDER.length] ?? ORDER[0];
   const label = LABELS[palette] ?? palette;
 
   return (
