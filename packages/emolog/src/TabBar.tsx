@@ -1,10 +1,9 @@
-import { BarChart3, ClipboardList, Pencil } from "lucide-react";
+import { BarChart3, Pencil } from "lucide-react";
 
-export type Tab = "record" | "history" | "stats";
+export type Tab = "record" | "stats";
 
 const TABS: { key: Tab; Icon: typeof Pencil; label: string }[] = [
   { key: "record", Icon: Pencil, label: "記録" },
-  { key: "history", Icon: ClipboardList, label: "履歴" },
   { key: "stats", Icon: BarChart3, label: "分析" },
 ];
 
@@ -14,6 +13,10 @@ interface TabBarProps {
 }
 
 export function TabBar({ activeTab, onTabChange }: TabBarProps) {
+  const activeIndex = Math.max(
+    0,
+    TABS.findIndex((t) => t.key === activeTab),
+  );
   return (
     <nav className="emolog-tabbar">
       {TABS.map(({ key, Icon, label }) => (
@@ -30,7 +33,10 @@ export function TabBar({ activeTab, onTabChange }: TabBarProps) {
       ))}
       <div
         className="emolog-tabbar-indicator"
-        style={{ transform: `translateX(${TABS.findIndex((t) => t.key === activeTab) * 100}%)` }}
+        style={{
+          width: `${100 / TABS.length}%`,
+          transform: `translateX(${activeIndex * 100}%)`,
+        }}
       />
     </nav>
   );

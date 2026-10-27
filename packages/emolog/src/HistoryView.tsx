@@ -34,6 +34,7 @@ interface HistoryViewProps {
   targetDate: string | null;
   onClearTargetDate: () => void;
   onSnackBar: (message: string, action?: { label: string; onClick: () => void }) => void;
+  refreshKey?: number;
 }
 
 export function HistoryView({
@@ -43,6 +44,7 @@ export function HistoryView({
   targetDate,
   onClearTargetDate,
   onSnackBar,
+  refreshKey = 0,
 }: HistoryViewProps) {
   const todayStr = today();
   const [entries, setEntries] = useState<Entry[]>([]);
@@ -92,7 +94,7 @@ export function HistoryView({
     setLoadedUntil(focusDate);
     loadEntries(focusDate, false);
     if (targetDate) onClearTargetDate();
-  }, [selectedList, filterEmoji, targetDate]);
+  }, [selectedList, filterEmoji, targetDate, refreshKey]);
 
   function loadMore() {
     const next = new Date(loadedUntil);
@@ -191,14 +193,14 @@ export function HistoryView({
             <span style={{ alignItems: "center", display: "inline-flex", gap: "4px" }}>
               <Search size={12} /> {filterEmoji}
             </span>
-            <IconButton label="フィルタ解除" size="icon-sm" onClick={() => onFilterEmoji(null)}>
+            <IconButton label="フィルタ解除" size="icon" onClick={() => onFilterEmoji(null)}>
               <X size={14} />
             </IconButton>
           </div>
         )}
         <IconButton
           label="クリップボードにコピー"
-          size="icon-sm"
+          size="icon"
           className="emolog-history-copy"
           onClick={copyLog}
         >
@@ -278,7 +280,7 @@ export function HistoryView({
                   )}
                   <IconButton
                     label="削除"
-                    size="icon-sm"
+                    size="icon"
                     className="emolog-history-delete"
                     onClick={() => handleDelete(entry)}
                   >

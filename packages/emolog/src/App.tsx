@@ -47,6 +47,7 @@ function incrementFavorite(emoji: string) {
 
 export function App() {
   const [activeTab, setActiveTab] = useState<Tab>("record");
+  const [historyVersion, setHistoryVersion] = useState(0);
   const [selectedList, setSelectedList] = useState<string>("");
   const [lists, setLists] = useState<ListDef[]>([]);
   const [favorites, setFavorites] = useState<string[]>(() => getTopFavorites());
@@ -115,16 +116,17 @@ export function App() {
     });
     incrementFavorite(emoji);
     refreshFavorites();
+    setHistoryVersion((v) => v + 1);
   }
 
   function handleSelectEmojiFromStats(emoji: string) {
     setFilterEmoji(emoji);
-    setActiveTab("history");
+    setActiveTab("record");
   }
 
   function handleSelectDateFromStats(date: string) {
     setTargetDate(date);
-    setActiveTab("history");
+    setActiveTab("record");
   }
 
   function handleSnackBar(message: string, action?: { label: string; onClick: () => void }) {
@@ -208,6 +210,7 @@ export function App() {
       setSelectedList(updatedLists[0].name);
     }
     refreshFavorites();
+    setHistoryVersion((v) => v + 1);
   }
 
   async function handleDeleteAll() {
@@ -217,6 +220,7 @@ export function App() {
     await refreshLists();
     refreshFavorites();
     setActiveTab("record");
+    setHistoryVersion((v) => v + 1);
   }
 
   return (
@@ -226,7 +230,7 @@ export function App() {
         <span className="emolog-header-title">emolog</span>
         <IconButton
           label="設定"
-          size="icon-sm"
+          size="icon"
           className="emolog-settings-trigger"
           onClick={() => setSettingsOpen(true)}
         >
@@ -265,6 +269,7 @@ export function App() {
                     <button
                       className={`emolog-list-tab${l.name === selectedList ? " emolog-list-active" : ""}`}
                       onClick={() => setSelectedList(l.name)}
+                      onDoubleClick={() => handleStartRename(l.name)}
                     >
                       {l.name}
                     </button>
@@ -276,6 +281,8 @@ export function App() {
                     >
                       <button
                         className="emolog-list-menu-btn"
+                        title="リストを編集"
+                        aria-label="リストを編集"
                         onClick={(e) => {
                           e.stopPropagation();
                           setMenuOpen(menuOpen === l.name ? null : l.name);
@@ -316,17 +323,21 @@ export function App() {
       {/* ── メインコンテンツ ── */}
       <div className="emolog-content">
         {activeTab === "record" && (
-          <RecordView favorites={favorites} onTap={handleTap} selectedList={selectedList} />
-        )}
-        {activeTab === "history" && (
-          <HistoryView
-            selectedList={selectedList}
-            filterEmoji={filterEmoji}
-            onFilterEmoji={setFilterEmoji}
-            targetDate={targetDate}
-            onClearTargetDate={() => setTargetDate(null)}
-            onSnackBar={handleSnackBar}
-          />
+          <>
+            <RecordView favorites={favorites} onTap={handleTap} selectedList={selectedList} />
+            <section className="emolog-history-section">
+              <h2 className="emolog-history-section-title">履歴</h2>
+              <HistoryView
+                selectedList={selectedList}
+                filterEmoji={filterEmoji}
+                onFilterEmoji={setFilterEmoji}
+                targetDate={targetDate}
+                onClearTargetDate={() => setTargetDate(null)}
+                onSnackBar={handleSnackBar}
+                refreshKey={historyVersion}
+              />
+            </section>
+          </>
         )}
         {activeTab === "stats" && (
           <StatsView

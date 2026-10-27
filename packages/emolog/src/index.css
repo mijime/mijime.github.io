@@ -856,3 +856,60 @@
   transform: translateX(-50%);
   width: min(92vw, 420px);
 }
+
+/* ── 記録画面に統合した履歴 ── */
+.emolog-history-section {
+  border-top: 1px solid var(--grid);
+  margin-top: 20px;
+  padding-top: 12px;
+}
+
+.emolog-history-section-title {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  margin: 0 0 12px;
+}
+
+/* ── タップ領域・リスト編集の調整 ── */
+.emolog-settings-trigger,
+.emolog-history-copy,
+.emolog-history-delete {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+}
+
+.emolog-history-delete {
+  opacity: 0.8;
+}
+
+.emolog-list-menu-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border-radius: 6px;
+  opacity: 0.75;
+}
+
+.emolog-list-menu-btn:hover {
+  background: var(--hover);
+  opacity: 1;
+}
+
+.emolog-list-rename-input {
+  width: 140px;
+}
+
+.emolog-list-menu button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
