@@ -1,0 +1,32 @@
+{
+  "name": "otete",
+  "short_name": "otete",
+  "description": "toddler activity box",
+  "id": "/apps/otete",
+  "start_url": "/apps/otete/",
+  "scope": "/apps/otete/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#faf8f3",
+  "theme_color": "#96661d",
+  "icons": [
+    {
+      "src": "/icons/otete-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/otete-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/otete-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

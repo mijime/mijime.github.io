@@ -4,6 +4,12 @@ import BaseLayout from "../../layouts/base-layout.astro";
 import "@mijime/mintodo/index.css";
 ---
 
-<BaseLayout title="mintodo">
+<BaseLayout
+  title="mintodo"
+  manifest="/apps/mintodo/manifest.webmanifest"
+  themeColor="#5a6b3c"
+  appName="mintodo"
+  icon="/icons/mintodo-180.png"
+>
   <MintodoApp client:only="react" />
 </BaseLayout>

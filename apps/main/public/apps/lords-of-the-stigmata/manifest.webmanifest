@@ -1,0 +1,32 @@
+{
+  "name": "lords-of-the-stigmata",
+  "short_name": "lords",
+  "description": "3D board game",
+  "id": "/apps/lords-of-the-stigmata",
+  "start_url": "/apps/lords-of-the-stigmata/",
+  "scope": "/apps/lords-of-the-stigmata/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#15141a",
+  "theme_color": "#7e5c96",
+  "icons": [
+    {
+      "src": "/icons/lords-of-the-stigmata-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/lords-of-the-stigmata-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/lords-of-the-stigmata-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

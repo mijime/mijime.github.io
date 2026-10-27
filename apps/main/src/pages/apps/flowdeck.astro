@@ -4,6 +4,12 @@ import BaseLayout from "../../layouts/base-layout.astro";
 import "@mijime/flowdeck/index.css";
 ---
 
-<BaseLayout title="flowdeck">
+<BaseLayout
+  title="flowdeck"
+  manifest="/apps/flowdeck/manifest.webmanifest"
+  themeColor="#3f6e66"
+  appName="flowdeck"
+  icon="/icons/flowdeck-180.png"
+>
   <FlowdeckApp client:only="react" />
 </BaseLayout>

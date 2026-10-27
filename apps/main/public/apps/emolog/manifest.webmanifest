@@ -1,0 +1,32 @@
+{
+  "name": "emolog",
+  "short_name": "emolog",
+  "description": "emotion logger",
+  "id": "/apps/emolog",
+  "start_url": "/apps/emolog/",
+  "scope": "/apps/emolog/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#faf8f3",
+  "theme_color": "#b04e52",
+  "icons": [
+    {
+      "src": "/icons/emolog-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/emolog-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/emolog-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

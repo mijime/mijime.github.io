@@ -4,6 +4,12 @@ import BaseLayout from "../../layouts/base-layout.astro";
 import "@mijime/saiflow/index.css";
 ---
 
-<BaseLayout title="saiflow">
+<BaseLayout
+  title="saiflow"
+  manifest="/apps/saiflow/manifest.webmanifest"
+  themeColor="#96661d"
+  appName="saiflow"
+  icon="/icons/saiflow-180.png"
+>
   <SaiflowApp client:only="react" />
 </BaseLayout>
