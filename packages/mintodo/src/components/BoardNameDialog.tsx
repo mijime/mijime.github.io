@@ -21,7 +21,7 @@ export function BoardNameDialog() {
 
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const trimmed = name.trim();
+    const trimmed = name.trim().slice(0, MAX_NAME);
     if (!trimmed) return;
     const event = new CustomEvent<{ name: string; mode: "create" | "rename"; boardId?: string }>(
       "board-name-submit",
@@ -61,7 +61,8 @@ export function BoardNameDialog() {
             autoFocus
             type="text"
             value={name}
-            onChange={(e) => setName(e.target.value.slice(0, MAX_NAME))}
+            onChange={(e) => setName(e.target.value)}
+            onBlur={() => setName((value) => value.slice(0, MAX_NAME))}
             maxLength={MAX_NAME}
             placeholder="例: メインプロジェクト"
           />
