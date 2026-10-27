@@ -21,13 +21,6 @@ export function AppHeader({
   return (
     <header className="border-b border-(--border)">
       <div className="flex items-center gap-x-3 gap-y-1 flex-wrap px-3 py-1.5">
-        <div className="flex items-baseline gap-2 shrink-0">
-          <span className="text-sm font-semibold tracking-tight">saiflow</span>
-          <span className="hidden md:inline text-[10px] opacity-35">
-            人生のお金の流れを年ごとに試算
-          </span>
-        </div>
-
         <label className="flex items-center gap-1 text-[11px] opacity-60 min-w-0">
           ファイル名
           <Input

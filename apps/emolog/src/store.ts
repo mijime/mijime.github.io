@@ -102,6 +102,12 @@ export async function getAllEntries(listId?: number): Promise<Entry[]> {
   return db.entries.orderBy("timestamp").toArray();
 }
 
+/** 絵文字で全期間を検索する。履歴の絵文字フィルタはページングせず全件を対象にする。 */
+export async function getEntriesByEmoji(emoji: string, listId?: number): Promise<Entry[]> {
+  const entries = await getAllEntries(listId);
+  return entries.filter((entry) => entry.emoji === emoji);
+}
+
 export async function getAllTags(listId?: number): Promise<string[]> {
   const entries =
     listId !== undefined

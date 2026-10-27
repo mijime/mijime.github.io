@@ -77,7 +77,6 @@ export function Hud({ pick, setPick, onCountryClick, validKeys }: HudProps): Rea
     <>
       {/* Top Bar */}
       <div id="topbar" className="panel">
-        <h1>{t("ui.appTitle")}</h1>
         <span className="ti">
           {t("ui.roundCounter")} <b id="tRound">{roundStr}</b>／6
         </span>

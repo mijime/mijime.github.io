@@ -5,6 +5,7 @@ import {
   addList,
   getAllEntries,
   getAllTags,
+  getEntriesByEmoji,
   getLists,
   getEntries,
   exportAll,
@@ -21,7 +22,7 @@ import {
 import type { Entry, ExportData } from "./types";
 
 function makeEntry(emoji: string, date: string, listId?: number): Omit<Entry, "id"> {
-  return { date, timestamp: Date.now(), emoji, listId };
+  return { date, timestamp: new Date(`${date}T00:00:00`).getTime(), emoji, listId };
 }
 
 describe("entries", () => {
@@ -73,6 +74,15 @@ describe("entries", () => {
     await updateEntryEmoji(id, "😡");
     const all = await getAllEntries();
     expect(all[0]?.emoji).toBe("😡");
+  });
+
+  it("finds emoji matches across the whole history", async () => {
+    const listId = await addList("listA");
+    await addEntry(makeEntry("😊", "2020-01-01", listId));
+    await addEntry(makeEntry("😢", "2026-07-10", listId));
+    await addEntry(makeEntry("😊", "2026-07-12", listId));
+    const matches = await getEntriesByEmoji("😊", listId);
+    expect(matches.map((entry) => entry.date)).toEqual(["2020-01-01", "2026-07-12"]);
   });
 });
 

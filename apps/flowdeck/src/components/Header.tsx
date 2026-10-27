@@ -2,7 +2,6 @@ import {
   BookOpen,
   CalendarDays,
   HelpCircle,
-  LayoutGrid,
   RotateCcw,
   Star,
   TrendingDown,
@@ -87,10 +86,6 @@ export function Header({ state, onHelp, onIntro, onNewGame, autoMode, onStopAuto
     <header className="game-topbar sticky top-[52px] z-30 border-b border-(--border) bg-(--toolbar-bg)/95 backdrop-blur">
       <div className="mx-auto max-w-[1440px] px-3 py-2">
         <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-          <h1 className="game-logo serif flex items-center gap-1.5 text-lg font-semibold tracking-wide sm:text-xl">
-            <LayoutGrid size={18} className="text-(--accent)" /> Flowdeck
-          </h1>
-
           <div className="flex min-w-[132px] items-center gap-2">
             <SectionLabel className="inline-flex items-center gap-1 whitespace-nowrap">
               <CalendarDays size={10} /> Day{" "}

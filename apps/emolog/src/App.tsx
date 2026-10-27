@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
+import { createPortal } from "react-dom";
 import { MoreHorizontal, Pencil, Plus, Settings, Trash2 } from "lucide-react";
 import { ConfirmDialog, IconButton } from "@mijime/theme/ui";
 import {
@@ -18,6 +19,7 @@ import { today, type ExportData, type ListDef } from "./types";
 import { TabBar, type Tab } from "./TabBar";
 import { RecordView } from "./RecordView";
 import { HistoryView } from "./HistoryView";
+import { CalendarTab } from "./CalendarTab";
 import { StatsView } from "./StatsView";
 import { SnackBar } from "./SnackBar";
 import { SettingsDialog } from "./SettingsDialog";
@@ -55,13 +57,13 @@ export function App() {
   const [favorites, setFavorites] = useState<string[]>(() => getTopFavorites());
   const [filterEmoji, setFilterEmoji] = useState<string | null>(null);
   const [filterTag, setFilterTag] = useState<string | null>(null);
-  const [targetDate, setTargetDate] = useState<string | null>(null);
   const [renamingId, setRenamingId] = useState<number | null>(null);
   const [renameValue, setRenameValue] = useState("");
   const [addingList, setAddingList] = useState(false);
   const [newListName, setNewListName] = useState("");
   const [deleteListTargetId, setDeleteListTargetId] = useState<number | null>(null);
   const [menuOpen, setMenuOpen] = useState<number | null>(null);
+  const [menuPosition, setMenuPosition] = useState<{ top: number; left: number } | null>(null);
   const [locationEnabled, setLocationEnabledState] = useState(() => isLocationEnabled());
   const [snackMessage, setSnackMessage] = useState<string | null>(null);
   const [snackAction, setSnackAction] = useState<
@@ -72,6 +74,7 @@ export function App() {
   const menuRef = useRef<HTMLDivElement>(null);
   const renameInputRef = useRef<HTMLInputElement>(null);
   const addListInputRef = useRef<HTMLInputElement>(null);
+  const activeListTabRef = useRef<HTMLButtonElement>(null);
 
   const refreshFavorites = useCallback(() => {
     setFavorites(getTopFavorites());
@@ -98,13 +101,36 @@ export function App() {
   useEffect(() => {
     if (!menuOpen) return;
     const handler = (e: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+      const target = e.target;
+      if (!(target instanceof Node)) return;
+      const onTrigger = target instanceof Element && target.closest(".emolog-list-menu-btn");
+      if (menuRef.current && !menuRef.current.contains(target) && !onTrigger) {
         setMenuOpen(null);
       }
     };
+    const closeMenu = () => setMenuOpen(null);
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") closeMenu();
+    };
     document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
+    document.addEventListener("keydown", onKeyDown);
+    window.addEventListener("resize", closeMenu);
+    document.addEventListener("scroll", closeMenu, true);
+    return () => {
+      document.removeEventListener("mousedown", handler);
+      document.removeEventListener("keydown", onKeyDown);
+      window.removeEventListener("resize", closeMenu);
+      document.removeEventListener("scroll", closeMenu, true);
+    };
   }, [menuOpen]);
+
+  useEffect(() => {
+    activeListTabRef.current?.scrollIntoView?.({
+      behavior: "smooth",
+      block: "nearest",
+      inline: "nearest",
+    });
+  }, [selectedListId, lists]);
 
   useEffect(() => {
     if (renamingId !== null && renameInputRef.current) {
@@ -143,11 +169,6 @@ export function App() {
     setActiveTab("record");
   }
 
-  function handleSelectDateFromStats(date: string) {
-    setTargetDate(date);
-    setActiveTab("record");
-  }
-
   function handleSnackBar(message: string, action?: { label: string; onClick: () => void }) {
     setSnackMessage(message);
     setSnackAction(action);
@@ -164,7 +185,20 @@ export function App() {
     setSelectedListId(id);
     setFilterTag(null);
     setFilterEmoji(null);
-    setTargetDate(null);
+  }
+
+  function toggleListMenu(id: number, target: HTMLElement) {
+    if (menuOpen === id) {
+      setMenuOpen(null);
+      return;
+    }
+    const rect = target.getBoundingClientRect();
+    const menuWidth = 160;
+    setMenuPosition({
+      top: rect.bottom + 4,
+      left: Math.max(8, Math.min(rect.left, window.innerWidth - menuWidth - 8)),
+    });
+    setMenuOpen(id);
   }
 
   async function handleCommitAddList() {
@@ -273,22 +307,10 @@ export function App() {
   }
 
   const deleteListName = lists.find((list) => list.id === deleteListTargetId)?.name;
+  const menuList = lists.find((list) => list.id === menuOpen);
 
   return (
     <div className="emolog">
-      {/* ── 設定ボタン ── */}
-      <div className="emolog-header">
-        <span className="emolog-header-title">emolog</span>
-        <IconButton
-          label="設定"
-          size="icon"
-          className="emolog-settings-trigger"
-          onClick={() => setSettingsOpen(true)}
-        >
-          <Settings size={16} />
-        </IconButton>
-      </div>
-
       {/* ── リストタブバー ── */}
       <div className="emolog-lists">
         {listError ? (
@@ -320,6 +342,7 @@ export function App() {
                       />
                     ) : (
                       <button
+                        ref={id === selectedListId ? activeListTabRef : undefined}
                         className={`emolog-list-tab${id === selectedListId ? " emolog-list-active" : ""}`}
                         onClick={() => selectList(id)}
                         onDoubleClick={() => handleStartRename(id, l.name)}
@@ -328,34 +351,18 @@ export function App() {
                       </button>
                     )}
                     {renamingId !== id && (
-                      <div
-                        className="emolog-list-menu-wrap"
-                        ref={menuOpen === id ? menuRef : undefined}
-                      >
+                      <div className="emolog-list-menu-wrap">
                         <button
                           className="emolog-list-menu-btn"
                           title="リストを編集"
                           aria-label="リストを編集"
                           onClick={(e) => {
                             e.stopPropagation();
-                            setMenuOpen(menuOpen === id ? null : id);
+                            toggleListMenu(id, e.currentTarget);
                           }}
                         >
                           <MoreHorizontal size={14} />
                         </button>
-                        {menuOpen === id && (
-                          <div className="emolog-list-menu">
-                            <button onClick={() => handleStartRename(id, l.name)}>
-                              <Pencil size={12} /> 名前を変更
-                            </button>
-                            <button
-                              className="emolog-list-menu-del"
-                              onClick={() => handleRemoveList(id)}
-                            >
-                              <Trash2 size={12} /> 削除
-                            </button>
-                          </div>
-                        )}
                       </div>
                     )}
                   </div>
@@ -381,19 +388,58 @@ export function App() {
                 />
               )}
             </div>
-            {!addingList && (
+            <div className="emolog-list-actions">
+              {!addingList && (
+                <IconButton
+                  label="リストを追加"
+                  size="icon-sm"
+                  className="emolog-list-add"
+                  onClick={handleStartAddList}
+                >
+                  <Plus size={16} />
+                </IconButton>
+              )}
               <IconButton
-                label="リストを追加"
+                label="設定"
                 size="icon-sm"
-                className="emolog-list-add"
-                onClick={handleStartAddList}
+                className="emolog-settings-trigger"
+                onClick={() => setSettingsOpen(true)}
               >
-                <Plus size={16} />
+                <Settings size={16} />
               </IconButton>
-            )}
+            </div>
           </>
         )}
       </div>
+
+      {menuList && menuPosition
+        ? createPortal(
+            <div
+              ref={menuRef}
+              className="emolog-list-menu"
+              role="menu"
+              style={{ top: menuPosition.top, left: menuPosition.left }}
+            >
+              <button
+                role="menuitem"
+                onClick={() => handleStartRename(menuList.id ?? -1, menuList.name)}
+              >
+                <Pencil size={12} /> 名前を変更
+              </button>
+              <button
+                role="menuitem"
+                className="emolog-list-menu-del"
+                onClick={() => {
+                  setMenuOpen(null);
+                  handleRemoveList(menuList.id ?? -1);
+                }}
+              >
+                <Trash2 size={12} /> 削除
+              </button>
+            </div>,
+            document.body,
+          )
+        : null}
 
       {/* ── メインコンテンツ ── */}
       <div className="emolog-content">
@@ -408,20 +454,17 @@ export function App() {
                 onFilterEmoji={setFilterEmoji}
                 filterTag={filterTag}
                 onFilterTag={setFilterTag}
-                targetDate={targetDate}
-                onClearTargetDate={() => setTargetDate(null)}
                 onSnackBar={handleSnackBar}
                 refreshKey={historyVersion}
               />
             </section>
           </>
         )}
+        {activeTab === "calendar" && (
+          <CalendarTab listId={selectedListId} onSelectEmoji={handleSelectEmojiFromStats} />
+        )}
         {activeTab === "stats" && (
-          <StatsView
-            selectedListId={selectedListId}
-            onSelectEmoji={handleSelectEmojiFromStats}
-            onSelectDate={handleSelectDateFromStats}
-          />
+          <StatsView selectedListId={selectedListId} onSelectEmoji={handleSelectEmojiFromStats} />
         )}
       </div>
 

@@ -7,24 +7,11 @@
   font-family: "IBM Plex Mono", monospace;
   display: flex;
   flex-direction: column;
-  height: 100dvh;
+  height: 100%;
+  min-height: 0;
 }
 
 /* ── ヘッダー ── */
-.emolog-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 12px;
-}
-
-.emolog-header-title {
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--mid);
-  letter-spacing: 0.05em;
-}
-
 .emolog-settings-trigger {
   background: none;
   border: 1px solid var(--grid);
@@ -156,6 +143,11 @@
   outline-offset: -2px;
 }
 
+.emolog-cal-selected {
+  background: color-mix(in srgb, var(--accent) 12%, var(--surface));
+  opacity: 1;
+}
+
 .emolog-cal-empty-day {
   opacity: 0.35;
 }
@@ -193,11 +185,11 @@
 /* ── リストタブ ── */
 .emolog-lists {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   align-items: center;
   gap: 4px;
   margin-bottom: 16px;
-  overflow: visible;
+  min-width: 0;
 }
 
 .emolog-lists::-webkit-scrollbar {
@@ -212,10 +204,16 @@
 
 .emolog-list-tabs {
   display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
   flex: 1;
-  overflow: visible;
+  flex-wrap: nowrap;
+  gap: 4px;
+  min-width: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 2px 0;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x proximity;
 }
 
 .emolog-list-tabs::-webkit-scrollbar {
@@ -225,7 +223,9 @@
 .emolog-list-tab-wrap {
   position: relative;
   display: flex;
+  flex: 0 0 auto;
   align-items: center;
+  scroll-snap-align: start;
 }
 
 .emolog-list-tab {
@@ -279,6 +279,13 @@
   line-height: 1;
 }
 
+.emolog-list-actions {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 4px;
+}
+
 .emolog-list-add:hover {
   background: var(--hover);
   color: var(--ink);
@@ -308,17 +315,14 @@
 }
 
 .emolog-list-menu {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  z-index: 100;
+  position: fixed;
+  z-index: 1000;
   background: var(--surface);
   border: 1px solid var(--grid);
   border-radius: 8px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
   min-width: 150px;
   overflow: hidden;
-  margin-top: 4px;
 }
 
 .emolog-list-menu button {

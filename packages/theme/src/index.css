@@ -69,3 +69,52 @@ body {
 .site-nav-link:hover {
   color: var(--terra);
 }
+
+/* ── App Header ─────────────────────────────────────── */
+.site-header-inner--app {
+  max-width: 1440px;
+  padding: 0 16px;
+}
+
+.app-header-brand {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 10px;
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.app-header-icon {
+  width: 24px;
+  height: 24px;
+  flex: none;
+  border: 1px solid var(--grid);
+  border-radius: 6px;
+  background: var(--surface);
+  object-fit: cover;
+}
+
+.app-header-title {
+  flex: none;
+  font-family: "Crimson Pro", serif;
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: 0.01em;
+}
+
+.app-header-description {
+  overflow: hidden;
+  color: var(--mid);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (max-width: 640px) {
+  .app-header-description {
+    display: none;
+  }
+}

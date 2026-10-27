@@ -3,6 +3,7 @@ import { Copy, MapPin, Pencil, Search, Trash2, X } from "lucide-react";
 import { IconButton } from "@mijime/theme/ui";
 import {
   getEntriesByDateRange,
+  getEntriesByEmoji,
   deleteEntry,
   updateEntryNote,
   updateEntryEmoji,
@@ -40,8 +41,6 @@ interface HistoryViewProps {
   onFilterEmoji: (emoji: string | null) => void;
   filterTag: string | null;
   onFilterTag: (tag: string | null) => void;
-  targetDate: string | null;
-  onClearTargetDate: () => void;
   onSnackBar: (message: string, action?: { label: string; onClick: () => void }) => void;
   refreshKey?: number;
 }
@@ -52,8 +51,6 @@ export function HistoryView({
   onFilterEmoji,
   filterTag,
   onFilterTag,
-  targetDate,
-  onClearTargetDate,
   onSnackBar,
   refreshKey = 0,
 }: HistoryViewProps) {
@@ -81,18 +78,25 @@ export function HistoryView({
     async (toDate: string, append: boolean) => {
       if (selectedListId === null) return;
       setLoading(true);
+      if (filterEmoji) {
+        // Emoji filters cover the whole history instead of only the loaded pages.
+        const fresh = await getEntriesByEmoji(filterEmoji, selectedListId);
+        setEntries(fresh);
+        setHasMore(false);
+        setLoading(false);
+        return;
+      }
       const start = new Date(toDate);
       start.setDate(start.getDate() - (PAGE_DAYS - 1));
       const from = getFullDate(start);
       const fresh = await getEntriesByDateRange(from, toDate, selectedListId ?? undefined);
-      const filtered = filterEmoji ? fresh.filter((e) => e.emoji === filterEmoji) : fresh;
       if (append) {
         setEntries((prev) => {
           const existing = new Set(prev.map((e) => e.id));
-          return [...prev, ...filtered.filter((e) => !existing.has(e.id))];
+          return [...prev, ...fresh.filter((e) => !existing.has(e.id))];
         });
       } else {
-        setEntries(filtered);
+        setEntries(fresh);
       }
       setHasMore(from > "2020-01-01");
       setLoading(false);
@@ -100,15 +104,14 @@ export function HistoryView({
     [selectedListId, filterEmoji],
   );
 
-  // Initial load and reload on filter/list/targetDate change
+  // Initial load and reload on filter/list change
   useEffect(() => {
-    const focusDate = targetDate || todayStr;
-    setLoadedUntil(focusDate);
-    loadEntries(focusDate, false);
-    if (targetDate) onClearTargetDate();
-  }, [selectedListId, filterEmoji, targetDate, refreshKey]);
+    setLoadedUntil(todayStr);
+    loadEntries(todayStr, false);
+  }, [selectedListId, filterEmoji, refreshKey]);
 
   function loadMore() {
+    if (filterEmoji || !hasMore || loading) return;
     const next = new Date(loadedUntil);
     next.setDate(next.getDate() - PAGE_DAYS);
     const nextDate = getFullDate(next);
