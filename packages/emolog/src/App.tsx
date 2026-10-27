@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
+import { MoreHorizontal, Pencil, Plus, Settings, Trash2 } from "lucide-react";
 import { IconButton } from "@mijime/theme/ui";
 import {
   addEntry,
@@ -229,7 +230,7 @@ export function App() {
           className="emolog-settings-trigger"
           onClick={() => setSettingsOpen(true)}
         >
-          ⚙️
+          <Settings size={16} />
         </IconButton>
       </div>
 
@@ -280,16 +281,18 @@ export function App() {
                           setMenuOpen(menuOpen === l.name ? null : l.name);
                         }}
                       >
-                        ⋯
+                        <MoreHorizontal size={14} />
                       </button>
                       {menuOpen === l.name && (
                         <div className="emolog-list-menu">
-                          <button onClick={() => handleStartRename(l.name)}>✏️ 名前を変更</button>
+                          <button onClick={() => handleStartRename(l.name)}>
+                            <Pencil size={12} /> 名前を変更
+                          </button>
                           <button
                             className="emolog-list-menu-del"
                             onClick={() => handleRemoveList(l.name)}
                           >
-                            🗑️ 削除
+                            <Trash2 size={12} /> 削除
                           </button>
                         </div>
                       )}
@@ -304,7 +307,7 @@ export function App() {
               className="emolog-list-add"
               onClick={handleAddList}
             >
-              ＋
+              <Plus size={16} />
             </IconButton>
           </>
         )}

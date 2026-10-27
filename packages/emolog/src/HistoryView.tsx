@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
+import { Copy, Search, Trash2, X } from "lucide-react";
 import { IconButton } from "@mijime/theme/ui";
 import { getEntriesByDateRange, deleteEntry, updateEntryNote, updateEntryEmoji } from "./store";
 import { type Entry, today, formatTime } from "./types";
@@ -187,9 +188,11 @@ export function HistoryView({
       <div className="emolog-history-toolbar">
         {filterEmoji && (
           <div className="emolog-history-filter">
-            <span>🔍 {filterEmoji}</span>
+            <span style={{ alignItems: "center", display: "inline-flex", gap: "4px" }}>
+              <Search size={12} /> {filterEmoji}
+            </span>
             <IconButton label="フィルタ解除" size="icon-sm" onClick={() => onFilterEmoji(null)}>
-              ×
+              <X size={14} />
             </IconButton>
           </div>
         )}
@@ -199,7 +202,7 @@ export function HistoryView({
           className="emolog-history-copy"
           onClick={copyLog}
         >
-          📋
+          <Copy size={14} />
         </IconButton>
       </div>
 
@@ -279,7 +282,7 @@ export function HistoryView({
                     className="emolog-history-delete"
                     onClick={() => handleDelete(entry)}
                   >
-                    ×
+                    <Trash2 size={14} />
                   </IconButton>
                 </div>
               ))}

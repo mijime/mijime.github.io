@@ -1,4 +1,5 @@
 import { useRef, useState } from "react";
+import { Trash2 } from "lucide-react";
 import { Button, ConfirmDialog, Modal } from "@mijime/theme/ui";
 import type { ExportData } from "./types";
 
@@ -85,7 +86,7 @@ export function SettingsDialog({
             onChange={handleImport}
           />
           <Button variant="danger" onClick={() => setConfirmDelete(true)} className="justify-start">
-            🗑️ すべてのデータを削除
+            <Trash2 size={14} /> すべてのデータを削除
           </Button>
         </div>
       </Modal>

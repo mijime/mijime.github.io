@@ -1,9 +1,11 @@
+import { BarChart3, ClipboardList, Pencil } from "lucide-react";
+
 export type Tab = "record" | "history" | "stats";
 
-const TABS: { key: Tab; icon: string; label: string }[] = [
-  { key: "record", icon: "✏️", label: "記録" },
-  { key: "history", icon: "📋", label: "履歴" },
-  { key: "stats", icon: "📊", label: "分析" },
+const TABS: { key: Tab; Icon: typeof Pencil; label: string }[] = [
+  { key: "record", Icon: Pencil, label: "記録" },
+  { key: "history", Icon: ClipboardList, label: "履歴" },
+  { key: "stats", Icon: BarChart3, label: "分析" },
 ];
 
 interface TabBarProps {
@@ -14,13 +16,15 @@ interface TabBarProps {
 export function TabBar({ activeTab, onTabChange }: TabBarProps) {
   return (
     <nav className="emolog-tabbar">
-      {TABS.map(({ key, icon, label }) => (
+      {TABS.map(({ key, Icon, label }) => (
         <button
           key={key}
           className={`emolog-tabbar-btn${activeTab === key ? " emolog-tabbar-active" : ""}`}
           onClick={() => onTabChange(key)}
         >
-          <span className="emolog-tabbar-icon">{icon}</span>
+          <span className="emolog-tabbar-icon">
+            <Icon size={20} />
+          </span>
           <span className="emolog-tabbar-label">{label}</span>
         </button>
       ))}

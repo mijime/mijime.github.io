@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button, IconButton } from "@mijime/theme/ui";
 import { getEntriesByDateRange } from "./store";
 import type { Entry } from "./types";
@@ -101,7 +102,7 @@ export function CalendarView({ onSelectDate, todayStr, list }: CalendarViewProps
             }
           }}
         >
-          ←
+          <ChevronLeft size={16} />
         </IconButton>
         <span className="emolog-cal-title">
           {year}年{month + 1}月
@@ -119,7 +120,7 @@ export function CalendarView({ onSelectDate, todayStr, list }: CalendarViewProps
             }
           }}
         >
-          →
+          <ChevronRight size={16} />
         </IconButton>
         {!(year === today.getFullYear() && month === today.getMonth()) && (
           <Button
