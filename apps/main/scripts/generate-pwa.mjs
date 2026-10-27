@@ -16,6 +16,17 @@ function writeJson(file, value) {
 
 function icon({ slug, icon: label, themeColor }, size, maskable = false) {
   const file = path.join(iconsDir, `${slug}${maskable ? "-maskable" : ""}-${size}.png`);
+  const source = path.join(
+    root,
+    "pwa-icons",
+    `${slug === site.slug ? "site" : slug}.svg`,
+  );
+  try {
+    execFileSync("rsvg-convert", ["-w", String(size), "-h", String(size), source, "-o", file]);
+    return;
+  } catch {
+    // Fall back to ImageMagick + a text glyph below.
+  }
   const pointsize = Math.round(size * (maskable ? 0.26 : 0.38));
   execFileSync("magick", [
     "-size",

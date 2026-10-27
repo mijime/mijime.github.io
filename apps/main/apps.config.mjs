@@ -1,5 +1,5 @@
 export const site = {
-  slug: "mijime",
+  slug: "site",
   name: "mijime",
   shortName: "mijime",
   description: "mijime apps, blog and experiments",
