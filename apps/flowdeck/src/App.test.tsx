@@ -11,7 +11,6 @@ describe("Flowdeck App", () => {
   it("ヘッダー・Backlog・チームボード・手札を表示する", () => {
     render(<App />);
 
-    expect(screen.getByText("Flowdeck")).toBeInTheDocument();
     expect(screen.getByText("あなたの手番")).toBeInTheDocument();
     expect(screen.getAllByText(/Backlog/).length).toBeGreaterThan(0);
     expect(screen.getByText("チームボード")).toBeInTheDocument();

@@ -33,14 +33,14 @@ describe("Toolbar header", () => {
     document.body.innerHTML = "";
   });
 
-  it("renders the 'mintodo' wordmark in the h1", () => {
+  it("renders the board controls without an in-app title", () => {
     render(
       <MindProvider>
         <Toolbar />
       </MindProvider>,
     );
-    const h1 = screen.getByRole("heading", { level: 1 });
-    expect(h1.textContent).toBe("mintodo");
+    expect(screen.queryByRole("heading", { level: 1 })).toBeNull();
+    expect(screen.getByRole("button", { name: "サイドバーを隠す" })).toBeTruthy();
   });
 
   it("does not render a theme toggle button", () => {
