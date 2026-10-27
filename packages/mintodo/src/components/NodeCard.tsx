@@ -1,6 +1,6 @@
 import { ChevronDown, ChevronUp, ListOrdered, Pencil, Plus } from "lucide-react";
 import { useDraggable, useDroppable } from "@dnd-kit/core";
-import { IconButton } from "@mijime/theme/ui";
+import { IconButton, Input } from "@mijime/theme/ui";
 import { useState } from "react";
 import { useMindStore } from "../hooks/use-mind-store";
 import { isDescendant } from "../store";
@@ -18,7 +18,7 @@ function InlineEditInput({ initialText }: { initialText: string }) {
   const { dispatch } = useMindStore();
   const [value, setValue] = useState(initialText);
   return (
-    <input
+    <Input
       data-testid="inline-edit-input"
       autoFocus
       value={value}
@@ -30,7 +30,7 @@ function InlineEditInput({ initialText }: { initialText: string }) {
       }}
       onBlur={() => dispatch({ text: value, type: "COMMIT_INLINE_EDIT" })}
       onPointerDown={(e) => e.stopPropagation()}
-      className="w-full bg-transparent text-sm font-medium outline-none border-b border-[var(--terra)]"
+      className="w-full bg-transparent text-sm font-medium border-0 border-b border-(--primary) rounded-none"
     />
   );
 }
