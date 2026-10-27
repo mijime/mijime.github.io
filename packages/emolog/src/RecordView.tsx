@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import { Button } from "@mijime/theme/ui";
 import "emoji-picker-element";
 
 // emoji-picker-element のカスタム要素を JSX で書けるようにする。
@@ -70,9 +71,14 @@ export function RecordView({ favorites, onTap, selectedList: _selectedList }: Re
       )}
 
       <div className="emolog-record-picker-toggle">
-        <button className="emolog-record-toggle" onClick={() => setShowPicker((v) => !v)}>
+        <Button
+          variant="secondary"
+          size="sm"
+          className="emolog-record-toggle"
+          onClick={() => setShowPicker((v) => !v)}
+        >
           {showPicker ? "▲ 閉じる" : "＋ 絵文字を選ぶ"}
-        </button>
+        </Button>
       </div>
 
       {showPicker && (

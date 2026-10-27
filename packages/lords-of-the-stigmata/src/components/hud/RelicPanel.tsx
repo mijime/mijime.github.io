@@ -26,7 +26,9 @@ export function RelicPanel(): React.JSX.Element {
               borderRadius: 3,
             }}
           >
-            <div style={{ color: "#b9a0e8", fontWeight: "bold" }}>✦{t(`relics.${rk}.name`)}</div>
+            <div style={{ color: "var(--kaga-murasaki)", fontWeight: "bold" }}>
+              ✦{t(`relics.${rk}.name`)}
+            </div>
             {takenBy !== undefined ? (
               <div style={{ fontSize: "10px", color: PCOLCSS[takenBy] }}>
                 {t("ui.relicTakenBy")}

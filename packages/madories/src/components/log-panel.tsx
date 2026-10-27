@@ -1,32 +1,31 @@
+import { X } from "lucide-react";
+import { Button, Card, IconButton } from "@mijime/theme/ui";
 import { clearLogs, downloadLogs, useLogs, type LogLevel } from "../log";
 
 const LEVEL_COLOR: Record<LogLevel, string> = {
-  error: "var(--terra)",
-  info: "var(--ink)",
-  warn: "#b58900",
+  error: "var(--danger)",
+  info: "var(--fg)",
+  warn: "var(--warning)",
 };
 
 export function LogPanel({ onClose }: { onClose: () => void }) {
   const logs = useLogs();
   return (
-    <div
+    <Card
+      tone="raised"
+      padding="sm"
       style={{
-        background: "var(--toolbar)",
-        border: "1px solid var(--border)",
-        borderRadius: "10px",
-        boxShadow: "0 4px 24px rgba(0,0,0,0.2)",
         display: "flex",
         flexDirection: "column",
         gap: "6px",
         maxHeight: "min(70vh, 480px)",
-        padding: "10px",
         width: "min(420px, 90vw)",
       }}
     >
       <div style={{ alignItems: "center", display: "flex", justifyContent: "space-between" }}>
         <span
           style={{
-            color: "var(--mid)",
+            color: "var(--muted)",
             fontFamily: "IBM Plex Mono, monospace",
             fontSize: "10px",
             letterSpacing: "0.12em",
@@ -35,22 +34,22 @@ export function LogPanel({ onClose }: { onClose: () => void }) {
           ログ ({logs.length})
         </span>
         <div style={{ display: "flex", gap: "4px" }}>
-          <button onClick={downloadLogs} style={btn} title="テキストで保存">
+          <Button variant="ghost" size="sm" onClick={downloadLogs} title="テキストで保存">
             保存
-          </button>
-          <button onClick={clearLogs} style={btn} title="クリア">
+          </Button>
+          <Button variant="ghost" size="sm" onClick={clearLogs} title="クリア">
             消去
-          </button>
-          <button onClick={onClose} style={btn}>
-            ✕
-          </button>
+          </Button>
+          <IconButton label="閉じる" size="icon-sm" onClick={onClose}>
+            <X size={12} />
+          </IconButton>
         </div>
       </div>
       <div
         style={{
-          background: "var(--paper)",
+          background: "var(--bg)",
           border: "1px solid var(--border)",
-          borderRadius: "6px",
+          borderRadius: "var(--radius-sm)",
           flex: 1,
           fontFamily: "IBM Plex Mono, monospace",
           fontSize: "10px",
@@ -63,7 +62,7 @@ export function LogPanel({ onClose }: { onClose: () => void }) {
         }}
       >
         {logs.length === 0 ? (
-          <span style={{ color: "var(--mid)" }}>ログはまだありません</span>
+          <span style={{ color: "var(--muted)" }}>ログはまだありません</span>
         ) : (
           logs.map((e, i) => (
             <div key={i} style={{ color: LEVEL_COLOR[e.level] }}>
@@ -72,17 +71,6 @@ export function LogPanel({ onClose }: { onClose: () => void }) {
           ))
         )}
       </div>
-    </div>
+    </Card>
   );
 }
-
-const btn: React.CSSProperties = {
-  background: "transparent",
-  border: "1px solid var(--border)",
-  borderRadius: "4px",
-  color: "var(--ink)",
-  cursor: "pointer",
-  fontFamily: "IBM Plex Mono, monospace",
-  fontSize: "11px",
-  padding: "3px 8px",
-};

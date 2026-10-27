@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
+import { IconButton } from "@mijime/theme/ui";
 import {
   addEntry,
   getLists,
@@ -222,13 +223,14 @@ export function App() {
       {/* ── 設定ボタン ── */}
       <div className="emolog-header">
         <span className="emolog-header-title">emolog</span>
-        <button
+        <IconButton
+          label="設定"
+          size="icon-sm"
           className="emolog-settings-trigger"
           onClick={() => setSettingsOpen(true)}
-          title="設定"
         >
           ⚙️
-        </button>
+        </IconButton>
       </div>
 
       {/* ── リストタブバー ── */}
@@ -296,9 +298,14 @@ export function App() {
                 </div>
               ))}
             </div>
-            <button className="emolog-list-add" onClick={handleAddList} title="リストを追加">
+            <IconButton
+              label="リストを追加"
+              size="icon-sm"
+              className="emolog-list-add"
+              onClick={handleAddList}
+            >
               ＋
-            </button>
+            </IconButton>
           </>
         )}
       </div>

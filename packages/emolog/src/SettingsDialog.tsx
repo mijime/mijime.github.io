@@ -1,5 +1,5 @@
-import { useRef } from "react";
-import { Button, Modal } from "@mijime/theme/ui";
+import { useRef, useState } from "react";
+import { Button, ConfirmDialog, Modal } from "@mijime/theme/ui";
 import type { ExportData } from "./types";
 
 interface SettingsDialogProps {
@@ -18,6 +18,7 @@ export function SettingsDialog({
   onDeleteAll,
 }: SettingsDialogProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
   if (!open) return null;
 
@@ -48,49 +49,57 @@ export function SettingsDialog({
   }
 
   async function handleDeleteAll() {
-    if (
-      !window.confirm(
-        "すべてのデータを完全に削除します。この操作は取り消せません。\nよろしいですか？",
-      )
-    )
-      return;
     await onDeleteAll();
+    setConfirmDelete(false);
   }
 
   return (
-    <Modal
-      open
-      onClose={onClose}
-      title="設定"
-      size="sm"
-      footer={
-        <Button variant="secondary" size="sm" onClick={onClose}>
-          閉じる
-        </Button>
-      }
-    >
-      <div className="flex flex-col gap-2">
-        <Button variant="secondary" onClick={handleExport} className="justify-start">
-          📤 データをエクスポート
-        </Button>
-        <Button
-          variant="secondary"
-          onClick={() => fileInputRef.current?.click()}
-          className="justify-start"
-        >
-          📥 データをインポート
-        </Button>
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept=".json"
-          className="hidden"
-          onChange={handleImport}
-        />
-        <Button variant="danger" onClick={handleDeleteAll} className="justify-start">
-          🗑️ すべてのデータを削除
-        </Button>
-      </div>
-    </Modal>
+    <>
+      <Modal
+        open
+        onClose={onClose}
+        title="設定"
+        size="sm"
+        footer={
+          <Button variant="secondary" size="sm" onClick={onClose}>
+            閉じる
+          </Button>
+        }
+      >
+        <div className="flex flex-col gap-2">
+          <Button variant="secondary" onClick={handleExport} className="justify-start">
+            📤 データをエクスポート
+          </Button>
+          <Button
+            variant="secondary"
+            onClick={() => fileInputRef.current?.click()}
+            className="justify-start"
+          >
+            📥 データをインポート
+          </Button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".json"
+            className="hidden"
+            onChange={handleImport}
+          />
+          <Button variant="danger" onClick={() => setConfirmDelete(true)} className="justify-start">
+            🗑️ すべてのデータを削除
+          </Button>
+        </div>
+      </Modal>
+      <ConfirmDialog
+        open={confirmDelete}
+        title="すべてのデータを削除"
+        description="この操作は取り消せません。"
+        tone="danger"
+        confirmLabel="すべて削除"
+        onCancel={() => setConfirmDelete(false)}
+        onConfirm={handleDeleteAll}
+      >
+        <p className="text-sm">すべての記録を完全に削除します。よろしいですか？</p>
+      </ConfirmDialog>
+    </>
   );
 }

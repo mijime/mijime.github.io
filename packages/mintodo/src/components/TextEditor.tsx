@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { Button, Textarea } from "@mijime/theme/ui";
 import { parseDSL, serializeDSL } from "../dsl";
 import { useMindStore } from "../hooks/use-mind-store";
 
@@ -67,15 +68,15 @@ export function TextEditor() {
 
   return (
     <div data-testid="text-editor" className="w-full h-full flex flex-col overflow-hidden">
-      <textarea
+      <Textarea
         data-testid="text-editor-textarea"
         value={text}
         onChange={(e) => setText(e.target.value)}
         spellCheck={false}
-        className="flex-1 w-full px-8 py-6 text-base font-mono resize-none outline-none border-0"
+        className="flex-1 w-full px-8 py-6 text-base font-mono resize-none outline-none border-0 rounded-none"
         style={{
           background: "transparent",
-          color: "var(--ink)",
+          color: "var(--fg)",
         }}
       />
       <div
@@ -87,29 +88,26 @@ export function TextEditor() {
           className="text-xs px-2 py-1 rounded mr-auto"
           style={{
             background:
-              saveState.kind === "unsaved" ? "rgba(245, 158, 11, 0.15)" : "rgba(34, 197, 94, 0.15)",
-            color: saveState.kind === "unsaved" ? "rgb(180, 83, 9)" : "rgb(21, 128, 61)",
+              saveState.kind === "unsaved"
+                ? "color-mix(in srgb, var(--warning) 15%, transparent)"
+                : "color-mix(in srgb, var(--success) 15%, transparent)",
+            color: saveState.kind === "unsaved" ? "var(--warning)" : "var(--success)",
           }}
           title={saveState.kind === "unsaved" ? saveState.reason : undefined}
         >
           {saveState.kind === "unsaved" ? "未保存" : "保存済み"}
         </span>
-        <button
-          type="button"
+        <Button
+          variant="secondary"
+          size="sm"
           data-testid="text-editor-reset"
           onClick={() => {
             setText(serializeDSL(state.nodes));
             setSaveState({ kind: "saved" });
           }}
-          className="px-3 py-1.5 text-sm rounded transition"
-          style={{
-            background: "var(--paper)",
-            border: "1px solid var(--border)",
-            color: "var(--ink)",
-          }}
         >
           リセット
-        </button>
+        </Button>
       </div>
     </div>
   );

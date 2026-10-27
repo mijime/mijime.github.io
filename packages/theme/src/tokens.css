@@ -1,0 +1,254 @@
+@import "./themes/sumi.css";
+
+/* ── Theme contract ─────────────────────────────────── */
+/* Swap `--palette-*` to create a theme.
+   Components only consume the semantic layer (`--primary`, `--secondary`,
+   `--accent`, `--bg`, `--fg`, `--muted`, ...), so a preset does not need to
+   touch component CSS. Example:
+
+     :root[data-palette="sumi"] {
+       --palette-primary: #3f3f46;
+       --palette-bg: #fafafa;
+       ...
+     }
+
+   See `themes/sumi.css` for a working preset and README.md for usage. */
+
+/* ── Palette: kaga (default) ────────────────────────── */
+:root,
+:root[data-palette="kaga"] {
+  color-scheme: light;
+
+  --palette-primary: #b04e52; /* 臙脂 */
+  --palette-on-primary: #fff8f4;
+  --palette-secondary: #35357d; /* 藍 */
+  --palette-on-secondary: #f7f7ff;
+  --palette-highlight: #c18a39; /* 黄土 */
+  --palette-on-highlight: #241a08;
+
+  --palette-bg: #faf8f3;
+  --palette-surface: #f3f0e9;
+  --palette-surface-raised: #ffffff;
+  --palette-sunken: #ebe7de;
+  --palette-hover: #f0ece4;
+  --palette-fg: #1c1b20;
+  --palette-muted: #6b6872;
+  --palette-border: #d8d3c7;
+  --palette-grid: #e7e2d7;
+  --palette-toolbar: #f5f2ea;
+
+  --palette-success: #5a6b3c; /* 草 */
+  --palette-warning: #8e6320;
+  --palette-danger: #a93b3b;
+  --palette-info: #35357d;
+
+  --palette-tone-violet: #7e5c96;
+  --palette-tone-blue: #35357d;
+  --palette-tone-amber: #96661d;
+  --palette-tone-red: #b04e52;
+  --palette-tone-green: #5a6b3c;
+  --palette-tone-teal: #3f6e66;
+  --palette-tone-sky: #4b6e93;
+  --palette-tone-indigo: #474a94;
+  --palette-tone-orange: #a65b32;
+  --palette-tone-lime: #62722f;
+  --palette-tone-rose: #a84c60;
+  --palette-tone-fuchsia: #94558c;
+  --palette-tone-cyan: #3d7a82;
+
+  /* Raw Kaga swatches for illustrations/content. */
+  --kaga-enji: #b04e52;
+  --kaga-ai: #35357d;
+  --kaga-oudo: #c18a39;
+  --kaga-kusa: #72814b;
+  --kaga-murasaki: #895b8a;
+}
+
+/* ── Semantic layer ─────────────────────────────────── */
+:root {
+  /* Brand */
+  --primary: var(--palette-primary);
+  --primary-hover: color-mix(in srgb, var(--palette-primary) 86%, var(--palette-fg));
+  --on-primary: var(--palette-on-primary);
+  --secondary: var(--palette-secondary);
+  --secondary-hover: color-mix(in srgb, var(--palette-secondary) 86%, var(--palette-fg));
+  --on-secondary: var(--palette-on-secondary);
+  --accent: var(--primary);
+  --on-accent: var(--on-primary);
+  --highlight: var(--palette-highlight);
+  --on-highlight: var(--palette-on-highlight);
+
+  /* Surfaces & text */
+  --bg: var(--palette-bg);
+  --surface: var(--palette-surface);
+  --surface-raised: var(--palette-surface-raised);
+  --sunken: var(--palette-sunken);
+  --hover: var(--palette-hover);
+  --fg: var(--palette-fg);
+  --muted: var(--palette-muted);
+  --border: var(--palette-border);
+  --grid: var(--palette-grid);
+  --toolbar-bg: var(--palette-toolbar);
+
+  /* Status */
+  --success: var(--palette-success);
+  --warning: var(--palette-warning);
+  --danger: var(--palette-danger);
+  --info: var(--palette-info);
+
+  /* Categorical tones */
+  --tone-violet: var(--palette-tone-violet);
+  --tone-blue: var(--palette-tone-blue);
+  --tone-amber: var(--palette-tone-amber);
+  --tone-red: var(--palette-tone-red);
+  --tone-green: var(--palette-tone-green);
+  --tone-teal: var(--palette-tone-teal);
+  --tone-sky: var(--palette-tone-sky);
+  --tone-indigo: var(--palette-tone-indigo);
+  --tone-orange: var(--palette-tone-orange);
+  --tone-lime: var(--palette-tone-lime);
+  --tone-rose: var(--palette-tone-rose);
+  --tone-fuchsia: var(--palette-tone-fuchsia);
+  --tone-cyan: var(--palette-tone-cyan);
+
+  /* Legacy aliases — keep older app CSS working while it migrates. */
+  --paper: var(--bg);
+  --ink: var(--fg);
+  --mid: var(--muted);
+  --terra: var(--primary);
+
+  /* Shape / motion */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --shadow-card:
+    0 1px 0 color-mix(in srgb, var(--border) 70%, transparent),
+    0 10px 24px -20px rgb(28 27 32 / 0.35);
+  --shadow-modal: 0 28px 56px -32px rgb(28 27 32 / 0.45);
+
+  /* Typography */
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+  --font-serif: "Shippori Mincho", "Hiragino Mincho ProN", serif;
+  --text-2xs: 9px;
+  --text-xs: 10px;
+  --text-sm: 12px;
+  --text-md: 13px;
+  --text-base: 14px;
+  --text-lg: 16px;
+  --text-xl: 20px;
+  --text-2xl: 24px;
+
+  /* Spacing */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-8: 3rem;
+}
+
+/* ── Palette: kaga dark ─────────────────────────────── */
+:root[data-theme="dark"],
+:root[data-palette="kaga"][data-theme="dark"] {
+  color-scheme: dark;
+
+  --palette-primary: #d98d8e;
+  --palette-on-primary: #1a1215;
+  --palette-secondary: #9ea0de;
+  --palette-on-secondary: #15151f;
+  --palette-highlight: #ddb268;
+  --palette-on-highlight: #241a08;
+
+  --palette-bg: #15141a;
+  --palette-surface: #1d1c23;
+  --palette-surface-raised: #232229;
+  --palette-sunken: #0f0e13;
+  --palette-hover: #26242d;
+  --palette-fg: #f2efe8;
+  --palette-muted: #a39da8;
+  --palette-border: #35323b;
+  --palette-grid: #2a2730;
+  --palette-toolbar: #1a191f;
+
+  --palette-success: #a3bb7c;
+  --palette-warning: #ddb268;
+  --palette-danger: #e78383;
+  --palette-info: #9ea0de;
+
+  --palette-tone-violet: #c4a6d8;
+  --palette-tone-blue: #a0a3e6;
+  --palette-tone-amber: #dcb26a;
+  --palette-tone-red: #e09092;
+  --palette-tone-green: #acc181;
+  --palette-tone-teal: #7fc4b8;
+  --palette-tone-sky: #92b8d8;
+  --palette-tone-indigo: #a9acf0;
+  --palette-tone-orange: #e0a274;
+  --palette-tone-lime: #b8c97e;
+  --palette-tone-rose: #e49cab;
+  --palette-tone-fuchsia: #d6a6d2;
+  --palette-tone-cyan: #8ac8ce;
+
+  --kaga-enji: #d98d8e;
+  --kaga-ai: #9ea0de;
+  --kaga-oudo: #ddb268;
+  --kaga-kusa: #a3bb7c;
+  --kaga-murasaki: #c4a6d8;
+
+  --shadow-card: 0 1px 0 rgb(255 255 255 / 0.04), 0 10px 24px -20px rgb(0 0 0 / 0.65);
+  --shadow-modal: 0 28px 56px -32px rgb(0 0 0 / 0.75);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]),
+  :root[data-palette="kaga"]:not([data-theme="light"]) {
+    color-scheme: dark;
+
+    --palette-primary: #d98d8e;
+    --palette-on-primary: #1a1215;
+    --palette-secondary: #9ea0de;
+    --palette-on-secondary: #15151f;
+    --palette-highlight: #ddb268;
+    --palette-on-highlight: #241a08;
+
+    --palette-bg: #15141a;
+    --palette-surface: #1d1c23;
+    --palette-surface-raised: #232229;
+    --palette-sunken: #0f0e13;
+    --palette-hover: #26242d;
+    --palette-fg: #f2efe8;
+    --palette-muted: #a39da8;
+    --palette-border: #35323b;
+    --palette-grid: #2a2730;
+    --palette-toolbar: #1a191f;
+
+    --palette-success: #a3bb7c;
+    --palette-warning: #ddb268;
+    --palette-danger: #e78383;
+    --palette-info: #9ea0de;
+
+    --palette-tone-violet: #c4a6d8;
+    --palette-tone-blue: #a0a3e6;
+    --palette-tone-amber: #dcb26a;
+    --palette-tone-red: #e09092;
+    --palette-tone-green: #acc181;
+    --palette-tone-teal: #7fc4b8;
+    --palette-tone-sky: #92b8d8;
+    --palette-tone-indigo: #a9acf0;
+    --palette-tone-orange: #e0a274;
+    --palette-tone-lime: #b8c97e;
+    --palette-tone-rose: #e49cab;
+    --palette-tone-fuchsia: #d6a6d2;
+    --palette-tone-cyan: #8ac8ce;
+
+    --kaga-enji: #d98d8e;
+    --kaga-ai: #9ea0de;
+    --kaga-oudo: #ddb268;
+    --kaga-kusa: #a3bb7c;
+    --kaga-murasaki: #c4a6d8;
+
+    --shadow-card: 0 1px 0 rgb(255 255 255 / 0.04), 0 10px 24px -20px rgb(0 0 0 / 0.65);
+    --shadow-modal: 0 28px 56px -32px rgb(0 0 0 / 0.75);
+  }
+}

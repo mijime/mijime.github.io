@@ -195,7 +195,7 @@ export function BarChart() {
         <polyline
           points={netPoints}
           fill="none"
-          stroke="#3b82f6"
+          stroke="var(--tone-blue)"
           strokeWidth={1.5}
           strokeDasharray="4,3"
         />
@@ -209,7 +209,7 @@ export function BarChart() {
               cx={x(i)}
               cy={midY - netScale(net)}
               r={2.5}
-              fill="#3b82f6"
+              fill="var(--tone-blue)"
             />
           );
         })}
@@ -274,7 +274,7 @@ export function BarChart() {
               y1={-5}
               x2={14}
               y2={-5}
-              stroke="#3b82f6"
+              stroke="var(--tone-blue)"
               strokeWidth={1.5}
               strokeDasharray="3,2"
             />

@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
+import { Tabs } from "@mijime/theme/ui";
 import { getEntriesByDateRange, getAllEntries } from "./store";
 import { computeSummary, getDateRangeForPeriod, type Period, type SummaryStats } from "./summary";
 import type { Entry } from "./types";
@@ -37,17 +38,14 @@ export function SummaryView({ onSelectEmoji, list }: SummaryViewProps) {
 
   return (
     <div className="emolog-summary">
-      <div className="emolog-summary-periods">
-        {PERIODS.map((p) => (
-          <button
-            key={p.key}
-            className={`emolog-summary-period${period === p.key ? " emolog-summary-period-active" : ""}`}
-            onClick={() => setPeriod(p.key)}
-          >
-            {p.label}
-          </button>
-        ))}
-      </div>
+      <Tabs
+        size="sm"
+        ariaLabel="期間"
+        value={period}
+        onChange={setPeriod}
+        options={PERIODS.map((p) => ({ value: p.key, label: p.label }))}
+        className="emolog-summary-periods"
+      />
 
       {summary.total === 0 ? (
         <div className="emolog-summary-empty">この期間の記録はありません</div>

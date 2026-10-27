@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
+import { Button, IconButton } from "@mijime/theme/ui";
 import { getEntriesByDateRange } from "./store";
 import type { Entry } from "./types";
 
@@ -87,7 +88,10 @@ export function CalendarView({ onSelectDate, todayStr, list }: CalendarViewProps
   return (
     <div className="emolog-calendar">
       <div className="emolog-cal-header">
-        <button
+        <IconButton
+          label="前月"
+          size="icon-sm"
+          className="emolog-nav-btn"
           onClick={() => {
             if (month === 0) {
               setYear((y) => y - 1);
@@ -96,15 +100,16 @@ export function CalendarView({ onSelectDate, todayStr, list }: CalendarViewProps
               setMonth((m) => m - 1);
             }
           }}
-          className="emolog-nav-btn"
-          aria-label="前月"
         >
           ←
-        </button>
+        </IconButton>
         <span className="emolog-cal-title">
           {year}年{month + 1}月
         </span>
-        <button
+        <IconButton
+          label="翌月"
+          size="icon-sm"
+          className="emolog-nav-btn"
           onClick={() => {
             if (month === 11) {
               setYear((y) => y + 1);
@@ -113,21 +118,21 @@ export function CalendarView({ onSelectDate, todayStr, list }: CalendarViewProps
               setMonth((m) => m + 1);
             }
           }}
-          className="emolog-nav-btn"
-          aria-label="翌月"
         >
           →
-        </button>
+        </IconButton>
         {!(year === today.getFullYear() && month === today.getMonth()) && (
-          <button
+          <Button
+            variant="secondary"
+            size="sm"
+            className="emolog-today-btn"
             onClick={() => {
               setYear(today.getFullYear());
               setMonth(today.getMonth());
             }}
-            className="emolog-today-btn"
           >
             今日
-          </button>
+          </Button>
         )}
       </div>
       <div className="emolog-cal-grid">

@@ -1,14 +1,16 @@
+@import "@mijime/theme/tokens.css";
+
 :root {
-  --ink: #0c0a13;
-  --panel: rgba(19, 15, 29, 0.93);
-  --panel2: rgba(28, 22, 42, 0.95);
-  --gold: #c9a437;
-  --gold-dim: rgba(201, 164, 55, 0.4);
-  --ember: #a04a32;
-  --txt: #e9e2cf;
-  --txt-dim: #9c937c;
-  --good: #7fb069;
-  --bad: #c75146;
+  --stage: var(--paper);
+  --panel: color-mix(in srgb, var(--surface) 93%, transparent);
+  --panel2: color-mix(in srgb, var(--surface-raised) 95%, transparent);
+  --gold: var(--kaga-oudo);
+  --gold-dim: color-mix(in srgb, var(--kaga-oudo) 40%, transparent);
+  --ember: var(--kaga-enji);
+  --txt: var(--ink);
+  --txt-dim: var(--mid);
+  --good: var(--kaga-kusa);
+  --bad: var(--danger);
   --serif: "Hiragino Mincho ProN", "Yu Mincho", "YuMincho", "Noto Serif JP", serif;
 }
 * {
@@ -20,7 +22,7 @@ html,
 body {
   height: 100%;
   overflow: hidden;
-  background: var(--ink);
+  background: var(--stage);
   color: var(--txt);
   font-family: var(--serif);
   font-size: 14px;
@@ -47,7 +49,7 @@ button {
 }
 button:hover:not(:disabled) {
   border-color: var(--gold);
-  background: rgba(201, 164, 55, 0.12);
+  background: rgba(193, 138, 57, 0.12);
 }
 button:disabled {
   opacity: 0.35;
@@ -123,7 +125,7 @@ button:focus-visible {
 }
 .pcard.turn {
   border-color: var(--gold);
-  box-shadow: 0 0 12px rgba(201, 164, 55, 0.25);
+  box-shadow: 0 0 12px rgba(193, 138, 57, 0.25);
 }
 .pcard .pname {
   font-weight: 600;
@@ -286,7 +288,7 @@ button:focus-visible {
   color: var(--ember);
 }
 #plog .relic {
-  color: #b9a0e8;
+  color: var(--kaga-murasaki);
 }
 /* tooltip */
 #tip {
@@ -390,7 +392,7 @@ button:focus-visible {
   position: fixed;
   inset: 0;
   z-index: 50;
-  background: radial-gradient(ellipse at 50% 30%, #1b1430 0%, #0c0a13 70%);
+  background: radial-gradient(ellipse at 50% 30%, var(--surface-raised) 0%, var(--paper) 70%);
   overflow-y: auto;
   padding: 34px 18px 50px;
 }
@@ -404,7 +406,7 @@ button:focus-visible {
   text-align: center;
   color: var(--gold);
   font-weight: 600;
-  text-shadow: 0 0 24px rgba(201, 164, 55, 0.35);
+  text-shadow: 0 0 24px rgba(193, 138, 57, 0.35);
 }
 #setup .sub {
   text-align: center;
@@ -427,7 +429,7 @@ button:focus-visible {
 }
 .cpurow button.sel {
   border-color: var(--gold);
-  background: rgba(201, 164, 55, 0.16);
+  background: rgba(193, 138, 57, 0.16);
   color: var(--gold);
 }
 #cgrid {
@@ -448,7 +450,7 @@ button:focus-visible {
 }
 .scard.sel {
   border-color: var(--gold);
-  background: rgba(201, 164, 55, 0.1);
+  background: rgba(193, 138, 57, 0.1);
 }
 .scard .sn {
   font-weight: 600;
@@ -594,7 +596,7 @@ button:focus-visible {
   width: 8px;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(201, 164, 55, 0.3);
+  background: rgba(193, 138, 57, 0.3);
   border-radius: 4px;
 }
 ::-webkit-scrollbar-track {
@@ -607,9 +609,9 @@ button:focus-visible {
   transform: translate(-50%, -50%);
   font-size: 44px;
   font-family: "Hiragino Mincho ProN", "Yu Mincho", serif;
-  color: var(--gold, #c9a437);
+  color: var(--gold);
   text-shadow:
-    0 0 24px rgba(201, 164, 55, 0.55),
+    0 0 24px rgba(193, 138, 57, 0.55),
     0 2px 10px rgba(0, 0, 0, 0.8);
   letter-spacing: 0.4em;
   pointer-events: none;
@@ -639,7 +641,7 @@ button:focus-visible {
   right: 10px;
   font-weight: 700;
   font-size: 15px;
-  color: var(--gold, #c9a437);
+  color: var(--gold);
   text-shadow: 0 1px 6px rgba(0, 0, 0, 0.8);
   pointer-events: none;
   animation: ipFloat 1.4s ease-out forwards;
@@ -670,10 +672,10 @@ button:focus-visible {
   align-items: center;
   gap: 8px;
   padding: 8px 20px;
-  background: rgba(20, 14, 8, 0.88);
-  border: 1px solid rgba(201, 164, 55, 0.5);
+  background: rgba(18, 16, 22, 0.88);
+  border: 1px solid rgba(193, 138, 57, 0.5);
   border-radius: 6px;
-  color: #ece4cf;
+  color: var(--txt);
   font-size: 15px;
   z-index: 60;
   animation: turnBannerIn 0.25s ease-out;
@@ -705,23 +707,23 @@ button:focus-visible {
   padding: 6px;
 }
 #fxcontrols button.on {
-  border-color: #c9a437;
-  color: #c9a437;
+  border-color: var(--gold);
+  color: var(--gold);
 }
 .vp-pop {
-  background: rgba(20, 14, 8, 0.9);
+  background: rgba(18, 16, 22, 0.9);
   border: 1px solid;
   border-radius: 6px;
   padding: 4px 10px;
   text-align: center;
-  color: #ffd76a;
+  color: var(--gold);
   animation: vpPop 0.75s ease-out;
   pointer-events: none;
   white-space: nowrap;
 }
 .vp-pop small {
   display: block;
-  color: #b8ab8e;
+  color: var(--txt-dim);
   font-size: 10px;
 }
 @keyframes vpPop {
@@ -735,11 +737,11 @@ button:focus-visible {
   }
 }
 .rank-preview {
-  background: rgba(20, 14, 8, 0.92);
-  border: 1px solid rgba(201, 164, 55, 0.6);
+  background: rgba(18, 16, 22, 0.92);
+  border: 1px solid rgba(193, 138, 57, 0.6);
   border-radius: 6px;
   padding: 4px 10px;
-  color: #ece4cf;
+  color: var(--txt);
   font-size: 13px;
   text-align: center;
   pointer-events: none;
@@ -747,6 +749,6 @@ button:focus-visible {
 }
 .rank-preview small {
   display: block;
-  color: #b8ab8e;
+  color: var(--txt-dim);
   font-size: 10px;
 }

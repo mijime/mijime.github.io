@@ -847,3 +847,12 @@
   border-color: var(--ink) !important;
   font-weight: 600;
 }
+
+/* Shared toast placement above the bottom tab bar. */
+.emolog-toast-stack {
+  right: auto;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(92vw, 420px);
+}

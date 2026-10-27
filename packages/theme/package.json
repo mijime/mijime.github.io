@@ -4,6 +4,10 @@
   "type": "module",
   "exports": {
     "./index.css": "./src/index.css",
+    "./tokens.css": "./src/tokens.css",
+    "./themes/sumi.css": "./src/themes/sumi.css",
+    "./palette": "./src/palette.ts",
+    "./usePalette": "./src/use-palette.ts",
     "./DarkModeToggle": "./src/dark-mode-toggle.tsx",
     "./useDarkMode": "./src/use-dark-mode.ts",
     "./ui": "./src/ui/index.ts"

@@ -1,5 +1,6 @@
 import { Download, Upload } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { Button, IconButton } from "@mijime/theme/ui";
 import { floorsToText, textToFloors } from "../floor/share";
 import type { FloorPlan } from "../types";
 import { BottomSheet } from "./bottom-sheet";
@@ -30,19 +31,9 @@ function DslHeader({ onClose }: { onClose: () => void }) {
       >
         DSL
       </div>
-      <button
-        onClick={onClose}
-        style={{
-          background: "transparent",
-          border: "none",
-          color: "var(--mid)",
-          cursor: "pointer",
-          fontSize: "13px",
-          padding: "0",
-        }}
-      >
+      <IconButton label="閉じる" size="icon-sm" onClick={onClose}>
         ✕
-      </button>
+      </IconButton>
     </div>
   );
 }
@@ -81,19 +72,6 @@ export function DslPanel({ floors, onApplyFloors, open, onToggle }: Props) {
     fontSize: "11px",
   };
 
-  const btnStyle: React.CSSProperties = {
-    alignItems: "center",
-    background: "transparent",
-    border: "1px solid var(--border)",
-    color: "var(--ink)",
-    cursor: "pointer",
-    display: "flex",
-    gap: "6px",
-    justifyContent: "center",
-    padding: "8px 8px",
-    ...mono,
-  };
-
   const editor = (
     <>
       <textarea
@@ -118,12 +96,17 @@ export function DslPanel({ floors, onApplyFloors, open, onToggle }: Props) {
         </div>
       )}
       <div style={{ display: "flex", gap: "6px" }}>
-        <button onClick={handleExport} className="flex-1 md:flex-none" style={btnStyle}>
+        <Button
+          variant="secondary"
+          size="sm"
+          onClick={handleExport}
+          className="flex-1 md:flex-none"
+        >
           <Download size={14} /> export
-        </button>
-        <button onClick={handleApply} className="flex-1 md:flex-none" style={btnStyle}>
+        </Button>
+        <Button variant="primary" size="sm" onClick={handleApply} className="flex-1 md:flex-none">
           <Upload size={14} /> apply
-        </button>
+        </Button>
       </div>
     </>
   );

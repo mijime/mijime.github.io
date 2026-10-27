@@ -232,7 +232,7 @@ describe("GanttBoard bar colors", () => {
       </MindProvider>,
     );
     const bar = screen.getByTestId("gantt-bar-a-bar");
-    expect(bar.style.background).toBe("rgb(14, 165, 233)");
+    expect(bar.style.background).toBe("var(--tone-sky)");
   });
 
   it("leaf bar uses status color (done → emerald)", () => {
@@ -248,7 +248,7 @@ describe("GanttBoard bar colors", () => {
       </MindProvider>,
     );
     const bar = screen.getByTestId("gantt-bar-a-bar");
-    expect(bar.style.background).toBe("rgb(16, 185, 129)");
+    expect(bar.style.background).toBe("var(--tone-green)");
   });
 
   it("leaf bar uses status color (review → amber)", () => {
@@ -264,7 +264,7 @@ describe("GanttBoard bar colors", () => {
       </MindProvider>,
     );
     const bar = screen.getByTestId("gantt-bar-a-bar");
-    expect(bar.style.background).toBe("rgb(245, 158, 11)");
+    expect(bar.style.background).toBe("var(--tone-amber)");
   });
 
   it("leaf bar uses status color (inbox → slate)", () => {
@@ -280,7 +280,7 @@ describe("GanttBoard bar colors", () => {
       </MindProvider>,
     );
     const bar = screen.getByTestId("gantt-bar-a-bar");
-    expect(bar.style.background).toBe("rgb(148, 163, 184)");
+    expect(bar.style.background).toBe("var(--mid)");
   });
 
   it("leaf bar has top/bottom border matching its status", () => {
@@ -296,8 +296,8 @@ describe("GanttBoard bar colors", () => {
       </MindProvider>,
     );
     const bar = screen.getByTestId("gantt-bar-a-bar");
-    expect(bar.style.borderTop).toBe("2px solid rgb(14, 165, 233)");
-    expect(bar.style.borderBottom).toBe("2px solid rgb(14, 165, 233)");
+    expect(bar.style.borderTop).toBe("2px solid var(--tone-sky)");
+    expect(bar.style.borderBottom).toBe("2px solid var(--tone-sky)");
   });
 
   it("parent bar border matches own status (not child status)", () => {
@@ -316,14 +316,14 @@ describe("GanttBoard bar colors", () => {
     );
     const parentBar = screen.getByTestId("gantt-bar-a-bar");
     // Parent is "review" → amber border
-    expect(parentBar.style.borderTop).toBe("2px solid rgb(245, 158, 11)");
-    expect(parentBar.style.borderBottom).toBe("2px solid rgb(245, 158, 11)");
+    expect(parentBar.style.borderTop).toBe("2px solid var(--tone-amber)");
+    expect(parentBar.style.borderBottom).toBe("2px solid var(--tone-amber)");
     // Child segments still show their own status colors
     const parentRow = screen.getByTestId("gantt-bar-a");
     const segC = parentRow.querySelector("[data-testid='gantt-bar-a-seg-c']") as HTMLElement;
-    expect(segC.style.background).toBe("rgb(14, 165, 233)");
+    expect(segC.style.background).toBe("var(--tone-sky)");
     const segD = parentRow.querySelector("[data-testid='gantt-bar-a-seg-d']") as HTMLElement;
-    expect(segD.style.background).toBe("rgb(16, 185, 129)");
+    expect(segD.style.background).toBe("var(--tone-green)");
   });
 
   it("parent bar has segment for each direct child", () => {
@@ -361,9 +361,9 @@ describe("GanttBoard bar colors", () => {
     );
     const parentBar = screen.getByTestId("gantt-bar-a");
     const segC = parentBar.querySelector("[data-testid='gantt-bar-a-seg-c']") as HTMLElement;
-    expect(segC.style.background).toBe("rgb(14, 165, 233)");
+    expect(segC.style.background).toBe("var(--tone-sky)");
     const segD = parentBar.querySelector("[data-testid='gantt-bar-a-seg-d']") as HTMLElement;
-    expect(segD.style.background).toBe("rgb(16, 185, 129)");
+    expect(segD.style.background).toBe("var(--tone-green)");
   });
 
   it("segments have absolute positioning relative to parent bar", () => {

@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
+import { IconButton } from "@mijime/theme/ui";
 import { getEntriesByDateRange, deleteEntry, updateEntryNote, updateEntryEmoji } from "./store";
 import { type Entry, today, formatTime } from "./types";
 
@@ -187,12 +188,19 @@ export function HistoryView({
         {filterEmoji && (
           <div className="emolog-history-filter">
             <span>🔍 {filterEmoji}</span>
-            <button onClick={() => onFilterEmoji(null)}>×</button>
+            <IconButton label="フィルタ解除" size="icon-sm" onClick={() => onFilterEmoji(null)}>
+              ×
+            </IconButton>
           </div>
         )}
-        <button onClick={copyLog} className="emolog-history-copy" title="クリップボードにコピー">
+        <IconButton
+          label="クリップボードにコピー"
+          size="icon-sm"
+          className="emolog-history-copy"
+          onClick={copyLog}
+        >
           📋
-        </button>
+        </IconButton>
       </div>
 
       {/* Timeline */}
@@ -265,13 +273,14 @@ export function HistoryView({
                       {entry.note || "＋"}
                     </span>
                   )}
-                  <button
+                  <IconButton
+                    label="削除"
+                    size="icon-sm"
                     className="emolog-history-delete"
                     onClick={() => handleDelete(entry)}
-                    title="削除"
                   >
                     ×
-                  </button>
+                  </IconButton>
                 </div>
               ))}
             </div>

@@ -3,18 +3,16 @@ import { describe, expect, it, vi } from "vitest";
 import { TaskCheckbox } from "./TaskCheckbox";
 
 describe("TaskCheckbox", () => {
-  it("renders an empty square when not done", () => {
+  it("renders an unchecked box when not done", () => {
     render(<TaskCheckbox isDone={false} onToggle={() => {}} testId="cb" />);
-    const btn = screen.getByTestId("cb");
-    expect(btn.className).toContain("border-[1.5px]");
-    expect(btn.textContent).toBe("");
+    const cb = screen.getByTestId("cb") as HTMLInputElement;
+    expect(cb.checked).toBe(false);
   });
 
-  it("renders a check mark and filled background when done", () => {
+  it("renders a checked box when done", () => {
     render(<TaskCheckbox isDone={true} onToggle={() => {}} testId="cb" />);
-    const btn = screen.getByTestId("cb");
-    expect(btn.textContent).toBe("✓");
-    expect(btn.className).toContain("bg-(--success)");
+    const cb = screen.getByTestId("cb") as HTMLInputElement;
+    expect(cb.checked).toBe(true);
   });
 
   it("calls onToggle when clicked and stops propagation", () => {

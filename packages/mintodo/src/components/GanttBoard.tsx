@@ -12,16 +12,16 @@ const ROW_PAD_X = 8;
 function statusColorHex(s: MindNode["status"]): string {
   switch (s) {
     case "wip": {
-      return "#0ea5e9";
+      return "var(--tone-sky)";
     }
     case "review": {
-      return "#f59e0b";
+      return "var(--tone-amber)";
     }
     case "done": {
-      return "#10b981";
+      return "var(--tone-green)";
     }
     default: {
-      return "#94a3b8";
+      return "var(--mid)";
     }
   }
 }
@@ -196,19 +196,28 @@ export function GanttBoard() {
                 {leafOverdue && (
                   <span
                     className="text-[10px] px-1.5 rounded"
-                    style={{ background: "rgba(244,63,94,0.15)", color: "#be123c" }}
+                    style={{
+                      background: "color-mix(in srgb, var(--tone-rose) 15%, transparent)",
+                      color: "var(--tone-rose)",
+                    }}
                   >{`⚠ ${leafOd}日超過`}</span>
                 )}
                 {nonLeafOverdue && (
                   <span
                     className="text-[10px] px-1.5 rounded"
-                    style={{ background: "rgba(244,63,94,0.15)", color: "#be123c" }}
+                    style={{
+                      background: "color-mix(in srgb, var(--tone-rose) 15%, transparent)",
+                      color: "var(--tone-rose)",
+                    }}
                   >{`⚠ ${nonLeafOd}日超過`}</span>
                 )}
                 {overflow > 0 && (
                   <span
                     className="text-[10px] px-1.5 rounded"
-                    style={{ background: "rgba(251,191,36,0.15)", color: "#92400e" }}
+                    style={{
+                      background: "color-mix(in srgb, var(--tone-amber) 15%, transparent)",
+                      color: "var(--tone-amber)",
+                    }}
                   >{`⚠ ${Math.round(overflow)}h超過`}</span>
                 )}
               </div>
@@ -323,7 +332,7 @@ export function GanttBoard() {
               bottom: 0,
               left: 0,
               width: 2,
-              background: "#ef4444",
+              background: "var(--tone-red)",
             }}
           />
         </div>

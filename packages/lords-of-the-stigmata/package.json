@@ -21,12 +21,13 @@
     "sim": "tsx scripts/sim.ts"
   },
   "dependencies": {
+    "@mijime/theme": "workspace:*",
     "@react-three/drei": "^10.7.9",
     "@react-three/fiber": "^9.8.2",
-    "i18next": "^26.5.4",
+    "i18next": "^26.5.11",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
-    "react-i18next": "^17.1.0",
+    "react-i18next": "^17.1.9",
     "three": "^0.186.1"
   },
   "devDependencies": {

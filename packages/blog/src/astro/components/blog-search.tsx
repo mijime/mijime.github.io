@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { Button, Input } from "@mijime/theme/ui";
 import { parseQuery, toSQL } from "@mijime/blog/search";
 import type { PostMeta } from "@mijime/blog";
 
@@ -89,7 +90,7 @@ export function BlogSearch() {
     <div className="search-page">
       <h1>Search</h1>
       <div className="search-form">
-        <input
+        <Input
           className="search-form-input"
           placeholder="alpha tags:react date>=:2024-01-01"
           value={input}
@@ -99,9 +100,9 @@ export function BlogSearch() {
             if (e.key === "Enter") triggerSearch(input);
           }}
         />
-        <button className="search-form-btn" onClick={() => triggerSearch(input)}>
+        <Button className="search-form-btn" onClick={() => triggerSearch(input)}>
           search
-        </button>
+        </Button>
       </div>
       <ResultCount results={results} searched={searched} searchError={searchError} />
       <ul className="post-list">

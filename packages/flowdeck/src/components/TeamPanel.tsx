@@ -1,4 +1,5 @@
 import { Layers, Users } from "lucide-react";
+import { Panel } from "@mijime/theme/ui";
 import type { GameState } from "../engine/types";
 import { PLAYER_TONE, TraitIcon, traitSummary } from "./ui";
 
@@ -19,7 +20,7 @@ export function TeamPanel({ state, aiTab, onSelectAi }: Props) {
   const tone = PLAYER_TONE[selected.id];
 
   return (
-    <section className="ui-panel p-2">
+    <Panel className="p-2">
       <div className="mb-1.5 flex items-baseline justify-between gap-1">
         <h2 className="flex items-center gap-1.5 text-[11px] font-semibold tracking-[0.08em]">
           <Users size={11} className="text-(--accent)" /> チーム
@@ -88,6 +89,6 @@ export function TeamPanel({ state, aiTab, onSelectAi }: Props) {
           </span>
         </div>
       </div>
-    </section>
+    </Panel>
   );
 }

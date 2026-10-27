@@ -1,0 +1,80 @@
+/* Example preset: 墨 (sumi) — monochrome UI.
+   Import this file, then set `document.documentElement.dataset.palette = "sumi"`.
+   Only `--palette-*` needs to change; components keep using semantic tokens. */
+
+:root[data-palette="sumi"] {
+  --palette-primary: #3f3f46;
+  --palette-on-primary: #fafafa;
+  --palette-secondary: #52525b;
+  --palette-on-secondary: #fafafa;
+  --palette-highlight: #a16207;
+  --palette-on-highlight: #fafafa;
+
+  --palette-bg: #fafafa;
+  --palette-surface: #f4f4f5;
+  --palette-surface-raised: #ffffff;
+  --palette-sunken: #e4e4e7;
+  --palette-hover: #efeff1;
+  --palette-fg: #18181b;
+  --palette-muted: #71717a;
+  --palette-border: #d4d4d8;
+  --palette-grid: #e4e4e7;
+  --palette-toolbar: #f4f4f5;
+
+  --palette-success: #4d7c0f;
+  --palette-warning: #a16207;
+  --palette-danger: #b91c1c;
+  --palette-info: #3f3f46;
+}
+
+:root[data-palette="sumi"][data-theme="dark"] {
+  --palette-primary: #d4d4d8;
+  --palette-on-primary: #18181b;
+  --palette-secondary: #a1a1aa;
+  --palette-on-secondary: #18181b;
+  --palette-highlight: #fbbf24;
+  --palette-on-highlight: #18181b;
+
+  --palette-bg: #18181b;
+  --palette-surface: #27272a;
+  --palette-surface-raised: #303036;
+  --palette-sunken: #111113;
+  --palette-hover: #323238;
+  --palette-fg: #fafafa;
+  --palette-muted: #a1a1aa;
+  --palette-border: #3f3f46;
+  --palette-grid: #2d2d31;
+  --palette-toolbar: #202024;
+
+  --palette-success: #86efac;
+  --palette-warning: #fcd34d;
+  --palette-danger: #fca5a5;
+  --palette-info: #d4d4d8;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root[data-palette="sumi"]:not([data-theme="light"]) {
+    --palette-primary: #d4d4d8;
+    --palette-on-primary: #18181b;
+    --palette-secondary: #a1a1aa;
+    --palette-on-secondary: #18181b;
+    --palette-highlight: #fbbf24;
+    --palette-on-highlight: #18181b;
+
+    --palette-bg: #18181b;
+    --palette-surface: #27272a;
+    --palette-surface-raised: #303036;
+    --palette-sunken: #111113;
+    --palette-hover: #323238;
+    --palette-fg: #fafafa;
+    --palette-muted: #a1a1aa;
+    --palette-border: #3f3f46;
+    --palette-grid: #2d2d31;
+    --palette-toolbar: #202024;
+
+    --palette-success: #86efac;
+    --palette-warning: #fcd34d;
+    --palette-danger: #fca5a5;
+    --palette-info: #d4d4d8;
+  }
+}

@@ -1,7 +1,7 @@
 @import "@mijime/theme/index.css";
 
 :root {
-  --window-blue: #8bafc0;
+  --window-blue: #8fa3c0;
   --toolbar: var(--toolbar-bg);
   --accent: var(--terra);
   --paper-overlay: rgba(0, 0, 0, 0.3);
@@ -9,12 +9,12 @@
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --window-blue: #6a8fa0;
+    --window-blue: #6f84a8;
   }
 }
 
 [data-theme="dark"] {
-  --window-blue: #6a8fa0;
+  --window-blue: #6f84a8;
 }
 
 body {

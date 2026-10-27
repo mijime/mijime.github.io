@@ -19,6 +19,6 @@ describe("ShareDialog", () => {
     const long = `https://mijime.github.io/apps/madories/?d=${"a".repeat(4000)}`;
     const html = renderToString(<ShareDialog url={long} onClose={() => {}} />);
     expect(html).toContain("収まりません");
-    expect(html).not.toContain("<path");
+    expect(html).not.toContain("共有するQRコード");
   });
 });

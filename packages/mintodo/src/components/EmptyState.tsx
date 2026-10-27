@@ -1,6 +1,7 @@
+import { Button, EmptyState as ThemeEmptyState } from "@mijime/theme/ui";
 import { useMindStore } from "../hooks/use-mind-store";
 
-export function EmptyState() {
+export function EmptyStateScreen() {
   const { dispatch } = useMindStore();
   const onCreate = () =>
     dispatch({ modal: { kind: "board-name", mode: "create" }, type: "OPEN_MODAL" });
@@ -8,30 +9,26 @@ export function EmptyState() {
   return (
     <div
       className="absolute inset-0 flex items-center justify-center"
-      style={{ background: "var(--paper)" }}
+      style={{ background: "var(--bg)" }}
     >
-      <div className="text-center max-w-md">
-        <div className="text-6xl mb-4">🌱</div>
-        <h2
-          className="text-2xl mb-2"
-          style={{ fontFamily: '"Crimson Pro", serif', fontWeight: 600, color: "var(--ink)" }}
-        >
-          最初のボードを作成
-        </h2>
-        <p className="text-sm mb-6" style={{ color: "var(--mid)" }}>
-          プロジェクト、アイデア、ToDo...
-          <br />
-          ボードを作成してマインドマップを始めましょう
-        </p>
-        <button
-          type="button"
-          onClick={onCreate}
-          className="px-6 py-3 rounded text-sm font-semibold transition"
-          style={{ background: "var(--terra)", color: "var(--paper)" }}
-        >
-          + 新規ボード作成
-        </button>
-      </div>
+      <ThemeEmptyState
+        icon="🌱"
+        title="最初のボードを作成"
+        description={
+          <>
+            プロジェクト、アイデア、ToDo...
+            <br />
+            ボードを作成してマインドマップを始めましょう
+          </>
+        }
+        action={
+          <Button variant="primary" size="md" onClick={onCreate}>
+            + 新規ボード作成
+          </Button>
+        }
+      />
     </div>
   );
 }
+
+export { EmptyStateScreen as EmptyState };

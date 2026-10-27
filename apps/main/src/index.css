@@ -5,17 +5,17 @@
 
 /* ── Color Tokens ───────────────────────────────────── */
 :root {
-  --paper: #fafaf8;
-  --ink: #1a1a18;
+  --paper: #faf8f3;
+  --ink: #1c1b20;
 }
 :root[data-theme="dark"] {
-  --paper: #1a1a18;
-  --ink: #fafaf8;
+  --paper: #15141a;
+  --ink: #f2efe8;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --paper: #1a1a18;
-    --ink: #fafaf8;
+    --paper: #15141a;
+    --ink: #f2efe8;
   }
 }
 
