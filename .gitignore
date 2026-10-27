@@ -3,10 +3,8 @@ storybook-static/
 public/sitemap.xml
 apps/main/public/blog-meta.parquet
 apps/main/public/blog-meta.json
-# otete: `bun run standalone` が public/ に吐く生成物（ソースは src/）
-packages/otete/public/standalone.js
-packages/otete/public/styles.css
-packages/otete/public/client/vision-test.js
+# otete: ローカル確認用に生成されるビルド成果物
+apps/otete/public/client/vision-test.js
 
 ### https://raw.github.com/github/gitignore/218a941be92679ce67d0484547e3e142b2f5f6f0/Global/macOS.gitignore
 
@@ -163,10 +161,9 @@ bun.lock
 # Git worktrees
 .worktrees/
 
-# otete: ランチャー(omalauncher)用のタイルと起動スクリプト、public/ を配るだけのローカルサーバ、
-# および proot 環境向けの bun 設定はこのリポジトリでは管理しない（実行環境側に置く）
-packages/otete/launcher/
-packages/otete/open
-packages/otete/serve
-packages/otete/src/server.ts
-packages/otete/bunfig.toml
+# otete: ランチャー(omalauncher)用のタイルと起動スクリプト、配信するだけのローカルサーバは
+# このリポジトリでは管理しない（実行環境側に置く）
+apps/otete/launcher/
+apps/otete/open
+apps/otete/serve
+apps/otete/src/server.ts

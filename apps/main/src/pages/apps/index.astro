@@ -27,6 +27,15 @@ const apps = [
         {apps.map((app) => (
           <li class="apps-item" style={`--i:${app.i}`}>
             <a href={`/apps/${app.slug}/`} class="apps-link">
+              <img
+                src={`/icons/${app.slug}-192.png`}
+                alt=""
+                width="24"
+                height="24"
+                loading="lazy"
+                decoding="async"
+                class="apps-icon"
+              />
               <span class="apps-slug">{app.slug}</span>
               <span class="apps-desc">{app.desc}</span>
               <span class="apps-arrow">→</span>
@@ -108,7 +117,7 @@ const apps = [
 
   .apps-link {
     display: grid;
-    grid-template-columns: auto 1fr auto;
+    grid-template-columns: auto auto 1fr auto;
     align-items: center;
     gap: 12px;
     padding: 14px 0;
@@ -120,6 +129,16 @@ const apps = [
       color: var(--terra);
       .apps-arrow { transform: translateX(4px); }
     }
+  }
+
+  .apps-icon {
+    width: 24px;
+    height: 24px;
+    border-radius: 5px;
+    border: 1px solid var(--grid);
+    background: var(--surface);
+    object-fit: cover;
+    flex-shrink: 0;
   }
 
   .apps-slug {

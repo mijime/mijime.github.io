@@ -1,0 +1,18 @@
+/* Colour-scheme swatch buttons used by PaletteToggle / DarkModeToggle. */
+.site-theme-toggle {
+  background: transparent;
+  border: 1px solid currentColor;
+  border-radius: 4px;
+  padding: 2px 8px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 12px;
+  color: var(--mid);
+  opacity: 0.6;
+  transition: opacity 0.15s;
+  display: flex;
+  align-items: center;
+}
+.site-theme-toggle:hover {
+  opacity: 1;
+}

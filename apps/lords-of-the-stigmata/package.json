@@ -1,0 +1,45 @@
+{
+  "name": "@mijime/lords-of-the-stigmata",
+  "version": "1.0.0",
+  "description": "聖痕の支配者たち — 3D（Vite + TypeScript 版）",
+  "type": "module",
+  "exports": {
+    ".": "./src/components/App.tsx",
+    "./styles.css": "./src/styles.css"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "test": "vitest run --passWithNoTests",
+    "check": "pnpm run check:format && pnpm run check:types && pnpm run check:oxlint",
+    "check:format": "oxfmt --check",
+    "check:types": "tsc --noEmit",
+    "check:oxlint": "oxlint --format=github --fix",
+    "format": "pnpm run format:oxfmt",
+    "format:oxfmt": "oxfmt",
+    "sim": "tsx scripts/sim.ts"
+  },
+  "dependencies": {
+    "@mijime/theme": "workspace:*",
+    "@react-three/drei": "^10.7.9",
+    "@react-three/fiber": "^9.8.2",
+    "i18next": "^26.5.11",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "react-i18next": "^17.1.9",
+    "three": "^0.186.1"
+  },
+  "devDependencies": {
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@types/three": "^0.186.0",
+    "@vitejs/plugin-react": "^6.1.2",
+    "oxfmt": "^0.74.0",
+    "oxlint": "^1.89.0",
+    "tsx": "^4.23.15",
+    "typescript": "7.1.0-dev.20261015.1",
+    "vite": "^8.3.5",
+    "vitest": "^5.0.5"
+  }
+}

@@ -1,6 +1,7 @@
 @import "@mijime/theme/index.css";
 
 @import "tailwindcss";
+@source "../../../../apps/*/src/**/*.{ts,tsx}";
 @source "../../../../packages/*/src/**/*.{ts,tsx}";
 
 /* ── Content Area (below site header) ───────────────── */

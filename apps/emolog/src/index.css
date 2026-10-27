@@ -1,0 +1,1459 @@
+@import "@mijime/theme/index.css";
+
+.emolog {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 16px 16px 0;
+  font-family: "IBM Plex Mono", monospace;
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+}
+
+/* ── ヘッダー ── */
+.emolog-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.emolog-header-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--mid);
+  letter-spacing: 0.05em;
+}
+
+.emolog-settings-trigger {
+  background: none;
+  border: 1px solid var(--grid);
+  border-radius: 8px;
+  padding: 4px 8px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.emolog-settings-trigger:hover {
+  background: var(--hover);
+}
+
+/* ── メインコンテンツ領域 ── */
+.emolog-content {
+  flex: 1;
+  overflow-y: auto;
+  padding-bottom: 70px;
+}
+
+@keyframes emoFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ── カレンダー ── */
+.emolog-calendar {
+  margin-bottom: 24px;
+}
+
+.emolog-cal-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.emolog-cal-title {
+  font-size: 15px;
+  font-weight: 600;
+  min-width: 100px;
+  text-align: center;
+}
+
+.emolog-nav-btn {
+  background: none;
+  border: 1px solid var(--grid);
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-size: 14px;
+  cursor: pointer;
+  color: var(--ink);
+  transition: background 0.15s;
+}
+
+.emolog-nav-btn:hover:not(:disabled) {
+  background: var(--grid);
+}
+
+.emolog-nav-btn:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.emolog-today-btn {
+  background: var(--surface);
+  border: 1px solid var(--grid);
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-family: "IBM Plex Mono", monospace;
+  color: var(--ink);
+  cursor: pointer;
+  transition: background 0.15s;
+  margin-left: 4px;
+}
+.emolog-today-btn:hover {
+  background: var(--hover);
+}
+
+.emolog-cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+
+.emolog-cal-weekday {
+  text-align: center;
+  font-size: 10px;
+  color: var(--mid);
+  padding: 6px 0;
+  font-weight: 600;
+}
+
+.emolog-cal-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 1;
+  border: none;
+  border-radius: 6px;
+  background: var(--surface);
+  cursor: pointer;
+  transition:
+    background 0.15s,
+    transform 0.1s;
+  padding: 2px;
+  min-height: 44px;
+}
+.emolog-cal-cell:hover {
+  background: var(--hover);
+  transform: scale(1.05);
+}
+.emolog-cal-cell:active {
+  transform: scale(0.95);
+}
+
+.emolog-cal-today {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
+.emolog-cal-empty-day {
+  opacity: 0.35;
+}
+
+.emolog-cal-day {
+  font-size: 10px;
+  color: var(--mid);
+  line-height: 1;
+}
+
+.emolog-cal-emoji {
+  font-size: 20px;
+  line-height: 1;
+  margin-top: 2px;
+}
+
+.emolog-cal-density-1 {
+  opacity: 0.7;
+}
+.emolog-cal-density-2 {
+  opacity: 0.85;
+}
+.emolog-cal-density-3 {
+  opacity: 1;
+}
+.emolog-cal-density-4 {
+  opacity: 1;
+  transform: scale(1.1);
+}
+.emolog-cal-density-5 {
+  opacity: 1;
+  transform: scale(1.15);
+}
+
+/* ── リストタブ ── */
+.emolog-lists {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 16px;
+  overflow: visible;
+}
+
+.emolog-lists::-webkit-scrollbar {
+  display: none;
+}
+
+.emolog-list-placeholder {
+  font-size: 12px;
+  color: var(--mid);
+  padding: 8px 0;
+}
+
+.emolog-list-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  flex: 1;
+  overflow: visible;
+}
+
+.emolog-list-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.emolog-list-tab-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.emolog-list-tab {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 14px;
+  font-size: 13px;
+  font-family: "IBM Plex Mono", monospace;
+  border: 1px solid var(--grid);
+  border-radius: 20px;
+  background: var(--surface);
+  color: var(--mid);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s;
+  flex-shrink: 0;
+}
+
+.emolog-list-tab:hover {
+  background: var(--hover);
+  color: var(--ink);
+}
+
+.emolog-list-active {
+  background: var(--ink) !important;
+  color: var(--bg) !important;
+  border-color: var(--ink) !important;
+  font-weight: 600;
+}
+
+.emolog-list-indicator {
+  font-size: 12px;
+}
+
+.emolog-list-add {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px dashed var(--grid);
+  background: var(--surface);
+  color: var(--mid);
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+  padding: 0;
+  line-height: 1;
+}
+
+.emolog-list-add:hover {
+  background: var(--hover);
+  color: var(--ink);
+  border-style: solid;
+}
+
+/* ── リストメニュー ── */
+.emolog-list-menu-wrap {
+  position: relative;
+}
+
+.emolog-list-menu-btn {
+  background: none;
+  border: none;
+  color: var(--mid);
+  font-size: 14px;
+  cursor: pointer;
+  padding: 0 4px;
+  line-height: 1;
+  opacity: 0.5;
+  transition: opacity 0.15s;
+  flex-shrink: 0;
+}
+
+.emolog-list-menu-btn:hover {
+  opacity: 1;
+}
+
+.emolog-list-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 100;
+  background: var(--surface);
+  border: 1px solid var(--grid);
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  min-width: 150px;
+  overflow: hidden;
+  margin-top: 4px;
+}
+
+.emolog-list-menu button {
+  display: block;
+  width: 100%;
+  padding: 10px 14px;
+  font-size: 13px;
+  font-family: "IBM Plex Mono", monospace;
+  border: none;
+  background: none;
+  color: var(--ink);
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.1s;
+}
+
+.emolog-list-menu button:hover {
+  background: var(--hover);
+}
+
+.emolog-list-menu-del {
+  border-top: 1px solid var(--grid) !important;
+  color: var(--danger) !important;
+}
+
+.emolog-list-rename-input {
+  padding: 6px 12px;
+  font-size: 13px;
+  font-family: "IBM Plex Mono", monospace;
+  border: 1px solid var(--accent);
+  border-radius: 20px;
+  background: var(--bg);
+  color: var(--ink);
+  outline: none;
+  width: 100px;
+}
+
+/* ── スナックバー ── */
+.emolog-snackbar {
+  position: fixed;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--ink);
+  color: var(--bg);
+  padding: 12px 20px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-family: "IBM Plex Mono", monospace;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+  animation: emoSnackIn 0.2s ease;
+}
+
+.emolog-snackbar-text {
+  white-space: nowrap;
+}
+
+@keyframes emoSnackIn {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+/* ── 下部タブバー ── */
+.emolog-tabbar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  background: var(--surface);
+  border-top: 1px solid var(--grid);
+  z-index: 900;
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+.emolog-tabbar-btn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 8px 0 10px;
+  border: none;
+  background: none;
+  color: var(--mid);
+  cursor: pointer;
+  transition: color 0.15s;
+  font-family: "IBM Plex Mono", monospace;
+}
+
+.emolog-tabbar-active {
+  color: var(--accent);
+}
+
+.emolog-tabbar-icon {
+  font-size: 20px;
+  line-height: 1;
+}
+
+.emolog-tabbar-label {
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.emolog-tabbar-indicator {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 33.333%;
+  height: 2px;
+  background: var(--accent);
+  transition: transform 0.2s ease;
+  border-radius: 0 0 2px 2px;
+}
+
+/* ── 記録タブ ── */
+.emolog-record {
+  padding-top: 8px;
+}
+
+.emolog-record-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-bottom: 16px;
+  padding: 0 4px;
+}
+
+.emolog-record-fav {
+  aspect-ratio: 1;
+  font-size: 40px;
+  background: var(--surface);
+  border: 1px solid var(--grid);
+  border-radius: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    transform 0.12s,
+    background 0.15s,
+    box-shadow 0.15s;
+  padding: 0;
+}
+
+.emolog-record-fav:hover {
+  transform: scale(1.1);
+  background: var(--hover);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+}
+
+.emolog-record-fav:active {
+  transform: scale(0.92);
+}
+
+.emolog-record-empty {
+  text-align: center;
+  color: var(--mid);
+  font-size: 12px;
+  margin-bottom: 16px;
+}
+
+.emolog-record-picker-toggle {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 8px;
+}
+
+.emolog-record-toggle {
+  padding: 8px 20px;
+  font-size: 13px;
+  font-family: "IBM Plex Mono", monospace;
+  border: 1px solid var(--grid);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--ink);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.emolog-record-toggle:hover {
+  background: var(--hover);
+}
+
+.emolog-record-picker-panel {
+  margin-bottom: 12px;
+}
+
+.emolog-record-picker-element {
+  --background: var(--surface);
+  --border-color: var(--grid);
+  --input-border-color: var(--grid);
+  --input-border-focus-color: var(--accent);
+  --indicator-color: var(--accent);
+  --button-active-background: var(--hover);
+  width: 100%;
+  height: 360px;
+  border: 1px solid var(--grid);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.emolog-record-note {
+  margin-bottom: 12px;
+}
+
+.emolog-record-note-input {
+  width: 100%;
+  padding: 12px 16px;
+  font-size: 14px;
+  font-family: "IBM Plex Mono", monospace;
+  border: 1px solid var(--grid);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--ink);
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.15s;
+}
+
+.emolog-record-note-input:focus {
+  border-color: var(--accent);
+}
+
+.emolog-record-note-input::placeholder {
+  color: var(--mid);
+}
+
+/* ── 履歴タブ ── */
+.emolog-history {
+  flex: 1;
+}
+
+.emolog-history-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  gap: 8px;
+}
+
+.emolog-history-filter {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  background: var(--surface);
+  border: 1px solid var(--grid);
+  border-radius: 8px;
+  font-size: 13px;
+}
+
+.emolog-history-filter button {
+  background: none;
+  border: none;
+  color: var(--mid);
+  font-size: 14px;
+  cursor: pointer;
+  padding: 0 2px;
+  line-height: 1;
+}
+
+.emolog-history-copy {
+  background: none;
+  border: 1px solid var(--grid);
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-size: 14px;
+  cursor: pointer;
+  margin-left: auto;
+  transition: background 0.15s;
+}
+
+.emolog-history-copy:hover {
+  background: var(--grid);
+}
+
+.emolog-history-timeline {
+  position: relative;
+  padding-left: 36px;
+}
+
+.emolog-history-timeline::before {
+  content: "";
+  position: absolute;
+  left: 17px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--grid);
+  border-radius: 1px;
+}
+
+.emolog-history-group:first-child {
+  margin-top: 0;
+}
+
+.emolog-history-date {
+  position: relative;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--mid);
+  padding: 24px 0 10px 0;
+  letter-spacing: 0.05em;
+}
+
+.emolog-history-group:first-child .emolog-history-date {
+  padding-top: 0;
+}
+
+.emolog-history-date::before {
+  content: "";
+  position: absolute;
+  left: -25px;
+  top: 50%;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--mid);
+  border: 2px solid var(--bg);
+  transform: translateY(-50%);
+  z-index: 1;
+}
+
+.emolog-history-group:first-child .emolog-history-date::before {
+  top: 4px;
+  transform: none;
+}
+
+.emolog-history-today {
+  display: inline-block;
+  margin-left: 6px;
+  font-size: 9px;
+  line-height: 1.4;
+  background: var(--accent);
+  color: var(--on-accent);
+  padding: 1px 7px;
+  border-radius: 8px;
+  vertical-align: middle;
+  font-weight: 700;
+}
+
+.emolog-history-entry {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 8px;
+  animation: emoFadeIn 0.3s ease both;
+}
+
+.emolog-history-entry::before {
+  content: "";
+  position: absolute;
+  left: -24px;
+  top: 50%;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: 2px solid var(--bg);
+  box-shadow: 0 0 0 1px var(--accent);
+  transform: translateY(-50%);
+  z-index: 1;
+}
+
+.emolog-history-time {
+  font-size: 12px;
+  color: var(--mid);
+  min-width: 40px;
+  font-variant-numeric: tabular-nums;
+  flex-shrink: 0;
+}
+
+.emolog-history-emoji {
+  font-size: 28px;
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    transform 0.1s,
+    background 0.15s;
+  border-radius: 6px;
+  padding: 2px 4px;
+}
+
+.emolog-history-emoji:hover {
+  transform: scale(1.2);
+  background: var(--hover);
+}
+
+.emolog-history-emoji-active {
+  background: var(--accent);
+}
+
+.emolog-history-emoji-edit {
+  flex-shrink: 0;
+}
+
+.emolog-history-emoji-input {
+  width: 40px;
+  padding: 2px 4px;
+  font-size: 20px;
+  text-align: center;
+  border: 1px solid var(--accent);
+  border-radius: 6px;
+  background: var(--bg);
+  outline: none;
+  box-sizing: border-box;
+}
+
+.emolog-history-note {
+  font-size: 12px;
+  color: var(--mid);
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: pointer;
+  padding: 4px 0;
+  transition: color 0.15s;
+}
+
+.emolog-history-note:hover {
+  color: var(--ink);
+}
+
+.emolog-history-note-empty {
+  color: var(--grid);
+  font-size: 14px;
+}
+
+.emolog-history-note-input {
+  flex: 1;
+  padding: 4px 8px;
+  font-size: 13px;
+  font-family: "IBM Plex Mono", monospace;
+  border: 1px solid var(--accent);
+  border-radius: 4px;
+  background: var(--bg);
+  color: var(--ink);
+  outline: none;
+  min-width: 0;
+}
+
+.emolog-history-note-input:placeholder-shown {
+  background: var(--sunken);
+}
+
+.emolog-history-delete {
+  background: none;
+  border: none;
+  color: var(--mid);
+  font-size: 14px;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 4px;
+  opacity: 0.6;
+  transition:
+    opacity 0.15s,
+    background 0.15s;
+  flex-shrink: 0;
+}
+
+.emolog-history-entry:hover .emolog-history-delete {
+  opacity: 1;
+}
+
+.emolog-history-delete:hover {
+  background: var(--grid);
+}
+
+.emolog-history-empty {
+  text-align: center;
+  color: var(--mid);
+  font-size: 13px;
+  padding: 40px 0;
+}
+
+.emolog-history-loading {
+  text-align: center;
+  color: var(--mid);
+  font-size: 12px;
+  padding: 16px 0;
+}
+
+/* ── 分析タブ ── */
+.emolog-stats {
+  padding-top: 8px;
+}
+
+.emolog-stats > .ui-tabs {
+  display: flex;
+  width: 100%;
+}
+
+.emolog-stats > .ui-tabs .ui-tabs__item {
+  flex: 1;
+  justify-content: center;
+}
+
+.emolog-stats-subtabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 16px;
+  justify-content: center;
+}
+
+.emolog-stats-subtab {
+  padding: 6px 20px;
+  font-size: 13px;
+  font-family: "IBM Plex Mono", monospace;
+  border: 1px solid var(--grid);
+  border-radius: 20px;
+  background: var(--surface);
+  color: var(--mid);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.emolog-stats-subtab:hover {
+  background: var(--hover);
+  color: var(--ink);
+}
+
+.emolog-stats-subtab-active {
+  background: var(--ink) !important;
+  color: var(--bg) !important;
+  border-color: var(--ink) !important;
+  font-weight: 600;
+}
+
+/* Shared toast placement above the bottom tab bar. */
+.emolog-toast-stack {
+  right: auto;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(92vw, 420px);
+}
+
+/* ── 記録画面に統合した履歴 ── */
+.emolog-history-section {
+  border-top: 1px solid var(--grid);
+  margin-top: 20px;
+  padding-top: 12px;
+}
+
+.emolog-history-section-title {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  margin: 0 0 12px;
+}
+
+/* ── タップ領域・リスト編集の調整 ── */
+.emolog-settings-trigger,
+.emolog-history-copy,
+.emolog-history-delete {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+}
+
+.emolog-history-delete {
+  opacity: 0.8;
+}
+
+.emolog-list-menu-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border-radius: 6px;
+  opacity: 0.75;
+}
+
+.emolog-list-menu-btn:hover {
+  background: var(--hover);
+  opacity: 1;
+}
+
+.emolog-list-rename-input {
+  width: 140px;
+}
+
+.emolog-list-menu button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* ── 分析（集計） ── */
+.emolog-summary {
+  padding-top: 8px;
+}
+
+.emolog-summary-periods {
+  margin: 0 auto 16px;
+}
+
+.emolog-summary-stats {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.emolog-summary-stat {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 2px;
+  align-items: center;
+  padding: 10px;
+  border: 1px solid var(--grid);
+  border-radius: 10px;
+  background: var(--surface);
+}
+
+.emolog-summary-stat-value {
+  color: var(--ink);
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+}
+
+.emolog-summary-stat-label {
+  color: var(--mid);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+}
+
+.emolog-summary-rankings {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.emolog-summary-ranking {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr) 32px 44px;
+  gap: 8px;
+  align-items: center;
+  padding: 6px 4px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s;
+}
+
+.emolog-summary-ranking:hover {
+  background: var(--hover);
+}
+
+.emolog-summary-ranking-emoji {
+  font-size: 20px;
+  line-height: 1;
+}
+
+.emolog-summary-ranking-bar-container {
+  overflow: hidden;
+  width: 100%;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--grid);
+}
+
+.emolog-summary-ranking-bar {
+  height: 100%;
+  border-radius: inherit;
+  background: var(--accent);
+}
+
+.emolog-summary-ranking-count {
+  color: var(--mid);
+  font-size: 11px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.emolog-summary-ranking-pct {
+  color: var(--ink);
+  font-size: 11px;
+  font-weight: 600;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.emolog-summary-empty {
+  padding: 24px 0;
+  color: var(--mid);
+  font-size: 12px;
+  text-align: center;
+}
+
+/* ── 履歴のメモ編集 ── */
+.emolog-history-note-row {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 2px;
+  min-width: 0;
+}
+
+.emolog-history-note-row .emolog-history-note {
+  flex: 1;
+  min-width: 0;
+}
+
+.emolog-history-note-edit {
+  flex: none;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  opacity: 0.65;
+}
+
+.emolog-history-note-empty {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+/* ── ハッシュタグ ── */
+.emolog-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 7px;
+  border: 1px solid var(--grid);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--mid);
+  font-size: 11px;
+  line-height: 1.6;
+  white-space: nowrap;
+}
+
+.emolog-record-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 6px;
+}
+
+/* 未入力（プレースホルダー表示中）のときは背景を一段暗くする。 */
+.emolog-record-note-input:placeholder-shown {
+  background: var(--sunken);
+}
+
+/* ── 履歴のタグ・位置情報 ── */
+.emolog-history-main {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.emolog-history-entry-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  padding-left: 26px;
+}
+
+.emolog-history-tag-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 8px;
+}
+
+.emolog-history-tag {
+  padding: 1px 8px;
+  border: 1px solid var(--grid);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--mid);
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 11px;
+  line-height: 1.7;
+  cursor: pointer;
+}
+
+.emolog-history-tag:hover {
+  background: var(--hover);
+}
+
+.emolog-history-tag-active {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 10%, var(--surface));
+}
+
+.emolog-history-location {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border-radius: 4px;
+  color: var(--mid);
+  text-decoration: none;
+  opacity: 0.8;
+  flex-shrink: 0;
+  transition:
+    opacity 0.15s,
+    background 0.15s;
+}
+
+.emolog-history-entry:hover .emolog-history-location {
+  opacity: 1;
+}
+
+.emolog-history-location:hover {
+  background: var(--grid);
+}
+
+/* ── タイムライン（デイカレンダー） ── */
+.emolog-review {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-top: 8px;
+}
+
+.emolog-review-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.emolog-review-title {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.emolog-review-today {
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  color: var(--accent);
+  font-size: 10px;
+  font-weight: 500;
+}
+
+.emolog-review-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.emolog-review-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 8px 4px;
+  border: 1px solid var(--grid);
+  border-radius: 10px;
+  background: var(--surface);
+}
+
+.emolog-review-top {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.emolog-review-stat-value {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+
+.emolog-review-stat-label {
+  font-size: 10px;
+  color: var(--mid);
+  text-align: center;
+}
+
+.emolog-review-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.emolog-daycal {
+  position: relative;
+  max-height: min(55vh, 520px);
+  overflow-y: auto;
+  border: 1px solid var(--grid);
+  border-radius: 10px;
+  background: var(--surface);
+}
+
+.emolog-daycal-row {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr);
+  gap: 8px;
+  min-height: 42px;
+  padding: 4px 8px;
+  border-top: 1px solid var(--grid);
+}
+
+.emolog-daycal-row:first-child {
+  border-top: none;
+}
+
+.emolog-daycal-hour {
+  padding-top: 4px;
+  color: var(--mid);
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+}
+
+.emolog-daycal-slot {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 4px;
+  padding: 2px 0;
+}
+
+.emolog-daycal-entry {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  padding: 4px 6px;
+  border: 1px solid var(--grid);
+  border-radius: 6px;
+  background: var(--paper);
+}
+
+.emolog-daycal-time {
+  min-width: 34px;
+  padding-top: 2px;
+  color: var(--mid);
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+}
+
+.emolog-daycal-emoji {
+  font-size: 16px;
+  line-height: 1.2;
+}
+
+.emolog-daycal-body {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.emolog-daycal-note {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.emolog-daycal-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.emolog-review-empty {
+  padding: 32px 0;
+  color: var(--mid);
+  font-size: 13px;
+  text-align: center;
+}
+
+/* ── 集計のタグ ── */
+.emolog-summary-tags {
+  margin-top: 14px;
+}
+
+.emolog-summary-tags-title {
+  margin: 0 0 6px;
+  color: var(--mid);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.emolog-summary-tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+/* ── 設定: 位置情報 ── */
+.emolog-settings-location {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 8px 4px;
+  color: var(--ink);
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.emolog-settings-location input {
+  margin-top: 3px;
+  accent-color: var(--accent);
+}
+
+.emolog-settings-location small {
+  display: block;
+  margin-top: 2px;
+  color: var(--mid);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+/* ── 位置情報の地図 ── */
+.emolog-map-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-top: 8px;
+}
+
+.emolog-map {
+  height: min(60vh, 460px);
+  border: 1px solid var(--grid);
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--surface);
+  z-index: 0;
+}
+
+.emolog-map .leaflet-container {
+  font-family: inherit;
+}
+
+.emolog-map-pin {
+  background: transparent;
+  border: none;
+}
+
+.emolog-map-pin-inner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border: 2px solid var(--accent);
+  border-radius: 999px;
+  background: var(--paper);
+  box-shadow: 0 2px 6px rgb(0 0 0 / 0.25);
+  font-size: 17px;
+  line-height: 1;
+}
+
+.emolog-map-hint,
+.emolog-map-error,
+.emolog-map-privacy {
+  margin: 0;
+  color: var(--mid);
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+.emolog-map-error {
+  color: var(--danger);
+}
+
+.emolog-map-privacy {
+  font-size: 10px;
+  opacity: 0.85;
+}
+
+.emolog-map-popup {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 150px;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 12px;
+}
+
+.emolog-map-popup-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+}
+
+.emolog-map-popup-emoji {
+  font-size: 16px;
+}
+
+.emolog-map-popup-note {
+  margin: 0;
+  color: var(--mid);
+  overflow-wrap: anywhere;
+}
+
+.emolog-map-popup-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.emolog-map-popup a {
+  color: var(--accent);
+  font-size: 11px;
+}

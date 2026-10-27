@@ -1,0 +1,51 @@
+{
+  "name": "@mijime/emolog",
+  "version": "1.0.0",
+  "description": "Emoji-based emotion logger",
+  "type": "module",
+  "exports": {
+    ".": "./src/App.tsx",
+    "./index.css": "./src/index.css"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "test": "vitest run --passWithNoTests",
+    "check": "pnpm run check:format && pnpm run check:types && pnpm run check:oxlint",
+    "check:format": "oxfmt --check",
+    "check:types": "tsc --noEmit",
+    "check:oxlint": "oxlint --format=github --fix",
+    "format": "pnpm run format:oxfmt",
+    "format:oxfmt": "oxfmt"
+  },
+  "dependencies": {
+    "@mijime/theme": "workspace:*",
+    "dexie": "^4.4.7",
+    "emoji-picker-element": "^1.29.1",
+    "leaflet": "^1.9.4",
+    "lucide-react": "^1.61.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.3.3",
+    "@testing-library/react": "^16.3.3",
+    "@types/leaflet": "^1.9.22",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.1.2",
+    "fake-indexeddb": "^6.2.6",
+    "jsdom": "^30.1.3",
+    "oxfmt": "^0.74.0",
+    "oxlint": "^1.89.0",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "tailwindcss": "^4.3.3",
+    "typescript": "7.1.0-dev.20261015.1",
+    "vite": "^8.3.5",
+    "vitest": "^5.0.5"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  }
+}

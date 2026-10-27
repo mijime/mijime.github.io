@@ -1,6 +1,7 @@
 @import url("https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&family=Shippori+Mincho:wght@400;600&display=swap");
 
 @import "tailwindcss";
+@source "../../../apps/*/src/**/*.{ts,tsx}";
 @source "../../../packages/*/src/**/*.{ts,tsx}";
 
 /* ── Color Tokens ───────────────────────────────────── */
