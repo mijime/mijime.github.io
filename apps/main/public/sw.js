@@ -1,4 +1,4 @@
-const CACHE = "mijime-pwa-v1";
+const CACHE = "mijime-pwa-v2";
 const CORE = [
   "/",
   "/apps/",

@@ -63,7 +63,6 @@ export function BoardNameDialog() {
             value={name}
             onChange={(e) => setName(e.target.value)}
             onBlur={() => setName((value) => value.slice(0, MAX_NAME))}
-            maxLength={MAX_NAME}
             placeholder="例: メインプロジェクト"
           />
         </Field>

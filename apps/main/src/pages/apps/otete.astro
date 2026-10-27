@@ -49,15 +49,53 @@ import "@mijime/otete/index.css";
   <body>
     <OteteApp client:only="react" />
     <script is:inline>
-      if (
-        "serviceWorker" in navigator &&
-        location.hostname !== "localhost" &&
-        location.hostname !== "127.0.0.1"
-      ) {
-        window.addEventListener("load", () => {
-          navigator.serviceWorker.register("/sw.js").catch(() => {});
+      (() => {
+        if (!("serviceWorker" in navigator)) return;
+        const isDev =
+          location.hostname === "localhost" ||
+          location.hostname === "127.0.0.1" ||
+          location.port !== "";
+
+        if (isDev) {
+          const key = "sw-dev-clean-v2";
+          try {
+            if (sessionStorage.getItem(key)) return;
+          } catch {}
+          const cleanup = [
+            navigator.serviceWorker
+              .getRegistrations()
+              .then((registrations) =>
+                Promise.all(registrations.map((registration) => registration.unregister())),
+              ),
+          ];
+          if ("caches" in window) {
+            cleanup.push(
+              caches
+                .keys()
+                .then((keys) => Promise.all(keys.map((cacheKey) => caches.delete(cacheKey)))),
+            );
+          }
+          Promise.all(cleanup).then(() => {
+            try {
+              sessionStorage.setItem(key, "1");
+            } catch {}
+            location.reload();
+          });
+          return;
+        }
+
+        let refreshing = false;
+        navigator.serviceWorker.addEventListener("controllerchange", () => {
+          if (refreshing) return;
+          refreshing = true;
+          location.reload();
         });
-      }
+        window.addEventListener("load", () => {
+          navigator.serviceWorker
+            .register("/sw.js", { updateViaCache: "none" })
+            .catch(() => {});
+        });
+      })();
     </script>
   </body>
 </html>
