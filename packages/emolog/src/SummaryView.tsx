@@ -66,6 +66,7 @@ export function SummaryView({ onSelectEmoji, list }: SummaryViewProps) {
               <button
                 key={r.emoji}
                 className="emolog-summary-ranking"
+                aria-label={`${r.emoji} ${r.count}回 ${r.pct}%`}
                 onClick={() => onSelectEmoji(r.emoji)}
               >
                 <span className="emolog-summary-ranking-emoji">{r.emoji}</span>
@@ -75,7 +76,7 @@ export function SummaryView({ onSelectEmoji, list }: SummaryViewProps) {
                     style={{ width: `${Math.max(r.pct, 1)}%` }}
                   />
                 </div>
-                <span className="emolog-summary-ranking-count">{r.count}</span>
+                <span className="emolog-summary-ranking-count">{r.count}回</span>
                 <span className="emolog-summary-ranking-pct">{r.pct}%</span>
               </button>
             ))}

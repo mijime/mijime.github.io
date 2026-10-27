@@ -193,12 +193,11 @@
 /* ── リストタブ ── */
 .emolog-lists {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 4px;
   margin-bottom: 16px;
-  overflow-x: auto;
-  scrollbar-width: none;
-  -webkit-overflow-scrolling: touch;
+  overflow: visible;
 }
 
 .emolog-lists::-webkit-scrollbar {
@@ -213,10 +212,10 @@
 
 .emolog-list-tabs {
   display: flex;
+  flex-wrap: wrap;
   gap: 4px;
   flex: 1;
-  overflow-x: auto;
-  scrollbar-width: none;
+  overflow: visible;
 }
 
 .emolog-list-tabs::-webkit-scrollbar {
@@ -912,4 +911,138 @@
   display: flex;
   align-items: center;
   gap: 6px;
+}
+
+/* ── 分析（集計） ── */
+.emolog-summary {
+  padding-top: 8px;
+}
+
+.emolog-summary-periods {
+  margin: 0 auto 16px;
+}
+
+.emolog-summary-stats {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.emolog-summary-stat {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 2px;
+  align-items: center;
+  padding: 10px;
+  border: 1px solid var(--grid);
+  border-radius: 10px;
+  background: var(--surface);
+}
+
+.emolog-summary-stat-value {
+  color: var(--ink);
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+}
+
+.emolog-summary-stat-label {
+  color: var(--mid);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+}
+
+.emolog-summary-rankings {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.emolog-summary-ranking {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr) 32px 44px;
+  gap: 8px;
+  align-items: center;
+  padding: 6px 4px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s;
+}
+
+.emolog-summary-ranking:hover {
+  background: var(--hover);
+}
+
+.emolog-summary-ranking-emoji {
+  font-size: 20px;
+  line-height: 1;
+}
+
+.emolog-summary-ranking-bar-container {
+  overflow: hidden;
+  width: 100%;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--grid);
+}
+
+.emolog-summary-ranking-bar {
+  height: 100%;
+  border-radius: inherit;
+  background: var(--accent);
+}
+
+.emolog-summary-ranking-count {
+  color: var(--mid);
+  font-size: 11px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.emolog-summary-ranking-pct {
+  color: var(--ink);
+  font-size: 11px;
+  font-weight: 600;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.emolog-summary-empty {
+  padding: 24px 0;
+  color: var(--mid);
+  font-size: 12px;
+  text-align: center;
+}
+
+/* ── 履歴のメモ編集 ── */
+.emolog-history-note-row {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 2px;
+  min-width: 0;
+}
+
+.emolog-history-note-row .emolog-history-note {
+  flex: 1;
+  min-width: 0;
+}
+
+.emolog-history-note-edit {
+  flex: none;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  opacity: 0.65;
+}
+
+.emolog-history-note-empty {
+  color: var(--muted);
+  font-size: 12px;
 }

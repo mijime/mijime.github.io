@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { MoreHorizontal, Pencil, Plus, Settings, Trash2 } from "lucide-react";
-import { IconButton } from "@mijime/theme/ui";
+import { ConfirmDialog, IconButton } from "@mijime/theme/ui";
 import {
   addEntry,
   getLists,
@@ -55,6 +55,9 @@ export function App() {
   const [targetDate, setTargetDate] = useState<string | null>(null);
   const [renaming, setRenaming] = useState<string | null>(null);
   const [renameValue, setRenameValue] = useState("");
+  const [addingList, setAddingList] = useState(false);
+  const [newListName, setNewListName] = useState("");
+  const [deleteListTarget, setDeleteListTarget] = useState<string | null>(null);
   const [menuOpen, setMenuOpen] = useState<string | null>(null);
   const [snackMessage, setSnackMessage] = useState<string | null>(null);
   const [snackAction, setSnackAction] = useState<
@@ -64,6 +67,7 @@ export function App() {
   const [listError, setListError] = useState<string | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const renameInputRef = useRef<HTMLInputElement>(null);
+  const addListInputRef = useRef<HTMLInputElement>(null);
 
   const refreshFavorites = useCallback(() => {
     setFavorites(getTopFavorites());
@@ -105,6 +109,10 @@ export function App() {
     }
   }, [renaming]);
 
+  useEffect(() => {
+    if (addingList) addListInputRef.current?.focus();
+  }, [addingList]);
+
   async function handleTap(emoji: string, note?: string) {
     const now = Date.now();
     await addEntry({
@@ -135,10 +143,17 @@ export function App() {
   }
 
   // ── List management ──
-  async function handleAddList() {
-    const name = window.prompt("新しいリスト名");
-    if (!name || !name.trim()) return;
-    const trimmed = name.trim();
+  function handleStartAddList() {
+    setAddingList(true);
+    setNewListName("");
+    setMenuOpen(null);
+  }
+
+  async function handleCommitAddList() {
+    const trimmed = newListName.trim();
+    setAddingList(false);
+    setNewListName("");
+    if (!trimmed) return;
     if (lists.some((l) => l.name === trimmed)) {
       alert("同じ名前のリストが既にあります");
       return;
@@ -148,13 +163,18 @@ export function App() {
     setSelectedList(trimmed);
   }
 
-  async function handleRemoveList(name: string) {
+  function handleRemoveList(name: string) {
     if (lists.length <= 1) {
       alert("最後のリストは削除できません");
       return;
     }
-    if (!window.confirm(`「${name}」を削除しますか？\nこのリストの記録は「リストなし」になります`))
-      return;
+    setDeleteListTarget(name);
+  }
+
+  async function confirmRemoveList() {
+    const name = deleteListTarget;
+    setDeleteListTarget(null);
+    if (!name) return;
     await removeList(name);
     await refreshLists();
     if (selectedList === name) {
@@ -307,15 +327,36 @@ export function App() {
                   )}
                 </div>
               ))}
+              {addingList && (
+                <input
+                  ref={addListInputRef}
+                  type="text"
+                  className="emolog-list-rename-input"
+                  value={newListName}
+                  onChange={(e) => setNewListName(e.target.value)}
+                  onBlur={handleCommitAddList}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") handleCommitAddList();
+                    if (e.key === "Escape") {
+                      setAddingList(false);
+                      setNewListName("");
+                    }
+                  }}
+                  placeholder="新しいリスト"
+                  maxLength={20}
+                />
+              )}
             </div>
-            <IconButton
-              label="リストを追加"
-              size="icon-sm"
-              className="emolog-list-add"
-              onClick={handleAddList}
-            >
-              <Plus size={16} />
-            </IconButton>
+            {!addingList && (
+              <IconButton
+                label="リストを追加"
+                size="icon-sm"
+                className="emolog-list-add"
+                onClick={handleStartAddList}
+              >
+                <Plus size={16} />
+              </IconButton>
+            )}
           </>
         )}
       </div>
@@ -369,6 +410,19 @@ export function App() {
         onImport={handleImport}
         onDeleteAll={handleDeleteAll}
       />
+
+      {/* ── リスト削除の確認 ── */}
+      <ConfirmDialog
+        open={deleteListTarget !== null}
+        title="リストを削除"
+        description={deleteListTarget ? `「${deleteListTarget}」を削除します。` : undefined}
+        tone="danger"
+        confirmLabel="削除"
+        onCancel={() => setDeleteListTarget(null)}
+        onConfirm={confirmRemoveList}
+      >
+        <p className="text-sm">このリストの記録は「リストなし」になります。</p>
+      </ConfirmDialog>
     </div>
   );
 }

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { Copy, Search, Trash2, X } from "lucide-react";
+import { Copy, Pencil, Search, Trash2, X } from "lucide-react";
 import { IconButton } from "@mijime/theme/ui";
 import { getEntriesByDateRange, deleteEntry, updateEntryNote, updateEntryEmoji } from "./store";
 import { type Entry, today, formatTime } from "./types";
@@ -165,7 +165,7 @@ export function HistoryView({
 
   const filteredEntries = filterEmoji ? entries.filter((e) => e.emoji === filterEmoji) : entries;
   const groupedEntries = groupByDate(filteredEntries);
-  const dateLabels = Object.keys(groupedEntries).toSorted();
+  const dateLabels = Object.keys(groupedEntries).toSorted((a, b) => b.localeCompare(a));
 
   async function copyLog() {
     if (dateLabels.length === 0) {
@@ -175,7 +175,7 @@ export function HistoryView({
     const lines: string[] = [];
     for (const date of dateLabels) {
       lines.push(`📅 ${formatDateLabel(date)}`);
-      for (const e of groupedEntries[date]) {
+      for (const e of groupedEntries[date].toSorted((a, b) => b.timestamp - a.timestamp)) {
         const time = formatTime(e.timestamp);
         const note = e.note ? ` (${e.note})` : "";
         lines.push(`  ${time} ${e.emoji}${note}`);
@@ -219,75 +219,87 @@ export function HistoryView({
                 {formatDateLabel(date)}
                 {date === todayStr && <span className="emolog-history-today">今日</span>}
               </div>
-              {groupedEntries[date].map((entry) => (
-                <div key={entry.id} className="emolog-history-entry">
-                  <span className="emolog-history-time">{formatTime(entry.timestamp)}</span>
-                  {editingEmojiId === entry.id ? (
-                    <div className="emolog-history-emoji-edit">
-                      <input
-                        type="text"
-                        className="emolog-history-emoji-input"
-                        defaultValue={entry.emoji}
-                        autoFocus
-                        onBlur={(e) => handleEmojiChange(entry, e.target.value)}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") handleEmojiChange(entry, e.currentTarget.value);
-                          if (e.key === "Escape") setEditingEmojiId(null);
+              {groupedEntries[date]
+                .toSorted((a, b) => b.timestamp - a.timestamp)
+                .map((entry) => (
+                  <div key={entry.id} className="emolog-history-entry">
+                    <span className="emolog-history-time">{formatTime(entry.timestamp)}</span>
+                    {editingEmojiId === entry.id ? (
+                      <div className="emolog-history-emoji-edit">
+                        <input
+                          type="text"
+                          className="emolog-history-emoji-input"
+                          defaultValue={entry.emoji}
+                          autoFocus
+                          onBlur={(e) => handleEmojiChange(entry, e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") handleEmojiChange(entry, e.currentTarget.value);
+                            if (e.key === "Escape") setEditingEmojiId(null);
+                          }}
+                        />
+                      </div>
+                    ) : (
+                      <span
+                        className={`emolog-history-emoji${filterEmoji === entry.emoji ? " emolog-history-emoji-active" : ""}`}
+                        onClick={() => {
+                          if (filterEmoji === entry.emoji) {
+                            onFilterEmoji(null);
+                          } else {
+                            onFilterEmoji(entry.emoji);
+                          }
                         }}
+                        onDoubleClick={() => setEditingEmojiId(entry.id ?? null)}
+                        title="クリックでフィルター、ダブルクリックで絵文字を編集"
+                      >
+                        {entry.emoji}
+                      </span>
+                    )}
+                    {editingId === entry.id ? (
+                      <input
+                        ref={editInputRef}
+                        type="text"
+                        value={editNote}
+                        onChange={(e) => setEditNote(e.target.value)}
+                        onBlur={handleSaveNote}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") handleSaveNote();
+                          if (e.key === "Escape") {
+                            setEditingId(null);
+                            setEditNote("");
+                          }
+                        }}
+                        className="emolog-history-note-input"
+                        maxLength={40}
+                        placeholder="メモを入力"
                       />
-                    </div>
-                  ) : (
-                    <span
-                      className={`emolog-history-emoji${filterEmoji === entry.emoji ? " emolog-history-emoji-active" : ""}`}
-                      onClick={() => {
-                        if (filterEmoji === entry.emoji) {
-                          onFilterEmoji(null);
-                        } else {
-                          onFilterEmoji(entry.emoji);
-                        }
-                      }}
-                      onDoubleClick={() => setEditingEmojiId(entry.id ?? null)}
-                      title="クリックでフィルター、ダブルクリックで絵文字を編集"
+                    ) : (
+                      <div className="emolog-history-note-row">
+                        <IconButton
+                          label="メモを編集"
+                          size="icon-sm"
+                          className="emolog-history-note-edit"
+                          onClick={() => handleStartEdit(entry)}
+                        >
+                          <Pencil size={12} />
+                        </IconButton>
+                        <span
+                          className={`emolog-history-note${entry.note ? "" : " emolog-history-note-empty"}`}
+                          onClick={() => handleStartEdit(entry)}
+                        >
+                          {entry.note || "メモを追加"}
+                        </span>
+                      </div>
+                    )}
+                    <IconButton
+                      label="削除"
+                      size="icon"
+                      className="emolog-history-delete"
+                      onClick={() => handleDelete(entry)}
                     >
-                      {entry.emoji}
-                    </span>
-                  )}
-                  {editingId === entry.id ? (
-                    <input
-                      ref={editInputRef}
-                      type="text"
-                      value={editNote}
-                      onChange={(e) => setEditNote(e.target.value)}
-                      onBlur={handleSaveNote}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") handleSaveNote();
-                        if (e.key === "Escape") {
-                          setEditingId(null);
-                          setEditNote("");
-                        }
-                      }}
-                      className="emolog-history-note-input"
-                      maxLength={40}
-                      placeholder="メモを入力"
-                    />
-                  ) : (
-                    <span
-                      className={`emolog-history-note${entry.note ? "" : " emolog-history-note-empty"}`}
-                      onClick={() => handleStartEdit(entry)}
-                    >
-                      {entry.note || "＋"}
-                    </span>
-                  )}
-                  <IconButton
-                    label="削除"
-                    size="icon"
-                    className="emolog-history-delete"
-                    onClick={() => handleDelete(entry)}
-                  >
-                    <Trash2 size={14} />
-                  </IconButton>
-                </div>
-              ))}
+                      <Trash2 size={14} />
+                    </IconButton>
+                  </div>
+                ))}
             </div>
           ))
         )}

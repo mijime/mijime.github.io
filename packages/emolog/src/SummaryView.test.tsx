@@ -43,8 +43,8 @@ describe("SummaryView", () => {
     vi.spyOn(store, "getEntriesByDateRange").mockResolvedValue([e("😊"), e("😊"), e("😢")]);
     render(<SummaryView onSelectEmoji={() => {}} />);
     expect(await screen.findByText("3")).toBeDefined();
-    const twos = await screen.findAllByText("2");
-    expect(twos).toHaveLength(2);
+    expect(await screen.findByText("2")).toBeDefined();
+    expect(screen.getByText("2回")).toBeDefined();
     expect(screen.getByText("66.7%")).toBeDefined();
     expect(screen.getByText("33.3%")).toBeDefined();
   });
