@@ -9,6 +9,8 @@ interface Props {
   themeColor?: string;
   appName?: string;
   icon?: string;
+  app?: string;
+  description?: string;
 }
 const {
   title = "mijime",
@@ -16,6 +18,8 @@ const {
   themeColor = "#b04e52",
   appName = "mijime",
   icon = "/icons/site-180.png",
+  app,
+  description,
 } = Astro.props;
 const gtmId = import.meta.env.PUBLIC_GTM_ID;
 ---
@@ -45,11 +49,19 @@ const gtmId = import.meta.env.PUBLIC_GTM_ID;
   </head>
   <body>
     {gtmId && <noscript><iframe src={`https://www.googletagmanager.com/ns.html?id=${gtmId}`} height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>}
-    <header class="site-header">
-      <div class="site-header-inner">
-        <a href="/" class="site-logo">
-          <span class="site-logo-text">mijime</span>
-        </a>
+    <header class={app ? "site-header app-header" : "site-header"}>
+      <div class={app ? "site-header-inner site-header-inner--app" : "site-header-inner"}>
+        {app ? (
+          <a href="/apps/" class="app-header-brand" aria-label={`${appName} のアプリ一覧へ`}>
+            <img class="app-header-icon" src={icon} alt="" width="24" height="24" />
+            <span class="app-header-title">{appName}</span>
+            {description && <span class="app-header-description">{description}</span>}
+          </a>
+        ) : (
+          <a href="/" class="site-logo">
+            <span class="site-logo-text">mijime</span>
+          </a>
+        )}
         <nav class="site-nav">
           <PaletteToggle client:only="react" />
           <DarkModeToggle client:only="react" />

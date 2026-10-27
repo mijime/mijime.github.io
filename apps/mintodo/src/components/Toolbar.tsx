@@ -3,7 +3,6 @@ import {
   CheckCircle2,
   Eye,
   Keyboard,
-  Network,
   PanelLeftClose,
   PanelLeftOpen,
   Search,
@@ -42,29 +41,13 @@ export function Toolbar() {
         style={{ background: "var(--toolbar-bg)", borderColor: "var(--border)" }}
       >
         <div className="flex items-center justify-between lg:justify-start gap-3 w-full lg:w-auto">
-          <div className="flex items-center gap-3">
-            <IconButton
-              label={state.drawerOpen ? "サイドバーを隠す" : "サイドバーを表示"}
-              size="icon-sm"
-              onClick={onToggleDrawer}
-            >
-              {state.drawerOpen ? <PanelLeftClose size={18} /> : <PanelLeftOpen size={18} />}
-            </IconButton>
-            <div
-              className="p-2 rounded"
-              style={{ background: "var(--primary)", color: "var(--on-primary)" }}
-            >
-              <Network size={18} />
-            </div>
-            <div>
-              <h1
-                className="text-lg leading-tight tracking-wide"
-                style={{ fontFamily: '"Crimson Pro", serif', fontWeight: 600 }}
-              >
-                mintodo
-              </h1>
-            </div>
-          </div>
+          <IconButton
+            label={state.drawerOpen ? "サイドバーを隠す" : "サイドバーを表示"}
+            size="icon-sm"
+            onClick={onToggleDrawer}
+          >
+            {state.drawerOpen ? <PanelLeftClose size={18} /> : <PanelLeftOpen size={18} />}
+          </IconButton>
         </div>
         <div className="flex flex-wrap items-center gap-2 w-full lg:w-auto">
           <div className="relative flex-1 min-w-[150px] lg:max-w-[240px]">

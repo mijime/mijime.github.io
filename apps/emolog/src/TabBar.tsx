@@ -1,9 +1,10 @@
-import { BarChart3, Pencil } from "lucide-react";
+import { BarChart3, CalendarDays, Pencil } from "lucide-react";
 
-export type Tab = "record" | "stats";
+export type Tab = "record" | "calendar" | "stats";
 
 const TABS: { key: Tab; Icon: typeof Pencil; label: string }[] = [
   { key: "record", Icon: Pencil, label: "記録" },
+  { key: "calendar", Icon: CalendarDays, label: "カレンダー" },
   { key: "stats", Icon: BarChart3, label: "分析" },
 ];
 

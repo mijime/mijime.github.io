@@ -1,4 +1,5 @@
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import type { ComponentProps } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import * as store from "./store";
 import type { Entry } from "./types";
@@ -10,7 +11,7 @@ const entries: Entry[] = [
   { id: 3, date: "2026-10-26", timestamp: 3000, emoji: "😡", note: "yesterday" },
 ];
 
-function renderHistory() {
+function renderHistory(props: Partial<ComponentProps<typeof HistoryView>> = {}) {
   return render(
     <HistoryView
       selectedListId={1}
@@ -18,9 +19,8 @@ function renderHistory() {
       onFilterEmoji={() => {}}
       filterTag={null}
       onFilterTag={() => {}}
-      targetDate={null}
-      onClearTargetDate={() => {}}
       onSnackBar={() => {}}
+      {...props}
     />,
   );
 }
@@ -78,8 +78,6 @@ describe("HistoryView", () => {
         onFilterEmoji={() => {}}
         filterTag={null}
         onFilterTag={onFilterTag}
-        targetDate={null}
-        onClearTargetDate={() => {}}
         onSnackBar={() => {}}
       />,
     );
@@ -95,5 +93,15 @@ describe("HistoryView", () => {
     renderHistory();
     const link = await screen.findByTitle("地図で開く");
     expect(link.getAttribute("href")).toContain("35.6,139.7");
+  });
+
+  it("loads emoji matches from the whole history instead of the latest page", async () => {
+    const byRange = vi.spyOn(store, "getEntriesByDateRange").mockResolvedValue([]);
+    vi.spyOn(store, "getEntriesByEmoji").mockResolvedValue([
+      { id: 99, date: "2020-02-02", timestamp: 1000, emoji: "😀", note: "very old" },
+    ]);
+    renderHistory({ filterEmoji: "😀" });
+    await screen.findByText("very old");
+    expect(byRange).not.toHaveBeenCalled();
   });
 });

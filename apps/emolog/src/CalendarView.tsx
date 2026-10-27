@@ -8,6 +8,9 @@ interface CalendarViewProps {
   onSelectDate: (date: string) => void;
   todayStr: string;
   listId?: number | null;
+  selectedDate?: string | null;
+  initialYear?: number;
+  initialMonth?: number;
 }
 
 function getMonthDateRange(year: number, month: number): { from: string; to: string } {
@@ -42,10 +45,17 @@ function aggregateByDate(entries: Entry[]): Map<string, { emoji: string; count: 
   return result;
 }
 
-export function CalendarView({ onSelectDate, todayStr, listId }: CalendarViewProps) {
+export function CalendarView({
+  onSelectDate,
+  todayStr,
+  listId,
+  selectedDate,
+  initialYear,
+  initialMonth,
+}: CalendarViewProps) {
   const today = new Date();
-  const [year, setYear] = useState(today.getFullYear());
-  const [month, setMonth] = useState(today.getMonth());
+  const [year, setYear] = useState(initialYear ?? today.getFullYear());
+  const [month, setMonth] = useState(initialMonth ?? today.getMonth());
   const [dayData, setDayData] = useState<Map<string, { emoji: string; count: number }>>(new Map());
 
   const { from, to } = useMemo(() => getMonthDateRange(year, month), [year, month]);
@@ -68,11 +78,12 @@ export function CalendarView({ onSelectDate, todayStr, listId }: CalendarViewPro
     const dateStr = `${year}-${String(month + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
     const data = dayData.get(dateStr);
     const isToday = dateStr === todayStr;
+    const isSelected = dateStr === selectedDate;
 
     cells.push(
       <button
         key={dateStr}
-        className={`emolog-cal-cell${isToday ? " emolog-cal-today" : ""}${data ? "" : " emolog-cal-empty-day"}`}
+        className={`emolog-cal-cell${isToday ? " emolog-cal-today" : ""}${isSelected ? " emolog-cal-selected" : ""}${data ? "" : " emolog-cal-empty-day"}`}
         onClick={() => onSelectDate(dateStr)}
         title={`${dateStr}${data ? ` - ${data.count}件 / ${data.emoji}` : ""}`}
       >

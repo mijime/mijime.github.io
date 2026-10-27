@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ArrowLeft, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button, IconButton } from "@mijime/theme/ui";
 import { getEntries } from "./store";
 import { buildDailyReview, formatReviewSpan, groupByHour, type DailyReview } from "./review";
@@ -8,6 +8,9 @@ import { formatTime, type Entry } from "./types";
 interface ReviewViewProps {
   listId?: number | null;
   todayStr: string;
+  date: string;
+  onDateChange: (date: string) => void;
+  onBack: () => void;
   onSelectEmoji: (emoji: string) => void;
 }
 
@@ -26,8 +29,14 @@ function formatDateLabel(date: string): string {
   return `${year}/${month}/${day}（${weekdays[parsed.getDay()]}）`;
 }
 
-export function ReviewView({ listId, todayStr, onSelectEmoji }: ReviewViewProps) {
-  const [date, setDate] = useState(todayStr);
+export function ReviewView({
+  listId,
+  todayStr,
+  date,
+  onDateChange,
+  onBack,
+  onSelectEmoji,
+}: ReviewViewProps) {
   const [entries, setEntries] = useState<Entry[]>([]);
   const [loading, setLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -68,7 +77,10 @@ export function ReviewView({ listId, todayStr, onSelectEmoji }: ReviewViewProps)
   return (
     <div className="emolog-review">
       <div className="emolog-review-header">
-        <IconButton label="前日" size="icon-sm" onClick={() => setDate(shiftDate(date, -1))}>
+        <IconButton label="カレンダーへ戻る" size="icon-sm" onClick={onBack}>
+          <ArrowLeft size={16} />
+        </IconButton>
+        <IconButton label="前日" size="icon-sm" onClick={() => onDateChange(shiftDate(date, -1))}>
           <ChevronLeft size={16} />
         </IconButton>
         <div className="emolog-review-title">
@@ -79,12 +91,12 @@ export function ReviewView({ listId, todayStr, onSelectEmoji }: ReviewViewProps)
           label="翌日"
           size="icon-sm"
           disabled={date >= todayStr}
-          onClick={() => setDate(shiftDate(date, 1))}
+          onClick={() => onDateChange(shiftDate(date, 1))}
         >
           <ChevronRight size={16} />
         </IconButton>
         {date !== todayStr && (
-          <Button variant="secondary" size="sm" onClick={() => setDate(todayStr)}>
+          <Button variant="secondary" size="sm" onClick={() => onDateChange(todayStr)}>
             今日
           </Button>
         )}
