@@ -17,6 +17,16 @@ function renderDialog() {
 }
 
 describe("BoardNameDialog", () => {
+  it("keeps focus on the input while typing", () => {
+    renderDialog();
+    const input = screen.getByLabelText("ボード名") as HTMLInputElement;
+    input.focus();
+    expect(document.activeElement).toBe(input);
+
+    fireEvent.change(input, { target: { value: "あ" } });
+    expect(document.activeElement).toBe(input);
+  });
+
   it("does not truncate the value while the IME is composing", () => {
     renderDialog();
     const input = screen.getByLabelText("ボード名") as HTMLInputElement;
