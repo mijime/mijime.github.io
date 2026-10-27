@@ -1,5 +1,6 @@
 import { ChevronDown, ChevronUp, ListOrdered, Pencil, Plus } from "lucide-react";
 import { useDraggable, useDroppable } from "@dnd-kit/core";
+import { IconButton, Input } from "@mijime/theme/ui";
 import { useState } from "react";
 import { useMindStore } from "../hooks/use-mind-store";
 import { isDescendant } from "../store";
@@ -17,7 +18,7 @@ function InlineEditInput({ initialText }: { initialText: string }) {
   const { dispatch } = useMindStore();
   const [value, setValue] = useState(initialText);
   return (
-    <input
+    <Input
       data-testid="inline-edit-input"
       autoFocus
       value={value}
@@ -29,7 +30,7 @@ function InlineEditInput({ initialText }: { initialText: string }) {
       }}
       onBlur={() => dispatch({ text: value, type: "COMMIT_INLINE_EDIT" })}
       onPointerDown={(e) => e.stopPropagation()}
-      className="w-full bg-transparent text-sm font-medium outline-none border-b border-[var(--terra)]"
+      className="w-full bg-transparent text-sm font-medium border-0 border-b border-(--primary) rounded-none"
     />
   );
 }
@@ -88,18 +89,18 @@ export function NodeCard({ node }: Props) {
         ) : (
           <div className="flex-1 select-none pr-1 truncate">{node.text}</div>
         )}
-        <button
-          type="button"
+        <IconButton
+          label="子タスクを追加"
+          size="icon"
           data-testid="add-child-root"
-          className="w-7 h-7 rounded flex items-center justify-center transition"
-          style={{ background: "rgba(255,255,255,0.2)" }}
+          style={{ background: "color-mix(in srgb, white 20%, transparent)" }}
           onClick={(e) => {
             e.stopPropagation();
             dispatch({ newId: crypto.randomUUID(), parentId: node.id, type: "ADD_CHILD_INLINE" });
           }}
         >
           <Plus size={12} />
-        </button>
+        </IconButton>
       </div>
     );
   }
@@ -169,10 +170,10 @@ export function NodeCard({ node }: Props) {
               )}
             </button>
           )}
-          <button
-            type="button"
+          <IconButton
+            label="編集"
+            size="icon-sm"
             data-testid="ellipsis"
-            className="text-(--mid) hover:text-(--ink) p-1 rounded-md transition"
             onClick={(e) => {
               e.stopPropagation();
               dispatch({ modal: { kind: "edit", nodeId: node.id }, type: "OPEN_MODAL" });
@@ -180,17 +181,17 @@ export function NodeCard({ node }: Props) {
             onPointerDown={(e) => e.stopPropagation()}
           >
             <Pencil size={12} />
-          </button>
-          <button
-            type="button"
+          </IconButton>
+          <IconButton
+            label="作業履歴"
+            size="icon-sm"
+            className="relative"
             data-testid={`worklog-button-${node.id}`}
-            className="text-(--mid) hover:text-(--ink) p-1 rounded-md transition relative"
             onClick={(e) => {
               e.stopPropagation();
               dispatch({ modal: { kind: "work-log", nodeId: node.id }, type: "OPEN_MODAL" });
             }}
             onPointerDown={(e) => e.stopPropagation()}
-            title="作業履歴"
           >
             <ListOrdered size={12} />
             {node.workLogs.length > 0 && (
@@ -198,7 +199,7 @@ export function NodeCard({ node }: Props) {
                 {node.workLogs.length}
               </span>
             )}
-          </button>
+          </IconButton>
         </div>
       </div>
       {isEditing ? (

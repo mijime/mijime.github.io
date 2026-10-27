@@ -40,6 +40,11 @@ export function Modal({
 }: ModalProps) {
   const titleId = useId();
   const panelRef = useRef<HTMLDivElement>(null);
+  const onCloseRef = useRef(onClose);
+
+  useEffect(() => {
+    onCloseRef.current = onClose;
+  }, [onClose]);
 
   useEffect(() => {
     if (!open) return;
@@ -48,12 +53,16 @@ export function Modal({
     const previousOverflow = document.body.style.overflow;
 
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") onClose();
+      if (event.key === "Escape") onCloseRef.current();
     };
 
     document.addEventListener("keydown", onKeyDown);
     document.body.style.overflow = "hidden";
-    const frame = requestAnimationFrame(() => panelRef.current?.focus());
+    const frame = requestAnimationFrame(() => {
+      if (!panelRef.current?.contains(document.activeElement)) {
+        panelRef.current?.focus();
+      }
+    });
 
     return () => {
       cancelAnimationFrame(frame);
@@ -61,7 +70,7 @@ export function Modal({
       document.body.style.overflow = previousOverflow;
       previousFocus?.focus?.();
     };
-  }, [open, onClose]);
+  }, [open]);
 
   if (!open) return null;
 

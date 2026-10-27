@@ -1,4 +1,4 @@
-import { Button, Modal } from "@mijime/theme/ui";
+import { ConfirmDialog } from "@mijime/theme/ui";
 import { useMindStore } from "../hooks/use-mind-store";
 
 export function BoardDeleteDialog() {
@@ -18,28 +18,20 @@ export function BoardDeleteDialog() {
   };
 
   return (
-    <Modal
+    <ConfirmDialog
       open
-      onClose={close}
       title="ボードを削除"
-      size="sm"
-      footer={
-        <>
-          <Button variant="secondary" size="sm" onClick={close}>
-            キャンセル
-          </Button>
-          <Button variant="danger" size="sm" onClick={onConfirm}>
-            削除
-          </Button>
-        </>
-      }
+      tone="danger"
+      confirmLabel="削除"
+      onCancel={close}
+      onConfirm={onConfirm}
     >
       <p className="text-sm">
         「<span className="font-semibold">{modal.boardName}</span>」を削除しますか?
       </p>
-      <p className="mt-1 text-xs text-(--accent)">
+      <p className="mt-1 text-xs" style={{ color: "var(--danger)" }}>
         このボードのすべてのタスクが削除されます。この操作は取り消せません。
       </p>
-    </Modal>
+    </ConfirmDialog>
   );
 }

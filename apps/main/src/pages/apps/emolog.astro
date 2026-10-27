@@ -4,6 +4,12 @@ import BaseLayout from "../../layouts/base-layout.astro";
 import "@mijime/emolog/index.css";
 ---
 
-<BaseLayout title="emolog">
+<BaseLayout
+  title="emolog"
+  manifest="/apps/emolog/manifest.webmanifest"
+  themeColor="#b04e52"
+  appName="emolog"
+  icon="/icons/emolog-180.png"
+>
   <EmologApp client:only="react" />
 </BaseLayout>

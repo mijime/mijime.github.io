@@ -7,6 +7,7 @@ import type { CountryKey } from "../../types.ts";
 import type { DispatchPreview } from "../../engine/preview.ts";
 import { COUNTRIES } from "../../data/countries.ts";
 import { PCOLORS, PCOLCSS } from "../../data/players.ts";
+import { palette } from "@mijime/theme/palette";
 import { PawnMesh } from "./PawnMesh";
 
 export function platPos(i: number): THREE.Vector3 {
@@ -47,10 +48,10 @@ function makeCountryLabel(name: string, tag: string): THREE.CanvasTexture {
   x.font = '600 64px "Hiragino Mincho ProN","Yu Mincho",serif';
   x.shadowColor = "rgba(0,0,0,.9)";
   x.shadowBlur = 14;
-  x.fillStyle = "#ece4cf";
+  x.fillStyle = palette.dark.ink;
   x.fillText(name, 256, 96);
   x.font = '400 34px "Hiragino Mincho ProN","Yu Mincho",serif';
-  x.fillStyle = "#c9a437";
+  x.fillStyle = palette.dark.oudo;
   x.fillText(tag, 256, 150);
 
   return new THREE.CanvasTexture(cv);
@@ -76,7 +77,7 @@ function makeInflLabel(influences: number[]): THREE.CanvasTexture {
     x.textBaseline = "middle";
     x.shadowColor = "rgba(0,0,0,.9)";
     x.shadowBlur = 10;
-    x.fillStyle = "#ece4cf";
+    x.fillStyle = "#f2efe8";
     x.fillText(String(a.v), cx - 6, 52);
   });
   return new THREE.CanvasTexture(cv);

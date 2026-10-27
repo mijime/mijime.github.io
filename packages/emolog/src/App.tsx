@@ -1,4 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
+import { MoreHorizontal, Pencil, Plus, Settings, Trash2 } from "lucide-react";
+import { ConfirmDialog, IconButton } from "@mijime/theme/ui";
 import {
   addEntry,
   getLists,
@@ -45,6 +47,7 @@ function incrementFavorite(emoji: string) {
 
 export function App() {
   const [activeTab, setActiveTab] = useState<Tab>("record");
+  const [historyVersion, setHistoryVersion] = useState(0);
   const [selectedList, setSelectedList] = useState<string>("");
   const [lists, setLists] = useState<ListDef[]>([]);
   const [favorites, setFavorites] = useState<string[]>(() => getTopFavorites());
@@ -52,6 +55,9 @@ export function App() {
   const [targetDate, setTargetDate] = useState<string | null>(null);
   const [renaming, setRenaming] = useState<string | null>(null);
   const [renameValue, setRenameValue] = useState("");
+  const [addingList, setAddingList] = useState(false);
+  const [newListName, setNewListName] = useState("");
+  const [deleteListTarget, setDeleteListTarget] = useState<string | null>(null);
   const [menuOpen, setMenuOpen] = useState<string | null>(null);
   const [snackMessage, setSnackMessage] = useState<string | null>(null);
   const [snackAction, setSnackAction] = useState<
@@ -61,6 +67,7 @@ export function App() {
   const [listError, setListError] = useState<string | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const renameInputRef = useRef<HTMLInputElement>(null);
+  const addListInputRef = useRef<HTMLInputElement>(null);
 
   const refreshFavorites = useCallback(() => {
     setFavorites(getTopFavorites());
@@ -102,6 +109,10 @@ export function App() {
     }
   }, [renaming]);
 
+  useEffect(() => {
+    if (addingList) addListInputRef.current?.focus();
+  }, [addingList]);
+
   async function handleTap(emoji: string, note?: string) {
     const now = Date.now();
     await addEntry({
@@ -113,16 +124,17 @@ export function App() {
     });
     incrementFavorite(emoji);
     refreshFavorites();
+    setHistoryVersion((v) => v + 1);
   }
 
   function handleSelectEmojiFromStats(emoji: string) {
     setFilterEmoji(emoji);
-    setActiveTab("history");
+    setActiveTab("record");
   }
 
   function handleSelectDateFromStats(date: string) {
     setTargetDate(date);
-    setActiveTab("history");
+    setActiveTab("record");
   }
 
   function handleSnackBar(message: string, action?: { label: string; onClick: () => void }) {
@@ -131,10 +143,17 @@ export function App() {
   }
 
   // ── List management ──
-  async function handleAddList() {
-    const name = window.prompt("新しいリスト名");
-    if (!name || !name.trim()) return;
-    const trimmed = name.trim();
+  function handleStartAddList() {
+    setAddingList(true);
+    setNewListName("");
+    setMenuOpen(null);
+  }
+
+  async function handleCommitAddList() {
+    const trimmed = newListName.trim();
+    setAddingList(false);
+    setNewListName("");
+    if (!trimmed) return;
     if (lists.some((l) => l.name === trimmed)) {
       alert("同じ名前のリストが既にあります");
       return;
@@ -144,13 +163,18 @@ export function App() {
     setSelectedList(trimmed);
   }
 
-  async function handleRemoveList(name: string) {
+  function handleRemoveList(name: string) {
     if (lists.length <= 1) {
       alert("最後のリストは削除できません");
       return;
     }
-    if (!window.confirm(`「${name}」を削除しますか？\nこのリストの記録は「リストなし」になります`))
-      return;
+    setDeleteListTarget(name);
+  }
+
+  async function confirmRemoveList() {
+    const name = deleteListTarget;
+    setDeleteListTarget(null);
+    if (!name) return;
     await removeList(name);
     await refreshLists();
     if (selectedList === name) {
@@ -206,6 +230,7 @@ export function App() {
       setSelectedList(updatedLists[0].name);
     }
     refreshFavorites();
+    setHistoryVersion((v) => v + 1);
   }
 
   async function handleDeleteAll() {
@@ -215,6 +240,7 @@ export function App() {
     await refreshLists();
     refreshFavorites();
     setActiveTab("record");
+    setHistoryVersion((v) => v + 1);
   }
 
   return (
@@ -222,13 +248,14 @@ export function App() {
       {/* ── 設定ボタン ── */}
       <div className="emolog-header">
         <span className="emolog-header-title">emolog</span>
-        <button
+        <IconButton
+          label="設定"
+          size="icon"
           className="emolog-settings-trigger"
           onClick={() => setSettingsOpen(true)}
-          title="設定"
         >
-          ⚙️
-        </button>
+          <Settings size={16} />
+        </IconButton>
       </div>
 
       {/* ── リストタブバー ── */}
@@ -262,6 +289,7 @@ export function App() {
                     <button
                       className={`emolog-list-tab${l.name === selectedList ? " emolog-list-active" : ""}`}
                       onClick={() => setSelectedList(l.name)}
+                      onDoubleClick={() => handleStartRename(l.name)}
                     >
                       {l.name}
                     </button>
@@ -273,21 +301,25 @@ export function App() {
                     >
                       <button
                         className="emolog-list-menu-btn"
+                        title="リストを編集"
+                        aria-label="リストを編集"
                         onClick={(e) => {
                           e.stopPropagation();
                           setMenuOpen(menuOpen === l.name ? null : l.name);
                         }}
                       >
-                        ⋯
+                        <MoreHorizontal size={14} />
                       </button>
                       {menuOpen === l.name && (
                         <div className="emolog-list-menu">
-                          <button onClick={() => handleStartRename(l.name)}>✏️ 名前を変更</button>
+                          <button onClick={() => handleStartRename(l.name)}>
+                            <Pencil size={12} /> 名前を変更
+                          </button>
                           <button
                             className="emolog-list-menu-del"
                             onClick={() => handleRemoveList(l.name)}
                           >
-                            🗑️ 削除
+                            <Trash2 size={12} /> 削除
                           </button>
                         </div>
                       )}
@@ -295,10 +327,36 @@ export function App() {
                   )}
                 </div>
               ))}
+              {addingList && (
+                <input
+                  ref={addListInputRef}
+                  type="text"
+                  className="emolog-list-rename-input"
+                  value={newListName}
+                  onChange={(e) => setNewListName(e.target.value)}
+                  onBlur={handleCommitAddList}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") handleCommitAddList();
+                    if (e.key === "Escape") {
+                      setAddingList(false);
+                      setNewListName("");
+                    }
+                  }}
+                  placeholder="新しいリスト"
+                  maxLength={20}
+                />
+              )}
             </div>
-            <button className="emolog-list-add" onClick={handleAddList} title="リストを追加">
-              ＋
-            </button>
+            {!addingList && (
+              <IconButton
+                label="リストを追加"
+                size="icon-sm"
+                className="emolog-list-add"
+                onClick={handleStartAddList}
+              >
+                <Plus size={16} />
+              </IconButton>
+            )}
           </>
         )}
       </div>
@@ -306,17 +364,21 @@ export function App() {
       {/* ── メインコンテンツ ── */}
       <div className="emolog-content">
         {activeTab === "record" && (
-          <RecordView favorites={favorites} onTap={handleTap} selectedList={selectedList} />
-        )}
-        {activeTab === "history" && (
-          <HistoryView
-            selectedList={selectedList}
-            filterEmoji={filterEmoji}
-            onFilterEmoji={setFilterEmoji}
-            targetDate={targetDate}
-            onClearTargetDate={() => setTargetDate(null)}
-            onSnackBar={handleSnackBar}
-          />
+          <>
+            <RecordView favorites={favorites} onTap={handleTap} selectedList={selectedList} />
+            <section className="emolog-history-section">
+              <h2 className="emolog-history-section-title">履歴</h2>
+              <HistoryView
+                selectedList={selectedList}
+                filterEmoji={filterEmoji}
+                onFilterEmoji={setFilterEmoji}
+                targetDate={targetDate}
+                onClearTargetDate={() => setTargetDate(null)}
+                onSnackBar={handleSnackBar}
+                refreshKey={historyVersion}
+              />
+            </section>
+          </>
         )}
         {activeTab === "stats" && (
           <StatsView
@@ -348,6 +410,19 @@ export function App() {
         onImport={handleImport}
         onDeleteAll={handleDeleteAll}
       />
+
+      {/* ── リスト削除の確認 ── */}
+      <ConfirmDialog
+        open={deleteListTarget !== null}
+        title="リストを削除"
+        description={deleteListTarget ? `「${deleteListTarget}」を削除します。` : undefined}
+        tone="danger"
+        confirmLabel="削除"
+        onCancel={() => setDeleteListTarget(null)}
+        onConfirm={confirmRemoveList}
+      >
+        <p className="text-sm">このリストの記録は「リストなし」になります。</p>
+      </ConfirmDialog>
     </div>
   );
 }

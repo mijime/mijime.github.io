@@ -4,6 +4,12 @@ import BaseLayout from "../../layouts/base-layout.astro";
 import "@mijime/madories/index.css";
 ---
 
-<BaseLayout title="madories">
+<BaseLayout
+  title="madories"
+  manifest="/apps/madories/manifest.webmanifest"
+  themeColor="#35357d"
+  appName="madories"
+  icon="/icons/madories-180.png"
+>
   <MadoriesApp client:only="react" />
 </BaseLayout>

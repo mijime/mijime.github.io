@@ -136,8 +136,8 @@ export function Hud({ pick, setPick, onCountryClick, validKeys }: HudProps): Rea
                   key={`relic-${r}`}
                   className="tag"
                   style={{
-                    borderColor: "#b9a0e8",
-                    color: "#b9a0e8",
+                    borderColor: "var(--kaga-murasaki)",
+                    color: "var(--kaga-murasaki)",
                   }}
                   title={t(`relics.${r}.desc`)}
                 >

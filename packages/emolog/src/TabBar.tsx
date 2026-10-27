@@ -1,9 +1,10 @@
-export type Tab = "record" | "history" | "stats";
+import { BarChart3, Pencil } from "lucide-react";
 
-const TABS: { key: Tab; icon: string; label: string }[] = [
-  { key: "record", icon: "✏️", label: "記録" },
-  { key: "history", icon: "📋", label: "履歴" },
-  { key: "stats", icon: "📊", label: "分析" },
+export type Tab = "record" | "stats";
+
+const TABS: { key: Tab; Icon: typeof Pencil; label: string }[] = [
+  { key: "record", Icon: Pencil, label: "記録" },
+  { key: "stats", Icon: BarChart3, label: "分析" },
 ];
 
 interface TabBarProps {
@@ -12,21 +13,30 @@ interface TabBarProps {
 }
 
 export function TabBar({ activeTab, onTabChange }: TabBarProps) {
+  const activeIndex = Math.max(
+    0,
+    TABS.findIndex((t) => t.key === activeTab),
+  );
   return (
     <nav className="emolog-tabbar">
-      {TABS.map(({ key, icon, label }) => (
+      {TABS.map(({ key, Icon, label }) => (
         <button
           key={key}
           className={`emolog-tabbar-btn${activeTab === key ? " emolog-tabbar-active" : ""}`}
           onClick={() => onTabChange(key)}
         >
-          <span className="emolog-tabbar-icon">{icon}</span>
+          <span className="emolog-tabbar-icon">
+            <Icon size={20} />
+          </span>
           <span className="emolog-tabbar-label">{label}</span>
         </button>
       ))}
       <div
         className="emolog-tabbar-indicator"
-        style={{ transform: `translateX(${TABS.findIndex((t) => t.key === activeTab) * 100}%)` }}
+        style={{
+          width: `${100 / TABS.length}%`,
+          transform: `translateX(${activeIndex * 100}%)`,
+        }}
       />
     </nav>
   );

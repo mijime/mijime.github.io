@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { Plus, X } from "lucide-react";
+import { Button, IconButton, Input } from "@mijime/theme/ui";
 import type { FloorPlan } from "../types";
 
 interface Props {
@@ -29,14 +31,14 @@ export function FloorTabs({ floors, activeFloorId, onSelect, onAdd, onRename, on
   return (
     <div
       className="flex items-end gap-0 overflow-x-auto px-4 pt-3"
-      style={{ background: "var(--toolbar-bg)", borderBottom: "2px solid var(--terra)" }}
+      style={{ background: "var(--toolbar-bg)", borderBottom: "2px solid var(--primary)" }}
     >
       {floors.map((floor) => (
         <div key={floor.id} className="relative" style={{ flexShrink: 0 }}>
           {editingId === floor.id ? (
-            <input
+            <Input
               value={editingName}
-              onChange={(e) => setEditingName((e.target as HTMLInputElement).value)}
+              onChange={(e) => setEditingName(e.target.value)}
               onBlur={() => commitEdit(floor.id)}
               onKeyDown={(e) => {
                 if (e.key === "Enter") {
@@ -46,57 +48,39 @@ export function FloorTabs({ floors, activeFloorId, onSelect, onAdd, onRename, on
                   setEditingId(null);
                 }
               }}
-              className="px-3 py-2 text-xs w-24 outline-none"
-              style={{
-                background: "var(--paper)",
-                border: "1px solid var(--terra)",
-                color: "var(--ink)",
-                fontFamily: "IBM Plex Mono, monospace",
-              }}
+              className="h-8 w-24 text-xs"
             />
           ) : (
-            <div
-              className="flex items-center"
-              style={{
-                background: floor.id === activeFloorId ? "var(--paper)" : "transparent",
-                borderBottom:
-                  floor.id === activeFloorId ? "2px solid var(--terra)" : "2px solid transparent",
-                marginBottom: floor.id === activeFloorId ? "-2px" : "0",
-              }}
-            >
-              <button
+            <div className="flex items-center">
+              <Button
+                variant="ghost"
+                size="sm"
                 onClick={() => onSelect(floor.id)}
                 onDoubleClick={() => startEdit(floor)}
-                className="px-4 py-2 text-xs tracking-wider"
+                className="tracking-[0.1em] uppercase"
                 style={{
-                  color: floor.id === activeFloorId ? "var(--ink)" : "var(--mid)",
-                  fontFamily: "IBM Plex Mono, monospace",
-                  letterSpacing: "0.1em",
-                  textTransform: "uppercase",
+                  color: floor.id === activeFloorId ? "var(--fg)" : "var(--muted)",
+                  borderBottom:
+                    floor.id === activeFloorId
+                      ? "2px solid var(--primary)"
+                      : "2px solid transparent",
+                  borderRadius: 0,
                 }}
               >
                 {floor.name}
-              </button>
+              </Button>
               {floor.id === activeFloorId && floors.length > 1 && (
-                <button
-                  onClick={() => onRemove(floor.id)}
-                  className="pr-3 text-xs"
-                  style={{ color: "var(--terra)" }}
-                >
-                  ×
-                </button>
+                <IconButton label="この階を削除" size="icon-sm" onClick={() => onRemove(floor.id)}>
+                  <X size={12} />
+                </IconButton>
               )}
             </div>
           )}
         </div>
       ))}
-      <button
-        onClick={onAdd}
-        className="px-4 py-2 text-xs tracking-wider mb-0"
-        style={{ color: "var(--mid)", fontFamily: "IBM Plex Mono, monospace" }}
-      >
-        + ADD
-      </button>
+      <Button variant="ghost" size="sm" onClick={onAdd}>
+        <Plus size={12} /> ADD
+      </Button>
     </div>
   );
 }

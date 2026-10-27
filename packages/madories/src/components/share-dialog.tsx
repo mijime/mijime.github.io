@@ -1,4 +1,5 @@
 import { useMemo, useRef, useState } from "react";
+import { Button, Input, Modal } from "@mijime/theme/ui";
 import { createQrCode } from "../qr";
 
 interface Props {
@@ -6,8 +7,6 @@ interface Props {
   url: string;
   onClose: () => void;
 }
-
-const MONO = "IBM Plex Mono, monospace";
 
 /**
  * 共有URLをQRコードで見せるオーバーレイ。
@@ -47,40 +46,23 @@ export function ShareDialog({ url, onClose }: Props) {
 
   return (
     <>
-      <div
-        style={{
-          alignItems: "center",
-          background: "rgba(0,0,0,0.4)",
-          bottom: 0,
-          display: "flex",
-          justifyContent: "center",
-          left: 0,
-          position: "fixed",
-          right: 0,
-          top: 0,
-          zIndex: 100,
-        }}
-        onClick={onClose}
+      <Modal
+        open
+        onClose={onClose}
+        title="間取りを共有"
+        size="sm"
+        footer={
+          <>
+            <Button variant="secondary" size="sm" onClick={onClose}>
+              閉じる
+            </Button>
+            <Button variant="primary" size="sm" onClick={copy}>
+              {copyLabel}
+            </Button>
+          </>
+        }
       >
-        <div
-          style={{
-            background: "var(--paper)",
-            borderRadius: "10px",
-            display: "flex",
-            flexDirection: "column",
-            gap: "12px",
-            maxHeight: "90vh",
-            maxWidth: "90vw",
-            overflowY: "auto",
-            padding: "20px",
-            width: "360px",
-          }}
-          onClick={(e) => e.stopPropagation()}
-        >
-          <div style={{ fontFamily: MONO, fontSize: "13px", textAlign: "center" }}>
-            間取りを共有
-          </div>
-
+        <div className="flex flex-col gap-3">
           {qr ? (
             <>
               <div
@@ -105,77 +87,32 @@ export function ShareDialog({ url, onClose }: Props) {
                   <path d={qr.path} fill="#000000" />
                 </svg>
               </div>
-              <div
+              <p
                 style={{
-                  color: "var(--ink)",
-                  fontFamily: MONO,
+                  color: "var(--muted)",
                   fontSize: "11px",
-                  opacity: 0.7,
+                  margin: 0,
                   textAlign: "center",
                 }}
               >
                 スマホのカメラで読み取ると、この間取りが開きます(タップで拡大)
-              </div>
+              </p>
             </>
           ) : (
-            <div style={{ fontFamily: MONO, fontSize: "12px", lineHeight: 1.6 }}>
+            <p style={{ fontSize: "12px", lineHeight: 1.6, margin: 0 }}>
               間取りが大きすぎてQRコードに収まりません。下のURLをコピーして送ってください。
-            </div>
+            </p>
           )}
 
-          <input
+          <Input
             readOnly
             ref={inputRef}
-            style={{
-              border: "1px solid var(--border)",
-              borderRadius: "4px",
-              fontFamily: MONO,
-              fontSize: "11px",
-              padding: "6px 8px",
-              width: "100%",
-            }}
             value={url}
+            style={{ fontSize: "11px" }}
             onFocus={(e) => e.target.select()}
           />
-
-          <div style={{ display: "flex", gap: "8px" }}>
-            <button
-              onClick={copy}
-              style={{
-                background: "var(--ink)",
-                border: "none",
-                borderRadius: "4px",
-                color: "var(--paper)",
-                cursor: "pointer",
-                flex: 1,
-                fontFamily: MONO,
-                fontSize: "12px",
-                minHeight: "36px",
-                padding: "6px 0",
-              }}
-            >
-              {copyLabel}
-            </button>
-            <button
-              onClick={onClose}
-              style={{
-                background: "transparent",
-                border: "1px solid var(--border)",
-                borderRadius: "4px",
-                color: "var(--ink)",
-                cursor: "pointer",
-                fontFamily: MONO,
-                fontSize: "12px",
-                minHeight: "36px",
-                minWidth: "72px",
-                padding: "6px 12px",
-              }}
-            >
-              閉じる
-            </button>
-          </div>
         </div>
-      </div>
+      </Modal>
 
       {qr && zoomed && (
         <div
@@ -190,7 +127,7 @@ export function ShareDialog({ url, onClose }: Props) {
             position: "fixed",
             right: 0,
             top: 0,
-            zIndex: 110,
+            zIndex: 2100,
           }}
           onClick={() => setZoomed(false)}
         >

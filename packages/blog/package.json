@@ -29,7 +29,6 @@
     "@shikijs/rehype": "^4.5.0",
     "lindera-js": "^0.1.4",
     "lucide-react": "^1.61.0",
-    "mdast": "^3.0.0",
     "mermaid": "^12.2.0",
     "rehype": "^13.0.2",
     "rehype-stringify": "^10.0.1",
@@ -37,7 +36,7 @@
     "remark-gfm": "^4.0.1",
     "remark-html": "^16.0.1",
     "remark-rehype": "^11.1.2",
-    "unist-util-visit": "^5.1.0",
+    "unist-util-visit": "^5.2.0",
     "zod": "^4.6.7"
   },
   "devDependencies": {

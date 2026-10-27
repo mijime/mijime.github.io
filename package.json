@@ -7,10 +7,11 @@
     "preview": "pnpm --filter @mijime/main preview",
     "build": "pnpm -r run build",
     "check": "pnpm -r run check",
+    "test": "pnpm -r --workspace-concurrency=1 run test",
     "format": "pnpm -r run format"
   },
   "type": "module",
-  "packageManager": "pnpm@11.5.1",
+  "packageManager": "pnpm@12.15.0",
   "workspaces": [
     "apps/*",
     "packages/*"

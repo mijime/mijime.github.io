@@ -1,0 +1,32 @@
+{
+  "name": "madories",
+  "short_name": "madories",
+  "description": "floor plan editor",
+  "id": "/apps/madories",
+  "start_url": "/apps/madories/",
+  "scope": "/apps/madories/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#faf8f3",
+  "theme_color": "#35357d",
+  "icons": [
+    {
+      "src": "/icons/madories-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/madories-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/madories-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

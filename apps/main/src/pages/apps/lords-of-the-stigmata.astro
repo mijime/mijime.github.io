@@ -4,6 +4,12 @@ import BaseLayout from "../../layouts/base-layout.astro";
 import "@mijime/lords-of-the-stigmata/styles.css";
 ---
 
-<BaseLayout title="lords-of-the-stigmata">
+<BaseLayout
+  title="lords-of-the-stigmata"
+  manifest="/apps/lords-of-the-stigmata/manifest.webmanifest"
+  themeColor="#7e5c96"
+  appName="lords"
+  icon="/icons/lords-of-the-stigmata-180.png"
+>
   <StigmataApp client:only="react" />
 </BaseLayout>

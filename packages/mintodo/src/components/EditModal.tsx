@@ -248,15 +248,16 @@ export function EditModal() {
             autoFocus
           />
         </Field>
-        <button
-          type="button"
+        <Button
+          variant="ghost"
+          size="sm"
           data-testid="edit-modal-attr-toggle"
           onClick={() => setExpanded((v) => !v)}
-          className="flex items-center gap-1 text-xs text-(--mid) hover:underline"
+          className="self-start"
         >
           {expanded ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
           属性
-        </button>
+        </Button>
         {expanded && (
           <div className="space-y-4 border-t border-(--border) pt-4">
             <div>
@@ -277,20 +278,17 @@ export function EditModal() {
               <SectionLabel className="mb-1 block">優先度</SectionLabel>
               <div className="grid grid-cols-3 gap-2">
                 {PRIORITIES.map((p) => (
-                  <button
+                  <Button
                     key={p.value}
-                    type="button"
+                    variant={priority === p.value ? "primary" : "secondary"}
+                    size="sm"
                     data-priority={p.value}
                     aria-pressed={priority === p.value}
                     onClick={() => handlePriorityClick(p.value)}
-                    className={`rounded-sm border px-1 py-2 text-xs font-medium transition ${
-                      priority === p.value
-                        ? "border-(--accent) bg-(--accent) text-(--on-accent)"
-                        : "border-(--border) bg-(--paper) text-(--ink)"
-                    }`}
+                    className="justify-center"
                   >
                     {p.label}
-                  </button>
+                  </Button>
                 ))}
               </div>
             </div>
@@ -298,21 +296,18 @@ export function EditModal() {
               <SectionLabel className="mb-1 block">ステータス</SectionLabel>
               <div className="grid grid-cols-4 gap-2">
                 {STATUSES.map((s) => (
-                  <button
+                  <Button
                     key={s.value}
-                    type="button"
+                    variant={status === s.value ? "primary" : "secondary"}
+                    size="sm"
                     data-status={s.value}
                     data-testid={`status-${s.value}`}
                     aria-pressed={status === s.value}
                     onClick={() => handleStatusClick(s.value)}
-                    className={`rounded-sm border px-1 py-2 text-xs font-medium transition ${
-                      status === s.value
-                        ? "border-(--accent) bg-(--accent) text-(--on-accent)"
-                        : "border-(--border) bg-(--paper) text-(--ink)"
-                    }`}
+                    className="justify-center"
                   >
                     {s.label}
-                  </button>
+                  </Button>
                 ))}
               </div>
             </div>

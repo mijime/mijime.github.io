@@ -1,0 +1,32 @@
+{
+  "name": "saiflow",
+  "short_name": "saiflow",
+  "description": "life simulation",
+  "id": "/apps/saiflow",
+  "start_url": "/apps/saiflow/",
+  "scope": "/apps/saiflow/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#faf8f3",
+  "theme_color": "#96661d",
+  "icons": [
+    {
+      "src": "/icons/saiflow-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/saiflow-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/saiflow-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

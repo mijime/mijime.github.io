@@ -2,131 +2,70 @@
    おてて (otete) — Unified Design System
    Warm, chunky, tactile toy box with locked 2-line Guide Banner.
    ============================================================ */
+@import "@mijime/theme/tokens.css";
 
 :root {
-  color-scheme: light;
-  --bg: #fff9f0;
-  --bg-dot: rgba(0, 0, 0, 0.035);
-  --ink: #2f2a3a;
-  --muted: #8e879e;
-  --surface: #ffffff;
-  --pill: rgba(255, 255, 255, 0.96);
-  --tabs-bg: rgba(0, 0, 0, 0.06);
-  --line: rgba(0, 0, 0, 0.07);
-  --shadow: rgba(0, 0, 0, 0.14);
-  --accent: #f59f00;
-  --accent-soft: #ffe8cc;
+  /* Alias the shared theme tokens to otete's local vocabulary. */
+  --bg-dot: color-mix(in srgb, var(--ink) 4%, transparent);
+  --muted: var(--mid);
+  --surface: var(--surface-raised);
+  --pill: color-mix(in srgb, var(--surface-raised) 96%, transparent);
+  --tabs-bg: color-mix(in srgb, var(--ink) 6%, transparent);
+  --line: color-mix(in srgb, var(--ink) 8%, transparent);
+  --shadow: rgb(0 0 0 / 0.14);
+
+  --accent: var(--tone-amber);
+  --accent-soft: color-mix(in srgb, var(--accent) 16%, var(--paper));
   --font:
     "Hiragino Maru Gothic ProN", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Noto Sans JP",
     system-ui, -apple-system, sans-serif;
   --r: 28px;
   --r-sm: 18px;
-  --sh: 0 6px 0 rgba(0, 0, 0, 0.1), 0 14px 28px rgba(0, 0, 0, 0.1);
+  --sh: 0 6px 0 rgb(0 0 0 / 0.1), 0 14px 28px rgb(0 0 0 / 0.1);
 }
 
 html[data-theme="dark"] {
-  color-scheme: dark;
-  --bg: #14121c;
-  --bg-dot: rgba(255, 255, 255, 0.04);
-  --ink: #f1eef8;
-  --muted: #9a93b0;
-  --surface: #201d2b;
-  --pill: rgba(42, 38, 58, 0.94);
-  --tabs-bg: rgba(255, 255, 255, 0.08);
-  --line: rgba(255, 255, 255, 0.08);
-  --shadow: rgba(0, 0, 0, 0.55);
-  --sh: 0 6px 0 rgba(0, 0, 0, 0.35), 0 16px 30px rgba(0, 0, 0, 0.45);
+  --shadow: rgb(0 0 0 / 0.55);
+  --sh: 0 6px 0 rgb(0 0 0 / 0.35), 0 16px 30px rgb(0 0 0 / 0.45);
 }
 
-/* Per-screen accents */
+/* Per-screen accents — 加賀五彩. Tone tokens flip with the theme. */
 #app[data-screen="home"] {
-  --accent: #f59f00;
-  --accent-soft: #ffe8cc;
+  --accent: var(--tone-amber);
 }
 #app[data-screen="feed"] {
-  --accent: #fa5252;
-  --accent-soft: #ffe3e3;
+  --accent: var(--tone-red);
 }
 #app[data-screen="peek"] {
-  --accent: #228be6;
-  --accent-soft: #d0ebff;
+  --accent: var(--tone-blue);
 }
 #app[data-screen="puzzle"] {
-  --accent: #0ca678;
-  --accent-soft: #c3fae8;
+  --accent: var(--tone-green);
 }
 #app[data-screen="trace"] {
-  --accent: #2f9e44;
-  --accent-soft: #d8f5dd;
+  --accent: var(--tone-teal);
 }
 #app[data-screen="code"] {
-  --accent: #7950f2;
-  --accent-soft: #e5dbff;
+  --accent: var(--tone-violet);
 }
 #app[data-screen="draw"] {
-  --accent: #f06595;
-  --accent-soft: #ffe3ec;
+  --accent: var(--tone-rose);
 }
 #app[data-screen="learn"] {
-  --accent: #f59f00;
-  --accent-soft: #fff3d6;
+  --accent: var(--tone-amber);
 }
 #app[data-screen="count"] {
-  --accent: #7950f2;
-  --accent-soft: #e5dbff;
+  --accent: var(--tone-violet);
 }
 #app[data-screen="camera"] {
-  --accent: #1098ad;
-  --accent-soft: #c5f6fa;
+  --accent: var(--tone-sky);
 }
 #app[data-screen="gallery"] {
-  --accent: #4c6ef5;
-  --accent-soft: #dbe4ff;
+  --accent: var(--tone-indigo);
 }
 
-html[data-theme="dark"] #app[data-screen="home"] {
-  --accent: #ffc94d;
-  --accent-soft: #3a2b12;
-}
-html[data-theme="dark"] #app[data-screen="feed"] {
-  --accent: #ff8787;
-  --accent-soft: #3a1d24;
-}
-html[data-theme="dark"] #app[data-screen="peek"] {
-  --accent: #74c0fc;
-  --accent-soft: #142c42;
-}
-html[data-theme="dark"] #app[data-screen="puzzle"] {
-  --accent: #63e6be;
-  --accent-soft: #12332b;
-}
-html[data-theme="dark"] #app[data-screen="trace"] {
-  --accent: #69db7c;
-  --accent-soft: #17321d;
-}
-html[data-theme="dark"] #app[data-screen="code"] {
-  --accent: #b197fc;
-  --accent-soft: #261e3f;
-}
-html[data-theme="dark"] #app[data-screen="draw"] {
-  --accent: #ff8fab;
-  --accent-soft: #3a1f2b;
-}
-html[data-theme="dark"] #app[data-screen="learn"] {
-  --accent: #ffc94d;
-  --accent-soft: #3a2f12;
-}
-html[data-theme="dark"] #app[data-screen="count"] {
-  --accent: #b197fc;
-  --accent-soft: #261e3f;
-}
-html[data-theme="dark"] #app[data-screen="camera"] {
-  --accent: #66d9e8;
-  --accent-soft: #10333a;
-}
-html[data-theme="dark"] #app[data-screen="gallery"] {
-  --accent: #91a7ff;
-  --accent-soft: #1c2440;
+#app {
+  --accent-soft: color-mix(in srgb, var(--accent) 16%, var(--paper));
 }
 
 /* ===== Base Reset ===== */

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Tabs } from "@mijime/theme/ui";
 import { CalendarView } from "./CalendarView";
 import { SummaryView } from "./SummaryView";
 
@@ -14,20 +15,16 @@ export function StatsView({ selectedList, onSelectEmoji, onSelectDate }: StatsVi
 
   return (
     <div className="emolog-stats">
-      <div className="emolog-stats-subtabs">
-        <button
-          className={`emolog-stats-subtab${subTab === "summary" ? " emolog-stats-subtab-active" : ""}`}
-          onClick={() => setSubTab("summary")}
-        >
-          集計
-        </button>
-        <button
-          className={`emolog-stats-subtab${subTab === "calendar" ? " emolog-stats-subtab-active" : ""}`}
-          onClick={() => setSubTab("calendar")}
-        >
-          カレンダー
-        </button>
-      </div>
+      <Tabs
+        size="sm"
+        ariaLabel="集計表示"
+        value={subTab}
+        onChange={setSubTab}
+        options={[
+          { value: "summary", label: "集計" },
+          { value: "calendar", label: "カレンダー" },
+        ]}
+      />
       {subTab === "summary" ? (
         <SummaryView onSelectEmoji={onSelectEmoji} list={selectedList} />
       ) : (

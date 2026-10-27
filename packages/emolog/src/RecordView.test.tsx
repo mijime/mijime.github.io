@@ -43,7 +43,17 @@ describe("RecordView", () => {
 
   it('renders "他の絵文字から選ぶ" toggle button', () => {
     render(<RecordView favorites={[]} onTap={vi.fn()} selectedList="メイン" />);
-    expect(screen.getByText("＋ 絵文字を選ぶ")).toBeDefined();
+    expect(screen.getByRole("button", { name: /絵文字を選ぶ/ })).toBeDefined();
+  });
+
+  it("records an emoji picked from the picker after opening", () => {
+    const onTap = vi.fn();
+    const { container } = render(<RecordView favorites={[]} onTap={onTap} selectedList="メイン" />);
+    fireEvent.click(screen.getByRole("button", { name: /絵文字を選ぶ/ }));
+    const picker = container.querySelector("emoji-picker");
+    expect(picker).toBeTruthy();
+    fireEvent(picker!, new CustomEvent("emoji-click", { detail: { unicode: "😀" } }));
+    expect(onTap).toHaveBeenCalledWith("😀", undefined);
   });
 
   it("shows empty favorites message when no favorites", () => {

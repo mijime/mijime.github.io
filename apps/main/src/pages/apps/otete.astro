@@ -21,7 +21,12 @@ import "@mijime/otete/index.css";
       name="viewport"
       content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"
     />
-    <meta name="theme-color" content="#fffdf6" id="tmc" />
+    <meta name="theme-color" content="#faf8f3" id="tmc" />
+    <link rel="manifest" href="/apps/otete/manifest.webmanifest" />
+    <link rel="apple-touch-icon" href="/icons/otete-180.png" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="otete" />
     <title>otete</title>
     <link rel="icon" type="image/x-icon" href="/favicon.ico" />
     <!-- Set the app's theme before first paint to avoid a flash. -->
@@ -43,5 +48,54 @@ import "@mijime/otete/index.css";
   </head>
   <body>
     <OteteApp client:only="react" />
+    <script is:inline>
+      (() => {
+        if (!("serviceWorker" in navigator)) return;
+        const isDev =
+          location.hostname === "localhost" ||
+          location.hostname === "127.0.0.1" ||
+          location.port !== "";
+
+        if (isDev) {
+          const key = "sw-dev-clean-v2";
+          try {
+            if (sessionStorage.getItem(key)) return;
+          } catch {}
+          const cleanup = [
+            navigator.serviceWorker
+              .getRegistrations()
+              .then((registrations) =>
+                Promise.all(registrations.map((registration) => registration.unregister())),
+              ),
+          ];
+          if ("caches" in window) {
+            cleanup.push(
+              caches
+                .keys()
+                .then((keys) => Promise.all(keys.map((cacheKey) => caches.delete(cacheKey)))),
+            );
+          }
+          Promise.all(cleanup).then(() => {
+            try {
+              sessionStorage.setItem(key, "1");
+            } catch {}
+            location.reload();
+          });
+          return;
+        }
+
+        let refreshing = false;
+        navigator.serviceWorker.addEventListener("controllerchange", () => {
+          if (refreshing) return;
+          refreshing = true;
+          location.reload();
+        });
+        window.addEventListener("load", () => {
+          navigator.serviceWorker
+            .register("/sw.js", { updateViaCache: "none" })
+            .catch(() => {});
+        });
+      })();
+    </script>
   </body>
 </html>

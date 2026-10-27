@@ -80,23 +80,23 @@ describe("Toolbar delete-completed button", () => {
   });
 
   it("dispatches DELETE_COMPLETED after confirming", () => {
-    vi.spyOn(window, "confirm").mockReturnValue(true);
     renderWithNodes([
       makeNode("root", { children: ["a"] }),
       makeNode("a", { parentId: "root", status: "done", completed: true }),
     ]);
     fireEvent.click(screen.getByTestId("toolbar-delete-completed"));
+    fireEvent.click(screen.getByRole("button", { name: "削除" }));
     expect(captured!.nodes.a).toBeUndefined();
     expect(captured!.nodes.root).toBeDefined();
   });
 
   it("does nothing when confirm is cancelled", () => {
-    vi.spyOn(window, "confirm").mockReturnValue(false);
     renderWithNodes([
       makeNode("root", { children: ["a"] }),
       makeNode("a", { parentId: "root", status: "done", completed: true }),
     ]);
     fireEvent.click(screen.getByTestId("toolbar-delete-completed"));
+    fireEvent.click(screen.getByRole("button", { name: "キャンセル" }));
     expect(captured!.nodes.a).toBeDefined();
   });
 });

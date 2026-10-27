@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { Input } from "@mijime/theme/ui";
 
 const SEARCH_RESULT_LIMIT = 8;
 const BLUR_DELAY_MS = 150;
@@ -99,7 +100,7 @@ export function BlogHeaderSearch() {
 
   return (
     <div className="blog-search-inline" style={{ position: "relative" }}>
-      <input
+      <Input
         className="blog-search-input"
         placeholder="search…"
         value={input}

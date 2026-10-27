@@ -1,4 +1,5 @@
 import { Maximize2, Minus, Plus } from "lucide-react";
+import { Card, IconButton } from "@mijime/theme/ui";
 import { useMindStore } from "../hooks/use-mind-store";
 import { computeFitView } from "../view";
 
@@ -15,15 +16,10 @@ export function ZoomControls() {
   }
 
   return (
-    <div
-      className="absolute bottom-4 left-4 z-10 flex flex-col gap-1 p-2 rounded"
-      style={{ background: "var(--toolbar-bg)", border: "1px solid var(--border)" }}
-    >
-      <button
-        type="button"
-        className="p-2 rounded transition"
-        style={{ color: "var(--ink)" }}
-        title="ズームイン"
+    <Card tone="surface" padding="sm" className="absolute bottom-4 left-4 z-10 flex flex-col gap-1">
+      <IconButton
+        label="ズームイン"
+        size="icon-sm"
         onClick={() =>
           dispatch({
             type: "SET_VIEW",
@@ -32,12 +28,10 @@ export function ZoomControls() {
         }
       >
         <Plus size={16} />
-      </button>
-      <button
-        type="button"
-        className="p-2 rounded transition"
-        style={{ color: "var(--ink)" }}
-        title="ズームアウト"
+      </IconButton>
+      <IconButton
+        label="ズームアウト"
+        size="icon-sm"
         onClick={() =>
           dispatch({
             type: "SET_VIEW",
@@ -46,16 +40,10 @@ export function ZoomControls() {
         }
       >
         <Minus size={16} />
-      </button>
-      <button
-        type="button"
-        className="p-2 rounded transition"
-        style={{ color: "var(--ink)" }}
-        title="全体表示"
-        onClick={handleFitView}
-      >
+      </IconButton>
+      <IconButton label="全体表示" size="icon-sm" onClick={handleFitView}>
         <Maximize2 size={16} />
-      </button>
-    </div>
+      </IconButton>
+    </Card>
   );
 }

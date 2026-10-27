@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { IconButton } from "@mijime/theme/ui";
 import { useMindStore } from "../hooks/use-mind-store";
 import { categoryBorderColor, formatBadges } from "../lib/badges";
 import { nextStatus, previousStatus } from "../lib/status-cycle";
@@ -59,8 +60,9 @@ export function TaskCard({ node }: Props) {
         {node.text}
       </span>
       {isDone ? null : (
-        <button
-          type="button"
+        <IconButton
+          label="子タスクを追加"
+          size="icon-sm"
           data-testid={`add-child-${node.id}`}
           onClick={(e) => {
             e.stopPropagation();
@@ -74,15 +76,13 @@ export function TaskCard({ node }: Props) {
               dispatch({ modal: { kind: "edit-new", parentId: node.id }, type: "OPEN_MODAL" });
             }
           }}
-          className="w-[18px] h-[18px] rounded text-[11px] font-semibold flex items-center justify-center shrink-0"
           style={{
-            background: "color-mix(in srgb, var(--mid) 12%, transparent)",
-            color: "var(--mid)",
+            background: "color-mix(in srgb, var(--muted) 12%, transparent)",
+            color: "var(--muted)",
           }}
-          title="子タスクを追加"
         >
           +
-        </button>
+        </IconButton>
       )}
     </div>
   );

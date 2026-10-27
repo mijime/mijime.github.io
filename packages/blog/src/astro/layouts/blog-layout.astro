@@ -2,6 +2,7 @@
 import "@mijime/blog/index.css";
 import { BlogHeaderSearch } from "../components/blog-header-search";
 import { DarkModeToggle } from "@mijime/theme/DarkModeToggle";
+import { PaletteToggle } from "@mijime/theme/PaletteToggle";
 
 interface Props {
   title?: string;
@@ -55,6 +56,7 @@ const gtmId = import.meta.env.PUBLIC_GTM_ID as string | undefined;
           </a>
           <nav class="site-nav">
             <BlogHeaderSearch client:only="react" />
+            <PaletteToggle client:only="react" />
             <DarkModeToggle client:only="react" />
           </nav>
         </div>

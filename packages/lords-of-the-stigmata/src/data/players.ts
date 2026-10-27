@@ -1,3 +1,12 @@
-export const PCOLORS = [0x4e8fd6, 0xc2493d, 0x4d9b69, 0x9067c6];
-export const PCOLCSS = ["#4e8fd6", "#c2493d", "#4d9b69", "#9067c6"];
+import { palette } from "@mijime/theme/palette";
+
+const playerColors = [
+  palette.dark.tones.blue,
+  palette.dark.tones.red,
+  palette.dark.tones.green,
+  palette.dark.tones.violet,
+] as const;
+
+export const PCOLCSS: readonly string[] = playerColors;
+export const PCOLORS = playerColors.map((hex) => Number.parseInt(hex.slice(1), 16));
 export const PNAMES = ["You", "Azra", "Berith", "Cain"];

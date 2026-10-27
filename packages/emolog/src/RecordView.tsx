@@ -1,4 +1,6 @@
 import { useState, useRef, useEffect } from "react";
+import { ChevronUp, Plus } from "lucide-react";
+import { Button } from "@mijime/theme/ui";
 import "emoji-picker-element";
 
 // emoji-picker-element のカスタム要素を JSX で書けるようにする。
@@ -54,7 +56,7 @@ export function RecordView({ favorites, onTap, selectedList: _selectedList }: Re
     };
     el.addEventListener("emoji-click", handler);
     return () => el.removeEventListener("emoji-click", handler);
-  }, [note]);
+  }, [note, showPicker]);
 
   return (
     <div className="emolog-record">
@@ -70,9 +72,22 @@ export function RecordView({ favorites, onTap, selectedList: _selectedList }: Re
       )}
 
       <div className="emolog-record-picker-toggle">
-        <button className="emolog-record-toggle" onClick={() => setShowPicker((v) => !v)}>
-          {showPicker ? "▲ 閉じる" : "＋ 絵文字を選ぶ"}
-        </button>
+        <Button
+          variant="secondary"
+          size="sm"
+          className="emolog-record-toggle"
+          onClick={() => setShowPicker((v) => !v)}
+        >
+          {showPicker ? (
+            <>
+              <ChevronUp size={14} /> 閉じる
+            </>
+          ) : (
+            <>
+              <Plus size={14} /> 絵文字を選ぶ
+            </>
+          )}
+        </Button>
       </div>
 
       {showPicker && (

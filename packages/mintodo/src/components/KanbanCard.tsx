@@ -1,6 +1,7 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { ListOrdered, Pencil } from "lucide-react";
+import { IconButton } from "@mijime/theme/ui";
 import { useMindStore } from "../hooks/use-mind-store";
 import { parentBreadcrumb } from "../lib/breadcrumb";
 import type { MindNode } from "../types";
@@ -46,8 +47,9 @@ export function KanbanCard({ node }: Props) {
           {breadcrumb}
         </span>
         <div className="flex items-center gap-1 shrink-0">
-          <button
-            type="button"
+          <IconButton
+            label="編集"
+            size="icon-sm"
             data-testid={`kanban-card-edit-${node.id}`}
             onClick={(e) => {
               e.stopPropagation();
@@ -59,11 +61,12 @@ export function KanbanCard({ node }: Props) {
             onPointerDown={(e) => e.stopPropagation()}
           >
             <Pencil size={12} />
-          </button>
-          <button
-            type="button"
-            data-testid={`kanban-card-worklog-${node.id}`}
+          </IconButton>
+          <IconButton
+            label="作業履歴"
+            size="icon-sm"
             className="relative"
+            data-testid={`kanban-card-worklog-${node.id}`}
             onClick={(e) => {
               e.stopPropagation();
               dispatch({
@@ -72,7 +75,6 @@ export function KanbanCard({ node }: Props) {
               });
             }}
             onPointerDown={(e) => e.stopPropagation()}
-            title="作業履歴"
           >
             <ListOrdered size={12} />
             {node.workLogs.length > 0 && (
@@ -80,7 +82,7 @@ export function KanbanCard({ node }: Props) {
                 {node.workLogs.length}
               </span>
             )}
-          </button>
+          </IconButton>
         </div>
       </div>
       <TaskCard node={node} />

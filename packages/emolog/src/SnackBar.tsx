@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { Button } from "@mijime/theme/ui";
+import { Button, Toast, ToastStack } from "@mijime/theme/ui";
 
 interface SnackBarProps {
   message: string | null;
@@ -17,20 +17,27 @@ export function SnackBar({ message, action, onDismiss }: SnackBarProps) {
   if (!message) return null;
 
   return (
-    <div className="emolog-snackbar">
-      <span className="emolog-snackbar-text">{message}</span>
-      {action && (
-        <Button
-          variant="primary"
-          size="sm"
-          onClick={() => {
-            action.onClick();
-            onDismiss();
-          }}
-        >
-          {action.label}
-        </Button>
-      )}
-    </div>
+    <ToastStack className="emolog-toast-stack">
+      <Toast
+        tone="info"
+        onClose={onDismiss}
+        action={
+          action && (
+            <Button
+              variant="primary"
+              size="sm"
+              onClick={() => {
+                action.onClick();
+                onDismiss();
+              }}
+            >
+              {action.label}
+            </Button>
+          )
+        }
+      >
+        {message}
+      </Toast>
+    </ToastStack>
   );
 }

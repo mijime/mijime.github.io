@@ -1,0 +1,32 @@
+{
+  "name": "flowdeck",
+  "short_name": "flowdeck",
+  "description": "co-op kanban deckbuilder",
+  "id": "/apps/flowdeck",
+  "start_url": "/apps/flowdeck/",
+  "scope": "/apps/flowdeck/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#faf8f3",
+  "theme_color": "#3f6e66",
+  "icons": [
+    {
+      "src": "/icons/flowdeck-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/flowdeck-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/flowdeck-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import { Plus } from "lucide-react";
+import { Button } from "@mijime/theme/ui";
 import { useDroppable } from "@dnd-kit/core";
 import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { useMindStore } from "../hooks/use-mind-store";
@@ -81,8 +82,9 @@ export function KanbanColumn({ status }: Props) {
             <KanbanCard key={n.id} node={n} />
           ))}
         </SortableContext>
-        <button
-          type="button"
+        <Button
+          variant="ghost"
+          size="sm"
           data-testid={`kanban-column-add-${status}`}
           onClick={() =>
             dispatch({
@@ -90,15 +92,10 @@ export function KanbanColumn({ status }: Props) {
               type: "OPEN_MODAL",
             })
           }
-          className="mt-1 py-2 rounded text-xs flex items-center justify-center gap-1 transition shrink-0"
-          style={{
-            background: "var(--paper)",
-            border: "1px dashed var(--border)",
-            color: "var(--mid)",
-          }}
+          className="mt-1 justify-center border-dashed"
         >
           <Plus size={12} /> 追加
-        </button>
+        </Button>
       </div>
     </div>
   );

@@ -37,7 +37,7 @@ describe("PlanTabs", () => {
         onRemove={() => {}}
       />,
     );
-    expect(single).not.toContain("×");
+    expect(single).not.toContain("このプランを削除");
 
     const multiple = renderToString(
       <PlanTabs
@@ -49,6 +49,6 @@ describe("PlanTabs", () => {
         onRemove={() => {}}
       />,
     );
-    expect(multiple).toContain("×");
+    expect(multiple).toContain("このプランを削除");
   });
 });

@@ -1,4 +1,5 @@
 import { Plus, X } from "lucide-react";
+import { IconButton } from "@mijime/theme/ui";
 import { useMindStore } from "../hooks/use-mind-store";
 import { useBoardActions } from "../hooks/use-board-actions";
 import { BoardListItem } from "./BoardListItem";
@@ -46,24 +47,12 @@ export function BoardSidebar() {
           ボード
         </h2>
         <div className="flex items-center gap-1">
-          <button
-            type="button"
-            onClick={onCreate}
-            title="新規ボード"
-            className="p-1.5 rounded transition"
-            style={{ background: "var(--terra)", color: "var(--paper)" }}
-          >
+          <IconButton label="新規ボード" size="icon-sm" variant="primary" onClick={onCreate}>
             <Plus size={14} />
-          </button>
-          <button
-            type="button"
-            onClick={closeDrawer}
-            title="閉じる"
-            className="p-1.5 rounded transition md:hidden"
-            style={{ color: "var(--mid)" }}
-          >
+          </IconButton>
+          <IconButton label="閉じる" size="icon-sm" className="md:hidden" onClick={closeDrawer}>
             <X size={14} />
-          </button>
+          </IconButton>
         </div>
       </header>
       <ul className="flex-1 overflow-y-auto p-2">

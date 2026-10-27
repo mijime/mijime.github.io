@@ -4,6 +4,7 @@
   "type": "module",
   "scripts": {
     "dev": "astro dev",
+    "pwa": "node scripts/generate-pwa.mjs",
     "build": "node --experimental-wasm-modules ../../packages/blog/scripts/generate-parquet.mjs && astro build",
     "preview": "astro preview",
     "check": "pnpm run check:format && pnpm run check:types && pnpm run check:oxlint",

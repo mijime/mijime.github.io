@@ -1,11 +1,22 @@
 ---
 import "../styles/global.css";
 import { DarkModeToggle } from "@mijime/theme/DarkModeToggle";
+import { PaletteToggle } from "@mijime/theme/PaletteToggle";
 
 interface Props {
   title?: string;
+  manifest?: string;
+  themeColor?: string;
+  appName?: string;
+  icon?: string;
 }
-const { title = "mijime" } = Astro.props;
+const {
+  title = "mijime",
+  manifest = "/manifest.webmanifest",
+  themeColor = "#b04e52",
+  appName = "mijime",
+  icon = "/icons/site-180.png",
+} = Astro.props;
 const gtmId = import.meta.env.PUBLIC_GTM_ID;
 ---
 
@@ -16,6 +27,12 @@ const gtmId = import.meta.env.PUBLIC_GTM_ID;
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title}</title>
     <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <link rel="manifest" href={manifest} />
+    <link rel="apple-touch-icon" href={icon} />
+    <meta name="theme-color" content={themeColor} />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content={appName} />
     {gtmId && <script is:inline define:vars={{ gtmId }}>
       window.dataLayer ??= [];
       window.dataLayer.push({ "gtm.start": Date.now(), event: "gtm.js" });
@@ -34,6 +51,7 @@ const gtmId = import.meta.env.PUBLIC_GTM_ID;
           <span class="site-logo-text">mijime</span>
         </a>
         <nav class="site-nav">
+          <PaletteToggle client:only="react" />
           <DarkModeToggle client:only="react" />
         </nav>
       </div>
@@ -41,5 +59,54 @@ const gtmId = import.meta.env.PUBLIC_GTM_ID;
     <main class="site-content">
       <slot />
     </main>
+    <script is:inline>
+      (() => {
+        if (!("serviceWorker" in navigator)) return;
+        const isDev =
+          location.hostname === "localhost" ||
+          location.hostname === "127.0.0.1" ||
+          location.port !== "";
+
+        if (isDev) {
+          const key = "sw-dev-clean-v2";
+          try {
+            if (sessionStorage.getItem(key)) return;
+          } catch {}
+          const cleanup = [
+            navigator.serviceWorker
+              .getRegistrations()
+              .then((registrations) =>
+                Promise.all(registrations.map((registration) => registration.unregister())),
+              ),
+          ];
+          if ("caches" in window) {
+            cleanup.push(
+              caches
+                .keys()
+                .then((keys) => Promise.all(keys.map((cacheKey) => caches.delete(cacheKey)))),
+            );
+          }
+          Promise.all(cleanup).then(() => {
+            try {
+              sessionStorage.setItem(key, "1");
+            } catch {}
+            location.reload();
+          });
+          return;
+        }
+
+        let refreshing = false;
+        navigator.serviceWorker.addEventListener("controllerchange", () => {
+          if (refreshing) return;
+          refreshing = true;
+          location.reload();
+        });
+        window.addEventListener("load", () => {
+          navigator.serviceWorker
+            .register("/sw.js", { updateViaCache: "none" })
+            .catch(() => {});
+        });
+      })();
+    </script>
   </body>
 </html>

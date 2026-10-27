@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>オフライン — mijime</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+        --paper: #faf8f3;
+        --ink: #1c1b20;
+        --mid: #6b6872;
+        --accent: #b04e52;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --paper: #15141a;
+          --ink: #f2efe8;
+          --mid: #a39da8;
+          --accent: #d98d8e;
+        }
+      }
+      body {
+        display: grid;
+        place-items: center;
+        min-height: 100dvh;
+        margin: 0;
+        background: var(--paper);
+        color: var(--ink);
+        font-family: "IBM Plex Mono", ui-monospace, monospace;
+        text-align: center;
+      }
+      main {
+        padding: 2rem;
+      }
+      h1 {
+        margin: 0 0 0.5rem;
+        color: var(--accent);
+        font-size: 1.25rem;
+      }
+      p {
+        color: var(--mid);
+        font-size: 0.85rem;
+      }
+      a {
+        color: var(--accent);
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>オフラインです</h1>
+      <p>接続が戻ったら、もう一度開いてください。</p>
+      <p><a href="/apps/">アプリ一覧へ</a></p>
+    </main>
+  </body>
+</html>

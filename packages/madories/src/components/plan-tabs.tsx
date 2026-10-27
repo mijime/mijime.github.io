@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { Plus, X } from "lucide-react";
+import { Button, IconButton, Input } from "@mijime/theme/ui";
 import type { Plan } from "../types";
 
 interface Props {
@@ -36,7 +38,7 @@ export function PlanTabs({ plans, activePlanId, onSelect, onAdd, onRename, onRem
     >
       <span
         style={{
-          color: "var(--mid)",
+          color: "var(--muted)",
           fontFamily: "IBM Plex Mono, monospace",
           fontSize: "10px",
           letterSpacing: "0.12em",
@@ -48,10 +50,10 @@ export function PlanTabs({ plans, activePlanId, onSelect, onAdd, onRename, onRem
       {plans.map((plan) => (
         <div key={plan.id} className="flex items-center" style={{ flexShrink: 0 }}>
           {editingId === plan.id ? (
-            <input
+            <Input
               autoFocus
               value={editingName}
-              onChange={(e) => setEditingName((e.target as HTMLInputElement).value)}
+              onChange={(e) => setEditingName(e.target.value)}
               onBlur={() => commitEdit(plan.id)}
               onKeyDown={(e) => {
                 if (e.key === "Enter") {
@@ -61,52 +63,34 @@ export function PlanTabs({ plans, activePlanId, onSelect, onAdd, onRename, onRem
                   setEditingId(null);
                 }
               }}
-              className="px-2 py-0.5 text-xs w-28 outline-none"
-              style={{
-                background: "var(--paper)",
-                border: "1px solid var(--terra)",
-                color: "var(--ink)",
-                fontFamily: "IBM Plex Mono, monospace",
-              }}
+              className="h-7 w-28 text-xs"
             />
           ) : (
             <div className="flex items-center">
-              <button
+              <Button
+                variant={plan.id === activePlanId ? "secondary" : "ghost"}
+                size="sm"
                 onClick={() => onSelect(plan.id)}
                 onDoubleClick={() => startEdit(plan)}
-                className="px-3 py-1 text-xs"
-                style={{
-                  background: plan.id === activePlanId ? "var(--paper)" : "transparent",
-                  border:
-                    plan.id === activePlanId ? "1px solid var(--terra)" : "1px solid transparent",
-                  borderRadius: "4px",
-                  color: plan.id === activePlanId ? "var(--ink)" : "var(--mid)",
-                  fontFamily: "IBM Plex Mono, monospace",
-                }}
               >
                 {plan.name}
-              </button>
+              </Button>
               {plan.id === activePlanId && plans.length > 1 && (
-                <button
+                <IconButton
+                  label="このプランを削除"
+                  size="icon-sm"
                   onClick={() => onRemove(plan.id)}
-                  className="px-1 text-xs"
-                  style={{ color: "var(--terra)" }}
-                  title="このプランを削除"
                 >
-                  ×
-                </button>
+                  <X size={12} />
+                </IconButton>
               )}
             </div>
           )}
         </div>
       ))}
-      <button
-        onClick={onAdd}
-        className="px-3 py-1 text-xs"
-        style={{ color: "var(--mid)", fontFamily: "IBM Plex Mono, monospace" }}
-      >
-        + NEW
-      </button>
+      <Button variant="ghost" size="sm" onClick={onAdd}>
+        <Plus size={12} /> NEW
+      </Button>
     </div>
   );
 }
