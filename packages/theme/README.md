@@ -1,16 +1,20 @@
 # @mijime/theme
 
-Shared design tokens and UI primitives.
+Shared colour system and UI primitives.
 
 ## Entry points
 
-| Import                          | Use                                                             |
-| ------------------------------- | --------------------------------------------------------------- |
-| `@mijime/theme/index.css`       | Tokens + base/site styles + UI component CSS (default for apps) |
-| `@mijime/theme/tokens.css`      | Tokens only (for app shells that bring their own base CSS)      |
-| `@mijime/theme/themes/sumi.css` | Optional example palette preset                                 |
-| `@mijime/theme/ui`              | React primitives (Button, Modal, Card, Tabs, ...)               |
-| `@mijime/theme/palette`         | TS colour values for Canvas / WebGL / computed styles           |
+| Import                          | Use                                                          |
+| ------------------------------- | ------------------------------------------------------------ |
+| `@mijime/theme/index.css`       | Tokens + theme presets + base/site styles + UI component CSS |
+| `@mijime/theme/tokens.css`      | Tokens only (for app shells that bring their own base CSS)   |
+| `@mijime/theme/themes/sumi.css` | Optional example palette preset                              |
+| `@mijime/theme/ui`              | React primitives (Button, Modal, Card, Tabs, ...)            |
+| `@mijime/theme/palette`         | TS colour values for Canvas / WebGL / computed styles        |
+| `@mijime/theme/usePalette`      | React hook that reads/writes `data-palette`                  |
+| `@mijime/theme/PaletteToggle`   | Button that cycles through the bundled palettes              |
+| `@mijime/theme/useDarkMode`     | React hook that reads/writes `data-theme`                    |
+| `@mijime/theme/DarkModeToggle`  | Button that toggles light/dark mode                          |
 
 ## Colour architecture
 
@@ -49,7 +53,7 @@ Import the preset CSS once (the default `tokens.css` / `index.css` already impor
 
 ### Adding a theme
 
-Create `src/themes/<name>.css` and override `--palette-*` for both modes:
+Create `src/color/themes/<name>.css` and override `--palette-*` for both modes:
 
 ```css
 :root[data-palette="sakura"] {
@@ -72,6 +76,15 @@ Create `src/themes/<name>.css` and override `--palette-*` for both modes:
 
 Export the file from `package.json` and import it where the theme should be
 selectable. No component CSS changes are required.
+
+### JS palette
+
+`@mijime/theme/palette` exposes the same values as TypeScript for places that
+cannot read CSS variables (Canvas, WebGL, computed chart colours):
+
+```ts
+import { palette, cssVar, kagaGoshiki } from "@mijime/theme/palette";
+```
 
 ## UI primitives
 

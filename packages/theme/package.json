@@ -4,14 +4,14 @@
   "type": "module",
   "exports": {
     "./index.css": "./src/index.css",
-    "./tokens.css": "./src/tokens.css",
-    "./themes/sumi.css": "./src/themes/sumi.css",
-    "./themes/osaka-jade.css": "./src/themes/osaka-jade.css",
-    "./palette": "./src/palette.ts",
-    "./usePalette": "./src/use-palette.ts",
-    "./PaletteToggle": "./src/palette-toggle.tsx",
-    "./DarkModeToggle": "./src/dark-mode-toggle.tsx",
-    "./useDarkMode": "./src/use-dark-mode.ts",
+    "./tokens.css": "./src/color/tokens.css",
+    "./themes/sumi.css": "./src/color/themes/sumi.css",
+    "./themes/osaka-jade.css": "./src/color/themes/osaka-jade.css",
+    "./palette": "./src/color/palette.ts",
+    "./usePalette": "./src/color/use-palette.ts",
+    "./PaletteToggle": "./src/color/palette-toggle.tsx",
+    "./DarkModeToggle": "./src/color/dark-mode-toggle.tsx",
+    "./useDarkMode": "./src/color/use-dark-mode.ts",
     "./ui": "./src/ui/index.ts"
   },
   "scripts": {

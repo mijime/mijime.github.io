@@ -15,9 +15,8 @@
   },
   "scripts": {
     "test": "vitest run --passWithNoTests",
-    "check": "pnpm run check:format && pnpm run check:tsgo && pnpm run check:types && pnpm run check:oxlint",
+    "check": "pnpm run check:format && pnpm run check:types && pnpm run check:oxlint",
     "check:format": "oxfmt --check",
-    "check:tsgo": "tsgo --noEmit",
     "check:oxlint": "oxlint --format=github --fix",
     "check:types": "astro sync && tsc --noEmit --runExternalCode",
     "format": "pnpm run format:oxfmt",
@@ -43,7 +42,6 @@
     "@astrojs/ts-content-mapper": "^0.2.0",
     "@types/mdast": "^4.0.4",
     "@types/react": "^19.3.0",
-    "@typescript/native-preview": "7.0.0-dev.20260707.2",
     "astro": "^7.4.2",
     "duckdb": "^1.4.4",
     "oxfmt": "^0.74.0",
