@@ -1,5 +1,6 @@
 import { Layers, Users } from "lucide-react";
 import { Panel } from "@mijime/theme/ui";
+import { relicDescription, relicName } from "../data/relics";
 import type { GameState } from "../engine/types";
 import { PLAYER_TONE, TraitIcon, traitSummary } from "./ui";
 
@@ -27,6 +28,20 @@ export function TeamPanel({ state, aiTab, onSelectAi }: Props) {
         </h2>
         <span className="text-[9px] tabular-nums text-(--mid)">{ais.length}人</span>
       </div>
+
+      {(state.teamRelics ?? []).length > 0 && (
+        <div className="mb-1.5 flex flex-wrap gap-1">
+          {(state.teamRelics ?? []).map((id) => (
+            <span
+              key={id}
+              className="rounded-sm border border-(--accent)/40 bg-(--accent)/10 px-1.5 py-0.5 text-[8px] font-semibold text-(--accent)"
+              title={relicDescription(id)}
+            >
+              {relicName(id)}
+            </span>
+          ))}
+        </div>
+      )}
 
       <div className="grid grid-cols-2 gap-1">
         {ais.map((player) => {

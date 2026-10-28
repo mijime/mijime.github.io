@@ -1,4 +1,9 @@
-import type { GameState, PlayerOutcome, TaskLane } from "../../src/engine/types";
+import type {
+  GameState,
+  PersonalityWeights,
+  PlayerOutcome,
+  TaskLane,
+} from "../../src/engine/types";
 import type { RunResult } from "./runner";
 import { mean, rate } from "./stats";
 
@@ -11,6 +16,8 @@ export interface RunRow {
   stars: number;
   failed: boolean;
   teamScore: number;
+  actionsGained: number;
+  cardsDrawn: number;
   debt: number;
   debtPenalty: number;
   incidentPenalty: number;
@@ -47,6 +54,8 @@ export function toRunRow(result: RunResult): RunRow {
     state.metrics.length > 0 ? Math.max(...state.metrics.map((snapshot) => snapshot.wip)) : 0;
   const finalScore = outcome?.finalScore ?? 0;
   const teamScore = outcome?.teamScore ?? state.teamScore;
+  const actionsGained = state.analytics.actionsGained ?? 0;
+  const cardsDrawn = state.analytics.cardsDrawn ?? 0;
   const incidentPenalty = outcome?.scorePenalty ?? state.scorePenalty;
   const debtPenalty = outcome
     ? Math.max(0, outcome.teamScore - outcome.scorePenalty - finalScore)
@@ -60,6 +69,8 @@ export function toRunRow(result: RunResult): RunRow {
     stars: outcome?.stars ?? 0,
     failed: outcome?.failed ?? false,
     teamScore,
+    actionsGained,
+    cardsDrawn,
     debt: state.teamDebt,
     debtPenalty,
     incidentPenalty,
@@ -121,6 +132,7 @@ export function tipCategory(tip: string): string {
   if (tip.includes("に作業が集中")) return "solo-carry";
   if (tip.startsWith("支援プレイが")) return "low-support";
   if (tip.startsWith("LLMトークン")) return "token-economy";
+  if (tip.startsWith("効果カードを") && tip.includes("追加アクション/ドローが0")) return "engine";
   if (tip.startsWith("効果カード")) return "effect-combo";
   if (tip.startsWith("廃棄")) return "hygiene";
   if (tip.startsWith("Pull")) return "over-pull";
@@ -218,7 +230,7 @@ export function seatRows(results: RunResult[]): SeatRow[] {
 }
 
 export interface PlayerSample {
-  weights: { focus: number; greed: number; urgency: number };
+  weights: PersonalityWeights;
   score: number;
   completed: number;
   workPoints: number;

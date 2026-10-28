@@ -15,7 +15,14 @@ export const TOKEN_POLICIES: readonly TokenPolicy[] = [
   "never",
 ];
 
-const NEUTRAL_WEIGHTS: PersonalityWeights = { focus: 0, greed: 0, urgency: 0 };
+const NEUTRAL_WEIGHTS: PersonalityWeights = {
+  focus: 0,
+  greed: 0,
+  urgency: 0,
+  prudence: 0,
+  solidarity: 0,
+  appetite: 0,
+};
 
 export interface MonteCarloPolicy {
   tokenPolicy: TokenPolicy;
@@ -50,15 +57,28 @@ export interface MonteCarloRow extends MonteCarloPolicy {
 
 function policyLabel(policy: MonteCarloPolicy): string {
   if (policy.weights === null) return `${policy.tokenPolicy} roster`;
-  if (policy.weights.focus === 0 && policy.weights.greed === 0 && policy.weights.urgency === 0) {
-    return `${policy.tokenPolicy} neutral`;
-  }
-  return `${policy.tokenPolicy} f${policy.weights.focus} g${policy.weights.greed} u${policy.weights.urgency}`;
+  const weights = policy.weights;
+  const parts = [
+    weights.focus !== 0 ? `f${weights.focus}` : "",
+    weights.greed !== 0 ? `g${weights.greed}` : "",
+    weights.urgency !== 0 ? `u${weights.urgency}` : "",
+    (weights.prudence ?? 0) !== 0 ? `p${weights.prudence}` : "",
+    (weights.solidarity ?? 0) !== 0 ? `s${weights.solidarity}` : "",
+    (weights.appetite ?? 0) !== 0 ? `a${weights.appetite}` : "",
+  ].filter(Boolean);
+  return `${policy.tokenPolicy} ${parts.length > 0 ? parts.join(" ") : "neutral"}`;
 }
 
 function policyKey(policy: MonteCarloPolicy): string {
   const weights = policy.weights
-    ? `${policy.weights.focus}:${policy.weights.greed}:${policy.weights.urgency}`
+    ? [
+        policy.weights.focus,
+        policy.weights.greed,
+        policy.weights.urgency,
+        policy.weights.prudence ?? 0,
+        policy.weights.solidarity ?? 0,
+        policy.weights.appetite ?? 0,
+      ].join(":")
     : "roster";
   return `${policy.tokenPolicy}:${weights}`;
 }
@@ -66,7 +86,14 @@ function policyKey(policy: MonteCarloPolicy): string {
 /** -1〜1 を 0.25 刻みでサンプリングする。 */
 function sampleWeights(rand: () => number): PersonalityWeights {
   const pick = () => Math.round((rand() * 2 - 1) * 4) / 4;
-  return { focus: pick(), greed: pick(), urgency: pick() };
+  return {
+    focus: pick(),
+    greed: pick(),
+    urgency: pick(),
+    prudence: pick(),
+    solidarity: pick(),
+    appetite: pick(),
+  };
 }
 
 export function samplePolicies(samples: number, seed: number): MonteCarloPolicy[] {

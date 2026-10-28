@@ -95,6 +95,7 @@ describe("ResultScreen", () => {
 
     expect(screen.getByText("プロジェクト・サマリー")).toBeInTheDocument();
     expect(screen.getByText("日次推移")).toBeInTheDocument();
+    expect(screen.getByText("効果カード")).toBeInTheDocument();
     expect(screen.getByText(/参考 中央値/)).toBeInTheDocument();
     expect(screen.getAllByTestId("player-archetype").length).toBeGreaterThanOrEqual(5);
     expect(screen.queryByText("ポジション一覧")).toBeNull();

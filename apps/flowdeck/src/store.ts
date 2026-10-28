@@ -38,8 +38,20 @@ export function normalizeState(state: GameState): GameState {
   const next = state as GameState;
   next.version = 28;
   next.generationSwing ??= DEFAULT_GENERATION_SWING;
-  next.aiProfile ??= "standard";
+  if (next.aiProfile !== "standard") next.aiProfile = "standard";
   next.analytics = normalizeAnalytics(next.analytics);
+  next.teamRelics ??= [];
+  next.pendingRelic ??= null;
+  for (const player of next.players) {
+    player.weights.prudence ??= 0;
+    player.weights.solidarity ??= 0;
+    player.weights.appetite ??= 0;
+  }
+  for (const player of next.outcome?.perPlayer ?? []) {
+    player.weights.prudence ??= 0;
+    player.weights.solidarity ??= 0;
+    player.weights.appetite ??= 0;
+  }
   next.metrics = (next.metrics ?? []).map((snapshot) => {
     snapshot.lanes ??= { open: 0, inbox: 0, wip: 0, test: 0, done: 0 };
     snapshot.perPlayer ??= [];

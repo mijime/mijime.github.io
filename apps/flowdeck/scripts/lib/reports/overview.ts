@@ -54,6 +54,14 @@ export function printOverview(results: RunResult[], options: OverviewOptions): v
     "team score",
     rows.map((row) => row.teamScore),
   );
+  printDistribution(
+    "extra actions",
+    rows.map((row) => row.actionsGained),
+  );
+  printDistribution(
+    "cards drawn",
+    rows.map((row) => row.cardsDrawn),
+  );
   printDistribution("debt", debts);
   printDistribution("completed", completed);
   printDistribution("expired", expired);

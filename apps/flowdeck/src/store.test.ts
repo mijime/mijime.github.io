@@ -10,6 +10,11 @@ describe("normalizeState", () => {
     delete legacy.analytics;
     delete legacy.generationSwing;
     delete legacy.aiProfile;
+    for (const player of state.players) {
+      delete player.weights.prudence;
+      delete player.weights.solidarity;
+      delete player.weights.appetite;
+    }
     legacy.metrics = [
       {
         day: 1,
@@ -27,6 +32,9 @@ describe("normalizeState", () => {
     expect(normalized.aiProfile).toBe("standard");
     expect(normalized.generationSwing).toBe(0.1);
     expect(normalized.analytics.actions.play).toBe(0);
+    expect(normalized.players[0]?.weights.prudence).toBe(0);
+    expect(normalized.players[0]?.weights.solidarity).toBe(0);
+    expect(normalized.players[0]?.weights.appetite).toBe(0);
     expect(normalized.metrics[0]?.lanes).toEqual({
       open: 0,
       inbox: 0,

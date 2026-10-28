@@ -1,7 +1,15 @@
 import { TASK_BY_ID } from "../data/tasks";
+import { RELIC_CAP } from "../data/relics";
 import { RISK_BY_ID } from "../data/risks";
 import { addDebt } from "./debt";
 import { pushLog } from "./log";
+import {
+  chooseAiRelic,
+  chooseAiRelicDiscard,
+  grantRelic,
+  relicChoicesFor,
+  teamRelics,
+} from "./relics";
 import { playerById, recomputeTeamStats, taskContributions, taskSum } from "./metrics";
 import { BASE_RULES, type RuleSet } from "./rules";
 import { applyPenalty } from "./rules/penalties";
@@ -16,11 +24,12 @@ export function createTask(state: GameState, defId: string): TaskCard {
     id: `t${state.nextTaskId++}`,
     defId: def.id,
     title: def.title,
+    theme: def.theme,
     requirements: { ...def.requirements },
     score: def.score,
     deadline: def.deadline,
     tokens: 0,
-    reward: { ...def.reward },
+    reward: def.reward ? { ...def.reward } : undefined,
     tokenWork: { design: 0, dev: 0, test: 0 },
     kind: def.kind ?? "normal",
     penalty: def.penalty ? { ...def.penalty } : undefined,
@@ -44,7 +53,11 @@ export function refillOpen(state: GameState): void {
     }
     const defId = state.taskDeck.shift();
     if (!defId) break;
-    state.tasks.push(createTask(state, defId));
+    const task = createTask(state, defId);
+    state.tasks.push(task);
+    if (task.kind === "relic") {
+      pushLog(state, `レリックタスク出現: ${task.title}`, "bad");
+    }
     open += 1;
   }
 }
@@ -173,19 +186,25 @@ function acquireTask(state: GameState, task: TaskCard, rules: RuleSet): void {
     pushLog(state, `リスク未吸収: ${task.title}（負債 +${unmet}）`, "bad");
   }
 
+  const relicTask = task.kind === "relic";
+  const relicChoices = relicTask ? relicChoicesFor(state) : [];
+  const contributionText = contributions.length > 0 ? ` / 受取者: ${recipient.name}` : "";
+
   // モーダルは人間が受取者になった時だけ対象にする。AI の完了で上書きしない。
-  if (recipient.isHuman) {
+  // relicタスクは専用の選択モーダルを使う。
+  if (recipient.isHuman && !relicTask) {
     state.lastAcquisition = {
       id: task.id,
       day: state.day,
       taskTitle: task.title,
+      theme: task.theme,
       pullerId: puller.id,
       pullerName: puller.name,
       recipientId: recipient.id,
       recipientName: recipient.name,
       contributions,
       score: task.score,
-      reward: { ...task.reward },
+      reward: task.reward ? { ...task.reward } : undefined,
       risks: riskReports,
       added: { ...added },
       unmet: unmet > 0,
@@ -196,25 +215,55 @@ function acquireTask(state: GameState, task: TaskCard, rules: RuleSet): void {
 
   task.lane = "done";
   task.acquiredDay = state.day;
-  state.taskDiscard.push(task.defId);
+  if (!relicTask) state.taskDiscard.push(task.defId);
   recipient.completed += 1;
-  const contributionText = contributions.length > 0 ? ` / 受取者: ${recipient.name}` : "";
-  pushLog(state, `完了: ${task.title}（企業価値 +${task.score}${contributionText}）`, "good");
-
-  recipient.discard.push({
-    id: state.nextCardId++,
-    type: task.reward.type,
-    level: task.reward.level,
-    title: task.title,
-    effect: task.reward.effect,
-    score: task.score,
-  });
-  recomputeTeamStats(state);
   pushLog(
     state,
-    `報酬カード: ${task.title}（${task.reward.type} lv${task.reward.level}）を捨て札へ`,
+    relicTask
+      ? `完了: ${task.title}（チームレリック報酬${contributionText}）`
+      : `完了: ${task.title}（企業価値 +${task.score}${contributionText}）`,
     "good",
   );
+
+  if (relicTask) {
+    if (relicChoices.length === 0) {
+      pushLog(state, "レリック候補がありません", "bad");
+    } else if (recipient.isHuman) {
+      state.pendingRelic = {
+        taskTitle: task.title,
+        playerId: recipient.id,
+        options: relicChoices,
+        currentRelics: [...teamRelics(state)],
+        replace: teamRelics(state).length >= RELIC_CAP,
+      };
+      pushLog(state, `${recipient.name}: レリックを選択`, "good");
+    } else {
+      const pick = chooseAiRelic(relicChoices);
+      if (pick) {
+        const discard =
+          teamRelics(state).length >= RELIC_CAP
+            ? chooseAiRelicDiscard(teamRelics(state))
+            : undefined;
+        grantRelic(state, pick, discard);
+      }
+    }
+  } else if (task.reward) {
+    recipient.discard.push({
+      id: state.nextCardId++,
+      type: task.reward.type,
+      level: task.reward.level,
+      title: task.title,
+      effect: task.reward.effect,
+      score: task.score,
+      theme: task.theme,
+    });
+    pushLog(
+      state,
+      `報酬カード: ${task.title}（${task.reward.type} lv${task.reward.level}）を捨て札へ`,
+      "good",
+    );
+  }
+  recomputeTeamStats(state);
 
   returnAttachedCards(state, task);
 }
@@ -270,7 +319,7 @@ export function expireTasks(state: GameState, rules: RuleSet = BASE_RULES): void
     const previous = task.lane;
     task.expiredLane = previous;
     task.lane = "trash";
-    state.taskDiscard.push(task.defId);
+    if (task.kind !== "relic") state.taskDiscard.push(task.defId);
 
     if (task.penalty) applyExpiryPenalty(state, task, rules);
 

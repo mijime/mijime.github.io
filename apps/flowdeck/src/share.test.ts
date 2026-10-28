@@ -47,7 +47,7 @@ const sample: SharedResult = {
         id: "p1",
         name: "あなた",
         isHuman: true,
-        weights: { focus: 1, greed: 1, urgency: 1 },
+        weights: { focus: 1, greed: 1, urgency: 1, prudence: 0, solidarity: 0, appetite: 0 },
         completed: 3,
         score: 50,
         avgWip: 2,

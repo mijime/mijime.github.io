@@ -57,6 +57,14 @@ function int(value: string | undefined, fallback: number): number {
   return Number.isFinite(parsed) ? Math.floor(parsed) : fallback;
 }
 
+const WEIGHT_KEYS = ["focus", "greed", "urgency", "prudence", "solidarity", "appetite"] as const;
+
+type WeightKey = (typeof WEIGHT_KEYS)[number];
+
+function isWeightKey(value: string | undefined): value is WeightKey {
+  return value !== undefined && (WEIGHT_KEYS as readonly string[]).includes(value);
+}
+
 function parseWeights(value: string | undefined): PersonalityWeights | null {
   if (!value) return null;
   const weights: PersonalityWeights = { focus: 0, greed: 0, urgency: 0 };
@@ -64,8 +72,8 @@ function parseWeights(value: string | undefined): PersonalityWeights | null {
     const [rawKey, rawValue] = part.split("=");
     const key = rawKey?.trim();
     const parsed = Number(rawValue);
-    if (key !== "focus" && key !== "greed" && key !== "urgency") {
-      throw new Error(`unknown weight: ${key} (allowed: focus, greed, urgency)`);
+    if (!isWeightKey(key)) {
+      throw new Error(`unknown weight: ${key} (allowed: ${WEIGHT_KEYS.join(", ")})`);
     }
     if (!Number.isFinite(parsed)) throw new Error(`invalid weight value: ${part}`);
     weights[key] = parsed;
@@ -180,9 +188,9 @@ export function parseArgs(argv: string[]): SimOptions {
     seedValue !== undefined && Number.isFinite(Number(seedValue)) ? Number(seedValue) : null;
   const days = int(get(argv, "days"), TOTAL_DAYS);
   const players = int(get(argv, "players"), 5);
-  const aiProfileValue = get(argv, "ai-profile") ?? "strong";
-  if (aiProfileValue !== "standard" && aiProfileValue !== "strong") {
-    throw new Error(`--ai-profile must be standard or strong: ${aiProfileValue}`);
+  const aiProfileValue = get(argv, "ai-profile") ?? "standard";
+  if (aiProfileValue !== "standard") {
+    throw new Error(`--ai-profile is fixed to standard: ${aiProfileValue}`);
   }
   if (!DAY_OPTIONS.has(days)) {
     throw new Error(`--days must be one of ${[...DAY_OPTIONS].join(", ")}: ${days}`);
@@ -306,10 +314,10 @@ Options:
   --seed <n>          run one seed and print details
   --days <n>          ${GAME_LENGTH_OPTIONS.join(" | ")} (default: 10)
   --players <n>       4 | 5 | 6 (default: 5)
-  --ai-profile <s>    standard | strong (default: strong)
+  --ai-profile <s>    standard (default: standard, fixed)
   --ruleset <id>      base (default: base)
   --scenario <id>     ${scenarioIds().join(", ")}
-  --weights <spec>    focus,greed,urgency (e.g. focus=1,greed=-1,urgency=0)
+  --weights <spec>    focus,greed,urgency,prudence,solidarity,appetite
   --human-weights     weights for the human seat only
   --ai-weights        weights for AI seats only
   --matrix <spec>     days=10,20 players=4,5,6

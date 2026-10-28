@@ -13,22 +13,15 @@ import {
 } from "lucide-react";
 import { Button, Modal, SectionLabel, SegmentedControl } from "@mijime/theme/ui";
 import { GAME_LENGTH_OPTIONS, type GameLength } from "../engine/rules/balance";
-import { AI_PROFILE_OPTIONS } from "../engine/ai/profiles";
-import type { AiProfile } from "../engine/types";
 import { FlowDiagram } from "./FlowDiagram";
 
 interface Props {
-  onStart?: (days: number, aiCount: number, generationSwing: number, aiProfile: AiProfile) => void;
+  onStart?: (days: number, aiCount: number) => void;
   onClose?: () => void;
   review?: boolean;
 }
 
 const AI_OPTIONS = [3, 4, 5] as const;
-const SWING_OPTIONS = [
-  { value: 0, label: "安定", hint: "得損なし" },
-  { value: 0.1, label: "標準", hint: "±10%" },
-  { value: 0.2, label: "波乱", hint: "±20%" },
-] as const;
 
 const noop = () => {};
 
@@ -61,8 +54,6 @@ function ChoiceRow<T extends number>({
 export function IntroScreen({ onStart, onClose, review = false }: Props) {
   const [days, setDays] = useState<GameLength>(10);
   const [aiCount, setAiCount] = useState<3 | 4 | 5>(4);
-  const [swing, setSwing] = useState(0.1);
-  const [aiProfile, setAiProfile] = useState<AiProfile>("strong");
 
   return (
     <Modal
@@ -82,11 +73,7 @@ export function IntroScreen({ onStart, onClose, review = false }: Props) {
             閉じる <ArrowRight size={12} />
           </Button>
         ) : (
-          <Button
-            variant="primary"
-            size="sm"
-            onClick={() => onStart?.(days, aiCount, swing, aiProfile)}
-          >
+          <Button variant="primary" size="sm" onClick={() => onStart?.(days, aiCount)}>
             <Play size={12} /> プロジェクトを開始
           </Button>
         )
@@ -155,37 +142,9 @@ export function IntroScreen({ onStart, onClose, review = false }: Props) {
         )}
 
         {!review && (
-          <section>
-            <SectionLabel className="mb-1 block">チームメイト</SectionLabel>
-            <SegmentedControl
-              ariaLabel="チームメイト"
-              value={aiProfile}
-              onChange={setAiProfile}
-              options={AI_PROFILE_OPTIONS.map((option) => ({
-                value: option.value,
-                label: option.label,
-                hint: option.hint,
-              }))}
-              className="w-full [&>button]:flex-1"
-            />
-          </section>
-        )}
-
-        {!review && (
-          <section>
-            <SectionLabel className="mb-1 block">タスクの得損</SectionLabel>
-            <SegmentedControl
-              ariaLabel="タスクの得損"
-              value={swing}
-              onChange={setSwing}
-              options={SWING_OPTIONS.map((option) => ({
-                value: option.value,
-                label: option.label,
-                hint: option.hint,
-              }))}
-              className="w-full [&>button]:flex-1"
-            />
-          </section>
+          <p className="rounded-sm border border-(--border) bg-(--grid)/40 px-2.5 py-1.5 text-[9px] text-(--mid)">
+            チームメイトは標準、タスクの得損は標準（±10%）で固定。効果カードの組み合わせで追加作業を狙う。レリックタスクは高難度。
+          </p>
         )}
       </div>
     </Modal>

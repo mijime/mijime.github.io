@@ -32,6 +32,7 @@ export function computeOutcome(state: GameState, rules: RuleSet = BASE_RULES): O
     const allCards = [...player.hand, ...player.deck, ...player.discard];
     const deck = { design: 0, dev: 0, test: 0, debt: 0 };
     for (const card of allCards) deck[card.type] += 1;
+    const analytics = state.analytics.players?.[player.id] ?? emptyPlayerAnalytics();
     return {
       id: player.id,
       name: player.name,
@@ -46,7 +47,12 @@ export function computeOutcome(state: GameState, rules: RuleSet = BASE_RULES): O
         test: { ...player.contributed.test },
       },
       deck,
-      analytics: { ...(state.analytics.players?.[player.id] ?? emptyPlayerAnalytics()) },
+      effectPlays: analytics.effectPlays ?? 0,
+      actionsGained: analytics.actionsGained ?? 0,
+      cardsDrawn: analytics.cardsDrawn ?? 0,
+      cardsDiscarded: analytics.cardsDiscarded ?? 0,
+      cardsRecovered: analytics.cardsRecovered ?? 0,
+      analytics: { ...analytics },
     };
   });
   const classified = classifyPlayers(perPlayer);

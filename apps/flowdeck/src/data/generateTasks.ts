@@ -13,7 +13,7 @@ export { taskEfficiency, taskValue, totalRequirements } from "./generationMath";
  */
 function requirementBudget(def: TaskDef): readonly [number, number] {
   if (def.kind === "incident") return [11, 16];
-  if (def.reward.effect) return [14, 19];
+  if (def.reward?.effect) return [14, 19];
   switch (def.score) {
     case 1:
       return [8, 11];
@@ -74,7 +74,7 @@ export function generateTaskDefs(
     const def: TaskDef = {
       ...template,
       requirements: { ...template.requirements },
-      reward: { ...template.reward },
+      reward: template.reward ? { ...template.reward } : undefined,
       penalty: template.penalty ? { ...template.penalty } : undefined,
     };
     const ctx = {

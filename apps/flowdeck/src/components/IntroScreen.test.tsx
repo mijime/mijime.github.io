@@ -10,9 +10,8 @@ describe("IntroScreen", () => {
     expect(screen.getByText("LLMとエージェントのプロジェクト")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "20日" }));
     fireEvent.click(screen.getByRole("button", { name: "5人" }));
-    fireEvent.click(screen.getByRole("button", { name: /波乱/ }));
     fireEvent.click(screen.getByRole("button", { name: /プロジェクトを開始/ }));
-    expect(onStart).toHaveBeenCalledWith(20, 5, 0.2, "strong");
+    expect(onStart).toHaveBeenCalledWith(20, 5);
   });
 
   it("長期プロジェクト（100日）も選べる", () => {
@@ -20,8 +19,14 @@ describe("IntroScreen", () => {
     render(<IntroScreen onStart={onStart} />);
 
     fireEvent.click(screen.getByRole("button", { name: "100日" }));
-    fireEvent.click(screen.getByRole("button", { name: /有能/ }));
     fireEvent.click(screen.getByRole("button", { name: /プロジェクトを開始/ }));
-    expect(onStart).toHaveBeenCalledWith(100, 4, 0.1, "strong");
+    expect(onStart).toHaveBeenCalledWith(100, 4);
+  });
+
+  it("チームメイトとタスクの得損は選べない", () => {
+    render(<IntroScreen onStart={vi.fn()} />);
+
+    expect(screen.queryByRole("button", { name: /有能/ })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /波乱/ })).not.toBeInTheDocument();
   });
 });

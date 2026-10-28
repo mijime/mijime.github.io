@@ -1,5 +1,6 @@
 import type { ResultSummary } from "../../engine/analytics/result";
 import type { BenchmarkEntry } from "../../data/benchmark";
+import { EffectSummary } from "./EffectSummary";
 import { FlowSummary } from "./FlowSummary";
 import { PlayStyleSummary } from "./PlayStyleSummary";
 import { RiskSummary } from "./RiskSummary";
@@ -32,6 +33,7 @@ export function SummaryPanel({
         <FlowSummary flow={summary.flow} benchmark={benchmark} />
         <RiskSummary risk={summary.risk} />
         <PlayStyleSummary style={summary.style} />
+        <EffectSummary players={summary.players} />
       </div>
     </section>
   );

@@ -148,6 +148,7 @@ const TIP_IMPACT: Record<string, number> = {
   "over-pull": 50,
   "token-economy": 35,
   "effect-combo": 40,
+  engine: 32,
   hygiene: 35,
   "phase-bias": 25,
   "low-support": 20,
@@ -266,6 +267,21 @@ export const BASE_TIPS: readonly TipRule[] = [
     when: (facts) => totalEffectPlays(facts) >= facts.players.length * 2,
     text: (facts) =>
       `効果カードを${totalEffectPlays(facts)}回発動。ドロー・追加アクション・負債除去が噛み合っている。`,
+  },
+  {
+    id: "engine",
+    when: (facts) => {
+      const human = facts.players.find((player) => player.isHuman);
+      return Boolean(
+        human &&
+        (human.effectPlays ?? 0) >= 3 &&
+        (human.actionsGained ?? 0) + (human.cardsDrawn ?? 0) === 0,
+      );
+    },
+    text: (facts) => {
+      const human = facts.players.find((player) => player.isHuman);
+      return `効果カードを${human?.effectPlays ?? 0}枚使って追加アクション/ドローが0。アクション+1・ドロー・循環のカードを拾うと手数が伸びる。`;
+    },
   },
   {
     id: "hygiene",

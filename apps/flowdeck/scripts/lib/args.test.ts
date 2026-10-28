@@ -33,10 +33,10 @@ describe("parseArgs", () => {
     expect(options.weights?.all).toEqual({ focus: 1, greed: -1, urgency: 0.5 });
   });
 
-  it("チームメイトのプロファイルを読む", () => {
-    expect(parseArgs([]).aiProfile).toBe("strong");
-    expect(parseArgs(["--ai-profile", "strong"]).aiProfile).toBe("strong");
-    expect(() => parseArgs(["--ai-profile", "unknown"])).toThrow("--ai-profile must be");
+  it("チームメイトのプロファイルは標準固定", () => {
+    expect(parseArgs([]).aiProfile).toBe("standard");
+    expect(parseArgs(["--ai-profile", "standard"]).aiProfile).toBe("standard");
+    expect(() => parseArgs(["--ai-profile", "strong"])).toThrow("fixed to standard");
   });
 
   it("Monte Carloオプションを読む", () => {

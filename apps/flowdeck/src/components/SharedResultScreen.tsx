@@ -1,6 +1,7 @@
 import { Star } from "lucide-react";
 import { Button } from "@mijime/theme/ui";
 import { benchmarkFor } from "../data/benchmark";
+import { relicDescription, relicName } from "../data/relics";
 import type { PlayerOutcome } from "../engine/types";
 import type { SharedResult } from "../share";
 import { SummaryPanel } from "./result/SummaryPanel";
@@ -38,9 +39,7 @@ export function SharedResultScreen({ result }: { result: SharedResult }) {
           <h1 className="serif mt-1 text-2xl font-semibold">
             {result.totalDays}日間のプロジェクト
           </h1>
-          <p className="text-[10px] text-(--mid)">
-            シード {result.seed} / {result.aiProfile === "strong" ? "有能" : "標準"}チームメイト
-          </p>
+          <p className="text-[10px] text-(--mid)">シード {result.seed} / 標準チームメイト</p>
           <div className="mt-3 flex items-center justify-center gap-1 text-(--accent)">
             {Array.from({ length: 3 }, (_, index) => (
               <Star
@@ -58,6 +57,20 @@ export function SharedResultScreen({ result }: { result: SharedResult }) {
 
         <section className="mt-4 rounded-sm border border-(--border) bg-(--paper) p-3">
           <h2 className="serif text-[13px] font-semibold">チームの成果</h2>
+          {(result.relics ?? []).length > 0 && (
+            <p className="mt-1 flex flex-wrap items-center gap-1 text-[8px] text-(--accent)">
+              レリック:
+              {(result.relics ?? []).map((id) => (
+                <span
+                  key={id}
+                  className="rounded-sm border border-(--accent)/40 bg-(--accent)/10 px-1 py-0.5"
+                  title={relicDescription(id)}
+                >
+                  {relicName(id)}
+                </span>
+              ))}
+            </p>
+          )}
           <div className="mt-2 grid gap-1.5 sm:grid-cols-2">
             {summary.players.map((player) => (
               <article
@@ -85,6 +98,12 @@ export function SharedResultScreen({ result }: { result: SharedResult }) {
                   <span>
                     点 <b className="text-(--ink)">{player.score}</b>
                   </span>
+                  {((player.actionsGained ?? 0) > 0 || (player.cardsDrawn ?? 0) > 0) && (
+                    <span className="text-(--accent)">
+                      追加AP <b>+{player.actionsGained ?? 0}</b> / ドロー{" "}
+                      <b>{player.cardsDrawn ?? 0}</b>
+                    </span>
+                  )}
                 </div>
                 <div className="mt-1 grid grid-cols-3 gap-1">
                   {(["design", "dev", "test"] as const).map((type) => (

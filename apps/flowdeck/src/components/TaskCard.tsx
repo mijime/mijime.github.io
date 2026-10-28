@@ -18,6 +18,7 @@ import {
   rewardLabel,
   targetTypeForLane,
   taskOwnerName,
+  ThemeBadge,
 } from "./ui";
 
 interface Props {
@@ -125,8 +126,8 @@ export function TaskCardView({ state, task, dispatch, selectedCard, compact = fa
         }
       }}
       className={`flow-card flow-card-in border-l-2 p-2 ${
-        canTarget ? "cursor-pointer ring-2 ring-(--accent)/60" : ""
-      }`}
+        task.kind === "relic" ? "border-l-4 bg-(--accent)/5" : ""
+      } ${canTarget ? "cursor-pointer ring-2 ring-(--accent)/60" : ""}`}
       style={{ borderLeftColor: accent }}
       title={canTarget ? "選択中のカードを置く" : undefined}
     >
@@ -139,6 +140,11 @@ export function TaskCardView({ state, task, dispatch, selectedCard, compact = fa
         {task.kind === "incident" && (
           <Badge tone="danger" className="shrink-0 font-bold tracking-wider">
             INC
+          </Badge>
+        )}
+        {task.kind === "relic" && (
+          <Badge tone="accent" className="shrink-0 font-bold tracking-wider">
+            RELIC
           </Badge>
         )}
         {canUseMi && (
@@ -162,13 +168,14 @@ export function TaskCardView({ state, task, dispatch, selectedCard, compact = fa
       </div>
 
       <div className="mt-0.5 flex flex-wrap items-center gap-1 text-[9px] text-(--mid)">
+        <ThemeBadge theme={task.theme} />
         {!compact && <span>{taskOwnerName(state, task)}</span>}
         {owner && compact && <span>{owner.name}</span>}
         {isDone && <span>Day {task.acquiredDay} 完了</span>}
         {task.expiredLane && <span className="font-medium text-(--danger)">期限切れ</span>}
       </div>
 
-      {task.kind === "incident" && task.penalty && (
+      {(task.kind === "incident" || task.kind === "relic") && task.penalty && (
         <p className="mt-0.5 text-[9px] font-medium text-(--danger)">
           期限切れ: {penaltyLabel(task.penalty)}
         </p>
@@ -247,18 +254,27 @@ export function TaskCardView({ state, task, dispatch, selectedCard, compact = fa
 
       <div className="mt-1 flex flex-wrap items-center justify-between gap-1">
         <DeadlinePips task={task} />
-        <span
-          className="inline-flex items-center gap-0.5 rounded-sm border border-(--border) bg-(--surface) px-1 py-0.5 text-[9px] text-(--ink)"
-          title={rewardLabel(task)}
-        >
-          <CardTypeBadge type={task.reward.type} size={8} />
-          <LevelStars level={task.reward.level} className="text-[9px] text-(--accent)" />
-          {task.reward.effect && (
-            <span className="ml-0.5 text-[8px] font-medium text-(--mid)">
-              {effectLabel(task.reward.effect)}
-            </span>
-          )}
-        </span>
+        {task.kind === "relic" ? (
+          <span
+            className="inline-flex items-center gap-0.5 rounded-sm border border-(--accent)/40 bg-(--accent)/10 px-1 py-0.5 text-[9px] font-semibold text-(--accent)"
+            title="完了時にチームレリック3択"
+          >
+            RELIC 3択
+          </span>
+        ) : task.reward ? (
+          <span
+            className="inline-flex items-center gap-0.5 rounded-sm border border-(--border) bg-(--surface) px-1 py-0.5 text-[9px] text-(--ink)"
+            title={rewardLabel(task)}
+          >
+            <CardTypeBadge type={task.reward.type} size={8} />
+            <LevelStars level={task.reward.level} className="text-[9px] text-(--accent)" />
+            {task.reward.effect && (
+              <span className="ml-0.5 text-[8px] font-medium text-(--mid)">
+                {effectLabel(task.reward.effect)}
+              </span>
+            )}
+          </span>
+        ) : null}
       </div>
     </article>
   );

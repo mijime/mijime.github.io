@@ -18,14 +18,31 @@ import {
   type TaskTheme,
 } from "./taskThemes";
 
-interface EffectSpec {
-  kind: CardEffectKind;
-  amount: number;
+type EffectSpec =
+  | { kind: "draw"; amount: number }
+  | { kind: "action"; amount: number }
+  | { kind: "debt-clean"; amount: number }
+  | { kind: "deadline"; amount: number }
+  | { kind: "token"; amount: number }
+  | { kind: "shield"; amount: number }
+  | { kind: "cycle"; draw: number; discard: number }
+  | { kind: "recover"; amount: number }
+  | { kind: "refresh"; draw: number };
+
+interface DeckCounts {
+  normal: number;
+  effect: number;
+  incident: number;
+  relic: number;
 }
 
-const NORMAL_COUNT = 42;
-const EFFECT_COUNT = 24;
-const INCIDENT_COUNT = 6;
+/** 日数ごとの山札構成。10日は効果カードを通常より多くしてコンボを試しやすくする。 */
+const DECK_COUNTS: Record<number, DeckCounts> = {
+  10: { normal: 10, effect: 16, incident: 3, relic: 1 },
+  20: { normal: 19, effect: 25, incident: 4, relic: 1 },
+  30: { normal: 24, effect: 31, incident: 5, relic: 2 },
+  100: { normal: 28, effect: 38, incident: 6, relic: 4 },
+};
 
 const NORMAL_SCORES = [
   1,
@@ -37,16 +54,39 @@ const NORMAL_SCORES = [
 
 const INCIDENT_SCORES = [1, 1, 2, 2, 2, 2];
 
+/** アクションとドローを厚くした効果プール。 */
 const EFFECT_SPECS: EffectSpec[] = [
   ...Array.from({ length: 6 }, () => ({ kind: "draw" as const, amount: 1 })),
-  ...Array.from({ length: 3 }, () => ({ kind: "action" as const, amount: 1 })),
-  { kind: "debt-clean", amount: 1 },
-  { kind: "debt-clean", amount: 2 },
-  { kind: "debt-clean", amount: 2 },
-  ...Array.from({ length: 4 }, () => ({ kind: "deadline" as const, amount: 1 })),
-  ...Array.from({ length: 5 }, () => ({ kind: "token" as const, amount: 1 })),
-  { kind: "token", amount: 2 },
+  ...Array.from({ length: 4 }, () => ({ kind: "draw" as const, amount: 2 })),
+  ...Array.from({ length: 8 }, () => ({ kind: "action" as const, amount: 1 })),
+  ...Array.from({ length: 4 }, () => ({ kind: "action" as const, amount: 2 })),
+  ...Array.from({ length: 3 }, () => ({ kind: "debt-clean" as const, amount: 1 })),
+  ...Array.from({ length: 2 }, () => ({ kind: "debt-clean" as const, amount: 2 })),
+  ...Array.from({ length: 3 }, () => ({ kind: "deadline" as const, amount: 1 })),
+  ...Array.from({ length: 3 }, () => ({ kind: "token" as const, amount: 1 })),
   ...Array.from({ length: 2 }, () => ({ kind: "shield" as const, amount: 1 })),
+  ...Array.from({ length: 2 }, () => ({ kind: "cycle" as const, draw: 1, discard: 1 })),
+  { kind: "recover", amount: 1 },
+  ...Array.from({ length: 2 }, () => ({ kind: "refresh" as const, draw: 3 })),
+];
+
+const RELIC_TITLES = [
+  "全社LLM移行",
+  "ゼロダウンタイム基盤刷新",
+  "推論コスト半減",
+  "マルチテナント分離",
+  "エージェント全社展開",
+  "GPUクラスタ再構築",
+  "レガシー脱却",
+  "次世代API統合",
+];
+
+const RELIC_PENALTIES: TaskPenalty[] = [
+  { kind: "debt", target: "all", amount: 3 },
+  { kind: "debt", target: "all", amount: 2 },
+  { kind: "teamScore", amount: 6 },
+  { kind: "discardHand", target: "all" },
+  { kind: "loseAction", target: "all", amount: 2 },
 ];
 
 const PENALTY_POOL: TaskPenalty[] = [
@@ -60,6 +100,10 @@ const PENALTY_POOL: TaskPenalty[] = [
   { kind: "loseAction", target: "all", amount: 1 },
   { kind: "loseAction", target: "owner", amount: 1 },
 ];
+
+function countsFor(totalDays: number): DeckCounts {
+  return DECK_COUNTS[totalDays] ?? DECK_COUNTS[10]!;
+}
 
 function pickWeightedTheme(state: GameState): TaskTheme {
   const total = TASK_THEMES.reduce((sum, theme) => sum + theme.weight, 0);
@@ -106,13 +150,22 @@ function makeEffect(spec: EffectSpec): CardEffect {
       return { kind: "token", token: "mi", amount: spec.amount };
     case "shield":
       return { kind: "shield", amount: spec.amount };
+    case "cycle":
+      return { kind: "cycle", draw: spec.draw, discard: spec.discard };
+    case "recover":
+      return { kind: "recover", amount: spec.amount };
+    case "refresh":
+      return { kind: "refresh", draw: spec.draw };
   }
 }
 
 function effectScore(spec: EffectSpec): number {
-  if (spec.kind === "debt-clean") return spec.amount === 1 ? 2 : 1;
-  if (spec.kind === "deadline" || spec.kind === "shield") return 2;
-  return 1;
+  // 効果カード自体が企業価値になるよう、基本スコアを+2する。
+  // 要求量は applyValueRequirements がスコア込みの価値から逆算する。
+  if (spec.kind === "draw" || spec.kind === "action") return spec.amount >= 2 ? 4 : 3;
+  if (spec.kind === "debt-clean") return spec.amount === 1 ? 4 : 3;
+  if (spec.kind === "deadline" || spec.kind === "shield" || spec.kind === "refresh") return 4;
+  return 3;
 }
 
 function effectRewardLevel(state: GameState, spec: EffectSpec): number {
@@ -128,12 +181,16 @@ function effectRewardLevel(state: GameState, spec: EffectSpec): number {
       return 4 + randInt(state, 2);
     case "shield":
       return 3 + randInt(state, 2);
+    case "cycle":
+    case "recover":
+    case "refresh":
+      return 4;
   }
 }
 
 /**
- * テンプレートを使わず、テーマ・比率・価値-first だけで72枚を生成する。
- * 名前・スコア・報酬・納期・効果・罰則を毎ゲーム作り直す。
+ * テンプレートを使わず、テーマ・比率・価値-first でタスクを作る。
+ * 日数に応じて山札枚数を変え、レリックタスクも生成する。
  */
 export function generateAutoTasks(
   state: GameState,
@@ -141,6 +198,7 @@ export function generateAutoTasks(
   swing = DEFAULT_GENERATION_SWING,
 ): TaskDef[] {
   const defs: TaskDef[] = [];
+  const counts = countsFor(state.totalDays);
   const usedNames = new Set<string>();
 
   const uniqueName = (base: string): string => {
@@ -165,12 +223,23 @@ export function generateAutoTasks(
     return uniqueName(title);
   };
 
-  const add = (def: TaskDef): void => {
+  const add = (def: TaskDef, requirementScale = 1): void => {
     applyValueRequirements(def, state, totalScale, swing);
+    if (requirementScale !== 1) {
+      for (const phase of ["design", "dev", "test"] as const) {
+        if (def.requirements[phase] > 0) {
+          def.requirements[phase] = Math.max(
+            1,
+            Math.round(def.requirements[phase] * requirementScale),
+          );
+        }
+      }
+    }
     defs.push(def);
   };
 
-  for (const score of NORMAL_SCORES) {
+  const normalScores = shuffle(state, NORMAL_SCORES).slice(0, counts.normal);
+  for (const score of normalScores) {
     const theme = pickWeightedTheme(state);
     const subject = pickOne(state, theme.subjects);
     const suffix = pickOne(state, NORMAL_SUFFIXES);
@@ -189,7 +258,7 @@ export function generateAutoTasks(
     });
   }
 
-  const effectSpecs = shuffle(state, EFFECT_SPECS);
+  const effectSpecs = shuffle(state, EFFECT_SPECS).slice(0, counts.effect);
   for (const spec of effectSpecs) {
     const theme = pickWeightedTheme(state);
     add({
@@ -208,8 +277,9 @@ export function generateAutoTasks(
     });
   }
 
-  const penalties = shuffle(state, PENALTY_POOL).slice(0, INCIDENT_COUNT);
-  for (const score of INCIDENT_SCORES) {
+  const penalties = shuffle(state, PENALTY_POOL);
+  const incidentScores = shuffle(state, INCIDENT_SCORES).slice(0, counts.incident);
+  for (const score of incidentScores) {
     const theme = pickWeightedTheme(state);
     const subject = pickOne(state, theme.incidentSubjects);
     const suffix = pickOne(state, INCIDENT_SUFFIXES);
@@ -227,6 +297,29 @@ export function generateAutoTasks(
     });
   }
 
+  const relicTitles = shuffle(state, RELIC_TITLES);
+  const relicPenalties = shuffle(state, RELIC_PENALTIES);
+  for (let index = 0; index < counts.relic; index += 1) {
+    const theme = pickWeightedTheme(state);
+    add(
+      {
+        id: `auto-${defs.length}`,
+        title: uniqueName(relicTitles[index % relicTitles.length] ?? "全社移行"),
+        theme: theme.id,
+        requirements: { ...theme.phaseWeights },
+        score: 8,
+        deadline: 8,
+        kind: "relic",
+        penalty: relicPenalties[index % relicPenalties.length] ?? {
+          kind: "debt",
+          target: "all",
+          amount: 3,
+        },
+      },
+      2.2,
+    );
+  }
+
   return defs;
 }
 
@@ -237,7 +330,8 @@ export const AUTO_GENERATION: TaskGenerationPolicy = {
 };
 
 export const AUTO_COUNTS = {
-  normal: NORMAL_COUNT,
-  effect: EFFECT_COUNT,
-  incident: INCIDENT_COUNT,
+  normal: 28,
+  effect: 38,
+  incident: 6,
+  relic: 4,
 };

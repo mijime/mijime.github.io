@@ -21,12 +21,10 @@ describe("benchmark", () => {
     expect(hundred?.score.median).toBeGreaterThan(0);
   });
 
-  it("プロファイル別の参考値を持つ", () => {
+  it("標準プロファイルの参考値を持つ", () => {
     const standard = benchmarkFor(5, 10, 0.1, "standard");
-    const strong = benchmarkFor(5, 10, 0.1, "strong");
     expect(standard?.aiProfile).toBe("standard");
-    expect(strong?.aiProfile).toBe("strong");
-    expect(strong?.score.median).toBeGreaterThan(standard?.score.median ?? 0);
+    expect(standard?.runs).toBe(1000);
   });
 
   it("得損の振れ幅ごとに参考値を持つ", () => {

@@ -55,6 +55,8 @@ export function createGame(
     metrics: [],
     outcome: null,
     lastAcquisition: null,
+    teamRelics: [],
+    pendingRelic: null,
     rules: teamRules,
   };
 
@@ -64,7 +66,14 @@ export function createGame(
       id: HUMAN_ID,
       name: "あなた",
       isHuman: true,
-      weights: { focus: 0, greed: 0, urgency: 0 },
+      weights: {
+        focus: 0,
+        greed: 0,
+        urgency: 0,
+        prudence: 0,
+        solidarity: 0,
+        appetite: 0,
+      },
     },
     ...characters.map((character) => ({
       id: character.id,

@@ -8,7 +8,14 @@ describe("samplePolicies", () => {
     expect(policies.slice(0, TOKEN_POLICIES.length)).toEqual(
       TOKEN_POLICIES.map((tokenPolicy) => ({
         tokenPolicy,
-        weights: { focus: 0, greed: 0, urgency: 0 },
+        weights: {
+          focus: 0,
+          greed: 0,
+          urgency: 0,
+          prudence: 0,
+          solidarity: 0,
+          appetite: 0,
+        },
       })),
     );
   });

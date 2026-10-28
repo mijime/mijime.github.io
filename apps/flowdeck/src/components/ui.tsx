@@ -5,6 +5,7 @@ import type {
   PersonalityWeights,
   TaskCard,
 } from "../engine/types";
+import { TASK_THEMES } from "../data/taskThemes";
 import { playerById, taskSum } from "../engine/metrics";
 import { effectDescription, effectLabel } from "../engine/rules/effects";
 import { effectivePlayLevel, phaseForLane } from "../engine/rules/lanes";
@@ -18,10 +19,13 @@ import {
   Hammer,
   Inbox,
   Palette,
+  Layers,
   Search,
+  Shield,
   Star,
   Timer,
   UserRound,
+  Users,
   Wrench,
 } from "lucide-react";
 
@@ -65,12 +69,18 @@ const TRAIT_ICON = {
   focus: Gauge,
   greed: Gem,
   urgency: Timer,
+  prudence: Shield,
+  solidarity: Users,
+  appetite: Layers,
 } as const;
 
 const TRAIT_DIRECTION: Record<keyof PersonalityWeights, (value: number) => string> = {
   focus: (value) => (value >= 0 ? "仕上げ" : "着手"),
   greed: (value) => (value >= 0 ? "報酬" : "整理"),
   urgency: (value) => (value >= 0 ? "納期" : "長期"),
+  prudence: (value) => (value >= 0 ? "慎重" : "強気"),
+  solidarity: (value) => (value >= 0 ? "支援" : "自走"),
+  appetite: (value) => (value >= 0 ? "抱え込み" : "集中"),
 };
 
 export function topTrait(weights: PersonalityWeights): keyof PersonalityWeights {
@@ -180,6 +190,31 @@ export const CARD_LABEL: Record<CardType, string> = {
   test: "テスト",
   debt: "負債",
 };
+
+export const THEME_LABEL: Record<string, string> = Object.fromEntries(
+  TASK_THEMES.map((theme) => [theme.id, theme.label]),
+);
+
+const THEME_STYLE: Record<string, string> = {
+  llm: "border-(--tone-violet)/40 bg-(--tone-violet)/10 text-(--tone-violet)",
+  agent: "border-(--tone-blue)/40 bg-(--tone-blue)/10 text-(--tone-blue)",
+  saas: "border-(--tone-teal)/40 bg-(--tone-teal)/10 text-(--tone-teal)",
+  platform: "border-(--tone-amber)/40 bg-(--tone-amber)/10 text-(--tone-amber)",
+};
+
+export function ThemeBadge({ theme, className = "" }: { theme?: string; className?: string }) {
+  if (!theme) return null;
+  return (
+    <span
+      className={`inline-flex shrink-0 items-center rounded-[2px] border px-1 py-px text-[8px] font-semibold leading-tight ${
+        THEME_STYLE[theme] ?? "border-(--border) bg-(--grid)/40 text-(--mid)"
+      } ${className}`}
+      title={`${THEME_LABEL[theme] ?? theme}テーマ`}
+    >
+      {THEME_LABEL[theme] ?? theme}
+    </span>
+  );
+}
 
 export const CARD_STYLE: Record<CardType, string> = {
   design: "border-(--tone-violet)/45 bg-(--tone-violet)/10 text-(--ink)",
@@ -320,6 +355,8 @@ export function canPlayCardOnTask(
 }
 
 export function rewardLabel(task: TaskCard): string {
+  if (task.kind === "relic") return "報酬: チームレリック3択";
+  if (!task.reward) return "報酬なし";
   const effect = effectLabel(task.reward.effect);
   const description = effectDescription(task.reward.effect);
   return `報酬: ${CARD_LABEL[task.reward.type]}lv${task.reward.level}${

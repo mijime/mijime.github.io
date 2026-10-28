@@ -4,7 +4,14 @@ import { playerSamples, seatRows } from "../aggregate";
 import { heading, printTable, subheading } from "../format";
 import type { RunResult } from "../runner";
 
-const AXES: (keyof PersonalityWeights)[] = ["focus", "greed", "urgency"];
+const AXES: (keyof PersonalityWeights)[] = [
+  "focus",
+  "greed",
+  "urgency",
+  "prudence",
+  "solidarity",
+  "appetite",
+];
 
 function formatCorrelation(value: number | null): string {
   return value === null ? "-" : value.toFixed(2);
@@ -17,7 +24,7 @@ export function printCorrelations(results: RunResult[]): void {
   subheading("性格軸と個人成績（Pearson / Spearman）");
   const rows: string[][] = [];
   for (const axis of AXES) {
-    const values = samples.map((sample) => sample.weights[axis]);
+    const values = samples.map((sample) => sample.weights[axis] ?? 0);
     const metrics: { label: string; values: number[] }[] = [
       { label: "報酬pt", values: samples.map((sample) => sample.score) },
       { label: "獲得数", values: samples.map((sample) => sample.completed) },

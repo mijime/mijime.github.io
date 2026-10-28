@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { playBotRound, reduce } from "./reducer";
+import { RELICS } from "../data/relics";
 import { TASK_DEFS } from "../data/tasks";
 import { pushLog } from "./log";
 import { createGame } from "./setup";
@@ -80,10 +81,10 @@ describe("setup", () => {
     expect(state.players[0]?.hand).toHaveLength(HAND_SIZE);
     expect(state.players[0]?.deck.length).toBe(12 - HAND_SIZE);
     expect(state.tasks.filter((task) => task.lane === "open")).toHaveLength(state.rules.openTasks);
-    expect(state.taskDeck).toHaveLength(TASK_DEFS.length - state.rules.openTasks);
+    expect(state.taskDeck).toHaveLength(state.taskDefs.length - state.rules.openTasks);
     expect(state.riskDeck).toHaveLength(16);
     expect(state.phase).toBe("human");
-    expect(state.rules).toMatchObject({ openTasks: 4, debtLimit: 6, starThree: 45 });
+    expect(state.rules).toMatchObject({ openTasks: 4, debtLimit: 5, starThree: 52 });
     expect(state.players.filter((player) => !player.isHuman)).toHaveLength(4);
     expect(state.players.every((player) => player.hand.length === HAND_SIZE)).toBe(true);
   });
@@ -105,49 +106,52 @@ describe("setup", () => {
     expect(state.rules).toMatchObject({
       openTasks: 3,
       debtLimit: 5,
-      starThree: 36,
+      starThree: 41,
     });
   });
 
   it("20日/30日/100日で目標と負債上限が伸びる", () => {
     const twenty = createGame(1, 20, 4);
     expect(twenty.totalDays).toBe(20);
-    expect(twenty.rules).toMatchObject({ debtLimit: 7, starOne: 80, starTwo: 89, starThree: 94 });
+    expect(twenty.rules).toMatchObject({
+      debtLimit: 5,
+      starOne: 94,
+      starTwo: 110,
+      starThree: 118,
+    });
     const thirty = createGame(1, 30, 4);
     expect(thirty.totalDays).toBe(30);
     expect(thirty.rules).toMatchObject({
-      debtLimit: 8,
-      starOne: 129,
-      starTwo: 142,
-      starThree: 145,
+      debtLimit: 6,
+      starOne: 152,
+      starTwo: 180,
+      starThree: 195,
     });
     const hundred = createGame(1, 100, 4);
     expect(hundred.totalDays).toBe(100);
     expect(hundred.rules).toMatchObject({
-      debtLimit: 11,
-      starOne: 505,
-      starTwo: 525,
-      starThree: 533,
+      debtLimit: 6,
+      starOne: 777,
+      starTwo: 934,
+      starThree: 969,
     });
   });
 
-  it("全ゲーム長×人数×プロファイルの目標値が揃っている", () => {
-    for (const profile of ["standard", "strong"] as const) {
-      for (const players of [4, 5, 6]) {
-        for (const days of GAME_LENGTH_OPTIONS) {
-          const rules = teamRulesFor(players, days, profile);
-          expect(rules.openTasks).toBeGreaterThan(0);
-          expect(rules.debtLimit).toBeGreaterThan(0);
-          expect(rules.starOne).toBeLessThan(rules.starTwo);
-          expect(rules.starTwo).toBeLessThan(rules.starThree);
-        }
+  it("全ゲーム長×人数の目標値が揃っている", () => {
+    for (const players of [4, 5, 6]) {
+      for (const days of GAME_LENGTH_OPTIONS) {
+        const rules = teamRulesFor(players, days);
+        expect(rules.openTasks).toBeGreaterThan(0);
+        expect(rules.debtLimit).toBeGreaterThan(0);
+        expect(rules.starOne).toBeLessThan(rules.starTwo);
+        expect(rules.starTwo).toBeLessThan(rules.starThree);
       }
     }
   });
 
-  it("有能プロファイルでは強めの範囲で性格がランダムになる", () => {
-    const state = createGame(1, 10, 4, BASE_RULES, undefined, "strong");
-    expect(state.aiProfile).toBe("strong");
+  it("標準プロファイルでは慎重・低WIP寄りの範囲で性格がランダムになる", () => {
+    const state = createGame(1, 10, 4);
+    expect(state.aiProfile).toBe("standard");
     const ais = state.players.filter((player) => !player.isHuman);
     expect(ais).toHaveLength(4);
     for (const ai of ais) {
@@ -157,12 +161,18 @@ describe("setup", () => {
       expect(ai.weights.greed).toBeLessThanOrEqual(-0.25);
       expect(ai.weights.urgency).toBeGreaterThanOrEqual(0.5);
       expect(ai.weights.urgency).toBeLessThanOrEqual(1);
+      expect(ai.weights.prudence).toBeGreaterThanOrEqual(0.2);
+      expect(ai.weights.prudence).toBeLessThanOrEqual(0.8);
+      expect(ai.weights.solidarity).toBeGreaterThanOrEqual(-0.2);
+      expect(ai.weights.solidarity).toBeLessThanOrEqual(0.4);
+      expect(ai.weights.appetite).toBeGreaterThanOrEqual(-0.8);
+      expect(ai.weights.appetite).toBeLessThanOrEqual(0.1);
     }
     expect(new Set(ais.map((ai) => JSON.stringify(ai.weights))).size).toBeGreaterThan(1);
   });
 
   it("標準プロファイルではAIの名前・性格がランダムで決まる", () => {
-    const state = createGame(1, 10, 4, BASE_RULES, undefined, "standard");
+    const state = createGame(1, 10, 4);
     const ais = state.players.filter((player) => !player.isHuman);
     expect(ais).toHaveLength(4);
     expect(new Set(ais.map((player) => player.name)).size).toBe(4);
@@ -201,7 +211,7 @@ describe("setup", () => {
 
   it("タスクはseedから生成され、名前は重複しない", () => {
     const state = createGame(42);
-    expect(state.taskDefs).toHaveLength(TASK_DEFS.length);
+    expect(state.taskDefs).toHaveLength(30);
     expect(new Set(state.taskDefs.map((task) => task.title)).size).toBe(state.taskDefs.length);
     expect(state.taskDefs.some((task) => task.title.includes("の"))).toBe(true);
     expect(state.taskDefs.some((task) => task.kind === "incident")).toBe(true);
@@ -209,7 +219,7 @@ describe("setup", () => {
 
   it("効果カードの一部にLLMトークン効果が付く", () => {
     const state = createGame(42);
-    const tokenTasks = state.taskDefs.filter((task) => task.reward.effect?.kind === "token");
+    const tokenTasks = state.taskDefs.filter((task) => task.reward?.effect?.kind === "token");
     expect(tokenTasks.length).toBeGreaterThan(0);
     expect(tokenTasks.every((task) => task.kind !== "incident")).toBe(true);
   });
@@ -231,6 +241,93 @@ describe("setup", () => {
     expect(stable.generationSwing).toBe(0);
     expect(volatile.generationSwing).toBe(0.2);
     expect(volatile.taskDefs).not.toEqual(stable.taskDefs);
+  });
+});
+
+describe("レリック", () => {
+  it("レリックタスク完了で人間に3択を提示し、選択でチームレリックを得る", () => {
+    const state = testState();
+    const task = addTask(state, "test", state.humanId, {
+      kind: "relic",
+      reward: undefined,
+      requirements: { design: 0, dev: 0, test: 1 },
+      score: 8,
+      penalty: { kind: "debt", target: "all", amount: 3 },
+    });
+    attach(state, task, state.humanId, "test", 1);
+
+    advanceTasks(state);
+
+    expect(task.lane).toBe("done");
+    expect(state.pendingRelic?.options).toHaveLength(3);
+    expect(state.teamRelics).toEqual([]);
+
+    const selected = state.pendingRelic?.options[0];
+    expect(selected).toBeTruthy();
+    const next = reduce(state, { type: "CHOOSE_RELIC", relicId: selected! });
+    expect(next.teamRelics).toEqual([selected]);
+    expect(next.pendingRelic).toBeNull();
+  });
+
+  it("AIが受取者なら自動でレリックを選ぶ", () => {
+    const state = testState();
+    const ai = state.players[1]!;
+    const task = addTask(state, "test", ai.id, {
+      kind: "relic",
+      reward: undefined,
+      requirements: { design: 0, dev: 0, test: 1 },
+      score: 8,
+    });
+    attach(state, task, ai.id, "test", 1);
+
+    advanceTasks(state);
+
+    expect(state.pendingRelic).toBeNull();
+    expect(state.teamRelics).toHaveLength(1);
+  });
+
+  it("上限時は交換するレリックを選ぶ", () => {
+    const state = testState();
+    state.teamRelics = RELICS.slice(0, 2).map((relic) => relic.id);
+    const task = addTask(state, "test", state.humanId, {
+      kind: "relic",
+      reward: undefined,
+      requirements: { design: 0, dev: 0, test: 1 },
+      score: 8,
+    });
+    attach(state, task, state.humanId, "test", 1);
+
+    advanceTasks(state);
+
+    expect(state.pendingRelic?.replace).toBe(true);
+    const selected = state.pendingRelic?.options[0];
+    const discard = state.teamRelics[0];
+    if (!selected || !discard) throw new Error("relic options missing");
+    const next = reduce(state, {
+      type: "CHOOSE_RELIC",
+      relicId: selected,
+      discardRelicId: discard,
+    });
+    expect(next.teamRelics).toHaveLength(2);
+    expect(next.teamRelics).toContain(selected);
+    expect(next.teamRelics).not.toContain(discard);
+  });
+
+  it("フローと洞察がターン開始時に効く", () => {
+    const state = testState();
+    state.teamRelics = ["flow", "insight"];
+    state.players[0]!.deck = Array.from({ length: 12 }, (_, index) => ({
+      id: 200 + index,
+      type: "design" as const,
+      level: 2,
+    }));
+    state.players[0]!.hand = [];
+    state.players[0]!.discard = [];
+
+    startPlayerTurn(state, state.humanId, BASE_RULES);
+
+    expect(state.players[0]?.actionsLeft).toBe(ACTIONS_PER_TURN + 1);
+    expect(state.players[0]?.hand).toHaveLength(HAND_SIZE + 1);
   });
 });
 
@@ -268,6 +365,61 @@ describe("タスクの流れ", () => {
     expect(task.lane).toBe("wip");
     expect(state.players[0]?.actionsLeft).toBe(ACTIONS_PER_TURN - 2);
     expect(state.players[0]?.contributed.design).toEqual({ cards: 2, points: 5 });
+  });
+
+  it("アクション効果は追加アクションを記録する", () => {
+    const state = testState();
+    const task = addTask(state, "inbox", state.humanId, {
+      requirements: { design: 10, dev: 0, test: 0 },
+    });
+    const boost = card(state, "design", 2, { kind: "action", amount: 2 });
+    state.players[0]!.hand = [boost];
+
+    expect(playCard(state, state.humanId, boost.id, task.id)).toBe(true);
+    expect(state.players[0]?.actionsLeft).toBe(ACTIONS_PER_TURN - 1 + 2);
+    expect(state.analytics.actionsGained).toBe(2);
+  });
+
+  it("ドロー効果は引いた枚数を記録する", () => {
+    const state = testState();
+    const task = addTask(state, "inbox", state.humanId, {
+      requirements: { design: 10, dev: 0, test: 0 },
+    });
+    const draw = card(state, "design", 2, { kind: "draw", amount: 2 });
+    state.players[0]!.hand = [draw];
+    state.players[0]!.deck = [card(state, "dev", 2), card(state, "test", 2)];
+
+    expect(playCard(state, state.humanId, draw.id, task.id)).toBe(true);
+    expect(state.analytics.cardsDrawn).toBe(2);
+  });
+
+  it("循環はドローと捨てを記録する", () => {
+    const state = testState();
+    const task = addTask(state, "inbox", state.humanId, {
+      requirements: { design: 10, dev: 0, test: 0 },
+    });
+    const cycle = card(state, "design", 2, { kind: "cycle", draw: 1, discard: 1 });
+    state.players[0]!.hand = [cycle, card(state, "design", 2)];
+    state.players[0]!.deck = [card(state, "dev", 2)];
+
+    expect(playCard(state, state.humanId, cycle.id, task.id)).toBe(true);
+    expect(state.analytics.cardsDrawn).toBe(1);
+    expect(state.analytics.cardsDiscarded).toBe(1);
+  });
+
+  it("回収は捨て札から手札に戻す", () => {
+    const state = testState();
+    const task = addTask(state, "inbox", state.humanId, {
+      requirements: { design: 10, dev: 0, test: 0 },
+    });
+    const recover = card(state, "design", 2, { kind: "recover", amount: 1 });
+    const reward = { ...card(state, "dev", 3), score: 2, title: "回収対象" };
+    state.players[0]!.hand = [recover];
+    state.players[0]!.discard = [reward];
+
+    expect(playCard(state, state.humanId, recover.id, task.id)).toBe(true);
+    expect(state.players[0]?.hand.some((c) => c.id === reward.id)).toBe(true);
+    expect(state.analytics.cardsRecovered).toBe(1);
   });
 
   it("開発カードで In Progress から Review へ進む", () => {
@@ -395,6 +547,7 @@ describe("タスクの流れ", () => {
   it("報酬カードの効果が捨て札に入る", () => {
     const state = testState();
     const task = addTask(state, "test", state.humanId, {
+      theme: "platform",
       requirements: { design: 0, dev: 0, test: 1 },
       score: 1,
       reward: { type: "design", level: 5, effect: { kind: "draw", amount: 1 } },
@@ -405,6 +558,8 @@ describe("タスクの流れ", () => {
 
     const reward = state.players[0]?.discard.find((c) => c.title === task.title);
     expect(reward?.effect).toEqual({ kind: "draw", amount: 1 });
+    expect(reward?.theme).toBe("platform");
+    expect(state.lastAcquisition?.theme).toBe("platform");
   });
 
   it("テストカードは他プレイヤーの Review タスクを支援できる", () => {
@@ -798,6 +953,23 @@ describe("ボードミーティング", () => {
 });
 
 describe("デッキと報酬", () => {
+  it("デッキ構成だけでは最終評価に加点されない", () => {
+    const state = testState();
+    const player = state.players[0]!;
+    player.discard = [
+      { id: 1, type: "design", level: 3, score: 2, title: "a", theme: "llm" },
+      { id: 2, type: "dev", level: 3, score: 2, title: "b", theme: "llm" },
+      { id: 3, type: "test", level: 3, score: 2, title: "c", theme: "llm" },
+    ];
+    state.teamScore = 10;
+    state.teamDebt = 0;
+    state.scorePenalty = 0;
+
+    const outcome = computeOutcome(state);
+
+    expect(outcome.finalScore).toBe(10);
+  });
+
   it("賄えないリスクカードがあると負債カードを得る", () => {
     const state = testState();
     state.riskDeck = ["r-design2"];
@@ -918,7 +1090,7 @@ describe("デッキと報酬", () => {
     expect(state.players[0]?.actionsLeft).toBe(ACTIONS_PER_TURN);
   });
 
-  it("テストカードはReviewでも印刷されたlvのまま（+1しない）", () => {
+  it("テストカードはReviewでもレーン補正なし（+1しない）", () => {
     const state = testState();
     const task = addTask(state, "test", state.humanId, {
       requirements: { design: 0, dev: 0, test: 5 },
@@ -964,7 +1136,7 @@ describe("デッキと報酬", () => {
   });
 
   it("タスク報酬はすべてlv1以上", () => {
-    expect(TASK_DEFS.every((task) => task.reward.level >= 1)).toBe(true);
+    expect(TASK_DEFS.every((task) => (task.reward?.level ?? 0) >= 1)).toBe(true);
   });
 
   it("1アクションで手札を1枚廃棄できる", () => {
