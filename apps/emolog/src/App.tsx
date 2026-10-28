@@ -461,7 +461,11 @@ export function App() {
           </>
         )}
         {activeTab === "calendar" && (
-          <CalendarTab listId={selectedListId} onSelectEmoji={handleSelectEmojiFromStats} />
+          <CalendarTab
+            listId={selectedListId}
+            onSelectEmoji={handleSelectEmojiFromStats}
+            onSnackBar={handleSnackBar}
+          />
         )}
         {activeTab === "stats" && (
           <StatsView selectedListId={selectedListId} onSelectEmoji={handleSelectEmojiFromStats} />

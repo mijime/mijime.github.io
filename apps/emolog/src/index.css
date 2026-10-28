@@ -522,6 +522,42 @@
   margin-bottom: 12px;
 }
 
+.emolog-emoji-picker {
+  margin: 6px 0 10px;
+}
+
+.emolog-emoji-picker-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+  color: var(--mid);
+  font-size: 11px;
+}
+
+.emolog-emoji-picker-header button {
+  display: inline-flex;
+  padding: 2px;
+  border: none;
+  background: none;
+  color: var(--mid);
+  cursor: pointer;
+}
+
+.emolog-emoji-picker-element {
+  --background: var(--surface);
+  --border-color: var(--grid);
+  --input-border-color: var(--grid);
+  --input-border-focus-color: var(--accent);
+  --indicator-color: var(--accent);
+  --button-active-background: var(--hover);
+  width: 100%;
+  height: 300px;
+  border: 1px solid var(--grid);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
 .emolog-record-picker-element {
   --background: var(--surface);
   --border-color: var(--grid);
@@ -565,6 +601,34 @@
 /* ── 履歴タブ ── */
 .emolog-history {
   flex: 1;
+}
+
+.emolog-history-search {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 10px;
+  padding: 0 10px;
+  border: 1px solid var(--grid);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--mid);
+}
+
+.emolog-history-search-input {
+  flex: 1;
+  min-width: 0;
+  padding: 8px 0;
+  border: none;
+  background: none;
+  color: var(--ink);
+  font-family: inherit;
+  font-size: 13px;
+  outline: none;
+}
+
+.emolog-history-search-input::placeholder {
+  color: var(--mid);
 }
 
 .emolog-history-toolbar {
@@ -717,6 +781,9 @@
     background 0.15s;
   border-radius: 6px;
   padding: 2px 4px;
+  user-select: none;
+  -webkit-touch-callout: none;
+  touch-action: manipulation;
 }
 
 .emolog-history-emoji:hover {
@@ -728,20 +795,10 @@
   background: var(--accent);
 }
 
-.emolog-history-emoji-edit {
-  flex-shrink: 0;
-}
-
-.emolog-history-emoji-input {
-  width: 40px;
-  padding: 2px 4px;
-  font-size: 20px;
-  text-align: center;
-  border: 1px solid var(--accent);
-  border-radius: 6px;
-  background: var(--bg);
-  outline: none;
-  box-sizing: border-box;
+.emolog-history-emoji-editing {
+  background: var(--hover);
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
 }
 
 .emolog-history-note {
@@ -1162,7 +1219,7 @@
   background: var(--grid);
 }
 
-/* ── タイムライン（デイカレンダー） ── */
+/* ── 日別タイムライン ── */
 .emolog-review {
   display: flex;
   flex-direction: column;
@@ -1237,85 +1294,72 @@
   gap: 4px;
 }
 
-.emolog-daycal {
-  position: relative;
-  max-height: min(55vh, 520px);
-  overflow-y: auto;
-  border: 1px solid var(--grid);
-  border-radius: 10px;
-  background: var(--surface);
-}
-
-.emolog-daycal-row {
-  display: grid;
-  grid-template-columns: 44px minmax(0, 1fr);
-  gap: 8px;
-  min-height: 42px;
-  padding: 4px 8px;
-  border-top: 1px solid var(--grid);
-}
-
-.emolog-daycal-row:first-child {
-  border-top: none;
-}
-
-.emolog-daycal-hour {
+.emolog-review-timeline {
   padding-top: 4px;
-  color: var(--mid);
-  font-size: 10px;
-  font-variant-numeric: tabular-nums;
+  padding-bottom: 4px;
 }
 
-.emolog-daycal-slot {
-  display: flex;
-  min-width: 0;
-  flex-direction: column;
-  gap: 4px;
-  padding: 2px 0;
-}
-
-.emolog-daycal-entry {
-  display: flex;
-  align-items: flex-start;
-  gap: 6px;
-  padding: 4px 6px;
-  border: 1px solid var(--grid);
-  border-radius: 6px;
-  background: var(--paper);
-}
-
-.emolog-daycal-time {
-  min-width: 34px;
-  padding-top: 2px;
-  color: var(--mid);
-  font-size: 10px;
-  font-variant-numeric: tabular-nums;
-}
-
-.emolog-daycal-emoji {
-  font-size: 16px;
-  line-height: 1.2;
-}
-
-.emolog-daycal-body {
+.emolog-review-entry-body {
   display: flex;
   flex: 1;
   min-width: 0;
   flex-direction: column;
-  gap: 2px;
+  gap: 4px;
 }
 
-.emolog-daycal-note {
+.emolog-review-note-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 4px;
+}
+
+.emolog-review-entry-note {
+  flex: 1;
   margin: 0;
+  color: var(--ink);
   font-size: 12px;
   line-height: 1.5;
   overflow-wrap: anywhere;
+  cursor: pointer;
 }
 
-.emolog-daycal-tags {
+.emolog-review-note-input {
+  flex: none;
+  width: 100%;
+}
+
+.emolog-review-entry-tags {
   display: flex;
   flex-wrap: wrap;
   gap: 4px;
+}
+
+.emolog-review-gap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-height: 30px;
+  padding: 3px 0;
+}
+
+.emolog-review-gap::before {
+  content: "";
+  position: absolute;
+  left: -19px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: repeating-linear-gradient(to bottom, var(--grid) 0 3px, var(--bg) 3px 8px);
+}
+
+.emolog-review-gap-label {
+  padding: 2px 8px;
+  border: 1px solid var(--grid);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--mid);
+  font-size: 10px;
+  line-height: 1.4;
 }
 
 .emolog-review-empty {

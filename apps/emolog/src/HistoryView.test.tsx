@@ -95,13 +95,71 @@ describe("HistoryView", () => {
     expect(link.getAttribute("href")).toContain("35.6,139.7");
   });
 
+  it("changes an emoji from the picker on double click", async () => {
+    vi.spyOn(store, "getEntriesByDateRange").mockResolvedValue([entries[0]]);
+    const update = vi.spyOn(store, "updateEntryEmoji").mockResolvedValue(1);
+    const { container } = renderHistory();
+
+    await screen.findByText("😀");
+    fireEvent.doubleClick(container.querySelector(".emolog-history-emoji")!);
+
+    const picker = container.querySelector("emoji-picker");
+    expect(picker).toBeTruthy();
+    fireEvent(picker!, new CustomEvent("emoji-click", { detail: { unicode: "😎" } }));
+
+    await waitFor(() => expect(update).toHaveBeenCalledWith(1, "😎"));
+    await waitFor(() => expect(container.querySelector("emoji-picker")).toBeNull());
+  });
+
   it("loads emoji matches from the whole history instead of the latest page", async () => {
-    const byRange = vi.spyOn(store, "getEntriesByDateRange").mockResolvedValue([]);
-    vi.spyOn(store, "getEntriesByEmoji").mockResolvedValue([
+    const all = vi.spyOn(store, "getAllEntries").mockResolvedValue([
       { id: 99, date: "2020-02-02", timestamp: 1000, emoji: "😀", note: "very old" },
+      { id: 100, date: "2020-02-03", timestamp: 2000, emoji: "😢", note: "other" },
     ]);
     renderHistory({ filterEmoji: "😀" });
     await screen.findByText("very old");
-    expect(byRange).not.toHaveBeenCalled();
+    expect(all).toHaveBeenCalledWith(1);
+    expect(screen.queryByText("other")).toBeNull();
+  });
+
+  it("searches notes across the whole history", async () => {
+    vi.spyOn(store, "getEntriesByDateRange").mockResolvedValue(entries);
+    vi.spyOn(store, "getAllEntries").mockResolvedValue([
+      { id: 99, date: "2020-02-02", timestamp: 1000, emoji: "😀", note: "very old" },
+      { id: 100, date: "2020-02-03", timestamp: 2000, emoji: "😢", note: "other" },
+    ]);
+    renderHistory();
+    await screen.findByText("😢");
+
+    fireEvent.change(screen.getByLabelText("履歴を検索"), { target: { value: "very" } });
+
+    expect(await screen.findByText("very old")).toBeTruthy();
+    await waitFor(() => expect(screen.queryByText("other")).toBeNull());
+  });
+
+  it("filters tags against the whole history", async () => {
+    vi.spyOn(store, "getEntriesByDateRange").mockResolvedValue(entries);
+    vi.spyOn(store, "getAllEntries").mockResolvedValue([
+      {
+        id: 99,
+        date: "2020-02-02",
+        timestamp: 1000,
+        emoji: "😀",
+        note: "old work",
+        tags: ["work"],
+      },
+      {
+        id: 100,
+        date: "2020-02-03",
+        timestamp: 2000,
+        emoji: "😢",
+        note: "old private",
+        tags: ["private"],
+      },
+    ]);
+    renderHistory({ filterTag: "work" });
+
+    expect(await screen.findByText("old work")).toBeTruthy();
+    expect(screen.queryByText("old private")).toBeNull();
   });
 });
