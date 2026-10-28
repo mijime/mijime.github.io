@@ -40,7 +40,7 @@ describe("Toolbar header", () => {
       </MindProvider>,
     );
     expect(screen.queryByRole("heading", { level: 1 })).toBeNull();
-    expect(screen.getByRole("button", { name: "サイドバーを隠す" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "サイドバーを表示" })).toBeTruthy();
   });
 
   it("does not render a theme toggle button", () => {

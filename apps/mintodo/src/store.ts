@@ -85,7 +85,7 @@ export function createInitialState(): State {
     boards: [],
     currentBoardId: null,
     draggingNodeId: null,
-    drawerOpen: true,
+    drawerOpen: false,
     hideCompleted: false,
     layoutVersion: 0,
     modal: null,

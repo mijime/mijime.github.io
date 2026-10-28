@@ -161,4 +161,194 @@ describe("usePanZoom", () => {
 
     expect(el.textContent).toContain("Zoom: 3");
   });
+
+  it("two-finger pinch out zooms in around the midpoint", async () => {
+    const { container } = render(
+      <MindProvider>
+        <TestComponent />
+      </MindProvider>,
+    );
+
+    const el = container.querySelector("div") as HTMLDivElement;
+
+    await act(() => {
+      el.dispatchEvent(
+        new PointerEvent("pointerdown", {
+          bubbles: true,
+          pointerType: "touch",
+          pointerId: 1,
+          clientX: 100,
+          clientY: 40,
+        }),
+      );
+      el.dispatchEvent(
+        new PointerEvent("pointerdown", {
+          bubbles: true,
+          pointerType: "touch",
+          pointerId: 2,
+          clientX: 140,
+          clientY: 40,
+        }),
+      );
+      window.dispatchEvent(
+        new PointerEvent("pointermove", {
+          bubbles: true,
+          pointerType: "touch",
+          pointerId: 2,
+          clientX: 180,
+          clientY: 40,
+        }),
+      );
+    });
+
+    // 距離が 40 -> 80 になるのでズームは 2 倍。
+    // 中点 (140, 40) を固定したまま、中点の移動分 (20, 0) だけパンする。
+    expect(el.textContent).toContain("Pan: 0, 0 | Zoom: 2");
+  });
+
+  it("accumulates zoom across interleaved pointer moves", async () => {
+    const { container } = render(
+      <MindProvider>
+        <TestComponent />
+      </MindProvider>,
+    );
+
+    const el = container.querySelector("div") as HTMLDivElement;
+
+    await act(() => {
+      el.dispatchEvent(
+        new PointerEvent("pointerdown", {
+          bubbles: true,
+          pointerType: "touch",
+          pointerId: 1,
+          clientX: 100,
+          clientY: 40,
+        }),
+      );
+      el.dispatchEvent(
+        new PointerEvent("pointerdown", {
+          bubbles: true,
+          pointerType: "touch",
+          pointerId: 2,
+          clientX: 140,
+          clientY: 40,
+        }),
+      );
+      // 1本目 40 -> 50 (x1.25)、2本目 50 -> 60 (x1.2) で合計 1.5 倍になる。
+      window.dispatchEvent(
+        new PointerEvent("pointermove", {
+          bubbles: true,
+          pointerType: "touch",
+          pointerId: 1,
+          clientX: 90,
+          clientY: 40,
+        }),
+      );
+      window.dispatchEvent(
+        new PointerEvent("pointermove", {
+          bubbles: true,
+          pointerType: "touch",
+          pointerId: 2,
+          clientX: 150,
+          clientY: 40,
+        }),
+      );
+    });
+
+    expect(el.textContent).toContain("Zoom: 1.5");
+  });
+
+  it("two-finger pinch in zooms out and clamps at 0.2", async () => {
+    const { container } = render(
+      <MindProvider>
+        <TestComponent />
+      </MindProvider>,
+    );
+
+    const el = container.querySelector("div") as HTMLDivElement;
+
+    await act(() => {
+      el.dispatchEvent(
+        new PointerEvent("pointerdown", {
+          bubbles: true,
+          pointerType: "touch",
+          pointerId: 1,
+          clientX: 100,
+          clientY: 40,
+        }),
+      );
+      el.dispatchEvent(
+        new PointerEvent("pointerdown", {
+          bubbles: true,
+          pointerType: "touch",
+          pointerId: 2,
+          clientX: 140,
+          clientY: 40,
+        }),
+      );
+      window.dispatchEvent(
+        new PointerEvent("pointermove", {
+          bubbles: true,
+          pointerType: "touch",
+          pointerId: 2,
+          clientX: 101,
+          clientY: 40,
+        }),
+      );
+    });
+
+    expect(el.textContent).toContain("Zoom: 0.2");
+  });
+
+  it("pointerup ends pinch tracking", async () => {
+    const { container } = render(
+      <MindProvider>
+        <TestComponent />
+      </MindProvider>,
+    );
+
+    const el = container.querySelector("div") as HTMLDivElement;
+
+    await act(() => {
+      el.dispatchEvent(
+        new PointerEvent("pointerdown", {
+          bubbles: true,
+          pointerType: "touch",
+          pointerId: 1,
+          clientX: 100,
+          clientY: 40,
+        }),
+      );
+      el.dispatchEvent(
+        new PointerEvent("pointerdown", {
+          bubbles: true,
+          pointerType: "touch",
+          pointerId: 2,
+          clientX: 140,
+          clientY: 40,
+        }),
+      );
+      window.dispatchEvent(
+        new PointerEvent("pointerup", {
+          bubbles: true,
+          pointerType: "touch",
+          pointerId: 2,
+          clientX: 140,
+          clientY: 40,
+        }),
+      );
+      window.dispatchEvent(
+        new PointerEvent("pointermove", {
+          bubbles: true,
+          pointerType: "touch",
+          pointerId: 1,
+          clientX: 110,
+          clientY: 50,
+        }),
+      );
+    });
+
+    // 残った1本指はパンとして扱われ、ズームは変わらない。
+    expect(el.textContent).toContain("Pan: 10, 10 | Zoom: 1");
+  });
 });

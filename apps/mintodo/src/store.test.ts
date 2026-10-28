@@ -34,7 +34,7 @@ describe("createInitialState", () => {
     expect(s.boards).toEqual([]);
     expect(s.currentBoardId).toBeNull();
     expect(s.nodes).toEqual({});
-    expect(s.drawerOpen).toBe(true);
+    expect(s.drawerOpen).toBe(false);
   });
 });
 
