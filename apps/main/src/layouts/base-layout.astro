@@ -11,6 +11,7 @@ interface Props {
   icon?: string;
   app?: string;
   description?: string;
+  viewport?: string;
 }
 const {
   title = "mijime",
@@ -20,6 +21,7 @@ const {
   icon = "/icons/site-180.png",
   app,
   description,
+  viewport = "width=device-width, initial-scale=1",
 } = Astro.props;
 const gtmId = import.meta.env.PUBLIC_GTM_ID;
 ---
@@ -28,7 +30,7 @@ const gtmId = import.meta.env.PUBLIC_GTM_ID;
 <html lang="ja">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content={viewport} />
     <title>{title}</title>
     <link rel="icon" type="image/x-icon" href="/favicon.ico" />
     <link rel="manifest" href={manifest} />
@@ -37,6 +39,22 @@ const gtmId = import.meta.env.PUBLIC_GTM_ID;
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-title" content={appName} />
+    <!-- Apply the saved theme before first paint so the page never flashes. -->
+    <script is:inline>
+      (() => {
+        const stored = (() => {
+          try {
+            return localStorage.getItem("theme");
+          } catch {
+            return null;
+          }
+        })();
+        const dark = stored
+          ? stored === "dark"
+          : matchMedia("(prefers-color-scheme: dark)").matches;
+        document.documentElement.dataset.theme = dark ? "dark" : "light";
+      })();
+    </script>
     {gtmId && <script is:inline define:vars={{ gtmId }}>
       window.dataLayer ??= [];
       window.dataLayer.push({ "gtm.start": Date.now(), event: "gtm.js" });

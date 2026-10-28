@@ -9,6 +9,12 @@
   height: calc(100vh - 52px);
 }
 
+/* otete: the selection/settings pages scroll under the site header, while the
+   activity screens go full-screen and hide the header. */
+html[data-otete-view="play"] .site-content {
+  height: 100dvh;
+}
+
 /* ── Shiki Syntax Highlight ─────────────────────────── */
 .shiki span {
   color: var(--shiki-light);
