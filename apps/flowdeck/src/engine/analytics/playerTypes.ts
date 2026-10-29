@@ -149,8 +149,8 @@ export const PLAYER_ARCHETYPES: readonly PlayerArchetype[] = [
   },
   {
     id: "combo",
-    label: "コンボデザイナー",
-    description: "効果カードを多用して盤面を動かす",
+    label: "デッキエンジニア",
+    description: "追加アクションとドローで手数を増やす",
     group: "utility",
   },
   BALANCED_ARCHETYPE,
@@ -177,6 +177,8 @@ interface Profile {
   tokenRatio: number;
   incidentRatio: number;
   effectRatio: number;
+  actionGainRatio: number;
+  drawRatio: number;
   designRatio: number;
   devRatio: number;
   testRatio: number;
@@ -186,6 +188,8 @@ interface Profile {
   tokenRate: number;
   incidentRate: number;
   effectRate: number;
+  actionGainRate: number;
+  drawRate: number;
   substitutionRate: number;
   completionRate: number;
   workPerPlay: number;
@@ -232,6 +236,8 @@ function profileOf(player: PlayerOutcome, team: PlayerOutcome[]): Profile {
   const teamTokens = team.map((entry) => entry.analytics?.tokensUsed ?? 0);
   const teamIncidents = team.map((entry) => entry.analytics?.incidentPlays ?? 0);
   const teamEffects = team.map((entry) => entry.analytics?.effectPlays ?? 0);
+  const teamActionsGained = team.map((entry) => entry.analytics?.actionsGained ?? 0);
+  const teamCardsDrawn = team.map((entry) => entry.analytics?.cardsDrawn ?? 0);
   const teamDesign = team.map((entry) => entry.contributed.design.cards);
   const teamDev = team.map((entry) => entry.contributed.dev.cards);
   const teamTest = team.map((entry) => entry.contributed.test.cards);
@@ -263,6 +269,8 @@ function profileOf(player: PlayerOutcome, team: PlayerOutcome[]): Profile {
     tokenRatio: ratio(analytics.tokensUsed, teamTokens),
     incidentRatio: ratio(analytics.incidentPlays, teamIncidents),
     effectRatio: ratio(analytics.effectPlays, teamEffects),
+    actionGainRatio: ratio(analytics.actionsGained, teamActionsGained),
+    drawRatio: ratio(analytics.cardsDrawn, teamCardsDrawn),
     designRatio: ratio(cards.design.cards, teamDesign),
     devRatio: ratio(cards.dev.cards, teamDev),
     testRatio: ratio(cards.test.cards, teamTest),
@@ -272,6 +280,8 @@ function profileOf(player: PlayerOutcome, team: PlayerOutcome[]): Profile {
     tokenRate: analytics.tokensUsed / Math.max(1, plays + analytics.tokensUsed),
     incidentRate: analytics.incidentPlays / Math.max(1, plays),
     effectRate: analytics.effectPlays / Math.max(1, plays),
+    actionGainRate: analytics.actionsGained / Math.max(1, plays),
+    drawRate: analytics.cardsDrawn / Math.max(1, plays),
     substitutionRate: analytics.substitutions / Math.max(1, plays),
     completionRate: player.completed / Math.max(1, plays),
     workPerPlay: work / Math.max(1, plays),
@@ -403,7 +413,14 @@ const RULES: Rule[] = [
   },
   {
     type: ARCHETYPE_BY_ID.get("combo")!,
-    score: (p) => 6 * p.effectRatio + 22 * p.effectRate + 2 * p.workRatio,
+    score: (p) =>
+      6 * p.effectRatio +
+      22 * p.effectRate +
+      8 * p.actionGainRatio +
+      6 * p.drawRatio +
+      10 * p.actionGainRate +
+      6 * p.drawRate +
+      2 * p.workRatio,
   },
 ];
 

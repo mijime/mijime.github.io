@@ -1,8 +1,11 @@
-import { useEffect, useMemo, useRef, useState } from "react";
-import { ArrowLeft, ChevronLeft, ChevronRight } from "lucide-react";
+import { Fragment, useEffect, useMemo, useRef, useState } from "react";
+import { ArrowLeft, ChevronLeft, ChevronRight, Pencil, Trash2 } from "lucide-react";
 import { Button, IconButton } from "@mijime/theme/ui";
-import { getEntries } from "./store";
-import { buildDailyReview, formatReviewSpan, groupByHour, type DailyReview } from "./review";
+import { deleteEntry, getEntries, updateEntryEmoji, updateEntryNote } from "./store";
+import { buildDailyReview, buildTimelineGaps, formatReviewSpan, type DailyReview } from "./review";
+import { EmojiButton } from "./EmojiButton";
+import { EmojiPicker } from "./EmojiPicker";
+import { extractTags } from "./tags";
 import { formatTime, type Entry } from "./types";
 
 interface ReviewViewProps {
@@ -12,9 +15,8 @@ interface ReviewViewProps {
   onDateChange: (date: string) => void;
   onBack: () => void;
   onSelectEmoji: (emoji: string) => void;
+  onSnackBar?: (message: string, action?: { label: string; onClick: () => void }) => void;
 }
-
-const HOURS = Array.from({ length: 24 }, (_, hour) => hour);
 
 function shiftDate(date: string, delta: number): string {
   const parsed = new Date(`${date}T00:00:00`);
@@ -36,11 +38,24 @@ export function ReviewView({
   onDateChange,
   onBack,
   onSelectEmoji,
+  onSnackBar,
 }: ReviewViewProps) {
   const [entries, setEntries] = useState<Entry[]>([]);
   const [loading, setLoading] = useState(false);
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const rowRefs = useRef(new Map<number, HTMLDivElement>());
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [editNote, setEditNote] = useState("");
+  const [editingEmojiId, setEditingEmojiId] = useState<number | null>(null);
+  const editInputRef = useRef<HTMLInputElement>(null);
+  const deleteTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const dateRef = useRef(date);
+  dateRef.current = date;
+
+  useEffect(
+    () => () => {
+      if (deleteTimerRef.current) clearTimeout(deleteTimerRef.current);
+    },
+    [],
+  );
 
   useEffect(() => {
     let cancelled = false;
@@ -61,18 +76,65 @@ export function ReviewView({
   }, [date, listId]);
 
   const review: DailyReview = useMemo(() => buildDailyReview(entries, date), [entries, date]);
-  const byHour = useMemo(() => groupByHour(review.entries), [review.entries]);
+  const gaps = useMemo(() => buildTimelineGaps(review.entries), [review.entries]);
+  const gapByIndex = useMemo(() => new Map(gaps.map((gap) => [gap.index, gap])), [gaps]);
   const span = formatReviewSpan(review);
   const topEmoji = review.topEmoji;
-  const firstHour = review.entries[0] ? new Date(review.entries[0].timestamp).getHours() : 0;
 
-  useEffect(() => {
-    const container = scrollRef.current;
-    const row = rowRefs.current.get(firstHour);
-    if (container && row) {
-      container.scrollTop = Math.max(0, row.offsetTop - 8);
-    }
-  }, [date, firstHour, review.entries.length]);
+  function handleStartEdit(entry: Entry) {
+    if (entry.id === undefined) return;
+    setEditingId(entry.id);
+    setEditNote(entry.note || "");
+    setTimeout(() => editInputRef.current?.focus(), 50);
+  }
+
+  async function handleSaveNote() {
+    if (editingId === null) return;
+    const note = editNote.trim();
+    const tags = extractTags(note);
+    await updateEntryNote(editingId, note || "");
+    setEntries((prev) =>
+      prev.map((entry) =>
+        entry.id === editingId ? { ...entry, note: note || undefined, tags } : entry,
+      ),
+    );
+    setEditingId(null);
+    setEditNote("");
+  }
+
+  async function handleEmojiChange(entry: Entry, newEmoji: string) {
+    if (entry.id === undefined || newEmoji === entry.emoji) return;
+    await updateEntryEmoji(entry.id, newEmoji);
+    setEntries((prev) =>
+      prev.map((item) => (item.id === entry.id ? { ...item, emoji: newEmoji } : item)),
+    );
+    setEditingEmojiId(null);
+  }
+
+  function handleDelete(entry: Entry) {
+    if (entry.id === null || entry.id === undefined) return;
+    setEntries((prev) => prev.filter((item) => item.id !== entry.id));
+    const timer = setTimeout(async () => {
+      await deleteEntry(entry.id!);
+    }, 3000);
+    deleteTimerRef.current = timer;
+    onSnackBar?.("削除しました", {
+      label: "取り消し",
+      onClick: () => {
+        if (deleteTimerRef.current) {
+          clearTimeout(deleteTimerRef.current);
+          deleteTimerRef.current = null;
+        }
+        // 表示中の日付が変わっていたら、別の日の一覧には戻さない。
+        if (entry.date !== dateRef.current) return;
+        setEntries((prev) => {
+          const restored = [...prev, entry];
+          restored.sort((a, b) => a.timestamp - b.timestamp);
+          return restored;
+        });
+      },
+    });
+  }
 
   return (
     <div className="emolog-review">
@@ -140,42 +202,90 @@ export function ReviewView({
             </div>
           )}
 
-          <div className="emolog-daycal" ref={scrollRef}>
-            {HOURS.map((hour) => (
-              <div
-                key={hour}
-                className="emolog-daycal-row"
-                ref={(element) => {
-                  if (element) {
-                    rowRefs.current.set(hour, element);
-                  } else {
-                    rowRefs.current.delete(hour);
-                  }
-                }}
-              >
-                <span className="emolog-daycal-hour">{String(hour).padStart(2, "0")}:00</span>
-                <div className="emolog-daycal-slot">
-                  {(byHour.get(hour) ?? []).map((entry) => (
-                    <div key={entry.id ?? entry.timestamp} className="emolog-daycal-entry">
-                      <span className="emolog-daycal-time">{formatTime(entry.timestamp)}</span>
-                      <span className="emolog-daycal-emoji">{entry.emoji}</span>
-                      <div className="emolog-daycal-body">
-                        {entry.note ? <p className="emolog-daycal-note">{entry.note}</p> : null}
-                        {entry.tags && entry.tags.length > 0 && (
-                          <div className="emolog-daycal-tags">
-                            {entry.tags.map((tag) => (
-                              <span key={tag} className="emolog-tag">
-                                #{tag}
-                              </span>
-                            ))}
-                          </div>
-                        )}
-                      </div>
+          <div className="emolog-history-timeline emolog-review-timeline">
+            {review.entries.map((entry, index) => {
+              const gap = gapByIndex.get(index);
+              return (
+                <Fragment key={entry.id ?? entry.timestamp}>
+                  {gap && (
+                    <div className="emolog-review-gap">
+                      <span className="emolog-review-gap-label">{gap.label}の空き</span>
                     </div>
-                  ))}
-                </div>
-              </div>
-            ))}
+                  )}
+                  <div className="emolog-history-entry">
+                    <span className="emolog-history-time">{formatTime(entry.timestamp)}</span>
+                    <EmojiButton
+                      emoji={entry.emoji}
+                      editing={editingEmojiId === entry.id}
+                      onEdit={() => setEditingEmojiId(entry.id ?? null)}
+                    />
+                    <div className="emolog-review-entry-body">
+                      {editingId === entry.id ? (
+                        <input
+                          ref={editInputRef}
+                          type="text"
+                          className="emolog-history-note-input emolog-review-note-input"
+                          value={editNote}
+                          onChange={(e) => setEditNote(e.target.value)}
+                          onBlur={handleSaveNote}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") handleSaveNote();
+                            if (e.key === "Escape") {
+                              setEditingId(null);
+                              setEditNote("");
+                            }
+                          }}
+                          maxLength={80}
+                          placeholder="メモを入力"
+                        />
+                      ) : (
+                        <>
+                          <div className="emolog-review-note-row">
+                            <IconButton
+                              label="メモを編集"
+                              size="icon-sm"
+                              className="emolog-history-note-edit"
+                              onClick={() => handleStartEdit(entry)}
+                            >
+                              <Pencil size={12} />
+                            </IconButton>
+                            <p
+                              className={`emolog-review-entry-note${entry.note ? "" : " emolog-history-note-empty"}`}
+                              onClick={() => handleStartEdit(entry)}
+                            >
+                              {entry.note || "メモを追加"}
+                            </p>
+                          </div>
+                          {entry.tags && entry.tags.length > 0 && (
+                            <div className="emolog-review-entry-tags">
+                              {entry.tags.map((tag) => (
+                                <span key={tag} className="emolog-tag">
+                                  #{tag}
+                                </span>
+                              ))}
+                            </div>
+                          )}
+                        </>
+                      )}
+                    </div>
+                    <IconButton
+                      label="削除"
+                      size="icon"
+                      className="emolog-history-delete"
+                      onClick={() => handleDelete(entry)}
+                    >
+                      <Trash2 size={14} />
+                    </IconButton>
+                  </div>
+                  {editingEmojiId === entry.id && (
+                    <EmojiPicker
+                      onSelect={(emoji) => handleEmojiChange(entry, emoji)}
+                      onClose={() => setEditingEmojiId(null)}
+                    />
+                  )}
+                </Fragment>
+              );
+            })}
           </div>
         </>
       )}

@@ -9,8 +9,8 @@ import {
 } from "./generateTasks";
 import { requirementSwing } from "./generationMath";
 
-function generate(seed: number, policy: typeof BUDGET_GENERATION): TaskDef[] {
-  const state = { seed, rngState: seed >>> 0 } as GameState;
+function generate(seed: number, policy: typeof BUDGET_GENERATION, totalDays = 10): TaskDef[] {
+  const state = { seed, rngState: seed >>> 0, totalDays } as GameState;
   return generateTaskDefs(state, policy);
 }
 
@@ -34,19 +34,37 @@ describe("task generation", () => {
     expect(values.some((value) => value > 0.45 || value < 0.25)).toBe(true);
   });
 
-  it("auto生成は72枚・42/24/6・名前ユニーク・効率外れ値なし", () => {
-    for (let seed = 1; seed <= 20; seed += 1) {
-      const defs = generate(seed, AUTO_GENERATION);
-      expect(defs).toHaveLength(72);
-      expect(defs.filter((def) => def.kind !== "incident" && !def.reward.effect)).toHaveLength(42);
-      expect(defs.filter((def) => def.reward.effect)).toHaveLength(24);
-      expect(defs.filter((def) => def.kind === "incident")).toHaveLength(6);
-      expect(new Set(defs.map((def) => def.title)).size).toBe(72);
-      for (const def of defs) {
-        expect(def.theme).toBeTruthy();
-        const efficiency = taskEfficiency(def);
-        expect(efficiency).toBeGreaterThanOrEqual(0.24);
-        expect(efficiency).toBeLessThanOrEqual(0.46);
+  it("auto生成は日数ごとの枚数・比率・名前ユニーク・効率外れ値なし", () => {
+    const expected = {
+      10: { total: 30, normal: 10, effect: 16, incident: 3, relic: 1 },
+      20: { total: 49, normal: 19, effect: 25, incident: 4, relic: 1 },
+      30: { total: 62, normal: 24, effect: 31, incident: 5, relic: 2 },
+      100: { total: 76, normal: 28, effect: 38, incident: 6, relic: 4 },
+    } as const;
+
+    for (const [days, counts] of Object.entries(expected)) {
+      for (let seed = 1; seed <= 20; seed += 1) {
+        const defs = generate(seed, AUTO_GENERATION, Number(days));
+        expect(defs).toHaveLength(counts.total);
+        expect(defs.filter((def) => def.kind === "normal" && !def.reward?.effect)).toHaveLength(
+          counts.normal,
+        );
+        expect(defs.filter((def) => def.reward?.effect)).toHaveLength(counts.effect);
+        expect(defs.filter((def) => def.kind === "incident")).toHaveLength(counts.incident);
+        expect(defs.filter((def) => def.kind === "relic")).toHaveLength(counts.relic);
+        expect(new Set(defs.map((def) => def.title)).size).toBe(counts.total);
+        for (const def of defs) {
+          expect(def.theme).toBeTruthy();
+          const efficiency = taskEfficiency(def);
+          if (def.kind === "relic") {
+            // ボスは意図的に要求が重い
+            expect(efficiency).toBeGreaterThanOrEqual(0.05);
+            expect(efficiency).toBeLessThanOrEqual(0.2);
+          } else {
+            expect(efficiency).toBeGreaterThanOrEqual(0.24);
+            expect(efficiency).toBeLessThanOrEqual(0.46);
+          }
+        }
       }
     }
   });
@@ -54,13 +72,17 @@ describe("task generation", () => {
   it("generationSwingで得損の幅を注入できる", () => {
     const stable = generate(42, { ...AUTO_GENERATION, swing: 0 });
     const volatile = generate(42, { ...AUTO_GENERATION, swing: 0.2 });
+    const normalEfficiencies = (defs: TaskDef[]) =>
+      defs.filter((def) => def.kind !== "relic").map(taskEfficiency);
+    const stableValues = normalEfficiencies(stable);
+    const volatileValues = normalEfficiencies(volatile);
     const stableRange = {
-      min: Math.min(...stable.map(taskEfficiency)),
-      max: Math.max(...stable.map(taskEfficiency)),
+      min: Math.min(...stableValues),
+      max: Math.max(...stableValues),
     };
     const volatileRange = {
-      min: Math.min(...volatile.map(taskEfficiency)),
-      max: Math.max(...volatile.map(taskEfficiency)),
+      min: Math.min(...volatileValues),
+      max: Math.max(...volatileValues),
     };
     expect(stable).not.toEqual(volatile);
     expect(volatileRange.max - volatileRange.min).toBeGreaterThan(

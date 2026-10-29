@@ -1,14 +1,16 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { Fragment, useState, useEffect, useRef, useCallback } from "react";
 import { Copy, MapPin, Pencil, Search, Trash2, X } from "lucide-react";
 import { IconButton } from "@mijime/theme/ui";
 import {
   getEntriesByDateRange,
-  getEntriesByEmoji,
+  getAllEntries,
   deleteEntry,
   updateEntryNote,
   updateEntryEmoji,
   getAllTags,
 } from "./store";
+import { EmojiButton } from "./EmojiButton";
+import { EmojiPicker } from "./EmojiPicker";
 import { extractTags } from "./tags";
 import { type Entry, today, formatTime } from "./types";
 
@@ -60,6 +62,8 @@ export function HistoryView({
   const [loadedUntil, setLoadedUntil] = useState<string>(todayStr);
   const [hasMore, setHasMore] = useState(true);
   const [loading, setLoading] = useState(false);
+  const [query, setQuery] = useState("");
+  const normalizedQuery = query.trim().toLowerCase();
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editNote, setEditNote] = useState("");
   const [editingEmojiId, setEditingEmojiId] = useState<number | null>(null);
@@ -78,9 +82,9 @@ export function HistoryView({
     async (toDate: string, append: boolean) => {
       if (selectedListId === null) return;
       setLoading(true);
-      if (filterEmoji) {
-        // Emoji filters cover the whole history instead of only the loaded pages.
-        const fresh = await getEntriesByEmoji(filterEmoji, selectedListId);
+      if (filterEmoji || filterTag || normalizedQuery) {
+        // フィルタ中は読み込み済みページではなく全履歴を対象にする。
+        const fresh = await getAllEntries(selectedListId);
         setEntries(fresh);
         setHasMore(false);
         setLoading(false);
@@ -101,17 +105,17 @@ export function HistoryView({
       setHasMore(from > "2020-01-01");
       setLoading(false);
     },
-    [selectedListId, filterEmoji],
+    [selectedListId, filterEmoji, filterTag, normalizedQuery],
   );
 
   // Initial load and reload on filter/list change
   useEffect(() => {
     setLoadedUntil(todayStr);
     loadEntries(todayStr, false);
-  }, [selectedListId, filterEmoji, refreshKey]);
+  }, [selectedListId, filterEmoji, filterTag, normalizedQuery, refreshKey]);
 
   function loadMore() {
-    if (filterEmoji || !hasMore || loading) return;
+    if (filterEmoji || filterTag || normalizedQuery || !hasMore || loading) return;
     const next = new Date(loadedUntil);
     next.setDate(next.getDate() - PAGE_DAYS);
     const nextDate = getFullDate(next);
@@ -182,7 +186,7 @@ export function HistoryView({
     };
     el.addEventListener("scroll", onScroll, { passive: true });
     return () => el.removeEventListener("scroll", onScroll);
-  }, [loadedUntil, hasMore, loading, selectedListId, filterEmoji]);
+  }, [loadedUntil, hasMore, loading, selectedListId, filterEmoji, filterTag, normalizedQuery]);
 
   useEffect(() => {
     if (selectedListId === null) {
@@ -197,7 +201,11 @@ export function HistoryView({
   const filteredEntries = entries.filter(
     (entry) =>
       (!filterEmoji || entry.emoji === filterEmoji) &&
-      (!filterTag || entry.tags?.includes(filterTag)),
+      (!filterTag || entry.tags?.includes(filterTag)) &&
+      (!normalizedQuery ||
+        entry.note?.toLowerCase().includes(normalizedQuery) ||
+        entry.emoji.includes(normalizedQuery) ||
+        entry.tags?.some((tag) => tag.toLowerCase().includes(normalizedQuery))),
   );
   const groupedEntries = groupByDate(filteredEntries);
   const dateLabels = Object.keys(groupedEntries).toSorted((a, b) => b.localeCompare(a));
@@ -221,6 +229,23 @@ export function HistoryView({
 
   return (
     <div className="emolog-history" ref={historyRef}>
+      <div className="emolog-history-search">
+        <Search size={14} />
+        <input
+          type="search"
+          className="emolog-history-search-input"
+          value={query}
+          placeholder="メモ・タグを検索"
+          aria-label="履歴を検索"
+          onChange={(e) => setQuery(e.target.value)}
+        />
+        {query && (
+          <IconButton label="検索をクリア" size="icon" onClick={() => setQuery("")}>
+            <X size={14} />
+          </IconButton>
+        )}
+      </div>
+
       {/* Filter bar */}
       <div className="emolog-history-toolbar">
         {filterEmoji && (
@@ -270,7 +295,11 @@ export function HistoryView({
       {/* Timeline */}
       <div className="emolog-history-timeline">
         {dateLabels.length === 0 ? (
-          <p className="emolog-history-empty">この期間の記録はありません</p>
+          <p className="emolog-history-empty">
+            {filterEmoji || filterTag || normalizedQuery
+              ? "条件に一致する記録はありません"
+              : "この期間の記録はありません"}
+          </p>
         ) : (
           dateLabels.map((date) => (
             <div key={date} className="emolog-history-group">
@@ -281,25 +310,14 @@ export function HistoryView({
               {groupedEntries[date]
                 .toSorted((a, b) => b.timestamp - a.timestamp)
                 .map((entry) => (
-                  <div key={entry.id} className="emolog-history-entry">
-                    <span className="emolog-history-time">{formatTime(entry.timestamp)}</span>
-                    {editingEmojiId === entry.id ? (
-                      <div className="emolog-history-emoji-edit">
-                        <input
-                          type="text"
-                          className="emolog-history-emoji-input"
-                          defaultValue={entry.emoji}
-                          autoFocus
-                          onBlur={(e) => handleEmojiChange(entry, e.target.value)}
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter") handleEmojiChange(entry, e.currentTarget.value);
-                            if (e.key === "Escape") setEditingEmojiId(null);
-                          }}
-                        />
-                      </div>
-                    ) : (
-                      <span
-                        className={`emolog-history-emoji${filterEmoji === entry.emoji ? " emolog-history-emoji-active" : ""}`}
+                  <Fragment key={entry.id ?? entry.timestamp}>
+                    <div className="emolog-history-entry">
+                      <span className="emolog-history-time">{formatTime(entry.timestamp)}</span>
+                      <EmojiButton
+                        emoji={entry.emoji}
+                        active={filterEmoji === entry.emoji}
+                        editing={editingEmojiId === entry.id}
+                        title="クリックでフィルター、長押し・ダブルクリックで絵文字を変更"
                         onClick={() => {
                           if (filterEmoji === entry.emoji) {
                             onFilterEmoji(null);
@@ -307,84 +325,87 @@ export function HistoryView({
                             onFilterEmoji(entry.emoji);
                           }
                         }}
-                        onDoubleClick={() => setEditingEmojiId(entry.id ?? null)}
-                        title="クリックでフィルター、ダブルクリックで絵文字を編集"
-                      >
-                        {entry.emoji}
-                      </span>
-                    )}
-                    {editingId === entry.id ? (
-                      <input
-                        ref={editInputRef}
-                        type="text"
-                        value={editNote}
-                        onChange={(e) => setEditNote(e.target.value)}
-                        onBlur={handleSaveNote}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") handleSaveNote();
-                          if (e.key === "Escape") {
-                            setEditingId(null);
-                            setEditNote("");
-                          }
-                        }}
-                        className="emolog-history-note-input"
-                        maxLength={80}
-                        placeholder="メモを入力"
+                        onEdit={() => setEditingEmojiId(entry.id ?? null)}
                       />
-                    ) : (
-                      <div className="emolog-history-main">
-                        <div className="emolog-history-note-row">
-                          <IconButton
-                            label="メモを編集"
-                            size="icon-sm"
-                            className="emolog-history-note-edit"
-                            onClick={() => handleStartEdit(entry)}
-                          >
-                            <Pencil size={12} />
-                          </IconButton>
-                          <span
-                            className={`emolog-history-note${entry.note ? "" : " emolog-history-note-empty"}`}
-                            onClick={() => handleStartEdit(entry)}
-                          >
-                            {entry.note || "メモを追加"}
-                          </span>
-                        </div>
-                        {(entry.tags?.length ?? 0) > 0 && (
-                          <div className="emolog-history-entry-meta">
-                            {entry.tags?.map((tag) => (
-                              <button
-                                key={tag}
-                                className={`emolog-history-tag${filterTag === tag ? " emolog-history-tag-active" : ""}`}
-                                onClick={() => onFilterTag(filterTag === tag ? null : tag)}
-                              >
-                                #{tag}
-                              </button>
-                            ))}
+                      {editingId === entry.id ? (
+                        <input
+                          ref={editInputRef}
+                          type="text"
+                          value={editNote}
+                          onChange={(e) => setEditNote(e.target.value)}
+                          onBlur={handleSaveNote}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") handleSaveNote();
+                            if (e.key === "Escape") {
+                              setEditingId(null);
+                              setEditNote("");
+                            }
+                          }}
+                          className="emolog-history-note-input"
+                          maxLength={80}
+                          placeholder="メモを入力"
+                        />
+                      ) : (
+                        <div className="emolog-history-main">
+                          <div className="emolog-history-note-row">
+                            <IconButton
+                              label="メモを編集"
+                              size="icon-sm"
+                              className="emolog-history-note-edit"
+                              onClick={() => handleStartEdit(entry)}
+                            >
+                              <Pencil size={12} />
+                            </IconButton>
+                            <span
+                              className={`emolog-history-note${entry.note ? "" : " emolog-history-note-empty"}`}
+                              onClick={() => handleStartEdit(entry)}
+                            >
+                              {entry.note || "メモを追加"}
+                            </span>
                           </div>
-                        )}
-                      </div>
-                    )}
-                    {entry.location && (
-                      <a
-                        className="emolog-history-location"
-                        href={`https://www.google.com/maps?q=${entry.location.lat},${entry.location.lng}`}
-                        target="_blank"
-                        rel="noreferrer"
-                        aria-label="地図で開く"
-                        title="地図で開く"
+                          {(entry.tags?.length ?? 0) > 0 && (
+                            <div className="emolog-history-entry-meta">
+                              {entry.tags?.map((tag) => (
+                                <button
+                                  key={tag}
+                                  className={`emolog-history-tag${filterTag === tag ? " emolog-history-tag-active" : ""}`}
+                                  onClick={() => onFilterTag(filterTag === tag ? null : tag)}
+                                >
+                                  #{tag}
+                                </button>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      )}
+                      {entry.location && (
+                        <a
+                          className="emolog-history-location"
+                          href={`https://www.google.com/maps?q=${entry.location.lat},${entry.location.lng}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          aria-label="地図で開く"
+                          title="地図で開く"
+                        >
+                          <MapPin size={14} />
+                        </a>
+                      )}
+                      <IconButton
+                        label="削除"
+                        size="icon"
+                        className="emolog-history-delete"
+                        onClick={() => handleDelete(entry)}
                       >
-                        <MapPin size={14} />
-                      </a>
+                        <Trash2 size={14} />
+                      </IconButton>
+                    </div>
+                    {editingEmojiId === entry.id && (
+                      <EmojiPicker
+                        onSelect={(emoji) => handleEmojiChange(entry, emoji)}
+                        onClose={() => setEditingEmojiId(null)}
+                      />
                     )}
-                    <IconButton
-                      label="削除"
-                      size="icon"
-                      className="emolog-history-delete"
-                      onClick={() => handleDelete(entry)}
-                    >
-                      <Trash2 size={14} />
-                    </IconButton>
-                  </div>
+                  </Fragment>
                 ))}
             </div>
           ))

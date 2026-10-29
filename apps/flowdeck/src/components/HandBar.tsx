@@ -15,6 +15,7 @@ import {
   cardTitle,
   effectDescription,
   effectLabel,
+  ThemeBadge,
 } from "./ui";
 
 interface Props {
@@ -71,6 +72,7 @@ function HandCard({
       <span className="mt-1 line-clamp-2 text-[10px] font-medium leading-snug text-(--ink)">
         {cardTitle(card)}
       </span>
+      {card.theme && <ThemeBadge theme={card.theme} className="mt-0.5 self-start" />}
       {effectLabel(card.effect) && (
         <span className="mt-auto text-[8.5px] font-medium text-(--ink)/70">
           {effectLabel(card.effect)}
@@ -123,6 +125,7 @@ export function HandBar({ state, dispatch, selectedCardId, onSelect }: Props) {
                 </div>
                 <div className="mt-1 flex items-center justify-between">
                   <span className="text-[9px] text-(--mid)">{cardName(selected)}</span>
+                  <ThemeBadge theme={selected.theme} />
                   {selected.type === "debt" ? (
                     <span className="text-[12px] font-bold text-(--danger)">!</span>
                   ) : (
@@ -135,7 +138,7 @@ export function HandBar({ state, dispatch, selectedCardId, onSelect }: Props) {
                 </div>
                 {selected.type === "test" && (
                   <p className="mt-1 text-[9px] font-medium text-(--info)">
-                    Review専用・lvそのまま
+                    Review専用・レーン補正なし
                   </p>
                 )}
                 {effectLabel(selected.effect) && (
@@ -183,7 +186,7 @@ export function HandBar({ state, dispatch, selectedCardId, onSelect }: Props) {
 
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-              <div className="flex items-center gap-2 text-[10px] text-(--ink)/70">
+              <div className="flex flex-wrap items-center gap-2 text-[10px] text-(--ink)/70">
                 <SectionLabel className="hidden sm:inline">Loadout</SectionLabel>
                 <Hand size={13} />
                 <span className="font-semibold text-(--ink)" title="手札">

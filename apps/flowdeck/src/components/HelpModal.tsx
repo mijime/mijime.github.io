@@ -105,8 +105,15 @@ export function HelpModal({ rules, onClose }: { rules: TeamRules; onClose: () =>
             報酬カードはデッキに残る間だけ企業価値。捨てると企業価値も消える。
           </p>
           <p className="rounded-sm border border-(--border) px-2 py-1">
-            タスクの得損は開始時に選択。波乱ほど通常タスクの要求量が
-            <strong className="text-(--ink)">0.8〜1.2倍</strong>に散らばる。
+            効果カードは
+            <strong className="text-(--ink)">
+              アクション+1/+2・ドロー・循環・回収・全員リセット
+            </strong>
+            で手数を増やす。連鎖は専用ルールではなく、この循環から自然に生まれる。
+          </p>
+          <p className="rounded-sm border border-(--border) px-2 py-1">
+            <strong className="text-(--ink)">レリックタスク</strong>
+            は高難度。完了するとチームレリック3択。上限2個。
           </p>
         </section>
 
@@ -123,7 +130,9 @@ export function HelpModal({ rules, onClose }: { rules: TeamRules; onClose: () =>
             </div>
             <div>
               <dt className="font-medium text-(--ink)">チームメイト</dt>
-              <dd className="text-(--mid)">標準（個性重視）/ 有能（整理重視）</dd>
+              <dd className="text-(--mid)">
+                標準（慎重・低WIP）で固定。タスクの得損も標準（±10%）固定
+              </dd>
             </div>
             <div>
               <dt className="font-medium text-(--ink)">完了</dt>
@@ -131,11 +140,21 @@ export function HelpModal({ rules, onClose }: { rules: TeamRules; onClose: () =>
             </div>
             <div>
               <dt className="font-medium text-(--ink)">報酬</dt>
-              <dd className="text-(--mid)">完了時に受け取るカード</dd>
+              <dd className="text-(--mid)">
+                完了時に受け取るカード。レリックタスクはチームレリック
+              </dd>
             </div>
             <div>
               <dt className="font-medium text-(--ink)">企業価値</dt>
               <dd className="text-(--mid)">デッキにある報酬カードの合計</dd>
+            </div>
+            <div>
+              <dt className="font-medium text-(--ink)">テーマ</dt>
+              <dd className="text-(--mid)">タスクと報酬カードの分類（表示用）</dd>
+            </div>
+            <div>
+              <dt className="font-medium text-(--ink)">レリック</dt>
+              <dd className="text-(--mid)">レリックタスク完了で得るチーム共有パッシブ。上限2個</dd>
             </div>
             <div>
               <dt className="font-medium text-(--ink)">最終評価</dt>

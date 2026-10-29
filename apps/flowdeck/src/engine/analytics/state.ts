@@ -11,6 +11,10 @@ export function emptyPlayerAnalytics(): PlayerAnalytics {
     incidentPlays: 0,
     effectPlays: 0,
     debtCleaned: 0,
+    actionsGained: 0,
+    cardsDrawn: 0,
+    cardsDiscarded: 0,
+    cardsRecovered: 0,
   };
 }
 
@@ -21,6 +25,10 @@ export function emptyGameAnalytics(): GameAnalytics {
     supportPlays: 0,
     substitutions: 0,
     tokensUsed: 0,
+    actionsGained: 0,
+    cardsDrawn: 0,
+    cardsDiscarded: 0,
+    cardsRecovered: 0,
     debtSources: { risk: 0, incident: 0, other: 0 },
     players: {},
   };
@@ -41,6 +49,10 @@ export function normalizePlayerAnalytics(
     incidentPlays: value.incidentPlays ?? 0,
     effectPlays: value.effectPlays ?? 0,
     debtCleaned: value.debtCleaned ?? 0,
+    actionsGained: value.actionsGained ?? 0,
+    cardsDrawn: value.cardsDrawn ?? 0,
+    cardsDiscarded: value.cardsDiscarded ?? 0,
+    cardsRecovered: value.cardsRecovered ?? 0,
   };
 }
 
@@ -56,6 +68,10 @@ export function normalizeAnalytics(
     supportPlays: value.supportPlays ?? 0,
     substitutions: value.substitutions ?? 0,
     tokensUsed: value.tokensUsed ?? 0,
+    actionsGained: value.actionsGained ?? 0,
+    cardsDrawn: value.cardsDrawn ?? 0,
+    cardsDiscarded: value.cardsDiscarded ?? 0,
+    cardsRecovered: value.cardsRecovered ?? 0,
     debtSources: { ...base.debtSources, ...value.debtSources },
     players: Object.fromEntries(
       Object.entries(value.players ?? {}).map(([id, entry]) => [

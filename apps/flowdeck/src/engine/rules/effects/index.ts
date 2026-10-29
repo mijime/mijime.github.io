@@ -1,8 +1,11 @@
 import type { CardEffect, CardEffectKind } from "../../types";
 import { actionEffect } from "./action";
+import { cycleEffect } from "./cycle";
 import { deadlineEffect } from "./deadline";
 import { debtCleanEffect } from "./debt-clean";
 import { drawEffect } from "./draw";
+import { recoverEffect } from "./recover";
+import { refreshEffect } from "./refresh";
 import { shieldEffect } from "./shield";
 import { tokenEffect } from "./token";
 import type { CardEffectPlugin, CardEffectRegistry, EffectContext } from "./types";
@@ -16,6 +19,9 @@ export const CARD_EFFECTS = {
   deadline: deadlineEffect,
   token: tokenEffect,
   shield: shieldEffect,
+  cycle: cycleEffect,
+  recover: recoverEffect,
+  refresh: refreshEffect,
 } satisfies CardEffectRegistry;
 
 /**

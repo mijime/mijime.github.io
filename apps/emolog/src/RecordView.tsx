@@ -1,22 +1,8 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import { ChevronUp, Plus } from "lucide-react";
 import { Button } from "@mijime/theme/ui";
-import "emoji-picker-element";
+import { EmojiPicker } from "./EmojiPicker";
 import { extractTags } from "./tags";
-
-// emoji-picker-element のカスタム要素を JSX で書けるようにする。
-// react-jsx の JSX 名前空間は react 側にあるので、そこを拡張する（型は緩めで十分）。
-declare module "react" {
-  namespace JSX {
-    interface IntrinsicElements {
-      "emoji-picker": {
-        ref?: unknown;
-        class?: string;
-        [attribute: string]: unknown;
-      };
-    }
-  }
-}
 
 const MAX_FAV = 12;
 
@@ -28,8 +14,6 @@ interface RecordViewProps {
 export function RecordView({ favorites, onTap }: RecordViewProps) {
   const [note, setNote] = useState("");
   const [showPicker, setShowPicker] = useState(false);
-  const [_pickerEmoji, _setPickerEmoji] = useState<string | null>(null);
-  const pickerRef = useRef<HTMLElement>(null);
   const noteInputRef = useRef<HTMLInputElement>(null);
 
   const displayFavs = favorites.slice(0, MAX_FAV);
@@ -44,20 +28,6 @@ export function RecordView({ favorites, onTap }: RecordViewProps) {
       noteInputRef.current.value = "";
     }
   }
-
-  useEffect(() => {
-    const el = pickerRef.current;
-    if (!el) return;
-    const handler = (e: Event) => {
-      const { detail } = e as CustomEvent;
-      const emoji = detail.unicode || detail.emoji?.native || detail.emoji;
-      if (emoji) {
-        handleTap(emoji);
-      }
-    };
-    el.addEventListener("emoji-click", handler);
-    return () => el.removeEventListener("emoji-click", handler);
-  }, [note, showPicker]);
 
   return (
     <div className="emolog-record">
@@ -93,7 +63,7 @@ export function RecordView({ favorites, onTap }: RecordViewProps) {
 
       {showPicker && (
         <div className="emolog-record-picker-panel">
-          <emoji-picker ref={pickerRef} class="emolog-record-picker-element" />
+          <EmojiPicker onSelect={handleTap} />
         </div>
       )}
 

@@ -1,7 +1,7 @@
 import { AlertTriangle, ArrowRight, Sparkles } from "lucide-react";
 import { Badge, Button, Modal } from "@mijime/theme/ui";
 import type { AcquisitionReport } from "../engine/types";
-import { CARD_LABEL, LevelStars, effectDescription, effectLabel } from "./ui";
+import { CARD_LABEL, LevelStars, ThemeBadge, effectDescription, effectLabel } from "./ui";
 
 interface Props {
   report: AcquisitionReport;
@@ -42,6 +42,7 @@ export function AcquisitionModal({ report, debtLimit, onClose }: Props) {
           <span className="inline-flex items-center gap-1 text-(--accent)">
             <Sparkles size={9} /> {report.recipientName}
             {report.pullerId !== report.recipientId && <span>引: {report.pullerName}</span>}
+            <ThemeBadge theme={report.theme} />
           </span>
           <Badge tone="neutral">Day {report.day}</Badge>
         </div>
@@ -52,23 +53,33 @@ export function AcquisitionModal({ report, debtLimit, onClose }: Props) {
             <span className="text-[15px] font-semibold text-(--success)">+{report.score}</span>
           </div>
           <div className="rounded-sm border border-(--border) bg-(--paper) px-2 py-1.5">
-            <span className="block text-[8px] text-(--mid)">報酬カード（受取者へ）</span>
-            <span
-              className={`text-[12px] font-medium ${
-                report.reward.level > 0 ? "text-(--ink)" : "text-(--mid)"
-              }`}
-            >
-              <Sparkles size={10} className="mr-0.5 inline" />
-              {CARD_LABEL[report.reward.type]}{" "}
-              <LevelStars level={report.reward.level} className="text-[9px]" />
-            </span>
-            {report.reward.effect && (
-              <span
-                className="mt-0.5 block text-[8px] text-(--accent)"
-                title={effectDescription(report.reward.effect) ?? undefined}
-              >
-                {effectLabel(report.reward.effect)}
+            <span className="block text-[8px] text-(--mid)">報酬</span>
+            {report.reward ? (
+              <>
+                <span
+                  className={`text-[12px] font-medium ${
+                    report.reward.level > 0 ? "text-(--ink)" : "text-(--mid)"
+                  }`}
+                >
+                  <Sparkles size={10} className="mr-0.5 inline" />
+                  {CARD_LABEL[report.reward.type]}{" "}
+                  <LevelStars level={report.reward.level} className="text-[9px]" />
+                </span>
+                {report.reward.effect && (
+                  <span
+                    className="mt-0.5 block text-[8px] text-(--accent)"
+                    title={effectDescription(report.reward.effect) ?? undefined}
+                  >
+                    {effectLabel(report.reward.effect)}
+                  </span>
+                )}
+              </>
+            ) : report.relicChoices ? (
+              <span className="block text-[12px] font-medium text-(--accent)">
+                <Sparkles size={10} className="mr-0.5 inline" /> チームレリック3択
               </span>
+            ) : (
+              <span className="block text-[12px] font-medium text-(--mid)">なし</span>
             )}
           </div>
         </div>

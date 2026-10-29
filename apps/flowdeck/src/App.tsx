@@ -9,12 +9,15 @@ import { IntroScreen } from "./components/IntroScreen";
 import { OpsBoard } from "./components/OpsBoard";
 import { LogPanel } from "./components/LogPanel";
 import { NewGameModal } from "./components/NewGameModal";
+import { RelicChoiceModal } from "./components/RelicChoiceModal";
 import { ResultScreen } from "./components/ResultScreen";
 import { SharedResultScreen } from "./components/SharedResultScreen";
 import { TeamPanel } from "./components/TeamPanel";
 import { TurnBanner } from "./components/TurnBanner";
 import { loadGame, useGame } from "./store";
 import { decodeSharedResult, type SharedResult } from "./share";
+import { DEFAULT_GENERATION_SWING } from "./engine/rules/generation";
+import { DEFAULT_AI_PROFILE } from "./engine/ai/profiles";
 
 const INTRO_KEY = "flowdeck:intro:v1";
 
@@ -77,16 +80,24 @@ export function App() {
   }, [state.day]);
 
   useEffect(() => {
-    if (state.phase !== "ai" || showAcquisition) return;
+    if (state.phase !== "ai" || showAcquisition || state.pendingRelic) return;
     const timer = setTimeout(() => dispatch({ type: "RUN_AI_TURN" }), 550);
     return () => clearTimeout(timer);
-  }, [state.phase, state.activePlayerIndex, showAcquisition, dispatch]);
+  }, [state.phase, state.activePlayerIndex, showAcquisition, state.pendingRelic, dispatch]);
 
   useEffect(() => {
-    if (!autoMode || state.phase !== "human" || showAcquisition) return;
+    if (!autoMode || state.phase !== "human" || showAcquisition || state.pendingRelic) return;
     const timer = setTimeout(() => dispatch({ type: "AUTO_STEP" }), 450);
     return () => clearTimeout(timer);
-  }, [autoMode, state.phase, state.activePlayerIndex, state.day, showAcquisition, dispatch]);
+  }, [
+    autoMode,
+    state.phase,
+    state.activePlayerIndex,
+    state.day,
+    showAcquisition,
+    state.pendingRelic,
+    dispatch,
+  ]);
 
   useEffect(() => {
     if (!autoMode || !showAcquisition || !humanAcquisition) return;
@@ -95,10 +106,10 @@ export function App() {
   }, [autoMode, showAcquisition, humanAcquisition]);
 
   useEffect(() => {
-    if (state.phase !== "roundEnd" || showAcquisition) return;
+    if (state.phase !== "roundEnd" || showAcquisition || state.pendingRelic) return;
     const timer = setTimeout(() => dispatch({ type: "END_ROUND" }), 550);
     return () => clearTimeout(timer);
-  }, [state.phase, state.day, showAcquisition, dispatch]);
+  }, [state.phase, state.day, showAcquisition, state.pendingRelic, dispatch]);
 
   useEffect(() => {
     if (state.phase !== "ai") return;
@@ -169,11 +180,19 @@ export function App() {
       {dayBanner !== null && (
         <DayTransition key={dayBanner} day={dayBanner} totalDays={state.totalDays} />
       )}
-      {showAcquisition && humanAcquisition && (
+      {showAcquisition && humanAcquisition && !state.pendingRelic && (
         <AcquisitionModal
           report={humanAcquisition}
           debtLimit={state.rules.debtLimit}
           onClose={() => setDismissedAcquisitionId(humanAcquisition.id)}
+        />
+      )}
+      {state.pendingRelic && (
+        <RelicChoiceModal
+          choice={state.pendingRelic}
+          onChoose={(relicId, discardRelicId) =>
+            dispatch({ type: "CHOOSE_RELIC", relicId, discardRelicId })
+          }
         />
       )}
       {helpOpen && <HelpModal rules={state.rules} onClose={() => setHelpOpen(false)} />}
@@ -181,26 +200,36 @@ export function App() {
         <NewGameModal
           currentDays={state.totalDays}
           currentAiCount={state.players.filter((player) => !player.isHuman).length}
-          currentSwing={state.generationSwing}
-          currentAiProfile={state.aiProfile}
           onClose={() => setNewGameOpen(false)}
-          onStart={(days, aiCount, generationSwing, aiProfile) => {
+          onStart={(days, aiCount) => {
             setNewGameOpen(false);
-            dispatch({ type: "RESTART", days, aiCount, generationSwing, aiProfile });
+            dispatch({
+              type: "RESTART",
+              days,
+              aiCount,
+              generationSwing: DEFAULT_GENERATION_SWING,
+              aiProfile: DEFAULT_AI_PROFILE,
+            });
           }}
         />
       )}
       {introMode && (
         <IntroScreen
           review={introMode === "review"}
-          onStart={(days, aiCount, generationSwing, aiProfile) => {
+          onStart={(days, aiCount) => {
             try {
               localStorage.setItem(INTRO_KEY, "1");
             } catch {
               // 保存できなくても開始する
             }
             setIntroMode(null);
-            dispatch({ type: "RESTART", days, aiCount, generationSwing, aiProfile });
+            dispatch({
+              type: "RESTART",
+              days,
+              aiCount,
+              generationSwing: DEFAULT_GENERATION_SWING,
+              aiProfile: DEFAULT_AI_PROFILE,
+            });
           }}
           onClose={() => {
             try {

@@ -3,6 +3,7 @@ import { analyticsFor } from "./analytics/state";
 import { discardHand, drawCards } from "./hand";
 import { pushLog } from "./log";
 import { makeSnapshot, playerById, recomputeTeamStats } from "./metrics";
+import { applyRelicDayStart, hasRelic } from "./relics";
 import { BASE_RULES, type RuleSet } from "./rules";
 import { applyCardEffect } from "./rules/effects";
 import { effectivePlayLevel, phaseForLane, PHASE_LABEL } from "./rules/lanes";
@@ -93,7 +94,16 @@ export function playCard(
   playerAnalytics.playByPhase[playType] += 1;
   if (card.effect) playerAnalytics.effectPlays += 1;
   if (task.kind === "incident") playerAnalytics.incidentPlays += 1;
-  if (card.effect) applyCardEffect(rules.effects, { state, player, task }, card.effect);
+  if (card.effect) {
+    applyCardEffect(rules.effects, { state, player, task }, card.effect);
+    if (hasRelic(state, "catalyst") && !player.effectActionUsed) {
+      player.effectActionUsed = true;
+      player.actionsLeft += 1;
+      state.analytics.actionsGained += 1;
+      playerAnalytics.actionsGained += 1;
+      pushLog(state, `${player.name}: 触媒でアクション +1`, "good");
+    }
+  }
 
   const support = task.ownerId !== playerId;
   const substitute = card.type !== targetType;
@@ -121,18 +131,28 @@ export function playCard(
 
 export function discardCard(state: GameState, playerId: string, cardId: number): boolean {
   const player = state.players.find((p) => p.id === playerId);
-  if (!player || player.actionsLeft <= 0) return false;
+  if (!player) return false;
+  const free = hasRelic(state, "lean") && !player.freeTrashUsed;
+  if (!free && player.actionsLeft <= 0) return false;
   const index = player.hand.findIndex((card) => card.id === cardId);
   if (index < 0) return false;
   const [card] = player.hand.splice(index, 1);
   if (!card) return false;
-  player.actionsLeft -= 1;
+  if (free) {
+    player.freeTrashUsed = true;
+  } else {
+    player.actionsLeft -= 1;
+  }
   state.analytics.actions.trash += 1;
   const playerAnalytics = analyticsFor(state, playerId);
   playerAnalytics.actions.trash += 1;
   if (card.type === "debt") playerAnalytics.debtCleaned += 1;
   recomputeTeamStats(state);
-  pushLog(state, `${player.name}: ${card.title ?? `${card.type} lv${card.level}`} を廃棄`, "info");
+  pushLog(
+    state,
+    `${player.name}: ${card.title ?? `${card.type} lv${card.level}`} を廃棄${free ? "（軽量化）" : ""}`,
+    "info",
+  );
   return true;
 }
 
@@ -193,7 +213,10 @@ export function startPlayerTurn(
   discardHand(player);
   const penalty = player.actionPenalty;
   player.actionPenalty = 0;
-  player.actionsLeft = Math.max(0, rules.balance.actionsPerTurn - penalty);
+  player.freeTrashUsed = false;
+  player.effectActionUsed = false;
+  const relicActions = hasRelic(state, "flow") ? 1 : 0;
+  player.actionsLeft = Math.max(0, rules.balance.actionsPerTurn - penalty) + relicActions;
   if (penalty > 0) {
     pushLog(
       state,
@@ -201,7 +224,9 @@ export function startPlayerTurn(
       "bad",
     );
   }
-  drawCards(state, player, rules.balance.handSize);
+  const relicDraw = hasRelic(state, "insight") ? 1 : 0;
+  drawCards(state, player, rules.balance.handSize + relicDraw);
+  applyRelicDayStart(state, player);
 }
 
 export function finishRound(state: GameState, rules: RuleSet = BASE_RULES): void {

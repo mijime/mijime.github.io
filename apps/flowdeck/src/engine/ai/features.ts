@@ -19,7 +19,7 @@ export function urgencyOf(task: TaskCard): number {
 }
 
 export function taskValue(task: TaskCard): number {
-  const raw = task.score + task.reward.level + (task.reward.effect ? 1 : 0);
+  const raw = task.score + (task.reward?.level ?? 0) + (task.reward?.effect ? 1 : 0);
   const requirement = task.requirements.design + task.requirements.dev + task.requirements.test;
   const absolute = clamp01(raw / 11);
   // 低スコアでも要求が軽いタスクを拾えるように、要求量あたりの効率を主に見る

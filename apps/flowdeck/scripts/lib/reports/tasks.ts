@@ -5,15 +5,16 @@ import { formatNumber, formatPercent, mean, rate } from "../stats";
 import { heading, printTable, subheading } from "../format";
 import type { RunResult } from "../runner";
 
-export type TaskClass = "standard" | "high-score" | "effect" | "incident";
+export type TaskClass = "standard" | "high-score" | "effect" | "incident" | "relic";
 
 export function taskClass(task: {
   kind?: TaskCard["kind"];
-  reward: TaskCard["reward"];
+  reward?: TaskCard["reward"];
   score: number;
 }): TaskClass {
+  if (task.kind === "relic") return "relic";
   if (task.kind === "incident") return "incident";
-  if (task.reward.effect) return "effect";
+  if (task.reward?.effect) return "effect";
   if (task.score >= 4) return "high-score";
   return "standard";
 }
@@ -38,7 +39,7 @@ export function printTasks(results: RunResult[]): void {
     for (const def of defs) {
       poolValues.push(taskValue(def));
       poolRequirements.push(totalRequirements(def.requirements));
-      poolRewards.push(def.reward.level);
+      poolRewards.push(def.reward?.level ?? 0);
       poolEfficiency.push(taskEfficiency(def));
     }
     for (const task of result.state.tasks) {
@@ -49,8 +50,9 @@ export function printTasks(results: RunResult[]): void {
       const byScore = task.lane === "done" ? scoreDone : scoreExpired;
       byScore.set(task.score, (byScore.get(task.score) ?? 0) + 1);
       const byReward = task.lane === "done" ? rewardDone : rewardExpired;
-      byReward.set(task.reward.level, (byReward.get(task.reward.level) ?? 0) + 1);
-      if (task.reward.effect) {
+      const rewardLevel = task.reward?.level ?? 0;
+      byReward.set(rewardLevel, (byReward.get(rewardLevel) ?? 0) + 1);
+      if (task.reward?.effect) {
         const byEffect = task.lane === "done" ? effectDone : effectExpired;
         byEffect.set(task.reward.effect.kind, (byEffect.get(task.reward.effect.kind) ?? 0) + 1);
       }
@@ -69,7 +71,7 @@ export function printTasks(results: RunResult[]): void {
   subheading("タスク種別の完了率");
   printTable(
     ["class", "done/game", "expired/game", "rate"],
-    (["standard", "high-score", "effect", "incident"] as const).map((category) => {
+    (["standard", "high-score", "effect", "incident", "relic"] as const).map((category) => {
       const completed = done.get(category) ?? 0;
       const gone = expired.get(category) ?? 0;
       return [

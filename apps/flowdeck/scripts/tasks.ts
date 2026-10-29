@@ -19,7 +19,7 @@ interface Options {
 
 interface Row {
   def: TaskDef;
-  archetype: "normal" | "effect" | "incident";
+  archetype: "normal" | "effect" | "incident" | "relic";
   value: number;
   total: number;
   efficiency: number;
@@ -47,12 +47,13 @@ function parseArgs(argv: string[]): Options {
 }
 
 function archetypeOf(def: TaskDef): Row["archetype"] {
+  if (def.kind === "relic") return "relic";
   if (def.kind === "incident") return "incident";
-  return def.reward.effect ? "effect" : "normal";
+  return def.reward?.effect ? "effect" : "normal";
 }
 
 function generate(seed: number, policy: keyof typeof GENERATION_POLICIES, swing: number): Row[] {
-  const state = { seed, rngState: seed >>> 0 } as GameState;
+  const state = { seed, rngState: seed >>> 0, totalDays: 100 } as GameState;
   return generateTaskDefs(state, { ...GENERATION_POLICIES[policy], swing }).map((def) => ({
     def,
     archetype: archetypeOf(def),
@@ -125,8 +126,8 @@ function printSummary(policy: keyof typeof GENERATION_POLICIES, rows: Row[], swi
   console.log(
     `  effect: ${[
       ...counts(
-        rows.filter((row) => row.def.reward.effect),
-        (row) => row.def.reward.effect?.kind ?? "none",
+        rows.filter((row) => row.def.reward?.effect),
+        (row) => row.def.reward?.effect?.kind ?? "none",
       ),
     ]
       .map(([k, v]) => `${k}=${v}`)
@@ -140,7 +141,7 @@ function printSummary(policy: keyof typeof GENERATION_POLICIES, rows: Row[], swi
   console.log(
     `  unique titles: ${new Set(rows.map((row) => row.def.title)).size} / ${rows.length}`,
   );
-  for (const archetype of ["normal", "effect", "incident"] as const) {
+  for (const archetype of ["normal", "effect", "incident", "relic"] as const) {
     printDistribution(
       archetype,
       rows.filter((row) => row.archetype === archetype),
@@ -156,10 +157,13 @@ function printSeed(seed: number, policy: keyof typeof GENERATION_POLICIES, swing
   const rows = generate(seed, policy, swing).toSorted((a, b) => b.efficiency - a.efficiency);
   console.log(`\n[${policy}] seed=${seed} swing=${swing}`);
   for (const row of rows) {
-    const effect = row.def.reward.effect ? ` effect=${row.def.reward.effect.kind}` : "";
+    const effect = row.def.reward?.effect ? ` effect=${row.def.reward.effect.kind}` : "";
+    const reward = row.def.reward
+      ? `reward=${row.def.reward.type}${row.def.reward.level}`
+      : "reward=relic";
     const penalty = row.def.penalty ? ` penalty=${row.def.penalty.kind}` : "";
     console.log(
-      `  ${row.efficiency.toFixed(3)} ${row.archetype.padEnd(8)} score=${row.def.score} reward=${row.def.reward.type}${row.def.reward.level}${effect}${penalty} req=${row.def.requirements.design}/${row.def.requirements.dev}/${row.def.requirements.test} total=${row.total} value=${row.value.toFixed(1)} ${row.def.title}`,
+      `  ${row.efficiency.toFixed(3)} ${row.archetype.padEnd(8)} score=${row.def.score} ${reward}${effect}${penalty} req=${row.def.requirements.design}/${row.def.requirements.dev}/${row.def.requirements.test} total=${row.total} value=${row.value.toFixed(1)} ${row.def.title}`,
     );
   }
 }
@@ -270,7 +274,7 @@ function main() {
           swing: options.swing,
           summary: summarize(rows),
           archetypes: Object.fromEntries(
-            (["normal", "effect", "incident"] as const).map((archetype) => [
+            (["normal", "effect", "incident", "relic"] as const).map((archetype) => [
               archetype,
               summarize(rows.filter((row) => row.archetype === archetype)),
             ]),

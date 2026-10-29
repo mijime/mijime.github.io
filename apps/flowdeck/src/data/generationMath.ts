@@ -10,7 +10,7 @@ export const PHASES: readonly Phase[] = ["design", "dev", "test"];
 
 /** タスク種別ごとの要求量の揺らし幅。effect/incident は控えめにする。 */
 export function requirementSwing(def: TaskDef, swing: number, roll: number): number {
-  const amplitude = def.kind === "incident" || def.reward.effect ? swing / 2 : swing;
+  const amplitude = def.kind === "incident" || def.reward?.effect ? swing / 2 : swing;
   if (roll < 2) return -amplitude;
   if (roll < 8) return 0;
   return amplitude;
@@ -24,8 +24,7 @@ export function totalRequirements(requirements: TaskRequirements): number {
 export function taskValue(def: TaskDef): number {
   return (
     def.score +
-    def.reward.level * 0.5 +
-    effectGenerationValue(def.reward.effect) +
+    (def.reward ? def.reward.level * 0.5 + effectGenerationValue(def.reward.effect) : 0) +
     penaltyGenerationValue(def.penalty)
   );
 }
@@ -69,14 +68,16 @@ export function redistribute(requirements: TaskRequirements, targetTotal: number
 }
 
 export function valueEfficiency(def: TaskDef): number {
+  if (def.kind === "relic") return 0.26;
   if (def.kind === "incident") return 0.34;
-  if (def.reward.effect) return 0.29;
+  if (def.reward?.effect) return 0.29;
   return def.score >= 6 ? 0.31 : 0.3;
 }
 
 export function valueTotalBounds(def: TaskDef): readonly [number, number] {
+  if (def.kind === "relic") return [24, 38];
   if (def.kind === "incident") return [10, 17];
-  if (def.reward.effect) return [13, 21];
+  if (def.reward?.effect) return [13, 21];
   return [8, 28];
 }
 

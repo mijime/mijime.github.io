@@ -22,6 +22,8 @@ export function playScore(
   const feature = playFeature(candidate, rules);
   const quality = candidate.type === "test" ? 0.5 + 0.5 * feature : Math.min(0.2, feature * 0.2);
   const hygiene = Math.max(0, -weights.greed);
+  const prudence = weights.prudence ?? 0;
+  const solidarity = weights.solidarity ?? 0;
   const urgency = urgencyOf(candidate.task);
   const playLevel = effectivePlayLevel(
     candidate.card,
@@ -35,6 +37,8 @@ export function playScore(
     weights.focus * FOCUS_SCALE * feature +
     Math.max(0, weights.greed) * GREED_SCALE * playValue(candidate.task, candidate.card, rules) +
     hygiene * 12 * quality +
+    prudence * (candidate.task.kind === "incident" ? 30 : 0) +
+    solidarity * (candidate.support ? 50 : -20) +
     (candidate.task.kind === "incident" ? 20 : 0) +
     weights.urgency * URGENCY_SCALE * urgency * completion +
     URGENCY_BASE * urgency * completion
@@ -48,13 +52,20 @@ export function pullScore(
   weights: PersonalityWeights,
 ): number {
   const own = playerWip(state, player.id);
+  const prudence = weights.prudence ?? 0;
+  const solidarity = weights.solidarity ?? 0;
+  const appetite = weights.appetite ?? 0;
 
   return (
     PULL_BASE -
     weights.focus * FOCUS_SCALE * pullFeature(state, player) +
     Math.max(0, weights.greed) * 40 * taskValue(task) +
     weights.urgency * 30 * urgencyOf(task) +
-    (task.kind === "incident" ? 20 : 0) -
+    prudence * (task.kind === "incident" ? 25 : 0) +
+    (task.kind === "incident" ? 20 : 0) +
+    appetite * 30 -
+    Math.max(0, -appetite) * own * 20 -
+    solidarity * 10 -
     own * 14
   );
 }
@@ -67,11 +78,12 @@ export function trashScore(
   // タスク報酬カードは AI の性格に関係なく捨てない
   if (card.score !== undefined || card.title) return Number.NEGATIVE_INFINITY;
   const hygiene = Math.max(0, -weights.greed);
+  const prudence = weights.prudence ?? 0;
   const debtPressure = state.teamDebt / Math.max(1, state.rules.debtLimit);
 
-  // 負債は全AIが片付ける（能力の下限）。低レベルカードの廃棄だけ性格に任せる。
+  // 負債は慎重さが高いほど優先する。低レベルカードの廃棄は整理（greed負）に任せる。
   if (card.type === "debt") {
-    return 80 + debtPressure * 20 + hygiene * 10;
+    return 80 + debtPressure * 20 + hygiene * 10 + prudence * 40;
   }
   if (card.level > 3) return Number.NEGATIVE_INFINITY;
   const feature = (4 - card.level) / 3;

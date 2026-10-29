@@ -9,6 +9,9 @@ const SAMPLES: CardEffect[] = [
   { kind: "deadline", amount: 1 },
   { kind: "token", token: "mi", amount: 1 },
   { kind: "shield", amount: 1 },
+  { kind: "cycle", draw: 1, discard: 1 },
+  { kind: "recover", amount: 1 },
+  { kind: "refresh", draw: 3 },
 ];
 
 describe("card effect plugins", () => {

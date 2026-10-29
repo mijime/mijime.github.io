@@ -116,13 +116,19 @@ function BacklogCard({
           className="inline-flex items-center gap-0.5 rounded-sm border border-(--border) bg-(--surface) px-1 py-0.5 text-[8px] text-(--ink)"
           title={rewardLabel(task)}
         >
-          <CardTypeBadge type={task.reward.type} size={7} />
-          <LevelStars level={task.reward.level} className="text-[8px] text-(--accent)" />
-          {task.reward.effect && (
-            <span className="ml-0.5 text-[7px] text-(--mid)">
-              {effectLabel(task.reward.effect)}
-            </span>
-          )}
+          {task.kind === "relic" ? (
+            <span className="font-semibold text-(--accent)">RELIC 3択</span>
+          ) : task.reward ? (
+            <>
+              <CardTypeBadge type={task.reward.type} size={7} />
+              <LevelStars level={task.reward.level} className="text-[8px] text-(--accent)" />
+              {task.reward.effect && (
+                <span className="ml-0.5 text-[7px] text-(--mid)">
+                  {effectLabel(task.reward.effect)}
+                </span>
+              )}
+            </>
+          ) : null}
         </span>
       </div>
 

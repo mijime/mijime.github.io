@@ -52,6 +52,34 @@ export function formatReviewSpan(review: DailyReview): string | null {
   return `${formatTime(review.firstAt)} - ${formatTime(review.lastAt)}`;
 }
 
+/** 分単位に切り捨てた「1時間30分」形式の文字列を返す。 */
+export function formatGapDuration(ms: number): string {
+  const totalMinutes = Math.max(0, Math.floor(ms / 60_000));
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+  if (hours === 0) return `${minutes}分`;
+  if (minutes === 0) return `${hours}時間`;
+  return `${hours}時間${minutes}分`;
+}
+
+export interface TimelineGap {
+  /** この index の記録の直前に空き時間がある */
+  index: number;
+  durationMs: number;
+  label: string;
+}
+
+/** 記録と記録の間が minMinutes 以上空いている箇所を返す。 */
+export function buildTimelineGaps(entries: Entry[], minMinutes = 30): TimelineGap[] {
+  const gaps: TimelineGap[] = [];
+  for (let i = 1; i < entries.length; i++) {
+    const durationMs = entries[i].timestamp - entries[i - 1].timestamp;
+    if (durationMs < minMinutes * 60_000) continue;
+    gaps.push({ index: i, durationMs, label: formatGapDuration(durationMs) });
+  }
+  return gaps;
+}
+
 /** タイムスタンプのローカル時刻ごとにエントリをまとめる。 */
 export function groupByHour(entries: Entry[]): Map<number, Entry[]> {
   const groups = new Map<number, Entry[]>();

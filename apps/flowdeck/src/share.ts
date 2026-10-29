@@ -8,6 +8,7 @@ export interface SharedResult {
   totalDays: number;
   aiProfile: AiProfile;
   generationSwing: number;
+  relics?: string[];
   summary: ResultSummary;
 }
 
@@ -27,6 +28,7 @@ export function buildSharedResult(state: GameState): SharedResult | null {
     totalDays: state.totalDays,
     aiProfile: state.aiProfile,
     generationSwing: state.generationSwing,
+    relics: state.teamRelics ?? [],
     summary: { ...summary, players },
   };
 }
@@ -103,6 +105,12 @@ export async function decodeSharedResult(code: string): Promise<SharedResult | n
       typeof parsed.summary?.score?.finalScore !== "number"
     ) {
       return null;
+    }
+    parsed.aiProfile = "standard";
+    for (const player of parsed.summary.players) {
+      player.weights.prudence ??= 0;
+      player.weights.solidarity ??= 0;
+      player.weights.appetite ??= 0;
     }
     return parsed;
   } catch {

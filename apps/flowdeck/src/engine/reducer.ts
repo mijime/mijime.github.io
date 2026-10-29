@@ -10,6 +10,7 @@ import {
   pullTask,
   useToken,
 } from "./core";
+import { grantRelic } from "./relics";
 import { randomSeed } from "./rng";
 import { BASE_RULES, type RuleSet } from "./rules";
 import { createGame } from "./setup";
@@ -32,6 +33,16 @@ export function reduce(state: GameState, action: Action, rules: RuleSet = BASE_R
       action.aiProfile ?? state.aiProfile,
     );
   }
+
+  if (action.type === "CHOOSE_RELIC") {
+    if (!state.pendingRelic) return state;
+    const s: GameState = structuredClone(state);
+    if (!grantRelic(s, action.relicId, action.discardRelicId)) return state;
+    s.pendingRelic = null;
+    return s;
+  }
+
+  if (state.pendingRelic) return state;
 
   const s: GameState = structuredClone(state);
 

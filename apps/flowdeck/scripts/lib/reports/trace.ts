@@ -102,19 +102,28 @@ export function printTrace(result: RunResult, top = 12): void {
       task.title,
       task.lane,
       String(task.score),
-      `${task.reward.type}${task.reward.level}`,
+      task.reward ? `${task.reward.type}${task.reward.level}` : "relic",
       span,
     ]),
   );
 
   subheading("プレイヤー別の結果");
   printTable(
-    ["player", "trait", "completed", "reward", "work", "WIP", "deck(設/開/テ/負)"],
+    ["player", "f/g/u/p/s/a", "completed", "reward", "work", "WIP", "deck(設/開/テ/負)"],
     summary.players.map((player) => [
       player.name,
       player.isHuman
         ? "human"
-        : `${player.weights.focus.toFixed(1)}/${player.weights.greed.toFixed(1)}/${player.weights.urgency.toFixed(1)}`,
+        : [
+            player.weights.focus,
+            player.weights.greed,
+            player.weights.urgency,
+            player.weights.prudence ?? 0,
+            player.weights.solidarity ?? 0,
+            player.weights.appetite ?? 0,
+          ]
+            .map((value) => value.toFixed(1))
+            .join("/"),
       String(player.completed),
       String(player.score),
       String(

@@ -76,6 +76,13 @@ body {
   padding: 0 16px;
 }
 
+/* `viewport-fit=cover` pages (otete) put the header under the status bar unless
+   it reserves the notch. Pages without cover see env() as 0. */
+.app-header .site-header-inner {
+  height: calc(52px + env(safe-area-inset-top));
+  padding-top: env(safe-area-inset-top);
+}
+
 .app-header-brand {
   display: flex;
   min-width: 0;

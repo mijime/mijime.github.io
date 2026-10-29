@@ -17,9 +17,16 @@ export interface PersonalityWeights {
   greed: number;
   /** + 納期 / - 長期 */
   urgency: number;
+  /** + 慎重（インシデント・負債を処理） / - 強気（リスク許容） */
+  prudence?: number;
+  /** + 支援 / - 自走 */
+  solidarity?: number;
+  /** + WIPを抱える / - WIPを絞る */
+  appetite?: number;
 }
 
-export type AiProfile = "standard" | "strong";
+/** 旧 standard / strong を統合した単一プロファイル。 */
+export type AiProfile = "standard";
 export type ContributionPhase = "design" | "dev" | "test";
 
 export interface ContributionStats {
@@ -34,6 +41,12 @@ export interface CardEffectMap {
   deadline: { amount: number };
   token: { token: string; amount: number };
   shield: { amount: number };
+  /** 山札から draw 枚引き、低レベルのカードを discard 枚捨てる */
+  cycle: { draw: number; discard: number };
+  /** 捨て札から amount 枚を手札に戻す */
+  recover: { amount: number };
+  /** 全員の手札を捨てて draw 枚引き直す */
+  refresh: { draw: number };
 }
 
 export type CardEffectKind = keyof CardEffectMap;
@@ -50,6 +63,8 @@ export interface CardInstance {
   effect?: CardEffect;
   /** タスク報酬カードのスコア。デッキに残っている間だけチームスコアに数える */
   score?: number;
+  /** 報酬元タスクのテーマ（表示用） */
+  theme?: string;
 }
 
 export interface AttachedCard {
@@ -72,7 +87,7 @@ export interface TaskReward {
   effect?: CardEffect;
 }
 
-export type TaskKind = "normal" | "incident";
+export type TaskKind = "normal" | "incident" | "relic";
 
 export interface TaskPenaltyMap {
   debt: { target: "owner" | "all"; amount: number };
@@ -96,11 +111,11 @@ export interface TaskDef {
   score: number;
   /** 納期トークンがこの数に達したらトラッシュ */
   deadline: number;
-  /** 獲得時にタスクカード自身がなる報酬カード */
-  reward: TaskReward;
-  /** 通常タスク or インシデント */
+  /** 獲得時にタスクカード自身がなる報酬カード。relicタスクはカード報酬なし */
+  reward?: TaskReward;
+  /** 通常タスク / インシデント / レリックタスク */
   kind?: TaskKind;
-  /** インシデントが期限切れになった時の罰則 */
+  /** 期限切れになった時の罰則 */
   penalty?: TaskPenalty;
 }
 
@@ -108,11 +123,13 @@ export interface TaskCard {
   id: string;
   defId: string;
   title: string;
+  /** タスクのテーマ（llm / agent / saas / platform）。 */
+  theme?: string;
   requirements: TaskRequirements;
   score: number;
   deadline: number;
   tokens: number;
-  reward: TaskReward;
+  reward?: TaskReward;
   /** mi などの作業トークン。レベル1作業としてフェーズに加算する */
   tokenWork: { design: number; dev: number; test: number };
   kind: TaskKind;
@@ -139,6 +156,10 @@ export interface PlayerState {
   tokens: Record<string, number>;
   /** 次に受ける負債を防ぐシールド */
   shields?: number;
+  /** 1ターン1回の廃棄を無料にするレリック用 */
+  freeTrashUsed?: boolean;
+  /** 1ターン1回の効果カード追加アクション用 */
+  effectActionUsed?: boolean;
   /** 翌日開始時に失うアクション数 */
   actionPenalty: number;
   completed: number;
@@ -186,6 +207,14 @@ export interface GameAnalytics {
   supportPlays: number;
   substitutions: number;
   tokensUsed: number;
+  /** 効果カードで増えたアクション */
+  actionsGained: number;
+  /** 効果カードで引いた枚数 */
+  cardsDrawn: number;
+  /** 循環などで捨てた枚数 */
+  cardsDiscarded: number;
+  /** 捨て札から回収した枚数 */
+  cardsRecovered: number;
   debtSources: { risk: number; incident: number; other: number };
   /** プレイヤーごとの行動傾向。リザルトのポジション判定に使う */
   players: Record<string, PlayerAnalytics>;
@@ -201,6 +230,14 @@ export interface PlayerAnalytics {
   incidentPlays: number;
   effectPlays: number;
   debtCleaned: number;
+  /** 効果カードで増えたアクション */
+  actionsGained: number;
+  /** 効果カードで引いた枚数 */
+  cardsDrawn: number;
+  /** 循環などで捨てた枚数 */
+  cardsDiscarded: number;
+  /** 捨て札から回収した枚数 */
+  cardsRecovered: number;
 }
 
 export interface DaySnapshot {
@@ -231,6 +268,16 @@ export interface PlayerOutcome {
   avgWip: number;
   contributed: Record<ContributionPhase, ContributionStats>;
   deck: Record<CardType, number>;
+  /** プレイした効果カード枚数 */
+  effectPlays?: number;
+  /** 効果カードで増えたアクション */
+  actionsGained?: number;
+  /** 効果カードで引いた枚数 */
+  cardsDrawn?: number;
+  /** 循環などで捨てた枚数 */
+  cardsDiscarded?: number;
+  /** 捨て札から回収した枚数 */
+  cardsRecovered?: number;
   /** リザルトのポジション判定に使う行動傾向 */
   analytics?: PlayerAnalytics;
   /** 判定されたポジション（24種 + オールラウンダー） */
@@ -249,13 +296,16 @@ export interface AcquisitionReport {
   id: string;
   day: number;
   taskTitle: string;
+  theme?: string;
   pullerId: string;
   pullerName: string;
   recipientId: string;
   recipientName: string;
   contributions: Contribution[];
   score: number;
-  reward: TaskReward;
+  reward?: TaskReward;
+  /** relicタスクで提示されたレリック候補 */
+  relicChoices?: string[];
   risks: { title: string; description: string }[];
   added: { design: number; dev: number; test: number };
   unmet: boolean;
@@ -278,6 +328,17 @@ export interface Outcome {
   expired: number;
   testExpired: number;
   tips: string[];
+}
+
+export interface PendingRelicChoice {
+  taskTitle: string;
+  playerId: string;
+  /** 提示するレリック（最大3） */
+  options: string[];
+  /** 取得済みのチームレリック（上限時の交換用） */
+  currentRelics: string[];
+  /** 上限に達していて交換が必要か */
+  replace: boolean;
 }
 
 export interface GameState {
@@ -314,6 +375,10 @@ export interface GameState {
   metrics: DaySnapshot[];
   outcome: Outcome | null;
   lastAcquisition: AcquisitionReport | null;
+  /** チーム共有レリック */
+  teamRelics?: string[];
+  /** 人間が選ぶレリック候補。存在する間は他の行動をブロックする */
+  pendingRelic?: PendingRelicChoice | null;
   rules: TeamRules;
 }
 
@@ -326,6 +391,7 @@ export type Action =
   | { type: "END_ROUND" }
   | { type: "DISCARD_CARD"; cardId: number }
   | { type: "USE_TOKEN"; token: string; taskId: string }
+  | { type: "CHOOSE_RELIC"; relicId: string; discardRelicId?: string }
   | { type: "HYDRATE"; state: GameState }
   | {
       type: "RESTART";

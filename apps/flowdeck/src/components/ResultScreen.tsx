@@ -5,6 +5,7 @@ import type { Action, GameState, PlayerOutcome } from "../engine/types";
 import { buildResultSummary } from "../engine/analytics/result";
 import { archetypeById } from "../engine/analytics/playerTypes";
 import { benchmarkFor } from "../data/benchmark";
+import { relicDescription, relicName } from "../data/relics";
 import { CARD_LABEL, CARD_STYLE, CardTypeBadge, PlayerIcon, traitSummary } from "./ui";
 import { LOG_TONE, groupLogByDay } from "./LogPanel";
 import { newSeed } from "../store";
@@ -92,9 +93,7 @@ export function ResultScreen({ state, dispatch }: Props) {
       <div className="mx-auto max-w-3xl px-4 py-6">
         <header className="text-center">
           <h1 className="serif text-2xl font-semibold">{state.totalDays}日間のプロジェクト終了</h1>
-          <p className="text-[10px] text-(--mid)">
-            シード {state.seed} / {state.aiProfile === "strong" ? "有能" : "標準"}チームメイト
-          </p>
+          <p className="text-[10px] text-(--mid)">シード {state.seed} / 標準チームメイト</p>
 
           <div className="mt-3 flex items-center justify-center gap-1 text-(--accent)">
             {Array.from({ length: 3 }, (_, index) => (
@@ -135,11 +134,12 @@ export function ResultScreen({ state, dispatch }: Props) {
                 チーム内 {rank}位 / {outcome.perPlayer.length}人
               </span>
             </div>
-            <div className="mt-2 grid grid-cols-4 gap-1">
+            <div className="mt-2 grid grid-cols-5 gap-1">
               <ContributionStat label="作業" value={`${humanWork}pt`} />
               <ContributionStat label="プレイ" value={`${workCards(human)}枚`} />
               <ContributionStat label="完了" value={`${human.completed}件`} />
               <ContributionStat label="報酬" value={`${human.score}pt`} />
+              <ContributionStat label="追加AP" value={`+${human.actionsGained ?? 0}`} />
             </div>
             <div className="mt-2 flex items-center gap-2">
               <span className="shrink-0 text-[8px] text-(--mid)">チームの作業の</span>
@@ -164,6 +164,20 @@ export function ResultScreen({ state, dispatch }: Props) {
         <div className="mt-2 grid gap-2">
           <section className="rounded-sm border border-(--border) bg-(--paper) p-3">
             <h2 className="serif text-[13px] font-semibold">チームの成果</h2>
+            {(state.teamRelics ?? []).length > 0 && (
+              <p className="mt-1 flex flex-wrap items-center gap-1 text-[8px] text-(--accent)">
+                レリック:
+                {(state.teamRelics ?? []).map((id) => (
+                  <span
+                    key={id}
+                    className="rounded-sm border border-(--accent)/40 bg-(--accent)/10 px-1 py-0.5"
+                    title={relicDescription(id)}
+                  >
+                    {relicName(id)}
+                  </span>
+                ))}
+              </p>
+            )}
             <div className="mt-2 grid gap-1.5 sm:grid-cols-2">
               {outcome.perPlayer.map((player) => (
                 <article
@@ -195,6 +209,12 @@ export function ResultScreen({ state, dispatch }: Props) {
                       点 <b className="text-(--ink)">{player.score}</b>
                     </span>
                     <span>WIP {player.avgWip.toFixed(1)}</span>
+                    {((player.actionsGained ?? 0) > 0 || (player.cardsDrawn ?? 0) > 0) && (
+                      <span className="text-(--accent)">
+                        追加AP <b>+{player.actionsGained ?? 0}</b> / ドロー{" "}
+                        <b>{player.cardsDrawn ?? 0}</b>
+                      </span>
+                    )}
                   </div>
                   <p className="mt-0.5 text-[7px] text-(--mid)">
                     {archetypeById(player.archetypeId).description}
@@ -227,6 +247,13 @@ export function ResultScreen({ state, dispatch }: Props) {
                       <span className="text-(--danger)"> / 負債 {player.deck.debt}</span>
                     )}
                   </p>
+                  {(player.effectPlays ?? 0) > 0 && (
+                    <p className="mt-0.5 flex flex-wrap items-center gap-1 text-[7.5px] text-(--accent)">
+                      <span>効果カード {player.effectPlays ?? 0}枚</span>
+                      <span>追加AP +{player.actionsGained ?? 0}</span>
+                      <span>ドロー {player.cardsDrawn ?? 0}枚</span>
+                    </p>
+                  )}
                 </article>
               ))}
             </div>
@@ -298,7 +325,14 @@ export function ResultScreen({ state, dispatch }: Props) {
             <Button
               variant="secondary"
               size="sm"
-              onClick={() => dispatch({ type: "RESTART", seed: state.seed })}
+              onClick={() =>
+                dispatch({
+                  type: "RESTART",
+                  seed: state.seed,
+                  days: state.totalDays,
+                  aiCount: state.players.length - 1,
+                })
+              }
               className="gap-1 px-2 py-1 text-(--mid)"
             >
               <RefreshCw size={11} /> 同じシードで再挑戦
@@ -306,7 +340,14 @@ export function ResultScreen({ state, dispatch }: Props) {
             <Button
               variant="primary"
               size="sm"
-              onClick={() => dispatch({ type: "RESTART", seed: newSeed() })}
+              onClick={() =>
+                dispatch({
+                  type: "RESTART",
+                  seed: newSeed(),
+                  days: state.totalDays,
+                  aiCount: state.players.length - 1,
+                })
+              }
               className="px-3 py-1.5"
             >
               <RotateCcw size={12} /> もう一度（新しいシード）
