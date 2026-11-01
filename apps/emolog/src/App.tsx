@@ -15,6 +15,7 @@ import {
   updateEntryLocation,
 } from "./store";
 import { captureLocation, isLocationEnabled, setLocationEnabled } from "./location";
+import { prefetchEmojiData } from "./emojiData";
 import { today, type ExportData, type ListDef } from "./types";
 import { TabBar, type Tab } from "./TabBar";
 import { RecordView } from "./RecordView";
@@ -75,6 +76,7 @@ export function App() {
   const renameInputRef = useRef<HTMLInputElement>(null);
   const addListInputRef = useRef<HTMLInputElement>(null);
   const activeListTabRef = useRef<HTMLButtonElement>(null);
+  const locationErrorShownRef = useRef(false);
 
   const refreshFavorites = useCallback(() => {
     setFavorites(getTopFavorites());
@@ -96,6 +98,17 @@ export function App() {
         console.error("list loading error:", err);
         setListError(err?.message || String(err));
       });
+  }, []);
+
+  useEffect(() => {
+    // 初回オフラインでも絵文字ピッカーを使えるように、空き時間にデータを先読みする。
+    const run = () => prefetchEmojiData();
+    if (typeof requestIdleCallback === "function") {
+      const id = requestIdleCallback(run, { timeout: 4000 });
+      return () => cancelIdleCallback(id);
+    }
+    const timer = setTimeout(run, 2000);
+    return () => clearTimeout(timer);
   }, []);
 
   useEffect(() => {
@@ -144,21 +157,50 @@ export function App() {
   }, [addingList]);
 
   async function handleTap(emoji: string, note?: string) {
+    // 位置情報はタップ直後に取得を開始する。await を挟むとユーザー操作から
+    // 離れてしまい、許可プロンプトや測位が不安定になるため。
+    const locationPromise = locationEnabled ? captureLocation() : undefined;
+
+    const listId = selectedListId ?? (await ensureDefaultList());
+    if (selectedListId === null) {
+      setSelectedListId(listId);
+      void refreshLists();
+    }
+
     const now = Date.now();
     const id = await addEntry({
       date: today(),
       timestamp: now,
       emoji,
       note: note || undefined,
-      listId: selectedListId ?? undefined,
+      listId,
     });
-    if (locationEnabled) {
-      void captureLocation().then((location) => {
-        if (location) {
-          void updateEntryLocation(id, location).then(() => setHistoryVersion((v) => v + 1));
-        }
-      });
+
+    if (locationPromise) {
+      void locationPromise
+        .then(async (result) => {
+          if (!result.ok) {
+            if (result.reason !== "unsupported" && !locationErrorShownRef.current) {
+              locationErrorShownRef.current = true;
+              handleSnackBar(
+                result.reason === "denied"
+                  ? "位置情報の利用が許可されていません"
+                  : "位置情報を取得できませんでした",
+              );
+            }
+            return;
+          }
+          const updated = await updateEntryLocation(id, result.location);
+          if (updated) {
+            locationErrorShownRef.current = false;
+            setHistoryVersion((v) => v + 1);
+          }
+        })
+        .catch((error: unknown) => {
+          console.error("location update error:", error);
+        });
     }
+
     incrementFavorite(emoji);
     refreshFavorites();
     setHistoryVersion((v) => v + 1);
@@ -308,6 +350,7 @@ export function App() {
 
   const deleteListName = lists.find((list) => list.id === deleteListTargetId)?.name;
   const menuList = lists.find((list) => list.id === menuOpen);
+  const currentList = lists.find((list) => list.id === selectedListId);
 
   return (
     <div className="emolog">
@@ -344,6 +387,7 @@ export function App() {
                       <button
                         ref={id === selectedListId ? activeListTabRef : undefined}
                         className={`emolog-list-tab${id === selectedListId ? " emolog-list-active" : ""}`}
+                        aria-current={id === selectedListId ? "page" : undefined}
                         onClick={() => selectList(id)}
                         onDoubleClick={() => handleStartRename(id, l.name)}
                       >
@@ -445,7 +489,17 @@ export function App() {
       <div className="emolog-content">
         {activeTab === "record" && (
           <>
-            <RecordView favorites={favorites} onTap={handleTap} />
+            {currentList && (
+              <p className="emolog-record-current-list">
+                <span className="emolog-record-current-list-name">{currentList.name}</span>
+                <span>に記録</span>
+              </p>
+            )}
+            <RecordView
+              favorites={favorites}
+              onTap={handleTap}
+              disabled={selectedListId === null}
+            />
             <section className="emolog-history-section">
               <h2 className="emolog-history-section-title">履歴</h2>
               <HistoryView
@@ -496,6 +550,7 @@ export function App() {
         onLocationEnabledChange={(enabled) => {
           setLocationEnabledState(enabled);
           setLocationEnabled(enabled);
+          locationErrorShownRef.current = false;
         }}
       />
 

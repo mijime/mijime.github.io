@@ -454,6 +454,20 @@
   padding-top: 8px;
 }
 
+.emolog-record-current-list {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  margin: 0 4px 8px;
+  color: var(--mid);
+  font-size: 11px;
+}
+
+.emolog-record-current-list-name {
+  color: var(--ink);
+  font-weight: 600;
+}
+
 .emolog-record-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -487,6 +501,17 @@
 
 .emolog-record-fav:active {
   transform: scale(0.92);
+}
+
+.emolog-record-fav:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.emolog-record-fav:disabled:hover {
+  transform: none;
+  background: var(--surface);
+  box-shadow: none;
 }
 
 .emolog-record-empty {

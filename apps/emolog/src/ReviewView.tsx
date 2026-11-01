@@ -1,7 +1,7 @@
 import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import { ArrowLeft, ChevronLeft, ChevronRight, Pencil, Trash2 } from "lucide-react";
 import { Button, IconButton } from "@mijime/theme/ui";
-import { deleteEntry, getEntries, updateEntryEmoji, updateEntryNote } from "./store";
+import { deleteEntry, getEntries, restoreEntry, updateEntryEmoji, updateEntryNote } from "./store";
 import { buildDailyReview, buildTimelineGaps, formatReviewSpan, type DailyReview } from "./review";
 import { EmojiButton } from "./EmojiButton";
 import { EmojiPicker } from "./EmojiPicker";
@@ -46,16 +46,10 @@ export function ReviewView({
   const [editNote, setEditNote] = useState("");
   const [editingEmojiId, setEditingEmojiId] = useState<number | null>(null);
   const editInputRef = useRef<HTMLInputElement>(null);
-  const deleteTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const dateRef = useRef(date);
   dateRef.current = date;
-
-  useEffect(
-    () => () => {
-      if (deleteTimerRef.current) clearTimeout(deleteTimerRef.current);
-    },
-    [],
-  );
+  const listIdRef = useRef(listId);
+  listIdRef.current = listId;
 
   useEffect(() => {
     let cancelled = false;
@@ -113,25 +107,42 @@ export function ReviewView({
 
   function handleDelete(entry: Entry) {
     if (entry.id === null || entry.id === undefined) return;
-    setEntries((prev) => prev.filter((item) => item.id !== entry.id));
-    const timer = setTimeout(async () => {
-      await deleteEntry(entry.id!);
-    }, 3000);
-    deleteTimerRef.current = timer;
+    const id = entry.id;
+    setEntries((prev) => prev.filter((item) => item.id !== id));
+
+    const deletion = deleteEntry(id).then(
+      () => true,
+      (error: unknown) => {
+        console.error("entry delete error:", error);
+        setEntries((prev) => {
+          if (prev.some((item) => item.id === id)) return prev;
+          return [...prev, entry].toSorted((a, b) => a.timestamp - b.timestamp);
+        });
+        onSnackBar?.("削除に失敗しました");
+        return false;
+      },
+    );
+
     onSnackBar?.("削除しました", {
       label: "取り消し",
       onClick: () => {
-        if (deleteTimerRef.current) {
-          clearTimeout(deleteTimerRef.current);
-          deleteTimerRef.current = null;
-        }
-        // 表示中の日付が変わっていたら、別の日の一覧には戻さない。
-        if (entry.date !== dateRef.current) return;
-        setEntries((prev) => {
-          const restored = [...prev, entry];
-          restored.sort((a, b) => a.timestamp - b.timestamp);
-          return restored;
-        });
+        void (async () => {
+          if (!(await deletion)) return;
+          try {
+            await restoreEntry(entry);
+          } catch (error) {
+            console.error("entry restore error:", error);
+            onSnackBar?.("復元に失敗しました");
+            return;
+          }
+          // 表示中の日付・リストが変わっていたら、別の一覧には戻さない。
+          if (entry.date !== dateRef.current) return;
+          if (listIdRef.current != null && entry.listId !== listIdRef.current) return;
+          setEntries((prev) => {
+            if (prev.some((item) => item.id === id)) return prev;
+            return [...prev, entry].toSorted((a, b) => a.timestamp - b.timestamp);
+          });
+        })();
       },
     });
   }

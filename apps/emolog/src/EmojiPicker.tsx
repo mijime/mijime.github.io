@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import { X } from "lucide-react";
 import "emoji-picker-element";
+import { emojiDataUrl } from "./emojiData";
 
 // emoji-picker-element のカスタム要素を JSX で書けるようにする。
 declare module "react" {
@@ -47,7 +48,11 @@ export function EmojiPicker({ onSelect, onClose }: EmojiPickerProps) {
           </button>
         </div>
       )}
-      <emoji-picker ref={pickerRef} class="emolog-emoji-picker-element" />
+      <emoji-picker
+        ref={pickerRef}
+        class="emolog-emoji-picker-element"
+        data-source={emojiDataUrl}
+      />
     </div>
   );
 }

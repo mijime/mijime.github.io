@@ -93,9 +93,10 @@ const gtmId = import.meta.env.PUBLIC_GTM_ID;
       (() => {
         if (!("serviceWorker" in navigator)) return;
         const isDev =
-          location.hostname === "localhost" ||
-          location.hostname === "127.0.0.1" ||
-          location.port !== "";
+          (location.hostname === "localhost" ||
+            location.hostname === "127.0.0.1" ||
+            location.port !== "") &&
+          new URLSearchParams(location.search).get("sw") !== "1";
 
         if (isDev) {
           const key = "sw-dev-clean-v2";

@@ -6,9 +6,9 @@ import type { Entry } from "./types";
 import { HistoryView } from "./HistoryView";
 
 const entries: Entry[] = [
-  { id: 1, date: "2026-10-27", timestamp: 1000, emoji: "😀", note: "old note" },
-  { id: 2, date: "2026-10-27", timestamp: 2000, emoji: "😢", note: "" },
-  { id: 3, date: "2026-10-26", timestamp: 3000, emoji: "😡", note: "yesterday" },
+  { id: 1, date: "2026-10-27", timestamp: 1000, emoji: "😀", note: "old note", listId: 1 },
+  { id: 2, date: "2026-10-27", timestamp: 2000, emoji: "😢", note: "", listId: 1 },
+  { id: 3, date: "2026-10-26", timestamp: 3000, emoji: "😡", note: "yesterday", listId: 1 },
 ];
 
 function renderHistory(props: Partial<ComponentProps<typeof HistoryView>> = {}) {
@@ -161,5 +161,90 @@ describe("HistoryView", () => {
 
     expect(await screen.findByText("old work")).toBeTruthy();
     expect(screen.queryByText("old private")).toBeNull();
+  });
+
+  it("deletes an entry immediately and can undo it", async () => {
+    vi.spyOn(store, "getEntriesByDateRange").mockResolvedValue(entries);
+    const remove = vi.spyOn(store, "deleteEntry").mockResolvedValue(undefined);
+    const restore = vi.spyOn(store, "restoreEntry").mockResolvedValue(undefined);
+    const onSnackBar = vi.fn();
+    renderHistory({ onSnackBar });
+
+    const note = await screen.findByText("old note");
+    fireEvent.click(
+      note.closest(".emolog-history-entry")!.querySelector(".emolog-history-delete")!,
+    );
+
+    await waitFor(() => expect(remove).toHaveBeenCalledWith(1));
+    await waitFor(() => expect(screen.queryByText("old note")).toBeNull());
+
+    const action = onSnackBar.mock.calls[0]![1] as { onClick: () => void };
+    action.onClick();
+
+    await waitFor(() =>
+      expect(restore).toHaveBeenCalledWith(expect.objectContaining({ id: 1, note: "old note" })),
+    );
+    expect(await screen.findByText("old note")).toBeTruthy();
+  });
+
+  it("does not bring back a deleted entry when the history reloads", async () => {
+    const range = vi.spyOn(store, "getEntriesByDateRange").mockResolvedValue(entries);
+    vi.spyOn(store, "deleteEntry").mockImplementation(async (id) => {
+      range.mockResolvedValue(entries.filter((entry) => entry.id !== id));
+    });
+    const { rerender } = renderHistory();
+
+    const note = await screen.findByText("old note");
+    fireEvent.click(
+      note.closest(".emolog-history-entry")!.querySelector(".emolog-history-delete")!,
+    );
+    await waitFor(() => expect(screen.queryByText("old note")).toBeNull());
+
+    rerender(
+      <HistoryView
+        selectedListId={1}
+        filterEmoji={null}
+        onFilterEmoji={() => {}}
+        filterTag={null}
+        onFilterTag={() => {}}
+        onSnackBar={() => {}}
+        refreshKey={1}
+      />,
+    );
+
+    await waitFor(() => expect(screen.queryByText("old note")).toBeNull());
+    expect(screen.getByText("yesterday")).toBeTruthy();
+  });
+
+  it("ignores stale responses when the list changes", async () => {
+    let resolveFirst: (value: Entry[]) => void = () => {};
+    const first = new Promise<Entry[]>((resolve) => {
+      resolveFirst = resolve;
+    });
+    const second: Entry[] = [
+      { id: 20, date: "2026-10-27", timestamp: 2000, emoji: "😢", note: "list two" },
+    ];
+    vi.spyOn(store, "getEntriesByDateRange")
+      .mockReturnValueOnce(first)
+      .mockResolvedValueOnce(second);
+    vi.spyOn(store, "getAllTags").mockResolvedValue([]);
+
+    const { rerender } = renderHistory({ selectedListId: 1 });
+    rerender(
+      <HistoryView
+        selectedListId={2}
+        filterEmoji={null}
+        onFilterEmoji={() => {}}
+        filterTag={null}
+        onFilterTag={() => {}}
+        onSnackBar={() => {}}
+      />,
+    );
+
+    expect(await screen.findByText("list two")).toBeTruthy();
+    resolveFirst([{ id: 10, date: "2026-10-27", timestamp: 1000, emoji: "😀", note: "list one" }]);
+
+    await waitFor(() => expect(screen.queryByText("list one")).toBeNull());
+    expect(screen.getByText("list two")).toBeTruthy();
   });
 });

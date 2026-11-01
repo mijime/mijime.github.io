@@ -131,6 +131,11 @@ export async function deleteEntry(id: number): Promise<void> {
   await db.entries.delete(id);
 }
 
+/** 取り消し用。削除した記録を同じ ID のまま復元する。 */
+export async function restoreEntry(entry: Entry): Promise<void> {
+  await db.entries.put(entry);
+}
+
 export async function updateEntryNote(id: number, note: string): Promise<number> {
   return db.entries.update(id, { note: note || undefined, tags: extractTags(note) });
 }

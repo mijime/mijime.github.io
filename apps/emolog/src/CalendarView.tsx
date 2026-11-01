@@ -61,9 +61,18 @@ export function CalendarView({
   const { from, to } = useMemo(() => getMonthDateRange(year, month), [year, month]);
 
   useEffect(() => {
-    getEntriesByDateRange(from, to, listId ?? undefined).then((entries) => {
-      setDayData(aggregateByDate(entries));
-    });
+    let cancelled = false;
+    setDayData(new Map());
+    getEntriesByDateRange(from, to, listId ?? undefined)
+      .then((entries) => {
+        if (!cancelled) setDayData(aggregateByDate(entries));
+      })
+      .catch(() => {
+        if (!cancelled) setDayData(new Map());
+      });
+    return () => {
+      cancelled = true;
+    };
   }, [from, to, listId]);
 
   const daysInMonth = getDaysInMonth(year, month);

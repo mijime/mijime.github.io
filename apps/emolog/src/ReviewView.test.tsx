@@ -104,11 +104,12 @@ describe("ReviewView timeline", () => {
     await waitFor(() => expect(container.querySelector("emoji-picker")).toBeNull());
   });
 
-  it("deletes an entry and can undo it", async () => {
+  it("deletes an entry immediately and can undo it", async () => {
     vi.spyOn(store, "getEntries").mockResolvedValue([
-      { id: 1, date, timestamp: at(8, 15), emoji: "☀️", note: "朝の記録" },
+      { id: 1, date, timestamp: at(8, 15), emoji: "☀️", note: "朝の記録", listId: 1 },
     ]);
     const remove = vi.spyOn(store, "deleteEntry").mockResolvedValue(undefined);
+    const restore = vi.spyOn(store, "restoreEntry").mockResolvedValue(undefined);
     const onSnackBar = vi.fn();
 
     render(
@@ -126,13 +127,16 @@ describe("ReviewView timeline", () => {
     await screen.findByText("朝の記録");
     fireEvent.click(screen.getByRole("button", { name: "削除" }));
 
+    await waitFor(() => expect(remove).toHaveBeenCalledWith(1));
     await waitFor(() => expect(screen.queryByText("朝の記録")).toBeNull());
     expect(onSnackBar).toHaveBeenCalledWith("削除しました", expect.any(Object));
 
     const action = onSnackBar.mock.calls[0]![1] as { onClick: () => void };
     action.onClick();
 
+    await waitFor(() =>
+      expect(restore).toHaveBeenCalledWith(expect.objectContaining({ id: 1, note: "朝の記録" })),
+    );
     expect(await screen.findByText("朝の記録")).toBeTruthy();
-    expect(remove).not.toHaveBeenCalled();
   });
 });

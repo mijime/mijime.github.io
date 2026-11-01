@@ -5,6 +5,7 @@ import {
   getEntriesByDateRange,
   getAllEntries,
   deleteEntry,
+  restoreEntry,
   updateEntryNote,
   updateEntryEmoji,
   getAllTags,
@@ -68,23 +69,21 @@ export function HistoryView({
   const [editNote, setEditNote] = useState("");
   const [editingEmojiId, setEditingEmojiId] = useState<number | null>(null);
   const editInputRef = useRef<HTMLInputElement>(null);
-  const deleteTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const historyRef = useRef<HTMLDivElement>(null);
-
-  useEffect(
-    () => () => {
-      if (deleteTimerRef.current) clearTimeout(deleteTimerRef.current);
-    },
-    [],
-  );
+  const loadIdRef = useRef(0);
 
   const loadEntries = useCallback(
     async (toDate: string, append: boolean) => {
-      if (selectedListId === null) return;
+      const loadId = ++loadIdRef.current;
+      if (selectedListId === null) {
+        setLoading(false);
+        return;
+      }
       setLoading(true);
       if (filterEmoji || filterTag || normalizedQuery) {
         // フィルタ中は読み込み済みページではなく全履歴を対象にする。
         const fresh = await getAllEntries(selectedListId);
+        if (loadId !== loadIdRef.current) return;
         setEntries(fresh);
         setHasMore(false);
         setLoading(false);
@@ -94,6 +93,7 @@ export function HistoryView({
       start.setDate(start.getDate() - (PAGE_DAYS - 1));
       const from = getFullDate(start);
       const fresh = await getEntriesByDateRange(from, toDate, selectedListId ?? undefined);
+      if (loadId !== loadIdRef.current) return;
       if (append) {
         setEntries((prev) => {
           const existing = new Set(prev.map((e) => e.id));
@@ -125,24 +125,55 @@ export function HistoryView({
 
   async function handleDelete(entry: Entry) {
     if (entry.id === null || entry.id === undefined) return;
-    setEntries((prev) => prev.filter((e) => e.id !== entry.id));
-    const timer = setTimeout(async () => {
-      await deleteEntry(entry.id!);
-    }, 3000);
-    deleteTimerRef.current = timer;
+    const id = entry.id;
+    setEntries((prev) => prev.filter((e) => e.id !== id));
+
+    const deletion = deleteEntry(id).then(
+      () => true,
+      (error: unknown) => {
+        console.error("entry delete error:", error);
+        setEntries((prev) => {
+          if (prev.some((e) => e.id === id)) return prev;
+          return [...prev, entry].toSorted((a, b) => a.timestamp - b.timestamp);
+        });
+        onSnackBar("削除に失敗しました");
+        return false;
+      },
+    );
+
     onSnackBar("削除しました", {
       label: "取り消し",
       onClick: () => {
-        if (deleteTimerRef.current) {
-          clearTimeout(deleteTimerRef.current);
-          deleteTimerRef.current = null;
-        }
-        setEntries((prev) => {
-          const restored = [...prev, entry];
-          restored.sort((a, b) => a.timestamp - b.timestamp);
-          return restored;
-        });
+        void (async () => {
+          if (!(await deletion)) return;
+          try {
+            await restoreEntry(entry);
+          } catch (error) {
+            console.error("entry restore error:", error);
+            onSnackBar("復元に失敗しました");
+            return;
+          }
+          // 別のリストに切り替わっていたら、そのリストの画面には戻さない。
+          if (selectedListId === null || entry.listId !== selectedListId) return;
+          setEntries((prev) => {
+            if (prev.some((e) => e.id === id)) return prev;
+            return [...prev, entry].toSorted((a, b) => a.timestamp - b.timestamp);
+          });
+          if (selectedListId !== null) {
+            getAllTags(selectedListId)
+              .then(setAllTags)
+              .catch(() => undefined);
+          }
+        })();
       },
+    });
+
+    // 削除が確定してからタグ一覧を更新する（削除前のタグが残らないように）。
+    void deletion.then((deleted) => {
+      if (!deleted || selectedListId === null) return;
+      getAllTags(selectedListId)
+        .then(setAllTags)
+        .catch(() => undefined);
     });
   }
 
