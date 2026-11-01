@@ -15,6 +15,26 @@ html[data-otete-view="play"] .site-content {
   height: 100dvh;
 }
 
+/* otete mounts its app inside this wrapper (c:only React host). Give it the
+   full content height so the app's viewport-fit layout — flex fills and inner
+   scrollers like the 🖼️ gallery grid — keeps working below the sticky
+   header on the chrome screens. */
+.site-content .otete {
+  height: 100%;
+}
+
+/* otete's chrome pages keep a notch margin for the standalone build; the
+   sticky app header already reserves `safe-area-inset-top` on the site. */
+html[data-otete-view="chrome"] .site-content .stage-screen {
+  padding-top: 8px;
+}
+html[data-otete-view="chrome"] .site-content .otete-home {
+  padding-top: 48px;
+}
+html[data-otete-view="chrome"] .site-content .otete-page {
+  padding-top: 28px;
+}
+
 /* ── Shiki Syntax Highlight ─────────────────────────── */
 .shiki span {
   color: var(--shiki-light);

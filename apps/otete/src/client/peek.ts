@@ -6,7 +6,7 @@
 //  - Shared `createBubbleField` from `fx.ts` for floating soap bubbles.
 //  - Forgiving scrubbing & tapping on the foam canvas pops it open with a joyful "ばあっ！".
 
-import { boing, bubblePop, cheer, marimba, speak } from "./audio";
+import { boing, bubblePop, cheer, speak } from "./audio";
 import { loadAllWords } from "./custom";
 import { burst, createBubbleField } from "./fx";
 import type { Nav } from "./home";
@@ -70,10 +70,6 @@ export function renderPeek(root: HTMLElement, nav: Nav): () => void {
         </div>
         <canvas id="pk-bubbles"></canvas>
       </div>
-
-      <div class="peek-dock">
-        <button class="toy-action-btn" id="pk-next" type="button">▶ つぎの あわあわ</button>
-      </div>
     </div>
   `;
 
@@ -85,7 +81,6 @@ export function renderPeek(root: HTMLElement, nav: Nav): () => void {
   const foamCtx = foamCanvas.getContext("2d")!;
   const bubCanvas = root.querySelector<HTMLCanvasElement>("#pk-bubbles")!;
   const bubCtx = bubCanvas.getContext("2d")!;
-  const nextBtn = root.querySelector<HTMLButtonElement>("#pk-next")!;
 
   const guide = createGuideBanner({
     friendIdx: 1,
@@ -304,11 +299,6 @@ export function renderPeek(root: HTMLElement, nav: Nav): () => void {
     burst(r.left + r.width / 2, r.top + r.height / 2, 18, ["#ffd23f", "#74c0fc", "#ff758f"]);
     void playWord(current);
     nextTimer = window.setTimeout(startRound, 3800);
-  });
-
-  tap(nextBtn, () => {
-    marimba(4, 0.4);
-    startRound();
   });
 
   let scrubbing = false;

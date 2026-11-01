@@ -1,9 +1,9 @@
 import { openAdmin } from "./admin";
-import { isMuted, marimba, plink, setMuted, soundIcon } from "./audio";
+import { isMuted, plink, setMuted, soundIcon } from "./audio";
 import { deleteDrawing, listDrawings, objectUrlsFor } from "./drawings";
 import { dropOverlay, makeOverlay } from "./overlay";
 import { themeIcon, toggleTheme } from "./theme";
-import { HOME_PILL, bindHome, hint, holdTap, tap } from "./ui";
+import { tap, tapOrHold } from "./ui";
 
 export type Nav = {
   home: () => void;
@@ -19,105 +19,95 @@ export type Nav = {
   gallery: () => void;
 };
 
+type Toy = { go: keyof Nav; emo: string; label: string; desc: string };
+
+// The otete top page and the games below it have different owners: a grown-up
+// picks what to play, the toddler plays it. So the catalogue is a site-style
+// list (see /apps/ for the visual language) while the games stay tactile toys.
+const CHEST: Toy[] = [
+  { go: "feed", emo: "🍎", label: "もぐもぐ", desc: "feeding" },
+  { go: "peek", emo: "🫧", label: "あわあわ", desc: "bubbles" },
+  { go: "puzzle", emo: "🧩", label: "すぽっ！", desc: "shape sorter" },
+  { go: "trace", emo: "🚂", label: "ぽっぽー", desc: "train tracing" },
+  { go: "code", emo: "🤖", label: "プログラム", desc: "musical code" },
+  { go: "draw", emo: "🎨", label: "おえかき", desc: "musical drawing" },
+  { go: "learn", emo: "📖", label: "ずかん", desc: "picture book" },
+  { go: "count", emo: "🔢", label: "かず", desc: "numbers" },
+  { go: "camera", emo: "🪞", label: "かがみ", desc: "magic mirror" },
+  { go: "gallery", emo: "🖼️", label: "さくひん", desc: "artworks" },
+];
+
 export function renderHome(root: HTMLElement, nav: Nav): void {
   root.innerHTML = `
-    <div class="stage-screen home-screen">
-      <div class="toy-topbar">
-        <span></span>
-        <div class="home-tools">
-          <button class="icon-btn" id="h-set" aria-label="せってい" title="せってい（ながおし）">⚙️</button>
-          <button class="icon-btn" id="h-snd" aria-label="おと">${soundIcon()}</button>
-          <button class="icon-btn" id="h-theme" aria-label="よる / ひる">${themeIcon()}</button>
+    <div class="otete-home">
+      <header class="otete-home-head">
+        <div>
+          <h1 class="otete-home-title">otete</h1>
+          <p class="otete-home-desc">toddler activity box</p>
         </div>
-      </div>
-
-      <div class="home-layout">
-        <div class="home-toys-col">
-          <div class="toy-box">
-            <button class="toy-card" data-go="feed" aria-label="もぐもぐ" style="--c1:#ff8787;--c2:#fa5252;--sh-c:#c92a2a" type="button">
-              <span class="toy-emo">🍎</span>
-            </button>
-
-            <button class="toy-card" data-go="peek" aria-label="あわあわ" style="--c1:#74c0fc;--c2:#228be6;--sh-c:#1864ab" type="button">
-              <span class="toy-emo">🫧</span>
-            </button>
-
-            <button class="toy-card" data-go="puzzle" aria-label="すぽっ！" style="--c1:#63e6be;--c2:#0ca678;--sh-c:#087f5b" type="button">
-              <span class="toy-emo">🧩</span>
-            </button>
-
-            <button class="toy-card" data-go="trace" aria-label="ぽっぽー" style="--c1:#8ce99a;--c2:#2f9e44;--sh-c:#2b8a3e" type="button">
-              <span class="toy-emo">🚂</span>
-            </button>
-
-            <button class="toy-card" data-go="code" aria-label="プログラム" style="--c1:#b197fc;--c2:#7950f2;--sh-c:#5f3dc4" type="button">
-              <span class="toy-emo">🤖</span>
-            </button>
-
-            <button class="toy-card" data-go="draw" aria-label="おえかき" style="--c1:#ff9ec0;--c2:#f06595;--sh-c:#a61e4d" type="button">
-              <span class="toy-emo">🎨</span>
-            </button>
-          </div>
-
-          <div class="shelf-row">
-            <button class="shelf-btn" data-go="learn" aria-label="ずかん" style="--c1:#ffd43b;--c2:#f59f00;--sh-c:#d9480f" type="button">
-              <span class="shelf-emo">📖</span>
-            </button>
-            <button class="shelf-btn" data-go="count" aria-label="かず" style="--c1:#b197fc;--c2:#7950f2;--sh-c:#5f3dc4" type="button">
-              <span class="shelf-emo">🔢</span>
-            </button>
-            <button class="shelf-btn" data-go="camera" aria-label="かがみ" style="--c1:#66d9e8;--c2:#1098ad;--sh-c:#0b7285" type="button">
-              <span class="shelf-emo">🪞</span>
-            </button>
-            <button class="shelf-btn" data-go="gallery" aria-label="さくひん" style="--c1:#91a7ff;--c2:#4c6ef5;--sh-c:#364fc7" type="button">
-              <span class="shelf-emo">🖼️</span>
-            </button>
-          </div>
+        <div class="otete-home-tools">
+          <button class="otete-tool" id="h-snd" type="button" aria-label="おと">${soundIcon()}</button>
+          <button class="otete-tool" id="h-theme" type="button" aria-label="よる / ひる">${themeIcon()}</button>
+          <button class="otete-tool" id="h-set" type="button" aria-label="おうちの せってい" title="おうちの せってい">⚙️</button>
         </div>
-      </div>
+      </header>
+
+      <ul class="toy-list">
+        ${CHEST.map(
+          (toy, i) => `
+          <li class="toy-row" style="--i:${i}">
+            <button class="toy-row-btn" data-go="${toy.go}" type="button">
+              <span class="toy-row-emo" aria-hidden="true">${toy.emo}</span>
+              <span class="toy-row-label">${toy.label}</span>
+              <span class="toy-row-desc">${toy.desc}</span>
+              <span class="toy-row-arrow" aria-hidden="true">→</span>
+            </button>
+          </li>`,
+        ).join("")}
+      </ul>
     </div>`;
 
-  root.querySelectorAll<HTMLElement>("[data-go]").forEach((el, i) => {
-    tap(el, () => {
-      marimba(i + 2, 0.45);
-      const go = el.dataset.go as keyof Nav | undefined;
-      if (go && nav[go]) nav[go]();
-    });
+  root.querySelectorAll<HTMLElement>("[data-go]").forEach((el) => {
+    // Fire on release, and only for a quick tap: no reaction to a
+    // press-and-hold or to a drag that turns into a scroll. The catalogue is
+    // thumbed through by grown-ups and small hands rest on the rows.
+    tapOrHold(
+      el,
+      () => {
+        plink(6, 0.3);
+        const go = el.dataset.go as keyof Nav | undefined;
+        if (go && nav[go]) nav[go]();
+      },
+      () => {},
+      450,
+    );
   });
 
-  const themeBtn = root.querySelector<HTMLElement>("#h-theme")!;
-  tap(themeBtn, () => {
-    toggleTheme();
-    themeBtn.textContent = themeIcon();
-    plink(12, 0.3);
-  });
   const sndBtn = root.querySelector<HTMLElement>("#h-snd")!;
   tap(sndBtn, () => {
     setMuted(!isMuted());
     sndBtn.textContent = soundIcon();
     if (!isMuted()) plink(12, 0.3);
   });
-  const setBtn = root.querySelector<HTMLElement>("#h-set")!;
-  holdTap(
-    setBtn,
-    800,
-    () => {
-      plink(12, 0.3);
-      openAdmin();
-    },
-    () => hint(setBtn, "ながおしで おうちの せってい"),
-  );
+  const themeBtn = root.querySelector<HTMLElement>("#h-theme")!;
+  tap(themeBtn, () => {
+    toggleTheme();
+    themeBtn.textContent = themeIcon();
+    plink(12, 0.3);
+  });
+  tap(root.querySelector<HTMLElement>("#h-set")!, () => {
+    plink(12, 0.3);
+    openAdmin();
+  });
 }
 
-/** 🖼️ さくひん — Saved artworks and mirror snapshots. */
 export function renderGallery(root: HTMLElement, nav: Nav): () => void {
   root.innerHTML = `
-    <div class="stage-screen gallery-screen">
-      <div class="toy-topbar">
-        ${HOME_PILL}
-        <div class="toy-badge">🖼️ さくひん</div>
-        <span></span>
-      </div>
+    <div class="otete-page otete-page--gallery">
+      <header class="otete-page-head">
+        <h1 class="otete-page-title">さくひん</h1>
+        <button class="otete-back" id="g-home" type="button">← もどる</button>
+      </header>
       <div class="gallery-grid" id="g-grid"><div class="g-empty">よみこみ中…</div></div>
     </div>`;
 
@@ -128,7 +118,7 @@ export function renderGallery(root: HTMLElement, nav: Nav): () => void {
     '<img alt="さくひん"><button class="pill viewer-close" type="button">✕</button>';
   document.body.append(viewer);
 
-  bindHome(root, () => nav.home());
+  tap(root.querySelector<HTMLElement>("#g-home")!, () => nav.home());
 
   const img = viewer.querySelector("img")!;
   const closeViewer = (): void => {

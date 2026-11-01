@@ -1,7 +1,8 @@
 ---
-// The game selection and parent settings live under the site's common app
-// header, so otete uses BaseLayout like every other app. Only the activity
-// screens themselves go full-screen (see `data-otete-view="play"` in styles.css).
+// Parent pages (the toy box and 🖼️ gallery) set data-otete-view="chrome" on
+// <html> and live under the site header like every other app page. Toddler
+// activity screens flip it to "play" and go full-screen, hiding the header
+// (see otete/src/styles.css).
 //
 // The viewport still has to be the app's own: `viewport-fit=cover` so
 // Env(safe-area-inset-*) works on notched phones, and no pinch-zoom, because

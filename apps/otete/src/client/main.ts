@@ -46,8 +46,31 @@ const ROUTES: Record<string, Screen> = {
   "#gallery": "gallery",
 };
 
+// Parent-facing screens that live under the site's common app header and
+// scroll like a normal page: the toy box (home) and the 🖼️ archive.
+// Everything else is a full-screen toddler activity.
+const CHROME_SCREENS = new Set<Screen>(["home", "gallery"]);
+
 function fromHash(): Screen {
   return ROUTES[window.location.hash] ?? "home";
+}
+
+// Publish the current view mode so styles.css (and the site's own CSS) can
+// switch between the fixed full-screen play layout and the normal-flow chrome
+// layout. See `data-otete-view` in styles.css and apps/main/global.css.
+function applyView(screen: Screen): void {
+  const chrome = CHROME_SCREENS.has(screen);
+  document.documentElement.dataset.oteteView = chrome ? "chrome" : "play";
+  setBackGuardPlaying(!chrome);
+  // Coming back to a chrome screen (or first boot on one) should always
+  // show the page from the top.
+  if (chrome) window.scrollTo(0, 0);
+}
+
+// Chrome pages rely on native scrolling and leaving the app via browser back;
+// the toddlers' gesture guards below are for the play surface only.
+function isPlayView(): boolean {
+  return document.documentElement.dataset.oteteView === "play";
 }
 
 function render(screen: Screen): void {
@@ -56,6 +79,7 @@ function render(screen: Screen): void {
   dispose = null;
   app.innerHTML = "";
   app.dataset.screen = screen;
+  applyView(screen);
 
   const nav: Nav = {
     home: () => navigate("home"),
@@ -137,6 +161,7 @@ function blockEdgeSwipeBack(): void {
   document.addEventListener(
     "touchstart",
     (e) => {
+      if (!isPlayView()) return;
       const touch = e.touches[0];
       if (e.touches.length !== 1 || !touch) return;
       const target = e.target instanceof Element ? e.target : null;
@@ -161,6 +186,7 @@ function blockHorizontalHistorySwipe(): void {
   document.addEventListener(
     "wheel",
     (e) => {
+      if (!isPlayView()) return;
       if (Math.abs(e.deltaX) <= Math.abs(e.deltaY)) return;
       if (inScrollable(e.target)) return;
       e.preventDefault();
@@ -172,9 +198,11 @@ function blockHorizontalHistorySwipe(): void {
 // Android's system back gesture is handled by the OS and cannot be cancelled
 // from a web page. Keep one extra history entry so the first back is swallowed
 // inside the toy; a quick second back is treated as intentional and leaves.
-// No extra UI is added for this — the home button and layout already show how
-// to move around.
+// On the chrome screens (toy box / 🖼️ gallery) the guard is dropped so the
+// browser's own back navigation works normally.
 const BACK_GUARD = "oteteBackGuard";
+
+let setBackGuardPlaying: (playing: boolean) => void = () => {};
 
 function isAndroid(): boolean {
   return /Android/i.test(navigator.userAgent);
@@ -186,11 +214,21 @@ function installAndroidBackGuard(): void {
   let firstBackAt = 0;
   let lastBackUrl = "";
   let allowBack = false;
+  let playing = false;
 
   const arm = (): void => {
+    if (!playing) return;
     const state = history.state as Record<string, unknown> | null;
     if (state?.[BACK_GUARD]) return;
     history.pushState({ ...state, [BACK_GUARD]: true }, "", location.href);
+  };
+
+  const disarm = (): void => {
+    const state = history.state as Record<string, unknown> | null;
+    if (!state?.[BACK_GUARD]) return;
+    const next = { ...state };
+    delete next[BACK_GUARD];
+    history.replaceState(next, "", location.href);
   };
 
   window.addEventListener("popstate", () => {
@@ -200,6 +238,7 @@ function installAndroidBackGuard(): void {
       lastBackUrl = "";
       return;
     }
+    if (!playing) return;
     const state = history.state as Record<string, unknown> | null;
     // Landing on a guard entry means the top guard was not consumed (for
     // example, an older traversal settling after a hash change). Never count
@@ -226,6 +265,13 @@ function installAndroidBackGuard(): void {
   });
   window.addEventListener("hashchange", arm);
   window.addEventListener("pageshow", arm);
+
+  setBackGuardPlaying = (next: boolean): void => {
+    playing = next;
+    if (playing) arm();
+    else disarm();
+  };
+
   arm();
 }
 
@@ -261,6 +307,8 @@ export function mount(root: HTMLElement, fxCanvas: HTMLCanvasElement): void {
   document.addEventListener(
     "touchmove",
     (e) => {
+      // Chrome pages scroll natively under the site header; don't block it.
+      if (!isPlayView()) return;
       if (inScrollable(e.target)) return;
       e.preventDefault();
     },
