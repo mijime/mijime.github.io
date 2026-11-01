@@ -1,18 +1,51 @@
-const CACHE = "mijime-pwa-v2";
+const CACHE = "mijime-pwa-v3";
 const CORE = [
   "/",
   "/apps/",
+  "/apps/emolog/",
+  "/apps/flowdeck/",
+  "/apps/lords-of-the-stigmata/",
+  "/apps/madories/",
+  "/apps/mintodo/",
+  "/apps/otete/",
+  "/apps/saiflow/",
+  "/apps/emolog/manifest.webmanifest",
+  "/apps/flowdeck/manifest.webmanifest",
+  "/apps/lords-of-the-stigmata/manifest.webmanifest",
+  "/apps/madories/manifest.webmanifest",
+  "/apps/mintodo/manifest.webmanifest",
+  "/apps/otete/manifest.webmanifest",
+  "/apps/saiflow/manifest.webmanifest",
   "/offline.html",
   "/manifest.webmanifest",
   "/icons/site-192.png",
   "/icons/site-512.png",
+  "/icons/emolog-180.png",
+  "/icons/emolog-192.png",
+  "/icons/flowdeck-180.png",
+  "/icons/flowdeck-192.png",
+  "/icons/lords-of-the-stigmata-180.png",
+  "/icons/lords-of-the-stigmata-192.png",
+  "/icons/madories-180.png",
+  "/icons/madories-192.png",
+  "/icons/mintodo-180.png",
+  "/icons/mintodo-192.png",
+  "/icons/otete-180.png",
+  "/icons/otete-192.png",
+  "/icons/saiflow-180.png",
+  "/icons/saiflow-192.png",
 ];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
     caches
       .open(CACHE)
-      .then((cache) => cache.addAll(CORE).catch(() => undefined))
+      // 1件の404で全件失敗しないように、個別に追加する。
+      .then((cache) =>
+        Promise.allSettled(
+          CORE.map((url) => cache.add(new Request(url, { cache: "no-store" }))),
+        ),
+      )
       .then(() => self.skipWaiting()),
   );
 });
@@ -38,9 +71,13 @@ self.addEventListener("fetch", (event) => {
     event.respondWith(
       (async () => {
         try {
-          const fresh = await fetch(request);
-          const cache = await caches.open(CACHE);
-          cache.put(request, fresh.clone());
+          // GitHub Pages の HTML は max-age=600 なので、HTTP キャッシュを
+          // 使うとデプロイ後しばらく古い画面が返る。常に取り直す。
+          const fresh = await fetch(request, { cache: "no-store" });
+          if (fresh.ok) {
+            const cache = await caches.open(CACHE);
+            await cache.put(request, fresh.clone());
+          }
           return fresh;
         } catch {
           return (
@@ -54,11 +91,15 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
+  // マニフェストは更新され得るので cache-first にしない。
+  const isManifest = url.pathname.endsWith("manifest.webmanifest");
+  // _astro 配下は内容ハッシュ付きで不変なので、毎回取り直さない。
+  const isHashedAsset = url.pathname.startsWith("/_astro/");
   const cacheFirst =
-    url.pathname.startsWith("/_astro/") ||
-    url.pathname.startsWith("/icons/") ||
-    url.pathname.startsWith("/apps/") ||
-    /\.(?:css|js|mjs|png|jpe?g|webp|svg|woff2?|ico|parquet)$/i.test(url.pathname);
+    !isManifest &&
+    (isHashedAsset ||
+      url.pathname.startsWith("/icons/") ||
+      /\.(?:css|js|mjs|png|jpe?g|webp|svg|woff2?|ico|parquet|json)$/i.test(url.pathname));
 
   event.respondWith(
     (async () => {
@@ -67,16 +108,20 @@ self.addEventListener("fetch", (event) => {
 
       if (cacheFirst) {
         if (cached) {
-          fetch(request)
-            .then((response) => {
-              if (response.ok) cache.put(request, response);
-            })
-            .catch(() => undefined);
+          // ハッシュ付きアセット以外は、キャッシュを返しつつ裏で最新版に更新する。
+          if (!isHashedAsset) {
+            fetch(request)
+              .then((response) => {
+                if (response.ok) return cache.put(request, response);
+                return undefined;
+              })
+              .catch(() => undefined);
+          }
           return cached;
         }
         try {
           const response = await fetch(request);
-          if (response.ok) cache.put(request, response.clone());
+          if (response.ok) await cache.put(request, response.clone());
           return response;
         } catch {
           return cached || Response.error();
@@ -85,7 +130,7 @@ self.addEventListener("fetch", (event) => {
 
       try {
         const response = await fetch(request);
-        if (response.ok) cache.put(request, response.clone());
+        if (response.ok) await cache.put(request, response.clone());
         return response;
       } catch {
         return cached || Response.error();

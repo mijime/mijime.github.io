@@ -21,15 +21,24 @@ export function SummaryView({ onSelectEmoji, listId }: SummaryViewProps) {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    let cancelled = false;
     setError(null);
     const range = getDateRangeForPeriod(period);
     const promise = range
       ? getEntriesByDateRange(range.from, range.to, listId ?? undefined)
       : getAllEntries(listId ?? undefined);
-    promise.then(setEntries).catch((err: unknown) => {
-      setError(err instanceof Error ? err.message : String(err));
-      setEntries([]);
-    });
+    promise
+      .then((next) => {
+        if (!cancelled) setEntries(next);
+      })
+      .catch((err: unknown) => {
+        if (cancelled) return;
+        setError(err instanceof Error ? err.message : String(err));
+        setEntries([]);
+      });
+    return () => {
+      cancelled = true;
+    };
   }, [period, listId]);
 
   const summary: SummaryStats = useMemo(() => computeSummary(entries), [entries]);

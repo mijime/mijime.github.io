@@ -9,9 +9,10 @@ const MAX_FAV = 12;
 interface RecordViewProps {
   favorites: string[];
   onTap: (emoji: string, note?: string) => void;
+  disabled?: boolean;
 }
 
-export function RecordView({ favorites, onTap }: RecordViewProps) {
+export function RecordView({ favorites, onTap, disabled = false }: RecordViewProps) {
   const [note, setNote] = useState("");
   const [showPicker, setShowPicker] = useState(false);
   const noteInputRef = useRef<HTMLInputElement>(null);
@@ -33,13 +34,22 @@ export function RecordView({ favorites, onTap }: RecordViewProps) {
     <div className="emolog-record">
       <div className="emolog-record-grid">
         {displayFavs.map((emoji) => (
-          <button key={emoji} className="emolog-record-fav" onClick={() => handleTap(emoji)}>
+          <button
+            key={emoji}
+            className="emolog-record-fav"
+            disabled={disabled}
+            onClick={() => handleTap(emoji)}
+          >
             {emoji}
           </button>
         ))}
       </div>
-      {favorites.length === 0 && (
-        <p className="emolog-record-empty">よく使う絵文字はまだありません</p>
+      {disabled ? (
+        <p className="emolog-record-empty">リストを読み込み中…</p>
+      ) : (
+        favorites.length === 0 && (
+          <p className="emolog-record-empty">よく使う絵文字はまだありません</p>
+        )
       )}
 
       <div className="emolog-record-picker-toggle">

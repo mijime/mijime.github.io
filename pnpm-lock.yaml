@@ -181,6 +181,9 @@ importers:
       emoji-picker-element:
         specifier: ^1.29.1
         version: 1.29.1
+      emoji-picker-element-data:
+        specifier: ^1.8.0
+        version: 1.8.0
       leaflet:
         specifier: ^1.9.4
         version: 1.9.4
@@ -3204,6 +3207,9 @@ packages:
 
   elkjs@0.9.3:
     resolution: {integrity: sha512-f/ZeWvW/BCXbhGEf1Ujp29EASo/lk1FDnETgNKwJrsVvGZhUWCZyg3xLJjAsxfOmt8KjswHmI5EwCQcPMpOYhQ==}
+
+  emoji-picker-element-data@1.8.0:
+    resolution: {integrity: sha512-VfRuRJNEDLS1JKlNS4olaqhjX5S1nnZ+ZHG73b/dV8QeZyi0yPruTPEE72EmF6XO3k/9hj3lybMIYMOYXb/57A==}
 
   emoji-picker-element@1.29.1:
     resolution: {integrity: sha512-TOiHzu9Dqib3x4MwcAi3wi3RdyT4SoeB4b15AvH1ks4SBwTl7DeebhZ0d3x6dNi4XfNU7IGRZ7NBQllj0RqwrQ==}
@@ -8177,6 +8183,8 @@ snapshots:
       gopd: 1.2.0
 
   elkjs@0.9.3: {}
+
+  emoji-picker-element-data@1.8.0: {}
 
   emoji-picker-element@1.29.1: {}
 
