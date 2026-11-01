@@ -77,9 +77,6 @@ body {
   margin: 0;
   padding: 0;
   height: 100%;
-  overflow: hidden;
-  position: fixed;
-  inset: 0;
   background: var(--bg);
   /* Stop two-finger horizontal swipes from navigating browser history
      (Chrome/Edge). iOS Safari's edge gesture is handled in client/main.ts. */
@@ -91,6 +88,31 @@ body {
   font-family: var(--font);
   color: var(--ink);
 }
+/* ===== View modes =====
+ * The client tags <html> with data-otete-view="play" or "chrome".
+ * Play screens (every toddler activity) own the whole viewport, so the site
+ * header hides and the layout stays fixed like the standalone build.
+ * Chrome screens (parent pages: the toy box and 🖼️ gallery) flow under the
+ * site header like every other app page.
+ *
+ * Before the client boots the attribute is unset: rules that used to live on
+ * html/body unconditionally move under [data-otete-view="play"] so the site
+ * pages render normally for that moment.
+ */
+html[data-otete-view="play"],
+html[data-otete-view="play"] body {
+  overflow: hidden;
+  position: fixed;
+  inset: 0;
+}
+html[data-otete-view="play"] .site-header {
+  display: none;
+}
+/* Sparkle effects belong to the toys; the grown-ups' catalogue and archive
+   pages stay tidy. */
+html[data-otete-view="chrome"] canvas#fx {
+  display: none;
+}
 canvas#fx {
   position: fixed;
   inset: 0;
@@ -98,15 +120,21 @@ canvas#fx {
   z-index: 50;
 }
 #app {
-  position: fixed;
-  inset: 0;
+  position: relative;
   z-index: 2;
   display: flex;
   flex-direction: column;
+  height: 100%;
+  background: var(--bg);
+  transition: background 0.3s ease;
+}
+html[data-otete-view="play"] #app {
+  position: fixed;
+  inset: 0;
+  min-height: 0;
   background:
     radial-gradient(var(--bg-dot) 1.6px, transparent 1.6px) 0 0 / 28px 28px,
     linear-gradient(180deg, var(--accent-soft) 0%, var(--bg) 58%);
-  transition: background 0.3s ease;
 }
 
 /* ===== 1. Unified Stage Shell & Topbar ===== */
@@ -523,94 +551,194 @@ html[data-theme="dark"] .wood-dock {
   opacity: 0.95;
 }
 
-/* ===== Home: Toy Box Room ===== */
-.home-layout {
-  flex: 1;
-  min-height: 0;
-  display: flex;
-  flex-direction: column;
-  gap: clamp(8px, 1.6vh, 14px);
+/* ===== Home: toy box catalogue (site-style, for grown-ups) ===== */
+.otete-home {
+  width: 100%;
+  max-width: 720px;
+  margin: 0 auto;
+  padding: calc(env(safe-area-inset-top) + 48px) 24px calc(env(safe-area-inset-bottom) + 56px);
 }
-.home-toys-col {
-  flex: 1;
-  min-height: 0;
+.otete-home-head {
   display: flex;
-  flex-direction: column;
-  gap: clamp(8px, 1.6vh, 14px);
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  border-top: 1px solid var(--border);
+  padding: 24px 0 28px;
 }
-.toy-box {
-  flex: 1;
-  min-height: 0;
+.otete-home-title {
+  font-family: "Crimson Pro", serif;
+  font-size: clamp(44px, 9vw, 68px);
+  font-weight: 600;
+  line-height: 0.95;
+  letter-spacing: -0.03em;
+  color: var(--ink);
+  margin: 0;
+}
+.otete-home-title::after {
+  content: "";
+  display: block;
+  width: 3ch;
+  height: 3px;
+  background: var(--terra);
+  margin-top: 12px;
+}
+.otete-home-desc {
+  color: var(--mid);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  margin: 6px 0 0;
+}
+.otete-home-tools {
+  display: flex;
+  gap: 8px;
+}
+.otete-tool {
+  width: 32px;
+  height: 32px;
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: clamp(8px, 2vw, 16px);
-}
-.toy-card {
-  border: 4px solid rgba(255, 255, 255, 0.42);
-  cursor: pointer;
-  color: #fff;
-  font-family: var(--font);
-  border-radius: 30px;
-  padding: clamp(8px, 2vw, 18px);
-  background: linear-gradient(165deg, var(--c1, #ff8787), var(--c2, #fa5252));
-  box-shadow:
-    0 7px 0 var(--sh-c, rgba(0, 0, 0, 0.22)),
-    0 12px 22px rgba(0, 0, 0, 0.15);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  min-height: 0;
-  transition:
-    transform 0.1s,
-    box-shadow 0.1s;
-}
-.toy-card:active {
-  transform: translateY(5px) scale(0.97);
-  box-shadow:
-    0 2px 0 var(--sh-c, rgba(0, 0, 0, 0.22)),
-    0 6px 12px rgba(0, 0, 0, 0.14);
-}
-.toy-emo {
-  font-size: clamp(52px, 14vmin, 88px);
+  place-items: center;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--ink);
+  font-size: 15px;
   line-height: 1;
-  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.18));
+  cursor: pointer;
+  transition:
+    color 0.15s,
+    border-color 0.15s;
+}
+.otete-tool:hover {
+  color: var(--terra);
+  border-color: var(--terra);
+}
+.toy-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.toy-row {
+  border-bottom: 1px solid var(--grid);
+  animation: oteteRowIn 0.5s calc(var(--i, 0) * 0.06s + 0.1s) ease both;
+}
+.toy-row:first-child {
+  border-top: 1px solid var(--grid);
+}
+.toy-row-btn {
+  display: grid;
+  grid-template-columns: auto auto 1fr auto;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 13px 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: var(--ink);
+  font-family: var(--font-mono);
+  text-align: left;
+  transition: color 0.15s;
+}
+.toy-row-btn:hover,
+.toy-row-btn:active {
+  color: var(--terra);
+}
+.toy-row-btn:hover .toy-row-arrow {
+  transform: translateX(4px);
+}
+.toy-row-emo {
+  font-size: 20px;
+  line-height: 1;
+}
+.toy-row-label {
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+.toy-row-desc {
+  overflow: hidden;
+  color: var(--mid);
+  font-size: 11px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.toy-row-arrow {
+  font-size: 14px;
+  color: var(--terra);
+  opacity: 0.6;
+  transition: transform 0.2s ease;
+}
+@keyframes oteteRowIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-.shelf-row {
-  flex: 0 0 auto;
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: clamp(8px, 1.8vw, 14px);
-}
-.shelf-btn {
-  border: 3px solid rgba(255, 255, 255, 0.38);
-  cursor: pointer;
-  color: #fff;
-  font-family: var(--font);
-  border-radius: 22px;
-  padding: clamp(8px, 1.4vh, 13px) 4px;
-  background: linear-gradient(165deg, var(--c1, #aaa), var(--c2, #777));
-  box-shadow:
-    0 5px 0 var(--sh-c, rgba(0, 0, 0, 0.2)),
-    0 8px 16px rgba(0, 0, 0, 0.12);
+/* ===== Chrome pages: site-style parent screens ===== */
+/* Shared by the toy catalogue (.otete-home) and 🖼️ gallery. */
+.otete-page {
   display: flex;
+  flex: 1;
+  min-height: 0;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 3px;
+  width: 100%;
+  max-width: 720px;
+  margin: 0 auto;
+  padding: calc(env(safe-area-inset-top) + 28px) 24px calc(env(safe-area-inset-bottom) + 56px);
+}
+.otete-page-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  border-top: 1px solid var(--border);
+  padding: 20px 0 20px;
+}
+.otete-page-title {
+  font-family: "Crimson Pro", serif;
+  font-size: clamp(36px, 7vw, 54px);
+  font-weight: 600;
+  line-height: 0.95;
+  letter-spacing: -0.03em;
+  color: var(--ink);
+  margin: 0;
+}
+.otete-page-title::after {
+  content: "";
+  display: block;
+  width: 3ch;
+  height: 3px;
+  background: var(--terra);
+  margin-top: 10px;
+}
+.otete-back {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--mid);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  padding: 7px 12px;
+  cursor: pointer;
   transition:
-    transform 0.1s,
-    box-shadow 0.1s;
+    color 0.15s,
+    border-color 0.15s;
 }
-.shelf-btn:active {
-  transform: translateY(3px) scale(0.95);
-  box-shadow: 0 2px 0 var(--sh-c, rgba(0, 0, 0, 0.2));
+.otete-back:hover {
+  color: var(--terra);
+  border-color: var(--terra);
 }
-.shelf-emo {
-  font-size: clamp(28px, 7.2vmin, 42px);
-  line-height: 1;
+.otete-page--gallery .thumb {
+  border: 1px solid var(--grid);
+  border-radius: 8px;
 }
 
 /* ===== Toy 1: 🍎 もぐもぐ (feed.ts) ===== */
@@ -770,11 +898,6 @@ html[data-theme="dark"] .wood-dock {
   touch-action: none;
   z-index: 3;
   cursor: pointer;
-}
-.peek-dock {
-  flex: 0 0 auto;
-  display: flex;
-  justify-content: center;
 }
 
 /* ===== Toy 3: 🧩 すぽっ！ (puzzle.ts) ===== */
@@ -2068,7 +2191,9 @@ canvas#glow {
 .viewer {
   position: fixed;
   inset: 0;
-  z-index: 45;
+  /* Above the site header (z-index 100) so the ✕ stays reachable on the
+     chrome screens, where the header is visible. */
+  z-index: 120;
   background: rgba(20, 20, 30, 0.92);
   display: flex;
   align-items: center;
@@ -2092,7 +2217,9 @@ canvas#glow {
 .overlay {
   position: fixed;
   inset: 0;
-  z-index: 60;
+  /* Above the site header (z-index 100) and equal to the viewer: sheets that
+     open later stay on top through DOM order, also on the chrome screens. */
+  z-index: 120;
   background: rgba(20, 18, 28, 0.6);
   display: flex;
   align-items: flex-end;
@@ -2509,9 +2636,6 @@ canvas#glow {
 
 /* ===== Landscape Optimization (Tablets & Horizontal Phones) ===== */
 @media (orientation: landscape) {
-  .toy-box {
-    grid-template-columns: repeat(3, 1fr);
-  }
   .play-split {
     flex-direction: row;
     align-items: stretch;
