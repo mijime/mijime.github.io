@@ -486,15 +486,20 @@ export function renderDraw(root: HTMLElement, nav: Nav): () => void {
         speak("さくひんに しまったよ！");
         roundFinished(true);
       } else {
+        boing(0.8);
         showStatus("ほぞんできなかった…", 2000);
       }
     } catch {
+      boing(0.8);
       showStatus("ほぞんできなかった…", 2000);
     }
   }
 
   tap(clrBtn, clearAll);
   tap(savBtn, () => {
+    // Answer the press immediately; the IndexedDB write can take a moment.
+    plink(14, 0.25);
+    showStatus("📁 ほぞんちゅう…", 0);
     void save();
   });
 

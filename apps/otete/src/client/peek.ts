@@ -6,7 +6,7 @@
 //  - Shared `createBubbleField` from `fx.ts` for floating soap bubbles.
 //  - Forgiving scrubbing & tapping on the foam canvas pops it open with a joyful "ばあっ！".
 
-import { boing, bubblePop, cheer, speak } from "./audio";
+import { boing, bubblePop, cheer, speak, tone } from "./audio";
 import { loadAllWords } from "./custom";
 import { burst, createBubbleField } from "./fx";
 import type { Nav } from "./home";
@@ -200,8 +200,8 @@ export function renderPeek(root: HTMLElement, nav: Nav): () => void {
   let lastY = 0;
   let halfwayHinted = false;
 
-  function scrubSegment(x0: number, y0: number, x1: number, y1: number): void {
-    if (revealed) return;
+  function scrubSegment(x0: number, y0: number, x1: number, y1: number): number {
+    if (revealed) return 0;
     const rect = foamCanvas.getBoundingClientRect();
     const wipeRadius = Math.max(24, Math.min(CW, CH) * 0.095);
     const dist = Math.hypot(x1 - x0, y1 - y0);
@@ -244,6 +244,7 @@ export function renderPeek(root: HTMLElement, nav: Nav): () => void {
       guide.setMessage("おっ！ みえてきた！ もうすこし ゴシゴシ！", "👀");
     }
     if (clearedRatio >= 0.52) revealNow();
+    return newlyCleared;
   }
 
   function revealNow(): void {
@@ -309,8 +310,13 @@ export function renderPeek(root: HTMLElement, nav: Nav): () => void {
     lastY = e.clientY;
     const sr = stage.getBoundingClientRect();
     guide.puppet.lookAt(e.clientX, e.clientY);
-    bubbles.tryPop(e.clientX - sr.left, e.clientY - sr.top, e.clientX, e.clientY);
-    scrubSegment(e.clientX, e.clientY, e.clientX, e.clientY);
+    const popped = bubbles.tryPop(e.clientX - sr.left, e.clientY - sr.top, e.clientX, e.clientY);
+    const cleared = scrubSegment(e.clientX, e.clientY, e.clientX, e.clientY);
+    if (!revealed && !popped && cleared === 0) {
+      // Touched a gap between foam puffs: still answer with a soft squish.
+      tone(170, 0.06, "sine", 0.12, 90);
+      burst(e.clientX, e.clientY, 3, ["#ffffff", "#d0ebff"]);
+    }
   });
 
   stage.addEventListener("pointermove", (e) => {

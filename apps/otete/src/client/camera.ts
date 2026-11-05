@@ -408,6 +408,7 @@ export function renderCamera(root: HTMLElement, nav: Nav): () => void {
     unlockAudio();
     if (!navigator.mediaDevices?.getUserMedia) {
       showStatus("🫧 タッチで あそべるよ！");
+      speak("しゃぼんだまで あそぼう！");
       return;
     }
     try {
@@ -421,6 +422,7 @@ export function renderCamera(root: HTMLElement, nav: Nav): () => void {
       speak("ばあっ！ まほうの かがみ だよ！");
     } catch {
       showStatus("🫧 しゃぼんだまで あそぼう！");
+      speak("しゃぼんだまで あそぼう！");
     }
   }
 

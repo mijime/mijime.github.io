@@ -49,6 +49,7 @@ export function tapOrHold(el: Element, onTap: () => void, onHold: () => void, ho
   let held = false;
   const stop = (): void => {
     window.clearTimeout(timer);
+    el.classList.remove("holding");
   };
   el.addEventListener("pointerdown", (e) => {
     const p = e as PointerEvent;
@@ -57,8 +58,11 @@ export function tapOrHold(el: Element, onTap: () => void, onHold: () => void, ho
     moved = false;
     held = false;
     window.clearTimeout(timer);
+    // Show that the press is being held before the long-press action fires.
+    el.classList.add("holding");
     timer = window.setTimeout(() => {
       held = true;
+      el.classList.remove("holding");
       onHold();
     }, holdMs);
   });
@@ -293,6 +297,7 @@ export function bindGrab(
   el: HTMLElement,
   opts: {
     canStart?: () => boolean;
+    onBlocked?: () => void;
     onStart?: (x: number, y: number) => void;
     onMove?: (x: number, y: number, dx: number, dy: number) => void;
     findTarget: (x: number, y: number, dx: number, dy: number, isTap: boolean) => GrabTarget | null;
@@ -306,8 +311,26 @@ export function bindGrab(
   let dx = 0;
   let dy = 0;
 
+  // A refused grab must not feel broken: give the button a tiny "no, not now"
+  // wobble and a soft wooden knock instead of staying silent.
+  const blocked = (): void => {
+    if (opts.onBlocked) {
+      opts.onBlocked();
+      return;
+    }
+    el.classList.remove("nope");
+    void el.offsetWidth;
+    el.classList.add("nope");
+    window.setTimeout(() => el.classList.remove("nope"), 420);
+    boing(0.72);
+  };
+
   el.addEventListener("pointerdown", (e) => {
-    if (opts.canStart && !opts.canStart()) return;
+    if (opts.canStart && !opts.canStart()) {
+      e.preventDefault();
+      blocked();
+      return;
+    }
     e.preventDefault();
     e.stopPropagation();
     el.setPointerCapture?.(e.pointerId);
