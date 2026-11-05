@@ -413,8 +413,12 @@ export function renderLearn(root: HTMLElement, nav: Nav): () => void {
       photosEl.querySelectorAll<HTMLElement>(".ws-thumb").forEach((t) => {
         tap(t, () => {
           photoIdx = Number(t.dataset.i) || 0;
+          plink(12, 0.25);
           paintVisual();
           paintPhotos();
+          visual.classList.remove("pop");
+          void visual.offsetWidth;
+          visual.classList.add("pop");
         });
       });
       tap(photosEl.querySelector("#ws-add")!, () => {

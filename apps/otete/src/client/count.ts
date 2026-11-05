@@ -150,6 +150,8 @@ export function renderCount(root: HTMLElement, nav: Nav): () => void {
 
     const field = main.querySelector<HTMLElement>("#hv-field")!;
     const slots = main.querySelectorAll<HTMLElement>(".hv-slot");
+    const autoBtn = main.querySelector<HTMLButtonElement>("#hv-auto")!;
+    let autoRunning = false;
 
     const cols = Math.min(4, Math.max(2, Math.ceil(Math.sqrt(n))));
     const rows = Math.ceil(n / cols);
@@ -229,12 +231,31 @@ export function renderCount(root: HTMLElement, nav: Nav): () => void {
       tap(el, () => collectItem(el));
     });
 
-    tap(main.querySelector("#hv-auto")!, () => {
+    tap(autoBtn, () => {
       if (locked) return;
       const uncollected = [...field.querySelectorAll<HTMLElement>(".hv-item:not(.collected)")];
+      if (autoRunning || uncollected.length === 0) {
+        // already counting (or nothing left): answer the finger instead of ignoring it
+        autoBtn.classList.remove("nope");
+        void autoBtn.offsetWidth;
+        autoBtn.classList.add("nope");
+        boing(0.8);
+        return;
+      }
+      autoRunning = true;
+      marimba(2, 0.42);
+      guide.puppet.hop();
+      autoBtn.classList.add("working");
       uncollected.forEach((el, idx) => {
         later(() => collectItem(el), idx * 600);
       });
+      later(
+        () => {
+          autoRunning = false;
+          autoBtn.classList.remove("working");
+        },
+        (uncollected.length - 1) * 600 + 420,
+      );
     });
   }
 
@@ -303,9 +324,16 @@ export function renderCount(root: HTMLElement, nav: Nav): () => void {
         onStart: (x, y) => {
           marimba(1, 0.35);
           guide.puppet.lookAt(x, y);
+          dishEl.classList.remove("invite");
         },
         onMove: (x, y) => {
           guide.puppet.lookAt(x, y);
+          // Light up the plate while a treat is carried over it, so the drop
+          // spot is obvious before the finger lifts.
+          const dr = dishEl.getBoundingClientRect();
+          const overDish =
+            x >= dr.left - 50 && x <= dr.right + 50 && y >= dr.top - 50 && y <= dr.bottom + 50;
+          dishEl.classList.toggle("invite", overDish);
         },
         findTarget: (x, y, _dx, dy, isTap) => {
           const nextSpot = spots[onPlate];
@@ -322,6 +350,7 @@ export function renderCount(root: HTMLElement, nav: Nav): () => void {
           return null;
         },
         onSnap: (pt) => {
+          dishEl.classList.remove("invite");
           if (locked || btn.classList.contains("taken") || onPlate >= target) return;
           btn.classList.add("taken");
           const spot = spots[onPlate];
@@ -373,6 +402,7 @@ export function renderCount(root: HTMLElement, nav: Nav): () => void {
           }
         },
         onCancel: () => {
+          dishEl.classList.remove("invite");
           guide.puppet.resetLook();
         },
       });
@@ -471,6 +501,10 @@ export function renderCount(root: HTMLElement, nav: Nav): () => void {
         btn.classList.add("pulse");
         const targetBtn = isLeft ? rightBtn : leftBtn;
         targetBtn.classList.add("hint-glow");
+        // Reveal the real counts with the hint: the next try is a comparison,
+        // not another guess.
+        numL.hidden = false;
+        numR.hidden = false;
         guide.setMessage(`そっちは ${chosen}こ だよ。 ひかっている ほうだよ！`);
         speak(`こっちは ${jNum(chosen)}こ だよ。${word} ほうを タッチしてね！`);
       }

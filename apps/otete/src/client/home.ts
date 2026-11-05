@@ -125,8 +125,14 @@ export function renderGallery(root: HTMLElement, nav: Nav): () => void {
     viewer.hidden = true;
     img.removeAttribute("src");
   };
-  tap(viewer.querySelector(".viewer-close")!, closeViewer);
-  tap(viewer, closeViewer);
+  tap(viewer.querySelector(".viewer-close")!, () => {
+    plink(9, 0.25);
+    closeViewer();
+  });
+  tap(viewer, () => {
+    plink(9, 0.25);
+    closeViewer();
+  });
 
   const grid = root.querySelector<HTMLElement>("#g-grid")!;
   let urls = new Map<string, { full: string; thumb: string }>();

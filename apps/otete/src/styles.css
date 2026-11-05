@@ -355,6 +355,14 @@ html[data-otete-view="play"] #app {
 .toy-action-btn[hidden] {
   display: none;
 }
+/* Long-running toy action (e.g. "いっしょに かぞえる"): visibly alive while it runs. */
+.toy-action-btn.working {
+  animation: pulse 0.9s ease infinite;
+}
+/* A refused grab: the toy wiggles instead of ignoring the finger. */
+.nope {
+  animation: shake 0.34s ease;
+}
 
 /* ===== 2. Unified Guide Banner (2-Line Locked Height — Never Breaks!) ===== */
 .guide-banner {
@@ -510,6 +518,53 @@ html[data-theme="dark"] .wood-dock {
   background: linear-gradient(180deg, #3a2b1c 0%, #2b1f14 100%);
   border-color: #5c4328;
   box-shadow: 0 7px 0 #1c130b;
+}
+
+/* ===== Loose toy objects (loose.ts) =====
+ * Toys live in a fixed overlay above the play surface so they can be carried
+ * anywhere, stay where they are dropped, shove each other, and be swiped
+ * across the table. The tray keeps an empty recess where each toy used to sit.
+ */
+.loose-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  pointer-events: none;
+}
+.loose-layer .loose {
+  position: absolute;
+  left: 0;
+  top: 0;
+  margin: 0 !important;
+  pointer-events: auto;
+  touch-action: none;
+  transform-origin: 50% 50%;
+  will-change: transform;
+  cursor: grab;
+}
+.loose.loose-held {
+  cursor: grabbing;
+  filter: drop-shadow(0 18px 26px rgba(0, 0, 0, 0.34));
+}
+.loose.loose-snap {
+  pointer-events: none;
+  opacity: 0;
+  transition:
+    transform 0.18s cubic-bezier(0.3, 0.9, 0.4, 1),
+    opacity 0.18s ease-out;
+}
+.toy-holder {
+  flex: 0 0 auto;
+  border-radius: 22px;
+  background: rgba(70, 45, 15, 0.07);
+  box-shadow: inset 0 2px 7px rgba(70, 45, 15, 0.18);
+}
+.toy-holder--food {
+  border-radius: 50%;
+}
+html[data-theme="dark"] .toy-holder {
+  background: rgba(0, 0, 0, 0.3);
+  box-shadow: inset 0 2px 7px rgba(0, 0, 0, 0.55);
 }
 
 /* Emoji visuals everywhere — always flex-centered vertically & horizontally */
@@ -781,15 +836,6 @@ html[data-theme="dark"] .wood-dock {
   touch-action: none;
   z-index: 4;
 }
-.food-card.dragging {
-  z-index: 30;
-  box-shadow: 0 18px 32px rgba(0, 0, 0, 0.28);
-}
-.food-card.eaten {
-  opacity: 0;
-  pointer-events: none;
-  transform: scale(0.2);
-}
 .food-visual {
   width: 70%;
   height: 70%;
@@ -969,15 +1015,6 @@ html[data-theme="dark"] .wood-dock {
   cursor: grab;
   touch-action: none;
   filter: drop-shadow(0 6px 0 rgba(0, 0, 0, 0.18)) drop-shadow(0 10px 16px rgba(0, 0, 0, 0.15));
-}
-.pz-piece.dragging {
-  z-index: 30;
-  filter: drop-shadow(0 16px 24px rgba(0, 0, 0, 0.32));
-}
-.pz-piece.placed {
-  opacity: 0;
-  pointer-events: none;
-  transform: scale(0.2);
 }
 
 /* ===== Toy 4: 🚂 ぽっぽー (trace.ts) ===== */
@@ -1512,6 +1549,19 @@ canvas#glow {
     inset 0 4px 12px rgba(0, 0, 0, 0.08),
     0 10px 0 #ced4da,
     0 16px 28px rgba(0, 0, 0, 0.14);
+  transition:
+    transform 0.16s ease,
+    border-color 0.16s ease,
+    box-shadow 0.16s ease;
+}
+/* A treat is being carried over the plate: say "put it here!" before release. */
+.serving-plate.invite {
+  transform: scale(1.03);
+  border-color: #ffd23f;
+  box-shadow:
+    inset 0 4px 12px rgba(0, 0, 0, 0.08),
+    0 10px 0 #e8b923,
+    0 18px 34px rgba(255, 210, 63, 0.42);
 }
 .serving-plate.served {
   animation: pop 0.5s ease;
@@ -1674,6 +1724,7 @@ canvas#glow {
   align-items: center;
   justify-content: center;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  animation: pop 0.34s ease;
 }
 .ss-count-badge[hidden] {
   display: none;
@@ -1784,6 +1835,13 @@ canvas#glow {
 }
 .wcard:active {
   transform: scale(0.94);
+}
+/* Press-and-hold feedback before the word sheet opens. */
+.wcard.holding {
+  transform: scale(0.9);
+  box-shadow:
+    0 0 0 4px var(--accent-soft),
+    0 2px 0 rgba(0, 0, 0, 0.1);
 }
 .wcard.pop {
   animation: pop 0.35s ease;

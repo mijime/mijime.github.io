@@ -7,7 +7,7 @@
 
 import { cheer, chooChoo, marimba, speak, tone } from "./audio";
 import { loadLevel, saveLevel } from "./difficulty";
-import { burst } from "./fx";
+import { burst, ring } from "./fx";
 import type { Nav } from "./home";
 import { answerCorrect, roundFinished } from "./reward";
 import { makePath, needCount, tolerance, TAU, type Pt, type TPath } from "./trace-paths";
@@ -270,7 +270,8 @@ export function renderTrace(root: HTMLElement, nav: Nav): () => void {
     saveLevel(PKEY, progress);
 
     const r = canvas.getBoundingClientRect();
-    answerCorrect(r.left + r.width / 2, r.top + r.height / 2, [path.color, "#ffd23f", "#37b24d"]);
+    const goal = map(path.pts.at(-1)!);
+    answerCorrect(r.left + goal[0], r.top + goal[1], [path.color, "#ffd23f", "#37b24d"]);
     roundFinished(true);
     nextTimer = window.setTimeout(() => load(true), 1850);
   }
@@ -283,7 +284,14 @@ export function renderTrace(root: HTMLElement, nav: Nav): () => void {
     lx = e.clientX - r.left;
     ly = e.clientY - r.top;
     guide.puppet.lookAt(e.clientX, e.clientY);
+    const before = frontier();
     stroke(lx, ly, true);
+    if (frontier() === before) {
+      // The finger landed away from the road: still answer the touch so the
+      // track never feels dead under a small hand.
+      ring(e.clientX, e.clientY, path.color);
+      tone(480, 0.05, "sine", 0.1);
+    }
   }
 
   function onMove(e: PointerEvent): void {

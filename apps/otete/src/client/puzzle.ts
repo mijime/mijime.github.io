@@ -4,22 +4,17 @@
 //  - Unified Topbar segmented pill (🔺かたち / 🎨いろ / 🐘おおきさ) + Guide Banner.
 //  - Pure visual wooden board (zero text labels inside holes so toddlers match by
 //    shape, colour, and size directly).
-//  - Unified `bindGrab`: drag a piece near its hole OR tap a piece to fly it straight in!
+//  - Loose wooden blocks (`loose.ts`): a block stays exactly where it is put
+//    down, shoves its neighbours, and can be swiped across the table. It drops
+//    into its hole only when it is actually carried over it — a tap just rocks
+//    the block, says its name, and points at the matching hole.
 
 import { cheer, marimba, snapIn, speak } from "./audio";
 import { loadLevel, saveLevel } from "./difficulty";
 import type { Nav } from "./home";
+import { createLooseField, type LooseObject } from "./loose";
 import { answerCorrect, roundFinished } from "./reward";
-import {
-  HOME_PILL,
-  bindGrab,
-  bindHome,
-  bindSeg,
-  createGuideBanner,
-  segHtml,
-  shuffle,
-  tap,
-} from "./ui";
+import { HOME_PILL, bindHome, bindSeg, createGuideBanner, segHtml, shuffle, tap } from "./ui";
 
 const LKEY = "otete-puzzle-level";
 
@@ -125,6 +120,12 @@ export function renderPuzzle(root: HTMLElement, nav: Nav, initialMode: Mode = "s
   let items: PieceItem[] = [];
   const placed = new Set<string>();
   let nextTimer = 0;
+  let disposed = false;
+  const timers: number[] = [];
+  const later = (fn: () => void, ms: number): void => {
+    if (disposed) return;
+    timers.push(window.setTimeout(fn, ms));
+  };
 
   const segs = [
     { key: "shape", emo: "🔺", label: "かたち" },
@@ -142,7 +143,7 @@ export function renderPuzzle(root: HTMLElement, nav: Nav, initialMode: Mode = "s
 
       <div id="pz-guide"></div>
 
-      <div class="play-split">
+      <div class="play-split" id="pz-play">
         <div class="wood-board" id="pz-board"></div>
         <div class="toy-dock puzzle-tray" id="pz-tray"></div>
       </div>
@@ -151,6 +152,7 @@ export function renderPuzzle(root: HTMLElement, nav: Nav, initialMode: Mode = "s
 
   const board = root.querySelector<HTMLElement>("#pz-board")!;
   const tray = root.querySelector<HTMLElement>("#pz-tray")!;
+  const field = createLooseField(root.querySelector<HTMLElement>("#pz-play")!);
 
   const modePrompt = (): string =>
     mode === "shape"
@@ -246,8 +248,60 @@ export function renderPuzzle(root: HTMLElement, nav: Nav, initialMode: Mode = "s
     }));
   }
 
+  function pulseHole(holeEl: HTMLElement): void {
+    holeEl.classList.remove("pulse");
+    void holeEl.offsetWidth;
+    holeEl.classList.add("pulse");
+  }
+
+  /** A block sinks into its hole: it only has to be carried over the hole. */
+  function snapPiece(
+    o: LooseObject,
+    item: PieceItem,
+    holeEl: HTMLElement,
+    hcx: number,
+    hcy: number,
+  ): void {
+    if (placed.has(item.id)) return;
+    placed.add(item.id);
+    holeEl.classList.remove("glow");
+    holeEl.classList.add("filled");
+    holeEl.querySelector<HTMLElement>(".pz-hole-filled")!.innerHTML = item.pieceSvg;
+
+    o.el.classList.add("loose-snap");
+    o.el.style.transform = `translate3d(${hcx - o.w / 2}px, ${hcy - o.h / 2}px, 0) rotate(0deg) scale(0.86)`;
+    later(() => field.remove(o), 180);
+
+    snapIn(placed.size);
+    speak(item.speech);
+    guide.puppet.hop();
+    guide.puppet.resetLook();
+    guide.setMessage(`スポッ！ ${item.speech}！`);
+    answerCorrect(hcx, hcy, [item.color, "#ffd23f", "#37b24d"]);
+
+    if (placed.size >= items.length) {
+      level++;
+      saveLevel(LKEY, level);
+      later(() => {
+        if (disposed) return;
+        guide.puppet.setMouth("joy");
+        guide.setMessage("やったー！ ぜんぶ はまったね！");
+        cheer();
+        speak("ぜんぶ はまったね！ すごい！");
+        roundFinished(true);
+        board.classList.add("celebrate");
+      }, 250);
+      nextTimer = window.setTimeout(() => {
+        board.classList.remove("celebrate");
+        dealRound();
+      }, 2000);
+    }
+  }
+
   function dealRound(): void {
+    if (disposed) return;
     window.clearTimeout(nextTimer);
+    field.clear();
     placed.clear();
     items = buildRoundItems();
     const trayOrder = shuffle([...items]);
@@ -283,80 +337,75 @@ export function renderPuzzle(root: HTMLElement, nav: Nav, initialMode: Mode = "s
         if (!it || placed.has(hid)) return;
         marimba(2, 0.35);
         speak(it.speech);
-        holeEl.classList.remove("pulse");
-        void holeEl.offsetWidth;
-        holeEl.classList.add("pulse");
+        pulseHole(holeEl);
       });
     });
 
-    tray.querySelectorAll<HTMLElement>(".pz-piece").forEach((pieceEl) => {
+    // The tray becomes a set of loose blocks on the table. Each block keeps the
+    // exact spot it was dealt to, and an empty wooden recess stays behind in
+    // the tray so the layout never jumps when a block is carried away.
+    const pieces = [...tray.querySelectorAll<HTMLElement>(".pz-piece")];
+    const rects = pieces.map((el) => el.getBoundingClientRect());
+    pieces.forEach((pieceEl, i) => {
       const id = pieceEl.dataset.id ?? "";
-      const item = items.find((x) => x.id === id)!;
-      const holeEl = board.querySelector<HTMLElement>(`.pz-hole[data-id="${id}"]`)!;
+      const item = items.find((x) => x.id === id);
+      const holeEl = board.querySelector<HTMLElement>(`.pz-hole[data-id="${id}"]`);
+      const r = rects[i];
+      if (!item || !holeEl || !r) return;
 
-      bindGrab(pieceEl, {
-        canStart: () => !placed.has(item.id),
-        onStart: (x, y) => {
-          marimba(1, 0.38);
-          speak(item.speech);
-          guide.puppet.lookAt(x, y);
+      const o = field.add(
+        pieceEl,
+        {
+          canGrab: () => !placed.has(item.id),
+          onGrab: (obj) => {
+            marimba(1, 0.38);
+            speak(item.speech);
+            guide.puppet.lookAt(obj.x, obj.y);
+          },
+          onDrag: (obj) => {
+            guide.puppet.lookAt(obj.x, obj.y);
+          },
+          onDrop: () => {
+            holeEl.classList.remove("glow");
+            guide.puppet.resetLook();
+          },
+          onTap: (obj) => {
+            marimba(2, 0.35);
+            field.kick(obj, 0, 0, (Math.random() < 0.5 ? -1 : 1) * 170);
+            pulseHole(holeEl);
+          },
+          onStep: (obj) => {
+            if (placed.has(item.id) || !holeEl.isConnected) return false;
+            const hr = holeEl.getBoundingClientRect();
+            const hcx = hr.left + hr.width / 2;
+            const hcy = hr.top + hr.height / 2;
+            const reach = Math.min(hr.width, hr.height);
+            const dist = Math.hypot(obj.x - hcx, obj.y - hcy);
+            holeEl.classList.toggle("glow", dist < reach * 0.95);
+            if (dist < reach * 0.5) {
+              snapPiece(obj, item, holeEl, hcx, hcy);
+              return true;
+            }
+            return false;
+          },
         },
-        onMove: (x, y) => {
-          guide.puppet.lookAt(x, y);
-          const hr = holeEl.getBoundingClientRect();
-          const dist = Math.hypot(x - (hr.left + hr.width / 2), y - (hr.top + hr.height / 2));
-          holeEl.classList.toggle("glow", dist < 140);
-        },
-        findTarget: (x, y, _dx, _dy, isTap) => {
-          holeEl.classList.remove("glow");
-          const hr = holeEl.getBoundingClientRect();
-          const hcx = hr.left + hr.width / 2;
-          const hcy = hr.top + hr.height / 2;
-          if (isTap || Math.hypot(x - hcx, y - hcy) < 145) {
-            return { x: hcx, y: hcy };
-          }
-          return null;
-        },
-        onSnap: (target) => {
-          if (placed.has(item.id)) return;
-          placed.add(item.id);
-          pieceEl.classList.add("placed");
-          holeEl.classList.add("filled");
-          holeEl.querySelector<HTMLElement>(".pz-hole-filled")!.innerHTML = item.pieceSvg;
+        { x: r.left + r.width / 2, y: r.top + r.height / 2 },
+      );
 
-          snapIn(placed.size);
-          speak(item.speech);
-          guide.puppet.hop();
-          guide.setMessage(`スポッ！ ${item.speech}！`);
-          answerCorrect(target.x, target.y, [item.color, "#ffd23f", "#37b24d"]);
-
-          if (placed.size >= items.length) {
-            level++;
-            saveLevel(LKEY, level);
-            window.setTimeout(() => {
-              guide.puppet.setMouth("joy");
-              guide.setMessage("やったー！ ぜんぶ はまったね！");
-              cheer();
-              speak("ぜんぶ はまったね！ すごい！");
-              roundFinished(true);
-              board.classList.add("celebrate");
-            }, 250);
-            nextTimer = window.setTimeout(() => {
-              board.classList.remove("celebrate");
-              dealRound();
-            }, 2000);
-          }
-        },
-        onCancel: () => {
-          guide.puppet.resetLook();
-        },
-      });
+      const holder = document.createElement("div");
+      holder.className = "toy-holder";
+      holder.style.width = `${o.w}px`;
+      holder.style.height = `${o.h}px`;
+      tray.append(holder);
     });
   }
 
   dealRound();
 
   return () => {
+    disposed = true;
     window.clearTimeout(nextTimer);
+    timers.forEach((t) => clearTimeout(t));
+    field.destroy();
   };
 }

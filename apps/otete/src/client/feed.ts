@@ -3,8 +3,10 @@
 // Upgraded spec:
 //  - Fixed 2-line order banner above the hungry animal friend: never shifts layout
 //    even when messages wrap.
-//  - Unified `bindGrab` on picnic tray foods: drag toward the mouth OR simply tap
-//    a food to fly it right into the wide-open mouth ("あーん！ -> ぱくっ！").
+//  - Loose picnic food (`loose.ts`): a snack stays exactly where it is put down,
+//    shoves its neighbours around the table, and can be swiped away. Food is
+//    eaten when it is actually carried (or flung) up to the open mouth — a tap
+//    just says the word.
 //  - Errorless pretend play: every food is deliciously eaten and named (using
 //    parent voice recordings when present); matching the craving advances the round.
 
@@ -14,8 +16,9 @@ import { loadAllWords } from "./custom";
 import { jNum, loadLevel, saveLevel } from "./difficulty";
 import { burst } from "./fx";
 import type { Nav } from "./home";
+import { createLooseField, type LooseObject } from "./loose";
 import { answerCorrect, roundFinished } from "./reward";
-import { HOME_PILL, bindGrab, bindHome, formatMsg, shuffle, tap } from "./ui";
+import { HOME_PILL, bindHome, formatMsg, shuffle, tap } from "./ui";
 import { wordVisual } from "./visual";
 import { playWord, type Word } from "./voice";
 
@@ -50,16 +53,21 @@ type Craving =
   | { kind: "color"; colorName: string; hex: string; target: Word }
   | { kind: "count"; need: number; eaten: number; target: Word };
 
+type FoodCard = { word: Word; el: HTMLElement; eaten: boolean };
+
 export function renderFeed(root: HTMLElement, nav: Nav): () => void {
   let level = loadLevel(LKEY, 0);
   let roundCount = 0;
   let friendIdx = Math.trunc(Math.random() * FRIENDS.length);
   let foods: Word[] = [];
   let tray: Word[] = [];
+  let cards: FoodCard[] = [];
   let craving: Craving | null = null;
   let busy = false;
+  let disposed = false;
   const timers: number[] = [];
   const later = (fn: () => void, ms: number): void => {
+    if (disposed) return;
     timers.push(window.setTimeout(fn, ms));
   };
 
@@ -73,7 +81,7 @@ export function renderFeed(root: HTMLElement, nav: Nav): () => void {
         <span class="topbar-spacer"></span>
       </div>
 
-      <div class="play-split">
+      <div class="play-split" id="f-play">
         <div class="feed-stage">
           <button class="guide-bubble feed-order" id="f-bubble" type="button">
             <span class="guide-visual" id="f-vis"></span>
@@ -95,6 +103,7 @@ export function renderFeed(root: HTMLElement, nav: Nav): () => void {
   const table = root.querySelector<HTMLElement>("#f-table")!;
   const titleEl = root.querySelector<HTMLElement>("#f-title")!;
   const switchBtn = root.querySelector<HTMLElement>("#f-switch")!;
+  const field = createLooseField(root.querySelector<HTMLElement>("#f-play")!);
 
   const puppet = createFriendPuppet(FRIENDS[friendIdx]!);
   charHost.append(puppet.el);
@@ -112,7 +121,13 @@ export function renderFeed(root: HTMLElement, nav: Nav): () => void {
 
   function mouthCenter(): { x: number; y: number } {
     const r = puppet.el.getBoundingClientRect();
-    return { x: r.left + r.width / 2, y: r.top + r.height * 0.6 };
+    return { x: r.left + r.width / 2, y: r.top + r.height * 0.615 };
+  }
+
+  /** How close a snack's centre must come to the lips to be eaten. */
+  function mouthReach(o: LooseObject): number {
+    const r = puppet.el.getBoundingClientRect();
+    return r.width * 0.16 + o.r * 0.6 + 10;
   }
 
   tap(switchBtn, () => {
@@ -211,11 +226,20 @@ export function renderFeed(root: HTMLElement, nav: Nav): () => void {
     return true;
   }
 
-  function feedItem(w: Word, cardEl: HTMLElement): void {
+  function feedItem(entry: FoodCard, o: LooseObject): void {
+    if (busy || entry.eaten) return;
+    busy = true;
+    entry.eaten = true;
+
+    const w = entry.word;
     const { x: mx, y: my } = mouthCenter();
-    cardEl.classList.add("eaten");
     chomp();
     burst(mx, my, 22, ["#ff758f", "#ffd23f", "#ff922b", "#69db7c"]);
+
+    // The snack pops into the mouth and is gone; the tray keeps its empty recess.
+    o.el.classList.add("loose-snap");
+    o.el.style.transform = `translate3d(${mx - o.w / 2}px, ${my - o.h / 2}px, 0) scale(0.2)`;
+    later(() => field.remove(o), 190);
 
     puppet.setMouth("chew");
     puppet.hop();
@@ -248,7 +272,7 @@ export function renderFeed(root: HTMLElement, nav: Nav): () => void {
         } else {
           busy = false;
           syncCravingBanner();
-          if (!table.querySelector(".food-card:not(.eaten)")) renderTray();
+          if (cards.every((c) => c.eaten)) renderTray();
         }
         return;
       }
@@ -278,17 +302,19 @@ export function renderFeed(root: HTMLElement, nav: Nav): () => void {
           puppet.setMouth("smile");
           syncCravingBanner();
           announceCraving();
-          if (!table.querySelector(".food-card:not(.eaten)")) renderTray();
+          if (cards.every((c) => c.eaten)) renderTray();
         }, 1050);
       }
     }, 480);
   }
 
   function renderTray(): void {
+    field.clear();
+    cards = [];
     table.innerHTML = tray
       .map(
-        (w, i) => `
-        <button class="food-card" data-idx="${i}" type="button" aria-label="${w.label}">
+        (w) => `
+        <button class="food-card" type="button" aria-label="${w.label}">
           <span class="food-visual">${wordVisual(w, "food-img", false)}</span>
           ${w.label ? `<span class="food-lbl">${w.label}</span>` : ""}
         </button>
@@ -296,50 +322,78 @@ export function renderFeed(root: HTMLElement, nav: Nav): () => void {
       )
       .join("");
 
-    table.querySelectorAll<HTMLElement>(".food-card").forEach((card) => {
-      const idx = Number(card.dataset.idx ?? 0);
-      const word = tray[idx]!;
-      bindGrab(card, {
-        canStart: () => !busy && !card.classList.contains("eaten"),
-        onStart: (x, y) => {
-          marimba(1, 0.35);
-          puppet.lookAt(x, y);
-          puppet.setMouth("open", 0.6);
-          setPrompt("あーーん！");
+    // Each snack becomes a loose toy on the table: it keeps the spot it was
+    // dealt to, shoves its neighbours, and stays put with nothing swallowed.
+    const els = [...table.querySelectorAll<HTMLElement>(".food-card")];
+    const rects = els.map((el) => el.getBoundingClientRect());
+
+    els.forEach((card, i) => {
+      const word = tray[i];
+      const r = rects[i];
+      if (!word || !r) return;
+
+      const entry: FoodCard = { word, el: card, eaten: false };
+      const o = field.add(
+        card,
+        {
+          canGrab: () => !busy && !entry.eaten,
+          onGrab: (obj) => {
+            marimba(1, 0.35);
+            puppet.lookAt(obj.x, obj.y);
+            puppet.setMouth("open", 0.6);
+            setPrompt("あーーん！");
+          },
+          onDrag: (obj) => {
+            puppet.lookAt(obj.x, obj.y);
+            const m = mouthCenter();
+            const dist = Math.hypot(obj.x - m.x, obj.y - m.y);
+            puppet.setMouth("open", Math.max(0.45, Math.min(1.25, 1.35 - dist / 240)));
+          },
+          onDrop: () => {
+            if (entry.eaten) return;
+            puppet.setMouth("smile");
+            puppet.resetLook();
+            syncCravingBanner();
+          },
+          onTap: (obj) => {
+            marimba(2, 0.35);
+            void playWord(word);
+            field.kick(obj, 0, 0, (Math.random() < 0.5 ? -1 : 1) * 150);
+          },
+          onStep: (obj) => {
+            if (busy || entry.eaten) return false;
+            const m = mouthCenter();
+            if (Math.hypot(obj.x - m.x, obj.y - m.y) < mouthReach(obj)) {
+              feedItem(entry, obj);
+              return true;
+            }
+            return false;
+          },
         },
-        onMove: (x, y) => {
-          puppet.lookAt(x, y);
-          const m = mouthCenter();
-          const dist = Math.hypot(x - m.x, y - m.y);
-          puppet.setMouth("open", Math.max(0.45, Math.min(1.25, 1.35 - dist / 240)));
-        },
-        findTarget: (x, y, _dx, dy, isTap) => {
-          const m = mouthCenter();
-          const dist = Math.hypot(x - m.x, y - m.y);
-          if (isTap || dist < 160 || dy < -50) {
-            busy = true;
-            return m;
-          }
-          return null;
-        },
-        onSnap: () => feedItem(word, card),
-        onCancel: () => {
-          puppet.setMouth("smile");
-          puppet.resetLook();
-          syncCravingBanner();
-        },
-      });
+        { x: r.left + r.width / 2, y: r.top + r.height / 2 },
+      );
+      cards.push(entry);
+
+      // An empty recess stays behind so the tray keeps its shape.
+      const holder = document.createElement("div");
+      holder.className = "toy-holder toy-holder--food";
+      holder.style.width = `${o.w}px`;
+      holder.style.height = `${o.h}px`;
+      table.append(holder);
     });
   }
 
   void (async () => {
     const all = await loadAllWords();
+    if (disposed) return;
     foods = all.filter((w) => w.category === "たべもの");
     if (foods.length < 2) foods = all;
     nextRound();
   })();
 
   return () => {
+    disposed = true;
     timers.forEach((t) => clearTimeout(t));
+    field.destroy();
   };
 }
